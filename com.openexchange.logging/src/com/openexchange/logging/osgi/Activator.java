@@ -69,7 +69,9 @@ import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.logging.LogConfigReloadable;
 import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.logging.mbean.LogbackConfiguration;
 import com.openexchange.logging.mbean.LogbackConfigurationMBean;
@@ -97,6 +99,8 @@ public class Activator implements BundleActivator {
     private volatile ServiceTracker<ConfigurationService, ConfigurationService> configurationTracker;
     private volatile RankingAwareTurboFilterList rankingAwareTurboFilterList;
     private volatile ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration;
+
+    private ServiceRegistration<Reloadable> reloadable;
 
     /*
      * Do not implement HousekeepingActivator, track services if you need them!
@@ -143,6 +147,8 @@ public class Activator implements BundleActivator {
         registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, serviceImpl);
 
         registerIncludeStackTraceService(serviceImpl, context);
+
+        reloadable = context.registerService(Reloadable.class, new LogConfigReloadable(), null);
     }
 
     @Override
@@ -174,6 +180,11 @@ public class Activator implements BundleActivator {
         if (null != includeStackTraceServiceRegistration) {
             includeStackTraceServiceRegistration.unregister();
             this.includeStackTraceServiceRegistration = null;
+        }
+
+        if (null != reloadable) {
+            reloadable.unregister();
+            reloadable = null;
         }
     }
 
