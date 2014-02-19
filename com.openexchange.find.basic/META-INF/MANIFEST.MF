@@ -47,6 +47,7 @@ Import-Package: com.openexchange.api2,
  com.openexchange.search.internal.operands,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.threadpool,
  com.openexchange.tools.iterator,
  com.openexchange.tools.oxfolder,
  com.openexchange.tools.session,
@@ -56,5 +57,6 @@ Import-Package: com.openexchange.api2,
  gnu.trove.map,
  gnu.trove.map.hash,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-ActivationPolicy: lazy

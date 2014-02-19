@@ -65,4 +65,16 @@ public class FindExceptionMessages implements LocalizableStrings {
     // The service you requested is currently not available. Please try again later.
     public static final String SERVICE_NOT_AVAILABLE = "The service you requested is currently not available. Please try again later.";
 
+    // A filter for field '%1$s' is missing but is required to search in module %2$s.
+    public static final String MISSING_SEARCH_FILTER = "A filter for field '%1$s' is missing but is required to search in module %2$s.";
+
+    // A search filter did not contain a field to filter on.
+    public static final String INVALID_FILTER_NO_FIELDS = "A search filter did not contain a field to filter on.";
+
+    // A search filter did not contain a query to search for.
+    public static final String INVALID_FILTER_NO_QUERIES = "A search filter did not contain a query to search for.";
+
+    // A search filter contained an unknown field: '%1$s'.
+    public static final String INVALID_FILTER_UNKNOWN_FIELD = "A search filter contained an unknown field: '%1$s'.";
+
 }

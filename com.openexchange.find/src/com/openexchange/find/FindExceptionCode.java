@@ -78,6 +78,18 @@ public enum FindExceptionCode implements DisplayableOXExceptionCode {
      * The filter query \"%1$s\" is not supported.
      */
     UNSUPPORTED_FILTER_QUERY("The filter query \"%1$s\" is not supported.", Category.CATEGORY_ERROR, 4),
+    /**
+     * A filter for field '%1$s' is missing but is required to search in module %2$s.
+     */
+    MISSING_SEARCH_FILTER(FindExceptionMessages.MISSING_SEARCH_FILTER, Category.CATEGORY_USER_INPUT, 5, FindExceptionMessages.MISSING_SEARCH_FILTER),
+    /**
+     * A search filter did not contain a field to filter on: '%1$s'.
+     */
+    INVALID_FILTER_NO_FIELDS("A search filter did not contain a field to filter on: '%1$s'.", Category.CATEGORY_USER_INPUT, 6, FindExceptionMessages.INVALID_FILTER_NO_FIELDS),
+    /**
+     * A search filter did not contain a query to search for: '%1$s'.
+     */
+    INVALID_FILTER_NO_QUERIES("A search filter did not contain a query to search for: '%1$s'.", Category.CATEGORY_USER_INPUT, 7, FindExceptionMessages.INVALID_FILTER_NO_QUERIES),
 
     ;
 

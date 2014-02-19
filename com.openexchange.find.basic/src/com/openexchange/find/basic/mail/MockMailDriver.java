@@ -51,7 +51,6 @@ package com.openexchange.find.basic.mail;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -100,6 +99,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import static com.openexchange.find.basic.mail.Constants.*;
 
 /**
  * {@link MockMailDriver}
@@ -108,14 +108,6 @@ import com.openexchange.tools.session.ServerSession;
  * @since 7.6.0
  */
 public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
-
-    private static final MailFolderFilter NO_FILTER = null;
-
-    private static final Set<String> PERSONS_FILTER_FIELDS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList("from","to","cc")));
-
-    private static final Set<String> FOLDERS_FILTER_FIELDS = Collections.singleton("folder");
-
-    // --------------------------------------------------------------------------------------------------- //
 
     /**
      * Initializes a new {@link MockMailDriver}.
@@ -137,7 +129,7 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
     @Override
     public ModuleConfig getConfiguration(ServerSession session) throws OXException {
         final TIntObjectMap<MailAccount> accountCache = new TIntObjectHashMap<MailAccount>(8);
-        final List<MailFolderInfo> mailFolders = loadMailFolders(session, NO_FILTER, accountCache);
+        final List<MailFolderInfo> mailFolders = loadMailFolders(session, null, accountCache);
         if (mailFolders.isEmpty()) {
             throw FindExceptionCode.NO_READABLE_FOLDER.create(Module.MAIL, session.getUserId(), session.getContextId());
         }
@@ -167,8 +159,8 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
         final MandatoryFilter folderFilter = new MandatoryFilter(folderFacet, defaultValue);
 
         final List<Facet> staticFacets = new ArrayList<Facet>(3);
-        final Facet subjectFacet = new FieldFacet(MailFacetType.SUBJECT, "subject");
-        final Facet bodyFacet = new FieldFacet(MailFacetType.MAIL_TEXT, "body");
+        final Facet subjectFacet = new FieldFacet(MailFacetType.SUBJECT, FIELD_SUBJECT);
+        final Facet bodyFacet = new FieldFacet(MailFacetType.MAIL_TEXT, FIELD_BODY);
         staticFacets.add(subjectFacet);
         staticFacets.add(bodyFacet);
         if (folderFacet != null) {
@@ -228,7 +220,7 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
         String folderName = null;
         for (Filter filter : filters) {
             Set<String> fields = filter.getFields();
-            if (fields.size() == 1 && "folder".equals(fields.iterator().next())) {
+            if (fields.size() == 1 && FIELD_FOLDER.equals(fields.iterator().next())) {
                 folderName = filter.getQueries().iterator().next();
                 break;
             }

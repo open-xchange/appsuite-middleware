@@ -46,71 +46,48 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.find.basic;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.contact.ContactService;
-import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.threadpool.ThreadPoolService;
+package com.openexchange.find.basic.mail;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
- * {@link Services}
+ * {@link Constants}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public class Services {
+public class Constants {
 
-    private static final AtomicReference<ServiceLookup> LOOKUP = new AtomicReference<ServiceLookup>();
+    public final static String FIELD_FROM = "from";
 
-    private Services() {
-        super();
-    }
+    public final static String FIELD_TO = "to";
 
-    public static ContactService getContactService() throws OXException {
-        return requireService(ContactService.class);
-    }
+    public final static String FIELD_CC = "cc";
 
-    public static FolderService getFolderService() throws OXException {
-        return requireService(FolderService.class);
-    }
+    public final static String FIELD_SUBJECT = "subject";
 
-    public static MailService getMailService() throws OXException {
-        return requireService(MailService.class);
-    }
+    public final static String FIELD_BODY = "body";
 
-    public static MailAccountStorageService getMailAccountStorageService() throws OXException {
-        return requireService(MailAccountStorageService.class);
-    }
+    public final static String FIELD_FOLDER = "folder";
 
-    public static ThreadPoolService getThreadPoolService() throws OXException {
-        return requireService(ThreadPoolService.class);
-    }
+    public final static String FIELD_TIME_RANGE = "time_range";
 
-    public static void setServiceLookup(ServiceLookup lookup) {
-        LOOKUP.set(lookup);
-    }
+    public static final Set<String> PERSONS_FILTER_FIELDS = createStringSet(FIELD_FROM, FIELD_TO, FIELD_CC);
 
-    public static <T> T requireService(Class<T> clazz) throws OXException {
-        T service = getServiceLookup().getService(clazz);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(clazz);
+    public static final Set<String> FOLDERS_FILTER_FIELDS = createStringSet(FIELD_FOLDER);
+
+    public static final Set<String> QUERY_FIELDS = createStringSet(FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC);
+
+    private static Set<String> createStringSet(String... args) {
+        Set<String> set = new HashSet<String>(args.length);
+        for (String str : args) {
+            set.add(str);
         }
-        return service;
-    }
-
-    private static ServiceLookup getServiceLookup() {
-        ServiceLookup serviceLookup = LOOKUP.get();
-        if (serviceLookup == null) {
-            throw new IllegalStateException("ServiceLookup was null!");
-        }
-
-        return serviceLookup;
+        return Collections.unmodifiableSet(set);
     }
 
 }
