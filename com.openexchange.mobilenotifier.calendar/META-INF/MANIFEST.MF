@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-Name: Calendar
+Bundle-Name: Open-Xchange Mobilenotifier Calendar Bundle
 Bundle-SymbolicName: com.openexchange.mobilenotifier.calendar
 Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.mobilenotifier.calendar.osgi.MobileNotifierCalendarActivator
@@ -10,7 +10,9 @@ Import-Package: com.openexchange.api2,
  com.openexchange.exception,
  com.openexchange.groupware.calendar,
  com.openexchange.groupware.container,
+ com.openexchange.groupware.ldap,
  com.openexchange.mobilenotifier,
+ com.openexchange.mobilenotifier.utility,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,

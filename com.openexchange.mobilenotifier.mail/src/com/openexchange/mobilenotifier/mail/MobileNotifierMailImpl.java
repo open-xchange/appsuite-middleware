@@ -144,10 +144,11 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
                         final Date receivedDate = mailMessage.getReceivedDate();
                         final String subject = mailMessage.getSubject();
                         final boolean attachments = mailMessage.hasAttachment();
-                        final String folder = mailMessage.getFolder();
+                        final String folder = mailMessage.getMailPath().getFolderArgument();
                         final int flag = mailMessage.getFlags();
                         final String id = mailMessage.getMailId();
-                        // localized date string
+
+                        // localize date string
                         final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                         final Locale locale = user.getLocale();
                         final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());

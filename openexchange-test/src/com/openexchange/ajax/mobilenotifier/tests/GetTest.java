@@ -74,19 +74,23 @@ public class GetTest extends AbstractMobileNotifierTest {
         super(name);
     }
 
+    // TODO: update to correct mandatory items
     public void testMailProviderJSONResponse() throws OXException, IOException, JSONException {
         singleProvider("io.ox/mail", new MandatoryFields("from", "received_date", "subject", "flags", "attachments", "id", "folder"));
     }
 
+    // TODO: update to correct mandatory items
     public void testCalendarProviderJSONResponse() throws OXException, IOException, JSONException {
         singleProvider("io.ox/calendar", new MandatoryFields(
-            "location",
-            "title",
-            "recurrence_start",
-            "start_date",
-            "attachments",
             "id",
-            "folder"));
+            "folder",
+            "title",
+            "location",
+            "start_date",
+            "organizer",
+            "status",
+            "comments",
+            "recurrence_"));
     }
 
     public void testShouldGetExceptionIfUnknownProvider() throws OXException, IOException, JSONException {
