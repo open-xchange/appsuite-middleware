@@ -323,22 +323,23 @@ public interface AppointmentSQLInterface {
      * @param userId unique identifier of the user.
      * @param confirm The confirm status
      * @param confirmMessage The confirm message
-     * @throws OXException
+     * @return The last-modified time stamp of associated appointment
+     * @throws OXException If setting the confirmation fails
      */
-    Date setUserConfirmation(int object_id, int folderId, int user_id, int confirm, String confirm_message) throws OXException;
+    Date setUserConfirmation(int objectId, int folderId, int userId, int confirm, String confirmMessage) throws OXException;
 
     /**
      * Sets the confirmation of an appointment for an external user, identified with his mail address.
      *
-     * @param oid
-     * @param folderId
-     * @param mail
-     * @param confirm
-     * @param message
-     * @return
-     * @throws OXException
+     * @param objectId unique identifier of the appointment.
+     * @param folderId folder of the appointment
+     * @param mail The E-Mail address of the associated external participant
+     * @param confirm The confirm status
+     * @param message The confirm message
+     * @return The last-modified time stamp of associated appointment
+     * @throws OXException If setting the confirmation fails
      */
-    public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message) throws OXException;
+    Date setExternalConfirmation(int objectId, int folderId, String mail, int confirm, String message) throws OXException;
 
     /**
      * Method to attach or detach attachments
@@ -437,7 +438,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * Counts the visible calendar objects in the given folder.
-     * 
+     *
      * @param folderId
      * @return
      * @throws OXException

@@ -875,23 +875,23 @@ public class CalendarSql implements AppointmentSQLInterface {
      * @see com.openexchange.api2.AppointmentSQLInterface#setUserConfirmation(int, int, int, java.lang.String)
      */
     @Override
-    public Date setUserConfirmation(final int oid, final int folderId, final int uid, final int confirm, final String confirm_message) throws OXException {
+    public Date setUserConfirmation(final int oid, final int folderId, final int uid, final int confirm, final String confirmMessage) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }
         final Context ctx = Tools.getContext(session);
-        if (confirm_message != null) {
+        if (confirmMessage != null) {
             String error = null;
-            error = Check.containsInvalidChars(confirm_message);
+            error = Check.containsInvalidChars(confirmMessage);
             if (error != null) {
                 throw OXCalendarExceptionCodes.INVALID_CHARACTER.create("Confirm Message", error);
             }
         }
-        return cimp.setUserConfirmation(oid, folderId, uid, confirm, confirm_message, session, ctx);
+        return cimp.setUserConfirmation(oid, folderId, uid, confirm, confirmMessage, session, ctx);
     }
 
     @Override
-    public Date setExternalConfirmation(final int oid, final int folderId, final String mail, final int confirm, final String message) throws OXException {
+    public Date setExternalConfirmation(final int objectId, final int folderId, final String mail, final int confirm, final String message) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }
@@ -903,7 +903,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 throw OXCalendarExceptionCodes.INVALID_CHARACTER.create("Confirm Message", error);
             }
         }
-        return cimp.setExternalConfirmation(oid, folderId, mail, confirm, message, session, ctx);
+        return cimp.setExternalConfirmation(objectId, folderId, mail, confirm, message, session, ctx);
     }
 
     @Override

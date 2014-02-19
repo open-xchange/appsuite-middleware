@@ -373,8 +373,8 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
-    public Date setExternalConfirmation(final int oid, final int folderId, final String mail, final int confirm, final String message) throws OXException {
-        return delegate.setExternalConfirmation(oid, folderId, mail, confirm, message);
+    public Date setExternalConfirmation(final int objectId, final int folderId, final String mail, final int confirm, final String message) throws OXException {
+        return delegate.setExternalConfirmation(objectId, folderId, mail, confirm, message);
     }
 
     @Override
@@ -383,11 +383,11 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
-    public Date setUserConfirmation(final int object_id, final int folderId, final int user_id, final int confirm, final String confirm_message) throws OXException {
+    public Date setUserConfirmation(final int objectId, final int folderId, final int userId, final int confirm, final String confirmMessage) throws OXException {
         try {
-            final CalendarDataObject original = getObjectById(object_id);
-            final Date retval = delegate.setUserConfirmation(object_id, folderId, user_id, confirm, confirm_message);
-            final CalendarDataObject reloaded = getObjectById(object_id);
+            final CalendarDataObject original = getObjectById(objectId);
+            final Date retval = delegate.setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
+            final CalendarDataObject reloaded = getObjectById(objectId);
             final ITipMailGenerator generator = generators.create(original, reloaded, session, onBehalfOf(folderId));
             final List<NotificationParticipant> recipients = generator.getRecipients();
             for (final NotificationParticipant notificationParticipant : recipients) {
