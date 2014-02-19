@@ -50,10 +50,11 @@
 package com.openexchange.mobilenotifier.utility;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.regex.Pattern;
 import com.openexchange.i18n.tools.StringHelper;
 
 
@@ -66,50 +67,23 @@ public class LocalizationUtility {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalizationUtility.class);
 
-    private static final Pattern PATTERN_DATE = Pattern.compile(Pattern.quote("#DATE#"));
-
-    private static final Pattern PATTERN_TIME = Pattern.compile(Pattern.quote("#TIME#"));
-
-    // TODO: LocalizableStrings
-    private static final String DATE_TIME_MSG = "#DATE# at #TIME#";
-
     /**
      * Formats a date in a specific localization
      * 
      * @param date The date
      * @param ltz The locale and time zone of the user
-     * @return localized date as a string
+     * @return localized date or time if date is current date
      */
-    public static String dateLocalizer(final Date date, final LocaleAndTimeZone ltz) {
-        StringHelper strHelper = StringHelper.valueOf(ltz.getLocale());
-        String replyPrefix = strHelper.getString(DATE_TIME_MSG);
-        {
-            try {
-                replyPrefix = PATTERN_DATE.matcher(replyPrefix).replaceFirst(
-                    date == null ? "" : com.openexchange.java.Strings.quoteReplacement(LocalizationUtility.getFormattedDate(
-                        date,
-                        DateFormat.LONG,
-                        ltz.getLocale(),
-                        ltz.getTimeZone())));
-            } catch (final Exception e) {
-                LOG.warn("", e);
-                replyPrefix = PATTERN_DATE.matcher(replyPrefix).replaceFirst("");
-            }
+    public static String dateOrTimeLocalizer(final Date date, final LocaleAndTimeZone ltz) {
+        Date currentDate = new Date();
+        String dateString = LocalizationUtility.getFormattedDate(date, DateFormat.LONG, ltz.getLocale(), ltz.getTimeZone());
 
-            try {
-                replyPrefix = PATTERN_TIME.matcher(replyPrefix).replaceFirst(
-                    date == null ? "" : com.openexchange.java.Strings.quoteReplacement(LocalizationUtility.getFormattedTime(
-                        date,
-                        DateFormat.SHORT,
-                        ltz.getLocale(),
-                        ltz.getTimeZone())));
-            } catch (final Exception e) {
-                LOG.warn("", e);
-                replyPrefix = PATTERN_TIME.matcher(replyPrefix).replaceFirst("");
-            }
-
-            return replyPrefix;
+        // checks if date is current date, if true show only the time
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        if (dateFormat.format(currentDate).equals(dateFormat.format(date))) {
+            dateString = LocalizationUtility.getFormattedTime(date, DateFormat.SHORT, ltz.getLocale(), ltz.getTimeZone());
         }
+        return dateString;
     }
 
     /**
@@ -121,7 +95,7 @@ public class LocalizationUtility {
      * @param timeZone The time zone
      * @return The formatted date
      */
-    private static final String getFormattedDate(final Date date, final int style, final Locale locale, final TimeZone timeZone) {
+    public static final String getFormattedDate(final Date date, final int style, final Locale locale, final TimeZone timeZone) {
         final DateFormat dateFormat = DateFormat.getDateInstance(style, locale);
         dateFormat.setTimeZone(timeZone);
         return dateFormat.format(date);
@@ -136,7 +110,7 @@ public class LocalizationUtility {
      * @param timeZone The time zone
      * @return The formatted time
      */
-    private static final String getFormattedTime(final Date date, final int style, final Locale locale, final TimeZone timeZone) {
+    public static final String getFormattedTime(final Date date, final int style, final Locale locale, final TimeZone timeZone) {
         final DateFormat dateFormat = DateFormat.getTimeInstance(style, locale);
         dateFormat.setTimeZone(timeZone);
         return dateFormat.format(date);

@@ -49,6 +49,8 @@
 
 package com.openexchange.mobilenotifier.mail;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -152,7 +154,22 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
                         final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                         final Locale locale = user.getLocale();
                         final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
-                        final String localizedReceivedDate = LocalizationUtility.dateLocalizer(receivedDate, ltz);
+
+                        String localizedReceivedDate = LocalizationUtility.getFormattedDate(
+                            receivedDate,
+                            DateFormat.LONG,
+                            ltz.getLocale(),
+                            ltz.getTimeZone());
+                        // checks if date is current date, if true show only the time
+                        final Date currentDate = new Date();
+                        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                        if (dateFormat.format(currentDate).equals(dateFormat.format(receivedDate))) {
+                            localizedReceivedDate = LocalizationUtility.getFormattedTime(
+                                receivedDate,
+                                DateFormat.SHORT,
+                                ltz.getLocale(),
+                                ltz.getTimeZone());
+                        }
 
                         notifyItem.add(new NotifyItem("folder", folder));
                         notifyItem.add(new NotifyItem("id", id));
