@@ -79,26 +79,34 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
 
     private final int type;
 
+    private int occurrence;
+
     /**
      * For external users
      *
      * Initializes a new {@link ConfirmRequest}.
      * @param folderId
      * @param objectId
+     * @param occurrence
      * @param confirmStatus
      * @param confirmMessage
      * @param mail
      * @param failOnError
      */
-    public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, String mail, boolean failOnError) {
+    public ConfirmRequest(int folderId, int objectId, int occurrence, int confirmStatus, String confirmMessage, String mail, boolean failOnError) {
         super();
         this.folderId = folderId;
         this.objectId = objectId;
+        this.occurrence = occurrence;
         this.confirmStatus = confirmStatus;
         this.confirmMessage = confirmMessage;
         this.mail = mail;
         this.failOnError = failOnError;
         this.type = Participant.EXTERNAL_USER;
+    }
+
+    public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, String mail, boolean failOnError) {
+        this(folderId, objectId, 0, confirmStatus, confirmMessage, mail, failOnError);
     }
 
     /**
@@ -107,21 +115,29 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
      * Initializes a new {@link ConfirmRequest}.
      * @param folderId
      * @param objectId
+     * @param occurrence
      * @param confirmStatus
      * @param confirmMessage
      * @param user
      * @param failOnError
      */
-    public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, int user, boolean failOnError) {
+    public ConfirmRequest(int folderId, int objectId, int occurrence, int confirmStatus, String confirmMessage, int user, boolean failOnError) {
         super();
         this.folderId = folderId;
         this.objectId = objectId;
+        this.occurrence = occurrence;
         this.confirmStatus = confirmStatus;
         this.confirmMessage = confirmMessage;
         this.user = user;
         this.failOnError = failOnError;
         this.type = Participant.USER;
+        
     }
+
+    public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, int user, boolean failOnError) {
+        this(folderId, objectId, 0, confirmStatus, confirmMessage, user, failOnError);
+    }
+    
 
     public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, boolean failOnError) {
         this(folderId, objectId, confirmStatus, confirmMessage, 0, failOnError);
@@ -153,6 +169,9 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CONFIRM));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ID, objectId));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
+        if (occurrence > 0) {
+            parameterList.add(new Parameter(AJAXServlet.PARAMETER_OCCURRENCE, occurrence));
+        }
         return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
