@@ -70,7 +70,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
-    
+
     private static final String DEL_DATES_MEMBERS = "del_dates_members";
 
     /**
@@ -95,7 +95,7 @@ public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
             if (Tools.hasPrimaryKey(con, DEL_DATES_MEMBERS)) {
                 Tools.dropPrimaryKey(con, DEL_DATES_MEMBERS);
             }
-            Tools.createPrimaryKey(con, DEL_DATES_MEMBERS, new String[] { "cid", "object_id", "member_uid", "pfid" });
+            Tools.createPrimaryKeyIfAbsent(con, DEL_DATES_MEMBERS, new String[] { "cid", "object_id", "member_uid", "pfid" });
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
@@ -116,7 +116,7 @@ public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
     public String[] getDependencies() {
         return new String[0];
     }
-    
+
     private void fillPfid(Connection con) throws SQLException {
         PreparedStatement stmt = null;
         int oldPos, newPos;

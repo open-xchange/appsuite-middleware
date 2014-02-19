@@ -80,9 +80,6 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
@@ -92,7 +89,18 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
             con.setAutoCommit(false);
             setUUID(con);
             Tools.modifyColumns(con, "user_setting_server", column);
-            Tools.createPrimaryKey(con, "user_setting_server", new String[] { "cid", "user", column.name });
+
+            // Drop possible foregin keys
+            String foreignKey = Tools.existsForeignKey(con, "user", new String[] {"cid", "id"}, "user_setting_server", new String[] {"cid", "user"});
+            if (null != foreignKey && !foreignKey.equals("")) {
+                Tools.dropForeignKey(con, "user_setting_server", foreignKey);
+            }
+
+            Tools.createPrimaryKeyIfAbsent(con, "user_setting_server", new String[] { "cid", "user", column.name });
+
+            // Re-create foreign key
+            Tools.createForeignKey(con, "user_setting_server", new String[] {"cid", "user"}, "user", new String[] {"cid", "id"});
+
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
@@ -106,14 +114,11 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask" };
+        return new String[] { UserSettingServerAddUuidUpdateTask.class.getName() };
     }
-    
+
     private void setUUID(Connection con) throws SQLException {
         PreparedStatement stmt = null;
         int oldPos, newPos;

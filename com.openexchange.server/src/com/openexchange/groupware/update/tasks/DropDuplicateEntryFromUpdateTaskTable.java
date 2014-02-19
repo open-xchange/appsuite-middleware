@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
@@ -60,69 +59,90 @@ import java.sql.Statement;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * Adds the primary key to the table updateTask.
+ * Drops duplicate entry from updateTask table.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MakeUUIDPrimaryForUpdateTaskTable extends UpdateTaskAdapter {
+public class DropDuplicateEntryFromUpdateTaskTable extends UpdateTaskAdapter {
 
-    public MakeUUIDPrimaryForUpdateTaskTable() {
+    public DropDuplicateEntryFromUpdateTaskTable() {
         super();
     }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        ProgressState progress = params.getProgressState();
         Connection con = Database.getNoTimeout(params.getContextId(), true);
+        boolean rb = false;
         try {
             startTransaction(con);
-            progress.setTotal(getTotalRows(con));
-            if (!Tools.columnExists(con, "updateTask", "uuid")) {
-                throw UpdateExceptionCodes.COLUMN_NOT_FOUND.create("uuid");
-            }
+            rb = true;
 
-            AddUUIDForUpdateTaskTable.fillUUIDs(con, progress);
+            checkNamingForUnifiedMailRenamerTask(con);
 
-            Tools.modifyColumns(con, "updateTask", new Column("uuid", "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKeyIfAbsent(con, "updateTask", new String[] { "cid", "uuid" });
             con.commit();
+            rb = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            if (rb) {
+                rollback(con);
+            }
             autocommit(con);
             Database.backNoTimeout(params.getContextId(), true, con);
         }
     }
 
-    @Override
-    public String[] getDependencies() {
-        return new String[] { AddUUIDForUpdateTaskTable.class.getName(), DropDuplicateEntryFromUpdateTaskTable.class.getName() };
-    }
-
-    private static int getTotalRows(Connection con) throws SQLException {
+    private void checkNamingForUnifiedMailRenamerTask(final Connection con) throws SQLException {
         Statement stmt = null;
         ResultSet rs = null;
-        int rows = 0;
         try {
             stmt = con.createStatement();
-            rs = stmt.executeQuery("SELECT COUNT(taskName) FROM updateTask WHERE uuid IS NULL");
-            while (rs.next()) {
-                rows += rs.getInt(1);
+            rs = stmt.executeQuery("SELECT 1 FROM updateTask WHERE BINARY taskName='com.openexchange.groupware.update.tasks.UnifiedInboxRenamerTask'");
+            final boolean wrongEntryExists = rs.next();
+            DBUtils.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            stmt = con.createStatement();
+            rs = stmt.executeQuery("SELECT 1 FROM updateTask WHERE BINARY taskName='com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask'");
+            final boolean correctEntryExists = rs.next();
+            DBUtils.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            if (correctEntryExists) {
+                if (wrongEntryExists) {
+                    // Duplicate entry
+                    stmt = con.createStatement();
+                    stmt.execute("DELETE FROM updateTask WHERE BINARY taskName='com.openexchange.groupware.update.tasks.UnifiedInboxRenamerTask'");
+                    DBUtils.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+            } else {
+                if (wrongEntryExists) {
+                    // Needs to be renamed to actual update task name
+                    stmt = con.createStatement();
+                    stmt.execute("UPDATE updateTask SET taskName='com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask' WHERE BINARY taskName='com.openexchange.groupware.update.tasks.UnifiedInboxRenamerTask'");
+                    DBUtils.closeSQLStuff(stmt);
+                    stmt = null;
+                }
             }
+
         } finally {
-            closeSQLStuff(rs, stmt);
+            DBUtils.closeSQLStuff(rs, stmt);
         }
-        return rows;
     }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] { UnifiedINBOXRenamerTask.class.getName() };
+    }
+
 }

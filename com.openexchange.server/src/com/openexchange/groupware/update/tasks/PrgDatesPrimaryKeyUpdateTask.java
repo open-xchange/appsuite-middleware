@@ -66,7 +66,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
-    
+
     private static final String PRG_DATES = "prg_dates";
 
     /**
@@ -76,9 +76,6 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
@@ -102,12 +99,9 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.DateExternalDropForeignKeyUpdateTask" };
+        return new String[] { DateExternalDropForeignKeyUpdateTask.class.getName() };
     }
 
 }

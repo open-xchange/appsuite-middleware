@@ -79,7 +79,7 @@ public class CalendarAddNewPrimaryKeyForConfirmPerOccurrence extends UpdateTaskA
 
     @Override
     public String[] getDependencies() {
-        return new String[] { CalendarAddConfirmPerOccurrenceTask.class.getName() };
+        return new String[] { PrgDatesMembersPrimaryKeyUpdateTask.class.getName(), DelDatesMembersPrimaryKeyUpdateTask.class.getName(), CalendarAddConfirmPerOccurrenceTask.class.getName() };
     }
 
     @Override
@@ -97,6 +97,7 @@ public class CalendarAddNewPrimaryKeyForConfirmPerOccurrence extends UpdateTaskA
                 // Drop & re-create primary key
                 final String[] tables = new String[] { "prg_dates_members", "del_dates_members" };
                 final String[] columns = new String[] {"cid","object_id","member_uid","pfid","occurrence"};
+
                 final int[] lengths = new int[5];
                 Arrays.fill(lengths, 0);
                 checkPrimaryKey(columns, lengths, tables, connnection);

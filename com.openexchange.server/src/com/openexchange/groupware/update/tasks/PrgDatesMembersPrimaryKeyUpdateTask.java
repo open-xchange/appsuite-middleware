@@ -65,7 +65,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link PrgDatesMembersPrimaryKeyUpdateTask}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class PrgDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
@@ -95,7 +95,7 @@ public class PrgDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
             if (Tools.hasPrimaryKey(con, PRG_DATES_MEMBERS)) {
                 Tools.dropPrimaryKey(con, PRG_DATES_MEMBERS);
             }
-            Tools.createPrimaryKey(con, PRG_DATES_MEMBERS, new String[] { "cid", "object_id", "member_uid", "pfid" });
+            Tools.createPrimaryKeyIfAbsent(con, PRG_DATES_MEMBERS, new String[] { "cid", "object_id", "member_uid", "pfid" });
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);

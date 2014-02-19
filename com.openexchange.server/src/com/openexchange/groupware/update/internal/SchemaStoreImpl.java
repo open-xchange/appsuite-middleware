@@ -152,7 +152,7 @@ public class SchemaStoreImpl extends SchemaStore {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            stmt.executeUpdate(CreateUpdateTaskTable.CREATES[0]);
+            stmt.executeUpdate(CreateUpdateTaskTable.CREATES_PRIMARY_KEY[0]);
         } finally {
             closeSQLStuff(stmt);
         }

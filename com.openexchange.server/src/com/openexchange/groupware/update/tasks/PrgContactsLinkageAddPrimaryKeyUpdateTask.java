@@ -79,9 +79,6 @@ public class PrgContactsLinkageAddPrimaryKeyUpdateTask extends UpdateTaskAdapter
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
@@ -90,7 +87,7 @@ public class PrgContactsLinkageAddPrimaryKeyUpdateTask extends UpdateTaskAdapter
         try {
             con.setAutoCommit(false);
             Tools.modifyColumns(con, "prg_contacts_linkage", column);
-            Tools.createPrimaryKey(con, "prg_contacts_linkage", new String[] { "cid", column.name });
+            Tools.createPrimaryKeyIfAbsent(con, "prg_contacts_linkage", new String[] { "cid", column.name });
             setUUID(con);
             con.commit();
         } catch (SQLException e) {
@@ -105,14 +102,11 @@ public class PrgContactsLinkageAddPrimaryKeyUpdateTask extends UpdateTaskAdapter
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask" };
+        return new String[] { PrgContactsLinkageAddUuidUpdateTask.class.getName() };
     }
-    
+
     private void setUUID(Connection con) throws SQLException {
         PreparedStatement stmt = null;
         int oldPos, newPos;

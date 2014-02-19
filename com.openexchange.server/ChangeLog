@@ -1,3 +1,7 @@
+* 2014-02-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31216: Added dependency to "PrgDatesMembersPrimaryKeyUpdateTask" update task
+
 * 2014-02-19 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31199: Process multicast results from GCM

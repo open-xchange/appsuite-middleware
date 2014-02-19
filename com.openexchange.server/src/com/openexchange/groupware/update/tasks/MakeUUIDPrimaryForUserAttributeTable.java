@@ -93,8 +93,18 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
 
             AddUUIDForUserAttributeTable.fillUUIDs(con, progress);
 
+            // Drop foreign key
+            String foreignKey = Tools.existsForeignKey(con, "user", new String[] {"cid", "id"}, "user_attribute", new String[] {"cid", "id"});
+            if (null != foreignKey && !foreignKey.equals("")) {
+                Tools.dropForeignKey(con, "user_attribute", foreignKey);
+            }
+
             Tools.modifyColumns(con, "user_attribute", new Column("uuid", "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(con, "user_attribute", new String[] { "cid", "uuid" });
+            Tools.createPrimaryKeyIfAbsent(con, "user_attribute", new String[] { "cid", "uuid" });
+
+            // Re-create foreign key
+            Tools.createForeignKey(con, "user_attribute", new String[] {"cid", "id"}, "user", new String[] {"cid", "id"});
+
             con.commit();
         } catch (SQLException e) {
             rollback(con);

@@ -66,7 +66,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
-    
+
     private static final String INFOSTORE = "infostore";
 
     /**
@@ -85,10 +85,21 @@ public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
         Connection con = Database.getNoTimeout(cid, true);
         try {
             con.setAutoCommit(false);
+
+            // Drop foreign key
+            String foreignKey = Tools.existsForeignKey(con, "infostore", new String[] {"cid", "id"}, "infostore_document", new String[] {"cid", "infostore_id"});
+            if (null != foreignKey && !foreignKey.equals("")) {
+                Tools.dropForeignKey(con, "infostore_document", foreignKey);
+            }
+
             if (Tools.hasPrimaryKey(con, INFOSTORE)) {
                 Tools.dropPrimaryKey(con, INFOSTORE);
             }
             Tools.createPrimaryKey(con, INFOSTORE, new String[] { "cid", "id", "folder_id" });
+
+            // Re-create foreign key
+            Tools.createForeignKey(con, "infostore_document", new String[] {"cid", "infostore_id"}, "infostore", new String[] {"cid", "id"});
+
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);

@@ -49,9 +49,7 @@
 
 package com.openexchange.admin.mysql;
 
-import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 /**
  * Creates the tables required for the calendar.
@@ -201,21 +199,6 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
     /**
      * SQL statement for del_dates_members table
      */
-    private static final String CREATE_DEL_DATES_MEMBERS = "CREATE TABLE " + TABLE_DEL_DATES_MEMBERS + " ("
-        + "object_id INT4,"
-        + "member_uid INT4,"
-        + "confirm INT4 UNSIGNED NOT NULL,"
-        + "reason TEXT,"
-        + "pfid INT4 DEFAULT NULL,"
-        + "reminder INT4 UNSIGNED,"
-        + "cid INT4 UNSIGNED NOT NULL,"
-        + "PRIMARY KEY (cid, object_id, member_uid),"
-        + "UNIQUE INDEX member (cid, member_uid, object_id)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-
-    /**
-     * SQL statement for del_dates_members table
-     */
     private static final String CREATE_DEL_DATES_MEMBERS_PRIMARY_KEY = "CREATE TABLE " + TABLE_DEL_DATES_MEMBERS + " ("
         + "object_id INT4,"
         + "member_uid INT4,"
@@ -224,7 +207,8 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "pfid INT4 DEFAULT -2 NOT NULL,"
         + "reminder INT4 UNSIGNED,"
         + "cid INT4 UNSIGNED NOT NULL,"
-        + "PRIMARY KEY (cid, object_id, member_uid, pfid),"
+        + "occurrence INT(10) unsigned NOT NULL DEFAULT '0',"
+        + "PRIMARY KEY (cid, object_id, member_uid, pfid, occurrence),"
         + "UNIQUE INDEX member (cid, member_uid, object_id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
@@ -232,21 +216,6 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
      * Table name of prg_dates_members table
      */
     private static final String TABLE_PRG_DATES_MEMBERS = "prg_dates_members";
-
-    /**
-     * SQL statement for prg_dates_members table
-     */
-    private static final String CREATE_PRG_DATES_MEMBERS = "CREATE TABLE " + TABLE_PRG_DATES_MEMBERS + " ("
-        + "object_id INT4,"
-        + "member_uid INT4,"
-        + "confirm INT4 UNSIGNED NOT NULL,"
-        + "reason TEXT,"
-        + "pfid INT4 DEFAULT NULL,"
-        + "reminder INT4 UNSIGNED,"
-        + "cid INT4 UNSIGNED NOT NULL,"
-        + "PRIMARY KEY (cid, object_id, member_uid),"
-        + "UNIQUE INDEX member (cid, member_uid, object_id)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
      * SQL statement for prg_dates_members table
@@ -259,7 +228,8 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "pfid INT4 DEFAULT -2 NOT NULL,"
         + "reminder INT4 UNSIGNED,"
         + "cid INT4 UNSIGNED NOT NULL,"
-        + "PRIMARY KEY (cid, object_id, member_uid, pfid),"
+        + "occurrence INT(10) unsigned NOT NULL DEFAULT '0',"
+        + "PRIMARY KEY (cid, object_id, member_uid, pfid, occurrence),"
         + "UNIQUE INDEX member (cid, member_uid, object_id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
@@ -278,8 +248,8 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "displayName VARCHAR(255),"
         + "confirm INT4 UNSIGNED NOT NULL,"
         + "reason TEXT,"
-        + "PRIMARY KEY (cid,objectId,mailAddress),"
-        + "FOREIGN KEY (cid,objectId) REFERENCES prg_dates(cid,intfield01)"
+        + "occurrence INT(10) unsigned NOT NULL DEFAULT '0',"
+        + "PRIMARY KEY (cid,objectId,`mailAddress`(255),occurremce)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
@@ -297,8 +267,8 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "displayName VARCHAR(255),"
         + "confirm INT4 UNSIGNED NOT NULL,"
         + "reason TEXT,"
-        + "PRIMARY KEY (cid,objectId,mailAddress),"
-        + "FOREIGN KEY (cid,objectId) REFERENCES del_dates(cid,intfield01)"
+        + "occurrence INT(10) unsigned NOT NULL DEFAULT '0',"
+        + "PRIMARY KEY (cid,objectId,`mailAddress`(255),occurrence)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
@@ -329,13 +299,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
      */
     @Override
     protected String[] getCreateStatements() {
-        FullPrimaryKeySupportService fullPrimaryKeySupportService = AdminServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
-        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-            return new String[] { CREATE_PRG_DATES, CREATE_PRG_DATE_RIGHTS, CREATE_DEL_DATE_RIGHTS, CREATE_DEL_DATES, CREATE_DEL_DATES_MEMBERS_PRIMARY_KEY,
-                CREATE_PRG_DATES_MEMBERS_PRIMARY_KEY, CREATE_DATE_EXTERNAL, CREATE_DEL_DATE_EXTERNAL };
-        }
-        return new String[] {
-            CREATE_PRG_DATES, CREATE_PRG_DATE_RIGHTS, CREATE_DEL_DATE_RIGHTS, CREATE_DEL_DATES, CREATE_DEL_DATES_MEMBERS,
-            CREATE_PRG_DATES_MEMBERS, CREATE_DATE_EXTERNAL, CREATE_DEL_DATE_EXTERNAL };
+        return new String[] { CREATE_PRG_DATES, CREATE_PRG_DATE_RIGHTS, CREATE_DEL_DATE_RIGHTS, CREATE_DEL_DATES, CREATE_DEL_DATES_MEMBERS_PRIMARY_KEY,
+            CREATE_PRG_DATES_MEMBERS_PRIMARY_KEY, CREATE_DATE_EXTERNAL, CREATE_DEL_DATE_EXTERNAL };
     }
 }

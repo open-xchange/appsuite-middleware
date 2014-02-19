@@ -332,6 +332,24 @@ public final class Tools {
      * @param columns names of the columns the primary key should cover.
      * @throws SQLException if some SQL problem occurs.
      */
+    public static final void createPrimaryKeyIfAbsent(final Connection con, final String table, final String[] columns) throws SQLException {
+        if (!existsPrimaryKey(con, table, columns)) {
+            if (hasPrimaryKey(con, table)) {
+               dropPrimaryKey(con, table);
+            }
+            createPrimaryKey(con, table, columns);
+        }
+    }
+
+    /**
+     * This method creates a new primary key on a table. Beware, this method is vulnerable to SQL injection because table and column names
+     * can not be set through a {@link PreparedStatement}.
+     *
+     * @param con writable database connection.
+     * @param table name of the table that should get a new primary key.
+     * @param columns names of the columns the primary key should cover.
+     * @throws SQLException if some SQL problem occurs.
+     */
     public static final void createPrimaryKey(final Connection con, final String table, final String[] columns) throws SQLException {
         final int[] lengths = new int[columns.length];
         Arrays.fill(lengths, -1);
@@ -397,13 +415,13 @@ public final class Tools {
         createIndex(con, table, null, columns, false);
     }
 
-    public static void createForeignKey(final Connection con, final String primaryTable, final String[] primaryColumns, final String foreignTable, final String[] foreignColumns) throws SQLException {
-        createForeignKey(con, null, primaryTable, primaryColumns, foreignTable, foreignColumns);
+    public static void createForeignKey(final Connection con, final String table, final String[] columns, final String referencedTable, final String[] referencedColumns) throws SQLException {
+        createForeignKey(con, null, table, columns, referencedTable, referencedColumns);
     }
 
-    public static void createForeignKey(final Connection con, final String name, final String primaryTable, final String[] primaryColumns, final String foreignTable, final String[] foreignColumns) throws SQLException {
+    public static void createForeignKey(final Connection con, final String name, final String table, final String[] columns, final String referencedTable, final String[] referencedColumns) throws SQLException {
         final StringBuilder sql = new StringBuilder("ALTER TABLE `");
-        sql.append(primaryTable);
+        sql.append(table);
         sql.append("` ADD FOREIGN KEY ");
         if (null != name) {
             sql.append('`');
@@ -411,15 +429,15 @@ public final class Tools {
             sql.append("` ");
         }
         sql.append("(`");
-        for (final String column : primaryColumns) {
+        for (final String column : columns) {
             sql.append(column);
             sql.append("`,`");
         }
         sql.setLength(sql.length() - 2);
         sql.append(") REFERENCES `");
-        sql.append(foreignTable);
+        sql.append(referencedTable);
         sql.append("`(`");
-        for (final String column : foreignColumns) {
+        for (final String column : referencedColumns) {
             sql.append(column);
             sql.append("`,`");
         }
