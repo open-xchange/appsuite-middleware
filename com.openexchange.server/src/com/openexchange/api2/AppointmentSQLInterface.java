@@ -348,7 +348,7 @@ public interface AppointmentSQLInterface {
      *
      * @param objectId unique identifier of the appointment.
      * @param folderId folder of the appointment
-     * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case \"id\" denotes a series appointment; otherwise <code>0</code> (zero)
+     * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code> denotes a series appointment; otherwise <code>0</code> (zero)
      * @param userId unique identifier of the user.
      * @param confirm The confirm status
      * @param confirmMessage The confirm message
@@ -362,7 +362,7 @@ public interface AppointmentSQLInterface {
      *
      * @param objectId unique identifier of the appointment.
      * @param folderId folder of the appointment
-     * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case \"id\" denotes a series appointment; otherwise <code>0</code> (zero)
+     * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code> denotes a series appointment; otherwise <code>0</code> (zero)
      * @param mail The E-Mail address of the associated external participant
      * @param confirm The confirm status
      * @param message The confirm message
