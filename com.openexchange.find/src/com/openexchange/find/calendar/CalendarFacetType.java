@@ -49,11 +49,14 @@
 
 package com.openexchange.find.calendar;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.find.facet.FacetType;
+import com.openexchange.java.Strings;
 
 /**
  * {@link CalendarFacetType}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public enum CalendarFacetType implements FacetType {
@@ -65,6 +68,14 @@ public enum CalendarFacetType implements FacetType {
     STATUS(CalendarStrings.STATUS),
     RELATIVE_DATE(CalendarStrings.RELATIVE_DATE),
     RECURRING_TYPE(CalendarStrings.RECURRING_TYPE);
+
+    private static final Map<String, CalendarFacetType> typesByName = new HashMap<String, CalendarFacetType>();
+    static {
+        for (CalendarFacetType type : values()) {
+            typesByName.put(type.getName(), type);
+        }
+    }
+
 
     private String displayName;
 
@@ -80,6 +91,18 @@ public enum CalendarFacetType implements FacetType {
     @Override
     public String getDisplayName() {
         return displayName;
+    }
+
+    /**
+     * Gets a {@link CalendarFacetType} by its name.
+     * @return The type or <code>null</code>, if the name is invalid.
+     */
+    public static CalendarFacetType getByName(String name) {
+        if (Strings.isEmpty(name)) {
+            return null;
+        }
+
+        return typesByName.get(name);
     }
 
 }

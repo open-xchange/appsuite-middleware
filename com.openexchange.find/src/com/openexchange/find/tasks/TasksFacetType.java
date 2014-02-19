@@ -49,11 +49,14 @@
 
 package com.openexchange.find.tasks;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.find.facet.FacetType;
+import com.openexchange.java.Strings;
 
 /**
  * {@link TasksFacetType} - Facet types for the drive module.
- * 
+ *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
 public enum TasksFacetType implements FacetType {
@@ -67,7 +70,12 @@ public enum TasksFacetType implements FacetType {
     TASK_TYPE(TasksStrings.FACET_TASK_TYPE),
     TASK_STATUS(TasksStrings.FACET_TASK_STATUS), ;
 
-    // ---------------------------------------------------------------------------------------------- //
+    private static final Map<String, TasksFacetType> typesByName = new HashMap<String, TasksFacetType>();
+    static {
+        for (TasksFacetType type : values()) {
+            typesByName.put(type.getName(), type);
+        }
+    }
 
     private final String displayName;
 
@@ -83,6 +91,18 @@ public enum TasksFacetType implements FacetType {
     @Override
     public String getDisplayName() {
         return displayName;
+    }
+
+    /**
+     * Gets a {@link TasksFacetType} by its name.
+     * @return The type or <code>null</code>, if the name is invalid.
+     */
+    public static TasksFacetType getByName(String name) {
+        if (Strings.isEmpty(name)) {
+            return null;
+        }
+
+        return typesByName.get(name);
     }
 
 }

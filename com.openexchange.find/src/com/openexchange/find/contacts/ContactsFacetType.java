@@ -49,11 +49,14 @@
 
 package com.openexchange.find.contacts;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.find.facet.FacetType;
+import com.openexchange.java.Strings;
 
 /**
  * The {@link FacetType}s for the contacts module.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.0
  */
@@ -68,14 +71,21 @@ public enum ContactsFacetType implements FacetType {
     TYPE(ContactsStrings.FACET_TYPE)
     ;
 
+    private static final Map<String, ContactsFacetType> typesByName = new HashMap<String, ContactsFacetType>();
+    static {
+        for (ContactsFacetType type : values()) {
+            typesByName.put(type.getName(), type);
+        }
+    }
+
     /**
-     * 
+     *
      */
     private final String displayName;
 
     /**
      * Initializes a new {@link ContactsFacetType}.
-     * 
+     *
      * @param displayName
      */
     private ContactsFacetType(final String displayName) {
@@ -96,6 +106,18 @@ public enum ContactsFacetType implements FacetType {
     @Override
     public String getDisplayName() {
         return displayName;
+    }
+
+    /**
+     * Gets a {@link ContactsFacetType} by its name.
+     * @return The type or <code>null</code>, if the name is invalid.
+     */
+    public static ContactsFacetType getByName(String name) {
+        if (Strings.isEmpty(name)) {
+            return null;
+        }
+
+        return typesByName.get(name);
     }
 
 }

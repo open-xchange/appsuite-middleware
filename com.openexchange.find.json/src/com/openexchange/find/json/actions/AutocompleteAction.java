@@ -59,8 +59,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
+import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchService;
+import com.openexchange.find.calendar.CalendarFacetType;
+import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
@@ -68,6 +72,7 @@ import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.json.FindRequest;
 import com.openexchange.find.mail.MailFacetType;
+import com.openexchange.find.tasks.TasksFacetType;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -108,14 +113,20 @@ public class AutocompleteAction extends AbstractFindAction {
         }
 
         try {
+            Module module = request.getModule();
             List<Facet> facets = new ArrayList<Facet>(activeFacets.length());
             for (int i = 0; i < activeFacets.length(); i++) {
                 JSONObject facetJSON = activeFacets.getJSONObject(i);
-                FacetType type = facetTypeFor(request.getModule(), facetJSON.getString("type"));
+                String typeName = facetJSON.getString("type");
+                FacetType type = facetTypeFor(module, typeName);
+                if (type == null) {
+                    throw FindExceptionCode.UNSUPPORTED_FACET.create(typeName, module.getIdentifier());
+                }
+
                 JSONArray valuesJSON = facetJSON.getJSONArray("values");
                 List<FacetValue> valueList = new ArrayList<FacetValue>(valuesJSON.length());
                 for (int j = 0; j < valuesJSON.length(); j++) {
-                    JSONObject valueJSON = valuesJSON.getJSONObject(i);
+                    JSONObject valueJSON = valuesJSON.getJSONObject(j);
                     String valueId = valueJSON.getString("id");
                     valueList.add(new FacetValue(
                         valueId,
@@ -138,7 +149,18 @@ public class AutocompleteAction extends AbstractFindAction {
             case MAIL:
                 return MailFacetType.getByName(name);
 
-            // TODO: add other modules
+            case CALENDAR:
+                return CalendarFacetType.getByName(name);
+
+            case CONTACTS:
+                return ContactsFacetType.getByName(name);
+
+            case DRIVE:
+                return DriveFacetType.getByName(name);
+
+            case TASKS:
+                return TasksFacetType.getByName(name);
+
             default:
                 return null;
         }

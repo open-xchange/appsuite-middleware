@@ -49,7 +49,10 @@
 
 package com.openexchange.find.drive;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.find.facet.FacetType;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -67,7 +70,13 @@ public enum DriveFacetType implements FacetType {
     FILE_CONTENT(DriveStrings.FACET_FILE_CONTENT),
     ;
 
-    // ---------------------------------------------------------------------------------------------- //
+    private static final Map<String, DriveFacetType> typesByName = new HashMap<String, DriveFacetType>();
+    static {
+        for (DriveFacetType type : values()) {
+            typesByName.put(type.getName(), type);
+        }
+    }
+
 
     private final String displayName;
 
@@ -83,6 +92,18 @@ public enum DriveFacetType implements FacetType {
     @Override
     public String getDisplayName() {
         return displayName;
+    }
+
+    /**
+     * Gets a {@link DriveFacetType} by its name.
+     * @return The type or <code>null</code>, if the name is invalid.
+     */
+    public static DriveFacetType getByName(String name) {
+        if (Strings.isEmpty(name)) {
+            return null;
+        }
+
+        return typesByName.get(name);
     }
 
 }

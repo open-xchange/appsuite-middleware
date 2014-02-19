@@ -75,6 +75,7 @@ public enum MailFacetType implements FacetType {
         }
     }
 
+
     private final String displayName;
 
     private MailFacetType(final String displayName) {
