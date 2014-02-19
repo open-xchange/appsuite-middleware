@@ -70,7 +70,7 @@ public class NameFacet extends CommonContactSearchFacet {
         ContactField.YOMI_FIRST_NAME, ContactField.YOMI_LAST_NAME, ContactField.SUFFIX
     };
 
-    private static final String ID = "email";
+    private static final String ID = "name";
 
     public NameFacet() {
         super(ContactsFacetType.NAME, Collections.singletonList(
