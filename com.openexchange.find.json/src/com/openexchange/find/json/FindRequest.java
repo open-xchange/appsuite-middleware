@@ -116,10 +116,15 @@ public class FindRequest {
      */
     public Offset getOffset() throws OXException {
         JSONObject json = (JSONObject) request.requireData();
-        int off, len;
+        int off = 0;
+        int len = -1;
         try {
-            off = json.getInt(PARAM_START);
-            len = json.getInt(PARAM_SIZE);
+            if (json.has(PARAM_START)) {
+                off = json.getInt(PARAM_START);
+            }
+            if (json.has(PARAM_SIZE)) {
+                len = json.getInt(PARAM_SIZE);
+            }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
