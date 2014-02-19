@@ -390,8 +390,8 @@ public final class Tools {
                 final DatabaseService databaseService = ServerServiceRegistry.getServize(DatabaseService.class);
                 final Connection wcon = databaseService.getWritable(contextId);
                 try {
-                    storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, con, false);
-                    final MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId, con);
+                    storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, wcon, false);
+                    final MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId, wcon);
                     for (final MailAccount macc : accounts) {
                         if (macc.getId() == accountId) {
                             return macc;
