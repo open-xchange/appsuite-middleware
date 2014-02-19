@@ -68,7 +68,7 @@ import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
  */
 public abstract class MobileNotifierFileUtil {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierFileUtil.class);
-    
+
     private static final String TEMPLATEPATH = "/templates/";
 
     /**

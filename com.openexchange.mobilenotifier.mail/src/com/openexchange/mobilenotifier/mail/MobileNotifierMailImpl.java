@@ -132,32 +132,31 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
                 try {
                     mailAccess = mailService.getMailAccess(session, mailAccount.getId());
                     mailAccess.connect();
-                    List<MailMessage> mailMessages = Arrays.asList(mailAccess.getMessageStorage().getUnreadMessages(
+                    final List<MailMessage> mailMessages = Arrays.asList(mailAccess.getMessageStorage().getUnreadMessages(
                         "INBOX",
                         MailSortField.RECEIVED_DATE,
                         OrderDirection.DESC,
                         requestedFields,
-                        100));
+                        25));
                     for (MailMessage mailMessage : mailMessages) {
-                        List<NotifyItem> notifyItem = new ArrayList<NotifyItem>();
+                        final List<NotifyItem> notifyItem = new ArrayList<NotifyItem>();
                         final InternetAddress[] inetAddr = mailMessage.getFrom();
-                        final Date received_string = mailMessage.getReceivedDate();
-
+                        final Date receivedDate = mailMessage.getReceivedDate();
                         final String subject = mailMessage.getSubject();
                         final boolean attachments = mailMessage.hasAttachment();
                         final String folder = mailMessage.getFolder();
                         final int flag = mailMessage.getFlags();
                         final String id = mailMessage.getMailId();
-
+                        // localized date string
                         final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                         final Locale locale = user.getLocale();
                         final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
+                        final String localizedReceivedDate = LocalizationUtility.dateLocalizer(receivedDate, ltz);
 
-                        String rect = LocalizationUtility.dateLocalizer(received_string, ltz);
                         notifyItem.add(new NotifyItem("folder", folder));
                         notifyItem.add(new NotifyItem("id", id));
                         notifyItem.add(new NotifyItem("from", inetAddr[0]));
-                        notifyItem.add(new NotifyItem("received_date", rect));
+                        notifyItem.add(new NotifyItem("received_date", localizedReceivedDate));
                         notifyItem.add(new NotifyItem("subject", subject));
                         notifyItem.add(new NotifyItem("attachments", attachments));
                         notifyItem.add(new NotifyItem("flags", flag));

@@ -50,6 +50,8 @@
 package com.openexchange.ajax.mobilenotifier.tests;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,11 +75,11 @@ public class GetTest extends AbstractMobileNotifierTest {
     }
 
     public void testMailProviderJSONResponse() throws OXException, IOException, JSONException {
-        testSingleProvider("io.ox/mail", new MandatoryFields("from", "received_date", "subject", "flags", "attachments", "id", "folder"));
+        singleProvider("io.ox/mail", new MandatoryFields("from", "received_date", "subject", "flags", "attachments", "id", "folder"));
     }
 
     public void testCalendarProviderJSONResponse() throws OXException, IOException, JSONException {
-        testSingleProvider("io.ox/calendar", new MandatoryFields(
+        singleProvider("io.ox/calendar", new MandatoryFields(
             "location",
             "title",
             "recurrence_start",
@@ -93,7 +95,7 @@ public class GetTest extends AbstractMobileNotifierTest {
         assertNotNull("exception should have thrown ", res.getException());
     }
 
-    private void testSingleProvider(String providerName, MandatoryFields mandatory) throws OXException, IOException, JSONException {
+    private void singleProvider(String providerName, MandatoryFields mandatoryItems) throws OXException, IOException, JSONException {
         GetMobileNotifierRequest req = new GetMobileNotifierRequest(providerName);
         GetMobileNotifierResponse res = getClient().execute(req);
 
@@ -103,21 +105,28 @@ public class GetTest extends AbstractMobileNotifierTest {
         JSONObject providerObject = (JSONObject) res.getData();
         assertTrue("could not find element \"provider\" in json structure", providerObject.has("provider"));
         JSONObject singleProviderObject = (JSONObject) providerObject.get("provider");
-        
+
         assertTrue("could not find provider " + providerName, singleProviderObject.has(providerName));
         JSONObject providerJSON = (JSONObject) singleProviderObject.get(providerName);
-        
+
         singleProviderObject = (JSONObject) singleProviderObject.get(providerName);
 
         assertTrue("could not find element \"items\"", providerJSON.has("items"));
         JSONArray itemsArray = (JSONArray) providerJSON.get("items");
 
-        String[] mandatoryArr = mandatory.getMandatory();
-        for (int i = 0; i < itemsArray.length(); i++) {
-            JSONObject itemObject = itemsArray.getJSONObject(i);
-            for (int j = 0; j < mandatoryArr.length; j++) {
-                assertTrue("could not found the mandatory item: " + mandatoryArr[j], itemObject.has(mandatoryArr[j]));
+        List<String> missingFields = new ArrayList<String>();
+        String[] mandatoryArr = mandatoryItems.getMandatory();
+
+        assertTrue("no items found ", itemsArray.length() > 0);
+
+        // get only the first notification item
+        JSONObject itemObject = itemsArray.getJSONObject(0);
+        for (int i = 0; i < mandatoryArr.length; i++) {
+            if (!itemObject.has(mandatoryArr[i])) {
+                missingFields.add(mandatoryArr[i]);
             }
         }
+
+        assertFalse("could not found the mandatory item: " + missingFields, missingFields.size() > 0);
     }
 }

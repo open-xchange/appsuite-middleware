@@ -47,54 +47,59 @@
  *
  */
 
-package com.openexchange.ajax.mobilenotifier.tests;
+package com.openexchange.mobilenotifier.calendar;
 
-import java.io.IOException;
-import junitx.framework.FileAssert;
-import org.json.JSONException;
-import com.openexchange.ajax.mobilenotifier.actions.ConfigputMobileNotifierRequest;
-import com.openexchange.ajax.mobilenotifier.actions.ConfigputMobileNotifierResponse;
+import java.util.Date;
+import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarField;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
-import com.openexchange.mobilenotifier.json.convert.ParsedNotifyTemplate;
-import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtil;
+import com.openexchange.mobilenotifier.NotifyItem;
+import com.openexchange.mobilenotifier.NotifyTemplate;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link ConfigputTest}
+ * {@link MobileNotifierCalendarImpl}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ConfigputTest extends AbstractMobileNotifierTest {
+public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
 
-    /**
-     * Initializes a new {@link ConfigputTest}.
-     * 
-     * @param name
-     */
-    public ConfigputTest(String name) {
-        super(name);
+    private final ServiceLookup services;
+
+    public MobileNotifierCalendarImpl(ServiceLookup services) {
+        this.services = services;
     }
 
-    public void testShouldUpdateTemplate() throws OXException, IOException, JSONException {
-        ParsedNotifyTemplate notifyTemplate = new ParsedNotifyTemplate();
-        notifyTemplate.setFrontendName("io.ox/mail");
-        final String template = "<div class=\"mail-listitem\">\n" + "\t<div class=\"from\"><%= from %></div>\n" + "\t<div class=\"received_date\"><%= received_date %></div>\n" + "\t<div class=\"subject\"><%= subject %></div>\n" + "\t<div class=\"flags\"><%= flags %></div>\n" + "\t<div class=\"attachments\"><%= attachments %></div>\n" + "</div>";
-        notifyTemplate.setHtmlTemplate(template);
-
-        ConfigputMobileNotifierRequest updReq = new ConfigputMobileNotifierRequest(notifyTemplate);
-        ConfigputMobileNotifierResponse updResp = getClient().execute(updReq);
-
-        assertFalse("should have been successful, but got: " + updResp.getErrorMessage(), updResp.hasError());
-
-        assertEquals("Should return true in case of success", new Boolean(true), updResp.getData());
+    @Override
+    public String getProviderName() {
+        return MobileNotifierProviders.APPOINTMENT.getProviderName();
     }
 
-    public void testShouldThrowExceptionIfUnknownService() throws OXException, IOException, JSONException {
-        ParsedNotifyTemplate notifyTemplate = new ParsedNotifyTemplate();
-        notifyTemplate.setFrontendName("io.ox/mehl");
-        notifyTemplate.setHtmlTemplate("<div></div>");
-        ConfigputMobileNotifierRequest updReq = new ConfigputMobileNotifierRequest(notifyTemplate);
-        ConfigputMobileNotifierResponse updResp = getClient().execute(updReq);
-        assertTrue("should get an exception, but no error occured", updResp.hasError());
+    @Override
+    public String getFrontendName() {
+        return MobileNotifierProviders.APPOINTMENT.getFrontendName();
     }
+
+    @Override
+    public List<List<NotifyItem>> getItems(Session session) throws OXException {
+
+        return null;
+    }
+
+    @Override
+    public NotifyTemplate getTemplate() throws OXException {
+        return null;
+    }
+
+    @Override
+    public void putTemplate(String changedTemplate) throws OXException {
+
+    }
+
 }

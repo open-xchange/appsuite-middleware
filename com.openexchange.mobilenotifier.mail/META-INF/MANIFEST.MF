@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
+Bundle-Vendor: Open-Xchange Inc.
 Bundle-Name: Open-Xchange Mobile Notifier Mail Bundle
 Bundle-SymbolicName: com.openexchange.mobilenotifier.mail
 Bundle-Version: 7.6.0
