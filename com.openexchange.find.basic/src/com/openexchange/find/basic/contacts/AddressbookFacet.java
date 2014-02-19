@@ -49,7 +49,10 @@
 
 package com.openexchange.find.basic.contacts;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.FacetValue;
@@ -65,14 +68,16 @@ public class AddressbookFacet extends CommonContactSearchFacet {
 
     private static final long serialVersionUID = -9131205652463933031L;
 
-    protected static final ContactField[] ADDRESSBOOK_FIELDS = {
-        ContactField.DISPLAY_NAME,
-    };
+    static final ContactField[] ADDRESSBOOK_FIELDS = merge(
+        AddressFacet.ADDRESS_FIELDS, EmailFacet.EMAIL_FIELDS, NameFacet.NAME_FIELDS, PhoneFacet.PHONE_FIELDS,
+        new ContactField[] { ContactField.CATEGORIES, ContactField.COMPANY, ContactField.COMMERCIAL_REGISTER }
+        //TOD=: more fields
+    );
 
-    private static final String ID = "phone";
+    private static final String ID = "address_book";
 
     public AddressbookFacet() {
-        super(ContactsFacetType.PHONE, Collections.singletonList(
+        super(ContactsFacetType.ADDRESSBOOK, Collections.singletonList(
             new FacetValue(ID, new SimpleDisplayItem(ID), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton(ID), "override"))));
     }
     @Override
@@ -83,6 +88,14 @@ public class AddressbookFacet extends CommonContactSearchFacet {
     @Override
     protected ContactField[] getFields() {
         return ADDRESSBOOK_FIELDS;
+    }
+
+    private static ContactField[] merge(ContactField[]...fields) {
+        Set<ContactField> mergedFields = new HashSet<ContactField>();
+        for (ContactField[] contactFields : fields) {
+            mergedFields.addAll(Arrays.asList(contactFields));
+        }
+        return mergedFields.toArray(new ContactField[mergedFields.size()]);
     }
 
 }

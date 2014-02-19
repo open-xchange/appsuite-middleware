@@ -65,7 +65,7 @@ public class NameFacet extends CommonContactSearchFacet {
 
     private static final long serialVersionUID = -9131203652463933031L;
 
-    private static final ContactField[] NAME_FIELDS = {
+    static final ContactField[] NAME_FIELDS = {
         ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.MIDDLE_NAME, ContactField.GIVEN_NAME, ContactField.TITLE,
         ContactField.YOMI_FIRST_NAME, ContactField.YOMI_LAST_NAME, ContactField.SUFFIX
     };

@@ -65,7 +65,7 @@ public class PhoneFacet extends CommonContactSearchFacet {
 
     private static final long serialVersionUID = -9131205652463933031L;
 
-    private static final ContactField[] PHONE_FIELDS = {
+    static final ContactField[] PHONE_FIELDS = {
         ContactField.TELEPHONE_ASSISTANT, ContactField.TELEPHONE_BUSINESS1, ContactField.TELEPHONE_BUSINESS2,
         ContactField.TELEPHONE_CALLBACK, ContactField.TELEPHONE_CAR, ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_HOME1,
         ContactField.TELEPHONE_HOME2, ContactField.TELEPHONE_IP, ContactField.TELEPHONE_ISDN, ContactField.TELEPHONE_OTHER,

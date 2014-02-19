@@ -65,7 +65,7 @@ public class AddressFacet extends CommonContactSearchFacet {
 
     private static final long serialVersionUID = -9031103652462933031L;
 
-    private static final ContactField[] ADDRESS_FIELDS = {
+    static final ContactField[] ADDRESS_FIELDS = {
         ContactField.STREET_BUSINESS, ContactField.STREET_HOME, ContactField.STREET_OTHER,
         ContactField.POSTAL_CODE_BUSINESS, ContactField.POSTAL_CODE_HOME, ContactField.POSTAL_CODE_OTHER,
         ContactField.CITY_BUSINESS, ContactField.CITY_HOME, ContactField.CITY_OTHER,

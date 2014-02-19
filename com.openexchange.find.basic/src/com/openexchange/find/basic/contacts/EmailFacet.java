@@ -65,7 +65,7 @@ public class EmailFacet extends CommonContactSearchFacet {
 
     private static final long serialVersionUID = -9131103652463933031L;
 
-    private static final ContactField[] EMAIL_FIELDS = {
+    static final ContactField[] EMAIL_FIELDS = {
         ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3
     };
 
