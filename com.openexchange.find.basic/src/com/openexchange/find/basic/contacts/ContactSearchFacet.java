@@ -55,8 +55,6 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -67,14 +65,6 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class ContactSearchFacet extends Facet {
 
     private static final long serialVersionUID = 3919108856976038573L;
-
-    /**
-     * A search term to indicate empty results beforehand.
-     */
-    static final SearchTerm<?> FALSE_TERM;
-    static {
-        FALSE_TERM = new SingleSearchTerm(SingleOperation.ISNULL);
-    }
 
     /**
      * Initializes a new {@link ContactSearchFacet}.

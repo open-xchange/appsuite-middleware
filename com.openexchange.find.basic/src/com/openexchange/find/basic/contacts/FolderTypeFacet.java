@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.FolderTypeDisplayItem;
@@ -136,9 +137,8 @@ public class FolderTypeFacet extends ContactSearchFacet {
                 }
                 return orTerm;
             }
-        } else {
-            return null; //TODO
         }
+        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
     }
 
     private static SingleSearchTerm getFolderIDEqualsTerm(String folderID) {

@@ -96,11 +96,17 @@ import com.openexchange.tools.session.ServerSession;
 public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriver {
 
     /**
-     * Defines the contact fields available that are available in a {@link ContactsDocument}.
+     * Defines the contact fields that are available in a {@link ContactsDocument}. Matches the fields typically fetched from the
+     * storage when serving the "list" request.
      */
-    public static final ContactField[] CONTACT_FIELDS = {
-        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.CONTEXTID, ContactField.UID, ContactField.DISPLAY_NAME,
-    };//TODO
+    private static final ContactField[] CONTACT_FIELDS = {
+        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.PRIVATE_FLAG, ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME,
+        ContactField.SUR_NAME, ContactField.TITLE, ContactField.POSITION, ContactField.INTERNAL_USERID, ContactField.EMAIL1,
+        ContactField.EMAIL2, ContactField.EMAIL3, ContactField.COMPANY, ContactField.DISTRIBUTIONLIST,
+        ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.NUMBER_OF_IMAGES, ContactField.LAST_MODIFIED, ContactField.YOMI_LAST_NAME,
+        ContactField.SUR_NAME, ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, ContactField.DISPLAY_NAME,
+        ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.USE_COUNT
+    };
 
 
     private final Map<String, ContactSearchFacet> staticFacets;
@@ -159,10 +165,18 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * combine with addressbook queries
          */
-        for (String query : searchRequest.getQueries()) {
-            SearchTerm<?> term = addressbookFacet.getSearchTerm(session, query);
+        List<String> queries = searchRequest.getQueries();
+        if (1 == queries.size()) {
+            SearchTerm<?> term = addressbookFacet.getSearchTerm(session, queries.get(0));
             if (null != term) {
                 searchTerm.addSearchTerm(term);
+            }
+        } else if (1 < queries.size()) {
+            for (String query : searchRequest.getQueries()) {
+                SearchTerm<?> term = addressbookFacet.getSearchTerm(session, query);
+                if (null != term) {
+                    searchTerm.addSearchTerm(term);
+                }
             }
         }
         /*
@@ -221,7 +235,6 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         if (null != contactFacet) {
             return contactFacet.getSearchTerm(session, query);
         }
-
         /*
          * check facets from autocomplete
          */

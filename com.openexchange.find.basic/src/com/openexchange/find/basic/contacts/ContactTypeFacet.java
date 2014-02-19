@@ -54,12 +54,15 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.ContactTypeDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -99,18 +102,24 @@ public class ContactTypeFacet extends ContactSearchFacet {
 
     @Override
     public SearchTerm<?> getSearchTerm(ServerSession session, String query) throws OXException {
-        Boolean markAsDistributionList;
         if (ContactTypeDisplayItem.Type.CONTACT.getIdentifier().equals(query)) {
-            markAsDistributionList = Boolean.FALSE;
-        } else if (ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier().equals(query)) {
-            markAsDistributionList = Boolean.TRUE;
-        } else {
-            throw new OXException();
+            CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            SingleSearchTerm term1 = new SingleSearchTerm(SingleOperation.ISNULL);
+            term1.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
+            searchTerm.addSearchTerm(term1);
+            SingleSearchTerm term2 = new SingleSearchTerm(SingleOperation.EQUALS);
+            term2.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
+            term2.addOperand(new ConstantOperand<Boolean>(Boolean.FALSE));
+            searchTerm.addSearchTerm(term2);
+            return searchTerm;
         }
-        SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-        searchTerm.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
-        searchTerm.addOperand(new ConstantOperand<Boolean>(markAsDistributionList));
-        return searchTerm;
+        if (ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier().equals(query)) {
+            SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+            searchTerm.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
+            searchTerm.addOperand(new ConstantOperand<Boolean>(Boolean.TRUE));
+            return searchTerm;
+        }
+        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
     }
 
 }
