@@ -49,6 +49,7 @@
 package com.openexchange.find;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -58,6 +59,11 @@ import java.util.List;
  * @since 7.6.0
  */
 public class SearchResult implements Serializable {
+
+    /**
+     * The empty search result.
+     */
+    public static final SearchResult EMPTY = new SearchResult(0, 0, Collections.<Document>emptyList());
 
     private static final long serialVersionUID = -4937862789320521401L;
 

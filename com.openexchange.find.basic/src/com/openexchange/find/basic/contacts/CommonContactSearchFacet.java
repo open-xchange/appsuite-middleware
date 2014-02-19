@@ -71,6 +71,12 @@ public abstract class CommonContactSearchFacet extends ContactSearchFacet {
 
     private static final long serialVersionUID = 2919108856976038573L;
 
+    /**
+     * Initializes a new {@link CommonContactSearchFacet}.
+     *
+     * @param type The facet type
+     * @param values The facet values
+     */
     protected CommonContactSearchFacet(FacetType type, List<FacetValue> values) {
         super(type, values);
     }
@@ -85,9 +91,11 @@ public abstract class CommonContactSearchFacet extends ContactSearchFacet {
         return orTerm;
     }
 
-    @Override
-    public abstract String getID();
-
+    /**
+     * Gets the contact fields used for comparisons in the search term.
+     *
+     * @return The contact fields used by the facet
+     */
     protected abstract ContactField[] getFields();
 
     private static SingleSearchTerm getFieldEqualsPatternTerm(ContactField field, String pattern) {

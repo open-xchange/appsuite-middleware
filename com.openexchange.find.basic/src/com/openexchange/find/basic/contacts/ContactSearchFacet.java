@@ -55,6 +55,8 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.search.SearchTerm;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -66,12 +68,39 @@ public abstract class ContactSearchFacet extends Facet {
 
     private static final long serialVersionUID = 3919108856976038573L;
 
+    /**
+     * A search term to indicate empty results beforehand.
+     */
+    static final SearchTerm<?> FALSE_TERM;
+    static {
+        FALSE_TERM = new SingleSearchTerm(SingleOperation.ISNULL);
+    }
+
+    /**
+     * Initializes a new {@link ContactSearchFacet}.
+     *
+     * @param type The facet type
+     * @param values The facet values
+     */
     protected ContactSearchFacet(FacetType type, List<FacetValue> values) {
         super(type, values);
     }
 
+    /**
+     * Constructs a search term for the supplied query.
+     *
+     * @param session The server session
+     * @param query The query
+     * @return The search term, or <code>null</code> to indicate a <code>FALSE</code> condition with empty results.
+     * @throws OXException
+     */
     public abstract SearchTerm<?> getSearchTerm(ServerSession session, String query) throws OXException;
 
+    /**
+     * Gets the identifier of the facet as referenced by the search filters.
+     *
+     * @return The ID
+     */
     public abstract String getID();
 
 }

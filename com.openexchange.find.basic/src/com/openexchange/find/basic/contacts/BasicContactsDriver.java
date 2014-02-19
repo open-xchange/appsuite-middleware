@@ -151,14 +151,29 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
          * build filters
          */
         for (Filter filter : searchRequest.getFilters()) {
-            searchTerm.addSearchTerm(getSearchTerm(session, filter));
+            SearchTerm<?> term = getSearchTerm(session, filter);
+            if (null != term) {
+                searchTerm.addSearchTerm(term);
+            }
         }
         /*
          * combine with addressbook queries
          */
         for (String query : searchRequest.getQueries()) {
-            searchTerm.addSearchTerm(addressbookFacet.getSearchTerm(session, query));
+            SearchTerm<?> term = addressbookFacet.getSearchTerm(session, query);
+            if (null != term) {
+                searchTerm.addSearchTerm(term);
+            }
         }
+        /*
+         * check for valid search term
+         */
+        if (0 == searchTerm.getOperands().length) {
+            return SearchResult.EMPTY;
+        }
+        /*
+         * search
+         */
         List<Document> contactDocuments = new ArrayList<Document>();
         SortOptions sortOptions = new SortOptions(searchRequest.getStart(), searchRequest.getSize());
         SearchIterator<Contact> searchIterator = null;
@@ -189,6 +204,15 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         return new AutocompleteResult(Collections.singletonList(new Facet(ContactsFacetType.CONTACTS, contactValues)));
     }
 
+    /**
+     * Creates a search term for the query using a facet matching the supplied field.
+     *
+     * @param session The server session
+     * @param field The filter field to select the matching facet
+     * @param query The query
+     * @return The search term, or <code>null</code> to indicate a <code>FALSE</code> condition with empty results.
+     * @throws OXException
+     */
     private SearchTerm<?> createSearchTerm(ServerSession session, String field, String query) throws OXException {
         /*
          * check static facets first
@@ -208,11 +232,19 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             return searchTerm;
         }
         /*
-         * unknown field
+         * unknown filter field
          */
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
     }
 
+    /**
+     * Gets the search term for a filter definition.
+     *
+     * @param session The server session
+     * @param filter The filter
+     * @return The search term, or <code>null</code> to indicate a <code>FALSE</code> condition with empty results.
+     * @throws OXException
+     */
     private SearchTerm<?> getSearchTerm(ServerSession session, Filter filter) throws OXException {
         Set<String> fields = filter.getFields();
         Set<String> queries = filter.getQueries();
@@ -222,10 +254,13 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         CompositeSearchTerm compositeTerm = new CompositeSearchTerm(CompositeOperation.OR);
         for (String field : fields) {
             for (String query : queries) {
-                compositeTerm.addSearchTerm(createSearchTerm(session, field, query));
+                SearchTerm<?> searchTerm = createSearchTerm(session, field, query);
+                if (null != searchTerm) {
+                    compositeTerm.addSearchTerm(searchTerm);
+                }
             }
         }
-        return compositeTerm;
+        return 0 == compositeTerm.getOperands().length ? null : compositeTerm;
     }
 
 }
