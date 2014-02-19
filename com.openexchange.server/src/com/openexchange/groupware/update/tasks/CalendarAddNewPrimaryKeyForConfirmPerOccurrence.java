@@ -94,11 +94,14 @@ public class CalendarAddNewPrimaryKeyForConfirmPerOccurrence extends UpdateTaskA
             rollback = true;
 
             {
+                // Drop & re-create primary key
                 final String[] tables = new String[] { "prg_dates_members", "del_dates_members" };
                 final String[] columns = new String[] {"cid","object_id","member_uid","pfid","occurrence"};
                 final int[] lengths = new int[5];
                 Arrays.fill(lengths, 0);
                 checkPrimaryKey(columns, lengths, tables, connnection);
+
+                // Drop & re-create unique key
                 {
                     final String[] oldCols = new String[] {"cid","member_uid","object_id"};
                     final String[] newCols = new String[] {"cid","member_uid","object_id", "occurrence"};
@@ -107,17 +110,19 @@ public class CalendarAddNewPrimaryKeyForConfirmPerOccurrence extends UpdateTaskA
             }
 
             {
-
+                // Drop foreign key: dateExternal(cid, objectId) -> prg_dates(cid, intfield01)
                 String foreignKey = Tools.existsForeignKey(connnection, "prg_dates", new String[] {"cid", "intfield01"}, "dateExternal", new String[] {"cid", "objectId"});
                 if (null != foreignKey && !foreignKey.equals("")) {
                     Tools.dropForeignKey(connnection, "dateExternal", foreignKey);
                 }
 
+                // Drop foreign key: delDateExternal(cid, objectId) -> del_dates(cid, intfield01)
                 foreignKey = Tools.existsForeignKey(connnection, "del_dates", new String[] {"cid", "intfield01"}, "delDateExternal", new String[] {"cid", "objectId"});
                 if (null != foreignKey && !foreignKey.equals("")) {
                     Tools.dropForeignKey(connnection, "delDateExternal", foreignKey);
                 }
 
+                // Drop & re-create primary key
                 final String[] tables = new String[] { "dateExternal", "delDateExternal" };
                 final String[] columns = new String[] {"cid","objectId","mailAddress","occurrence"};
                 final int[] lengths = new int[4];
