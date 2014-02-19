@@ -454,7 +454,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } else {
             final String prefix = getDefaultFolderPrefix();
             final int pLength = prefix.length();
-            considerStandardFolders = 1 == pLength ? 0 == parentFullName.length() : (parentFullName.equals(prefix.substring(0, pLength - 1)));
+            considerStandardFolders = 0 == pLength ? 0 == parentFullName.length() : (parentFullName.equals(prefix.substring(0, pLength - 1)));
         }
         return considerStandardFolders;
     }
