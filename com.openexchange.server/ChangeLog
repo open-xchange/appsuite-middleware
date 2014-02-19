@@ -1,6 +1,7 @@
 * 2014-02-19 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31199: Process multicast results from GCM
+ - Fix for bug 31181: Consider empty parameter values during parsing
 
 * 2014-02-18 - thorben.betten@open-xchange.com
 

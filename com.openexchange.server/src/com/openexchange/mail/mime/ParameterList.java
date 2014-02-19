@@ -247,7 +247,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     private void parseParameter(final String name, final String value) {
         String val;
-        if (value == null) {
+        if (Strings.isEmpty(value)) {
             val = "";
         } else {
             val =
