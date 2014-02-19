@@ -2159,10 +2159,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     @Override
     public String getDefaultFolderPrefix() throws OXException {
+        final String urlName = urlName("ns-", imapConfig.getServer(), imapConfig.getPort(), imapConfig.getLogin(), imapConfig.getPassword());
+        String defaultFolderPrefix = (String) session.getParameter(urlName);
+        if (null == defaultFolderPrefix) {
+            defaultFolderPrefix = getDefaultFolderPrefix0();
+            session.setParameter(urlName, defaultFolderPrefix);
+        }
+        return defaultFolderPrefix;
+    }
+
+    private String getDefaultFolderPrefix0() throws OXException {
         try {
-            /*
-             * Special handling for GMail...
-             */
+            // Special handling for GMail...
             {
                 final String server = imapConfig.getServer().toLowerCase(Locale.US);
                 if ("imap.gmail.com".equals(server) || "imap.googlemail.com".equals(server)) {
@@ -2180,17 +2188,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     }
                 }
             }
-            /*
-             * Try NAMESPACE command
-             */
-            final String prefixByInferiors = prefixByInferiors();
+            // Try NAMESPACE command
+            final char[] sep = new char[1];
+            final String prefixByInferiors = prefixByInferiors(sep);
             final String prefix;
             try {
                 final String[] namespaces = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
                 if (null == namespaces || 0 == namespaces.length) {
-                    /*
-                     * No namespaces available
-                     */
+                    // No namespaces available
                     return prefixByInferiors;
                 }
                 prefix = namespaces[0];
@@ -2202,7 +2207,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (isEmpty && RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapStore.getDefaultFolder(), true, session, accountId).booleanValue()) {
                 return prefix;
             }
-            final String retvalPrefix = new com.openexchange.java.StringAllocator(isEmpty ? STR_INBOX : prefix).append(NamespaceFoldersCache.getPersonalSeparator()).toString();
+            final String retvalPrefix = new com.openexchange.java.StringAllocator(isEmpty ? STR_INBOX : prefix).append(sep[0]).toString();
             if (!retvalPrefix.equals(prefixByInferiors)) {
                 LOG.warn("The personal namespace indicated by NAMESPACE command does not match root folder's capabilities: {} IS NOT {}", retvalPrefix, prefixByInferiors);
             }
@@ -2214,11 +2219,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private String prefixByInferiors() throws OXException {
+    private String prefixByInferiors(final char[] sep) throws OXException {
         try {
             final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
+            final char separator = defaultFolder.getSeparator();
+            sep[0] = separator;
             if (!RootSubfolderCache.canCreateSubfolders(defaultFolder, true, session, accountId).booleanValue() || MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace()) {
-                return new com.openexchange.java.StringAllocator(STR_INBOX).append(defaultFolder.getSeparator()).toString();
+                return new com.openexchange.java.StringAllocator(STR_INBOX).append(separator).toString();
             }
             return "";
         } catch (final MessagingException e) {
@@ -3055,6 +3062,40 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             isWhitespace = Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static String urlName(final String prefix, final String host, final int port, final String username, final String pw) {
+        // Start with "protocol:"
+        final StringAllocator tempURL = new StringAllocator(128);
+
+        if (null != prefix) {
+            tempURL.append(prefix);
+        }
+
+        tempURL.append("imap://");
+
+        // Add the user:password@
+        if (username != null) {
+            tempURL.append(username);
+            if (pw != null) {
+                tempURL.append(':');
+                tempURL.append(pw);
+            }
+            tempURL.append('@');
+        }
+
+        // Add host
+        if (host != null) {
+            tempURL.append(host);
+        }
+
+        // Add port
+        if (port > 0) {
+            tempURL.append(':');
+            tempURL.append(Integer.toString(port));
+        }
+
+        return tempURL.toString();
     }
 
 }
