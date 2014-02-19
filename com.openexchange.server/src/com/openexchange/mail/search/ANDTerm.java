@@ -117,6 +117,20 @@ public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
         terms[1] = secondTerm;
     }
 
+    /**
+     * Gets the first search term
+     */
+    public SearchTerm<?> getFirstTerm() {
+        return terms[0];
+    }
+
+    /**
+     * Gets the second search term
+     */
+    public SearchTerm<?> getSecondTerm() {
+        return terms[1];
+    }
+
     @Override
     public void addMailField(final Collection<MailField> col) {
         terms[0].addMailField(col);
