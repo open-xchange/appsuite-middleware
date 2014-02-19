@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
+import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
@@ -103,12 +104,14 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
 
 
     private final Map<String, ContactSearchFacet> staticFacets;
+    private final AddressbookFacet addressbookFacet;
 
     /**
      * Initializes a new {@link BasicContactsDriver}.
      */
     public BasicContactsDriver() {
         super();
+        addressbookFacet = new AddressbookFacet();
         staticFacets = new HashMap<String, ContactSearchFacet>();
         AddressbookFacet addressbookFacet = new AddressbookFacet();
         staticFacets.put(addressbookFacet.getID(), addressbookFacet);
@@ -143,11 +146,20 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
 
     @Override
     public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
-        List<Document> contactDocuments = new ArrayList<Document>();
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        /*
+         * build filters
+         */
         for (Filter filter : searchRequest.getFilters()) {
             searchTerm.addSearchTerm(getSearchTerm(session, filter));
         }
+        /*
+         * combine with addressbook queries
+         */
+        for (String query : searchRequest.getQueries()) {
+            searchTerm.addSearchTerm(addressbookFacet.getSearchTerm(session, query));
+        }
+        List<Document> contactDocuments = new ArrayList<Document>();
         SortOptions sortOptions = new SortOptions(searchRequest.getStart(), searchRequest.getSize());
         SearchIterator<Contact> searchIterator = null;
         try {
@@ -198,7 +210,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * unknown field
          */
-        throw new OXException();//TODO
+        throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
     }
 
     private SearchTerm<?> getSearchTerm(ServerSession session, Filter filter) throws OXException {

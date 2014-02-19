@@ -70,6 +70,10 @@ public enum FindExceptionCode implements DisplayableOXExceptionCode {
      * No visible/readable folder found in module %1$s for user %2$d in context %3$d.
      */
     NO_READABLE_FOLDER("No visible/readable folder found in module %1$s for user %2$d in context %3$d.", Category.CATEGORY_TRY_AGAIN, 2, FindExceptionMessages.SERVICE_NOT_AVAILABLE),
+    /**
+     * The filter field \"%1$s\" is not supported.
+     */
+    UNSUPPORTED_FILTER_FIELD("The filter field \"%1$s\" is not supported.", Category.CATEGORY_ERROR, 3),
 
     ;
 
