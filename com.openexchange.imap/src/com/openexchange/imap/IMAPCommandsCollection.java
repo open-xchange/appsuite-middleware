@@ -76,6 +76,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -98,6 +99,7 @@ import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
@@ -229,8 +231,8 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final String mboxName = prepareStringArgument(new StringAllocator("probe").append(
-                    Long.toString(System.currentTimeMillis())).toString());
+                final String mboxName = prepareStringArgument(new StringAllocator("probe").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString());
+                LOG.debug("Trying to probe IMAP server {} for root subfolder capability with mbox name: {}", p.getHost(), mboxName);
                 /*
                  * Perform command: CREATE
                  */
@@ -242,9 +244,13 @@ public final class IMAPCommandsCollection {
                     performCommand(p, sb.append("DELETE ").append(mboxName).toString());
                     return Boolean.TRUE;
                 }
-                if (response.isNO() && MimeMailException.isOverQuotaException(response.getRest())) {
-                    // Creating folder failed due to a exceeded quota exception. Thus assume "true".
-                    return Boolean.TRUE;
+                if (response.isNO()) {
+                    final String rest = response.getRest();
+                    if (MimeMailException.isOverQuotaException(rest)) {
+                        // Creating folder failed due to a exceeded quota exception. Thus assume "true".
+                        return Boolean.TRUE;
+                    }
+                    LOG.warn("Probe of IMAP server {} for root subfolder capability with mbox name {} failed with {}", p.getHost(), mboxName, rest);
                 }
                 return Boolean.FALSE;
             }

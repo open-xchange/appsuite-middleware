@@ -1,3 +1,7 @@
+* 2014-02-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30138: Ensure each probe for root subfolder capability is exclusively performed
+
 * 2014-02-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 31216: Added dependency to "PrgDatesMembersPrimaryKeyUpdateTask" update task
