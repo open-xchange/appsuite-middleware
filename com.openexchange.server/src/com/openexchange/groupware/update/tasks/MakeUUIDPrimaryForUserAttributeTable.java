@@ -54,15 +54,21 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -93,6 +99,8 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
 
             AddUUIDForUserAttributeTable.fillUUIDs(con, progress);
 
+            dropDuplicates(con);
+
             // Drop foreign key
             String foreignKey = Tools.existsForeignKey(con, "user", new String[] {"cid", "id"}, "user_attribute", new String[] {"cid", "id"});
             if (null != foreignKey && !foreignKey.equals("")) {
@@ -115,6 +123,67 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
         } finally {
             autocommit(con);
             Database.backNoTimeout(params.getContextId(), true, con);
+        }
+    }
+
+    private void dropDuplicates(final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT HEX(uuid),COUNT(*) AS count FROM user_attribute GROUP BY uuid HAVING count>1 ORDER BY count DESC");
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                return;
+            }
+
+            final List<UUID> dups = new LinkedList<UUID>();
+            do {
+                dups.add(UUIDs.fromUnformattedString(rs.getString(1)));
+            } while (rs.next());
+
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            for (final UUID uuid : dups) {
+                stmt = con.prepareStatement("SELECT cid, id, name, value FROM user_attribute WHERE ?=HEX(uuid)");
+                stmt.setString(1, UUIDs.getUnformattedString(uuid));
+                rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    final int cid = rs.getInt(1);
+                    final int id = rs.getInt(2);
+                    final String name = rs.getString(3);
+                    final String value = rs.getString(4);
+                    Databases.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
+
+                    stmt = con.prepareStatement("DELETE FROM user_attribute WHERE ?=HEX(uuid)");
+                    stmt.setString(1, UUIDs.getUnformattedString(uuid));
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+
+                    stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,UNHEX(?))");
+                    stmt.setInt(1, cid);
+                    stmt.setInt(2, id);
+                    stmt.setString(3, name);
+                    stmt.setString(4, value);
+                    stmt.setString(5, UUIDs.getUnformattedString(uuid));
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
+
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
