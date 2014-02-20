@@ -51,6 +51,7 @@ package com.openexchange.find.tasks;
 
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * The display item for task status types; either <i>Not started</i>, <i>In Progress</i>, <i>Done</i>, <i>Waiting</i> or <i>Deferred</i>.
@@ -65,17 +66,17 @@ public class TaskStatusDisplayItem implements DisplayItem {
      */
     public static enum Type {
 
-        NOT_STARTED("not_started"),
-        IN_PROGRESS("in_progress"),
-        DONE("done"),
-        WAITING("waiting"),
-        DEFERRED("deferred"),
+        NOT_STARTED(Task.NOT_STARTED),
+        IN_PROGRESS(Task.IN_PROGRESS),
+        DONE(Task.DONE),
+        WAITING(Task.WAITING),
+        DEFERRED(Task.DEFERRED),
         ;
 
         private final String identifier;
 
-        private Type(final String identifier) {
-            this.identifier = identifier;
+        private Type(final int identifier) {
+            this.identifier = Integer.toString(identifier);
         }
 
         /**

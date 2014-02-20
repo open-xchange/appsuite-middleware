@@ -47,62 +47,52 @@
  *
  */
 
-package com.openexchange.find.tasks;
+package com.openexchange.find.basic.tasks;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.find.facet.FacetType;
-import com.openexchange.java.Strings;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * {@link TasksFacetType} - Facet types for the drive module.
- *
+ * {@link Constants}
+ * 
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
+ * @since v7.6.0
  */
-public enum TasksFacetType implements FacetType {
+public class Constants {
 
-    TASK_PARTICIPANTS(TasksStrings.FACET_TASK_PARTICIPANTS),
-    TASK_FOLDERS(TasksStrings.FACET_TASK_FOLDERS),
-    TASK_SUBJECT(TasksStrings.FACET_TASK_SUBJECT),
-    TASK_DESCRIPTION(TasksStrings.FACET_TASK_DESCRIPTION),
-    TASK_LOCATION(TasksStrings.FACET_TASK_LOCATION),
-    TASK_ATTACHMENT_NAME(TasksStrings.FACET_TASK_ATTACHMENT_NAME),
-    TASK_TYPE(TasksStrings.FACET_TASK_TYPE),
-    TASK_STATUS(TasksStrings.FACET_TASK_STATUS), ;
+    public final static String FIELD_FROM = "from";
 
-    private static final Map<String, TasksFacetType> typesByName = new HashMap<String, TasksFacetType>();
-    static {
-        for (TasksFacetType type : values()) {
-            typesByName.put(type.getName(), type);
+    public final static String FIELD_TO = "to";
+
+    public final static String FIELD_CC = "cc";
+
+    public final static String FIELD_SUBJECT = "subject";
+
+    public final static String FIELD_DESCRIPTION = "description";
+
+    public final static String FIELD_FOLDER = "folder";
+
+    public final static String FIELD_STATUS = "status";
+    
+    public final static String FIELD_LOCATION ="location";
+    
+    public final static String FIELD_ATTACHMENT_NAME = "attachment_name";
+
+    public final static String FIELD_TYPE = "type";
+
+    public static final Set<String> PERSONS_FILTER_FIELDS = createStringSet(FIELD_FROM, FIELD_TO, FIELD_CC);
+
+    public static final Set<String> FOLDERS_FILTER_FIELDS = createStringSet(FIELD_FOLDER);
+
+    public static final Set<String> QUERY_FIELDS = createStringSet(FIELD_SUBJECT, FIELD_DESCRIPTION, FIELD_FROM, FIELD_TO, FIELD_CC);
+
+    private static Set<String> createStringSet(String... args) {
+        Set<String> set = new HashSet<String>(args.length);
+        for (String str : args) {
+            set.add(str);
         }
-    }
-
-    private final String displayName;
-
-    private TasksFacetType(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    @Override
-    public String getName() {
-        return toString().toLowerCase();
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Gets a {@link TasksFacetType} by its name.
-     * @return The type or <code>null</code>, if the name is invalid.
-     */
-    public static TasksFacetType getByName(String name) {
-        if (Strings.isEmpty(name)) {
-            return null;
-        }
-
-        return typesByName.get(name);
+        return Collections.unmodifiableSet(set);
     }
 
 }

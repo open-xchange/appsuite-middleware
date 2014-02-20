@@ -84,6 +84,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
+import static com.openexchange.find.basic.tasks.Constants.*;
 
 /**
  * {@link MockTasksDriver}
@@ -92,16 +93,6 @@ import com.openexchange.tools.session.ServerSession;
  * @since 7.6.0
  */
 public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
-
-    // private static final TasksFolderFilter NO_FILTER = null;
-
-    private static final Set<String> PERSONS_FILTER_FIELDS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
-        "from",
-        "to",
-        "cc")));
-
-    //
-    // private static final Set<String> FOLDERS_FILTER_FIELDS = Collections.singleton("folder");
 
     // --------------------------------------------------------------------------------------------------- //
 
@@ -128,23 +119,23 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
 
         // subject or task name
         {
-            final Facet facet = new FieldFacet(TasksFacetType.TASK_NAME, "task_name");
+            final Facet facet = new FieldFacet(TasksFacetType.TASK_SUBJECT, FIELD_SUBJECT);
             staticFacets.add(facet);
         }
         // description
         {
-            final Facet facet = new FieldFacet(TasksFacetType.TASK_DESCRIPTION, "task_description");
+            final Facet facet = new FieldFacet(TasksFacetType.TASK_DESCRIPTION, FIELD_DESCRIPTION);
             staticFacets.add(facet);
         }
         // location
         {
-            final Facet facet = new FieldFacet(TasksFacetType.TASK_LOCATION, "task_location");
+            final Facet facet = new FieldFacet(TasksFacetType.TASK_LOCATION, FIELD_LOCATION);
             staticFacets.add(facet);
         }
         // attachment name
         {
 
-            final Facet facet = new FieldFacet(TasksFacetType.TASK_ATTACHMENT_NAME, "task_attachment_name");
+            final Facet facet = new FieldFacet(TasksFacetType.TASK_ATTACHMENT_NAME, FIELD_ATTACHMENT_NAME);
             staticFacets.add(facet);
         }
         // Status
@@ -153,27 +144,27 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
             staticFacetValues.add(new FacetValue(TaskStatusDisplayItem.Type.NOT_STARTED.getIdentifier(), new TaskStatusDisplayItem(
                 TasksStrings.TASK_TYPE_NOT_STARTED,
                 TaskStatusDisplayItem.Type.NOT_STARTED), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton("task_status"),
+                Collections.singleton(FIELD_STATUS),
                 TaskStatusDisplayItem.Type.NOT_STARTED.getIdentifier())));
             staticFacetValues.add(new FacetValue(TaskStatusDisplayItem.Type.IN_PROGRESS.getIdentifier(), new TaskStatusDisplayItem(
                 TasksStrings.TASK_TYPE_IN_PROGRESS,
                 TaskStatusDisplayItem.Type.IN_PROGRESS), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton("task_status"),
+                Collections.singleton(Constants.FIELD_STATUS),
                 TaskStatusDisplayItem.Type.IN_PROGRESS.getIdentifier())));
             staticFacetValues.add(new FacetValue(TaskStatusDisplayItem.Type.DONE.getIdentifier(), new TaskStatusDisplayItem(
                 TasksStrings.TASK_TYPE_DONE,
                 TaskStatusDisplayItem.Type.DONE), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton("task_status"),
+                Collections.singleton(Constants.FIELD_STATUS),
                 TaskStatusDisplayItem.Type.DONE.getIdentifier())));
             staticFacetValues.add(new FacetValue(TaskStatusDisplayItem.Type.WAITING.getIdentifier(), new TaskStatusDisplayItem(
                 TasksStrings.TASK_TYPE_WAITING,
                 TaskStatusDisplayItem.Type.WAITING), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton("task_status"),
+                Collections.singleton(Constants.FIELD_STATUS),
                 TaskStatusDisplayItem.Type.WAITING.getIdentifier())));
             staticFacetValues.add(new FacetValue(TaskStatusDisplayItem.Type.DEFERRED.getIdentifier(), new TaskStatusDisplayItem(
                 TasksStrings.TASK_TYPE_DEFERRED,
                 TaskStatusDisplayItem.Type.DEFERRED), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton("task_status"),
+                Collections.singleton(Constants.FIELD_STATUS),
                 TaskStatusDisplayItem.Type.DEFERRED.getIdentifier())));
             final Facet statusFacet = new Facet(TasksFacetType.TASK_STATUS, staticFacetValues);
             staticFacets.add(statusFacet);
@@ -189,12 +180,12 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
             staticFacetValues.add(new FacetValue(TaskTypeDisplayItem.Type.SINGLE_TASK.getIdentifier(), new TaskTypeDisplayItem(
                 TasksStrings.TASK_STATUS_SINGLE_TASK,
                 TaskTypeDisplayItem.Type.SINGLE_TASK), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton("task_type"),
+                Collections.singleton(FIELD_TYPE),
                 TaskTypeDisplayItem.Type.SINGLE_TASK.getIdentifier())));
             staticFacetValues.add(new FacetValue(TaskTypeDisplayItem.Type.SERIES.getIdentifier(), new TaskTypeDisplayItem(
                 TasksStrings.TASK_STATUS_SERIES,
                 TaskTypeDisplayItem.Type.SERIES), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton("task_type"),
+                Collections.singleton(FIELD_TYPE),
                 TaskTypeDisplayItem.Type.SERIES.getIdentifier())));
             final Facet taskTypeFacet = new Facet(TasksFacetType.TASK_TYPE, staticFacetValues);
             staticFacets.add(taskTypeFacet);
@@ -209,7 +200,7 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<FacetValue> contactValues = new ArrayList<FacetValue>(contacts.size());
         for (Contact contact : contacts) {
-            Filter filter = new Filter(PERSONS_FILTER_FIELDS, extractMailAddessesFrom(contact));
+            Filter filter = new Filter(Constants.PERSONS_FILTER_FIELDS, extractMailAddessesFrom(contact));
             String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
             contactValues.add(new FacetValue(
                 valueId,
@@ -246,52 +237,6 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
 
     @Override
     public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
-
-        // jData ist gleich searchRequest
-        // final JSONObject jData = (JSONObject) req.getRequest().requireData();
-
-        // if (null != folderName) {
-        // searchObj.addFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));
-        // }
-        //
-        // final int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
-        // final Order order = OrderFields.parse(req.getParameter(AJAXServlet.PARAMETER_ORDER));
-        //
-        // //if (jsonObj.has("limit")) {
-        // // DataParser.checkInt(jsonObj, "limit");
-        // //}
-        //
-        // final Date start = req.getDate(AJAXServlet.PARAMETER_START);
-        // final Date end = req.getDate(AJAXServlet.PARAMETER_END);
-        //
-        // if (start != null) {
-        // final Date[] dateRange;
-        // if (end == null) {
-        // dateRange = new Date[1];
-        // } else {
-        // dateRange = new Date[2];
-        // dateRange[1] = end;
-        // }
-        // dateRange[0] = start;
-        // searchObj.setRange(dateRange);
-        // }
-        //
-        // if (jData.has(SearchFields.PATTERN)) {
-        // searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
-        // }
-        //
-        // searchObj.setTitle(DataParser.parseString(jData, CalendarFields.TITLE));
-        // searchObj.setPriority(DataParser.parseInt(jData, TaskFields.PRIORITY));
-        // searchObj.setSearchInNote(DataParser.parseBoolean(jData, "searchinnote"));
-        // searchObj.setStatus(DataParser.parseInt(jData, TaskFields.STATUS));
-        // searchObj.setCatgories(DataParser.parseString(jData, CommonFields.CATEGORIES));
-        // searchObj.setSubfolderSearch(DataParser.parseBoolean(jData, "subfoldersearch"));
-        //
-        // if (jData.has(CalendarFields.PARTICIPANTS)) {
-        // final Participants participants = new Participants();
-        // searchObj.setParticipants(CalendarParser.parseParticipants(jData, participants));
-        // }
-        //
 
         final TaskSearchObject searchObj = new TaskSearchObject();
 

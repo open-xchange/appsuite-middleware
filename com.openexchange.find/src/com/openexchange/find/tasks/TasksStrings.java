@@ -61,7 +61,7 @@ public class TasksStrings implements LocalizableStrings {
     // ------------------------- i18n strings for facet types -------------------------------------- //
 
     // Search in task name.
-    public static final String FACET_TASK_NAME = "Task name";
+    public static final String FACET_TASK_SUBJECT = "Task subject";
 
     // Search in folders.
     public static final String FACET_TASK_FOLDERS = "Task folders";
@@ -86,19 +86,11 @@ public class TasksStrings implements LocalizableStrings {
 
     // ------------------------- i18n strings for folder types ------------------------------------- //
 
-    public static final String TASK_NAME = FACET_TASK_NAME;
-
-    public static final String TASK_DESCRIPTION = FACET_TASK_DESCRIPTION;
-
-    public static final String TASK_LOCATION = FACET_TASK_LOCATION;
-
-    public static final String TASK_ATTACHMENT_NAME = FACET_TASK_ATTACHMENT_NAME;
-
     public static final String TASK_TYPE_NOT_STARTED = "Not Started";
 
     public static final String TASK_TYPE_IN_PROGRESS = "in Progress";
 
-    public static final String TASK_TYPE_DONE = "DONE";
+    public static final String TASK_TYPE_DONE = "Done";
 
     public static final String TASK_TYPE_WAITING = "Waiting";
 
