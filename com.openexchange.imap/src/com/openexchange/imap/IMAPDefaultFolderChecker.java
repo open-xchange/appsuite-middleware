@@ -203,8 +203,6 @@ public class IMAPDefaultFolderChecker {
             return INBOX;
         }
 
-        long st = System.currentTimeMillis();
-
         // Get default folder array
         final String[] arr = mailSessionCache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
         final String retval = arr == null ? null : arr[index];
