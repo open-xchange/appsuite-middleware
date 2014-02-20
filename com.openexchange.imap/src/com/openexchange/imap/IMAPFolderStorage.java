@@ -2196,6 +2196,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 final String[] namespaces = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
                 if (null == namespaces || 0 == namespaces.length) {
                     // No namespaces available
+                    LOG.info("IMAP server {} does not provide a personal namespace for login {}. Using fall-back \"by inferiors\" detection: \"{}\" (user={}, context={})", imapConfig.getServer(), imapConfig.getLogin(), prefixByInferiors, session.getUserId(), session.getContextId());
                     return prefixByInferiors;
                 }
                 prefix = namespaces[0];
