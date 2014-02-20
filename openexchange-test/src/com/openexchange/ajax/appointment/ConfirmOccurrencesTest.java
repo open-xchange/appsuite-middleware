@@ -50,7 +50,12 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
+import com.openexchange.ajax.appointment.action.ConflictObject;
+import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -76,6 +81,8 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
 
     private Appointment appointment;
 
+    private int nextYear;
+
     private static final int[] COLS = new int[] {
         Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.TITLE,
         Appointment.CONFIRMATIONS, Appointment.USERS, Appointment.PARTICIPANTS, Appointment.RECURRENCE_POSITION };
@@ -96,11 +103,12 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         client1 = client;
         client2 = new AJAXClient(User.User2);
         ctm = new CalendarTestManager(client1);
+        nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
 
         appointment = new Appointment();
         appointment.setTitle("Test for occurrence based confirmations.");
-        appointment.setStartDate(D("01.02.2014 08:00"));
-        appointment.setEndDate(D("01.02.2014 09:00"));
+        appointment.setStartDate(D("01.02." + nextYear + " 08:00"));
+        appointment.setEndDate(D("01.02." + nextYear + " 09:00"));
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
         appointment.setOccurrence(10);
@@ -125,7 +133,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         Appointment loadedAppointment = ctm.get(appointment);
         checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative");
 
-        Appointment[] apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02.2014 08:00"), D("11.02.2014 09:00"), COLS, false);
+        Appointment[] apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
             if (app.getObjectID() == appointment.getObjectID()) {
                 checkConfirmations(app, Appointment.TENTATIVE, "tentative");
@@ -142,8 +150,8 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm.setClient(client1);
 
         Appointment exception = ctm.createIdentifyingCopy(appointment);
-        exception.setStartDate(D("05.02.2014 10:00"));
-        exception.setEndDate(D("05.02.2014 12:00"));
+        exception.setStartDate(D("05.02." + nextYear + " 10:00"));
+        exception.setEndDate(D("05.02." + nextYear + " 12:00"));
         exception.setRecurrencePosition(5);
         exception.setTitle(appointment.getTitle() + " - Exception");
         exception.setLastModified(new Date(Long.MAX_VALUE));
@@ -160,7 +168,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         Appointment loadedAppointment = ctm.get(appointment);
         checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative");
 
-        Appointment[] apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02.2014 08:00"), D("11.02.2014 09:00"), COLS, false);
+        Appointment[] apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
             if (app.getObjectID() == appointment.getObjectID()) {
                 checkConfirmations(app, Appointment.TENTATIVE, "tentative");
@@ -189,7 +197,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         Appointment loadedAppointment = ctm.get(appointment);
         checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative");
         
-        Appointment[] apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02.2014 08:00"), D("11.02.2014 09:00"), COLS, false);
+        Appointment[] apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
             if (app.getObjectID() == appointment.getObjectID()) {
                 if (app.getRecurrencePosition() == 5) {
@@ -210,8 +218,8 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm.setClient(client1);
 
         Appointment exception = ctm.createIdentifyingCopy(appointment);
-        exception.setStartDate(D("05.02.2014 10:00"));
-        exception.setEndDate(D("05.02.2014 12:00"));
+        exception.setStartDate(D("05.02." + nextYear + " 10:00"));
+        exception.setEndDate(D("05.02." + nextYear + " 12:00"));
         exception.setRecurrencePosition(5);
         exception.setTitle(appointment.getTitle() + " - Exception");
         exception.setLastModified(new Date(Long.MAX_VALUE));
@@ -228,7 +236,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         Appointment loadedAppointment = ctm.get(appointment);
         checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative");
 
-        Appointment[] apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02.2014 08:00"), D("11.02.2014 09:00"), COLS, false);
+        Appointment[] apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
             if (app.getObjectID() == appointment.getObjectID()) {
                 checkConfirmations(app, Appointment.TENTATIVE, "tentative");
@@ -248,7 +256,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         loadedAppointment = ctm.get(appointment);
         checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative");
 
-        apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02.2014 08:00"), D("11.02.2014 09:00"), COLS, false);
+        apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
             if (app.getObjectID() == appointment.getObjectID()) {
                 checkConfirmations(app, Appointment.TENTATIVE, "tentative");
@@ -257,6 +265,45 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         
         loadedAppointment = ctm.get(exception);
         checkConfirmations(loadedAppointment, Appointment.ACCEPT, "accept");
+    }
+    
+    public void testConflicts() throws Exception {
+        ctm.confirm(appointment, Appointment.ACCEPT, "accept");
+        ctm.confirmExternal(appointment, "external1@example.com", Appointment.ACCEPT, "accept");
+        ctm.confirmExternal(appointment, "external2@example.com", Appointment.ACCEPT, "accept");
+        ctm.setClient(client2);
+        ctm.confirm(appointment, Appointment.ACCEPT, "accept");
+        ctm.setClient(client1);
+
+        ctm.confirm(appointment, Appointment.DECLINE, "decline", 5);
+        ctm.confirmExternal(appointment, "external1@example.com", Appointment.DECLINE, "decline", 5);
+        ctm.confirmExternal(appointment, "external2@example.com", Appointment.DECLINE, "decline", 5);
+        ctm.setClient(client2);
+        ctm.confirm(appointment, Appointment.DECLINE, "decline", 5);
+        ctm.setClient(client1);
+
+        Appointment loadedAppointment = ctm.get(appointment);
+        checkConfirmations(loadedAppointment, Appointment.ACCEPT, "accept");
+
+        Appointment conflict = new Appointment();
+        conflict.setTitle("Test for occurrence based confirmations. - CONFLICT");
+        conflict.setStartDate(D("05.02." + nextYear + " 08:00"));
+        conflict.setEndDate(D("05.02." + nextYear + " 09:00"));
+        conflict.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        conflict.setIgnoreConflicts(false);
+        
+        ctm.insert(conflict);
+        List<ConflictObject> conflicts = ((AppointmentInsertResponse) ctm.getLastResponse()).getConflicts();
+        boolean foundBadConflict = false;
+        if (conflicts != null) {
+            for (ConflictObject co : conflicts) {
+                if (co.getId() == appointment.getObjectID()) {
+                    foundBadConflict = true;
+                    break;
+                }
+            }
+        }
+        assertFalse("Found conflict", foundBadConflict);
     }
 
     private void checkConfirmations(Appointment appointment, int status, String message) {
