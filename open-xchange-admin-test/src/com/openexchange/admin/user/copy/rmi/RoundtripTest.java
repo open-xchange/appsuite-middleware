@@ -325,20 +325,21 @@ public class RoundtripTest extends AbstractRMITest {
         com.openexchange.ajax.contact.action.InsertResponse response3 = userClient.execute(contactRequest3);
         response3.fillObject(c3);
 
+        //TODO this has to be read from config file
         MailAccountDescription mail = new MailAccountDescription();
         mail.setLogin("jan.bauerdick424242669");
         mail.setName("jan.bauerdick@premium");
         mail.setPassword("secret");
         mail.setMailProtocol("imap");
         mail.setMailPort(143);
-        mail.setMailServer("devel-mail.netline.de");
+        mail.setMailServer("mail.devel.open-xchange.com");
         mail.setPrimaryAddress("jan.bauerdick@premium");
         mail.setSpamHandler("NoSpamHandler");
         mail.setTransportLogin("jan.bauerdick424242669");
         mail.setTransportPassword("secret");
         mail.setTransportPort(25);
         mail.setTransportProtocol("smtp");
-        mail.setTransportServer("devel-mail.netline.de");
+        mail.setTransportServer("mail.devel.open-xchange.com");
         mail.setConfirmedHamFullname("default0/confirmed_ham_fullname");
         MailAccountInsertRequest mailRequest = new MailAccountInsertRequest(mail);
         MailAccountInsertResponse mailResponse = userClient.execute(mailRequest);
