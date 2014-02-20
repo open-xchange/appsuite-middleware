@@ -58,8 +58,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -160,6 +163,8 @@ public final class ConfigurationImpl implements ConfigurationService {
      */
     final Map<String, String> yamlPaths;
 
+    final Map<String, byte[]> xmlFiles;
+
     /**
      * The <code>ConfigProviderServiceImpl</code> reference.
      */
@@ -187,6 +192,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         yamlFiles = new HashMap<String, Object>(64);
         yamlPaths = new HashMap<String, String>(64);
         dirs = new File[directories.length];
+        xmlFiles = new HashMap<String, byte[]>(2048);
         loadConfiguration(directories);
     }
 
@@ -213,6 +219,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
 
         };
+
         final org.slf4j.Logger log = LOG;
         final FileProcessor processor2 = new FileProcessor() {
 
@@ -233,6 +240,24 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
 
         };
+
+        FileFilter fileFilter3 = new FileFilter() {
+
+            @Override
+            public boolean accept(File pathname) {
+                return pathname.getName().endsWith(".xml");
+            }
+        };
+
+        FileProcessor processor3 = new FileProcessor() {
+
+            @Override
+            public void processFile(File file) {
+                byte[] hash = getHash(file);
+                xmlFiles.put(file.getPath(), hash);
+            }
+        };
+
         for (int i = 0; i < directories.length; i++) {
             if (null == directories[i]) {
                 throw new IllegalArgumentException("Given configuration directory path is null.");
@@ -248,6 +273,8 @@ public final class ConfigurationImpl implements ConfigurationService {
             processDirectory(dir, fileFilter, processor);
             // Process: Second round
             processDirectory(dir, fileFilter2, processor2);
+            // Process: Third round
+            processDirectory(dir, fileFilter3, processor3);
         }
     }
 
@@ -727,6 +754,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         LOG.info("Reloading configuration");
         // Copy current content to get associated files on check for expired PropertyWatchers
         final Map<String, Properties> oldPropertiesByFile = new HashMap<String, Properties>(propertiesByFile);
+        final Map<String, byte[]> oldXml = new HashMap<String, byte[]>(xmlFiles);
 
         // Clear maps
         properties.clear();
@@ -735,13 +763,14 @@ public final class ConfigurationImpl implements ConfigurationService {
         texts.clear();
         yamlFiles.clear();
         yamlPaths.clear();
+        xmlFiles.clear();
 
         // (Re-)load configuration
         // final Map<String, PropertyWatcher> watchers = PropertyWatcher.getAllWatchers();
         loadConfiguration(getDirectories());
 
         // Check if properties have been changed, abort if not
-        Set<String> changes = getChanges(oldPropertiesByFile);
+        Set<String> changes = getChanges(oldPropertiesByFile, oldXml);
         if (changes.isEmpty()) {
             LOG.info("No changes in configuration files detected, nothing to do");
             return;
@@ -828,7 +857,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @NonNull
-    private Set<String> getChanges(Map<String, Properties> oldPropertiesByFile) {
+    private Set<String> getChanges(Map<String, Properties> oldPropertiesByFile, Map<String, byte[]> oldXml) {
         final Set<String> result = new HashSet<String>(oldPropertiesByFile.size());
         for (final Map.Entry<String, Properties> newEntry : propertiesByFile.entrySet()) {
             final String fileName = newEntry.getKey();
@@ -843,11 +872,36 @@ public final class ConfigurationImpl implements ConfigurationService {
         final Set<String> removedFiles = new HashSet<String>(oldPropertiesByFile.keySet());
         removedFiles.removeAll(propertiesByFile.keySet());
         result.addAll(removedFiles);
+
+        // Do the same for xml files
+        for (String file : xmlFiles.keySet()) {
+            byte[] oldHash = oldXml.get(file);
+            byte[] newHash = xmlFiles.get(file);
+            if (null == oldHash || !Arrays.equals(oldHash, newHash)) {
+                result.add(file);
+            }
+        }
+        final Set<String> removedXml = new HashSet<String>(oldXml.keySet());
+        removedXml.removeAll(xmlFiles.keySet());
+        result.addAll(removedXml);
         return result;
     }
 
     public Collection<Reloadable> getReloadables() {
         return reloadableServices.values();
+    }
+
+    private byte[] getHash(File file) {
+        byte[] retval = null;
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+            md.update(readFile(file).getBytes());
+            retval = md.digest();
+        } catch (NoSuchAlgorithmException e) {
+            // Should not happen
+        }
+        return retval;
     }
 
 }
