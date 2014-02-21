@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,65 +49,46 @@
 
 package com.openexchange.file.storage.search;
 
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 
 
 /**
- * {@link AbstractDateSearchTerm}
+ * {@link ModifiedByTerm}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since 7.6.0
  */
-public abstract class AbstractDateSearchTerm implements SearchTerm<ComparablePattern<Date>> {
+public class ModifiedByTerm extends AbstractNumberSearchTerm {
 
-    /** The pattern */
-    protected final ComparablePattern<Date> pattern;
-
-    /**
-     * Initializes a new {@link AbstractDateSearchTerm}.
-     */
-    protected AbstractDateSearchTerm(final ComparablePattern<Date> pattern) {
-        super();
-        this.pattern = pattern;
+    protected ModifiedByTerm(ComparablePattern<Number> pattern) {
+        super(pattern);
     }
 
     @Override
-    public ComparablePattern<Date> getPattern() {
-        return pattern;
+    public void visit(SearchTermVisitor visitor) throws OXException {
+        if (null != visitor) {
+            visitor.visit(this);
+        }
     }
 
     @Override
-    public boolean matches(final File file) throws OXException {
-        final Date date = getDate(file);
-        if (null == date) {
-            return false;
+    public void addField(Collection<Field> col) {
+        if (null != pattern) {
+            col.add(Field.CREATED_BY);
         }
-
-        switch (pattern.getComparisonType()) {
-        case EQUALS:
-            return date.getTime() == pattern.getPattern().getTime();
-        case LESS_THAN:
-            return date.getTime() < pattern.getPattern().getTime();
-        case GREATER_THAN:
-            return date.getTime() > pattern.getPattern().getTime();
-        default:
-            return false;
-        }
-
     }
 
-    /**
-     * Gets the number to compare with.
-     *
-     * @param file The file to retrieve the number from
-     * @return The number
-     */
-    protected abstract Date getDate(File file);
+    @Override
+    protected Number getNumber(File file) {
+        return file.getModifiedBy();
+    }
 
-    protected Date addTimeZoneOffset(final long date, final TimeZone timeZone) {
-        return new Date(date + timeZone.getOffset(date));
+    @Override
+    protected boolean compareLongValues() {
+        return false;
     }
 
 }

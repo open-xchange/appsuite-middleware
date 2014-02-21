@@ -180,4 +180,99 @@ public interface SearchTermVisitor {
      */
     void visit(FileNameTerm fileNameTerm) throws OXException;
 
+    /**
+     * The visitation for last modified term.
+     *
+     * @param lastModifiedTerm The visited last modified term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(LastModifiedTerm lastModifiedTerm) throws OXException;
+
+    /**
+     * The visitation for created term.
+     *
+     * @param createdTerm The visited created term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CreatedTerm createdTerm);
+
+    /**
+     * The visitation for modified by term.
+     *
+     * @param modifiedByTerm The visited modified by term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(ModifiedByTerm modifiedByTerm);
+
+    /**
+     * The visitation for folder id term.
+     *
+     * @param folderIdTerm The visited folder id term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(FolderIdTerm folderIdTerm);
+
+    /**
+     * The visitation for title term.
+     *
+     * @param titleTerm The visited title term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(TitleTerm titleTerm);
+
+    /**
+     * The visitation for version term.
+     *
+     * @param versionTerm The visited version term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(VersionTerm versionTerm);
+
+    /**
+     * The visitation for content term.
+     *
+     * @param contentTerm The visited content term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(ContentTerm contentTerm);
+
+    /**
+     * The visitation for Id term.
+     *
+     * @param idTerm The visited id term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(IdTerm idTerm);
+
+    /**
+     * The visitation for file size term.
+     *
+     * @param fileSizeTerm The visited file size term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(FileSizeTerm fileSizeTerm);
+
+    /**
+     * The visitation for description term.
+     *
+     * @param descriptionTerm The visited description term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(DescriptionTerm descriptionTerm);
+
+    /**
+     * The visitation for url term.
+     *
+     * @param urlTerm The visited url term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(UrlTerm urlTerm);
+
+    /**
+     * The visitation for created by term.
+     *
+     * @param createdByTerm The visited created by term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CreatedByTerm createdByTerm);
 }
