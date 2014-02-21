@@ -51,6 +51,7 @@ package com.openexchange.mobilenotifier.calendar;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -96,7 +97,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
 
     @Override
     public List<List<NotifyItem>> getItems(Session session) throws OXException {
-        AppointmentSqlFactoryService factory = services.getService(AppointmentSqlFactoryService.class);
+        final AppointmentSqlFactoryService factory = services.getService(AppointmentSqlFactoryService.class);
         final int user_id = session.getUserId();
         final List<List<NotifyItem>> notifyItems = new ArrayList<List<NotifyItem>>();
 
@@ -104,29 +105,29 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
         final Date start = new Date(System.currentTimeMillis());
         final Date end = new Date(System.currentTimeMillis() + (24L * 60L * 60L * 1000L));
 
-        SearchIterator<Appointment> appointments;
         try {
-            appointments = factory.createAppointmentSql(session).getAppointmentsBetween(
+            final SearchIterator<Appointment> appointments = factory.createAppointmentSql(session).getAppointmentsBetween(
                 user_id,
                 start,
                 end,
                 new int[] {
                     Appointment.FOLDER_ID, Appointment.OBJECT_ID, Appointment.TITLE, Appointment.LOCATION, Appointment.START_DATE,
                     Appointment.END_DATE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS, Appointment.RECURRENCE_CALCULATOR,
-                    Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_ID, Appointment.NOTE },
+                    Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_ID, Appointment.NOTE,
+                    Appointment.PARTICIPANTS },
                 Appointment.START_DATE,
                 Order.DESCENDING);
 
             while (appointments.hasNext()) {
-                List<NotifyItem> item = new ArrayList<NotifyItem>();
-                Appointment appointment = appointments.next();
+                final List<NotifyItem> item = new ArrayList<NotifyItem>();
+                final Appointment appointment = appointments.next();
 
-                HumanReadableRecurrences readableRec = new HumanReadableRecurrences(appointment);
                 // localize recurrence string
+                final HumanReadableRecurrences readableRec = new HumanReadableRecurrences(appointment);
                 final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                 final Locale locale = user.getLocale();
                 final String recurrence = readableRec.getString(locale);
-
+                appointment.getConfirmations()[0].getConfirm();
                 item.add(new NotifyItem("recurrence", recurrence));
                 item.add(new NotifyItem("id", appointment.getObjectID()));
                 item.add(new NotifyItem("folder", appointment.getParentFolderID()));
@@ -134,6 +135,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                 item.add(new NotifyItem("location", appointment.getLocation()));
                 item.add(new NotifyItem("start_date", appointment.getStartDate()));
                 item.add(new NotifyItem("end_date", appointment.getEndDate()));
+                item.add(new NotifyItem("start_date_timestamp", convertDateToTimestamp(appointment.getStartDate())));
                 item.add(new NotifyItem("organizer", appointment.getOrganizer()));
                 item.add(new NotifyItem("note", appointment.getNote()));
                 item.add(new NotifyItem("status", appointment.getConfirm()));
@@ -156,5 +158,10 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
     public void putTemplate(String changedTemplate) throws OXException {
         MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.APPOINTMENT.getTemplateFileName(), changedTemplate);
     }
-
+    
+    private long convertDateToTimestamp(final Date date){
+        final Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        return c.getTimeInMillis();
+    }
 }

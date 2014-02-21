@@ -150,7 +150,7 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
                     notifyItem.add(new NotifyItem("folder", folderArg));
                     notifyItem.add(new NotifyItem("id", id));
                     notifyItem.add(new NotifyItem("from", inetAddr[0]));
-                    notifyItem.add(new NotifyItem("received-date", localizedReceivedDate));
+                    notifyItem.add(new NotifyItem("received_date", localizedReceivedDate));
                     notifyItem.add(new NotifyItem("subject", subject));
                     notifyItem.add(new NotifyItem("attachments", attachments));
                     notifyItem.add(new NotifyItem("flags", flag));
