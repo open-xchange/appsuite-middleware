@@ -59,9 +59,7 @@ import com.openexchange.calendar.itip.HumanReadableRecurrences;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.Order;
@@ -130,6 +128,16 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                 final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                 final Locale locale = user.getLocale();
                 final String recurrence = readableRec.getString(locale);
+
+                // get status of confirmation
+                int confirmed = Appointment.NONE;
+                UserParticipant[] participants = appointment.getUsers();
+                for (UserParticipant participant : participants) {
+                    if (participant.getIdentifier() == session.getUserId()) {
+                        confirmed = participant.getConfirm();
+                    }
+                }
+
                 item.add(new NotifyItem("recurrence", recurrence));
                 item.add(new NotifyItem("id", appointment.getObjectID()));
                 item.add(new NotifyItem("folder", appointment.getParentFolderID()));
@@ -140,7 +148,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                 item.add(new NotifyItem("start_date_timestamp", convertDateToTimestamp(appointment.getStartDate())));
                 item.add(new NotifyItem("organizer", appointment.getOrganizer()));
                 item.add(new NotifyItem("note", appointment.getNote()));
-                item.add(new NotifyItem("status", appointment.getConfirm()));
+                item.add(new NotifyItem("status", confirmed));
                 notifyItems.add(item);
             }
         } catch (SQLException e) {
