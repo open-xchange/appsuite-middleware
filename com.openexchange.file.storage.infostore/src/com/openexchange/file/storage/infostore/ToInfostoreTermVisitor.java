@@ -221,7 +221,7 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(final FolderIdTerm term) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.FolderIdTerm(term.getPattern(), term.isIgnoreCase(), term.isSubstringSearch());
+        infstoreTerm = new com.openexchange.groupware.infostore.search.FolderIdTerm(term.getPattern());
     }
 
     @Override

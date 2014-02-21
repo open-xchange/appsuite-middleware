@@ -63,8 +63,8 @@ import com.openexchange.groupware.infostore.utils.Metadata;
  */
 public class FolderIdTerm extends AbstractStringSearchTerm {
 
-    public FolderIdTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
-        super(pattern, ignoreCase, substringSearch);
+    public FolderIdTerm(final String folderId) {
+        super(folderId, false, false);
     }
 
     @Override

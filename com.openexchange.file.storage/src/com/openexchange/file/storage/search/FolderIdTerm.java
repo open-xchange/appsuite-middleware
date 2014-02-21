@@ -63,26 +63,26 @@ import com.openexchange.file.storage.File.Field;
  */
 public class FolderIdTerm extends AbstractStringSearchTerm {
 
-    public FolderIdTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
-        super(pattern, ignoreCase, substringSearch);
+    public FolderIdTerm(final String folderId) {
+        super(folderId, false, false);
     }
 
     @Override
-    public void visit(SearchTermVisitor visitor) throws OXException {
+    public void visit(final SearchTermVisitor visitor) throws OXException {
         if (null != visitor) {
             visitor.visit(this);
         }
     }
 
     @Override
-    public void addField(Collection<Field> col) {
+    public void addField(final Collection<Field> col) {
         if (null != col) {
             col.add(Field.FOLDER_ID);
         }
     }
 
     @Override
-    protected String getString(File file) {
+    protected String getString(final File file) {
         return file.getFolderId();
     }
 
