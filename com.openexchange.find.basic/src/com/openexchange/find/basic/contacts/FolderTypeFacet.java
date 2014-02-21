@@ -122,7 +122,7 @@ public class FolderTypeFacet extends ContactSearchFacet {
         } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(query)) {
             type = SharedType.getInstance();
         } else {
-            throw new OXException();
+            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
         }
         FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
             FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, false, session, null);
@@ -138,7 +138,10 @@ public class FolderTypeFacet extends ContactSearchFacet {
                 return orTerm;
             }
         }
-        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
+        /*
+         * no folders found, no results
+         */
+        return null;
     }
 
     private static SingleSearchTerm getFolderIDEqualsTerm(String folderID) {

@@ -160,23 +160,20 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             SearchTerm<?> term = getSearchTerm(session, filter);
             if (null != term) {
                 searchTerm.addSearchTerm(term);
+            } else {
+                /*
+                 * no search results if any filter indicates a FALSE condition
+                 */
+                return SearchResult.EMPTY;
             }
         }
         /*
          * combine with addressbook queries
          */
-        List<String> queries = searchRequest.getQueries();
-        if (1 == queries.size()) {
-            SearchTerm<?> term = addressbookFacet.getSearchTerm(session, queries.get(0));
+        for (String query : searchRequest.getQueries()) {
+            SearchTerm<?> term = addressbookFacet.getSearchTerm(session, query);
             if (null != term) {
                 searchTerm.addSearchTerm(term);
-            }
-        } else if (1 < queries.size()) {
-            for (String query : searchRequest.getQueries()) {
-                SearchTerm<?> term = addressbookFacet.getSearchTerm(session, query);
-                if (null != term) {
-                    searchTerm.addSearchTerm(term);
-                }
             }
         }
         /*
