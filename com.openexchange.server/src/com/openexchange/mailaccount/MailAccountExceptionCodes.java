@@ -73,7 +73,7 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.
      */
-    CONFLICT(MailAccountExceptionCodes.CONFLICT_MSG, CATEGORY_CONFLICT, 3),
+    CONFLICT(MailAccountExceptionCodes.CONFLICT_MSG, CATEGORY_CONFLICT, 3, MailAccountExceptionStrings.CONFLICT_MSG_DISPLAY),
     /**
      * A SQL error occurred: %1$s.
      */
@@ -81,7 +81,7 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * A host could not be resolved: %1$s.
      */
-    UNKNOWN_HOST_ERROR(MailAccountExceptionCodes.UNKNOWN_HOST_ERROR_MSG, CATEGORY_ERROR, 5),
+    UNKNOWN_HOST_ERROR(MailAccountExceptionCodes.UNKNOWN_HOST_ERROR_MSG, CATEGORY_ERROR, 5, MailAccountExceptionStrings.UNKNOWN_HOST_ERROR_MSG_DISPLAY),
     /**
      * Denied deletion of default mail account of user %1$s in context %2$s.
      */
@@ -133,7 +133,7 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Duplicate transport account for user %1$s in context %2$s.
      */
-    DUPLICATE_TRANSPORT_ACCOUNT(MailAccountExceptionCodes.DUPLICATE_TRANSPORT_ACCOUNT_MSG, CATEGORY_ERROR, 17),
+    DUPLICATE_TRANSPORT_ACCOUNT(MailAccountExceptionCodes.DUPLICATE_TRANSPORT_ACCOUNT_MSG, CATEGORY_ERROR, 17, MailAccountExceptionStrings.DUPLICATE_TRANSPORT_ACCOUNT_MSG_DISPLAY),
     /**
      * Unable to parse mail server URI "%1$s".
      */
@@ -145,27 +145,27 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Could not connect to mail server "%1$s" for login %2$s
      */
-    VALIDATE_FAILED_MAIL(MailAccountExceptionCodes.VALIDATE_FAILED_MAIL_MSG, CATEGORY_WARNING, 20, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
+    VALIDATE_FAILED_MAIL(MailAccountExceptionCodes.VALIDATE_FAILED_MAIL_MSG, CATEGORY_WARNING, 20, MailAccountExceptionStrings.VALIDATE_FAILED_MAIL_MSG_DISPLAY),
     /**
      * Could not connect to transport server "%1$s" for login %2$s
      */
-    VALIDATE_FAILED_TRANSPORT(MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT_MSG, CATEGORY_WARNING, 21, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
+    VALIDATE_FAILED_TRANSPORT(MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT_MSG, CATEGORY_WARNING, 21, MailAccountExceptionStrings.VALIDATE_FAILED_TRANSPORT_MSG_DISPLAY),
     /**
      * Default port specified for mail protocol "%1$s", but SSL is enabled. Please review if appropriate.
      */
-    DEFAULT_BUT_SECURE_MAIL(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_MAIL_MSG, CATEGORY_WARNING, 22, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
+    DEFAULT_BUT_SECURE_MAIL(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_MAIL_MSG, CATEGORY_WARNING, 22, MailAccountExceptionStrings.DEFAULT_BUT_SECURE_MAIL_MSG_DISPLAY),
     /**
      * Secure port specified for mail protocol "%1$s", but SSL is not enabled. Please review if appropriate.
      */
-    SECURE_BUT_DEFAULT_MAIL(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_MAIL_MSG, CATEGORY_WARNING, 23, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
+    SECURE_BUT_DEFAULT_MAIL(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_MAIL_MSG, CATEGORY_WARNING, 23, MailAccountExceptionStrings.SECURE_BUT_DEFAULT_MAIL_MSG_DISPLAY),
     /**
      * Default port specified for transport protocol "%1$s", but SSL is enabled. Please review if appropriate.
      */
-    DEFAULT_BUT_SECURE_TRANSPORT(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_TRANSPORT_MSG, CATEGORY_WARNING, 24, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
+    DEFAULT_BUT_SECURE_TRANSPORT(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_TRANSPORT_MSG, CATEGORY_WARNING, 24, MailAccountExceptionStrings.DEFAULT_BUT_SECURE_TRANSPORT_MSG_DISPLAY),
     /**
      * Secure port specified for transport protocol "%1$s", but SSL is not enabled. Please review if appropriate.
      */
-    SECURE_BUT_DEFAULT_TRANSPORT(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_TRANSPORT_MSG, CATEGORY_WARNING, 25, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
+    SECURE_BUT_DEFAULT_TRANSPORT(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_TRANSPORT_MSG, CATEGORY_WARNING, 25, MailAccountExceptionStrings.SECURE_BUT_DEFAULT_TRANSPORT_MSG_DISPLAY),
     /**
      * Mail account creation denied. The host/server name "%1$s" is covered by specified IP range back-list.
      */
