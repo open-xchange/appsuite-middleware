@@ -131,7 +131,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
 
                 // get status of confirmation
                 int confirmed = Appointment.NONE;
-                UserParticipant[] participants = appointment.getUsers();
+                final UserParticipant[] participants = appointment.getUsers();
                 for (UserParticipant participant : participants) {
                     if (participant.getIdentifier() == session.getUserId()) {
                         confirmed = participant.getConfirm();
@@ -176,13 +176,12 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
     }
 
     private long getEndOfDay(Date date) {
-        Calendar calendar = Calendar.getInstance();
+        final Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DATE);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
         calendar.set(Calendar.MILLISECOND, 999);
-        calendar.set(year, month, day, 23, 59, 59);
         return calendar.getTimeInMillis();
     }
 }

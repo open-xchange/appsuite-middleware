@@ -190,8 +190,8 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
      */
     private String getTeaser(final String folder, final String mailId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         final String[] idAsArr = new String[1];
-        final int cutIndex = 200;
         idAsArr[0] = mailId;
+        final int cutIndex = 200;
 
         final String[] message = mailAccess.getMessageStorage().getPrimaryContents(folder, idAsArr);
         String teaser = message[0];
@@ -204,9 +204,9 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
     }
 
     /**
-     * Converts date to localized string. If receivedDate is current date, only the time will be displayed
+     * Converts date to localized string. If receivedDate is current date, only the time will be displayed otherwise only the date is shown
      * 
-     * @param date The date to be localized
+     * @param date The date which should be localized
      * @param session The session of the user
      * @return localized date string
      * @throws OXException
