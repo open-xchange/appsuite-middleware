@@ -194,7 +194,6 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.search.SearchService;
-import com.openexchange.search.internal.SearchServiceImpl;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -272,7 +271,7 @@ public final class ServerActivator extends HousekeepingActivator {
         CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
         FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class, CryptoService.class, HttpService.class,
         SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
-        TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class };
+        TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class, SearchService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -530,8 +529,6 @@ public final class ServerActivator extends HousekeepingActivator {
         track(ConversionService.class, new RegistryCustomizer<ConversionService>(context, ConversionService.class));
         // Contact collector
         track(ContactCollectorService.class, new RegistryCustomizer<ContactCollectorService>(context, ContactCollectorService.class));
-        // Search Service
-        track(SearchService.class, new RegistryCustomizer<SearchService>(context, SearchService.class));
         // Login handler
         track(LoginHandlerService.class, new LoginHandlerCustomizer(context));
         track(BlockingLoginHandlerService.class, new BlockingLoginHandlerCustomizer(context));
@@ -620,8 +617,6 @@ public final class ServerActivator extends HousekeepingActivator {
                 }
             });
         }
-        // TODO: Register search service here until its encapsulated in an own bundle
-        registerService(SearchService.class, new SearchServiceImpl());
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
         registerService(LoginHandlerService.class, new TransportLoginHandler());

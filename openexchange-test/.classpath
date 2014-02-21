@@ -114,5 +114,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.3.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.find"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.find.basic"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.search"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
