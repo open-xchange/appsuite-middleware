@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,87 +49,64 @@
 
 package com.openexchange.file.storage.search;
 
+import static com.openexchange.java.Strings.toLowerCase;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.java.Strings;
+
 
 /**
- * {@link SearchTermVisitor}
+ * {@link AbstractStringSearchTerm}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.0
  */
-public interface SearchTermVisitor {
+public abstract class AbstractStringSearchTerm implements SearchTerm<String> {
+
+    /** The pattern */
+    protected final String pattern;
+
+    /** Whether to compare ignore-case or case-sensitive */
+    private final boolean ignoreCase;
 
     /**
-     * The visitation for AND term.
-     *
-     * @param andTerm The visited AND term
-     * @throws OXException If visit attempt fails
+     * Initializes a new {@link AbstractStringSearchTerm}.
      */
-    void visit(AndTerm andTerm) throws OXException;
+    protected AbstractStringSearchTerm(final String pattern, final boolean ignoreCase) {
+        super();
+        this.pattern = pattern;
+        this.ignoreCase = ignoreCase;
+    }
+
+    @Override
+    public String getPattern() {
+        return pattern;
+    }
 
     /**
-     * The visitation for OR term.
+     * Gets the ignore-case flag
      *
-     * @param orTerm The visited OR term
-     * @throws OXException If visit attempt fails
+     * @return The ignore-case flag
      */
-    void visit(OrTerm orTerm) throws OXException;
+    public boolean isIgnoreCase() {
+        return ignoreCase;
+    }
+
+    @Override
+    public boolean matches(final File file) throws OXException {
+        final String str = getString(file);
+        if (Strings.isEmpty(str)) {
+            return false;
+        }
+
+        return ignoreCase ? (toLowerCase(str).indexOf(toLowerCase(pattern)) >= 0) : (str.indexOf(pattern) >= 0);
+    }
 
     /**
-     * The visitation for not term.
+     * Gets the string to compare with.
      *
-     * @param notTerm The visited not term
-     * @throws OXException If visit attempt fails
+     * @param file The file to retrieve the string from
+     * @return The string
      */
-    void visit(NotTerm notTerm) throws OXException;
-
-    /**
-     * The visitation for meta term.
-     *
-     * @param metaTerm The visited meta term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(MetaTerm metaTerm) throws OXException;
-
-    /**
-     * The visitation for number-of-versions term.
-     *
-     * @param numberOfVersionsTerm The visited number-of-versions term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(NumberOfVersionsTerm numberOfVersionsTerm) throws OXException;
-
-    /**
-     * The visitation for last-modified UTC term.
-     *
-     * @param lastModifiedUtcTerm The visited last-modified UTC term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(LastModifiedUtcTerm lastModifiedUtcTerm) throws OXException;
-
-    /**
-     * The visitation for color label term.
-     *
-     * @param colorLabelTerm The visited color label term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(ColorLabelTerm colorLabelTerm) throws OXException;
-
-    /**
-     * The visitation for current version term.
-     *
-     * @param currentVersionTerm The current version term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(CurrentVersionTerm currentVersionTerm) throws OXException;
-
-    /**
-     * The visitation for version comment term.
-     *
-     * @param currentVersionTerm The version comment term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(VersionCommentTerm versionCommentTerm) throws OXException;
+    protected abstract String getString(File file);
 
 }

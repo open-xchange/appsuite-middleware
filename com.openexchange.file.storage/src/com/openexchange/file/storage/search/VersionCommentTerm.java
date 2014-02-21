@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,87 +49,46 @@
 
 package com.openexchange.file.storage.search;
 
+import java.util.Collection;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+
 
 /**
- * {@link SearchTermVisitor}
+ * {@link VersionCommentTerm}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.0
  */
-public interface SearchTermVisitor {
+public final class VersionCommentTerm extends AbstractStringSearchTerm {
 
     /**
-     * The visitation for AND term.
+     * Initializes a new {@link VersionCommentTerm}.
      *
-     * @param andTerm The visited AND term
-     * @throws OXException If visit attempt fails
+     * @param pattern The string to search for
+     * @param ignoreCase Signal case-sensitive behavior
      */
-    void visit(AndTerm andTerm) throws OXException;
+    public VersionCommentTerm(String pattern, boolean ignoreCase) {
+        super(pattern, ignoreCase);
+    }
 
-    /**
-     * The visitation for OR term.
-     *
-     * @param orTerm The visited OR term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(OrTerm orTerm) throws OXException;
+    @Override
+    public void visit(SearchTermVisitor visitor) throws OXException {
+        if (null != visitor) {
+            visitor.visit(this);
+        }
+    }
 
-    /**
-     * The visitation for not term.
-     *
-     * @param notTerm The visited not term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(NotTerm notTerm) throws OXException;
+    @Override
+    public void addField(Collection<Field> col) {
+        if (col != null) {
+            col.add(Field.VERSION_COMMENT);
+        }
+    }
 
-    /**
-     * The visitation for meta term.
-     *
-     * @param metaTerm The visited meta term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(MetaTerm metaTerm) throws OXException;
-
-    /**
-     * The visitation for number-of-versions term.
-     *
-     * @param numberOfVersionsTerm The visited number-of-versions term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(NumberOfVersionsTerm numberOfVersionsTerm) throws OXException;
-
-    /**
-     * The visitation for last-modified UTC term.
-     *
-     * @param lastModifiedUtcTerm The visited last-modified UTC term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(LastModifiedUtcTerm lastModifiedUtcTerm) throws OXException;
-
-    /**
-     * The visitation for color label term.
-     *
-     * @param colorLabelTerm The visited color label term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(ColorLabelTerm colorLabelTerm) throws OXException;
-
-    /**
-     * The visitation for current version term.
-     *
-     * @param currentVersionTerm The current version term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(CurrentVersionTerm currentVersionTerm) throws OXException;
-
-    /**
-     * The visitation for version comment term.
-     *
-     * @param currentVersionTerm The version comment term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(VersionCommentTerm versionCommentTerm) throws OXException;
+    @Override
+    protected String getString(File file) {
+        return file.getVersionComment();
+    }
 
 }
