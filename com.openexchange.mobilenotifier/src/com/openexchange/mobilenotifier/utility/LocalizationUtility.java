@@ -50,7 +50,6 @@
 package com.openexchange.mobilenotifier.utility;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;

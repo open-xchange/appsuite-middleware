@@ -57,7 +57,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
 import com.openexchange.ajax.mobilenotifier.actions.ConfiggetMobileNotifierRequest;
 import com.openexchange.ajax.mobilenotifier.actions.ConfiggetMobileNotifierResponse;
 import com.openexchange.exception.OXException;

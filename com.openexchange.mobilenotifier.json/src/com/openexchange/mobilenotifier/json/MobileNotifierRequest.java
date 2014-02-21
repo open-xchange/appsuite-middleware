@@ -107,7 +107,7 @@ public class MobileNotifierRequest {
      * @throws NullPointerException If name is <code>null</code>
      * @throws OXException If no such parameter exists
      */
-    public String[] getParameterAsStringArray(final String name) throws OXException {
+    public String[] getParameterAsStringArray(final String name) {
         String[] values = name.split(",");
 
         for (int i = 0; i < values.length; i++) {

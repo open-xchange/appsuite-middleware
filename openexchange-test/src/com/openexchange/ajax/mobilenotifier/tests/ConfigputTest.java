@@ -50,14 +50,11 @@
 package com.openexchange.ajax.mobilenotifier.tests;
 
 import java.io.IOException;
-import junitx.framework.FileAssert;
 import org.json.JSONException;
 import com.openexchange.ajax.mobilenotifier.actions.ConfigputMobileNotifierRequest;
 import com.openexchange.ajax.mobilenotifier.actions.ConfigputMobileNotifierResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.json.convert.ParsedNotifyTemplate;
-import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtil;
 
 /**
  * {@link ConfigputTest}
