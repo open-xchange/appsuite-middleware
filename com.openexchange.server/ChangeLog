@@ -1,6 +1,7 @@
 * 2014-02-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 30761: Do not occupy a database connection without using it.
+ - Fix for bug 31251: Fixed possible NPE on authentication failed error during POP3 sync
 
 * 2014-02-20 - thorben.betten@open-xchange.com
 
