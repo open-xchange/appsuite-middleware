@@ -87,8 +87,6 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     public static final String STANZA_UNDEFINED_CONDITION_MSG = "";
     public static final String STANZA_UNEXPECTED_REQUEST_MSG = "";
     
-    // Atmosphere
-    
     // Generic (start with code 1000)
     /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
     public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
@@ -99,8 +97,8 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     // Unexpected error: %1$s
     public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
 
-    /** Invalid ID. Resource identifier is missing. */
-    public static final String INVALID_ID = "Invalid ID. Resource identifier is missing.";
+    /** Invalid ID: %1$s */
+    public static final String INVALID_ID = "Invalid ID: %1$s";
 
     /** Resource not available. */
     public static final String RESOURCE_NOT_AVAILABLE_MSG = "Resource not available.";

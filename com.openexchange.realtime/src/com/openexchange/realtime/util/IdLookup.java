@@ -49,9 +49,12 @@
 
 package com.openexchange.realtime.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.osgi.RealtimeServiceRegistry;
 import com.openexchange.realtime.packet.ID;
@@ -65,55 +68,71 @@ import com.openexchange.user.UserService;
  */
 public class IdLookup {
 
+    private static final Logger LOG = LoggerFactory.getLogger(IdLookup.class);
+    
     /**
      * Utility method to get contextId and userId from a com.openexchange.realtime.packet.ID
+     * If either userId or contextId can be parsed into an Integer no lookup will be done for that field but the parsed value will be used.
+     * As realtime IDs may represent synthetic users without valid user and contextIds the parsing or lookup may fail.
      * 
      * @param id the realtime ID
      * @return a UserAndContext bean containing the requested information
      * @throws OXException if the needed services for the lookup are missing or the lookup for the ID fails.
      */
     public static UserAndContext getUserAndContextIDs(ID id) throws OXException {
+        int contextId = -1;
+        int userId = -1;
+        
+        ContextService contextService;
+        UserService userService;
+        String context = id.getContext();
+        String user = id.getUser();
+
+        try {
+            contextId = Integer.parseInt(context);
+            userId = Integer.parseInt(user);
+        } catch (NumberFormatException nfe) {
+            LOG.debug("Failed to parse id components of {} to int, will continue string based lookup", id);
+        }
+
+        if(contextId < 1 ) {
+            if (context == null || context.equals("")) {
+                LOG.debug("Context missing from id representation {}. Setting to 'defaultcontext'");
+                context = "defaultcontext";
+            }
+            contextService = getContextService();
+            contextId = contextService.getContextId(context);
+            if (contextId == -1) {
+                RealtimeExceptionCodes.INVALID_ID.create("Unable to lookup context: " + context);
+            }
+        }
+
+        if(userId < 1 ) {
+            contextService = getContextService();
+            userService = getUserService();
+            Context contextObject = contextService.getContext(contextId);
+            userId = userService.getUserId(user, contextObject);
+        }
+
+        return new UserAndContext(contextId, userId);
+    }
+
+    private static ContextService getContextService() throws RealtimeException {
         ServiceLookup serviceLookup = RealtimeServiceRegistry.getInstance();
         ContextService contextService = serviceLookup.getService(ContextService.class);
         if (contextService == null) {
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ContextService.class.getName());
         }
+        return contextService;
+    }
 
+    private static UserService getUserService() throws RealtimeException {
+        ServiceLookup serviceLookup = RealtimeServiceRegistry.getInstance();
         UserService userService = serviceLookup.getService(UserService.class);
         if (userService == null) {
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(UserService.class.getName());
         }
-        String ctxName = id.getContext();
-        if (ctxName == null || ctxName.equals("")) {
-            ctxName = "defaultcontext";
-        }
-        int contextId = contextService.getContextId(ctxName);
-        if (contextId == -1) {
-            return null;
-        }
-        Context context = contextService.getContext(contextId);
-        try {
-            int userId = userService.getUserId(id.getUser(), context);
-            return new UserAndContext(contextId, userId);
-        } catch (OXException x) {
-            return null;
-        }
-    }
-
-    /**
-     * Utility method to get contextId from a com.openexchange.realtime.packet.ID
-     * 
-     * @param id the realtime ID
-     * @return -1 if the context couldn't be found otherwise the contextId for the ID
-     * @throws OXException if the needed services for the lookup are missing or the lookup for the ID fails.
-     */
-    public static int getContextId(ID id) throws OXException {
-        ServiceLookup serviceLookup = RealtimeServiceRegistry.getInstance();
-        ContextService contextService = serviceLookup.getService(ContextService.class);
-        if (contextService == null) {
-            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ContextService.class.getName());
-        }
-        return contextService.getContextId(id.getContext());
+        return userService;
     }
 
     /**
