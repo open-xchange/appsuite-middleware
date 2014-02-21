@@ -49,81 +49,45 @@
 
 package com.openexchange.file.storage.search;
 
-import static com.openexchange.java.Strings.toLowerCase;
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.java.Strings;
+import com.openexchange.file.storage.File.Field;
 
 
 /**
- * {@link AbstractStringSearchTerm}
+ * {@link FileMd5SumTerm}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractStringSearchTerm implements SearchTerm<String> {
-
-    /** The pattern */
-    protected final String pattern;
-
-    /** Whether to compare ignore-case or case-sensitive */
-    protected final boolean ignoreCase;
-
-    /** Whether to perform a substring or equals check */
-    protected final boolean substringSearch;
+public final class FileMd5SumTerm extends AbstractStringSearchTerm {
 
     /**
-     * Initializes a new {@link AbstractStringSearchTerm}.
+     * Initializes a new {@link FileMd5SumTerm}.
+     *
+     * @param md5Sum
      */
-    protected AbstractStringSearchTerm(final String pattern, final boolean ignoreCase, final boolean substringSearch) {
-        super();
-        this.pattern = pattern;
-        this.ignoreCase = ignoreCase;
-        this.substringSearch = substringSearch;
+    public FileMd5SumTerm(final String md5Sum) {
+        super(md5Sum, false, false);
     }
 
     @Override
-    public String getPattern() {
-        return pattern;
-    }
-
-    /**
-     * Checks whether to perform a substring or equals check
-     *
-     * @return The substring-search flag
-     */
-    public boolean isSubstringSearch() {
-        return substringSearch;
-    }
-
-    /**
-     * Gets the ignore-case flag
-     *
-     * @return The ignore-case flag
-     */
-    public boolean isIgnoreCase() {
-        return ignoreCase;
+    public void visit(final SearchTermVisitor visitor) throws OXException {
+        if (null != visitor) {
+            visitor.visit(this);
+        }
     }
 
     @Override
-    public boolean matches(final File file) throws OXException {
-        final String str = getString(file);
-        if (Strings.isEmpty(str)) {
-            return false;
+    public void addField(final Collection<Field> col) {
+        if (null != col) {
+            col.add(Field.FILE_MD5SUM);
         }
-
-        if (substringSearch) {
-            return ignoreCase ? (toLowerCase(str).indexOf(toLowerCase(pattern)) >= 0) : (str.indexOf(pattern) >= 0);
-        }
-
-        return ignoreCase ? (toLowerCase(str).equals(toLowerCase(pattern))) : (str.equals(pattern));
     }
 
-    /**
-     * Gets the string to compare with.
-     *
-     * @param file The file to retrieve the string from
-     * @return The string
-     */
-    protected abstract String getString(File file);
+    @Override
+    protected String getString(final File file) {
+        return file.getFileMD5Sum();
+    }
 
 }

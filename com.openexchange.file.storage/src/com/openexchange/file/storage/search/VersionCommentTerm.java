@@ -68,26 +68,26 @@ public final class VersionCommentTerm extends AbstractStringSearchTerm {
      * @param pattern The string to search for
      * @param ignoreCase Signal case-sensitive behavior
      */
-    public VersionCommentTerm(String pattern, boolean ignoreCase) {
-        super(pattern, ignoreCase);
+    public VersionCommentTerm(final String pattern, final boolean ignoreCase) {
+        super(pattern, ignoreCase, true);
     }
 
     @Override
-    public void visit(SearchTermVisitor visitor) throws OXException {
+    public void visit(final SearchTermVisitor visitor) throws OXException {
         if (null != visitor) {
             visitor.visit(this);
         }
     }
 
     @Override
-    public void addField(Collection<Field> col) {
+    public void addField(final Collection<Field> col) {
         if (col != null) {
             col.add(Field.VERSION_COMMENT);
         }
     }
 
     @Override
-    protected String getString(File file) {
+    protected String getString(final File file) {
         return file.getVersionComment();
     }
 

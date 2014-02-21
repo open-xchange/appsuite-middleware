@@ -127,9 +127,17 @@ public interface SearchTermVisitor {
     /**
      * The visitation for version comment term.
      *
-     * @param currentVersionTerm The version comment term
+     * @param versionCommentTerm The version comment term
      * @throws OXException If visit attempt fails
      */
     void visit(VersionCommentTerm versionCommentTerm) throws OXException;
+
+    /**
+     * The visitation for file MD5 sum term.
+     *
+     * @param fileMd5SumTerm The file MD5 sum term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(FileMd5SumTerm fileMd5SumTerm);
 
 }
