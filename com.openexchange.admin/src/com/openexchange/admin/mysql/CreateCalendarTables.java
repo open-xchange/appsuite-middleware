@@ -249,7 +249,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "confirm INT4 UNSIGNED NOT NULL,"
         + "reason TEXT,"
         + "occurrence INT(10) unsigned NOT NULL DEFAULT '0',"
-        + "PRIMARY KEY (cid,objectId,`mailAddress`(255),occurremce)"
+        + "PRIMARY KEY (cid,objectId,`mailAddress`(255),occurrence)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
