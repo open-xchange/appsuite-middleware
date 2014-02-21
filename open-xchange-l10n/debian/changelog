@@ -1,3 +1,9 @@
+open-xchange-l10n (7.4.2-8) stable; urgency=low
+
+  * Build for patch 2014-02-28
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 21 Feb 2014 11:07:07 +0100
+
 open-xchange-l10n (7.4.2-7) stable; urgency=low
 
   * Build for patch 2014-02-26
