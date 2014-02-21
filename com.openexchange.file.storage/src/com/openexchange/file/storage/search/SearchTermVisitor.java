@@ -194,7 +194,7 @@ public interface SearchTermVisitor {
      * @param createdTerm The visited created term
      * @throws OXException If visit attempt fails
      */
-    void visit(CreatedTerm createdTerm);
+    void visit(CreatedTerm createdTerm) throws OXException;
 
     /**
      * The visitation for modified by term.
@@ -202,7 +202,7 @@ public interface SearchTermVisitor {
      * @param modifiedByTerm The visited modified by term
      * @throws OXException If visit attempt fails
      */
-    void visit(ModifiedByTerm modifiedByTerm);
+    void visit(ModifiedByTerm modifiedByTerm) throws OXException;
 
     /**
      * The visitation for folder id term.
@@ -210,7 +210,7 @@ public interface SearchTermVisitor {
      * @param folderIdTerm The visited folder id term
      * @throws OXException If visit attempt fails
      */
-    void visit(FolderIdTerm folderIdTerm);
+    void visit(FolderIdTerm folderIdTerm) throws OXException;
 
     /**
      * The visitation for title term.
@@ -218,7 +218,7 @@ public interface SearchTermVisitor {
      * @param titleTerm The visited title term
      * @throws OXException If visit attempt fails
      */
-    void visit(TitleTerm titleTerm);
+    void visit(TitleTerm titleTerm) throws OXException;
 
     /**
      * The visitation for version term.
@@ -226,7 +226,7 @@ public interface SearchTermVisitor {
      * @param versionTerm The visited version term
      * @throws OXException If visit attempt fails
      */
-    void visit(VersionTerm versionTerm);
+    void visit(VersionTerm versionTerm) throws OXException;
 
     /**
      * The visitation for content term.
@@ -234,7 +234,7 @@ public interface SearchTermVisitor {
      * @param contentTerm The visited content term
      * @throws OXException If visit attempt fails
      */
-    void visit(ContentTerm contentTerm);
+    void visit(ContentTerm contentTerm) throws OXException;
 
     /**
      * The visitation for Id term.
@@ -242,7 +242,7 @@ public interface SearchTermVisitor {
      * @param idTerm The visited id term
      * @throws OXException If visit attempt fails
      */
-    void visit(IdTerm idTerm);
+    void visit(IdTerm idTerm) throws OXException;
 
     /**
      * The visitation for file size term.
@@ -250,7 +250,7 @@ public interface SearchTermVisitor {
      * @param fileSizeTerm The visited file size term
      * @throws OXException If visit attempt fails
      */
-    void visit(FileSizeTerm fileSizeTerm);
+    void visit(FileSizeTerm fileSizeTerm) throws OXException;
 
     /**
      * The visitation for description term.
@@ -258,7 +258,7 @@ public interface SearchTermVisitor {
      * @param descriptionTerm The visited description term
      * @throws OXException If visit attempt fails
      */
-    void visit(DescriptionTerm descriptionTerm);
+    void visit(DescriptionTerm descriptionTerm) throws OXException;
 
     /**
      * The visitation for url term.
@@ -266,7 +266,7 @@ public interface SearchTermVisitor {
      * @param urlTerm The visited url term
      * @throws OXException If visit attempt fails
      */
-    void visit(UrlTerm urlTerm);
+    void visit(UrlTerm urlTerm) throws OXException;
 
     /**
      * The visitation for created by term.
@@ -274,5 +274,5 @@ public interface SearchTermVisitor {
      * @param createdByTerm The visited created by term
      * @throws OXException If visit attempt fails
      */
-    void visit(CreatedByTerm createdByTerm);
+    void visit(CreatedByTerm createdByTerm) throws OXException;
 }
