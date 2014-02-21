@@ -117,12 +117,12 @@ msgstr "Sijainnista toiseen logittaminen ei ole sallittu. Yhden sijainnin muisti
 #. Your proposed upload is smaller than the minimum allowed object size.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:89
 msgid "Your proposed upload is smaller than the minimum allowed object size."
-msgstr "Ehdottamasi lataus on pienempi kuin pienin sallittu objektikoko."
+msgstr "Ehdottamasi lataus on pienempi kuin pienin sallittu koko."
 
 #. Your proposed upload exceeds the maximum allowed object size.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:92
 msgid "Your proposed upload exceeds the maximum allowed object size."
-msgstr "Ehdottamasi lataus on suurempi kuin suurin sallittu objektikoko."
+msgstr "Ehdottamasi lataus on suurempi kuin suurin sallittu koko."
 
 #. The provided token has expired.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:95
@@ -142,7 +142,7 @@ msgstr "Määritelty muistipaikka (AWS bucket) on epäkelpo."
 #. All access to this object has been disabled.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:104
 msgid "All access to this object has been disabled."
-msgstr "Kaikki pääsy tähän objektiin on estetty."
+msgstr "Kaikki pääsy tähän kohteeseen on estetty."
 
 #. The provided security credentials are not valid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:107
@@ -208,7 +208,7 @@ msgstr "Tilapäinen uudelleenohjaus."
 #. Object restore is already in progress.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:142
 msgid "Object restore is already in progress."
-msgstr "Objektin palautus on jo käynnissä."
+msgstr "Kohteen palautus on jo käynnissä."
 
 #. You are being redirected to the bucket while DNS updates.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:145
@@ -1129,7 +1129,7 @@ msgid ""
 "Object %1$s does not belong to this pool. The object will be removed. If "
 "there was a previous message about this object not having been returned to "
 "the pool, the object was just in use too long."
-msgstr "Objekti %1$s ei kuulu tähän pooliin. Objekti poistetaan. Mikäli sait aiemmin viestien ettei objektia voida palauttaa pooliin, oli se vain käytössä liian kauan."
+msgstr "Kohde %1$s ei kuulu tähän pooliin. Kohde poistetaan. Mikäli sait aiemmin viestien ettei kohdetta voida palauttaa pooliin, oli se vain käytössä liian kauan."
 
 #. A property defining the server name was not found in the configuration properties files.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:93
@@ -1385,7 +1385,7 @@ msgstr "EWS-varoitus: %1$s (%2$s)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ews/src/com/openexchange/ews/EWSExceptionMessages.java:67
 msgid "Object \"%1$s\" not found"
-msgstr "Objektia \"%1$s\" ei löytynyt"
+msgstr "Kohdetta \"%1$s\" ei löytynyt"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.ews/src/com/openexchange/ews/EWSExceptionMessages.java:68
 msgid "The name \"%1$s\" is ambiguous"
@@ -1654,7 +1654,7 @@ msgid ""
 "Indicates a Windows NT Server could not be contacted or that objects within "
 "the domain are protected such that necessary information could not be "
 "retrieved."
-msgstr "Ilmaisee, että Windows NT palvelimeen ei saatu yhteyttä tai domain objektit ovat suojattuja tavalla, joka estää tarvittavan tiedon noutamisen."
+msgstr "Ilmaisee, että Windows NT palvelimeen ei saatu yhteyttä tai domain kohteet ovat suojattuja tavalla, joka estää tarvittavan tiedon noutamisen."
 
 #. The specified domain did not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:237
@@ -2124,12 +2124,12 @@ msgstr "Palvelimella tapahtu tilapäinen virhe, joka estää pyynnön toteuttami
 #. The general message for a conflicting update operation.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:72
 msgid "The object has been changed in the meantime."
-msgstr "Objektia on sillä välin muutettu."
+msgstr "Kohdetta on sillä välin muutettu."
 
 #. The general message for a missing object.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:75
 msgid "Object not found. %1$s"
-msgstr "Objektia ei löytynyt. %1$s"
+msgstr "Kohdetta ei löytynyt. %1$s"
 
 #. The general message if a user has no access to a certain module (e.g. calendar)
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:78
@@ -2475,7 +2475,7 @@ msgstr "Viestistä ei löytynyt liitettä tunnisteella %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:138
 msgid "Versit object could not be saved"
-msgstr "Versit objektia ei voitu tallentaa"
+msgstr "Versit kohdetta ei voitu tallentaa"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:140
 msgid "No support of capability \"THREAD=REFERENCES\""
@@ -3377,7 +3377,7 @@ msgstr "Viestin %1$s raakamuodon streamia ei voitu lukea kansiosta %2$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:217
 msgid "Versit object (i.e. vCard or vCalendar) could not be saved"
-msgstr "Versit objektia (esim. vCard tai vCalendar) ei voitu tallentaa"
+msgstr "Versit kohdetta (esim. vCard tai vCalendar) ei voitu tallentaa"
 
 #. *
 #. * POP3 server does not support capability "THREAD=REFERENCES"
@@ -4006,7 +4006,7 @@ msgstr "Tuntematon luokka: %1$s"
 #. Cowardly refusing to convert confidential classified objects.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:100
 msgid "Cowardly refusing to convert confidential classified objects."
-msgstr "Raukkamaisesti kieltäydyn muuntamasta luottamuksellisiksi luokiteltuja objekteja."
+msgstr "Raukkamaisesti kieltäydyn muuntamasta luottamuksellisiksi luokiteltuja kohteita."
 
 #. Missing DTStart in appointment
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:103
@@ -4241,7 +4241,7 @@ msgstr "Loppupäivämäärä ei voi olla ennen aloituspäivämäärää."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:87
 msgid "This label (%d) is not supported."
-msgstr "Seloste (%d) ei ole tuettu."
+msgstr "Tunniste (%d) ei ole tuettu."
 
 #. *
 #. * Private flag is only allowed inside of a private folder.
@@ -4345,28 +4345,28 @@ msgstr "Yksityiseksi merkittyä tapaamista ei voi siirtää julkiseen kansioon."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:158
 msgid "You do not have the appropriate permissions to modify this object."
-msgstr "Sinulla ei ole tarvittavia valtuuksia tämän objektin muokkaamiseksi."
+msgstr "Sinulla ei ole tarvittavia valtuuksia tämän kohteen muokkaamiseksi."
 
 #. *
 #. * You do not have the appropriate permissions to move this object.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:163
 msgid "You do not have the appropriate permissions to move this object."
-msgstr "Sinulla ei ole tarvittavia valtuuksia tämän objektin siirtämiseksi."
+msgstr "Sinulla ei ole tarvittavia valtuuksia tämän kohteen siirtämiseksi."
 
 #. *
 #. * You do not have the appropriate permissions to read this object.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:168
 msgid "You do not have the appropriate permissions to read this object."
-msgstr "Sinulla ei ole tarvittavia valtuuksia tämän objektin lukemiseen."
+msgstr "Sinulla ei ole tarvittavia valtuuksia tämän kohteen lukemiseen."
 
 #. *
 #. * You do not have the appropriate permissions to create an object.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:173
 msgid "You do not have the appropriate permissions to create an object."
-msgstr "Sinulla ei ole tarvittavia valtuuksia tämän objektin luomiseen."
+msgstr "Sinulla ei ole tarvittavia valtuuksia tämän kohteen luomiseen."
 
 #. *
 #. * You are trying to create a new recurring appointment from an exception. This is not possible.
@@ -4449,7 +4449,7 @@ msgstr "Kansio ei ole tyypiltään yhteystieto."
 msgid ""
 "You do not have the appropriate permission to access objects in the folder "
 "\"%1$s\"."
-msgstr "Sinulla ei ole tarvittavia valtuuksia objektien lukemiseen kansiosta \"%1$s\"."
+msgstr "Sinulla ei ole tarvittavia valtuuksia kohteiden lukemiseen kansiosta \"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:69
 msgid "Unable to scale image down."
@@ -4463,7 +4463,7 @@ msgstr "Tätä ominaisuutta ei ole kytketty päälle."
 msgid ""
 "You do not have the appropriate permission to create objects in the folder "
 "\"%1$s\"."
-msgstr "Sinulla ei ole tarvittavia valtuuksia objektien luomiseen kansioon \"%1$s\"."
+msgstr "Sinulla ei ole tarvittavia valtuuksia kohteiden luomiseen kansioon \"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:77
 msgid "Unable to synchronize the old contact with the new changes."
@@ -4475,7 +4475,7 @@ msgstr "Sinulla ei ole lupaa merkitä tätä yhteystietoa yksityiseksi."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:81
 msgid "Edit Conflict. Refresh object."
-msgstr "Muokkaa ristiriitaa. Päivitä objekti."
+msgstr "Muokkaa ristiriitaa. Päivitä kohde."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:83
 msgid "No changes found. No update required."
@@ -4527,7 +4527,7 @@ msgstr "Huono merkki kentässä \"%2$s\"."
 msgid ""
 "You do not have the appropriate permission to delete objects from the folder "
 "\"%1$s\"."
-msgstr "Sinulla ei ole tarvittavia valtuuksia objektien poistamiseen kansiosta \"%1$s\"."
+msgstr "Sinulla ei ole tarvittavia valtuuksia kohteiden poistamiseen kansiosta \"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:105
 msgid "Mime type is not defined."
@@ -4557,7 +4557,7 @@ msgstr "Välttämätöntä arvoa \"sukunimi\" ei annettu."
 msgid ""
 "You do not have the appropriate permission to change objects in the folder "
 "\"%2$s\"."
-msgstr "Sinulla ei ole tarvittavia valtuuksia objektien muuttamiseen kansiossa \"%2$s\"."
+msgstr "Sinulla ei ole tarvittavia valtuuksia kohteiden muuttamiseen kansiossa \"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
 msgid ""
@@ -4569,7 +4569,7 @@ msgstr "Sähköpostiosoite on pakollinen ulkopuolisille jakelulistan jäsenille.
 msgid ""
 "The object identifier is mandatory for distribution list members referencing "
 "existing contacts."
-msgstr "Objektin tunniste on pakollinen olemassaoleviin yhteystietoihin viittaavilla jakelulistan jäsenille."
+msgstr "Kohteen tunniste on pakollinen olemassaoleviin yhteystietoihin viittaavilla jakelulistan jäsenillä."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:123
 msgid "User contacts can not be deleted."
@@ -4688,7 +4688,7 @@ msgstr "Tiedostoni"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
 msgid "Drive"
-msgstr "Asema"
+msgstr "Drive"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:108
 msgid "Public files"
@@ -4738,7 +4738,7 @@ msgstr "Luonnokset"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:165
 msgid "Sent objects"
-msgstr "Lähetetyt objektit"
+msgstr "Lähetetyt kohteet"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -4800,9 +4800,9 @@ msgid ""
 "Note: This delivery receipt only acknowledges that the message was displayed "
 "on the recipients computer. There is no guarantee that the recipient has "
 "read or understood the message contents."
-msgstr "Tämä on toimituksen vahvistus lähettämästäsi sähköpostista. Lähetit sen #DATE# vastaanottajalle #RECIPIENT# aiheella \"#SUBJECT#\".\n"
+msgstr "Tämä on toimituksen kuittaus lähettämästäsi sähköpostista. Lähetit sen #DATE# vastaanottajalle #RECIPIENT# aiheella \"#SUBJECT#\".\n"
 "\n"
-"Huom: Tämä toimituksen vahvistus merkitsee vain että viesti on näytetty vastaanottajan tietokoneella. Ei ole mitään takeita siitä, että vastanottaja on lukenut tai ymmärtänyt viestin sisällön."
+"Huom: Tämä toimituksen kuittaus merkitsee vain että viesti on näytetty vastaanottajan tietokoneella. Ei ole mitään takeita siitä, että vastanottaja on lukenut tai ymmärtänyt viestin sisällön."
 
 #. The prefixed text on reply.
 #. #DATE# is replaced with the sent date of referenced email
@@ -6137,7 +6137,7 @@ msgstr "Uusia tiedostoja ei voi tallentaa käyttäen tiedostokohtaa (file offset
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:96
 msgid "Problem putting/removing an object into/from the cache."
-msgstr "Ongelma tallennettaessa/poistettaessa objektia välimuistiin/välimuistista."
+msgstr "Ongelma tallennettaessa/poistettaessa kohdetta välimuistiin/välimuistista."
 
 #. *
 #. * Hash algorithm %s isn't found.
@@ -6745,7 +6745,7 @@ msgstr "Postimoduuliin pääsy kielletty."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:76
 msgid "Error while converting contact to versit object."
-msgstr "Virhe muunnettaessa yhteystietoa versit objektiksi."
+msgstr "Virhe muunnettaessa yhteystietoa versit kohteiksi."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:78
 msgid "No attachment was found with id \"%1$s\" in message."
@@ -7503,7 +7503,7 @@ msgstr "Sinulla ei ole tarvittavia valtuuksia moduuliin %1$s."
 msgid ""
 "The object has been changed in the meantime. Please reload the view and try "
 "again."
-msgstr "Objektia on sillä välin muutettu. Päivitä näkymä ja yritä uudelleen."
+msgstr "Kohdetta on sillä välin muutettu. Päivitä näkymä ja yritä uudelleen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:66
 msgid ""
@@ -7580,7 +7580,7 @@ msgstr "Uudelle viestille ei ole vastaanottajaa/vastaanottajia."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:91
 msgid ""
 "Receipt acknowledgment cannot be sent: missing header %1$s in message %2$s"
-msgstr "Toimituksen vahvistusta ei voida lähettää: viestistä %2$s puuttuu otsake %1$s"
+msgstr "Toimituksen kuittausta ei voida lähettää: viestistä %2$s puuttuu otsake %1$s"
 
 #. *
 #. * No send address could be found in user configuration
@@ -13893,4 +13893,3 @@ msgstr "Zulu"
 
 #~ msgid "Unparsable HTTP response: %1$s"
 #~ msgstr "Jäsennyskelvoton HTTP-vastaus: %1$s"
-
