@@ -138,6 +138,14 @@ public interface SearchTermVisitor {
      * @param fileMd5SumTerm The file MD5 sum term
      * @throws OXException If visit attempt fails
      */
-    void visit(FileMd5SumTerm fileMd5SumTerm);
+    void visit(FileMd5SumTerm fileMd5SumTerm) throws OXException;
+
+    /**
+     * The visitation for locked-until term.
+     *
+     * @param lockedUntilTerm The locked-until term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(LockedUntilTerm lockedUntilTerm) throws OXException;
 
 }
