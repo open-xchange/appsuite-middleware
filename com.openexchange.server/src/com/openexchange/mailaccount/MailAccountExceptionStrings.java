@@ -61,6 +61,12 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // Cannot find mail account for user "%2$s".
     public static final String NOT_FOUND_MSG_DISPLAY = "Cannot find mail account for user \"%2$s\".";
 
+    // Shown when a mail account that already exists should be created
+    public static final String CONFLICT_MSG_DISPLAY = "Found two mail accounts with same identifier %1$s for user %2$s.";
+
+    // Shown when the requested host cannot be resolved
+    public static final String UNKNOWN_HOST_ERROR_MSG_DISPLAY = "A host could not be resolved: %1$s.";
+
     // You do not have the appropriate permissions to delete the default mail account.
     public static final String NO_DEFAULT_DELETE_MSG_DISPLAY = "You do not have the appropriate permissions to delete the default mail account.";
 
@@ -91,8 +97,26 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // The selected mail account name already exists.
     public static final String DUPLICATE_MAIL_ACCOUNT_MSG_DISPLAY = "The selected mail account name already exists.";
 
-    // Unable to connect to mail server.
-    public static final String UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY = "Unable to connect to mail server.";
+    // Shown when the transport account already exists
+    public static final String DUPLICATE_TRANSPORT_ACCOUNT_MSG_DISPLAY = "Duplicate transport account for user %1$s in context %2$s.";
+
+    // Shown when a connection to the mail server is not possible for the given login
+    public static final String VALIDATE_FAILED_MAIL_MSG_DISPLAY = "Could not connect to mail server \"%1$s\" for login %2$s. Please review your settings.";
+
+    // Shown when a connection to the mail transport server is not possible for the given login
+    public static final String VALIDATE_FAILED_TRANSPORT_MSG_DISPLAY = "Could not connect to transport server \"%1$s\" for login %2$s. Please review your settings.";
+
+    // Shown when no SSL port was set but SSL enabled
+    public static final String DEFAULT_BUT_SECURE_MAIL_MSG_DISPLAY = "Default port specified for mail protocol \"%1$s\", but SSL is enabled. Please review if appropriate.";
+
+    // Shown when SSL port was set but SSL not enabled
+    public static final String SECURE_BUT_DEFAULT_MAIL_MSG_DISPLAY = "Secure port specified for mail protocol \"%1$s\", but SSL is not enabled. Please review if appropriate.";
+
+    // Shown when no SSL port was set for transport protocol but SSL enabled
+    public static final String DEFAULT_BUT_SECURE_TRANSPORT_MSG_DISPLAY = "Default port specified for transport protocol \"%1$s\", but SSL is enabled. Please review if appropriate.";
+
+    // Shown when SSL port was set for transport protocol but SSL not enabled
+    public static final String SECURE_BUT_DEFAULT_TRANSPORT_MSG_DISPLAY = "Secure port specified for transport protocol \"%1$s\", but SSL is not enabled. Please review if appropriate.";
 
     // The given host name "%1$s" is invalid.
     public static final String INVALID_HOST_NAME_MSG_DISPLAY = "The given host name \"%1$s\" is invalid.";
