@@ -164,4 +164,20 @@ public interface SearchTermVisitor {
      */
     void visit(SequenceNumberTerm sequenceNumberTerm) throws OXException;
 
+    /**
+     * The visitation for file MIME type term.
+     *
+     * @param fileMimeTypeTerm The file MIME type term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(FileMimeTypeTerm fileMimeTypeTerm) throws OXException;
+
+    /**
+     * The visitation for file name term.
+     *
+     * @param fileNameTerm The file name term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(FileNameTerm fileNameTerm) throws OXException;
+
 }
