@@ -6538,74 +6538,126 @@ msgstr ""
 msgid "Cannot find mail account for user \"%2$s\"."
 msgstr ""
 
-#. You do not have the appropriate permissions to delete the default mail account.
+#. Shown when a mail account that already exists should be created
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:65
+msgid "Found two mail accounts with same identifier %1$s for user %2$s."
+msgstr ""
+
+#. Shown when the requested host cannot be resolved
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
+msgid "A host could not be resolved: %1$s."
+msgstr ""
+
+#. You do not have the appropriate permissions to delete the default mail account.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:71
 msgid ""
 "You do not have the appropriate permissions to delete the default mail "
 "account."
 msgstr ""
 
 #. You do not have the appropriate permissions to update the default mail account.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:74
 msgid ""
 "You do not have the appropriate permissions to update the default mail "
 "account."
 msgstr ""
 
 #. The default mail account already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:77
 msgid "The default mail account already exists."
 msgstr ""
 
 #. The Unified Mail account already exists
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:80
 msgid "The Unified Mail account already exists."
 msgstr ""
 
 #. It is not allowed to create a new mail account for Unified Mail.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:83
 msgid "It is not allowed to create a new mail account for Unified Mail."
 msgstr ""
 
 #. Validation for Unified Mail failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:86
 msgid "Validation for Unified Mail failed."
 msgstr ""
 
 #. You do not have the appropriate permissions to create more than one mail account.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:89
 msgid ""
 "You do not have the appropriate permissions to create more than one mail "
 "account."
 msgstr ""
 
 #. A mail account with the given E-Mail address already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:92
 msgid "A mail account with the given E-Mail address already exists."
 msgstr ""
 
 #. The mail account name "%1$s" is not valid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:95
 msgid "The mail account name \"%1$s\" is not valid."
 msgstr ""
 
 #. The selected mail account name already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:98
 msgid "The selected mail account name already exists."
 msgstr ""
 
-#. Unable to connect to mail server.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:95
-msgid "Unable to connect to mail server."
+#. Shown when the transport account already exists
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:101
+msgid "Duplicate transport account for user %1$s in context %2$s."
+msgstr ""
+
+#. Shown when a connection to the mail server is not possible for the given login
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:104
+msgid ""
+"Could not connect to mail server \"%1$s\" for login %2$s. Please review your "
+"settings."
+msgstr ""
+
+#. Shown when a connection to the mail transport server is not possible for the given login
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:107
+msgid ""
+"Could not connect to transport server \"%1$s\" for login %2$s. Please review "
+"your settings."
+msgstr ""
+
+#. Shown when no SSL port was set but SSL enabled
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:110
+msgid ""
+"Default port specified for mail protocol \"%1$s\", but SSL is enabled. "
+"Please review if appropriate."
+msgstr ""
+
+#. Shown when SSL port was set but SSL not enabled
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:113
+msgid ""
+"Secure port specified for mail protocol \"%1$s\", but SSL is not enabled. "
+"Please review if appropriate."
+msgstr ""
+
+#. Shown when no SSL port was set for transport protocol but SSL enabled
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:116
+msgid ""
+"Default port specified for transport protocol \"%1$s\", but SSL is enabled. "
+"Please review if appropriate."
+msgstr ""
+
+#. Shown when SSL port was set for transport protocol but SSL not enabled
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:119
+msgid ""
+"Secure port specified for transport protocol \"%1$s\", but SSL is not "
+"enabled. Please review if appropriate."
 msgstr ""
 
 #. The given host name "%1$s" is invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:98
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:122
 msgid "The given host name \"%1$s\" is invalid."
 msgstr ""
 
 #. The given host name "%1$s" is not allowed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:125
 msgid "The given host name \"%1$s\" is not allowed."
 msgstr ""
 
