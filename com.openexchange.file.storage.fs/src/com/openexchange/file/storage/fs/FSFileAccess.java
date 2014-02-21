@@ -73,6 +73,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
@@ -484,6 +485,11 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
             Collections.<File> emptyList(),
             Collections.<File> emptyList(),
             UNDEFINED_SEQUENCE_NUMBER);
+    }
+
+    @Override
+    public SearchIterator<File> search(final SearchTerm<?> searchTerm, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        return SearchIteratorAdapter.emptyIterator();
     }
 
     @Override

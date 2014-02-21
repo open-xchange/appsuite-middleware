@@ -63,7 +63,7 @@ import com.openexchange.file.storage.File.Field;
  */
 public class ModifiedByTerm extends AbstractNumberSearchTerm {
 
-    protected ModifiedByTerm(ComparablePattern<Number> pattern) {
+    public ModifiedByTerm(ComparablePattern<Number> pattern) {
         super(pattern);
     }
 

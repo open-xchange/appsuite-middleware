@@ -47,36 +47,34 @@
  *
  */
 
-package com.openexchange.file.storage.search;
+package com.openexchange.groupware.infostore.search;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
-
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 /**
- * {@link ContentTerm}
+ * {@link NotTerm}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class ContentTerm extends AbstractStringSearchTerm {
+public class NotTerm implements SearchTerm<SearchTerm<?>> {
 
-    public ContentTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
-        super(pattern, ignoreCase, substringSearch);
+    private final SearchTerm<?> term;
+
+    /**
+     * Initializes a new {@link NotTerm}.
+     */
+    public NotTerm(SearchTerm<?> term) {
+        super();
+        this.term = term;
     }
 
     @Override
-    public void addField(Collection<Field> col) {
-        if (null != col) {
-            col.add(Field.CONTENT);
-        }
-    }
-
-    @Override
-    protected String getString(File file) {
-        return file.getContent();
+    public SearchTerm<?> getPattern() {
+        return term;
     }
 
     @Override
@@ -84,6 +82,18 @@ public class ContentTerm extends AbstractStringSearchTerm {
         if (null != visitor) {
             visitor.visit(this);
         }
+    }
+
+    @Override
+    public void addField(Collection<Metadata> col) {
+        if (null != term) {
+            term.addField(col);
+        }
+    }
+
+    @Override
+    public boolean matches(DocumentMetadata file) throws OXException {
+        return !term.matches(file);
     }
 
 }

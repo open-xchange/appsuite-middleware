@@ -63,7 +63,7 @@ import com.openexchange.file.storage.File.Field;
  */
 public class TitleTerm extends AbstractStringSearchTerm {
 
-    protected TitleTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
+    public TitleTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
         super(pattern, ignoreCase, substringSearch);
     }
 

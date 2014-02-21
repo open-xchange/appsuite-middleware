@@ -47,43 +47,28 @@
  *
  */
 
-package com.openexchange.file.storage.search;
-
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
-
+package com.openexchange.groupware.infostore.search;
 
 /**
- * {@link ContentTerm}
+ * {@link ComparablePattern}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class ContentTerm extends AbstractStringSearchTerm {
+public interface ComparablePattern<T> {
 
-    public ContentTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
-        super(pattern, ignoreCase, substringSearch);
-    }
+    /**
+     * Gets the comparison type.
+     *
+     * @return The comparison type
+     */
+    ComparisonType getComparisonType();
 
-    @Override
-    public void addField(Collection<Field> col) {
-        if (null != col) {
-            col.add(Field.CONTENT);
-        }
-    }
-
-    @Override
-    protected String getString(File file) {
-        return file.getContent();
-    }
-
-    @Override
-    public void visit(SearchTermVisitor visitor) throws OXException {
-        if (null != visitor) {
-            visitor.visit(this);
-        }
-    }
+    /**
+     * Gets the pattern.
+     *
+     * @return The pattern
+     */
+    T getPattern();
 
 }

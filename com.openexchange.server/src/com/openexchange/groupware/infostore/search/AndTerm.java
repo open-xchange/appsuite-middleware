@@ -47,36 +47,41 @@
  *
  */
 
-package com.openexchange.file.storage.search;
+package com.openexchange.groupware.infostore.search;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 /**
- * {@link ContentTerm}
+ * {@link AndTerm}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class ContentTerm extends AbstractStringSearchTerm {
+public class AndTerm implements SearchTerm<List<SearchTerm<?>>> {
 
-    public ContentTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
-        super(pattern, ignoreCase, substringSearch);
-    }
+    private List<SearchTerm<?>> terms;
 
-    @Override
-    public void addField(Collection<Field> col) {
-        if (null != col) {
-            col.add(Field.CONTENT);
+    /**
+     * Initializes a new {@link AndTerm}.
+     */
+    public AndTerm(List<SearchTerm<?>> terms) {
+        super();
+        if (null != terms) {
+            this.terms = terms;
+        } else {
+            this.terms = Collections.emptyList();
         }
     }
 
     @Override
-    protected String getString(File file) {
-        return file.getContent();
+    public List<SearchTerm<?>> getPattern() {
+        return terms;
     }
 
     @Override
@@ -84,6 +89,25 @@ public class ContentTerm extends AbstractStringSearchTerm {
         if (null != visitor) {
             visitor.visit(this);
         }
+    }
+
+    @Override
+    public void addField(Collection<Metadata> col) {
+        for (SearchTerm<?> term : terms) {
+            term.addField(col);
+        }
+    }
+
+    @Override
+    public boolean matches(DocumentMetadata file) throws OXException {
+        if (terms.isEmpty()) {
+            return true;
+        }
+        boolean matches = terms.get(0).matches(file);
+        for (int i = 1; matches && i < terms.size(); i++) {
+            matches &= terms.get(i).matches(file);
+        }
+        return matches;
     }
 
 }

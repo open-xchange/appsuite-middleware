@@ -63,7 +63,7 @@ import com.openexchange.file.storage.File.Field;
  */
 public class IdTerm extends AbstractStringSearchTerm {
 
-    protected IdTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
+    public IdTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
         super(pattern, ignoreCase, substringSearch);
     }
 

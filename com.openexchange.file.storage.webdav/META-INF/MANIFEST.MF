@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
  com.openexchange.file.storage,
+ com.openexchange.file.storage.search,
  com.openexchange.groupware,
  com.openexchange.groupware.results,
  com.openexchange.i18n,

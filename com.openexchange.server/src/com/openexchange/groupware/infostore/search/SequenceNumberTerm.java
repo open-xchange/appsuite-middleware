@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,52 @@
  *
  */
 
-package com.openexchange.file.storage.search;
+package com.openexchange.groupware.infostore.search;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 /**
- * {@link ContentTerm}
+ * {@link SequenceNumberTerm}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContentTerm extends AbstractStringSearchTerm {
+public final class SequenceNumberTerm extends AbstractNumberSearchTerm {
 
-    public ContentTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
-        super(pattern, ignoreCase, substringSearch);
+    /**
+     * Initializes a new {@link SequenceNumberTerm}.
+     *
+     * @param sequenceNumberPattern The sequence number pattern
+     */
+    public SequenceNumberTerm(final ComparablePattern<Number> sequenceNumberPattern) {
+        super(sequenceNumberPattern);
     }
 
     @Override
-    public void addField(Collection<Field> col) {
-        if (null != col) {
-            col.add(Field.CONTENT);
-        }
-    }
-
-    @Override
-    protected String getString(File file) {
-        return file.getContent();
-    }
-
-    @Override
-    public void visit(SearchTermVisitor visitor) throws OXException {
+    public void visit(final SearchTermVisitor visitor) throws OXException {
         if (null != visitor) {
             visitor.visit(this);
         }
+    }
+
+    @Override
+    public void addField(final Collection<Metadata> col) {
+        if (null != col) {
+            col.add(Metadata.SEQUENCE_NUMBER_LITERAL);
+        }
+    }
+
+    @Override
+    protected Long getNumber(final DocumentMetadata file) {
+        return Long.valueOf(file.getSequenceNumber());
+    }
+
+    @Override
+    protected boolean compareLongValues() {
+        return true;
     }
 
 }

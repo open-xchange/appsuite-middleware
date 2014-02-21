@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,48 @@
  *
  */
 
-package com.openexchange.file.storage.search;
+package com.openexchange.groupware.infostore.search;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 /**
- * {@link ContentTerm}
+ * {@link VersionCommentTerm}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContentTerm extends AbstractStringSearchTerm {
+public final class VersionCommentTerm extends AbstractStringSearchTerm {
 
-    public ContentTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
-        super(pattern, ignoreCase, substringSearch);
+    /**
+     * Initializes a new {@link VersionCommentTerm}.
+     *
+     * @param pattern The string to search for
+     * @param ignoreCase Signal case-sensitive behavior
+     */
+    public VersionCommentTerm(final String pattern, final boolean ignoreCase) {
+        super(pattern, ignoreCase, true);
     }
 
     @Override
-    public void addField(Collection<Field> col) {
-        if (null != col) {
-            col.add(Field.CONTENT);
-        }
-    }
-
-    @Override
-    protected String getString(File file) {
-        return file.getContent();
-    }
-
-    @Override
-    public void visit(SearchTermVisitor visitor) throws OXException {
+    public void visit(final SearchTermVisitor visitor) throws OXException {
         if (null != visitor) {
             visitor.visit(this);
         }
+    }
+
+    @Override
+    public void addField(final Collection<Metadata> col) {
+        if (col != null) {
+            col.add(Metadata.VERSION_COMMENT_LITERAL);
+        }
+    }
+
+    @Override
+    protected String getString(final DocumentMetadata file) {
+        return file.getVersionComment();
     }
 
 }

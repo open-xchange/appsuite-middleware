@@ -75,6 +75,7 @@ import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
+import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
@@ -119,6 +120,12 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         if (security != null) {
             security.setProvider(provider);
         }
+    }
+
+    @Override
+    public SearchIterator<DocumentMetadata> search(SearchTerm<?> searchTerm, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserPermissionBits userPermissions) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override

@@ -65,14 +65,14 @@ import com.openexchange.file.storage.File.Field;
  */
 public class LastModifiedTerm extends AbstractDateSearchTerm {
 
-    private TimeZone timezone;
+    // private final TimeZone timezone;
 
     /**
      * Initializes a new {@link LastModifiedTerm}.
      */
-    public LastModifiedTerm(ComparablePattern<Date> pattern, TimeZone timezone) {
+    public LastModifiedTerm(ComparablePattern<Date> pattern/*, TimeZone timezone*/) {
         super(pattern);
-        this.timezone = timezone;
+        //this.timezone = timezone;
     }
 
     @Override
@@ -91,7 +91,7 @@ public class LastModifiedTerm extends AbstractDateSearchTerm {
 
     @Override
     protected Date getDate(File file) {
-        return addTimeZoneOffset(file.getLastModified().getTime(), timezone);
+        return file.getLastModified();
     }
 
 }

@@ -51,7 +51,6 @@ package com.openexchange.file.storage.search;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -65,14 +64,14 @@ import com.openexchange.file.storage.File.Field;
  */
 public class CreatedTerm extends AbstractDateSearchTerm {
 
-    private TimeZone timezone;
+    // private final TimeZone timezone;
 
     /**
      * Initializes a new {@link CreatedTerm}.
      */
-    public CreatedTerm(ComparablePattern<Date> pattern, TimeZone timezone) {
+    public CreatedTerm(ComparablePattern<Date> pattern/*, TimeZone timezone*/) {
         super(pattern);
-        this.timezone = timezone;
+        //this.timezone = timezone;
     }
 
     @Override
@@ -91,7 +90,7 @@ public class CreatedTerm extends AbstractDateSearchTerm {
 
     @Override
     protected Date getDate(File file) {
-        return addTimeZoneOffset(file.getCreated().getTime(), timezone);
+        return file.getCreated();
     }
 
 }

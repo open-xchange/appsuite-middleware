@@ -85,6 +85,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -885,6 +886,12 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     @Override
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
+    }
+
+    @Override
+    public SearchIterator<File> search(final SearchTerm<?> searchTerm, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private static final String ALL = "*";

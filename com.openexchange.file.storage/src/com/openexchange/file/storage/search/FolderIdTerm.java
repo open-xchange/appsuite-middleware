@@ -63,7 +63,7 @@ import com.openexchange.file.storage.File.Field;
  */
 public class FolderIdTerm extends AbstractStringSearchTerm {
 
-    protected FolderIdTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
+    public FolderIdTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
         super(pattern, ignoreCase, substringSearch);
     }
 

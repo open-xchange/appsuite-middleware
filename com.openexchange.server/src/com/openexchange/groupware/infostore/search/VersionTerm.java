@@ -47,36 +47,24 @@
  *
  */
 
-package com.openexchange.file.storage.search;
+package com.openexchange.groupware.infostore.search;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 /**
- * {@link ContentTerm}
+ * {@link VersionTerm}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class ContentTerm extends AbstractStringSearchTerm {
+public class VersionTerm extends AbstractStringSearchTerm {
 
-    public ContentTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
+    protected VersionTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
         super(pattern, ignoreCase, substringSearch);
-    }
-
-    @Override
-    public void addField(Collection<Field> col) {
-        if (null != col) {
-            col.add(Field.CONTENT);
-        }
-    }
-
-    @Override
-    protected String getString(File file) {
-        return file.getContent();
     }
 
     @Override
@@ -84,6 +72,18 @@ public class ContentTerm extends AbstractStringSearchTerm {
         if (null != visitor) {
             visitor.visit(this);
         }
+    }
+
+    @Override
+    public void addField(Collection<Metadata> col) {
+        if (null != col) {
+            col.add(Metadata.VERSION_LITERAL);
+        }
+    }
+
+    @Override
+    protected String getString(DocumentMetadata file) {
+        return Integer.toString(file.getVersion());
     }
 
 }

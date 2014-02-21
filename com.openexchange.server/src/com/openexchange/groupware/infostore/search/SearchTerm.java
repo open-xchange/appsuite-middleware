@@ -47,43 +47,51 @@
  *
  */
 
-package com.openexchange.file.storage.search;
+package com.openexchange.groupware.infostore.search;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 /**
- * {@link ContentTerm}
+ * {@link SearchTerm}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class ContentTerm extends AbstractStringSearchTerm {
+public interface SearchTerm<T> {
 
-    public ContentTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
-        super(pattern, ignoreCase, substringSearch);
-    }
+    /**
+     * Gets the pattern to which the expression should match.
+     *
+     * @return The pattern
+     */
+    T getPattern();
 
-    @Override
-    public void addField(Collection<Field> col) {
-        if (null != col) {
-            col.add(Field.CONTENT);
-        }
-    }
+    /**
+    * Handles given visitor for this search term.
+    *
+    * @param visitor The visitor
+    * @throws OXException If visitor invocation fails
+    */
+    void visit(SearchTermVisitor visitor) throws OXException;
 
-    @Override
-    protected String getString(File file) {
-        return file.getContent();
-    }
+    /**
+     * Adds the addressed field to specified collection
+     *
+     * @param col The collection which gathers addressed fields
+     */
+    void addField(Collection<Metadata> col);
 
-    @Override
-    public void visit(SearchTermVisitor visitor) throws OXException {
-        if (null != visitor) {
-            visitor.visit(this);
-        }
-    }
+    /**
+     * Checks if given file matches this search term
+     *
+     * @param file The file to check
+     * @return <code>true</code> if file matches this search term; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean matches(DocumentMetadata file) throws OXException;
 
 }

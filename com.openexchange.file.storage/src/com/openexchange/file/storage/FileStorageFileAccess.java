@@ -55,6 +55,7 @@ import java.util.Comparator;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.meta.FileComparator;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -531,6 +532,19 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @throws OXException If operation fails
      */
     SearchIterator<File> search(String pattern, List<File.Field> fields, String folderId, File.Field sort, SortDirection order, int start, int end) throws OXException;
+
+    /**
+     * Search for a given file.
+     *
+     * @param searchTerm The search term
+     * @param sort Which field to sort by. May be null.
+     * @param order The order in which to sort
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @return
+     * @throws OXException If operation fails
+     */
+    SearchIterator<File> search(SearchTerm<?> searchTerm, File.Field sort, SortDirection order, int start, int end) throws OXException;
 
     /**
      * Retrieve the parent account access.

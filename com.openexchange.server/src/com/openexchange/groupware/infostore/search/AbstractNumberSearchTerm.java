@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,80 @@
  *
  */
 
-package com.openexchange.file.storage.search;
+package com.openexchange.groupware.infostore.search;
 
-import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 
 
 /**
- * {@link ContentTerm}
+ * {@link AbstractNumberSearchTerm}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContentTerm extends AbstractStringSearchTerm {
+public abstract class AbstractNumberSearchTerm implements SearchTerm<ComparablePattern<Number>> {
 
-    public ContentTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
-        super(pattern, ignoreCase, substringSearch);
+    /** The pattern */
+    protected final ComparablePattern<Number> pattern;
+
+    /**
+     * Initializes a new {@link AbstractNumberSearchTerm}.
+     */
+    protected AbstractNumberSearchTerm(final ComparablePattern<Number> pattern) {
+        super();
+        this.pattern = pattern;
     }
 
     @Override
-    public void addField(Collection<Field> col) {
-        if (null != col) {
-            col.add(Field.CONTENT);
+    public ComparablePattern<Number> getPattern() {
+        return pattern;
+    }
+
+    @Override
+    public boolean matches(final DocumentMetadata file) throws OXException {
+        final Number number = getNumber(file);
+        if (null == number) {
+            return false;
+        }
+
+        if (compareLongValues()) {
+            switch (pattern.getComparisonType()) {
+            case EQUALS:
+                return number.longValue() == pattern.getPattern().longValue();
+            case LESS_THAN:
+                return number.longValue() < pattern.getPattern().longValue();
+            case GREATER_THAN:
+                return number.longValue() > pattern.getPattern().longValue();
+            default:
+                return false;
+            }
+        }
+
+        switch (pattern.getComparisonType()) {
+        case EQUALS:
+            return number.intValue() == pattern.getPattern().intValue();
+        case LESS_THAN:
+            return number.intValue() < pattern.getPattern().intValue();
+        case GREATER_THAN:
+            return number.intValue() > pattern.getPattern().intValue();
+        default:
+            return false;
         }
     }
 
-    @Override
-    protected String getString(File file) {
-        return file.getContent();
-    }
+    /**
+     * Gets the number to compare with.
+     *
+     * @param file The file to retrieve the number from
+     * @return The number
+     */
+    protected abstract Number getNumber(DocumentMetadata file);
 
-    @Override
-    public void visit(SearchTermVisitor visitor) throws OXException {
-        if (null != visitor) {
-            visitor.visit(this);
-        }
-    }
+    /**
+     * Signals whether to compare <code>long</code> value (default is <code>int</code>)
+     *
+     * @return <code>true</code> for <code>long</code> values; otherwise <code>false</code> for <code>int</code> ones
+     */
+    protected abstract boolean compareLongValues();
 
 }

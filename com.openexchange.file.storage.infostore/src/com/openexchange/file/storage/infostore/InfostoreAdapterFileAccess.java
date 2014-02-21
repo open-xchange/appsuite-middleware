@@ -66,6 +66,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -469,6 +470,23 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
                 pattern,
                 FieldMapping.getMatching(fields),
                 folder,
+                FieldMapping.getMatching(sort),
+                FieldMapping.getSortDirection(order),
+                start,
+                end,
+                ctx,
+                user,
+                userPermissions);
+        return new InfostoreSearchIterator(iterator);
+    }
+
+    @Override
+    public SearchIterator<File> search(SearchTerm<?> searchTerm, Field sort, SortDirection order, int start, int end) throws OXException {
+        final ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
+        searchTerm.visit(visitor);
+        final SearchIterator<DocumentMetadata> iterator =
+            search.search(
+                visitor.getInfstoreTerm(),
                 FieldMapping.getMatching(sort),
                 FieldMapping.getSortDirection(order),
                 start,

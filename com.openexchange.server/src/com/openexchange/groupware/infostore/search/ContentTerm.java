@@ -47,12 +47,12 @@
  *
  */
 
-package com.openexchange.file.storage.search;
+package com.openexchange.groupware.infostore.search;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 /**
@@ -68,14 +68,14 @@ public class ContentTerm extends AbstractStringSearchTerm {
     }
 
     @Override
-    public void addField(Collection<Field> col) {
+    public void addField(Collection<Metadata> col) {
         if (null != col) {
-            col.add(Field.CONTENT);
+            col.add(Metadata.CONTENT_LITERAL);
         }
     }
 
     @Override
-    protected String getString(File file) {
+    protected String getString(DocumentMetadata file) {
         return file.getContent();
     }
 

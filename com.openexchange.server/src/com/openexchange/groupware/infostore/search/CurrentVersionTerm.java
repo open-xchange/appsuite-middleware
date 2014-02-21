@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,35 @@
  *
  */
 
-package com.openexchange.file.storage.search;
+package com.openexchange.groupware.infostore.search;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 /**
- * {@link ContentTerm}
+ * {@link CurrentVersionTerm}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContentTerm extends AbstractStringSearchTerm {
+public final class CurrentVersionTerm implements SearchTerm<Boolean> {
 
-    public ContentTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
-        super(pattern, ignoreCase, substringSearch);
+    private final boolean currentVersion;
+
+    /**
+     * Initializes a new {@link CurrentVersionTerm}.
+     */
+    public CurrentVersionTerm(final boolean currentVersion) {
+        super();
+        this.currentVersion = currentVersion;
     }
 
     @Override
-    public void addField(Collection<Field> col) {
-        if (null != col) {
-            col.add(Field.CONTENT);
-        }
-    }
-
-    @Override
-    protected String getString(File file) {
-        return file.getContent();
+    public Boolean getPattern() {
+        return Boolean.valueOf(currentVersion);
     }
 
     @Override
@@ -84,6 +83,18 @@ public class ContentTerm extends AbstractStringSearchTerm {
         if (null != visitor) {
             visitor.visit(this);
         }
+    }
+
+    @Override
+    public void addField(Collection<Metadata> col) {
+        if (null != col) {
+            col.add(Metadata.CURRENT_VERSION_LITERAL);
+        }
+    }
+
+    @Override
+    public boolean matches(DocumentMetadata file) throws OXException {
+        return currentVersion ? InfostoreFacade.CURRENT_VERSION == file.getVersion() : InfostoreFacade.CURRENT_VERSION != file.getVersion();
     }
 
 }
