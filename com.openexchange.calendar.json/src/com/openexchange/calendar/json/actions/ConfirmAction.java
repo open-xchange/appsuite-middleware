@@ -79,10 +79,10 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "id", description = "Object ID of the appointment to confirm."),
     @Parameter(name = "folder", description = "ID of the folder through which the appointment is accessed."),
-    @Parameter(name = "occurrence", description = "The numeric identifier of the occurrence to which the confirmation applies (in case \"id\" denotes a series appointment)."),
+    @Parameter(name = "occurrence", optional=true, description = "The numeric identifier of the occurrence to which the confirmation applies (in case \"id\" denotes a series appointment)."),
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the to confirmed appointment.")
 }, requestBody = "The appointment object to delete. The fields for the object are described in Full identifier for an appointment.",
-responseDescription = "An array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. The fields of each object are described in Full identifier for an appointment.")
+    responseDescription = "An array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. The fields of each object are described in Full identifier for an appointment.")
 public final class ConfirmAction extends AppointmentAction {
 
     /**
@@ -102,7 +102,6 @@ public final class ConfirmAction extends AppointmentAction {
 
         // Get request body
         final JSONObject jData = req.getData();
-        //DataParser.checkInt(jData, ParticipantsFields.CONFIRMATION);
 
         final ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jData);
 
@@ -116,9 +115,25 @@ public final class ConfirmAction extends AppointmentAction {
 
         final AppointmentSQLInterface appointmentSql = getService().createAppointmentSql(session);
         Date timestamp = null;
-        if (participant.getType() == Participant.USER || participant.getType() == 0) {
+
+        boolean isUser = (participant.getType() == Participant.USER) || (participant.getType() == 0);
+        boolean isExternal = participant.getType() == Participant.EXTERNAL_USER;
+        boolean isOccurrenceChange = (optOccurrenceId != AppointmentAJAXRequest.NOT_FOUND) && (optOccurrenceId > 0);
+
+        if (isOccurrenceChange) {
+            if (isUser) {
+                timestamp = appointmentSql.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirmStatus, confirmMessage);
+            } else if (isExternal) {
+                timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, optOccurrenceId, participant.getEmailAddress(), confirmStatus, confirmMessage);
+            } else {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
+            }
+            return new AJAXRequestResult(new JSONObject(0), timestamp, "json");
+        }
+
+        if (isUser) {
             timestamp = appointmentSql.setUserConfirmation(objectId, folderId, userId, confirmStatus, confirmMessage);
-        } else if (participant.getType() == Participant.EXTERNAL_USER) {
+        } else if (isExternal) {
             timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, participant.getEmailAddress(), confirmStatus, confirmMessage);
         } else {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
