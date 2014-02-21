@@ -62,6 +62,7 @@ import com.openexchange.java.Strings;
  * {@link MetaTerm}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
 public final class MetaTerm implements SearchTerm<String> {
 

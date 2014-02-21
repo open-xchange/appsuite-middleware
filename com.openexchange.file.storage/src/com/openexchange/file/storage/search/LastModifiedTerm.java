@@ -51,7 +51,6 @@ package com.openexchange.file.storage.search;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;

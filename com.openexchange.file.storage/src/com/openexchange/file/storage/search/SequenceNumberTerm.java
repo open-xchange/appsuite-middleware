@@ -59,6 +59,7 @@ import com.openexchange.file.storage.File.Field;
  * {@link SequenceNumberTerm}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
 public final class SequenceNumberTerm extends AbstractNumberSearchTerm {
 
