@@ -110,8 +110,8 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final AndTerm andTerm) throws OXException {
-        final List<SearchTerm<?>> terms = andTerm.getPattern();
+    public void visit(final AndTerm term) throws OXException {
+        final List<SearchTerm<?>> terms = term.getPattern();
         final int size = terms.size();
         final List<com.openexchange.groupware.infostore.search.SearchTerm<?>> infostoreTerms = new ArrayList<com.openexchange.groupware.infostore.search.SearchTerm<?>>(size);
         for (int i = 0; i < size; i++) {
@@ -124,8 +124,8 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final OrTerm orTerm) throws OXException {
-        final List<SearchTerm<?>> terms = orTerm.getPattern();
+    public void visit(final OrTerm term) throws OXException {
+        final List<SearchTerm<?>> terms = term.getPattern();
         final int size = terms.size();
         final List<com.openexchange.groupware.infostore.search.SearchTerm<?>> infostoreTerms = new ArrayList<com.openexchange.groupware.infostore.search.SearchTerm<?>>(size);
         for (int i = 0; i < size; i++) {
@@ -138,35 +138,35 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final NotTerm notTerm) throws OXException {
+    public void visit(final NotTerm term) throws OXException {
         final ToInfostoreTermVisitor newVisitor = new ToInfostoreTermVisitor();
-        notTerm.getPattern().visit(newVisitor);
+        term.getPattern().visit(newVisitor);
         infstoreTerm = new com.openexchange.groupware.infostore.search.NotTerm(newVisitor.getInfstoreTerm());
     }
 
     @Override
-    public void visit(final MetaTerm metaTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.MetaTerm(metaTerm.getPattern());
+    public void visit(final MetaTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.MetaTerm(term.getPattern());
     }
 
     @Override
-    public void visit(final NumberOfVersionsTerm numberOfVersionsTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.NumberOfVersionsTerm(new ComparablePatternImpl<Number>(numberOfVersionsTerm.getPattern()));
+    public void visit(final NumberOfVersionsTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.NumberOfVersionsTerm(new ComparablePatternImpl<Number>(term.getPattern()));
     }
 
     @Override
-    public void visit(final LastModifiedUtcTerm lastModifiedUtcTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.LastModifiedUtcTerm(new ComparablePatternImpl<Date>(lastModifiedUtcTerm.getPattern()));
+    public void visit(final LastModifiedUtcTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.LastModifiedUtcTerm(new ComparablePatternImpl<Date>(term.getPattern()));
     }
 
     @Override
-    public void visit(final ColorLabelTerm colorLabelTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.ColorLabelTerm(new ComparablePatternImpl<Number>(colorLabelTerm.getPattern()));
+    public void visit(final ColorLabelTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.ColorLabelTerm(new ComparablePatternImpl<Number>(term.getPattern()));
     }
 
     @Override
-    public void visit(final CurrentVersionTerm currentVersionTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.CurrentVersionTerm(currentVersionTerm.getPattern().booleanValue());
+    public void visit(final CurrentVersionTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.CurrentVersionTerm(term.getPattern().booleanValue());
     }
 
     @Override
@@ -175,13 +175,13 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final FileMd5SumTerm fileMd5SumTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.FileMd5SumTerm(fileMd5SumTerm.getPattern());
+    public void visit(final FileMd5SumTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.FileMd5SumTerm(term.getPattern());
     }
 
     @Override
-    public void visit(final LockedUntilTerm lockedUntilTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.LockedUntilTerm(new ComparablePatternImpl<Date>(lockedUntilTerm.getPattern()));
+    public void visit(final LockedUntilTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.LockedUntilTerm(new ComparablePatternImpl<Date>(term.getPattern()));
     }
 
     @Override
@@ -190,8 +190,8 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final SequenceNumberTerm sequenceNumberTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.SequenceNumberTerm(new ComparablePatternImpl<Number>(sequenceNumberTerm.getPattern()));
+    public void visit(final SequenceNumberTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.SequenceNumberTerm(new ComparablePatternImpl<Number>(term.getPattern()));
     }
 
     @Override
@@ -205,18 +205,18 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final LastModifiedTerm lastModifiedTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.LastModifiedTerm(new ComparablePatternImpl<Date>(lastModifiedTerm.getPattern()));
+    public void visit(final LastModifiedTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.LastModifiedTerm(new ComparablePatternImpl<Date>(term.getPattern()));
     }
 
     @Override
-    public void visit(final CreatedTerm createdTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.CreatedTerm(new ComparablePatternImpl<Date>(createdTerm.getPattern()));
+    public void visit(final CreatedTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.CreatedTerm(new ComparablePatternImpl<Date>(term.getPattern()));
     }
 
     @Override
-    public void visit(final ModifiedByTerm modifiedByTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.ModifiedByTerm(new ComparablePatternImpl<Number>(modifiedByTerm.getPattern()));
+    public void visit(final ModifiedByTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.ModifiedByTerm(new ComparablePatternImpl<Number>(term.getPattern()));
     }
 
     @Override
@@ -230,8 +230,8 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final VersionTerm versionTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.VersionCommentTerm(versionTerm.getPattern(), versionTerm.isIgnoreCase());
+    public void visit(final VersionTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.VersionCommentTerm(term.getPattern(), term.isIgnoreCase());
     }
 
     @Override
@@ -246,8 +246,8 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final FileSizeTerm fileSizeTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.FileSizeTerm(new ComparablePatternImpl<Number>(fileSizeTerm.getPattern()));
+    public void visit(final FileSizeTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.FileSizeTerm(new ComparablePatternImpl<Number>(term.getPattern()));
     }
 
     @Override
@@ -261,8 +261,8 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final CreatedByTerm createdByTerm) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.CreatedByTerm(new ComparablePatternImpl<Number>(createdByTerm.getPattern()));
+    public void visit(final CreatedByTerm term) throws OXException {
+        infstoreTerm = new com.openexchange.groupware.infostore.search.CreatedByTerm(new ComparablePatternImpl<Number>(term.getPattern()));
     }
 
     private static final class ComparablePatternImpl<T> implements com.openexchange.groupware.infostore.search.ComparablePattern<T> {

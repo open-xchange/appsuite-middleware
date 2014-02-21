@@ -63,216 +63,216 @@ public interface SearchTermVisitor {
     /**
      * The visitation for AND term.
      *
-     * @param andTerm The visited AND term
+     * @param term The visited AND term
      * @throws OXException If visit attempt fails
      */
-    void visit(AndTerm andTerm) throws OXException;
+    void visit(AndTerm term) throws OXException;
 
     /**
      * The visitation for OR term.
      *
-     * @param orTerm The visited OR term
+     * @param term The visited OR term
      * @throws OXException If visit attempt fails
      */
-    void visit(OrTerm orTerm) throws OXException;
+    void visit(OrTerm term) throws OXException;
 
     /**
      * The visitation for not term.
      *
-     * @param notTerm The visited not term
+     * @param term The visited not term
      * @throws OXException If visit attempt fails
      */
-    void visit(NotTerm notTerm) throws OXException;
+    void visit(NotTerm term) throws OXException;
 
     /**
      * The visitation for meta term.
      *
-     * @param metaTerm The visited meta term
+     * @param term The visited meta term
      * @throws OXException If visit attempt fails
      */
-    void visit(MetaTerm metaTerm) throws OXException;
+    void visit(MetaTerm term) throws OXException;
 
     /**
      * The visitation for number-of-versions term.
      *
-     * @param numberOfVersionsTerm The visited number-of-versions term
+     * @param term The visited number-of-versions term
      * @throws OXException If visit attempt fails
      */
-    void visit(NumberOfVersionsTerm numberOfVersionsTerm) throws OXException;
+    void visit(NumberOfVersionsTerm term) throws OXException;
 
     /**
      * The visitation for last-modified UTC term.
      *
-     * @param lastModifiedUtcTerm The visited last-modified UTC term
+     * @param term The visited last-modified UTC term
      * @throws OXException If visit attempt fails
      */
-    void visit(LastModifiedUtcTerm lastModifiedUtcTerm) throws OXException;
+    void visit(LastModifiedUtcTerm term) throws OXException;
 
     /**
      * The visitation for color label term.
      *
-     * @param colorLabelTerm The visited color label term
+     * @param term The visited color label term
      * @throws OXException If visit attempt fails
      */
-    void visit(ColorLabelTerm colorLabelTerm) throws OXException;
+    void visit(ColorLabelTerm term) throws OXException;
 
     /**
      * The visitation for current version term.
      *
-     * @param currentVersionTerm The current version term
+     * @param term The current version term
      * @throws OXException If visit attempt fails
      */
-    void visit(CurrentVersionTerm currentVersionTerm) throws OXException;
+    void visit(CurrentVersionTerm term) throws OXException;
 
     /**
      * The visitation for version comment term.
      *
-     * @param versionCommentTerm The version comment term
+     * @param term The version comment term
      * @throws OXException If visit attempt fails
      */
-    void visit(VersionCommentTerm versionCommentTerm) throws OXException;
+    void visit(VersionCommentTerm term) throws OXException;
 
     /**
      * The visitation for file MD5 sum term.
      *
-     * @param fileMd5SumTerm The file MD5 sum term
+     * @param term The file MD5 sum term
      * @throws OXException If visit attempt fails
      */
-    void visit(FileMd5SumTerm fileMd5SumTerm) throws OXException;
+    void visit(FileMd5SumTerm term) throws OXException;
 
     /**
      * The visitation for locked-until term.
      *
-     * @param lockedUntilTerm The locked-until term
+     * @param term The locked-until term
      * @throws OXException If visit attempt fails
      */
-    void visit(LockedUntilTerm lockedUntilTerm) throws OXException;
+    void visit(LockedUntilTerm term) throws OXException;
 
     /**
      * The visitation for categories term.
      *
-     * @param categoriesTerm The categories term
+     * @param term The categories term
      * @throws OXException If visit attempt fails
      */
-    void visit(CategoriesTerm categoriesTerm) throws OXException;
+    void visit(CategoriesTerm term) throws OXException;
 
     /**
      * The visitation for sequence number term.
      *
-     * @param sequenceNumberTerm The sequence number term
+     * @param term The sequence number term
      * @throws OXException If visit attempt fails
      */
-    void visit(SequenceNumberTerm sequenceNumberTerm) throws OXException;
+    void visit(SequenceNumberTerm term) throws OXException;
 
     /**
      * The visitation for file MIME type term.
      *
-     * @param fileMimeTypeTerm The file MIME type term
+     * @param term The file MIME type term
      * @throws OXException If visit attempt fails
      */
-    void visit(FileMimeTypeTerm fileMimeTypeTerm) throws OXException;
+    void visit(FileMimeTypeTerm term) throws OXException;
 
     /**
      * The visitation for file name term.
      *
-     * @param fileNameTerm The file name term
+     * @param term The file name term
      * @throws OXException If visit attempt fails
      */
-    void visit(FileNameTerm fileNameTerm) throws OXException;
+    void visit(FileNameTerm term) throws OXException;
 
     /**
      * The visitation for last modified term.
      *
-     * @param lastModifiedTerm The visited last modified term
+     * @param term The visited last modified term
      * @throws OXException If visit attempt fails
      */
-    void visit(LastModifiedTerm lastModifiedTerm) throws OXException;
+    void visit(LastModifiedTerm term) throws OXException;
 
     /**
      * The visitation for created term.
      *
-     * @param createdTerm The visited created term
+     * @param term The visited created term
      * @throws OXException If visit attempt fails
      */
-    void visit(CreatedTerm createdTerm) throws OXException;
+    void visit(CreatedTerm term) throws OXException;
 
     /**
      * The visitation for modified by term.
      *
-     * @param modifiedByTerm The visited modified by term
+     * @param term The visited modified by term
      * @throws OXException If visit attempt fails
      */
-    void visit(ModifiedByTerm modifiedByTerm) throws OXException;
+    void visit(ModifiedByTerm term) throws OXException;
 
     /**
      * The visitation for folder id term.
      *
-     * @param folderIdTerm The visited folder id term
+     * @param term The visited folder id term
      * @throws OXException If visit attempt fails
      */
-    void visit(FolderIdTerm folderIdTerm) throws OXException;
+    void visit(FolderIdTerm term) throws OXException;
 
     /**
      * The visitation for title term.
      *
-     * @param titleTerm The visited title term
+     * @param term The visited title term
      * @throws OXException If visit attempt fails
      */
-    void visit(TitleTerm titleTerm) throws OXException;
+    void visit(TitleTerm term) throws OXException;
 
     /**
      * The visitation for version term.
      *
-     * @param versionTerm The visited version term
+     * @param term The visited version term
      * @throws OXException If visit attempt fails
      */
-    void visit(VersionTerm versionTerm) throws OXException;
+    void visit(VersionTerm term) throws OXException;
 
     /**
      * The visitation for content term.
      *
-     * @param contentTerm The visited content term
+     * @param term The visited content term
      * @throws OXException If visit attempt fails
      */
-    void visit(ContentTerm contentTerm) throws OXException;
+    void visit(ContentTerm term) throws OXException;
 
     /**
      * The visitation for Id term.
      *
-     * @param idTerm The visited id term
+     * @param term The visited id term
      * @throws OXException If visit attempt fails
      */
-    void visit(IdTerm idTerm) throws OXException;
+    void visit(IdTerm term) throws OXException;
 
     /**
      * The visitation for file size term.
      *
-     * @param fileSizeTerm The visited file size term
+     * @param term The visited file size term
      * @throws OXException If visit attempt fails
      */
-    void visit(FileSizeTerm fileSizeTerm) throws OXException;
+    void visit(FileSizeTerm term) throws OXException;
 
     /**
      * The visitation for description term.
      *
-     * @param descriptionTerm The visited description term
+     * @param term The visited description term
      * @throws OXException If visit attempt fails
      */
-    void visit(DescriptionTerm descriptionTerm) throws OXException;
+    void visit(DescriptionTerm term) throws OXException;
 
     /**
      * The visitation for url term.
      *
-     * @param urlTerm The visited url term
+     * @param term The visited url term
      * @throws OXException If visit attempt fails
      */
-    void visit(UrlTerm urlTerm) throws OXException;
+    void visit(UrlTerm term) throws OXException;
 
     /**
      * The visitation for created by term.
      *
-     * @param createdByTerm The visited created by term
+     * @param term The visited created by term
      * @throws OXException If visit attempt fails
      */
-    void visit(CreatedByTerm createdByTerm) throws OXException;
+    void visit(CreatedByTerm term) throws OXException;
 }
