@@ -76,6 +76,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
+import com.openexchange.file.storage.search.FieldCollectorVisitor;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -676,7 +677,15 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
         return new FileTimedResult(getFileList(folderId, fields));
     }
 
-    private List<File> getFileList(final String folderId, final List<Field> fields) throws OXException {
+    /**
+     * Gets the file listing from given folder
+     *
+     * @param folderId The folder identifier
+     * @param fields The fields to fill
+     * @return The file listing
+     * @throws OXException If listing fails
+     */
+    public List<File> getFileList(final String folderId, final List<Field> fields) throws OXException {
         try {
             /*
              * Get & check folder
@@ -797,8 +806,66 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
 
     @Override
     public SearchIterator<File> search(final SearchTerm<?> searchTerm, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        final List<File> results;
+        {
+            final FieldCollectorVisitor fieldCollector = new FieldCollectorVisitor(Field.ID, Field.FOLDER_ID);
+            searchTerm.visit(fieldCollector);
+
+            final CIFSSearchVisitor visitor = new CIFSSearchVisitor(new ArrayList<Field>(fieldCollector.getFields()), this);
+            searchTerm.visit(visitor);
+            results = visitor.getResults();
+        }
+        return getSortedRangeFrom(results, sort, order, start, end);
+    }
+
+    /**
+     * Recursively searches files using given search term.
+     *
+     * @param searchTerm The search term
+     * @param folderId The folder identifier
+     * @param fields The fields  to fill
+     * @param results The result
+     * @throws OXException If search fails
+     */
+    public void recursiveSearchFile(final SearchTerm<?> searchTerm, final String folderId, final List<Field> fields, final List<File> results) throws OXException {
+        try {
+            /*
+             * Check
+             */
+            final String fid = checkFolderId(folderId, rootUrl);
+            final SmbFile smbFolder = getSmbFile(fid);
+            if (!smbFolder.exists()) {
+                throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
+            }
+            if (!smbFolder.isDirectory()) {
+                throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
+            }
+            SmbFile[] subFiles;
+            try {
+                subFiles = smbFolder.canRead() ? smbFolder.listFiles() : new SmbFile[0];
+            } catch (final SmbException e) {
+                if (!indicatesNotReadable(e)) {
+                    throw e;
+                }
+                subFiles = new SmbFile[0];
+            }
+            for (final SmbFile subFile : subFiles) {
+                if (subFile.isDirectory()) {
+                    recursiveSearchFile(searchTerm, subFile.getPath(), fields, results);
+                } else {
+                    final CIFSFile file = new CIFSFile(folderId, subFile.getName(), session.getUserId()).parseSmbFile(subFile, fields);
+                    if (searchTerm.matches(file)) {
+                        results.add(file);
+                    }
+                }
+            }
+        } catch (final SmbException e) {
+            throw CIFSExceptionCodes.forSmbException(e);
+        } catch (final IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     private static final String ALL = "*";
@@ -828,6 +895,10 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 }
             }
         }
+        return getSortedRangeFrom(results, sort, order, start, end);
+    }
+
+    private SearchIterator<File> getSortedRangeFrom(final List<File> results, final Field sort, final SortDirection order, final int start, final int end) {
         /*
          * Empty?
          */

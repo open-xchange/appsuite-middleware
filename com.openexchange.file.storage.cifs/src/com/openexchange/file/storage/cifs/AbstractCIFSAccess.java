@@ -112,6 +112,15 @@ public abstract class AbstractCIFSAccess {
     }
 
     /**
+     * Gets the root URL.
+     *
+     * @return The root URL
+     */
+    public String getRootUrl() {
+        return rootUrl;
+    }
+
+    /**
      * Gets the associated SMB file.
      *
      * @param path The path
