@@ -250,7 +250,7 @@ public final class IMAPCommandsCollection {
                         // Creating folder failed due to a exceeded quota exception. Thus assume "true".
                         return Boolean.TRUE;
                     }
-                    LOG.warn("Probe of IMAP server {} for root subfolder capability with mbox name {} failed with {}", p.getHost(), mboxName, rest);
+                    LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} failed (\"NO {}\"). Thus assuming no root subfolder capability", p.getHost(), mboxName, rest);
                 }
                 return Boolean.FALSE;
             }
