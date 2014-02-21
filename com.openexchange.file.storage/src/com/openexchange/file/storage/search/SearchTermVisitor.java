@@ -148,4 +148,20 @@ public interface SearchTermVisitor {
      */
     void visit(LockedUntilTerm lockedUntilTerm) throws OXException;
 
+    /**
+     * The visitation for categories term.
+     *
+     * @param categoriesTerm The categories term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CategoriesTerm categoriesTerm) throws OXException;
+
+    /**
+     * The visitation for sequence number term.
+     *
+     * @param sequenceNumberTerm The sequence number term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(SequenceNumberTerm sequenceNumberTerm) throws OXException;
+
 }
