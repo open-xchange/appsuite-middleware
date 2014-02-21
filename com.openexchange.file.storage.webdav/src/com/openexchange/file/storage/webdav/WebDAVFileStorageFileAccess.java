@@ -1129,7 +1129,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             results = visitor.getResults();
         }
         return getSortedRangeFrom(results, sort, order, start, end);
-
     }
 
     /**
