@@ -102,20 +102,20 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
         final int user_id = session.getUserId();
         final List<List<NotifyItem>> notifyItems = new ArrayList<List<NotifyItem>>();
 
-        // test ranges 24h
-        final Date start = new Date(System.currentTimeMillis());
-        final Date end = new Date(System.currentTimeMillis() + (24L * 60L * 60L * 1000L));
+        // range from now until end of day
+        final Date currentDate = new Date(System.currentTimeMillis());
+        final Date endDay = new Date(getEndOfDay(currentDate));
 
         try {
             final SearchIterator<Appointment> appointments = factory.createAppointmentSql(session).getAppointmentsBetween(
                 user_id,
-                start,
-                end,
+                currentDate,
+                endDay,
                 new int[] {
                     Appointment.FOLDER_ID, Appointment.OBJECT_ID, Appointment.TITLE, Appointment.LOCATION, Appointment.START_DATE,
                     Appointment.END_DATE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS, Appointment.RECURRENCE_CALCULATOR,
                     Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_ID, Appointment.NOTE,
-                    Appointment.PARTICIPANTS, Appointment.USERS },
+                    Appointment.USERS },
                 Appointment.START_DATE,
                 Order.DESCENDING);
 
@@ -124,10 +124,10 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                 final Appointment appointment = appointments.next();
 
                 // localize recurrence string
-                final HumanReadableRecurrences readableRec = new HumanReadableRecurrences(appointment);
+                final HumanReadableRecurrences readableRecurrence = new HumanReadableRecurrences(appointment);
                 final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                 final Locale locale = user.getLocale();
-                final String recurrence = readableRec.getString(locale);
+                final String recurrence = readableRecurrence.getString(locale);
 
                 // get status of confirmation
                 int confirmed = Appointment.NONE;
@@ -168,10 +168,21 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
     public void putTemplate(String changedTemplate) throws OXException {
         MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.APPOINTMENT.getTemplateFileName(), changedTemplate);
     }
-    
+
     private long convertDateToTimestamp(final Date date){
         final Calendar c = Calendar.getInstance();
         c.setTime(date);
         return c.getTimeInMillis();
+    }
+
+    private long getEndOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DATE);
+        calendar.set(Calendar.MILLISECOND, 999);
+        calendar.set(year, month, day, 23, 59, 59);
+        return calendar.getTimeInMillis();
     }
 }
