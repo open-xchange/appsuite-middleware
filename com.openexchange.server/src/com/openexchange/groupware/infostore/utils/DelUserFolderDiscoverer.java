@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.infostore.utils;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -58,7 +57,6 @@ import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
@@ -88,8 +86,6 @@ public class DelUserFolderDiscoverer extends DBService {
                 throw e;
             }
             accessibleModules = null;
-        } catch (final SQLException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
         }
 
         final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
