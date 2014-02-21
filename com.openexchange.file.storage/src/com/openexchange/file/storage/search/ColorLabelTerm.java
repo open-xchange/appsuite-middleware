@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,71 +49,49 @@
 
 package com.openexchange.file.storage.search;
 
+import java.util.Collection;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+
 
 /**
- * {@link SearchTermVisitor}
+ * {@link ColorLabelTerm}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.0
  */
-public interface SearchTermVisitor {
+public final class ColorLabelTerm extends AbstractNumberSearchTerm {
 
     /**
-     * The visitation for AND term.
-     *
-     * @param andTerm The visited AND term
-     * @throws OXException If visit attempt fails
+     * Initializes a new {@link ColorLabelTerm}.
      */
-    void visit(AndTerm andTerm) throws OXException;
+    public ColorLabelTerm(final ComparablePattern<Number> pattern) {
+        super(pattern);
+    }
 
-    /**
-     * The visitation for OR term.
-     *
-     * @param orTerm The visited OR term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(OrTerm orTerm) throws OXException;
+    @Override
+    public void visit(SearchTermVisitor visitor) throws OXException {
+        if (null != visitor) {
+            visitor.visit(this);
+        }
+    }
 
-    /**
-     * The visitation for not term.
-     *
-     * @param notTerm The visited not term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(NotTerm notTerm) throws OXException;
+    @Override
+    public void addField(Collection<Field> col) {
+        if (col != null) {
+            col.add(Field.COLOR_LABEL);
+        }
+    }
 
-    /**
-     * The visitation for meta term.
-     *
-     * @param metaTerm The visited meta term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(MetaTerm metaTerm) throws OXException;
+    @Override
+    protected Integer getNumber(final File file) {
+        final int colorLabel = file.getColorLabel();
+        return colorLabel < 0 ? null : Integer.valueOf(colorLabel);
+    }
 
-    /**
-     * The visitation for number-of-versions term.
-     *
-     * @param numberOfVersionsTerm The visited number-of-versions term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(NumberOfVersionsTerm numberOfVersionsTerm);
-
-    /**
-     * The visitation for last-modified UTC term.
-     *
-     * @param lastModifiedUtcTerm The visited last-modified UTC term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(LastModifiedUtcTerm lastModifiedUtcTerm);
-
-    /**
-     * The visitation for color label term.
-     *
-     * @param colorLabelTerm The visited color label term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(ColorLabelTerm colorLabelTerm);
+    @Override
+    protected boolean compareLongValues() {
+        return false;
+    }
 
 }

@@ -60,21 +60,13 @@ import com.openexchange.file.storage.File.Field;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class LastModifiedUtcTerm implements SearchTerm<ComparablePattern<Date>> {
-
-    private final ComparablePattern<Date> pattern;
+public final class LastModifiedUtcTerm extends AbstractDateSearchTerm {
 
     /**
      * Initializes a new {@link LastModifiedUtcTerm}.
      */
     public LastModifiedUtcTerm(final ComparablePattern<Date> pattern) {
-        super();
-        this.pattern = pattern;
-    }
-
-    @Override
-    public ComparablePattern<Date> getPattern() {
-        return pattern;
+        super(pattern);
     }
 
     @Override
@@ -92,22 +84,8 @@ public final class LastModifiedUtcTerm implements SearchTerm<ComparablePattern<D
     }
 
     @Override
-    public boolean matches(final File file) throws OXException {
-        final Date lastModified = file.getLastModified();
-        if (null == lastModified) {
-            return false;
-        }
-        final Date date = pattern.getPattern();
-        switch (pattern.getComparisonType()) {
-        case EQUALS:
-            return lastModified.getTime() == date.getTime();
-        case LESS_THAN:
-            return lastModified.getTime() < date.getTime();
-        case GREATER_THAN:
-            return lastModified.getTime() > date.getTime();
-        default:
-            return false;
-        }
+    protected Date getDate(File file) {
+        return file.getLastModified();
     }
 
 }
