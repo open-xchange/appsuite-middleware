@@ -54,7 +54,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 
-
 /**
  * {@link NumberOfVersionsTerm}
  *
@@ -77,16 +76,15 @@ public final class NumberOfVersionsTerm implements SearchTerm<ComparablePattern<
         return pattern;
     }
 
-
     @Override
-    public void visit(SearchTermVisitor visitor) throws OXException {
+    public void visit(final SearchTermVisitor visitor) throws OXException {
         if (null != visitor) {
             visitor.visit(this);
         }
     }
 
     @Override
-    public void addField(Collection<Field> col) {
+    public void addField(final Collection<Field> col) {
         if (null != col) {
             col.add(Field.NUMBER_OF_VERSIONS);
         }
