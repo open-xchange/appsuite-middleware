@@ -77,7 +77,7 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * No notification items defined
      */
-    NO_ITEMS_FOUND("No notification items defined", CATEGORY_ERROR, 4, MobileNotifierExceptionMessages.MESSAGE);
+    SQL_ERROR("An unexpected SQL error occured.", CATEGORY_ERROR, 4, MobileNotifierExceptionMessages.SQL_ERROR_MSG);
     /**
      * The prefix constant.
      */

@@ -7,10 +7,13 @@ Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.mobilenotifier.calendar.osgi.MobileNotifierCalendarActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.api2,
+ com.openexchange.calendar.itip,
  com.openexchange.exception,
  com.openexchange.groupware.calendar,
  com.openexchange.groupware.container,
  com.openexchange.groupware.ldap,
+ com.openexchange.groupware.search,
+ com.openexchange.mail,
  com.openexchange.mobilenotifier,
  com.openexchange.mobilenotifier.utility,
  com.openexchange.osgi,

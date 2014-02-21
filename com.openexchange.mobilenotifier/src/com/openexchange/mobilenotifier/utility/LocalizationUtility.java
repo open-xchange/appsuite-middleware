@@ -51,11 +51,9 @@ package com.openexchange.mobilenotifier.utility;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-import com.openexchange.i18n.tools.StringHelper;
 
 
 /**
@@ -64,28 +62,6 @@ import com.openexchange.i18n.tools.StringHelper;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class LocalizationUtility {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalizationUtility.class);
-
-    /**
-     * Formats a date in a specific localization
-     * 
-     * @param date The date
-     * @param ltz The locale and time zone of the user
-     * @return localized date or time if date is current date
-     */
-    public static String dateOrTimeLocalizer(final Date date, final LocaleAndTimeZone ltz) {
-        Date currentDate = new Date();
-        String dateString = LocalizationUtility.getFormattedDate(date, DateFormat.LONG, ltz.getLocale(), ltz.getTimeZone());
-
-        // checks if date is current date, if true show only the time
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        if (dateFormat.format(currentDate).equals(dateFormat.format(date))) {
-            dateString = LocalizationUtility.getFormattedTime(date, DateFormat.SHORT, ltz.getLocale(), ltz.getTimeZone());
-        }
-        return dateString;
-    }
-
     /**
      * Formats specified date in given style with given locale and time zone.
      * 

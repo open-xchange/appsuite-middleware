@@ -71,7 +71,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
@@ -115,11 +114,9 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
     @Override
     public List<List<NotifyItem>> getItems(Session session) throws OXException {
         final MailService mailService = services.getService(MailService.class);
-        final UnifiedInboxManagement unified = services.getService(UnifiedInboxManagement.class);
         final List<List<NotifyItem>> notifyItems = new ArrayList<List<NotifyItem>>();
         final MailField[] requestedFields = new MailField[] {
-            MailField.ID, MailField.FOLDER_ID, MailField.FROM, MailField.RECEIVED_DATE, MailField.SUBJECT, MailField.FLAGS,
-            MailField.CONTENT_TYPE };
+            MailField.ID, MailField.FOLDER_ID, MailField.FROM, MailField.RECEIVED_DATE, MailField.SUBJECT, MailField.FLAGS };
         final List<MailMessage> messages = new LinkedList<MailMessage>();
 
         MailAccount[] userMailAccounts;
@@ -129,62 +126,41 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
         }
 
         for (final MailAccount mailAccount : userMailAccounts) {
-            if (unified.getUnifiedINBOXAccountID(session) != mailAccount.getId()) {
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                try {
-                    mailAccess = mailService.getMailAccess(session, mailAccount.getId());
-                    mailAccess.connect();
-                    final List<MailMessage> mailMessages = Arrays.asList(mailAccess.getMessageStorage().getUnreadMessages(
-                        "INBOX",
-                        MailSortField.RECEIVED_DATE,
-                        OrderDirection.DESC,
-                        requestedFields,
-                        25));
-                    for (MailMessage mailMessage : mailMessages) {
-                        final List<NotifyItem> notifyItem = new ArrayList<NotifyItem>();
-                        final InternetAddress[] inetAddr = mailMessage.getFrom();
-                        final Date receivedDate = mailMessage.getReceivedDate();
-                        final String subject = mailMessage.getSubject();
-                        final boolean attachments = mailMessage.hasAttachment();
-                        final String folder = mailMessage.getMailPath().getFolderArgument();
-                        final int flag = mailMessage.getFlags();
-                        final String id = mailMessage.getMailId();
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            try {
+                mailAccess = mailService.getMailAccess(session, mailAccount.getId());
+                mailAccess.connect();
+                final List<MailMessage> mailMessages = Arrays.asList(mailAccess.getMessageStorage().getUnreadMessages(
+                    "INBOX",
+                    MailSortField.RECEIVED_DATE,
+                    OrderDirection.DESC,
+                    requestedFields,
+                    25));
+                for (MailMessage mailMessage : mailMessages) {
+                    final String folderArg = mailMessage.getMailPath().getFolderArgument();
+                    final List<NotifyItem> notifyItem = new ArrayList<NotifyItem>();
+                    final InternetAddress[] inetAddr = mailMessage.getFrom();
+                    final String subject = mailMessage.getSubject();
+                    final boolean attachments = mailMessage.hasAttachment();
+                    final int flag = mailMessage.getFlags();
+                    final String id = mailMessage.getMailId();
+                    final String teaser = getTeaser(mailMessage.getFolder(), id, mailAccess);
+                    final String localizedReceivedDate = getLocalizedDateOrTime(mailMessage.getReceivedDate(), session);
 
-                        // localize date string
-                        final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
-                        final Locale locale = user.getLocale();
-                        final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
-
-                        String localizedReceivedDate = LocalizationUtility.getFormattedDate(
-                            receivedDate,
-                            DateFormat.LONG,
-                            ltz.getLocale(),
-                            ltz.getTimeZone());
-                        // checks if date is current date, if true show only the time
-                        final Date currentDate = new Date();
-                        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                        if (dateFormat.format(currentDate).equals(dateFormat.format(receivedDate))) {
-                            localizedReceivedDate = LocalizationUtility.getFormattedTime(
-                                receivedDate,
-                                DateFormat.SHORT,
-                                ltz.getLocale(),
-                                ltz.getTimeZone());
-                        }
-
-                        notifyItem.add(new NotifyItem("folder", folder));
-                        notifyItem.add(new NotifyItem("id", id));
-                        notifyItem.add(new NotifyItem("from", inetAddr[0]));
-                        notifyItem.add(new NotifyItem("received_date", localizedReceivedDate));
-                        notifyItem.add(new NotifyItem("subject", subject));
-                        notifyItem.add(new NotifyItem("attachments", attachments));
-                        notifyItem.add(new NotifyItem("flags", flag));
-                        messages.add(mailMessage);
-                        notifyItems.add(notifyItem);
-                    }
-                } finally {
-                    if (mailAccess != null) {
-                        mailAccess.close(true);
-                    }
+                    notifyItem.add(new NotifyItem("folder", folderArg));
+                    notifyItem.add(new NotifyItem("id", id));
+                    notifyItem.add(new NotifyItem("from", inetAddr[0]));
+                    notifyItem.add(new NotifyItem("received_date", localizedReceivedDate));
+                    notifyItem.add(new NotifyItem("subject", subject));
+                    notifyItem.add(new NotifyItem("attachments", attachments));
+                    notifyItem.add(new NotifyItem("flags", flag));
+                    notifyItem.add(new NotifyItem("teaser", teaser));
+                    messages.add(mailMessage);
+                    notifyItems.add(notifyItem);
+                }
+            } finally {
+                if (mailAccess != null) {
+                    mailAccess.close(true);
                 }
             }
         }
@@ -201,5 +177,55 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
     @Override
     public void putTemplate(String changedTemplate) throws OXException {
         MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.MAIL.getTemplateFileName(), changedTemplate);
+    }
+
+    /**
+     * Cuts the primary mail content after 200 character, removes control character
+     * 
+     * @param folder The folder
+     * @param mailId The id of the mail message
+     * @param mailAccess The mail access
+     * @return String of the mail content
+     * @throws OXException
+     */
+    private String getTeaser(final String folder, final String mailId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        final String[] idAsArr = new String[1];
+        final int cutIndex = 200;
+        idAsArr[0] = mailId;
+
+        final String[] message = mailAccess.getMessageStorage().getPrimaryContents(folder, idAsArr);
+        String teaser = message[0];
+        // removes control character
+        teaser = teaser.replaceAll("[\\u0000-\\u001f]", "");
+        if (teaser.length() > cutIndex) {
+            teaser = message[0].substring(0, cutIndex) + " [...]";
+        }
+        return teaser;
+    }
+
+    /**
+     * Converts date to localized string. If receivedDate is current date, only the time will be displayed
+     * 
+     * @param date The date to be localized
+     * @param session The session of the user
+     * @return localized date string
+     * @throws OXException
+     */
+    private String getLocalizedDateOrTime(Date date, Session session) throws OXException {
+        final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+        final Locale locale = user.getLocale();
+        final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
+
+        String localizedReceivedDate = LocalizationUtility.getFormattedDate(date,
+            DateFormat.LONG,
+            ltz.getLocale(),
+            ltz.getTimeZone());
+        // checks if date is current date, if true show only the time
+        final Date currentDate = new Date();
+        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        if (dateFormat.format(currentDate).equals(dateFormat.format(date))) {
+            localizedReceivedDate = LocalizationUtility.getFormattedTime(date, DateFormat.SHORT, ltz.getLocale(), ltz.getTimeZone());
+        }
+        return localizedReceivedDate;
     }
 }

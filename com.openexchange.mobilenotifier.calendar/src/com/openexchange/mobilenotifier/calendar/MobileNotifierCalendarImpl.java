@@ -49,21 +49,23 @@
 
 package com.openexchange.mobilenotifier.calendar;
 
-import java.awt.SystemColor;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import com.openexchange.calendar.itip.HumanReadableRecurrences;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
+import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
-import com.openexchange.mobilenotifier.utility.LocaleAndTimeZone;
-import com.openexchange.mobilenotifier.utility.LocalizationUtility;
 import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtil;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -98,29 +100,47 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
         final int user_id = session.getUserId();
         final List<List<NotifyItem>> notifyItems = new ArrayList<List<NotifyItem>>();
 
-        // test range
+        // test ranges 24h
         final Date start = new Date(System.currentTimeMillis());
-        final Date end = new Date(System.currentTimeMillis() + (24 * 60 * 60 * 1000));
+        final Date end = new Date(System.currentTimeMillis() + (24L * 60L * 60L * 1000L));
 
-        SearchIterator<Appointment> appointments = factory.createAppointmentSql(session).getActiveAppointments(
-            user_id,
-            start,
-            end,
-            new int[] {
-                Appointment.FOLDER_ID, Appointment.OBJECT_ID, Appointment.TITLE, Appointment.LOCATION, Appointment.RECURRENCE_TYPE,
-                Appointment.START_DATE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS, Appointment.NOTE });
-        while (appointments.hasNext()) {
-            List<NotifyItem> item = new ArrayList<NotifyItem>();
-            Appointment appointment = appointments.next();
-            item.add(new NotifyItem("id", appointment.getObjectID()));
-            item.add(new NotifyItem("folder", appointment.getParentFolderID()));
-            item.add(new NotifyItem("title", appointment.getTitle()));
-            item.add(new NotifyItem("location", appointment.getLocation()));
-            item.add(new NotifyItem("start_date", appointment.getStartDate()));
-            item.add(new NotifyItem("end_date", appointment.getEndDate()));
-            item.add(new NotifyItem("organizer", appointment.getOrganizer()));
-            item.add(new NotifyItem("note", appointment.getNote()));
-            notifyItems.add(item);
+        SearchIterator<Appointment> appointments;
+        try {
+            appointments = factory.createAppointmentSql(session).getAppointmentsBetween(
+                user_id,
+                start,
+                end,
+                new int[] {
+                    Appointment.FOLDER_ID, Appointment.OBJECT_ID, Appointment.TITLE, Appointment.LOCATION, Appointment.START_DATE,
+                    Appointment.END_DATE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS, Appointment.RECURRENCE_CALCULATOR,
+                    Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_ID, Appointment.NOTE },
+                Appointment.START_DATE,
+                Order.DESCENDING);
+
+            while (appointments.hasNext()) {
+                List<NotifyItem> item = new ArrayList<NotifyItem>();
+                Appointment appointment = appointments.next();
+
+                HumanReadableRecurrences readableRec = new HumanReadableRecurrences(appointment);
+                // localize recurrence string
+                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+                final Locale locale = user.getLocale();
+                final String recurrence = readableRec.getString(locale);
+
+                item.add(new NotifyItem("recurrence", recurrence));
+                item.add(new NotifyItem("id", appointment.getObjectID()));
+                item.add(new NotifyItem("folder", appointment.getParentFolderID()));
+                item.add(new NotifyItem("title", appointment.getTitle()));
+                item.add(new NotifyItem("location", appointment.getLocation()));
+                item.add(new NotifyItem("start_date", appointment.getStartDate()));
+                item.add(new NotifyItem("end_date", appointment.getEndDate()));
+                item.add(new NotifyItem("organizer", appointment.getOrganizer()));
+                item.add(new NotifyItem("note", appointment.getNote()));
+                item.add(new NotifyItem("status", appointment.getConfirm()));
+                notifyItems.add(item);
+            }
+        } catch (SQLException e) {
+            throw MobileNotifierExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         }
         return notifyItems;
     }

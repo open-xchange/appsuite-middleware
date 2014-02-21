@@ -68,4 +68,8 @@ public class MobileNotifierExceptionMessages implements LocalizableStrings {
 
     // The default message displayed to user.
     public static final String MESSAGE = "An error occurred inside the server which prevented it from fulfilling the request.";
+
+    // SQL error message
+    public static final String SQL_ERROR_MSG = "Error while reading/writing data from/to the database.";
+
 }
