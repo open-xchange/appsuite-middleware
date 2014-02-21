@@ -50,58 +50,61 @@
 package com.openexchange.file.storage.search;
 
 import java.util.Collection;
+import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 
-
 /**
- * {@link NumberOfVersionsTerm}
+ * {@link LastModifiedUtcTerm}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class NumberOfVersionsTerm implements SearchTerm<ComparablePattern<Number>> {
+public final class LastModifiedUtcTerm implements SearchTerm<ComparablePattern<Date>> {
 
-    private final ComparablePattern<Number> pattern;
+    private final ComparablePattern<Date> pattern;
 
     /**
-     * Initializes a new {@link NumberOfVersionsTerm}.
+     * Initializes a new {@link LastModifiedUtcTerm}.
      */
-    public NumberOfVersionsTerm(final ComparablePattern<Number> pattern) {
+    public LastModifiedUtcTerm(final ComparablePattern<Date> pattern) {
         super();
         this.pattern = pattern;
     }
 
     @Override
-    public ComparablePattern<Number> getPattern() {
+    public ComparablePattern<Date> getPattern() {
         return pattern;
     }
 
-
     @Override
-    public void visit(SearchTermVisitor visitor) throws OXException {
+    public void visit(final SearchTermVisitor visitor) throws OXException {
         if (null != visitor) {
             visitor.visit(this);
         }
     }
 
     @Override
-    public void addField(Collection<Field> col) {
+    public void addField(final Collection<Field> col) {
         if (null != col) {
-            col.add(Field.NUMBER_OF_VERSIONS);
+            col.add(Field.LAST_MODIFIED_UTC);
         }
     }
 
     @Override
     public boolean matches(final File file) throws OXException {
-        final int numberOfVersions = file.getNumberOfVersions();
+        final Date lastModified = file.getLastModified();
+        if (null == lastModified) {
+            return false;
+        }
+        final Date date = pattern.getPattern();
         switch (pattern.getComparisonType()) {
         case EQUALS:
-            return numberOfVersions == pattern.getPattern().intValue();
+            return lastModified.getTime() == date.getTime();
         case LESS_THAN:
-            return numberOfVersions < pattern.getPattern().intValue();
+            return lastModified.getTime() < date.getTime();
         case GREATER_THAN:
-            return numberOfVersions > pattern.getPattern().intValue();
+            return lastModified.getTime() > date.getTime();
         default:
             return false;
         }

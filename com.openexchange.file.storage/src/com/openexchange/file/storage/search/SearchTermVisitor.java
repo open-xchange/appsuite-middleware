@@ -100,4 +100,12 @@ public interface SearchTermVisitor {
      */
     void visit(NumberOfVersionsTerm numberOfVersionsTerm);
 
+    /**
+     * The visitation for last-modified UTC term.
+     *
+     * @param lastModifiedUtcTerm The visited last-modified UTC term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(LastModifiedUtcTerm lastModifiedUtcTerm);
+
 }
