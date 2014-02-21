@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -58,7 +56,6 @@ import java.util.Set;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -72,8 +69,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CapabilityUserConfigurationStorage extends UserConfigurationStorage {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CapabilityUserConfigurationStorage.class);
 
     /**
      * Initializes a new {@link CapabilityUserConfigurationStorage}
@@ -98,20 +93,12 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
 
     @Override
     public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws OXException {
-        try {
-            return loadUserConfiguration(userId, groups, ctx);
-        } catch (SQLException e) {
-            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
-        }
+        return loadUserConfiguration(userId, groups, ctx);
     }
 
     @Override
     public UserConfiguration[] getUserConfiguration(final Context ctx, final User[] users) throws OXException {
-        try {
-            return loadUserConfiguration(ctx, null, users);
-        } catch (final SQLException e) {
-            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
-        }
+        return loadUserConfiguration(ctx, users);
     }
 
     @Override
@@ -138,27 +125,11 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
      * @param userId - the user ID
      * @param ctx - the context
      * @return the instance of <code>{@link UserConfiguration}</code>
-     * @throws SQLException - if user configuration could not be loaded from database
      * @throws OXException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
      *             implementation
      */
-    public static UserConfiguration loadUserConfiguration(final int userId, final Context ctx) throws SQLException, OXException {
-        return loadUserConfiguration(userId, null, ctx, true, null);
-    }
-
-    /**
-     * Loads the user configuration from database specified through user ID and context
-     *
-     * @param userId - the user ID
-     * @param groups - the group IDs the user belongs to; may be <code>null</code>
-     * @param ctx - the context
-     * @return the instance of <code>{@link UserConfiguration}</code>
-     * @throws SQLException - if user configuration could not be loaded from database
-     * @throws OXException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
-     *             implementation
-     */
-    public static UserConfiguration loadUserConfiguration(final int userId, final int[] groups, final Context ctx) throws SQLException, OXException {
-        return loadUserConfiguration(userId, groups, ctx, true, null);
+    public static UserConfiguration loadUserConfiguration(int userId, Context ctx) throws OXException {
+        return loadUserConfiguration(userId, null, ctx);
     }
 
     private static Set<String> getCapabilities(final int userId, final int cid) throws OXException {
@@ -197,15 +168,13 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
      * @param userId - the user ID
      * @param groupsArg - the group IDs the user belongs to; may be <code>null</code>
      * @param ctx - the context
-     * @param readConArg - the readable context; may be <code>null</code>
      * @return the instance of <code>{@link UserConfiguration}</code>
-     * @throws SQLException - if user configuration could not be loaded from database
      * @throws OXException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code>
      *             implementation
      * @throws OXException - if a readable connection could not be obtained from connection pool
      * @throws OXException - if no matching user configuration is kept in database
      */
-    public static UserConfiguration loadUserConfiguration(final int userId, final int[] groupsArg, final Context ctx, final boolean calcPerms, final Connection readConArg) throws SQLException, OXException {
+    public static UserConfiguration loadUserConfiguration(int userId, int[] groupsArg, Context ctx) throws OXException {
         final int[] groups = groupsArg == null ? UserStorage.getInstance().getUser(userId, ctx).getGroups() : groupsArg;
         // Check existence of the user
         UserStorage.getInstance().getUser(userId, ctx);
@@ -214,7 +183,7 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
     }
 
 
-    public static UserConfiguration[] loadUserConfiguration(final Context ctx, final Connection conArg, final User[] users) throws OXException, SQLException {
+    public static UserConfiguration[] loadUserConfiguration(Context ctx, User[] users) throws OXException {
 
         UserConfiguration[] retval = new UserConfiguration[users.length];
         // Here we just assume the users exist
@@ -237,25 +206,16 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
         if (0 == userIds.length) {
             return new UserConfiguration[0];
         }
-        Connection con = Database.get(ctx, false);
-        try {
-            return loadUserConfigurations(ctx, con, userIds, groups);
-        } catch (SQLException e) {
-            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Database.back(ctx, false, con);
-        }
+        return loadUserConfigurations(ctx, userIds, groups);
     }
 
-    private static UserConfiguration[] loadUserConfigurations(Context ctx, Connection con, int[] userIds, int[][] groupsArg) throws OXException, SQLException {
-
+    private static UserConfiguration[] loadUserConfigurations(Context ctx, int[] userIds, int[][] groupsArg) throws OXException {
         final List<UserConfiguration> list = new ArrayList<UserConfiguration>(userIds.length);
         for (int i = 0; i < userIds.length; i++) {
             final int userId = userIds[i];
             final int[] groups = groupsArg[i] == null ? UserStorage.getInstance().getUser(userId, ctx).getGroups() : groupsArg[i];
             list.add(new UserConfiguration(getCapabilities(userId, ctx.getContextId()), userId, groups, ctx));
         }
-        return list.toArray(new UserConfiguration[0]);
-
+        return list.toArray(new UserConfiguration[userIds.length]);
     }
 }
