@@ -72,6 +72,7 @@ public class CreatedTerm extends AbstractDateSearchTerm {
      */
     public CreatedTerm(ComparablePattern<Date> pattern, TimeZone timezone) {
         super(pattern);
+        this.timezone = timezone;
     }
 
     @Override
