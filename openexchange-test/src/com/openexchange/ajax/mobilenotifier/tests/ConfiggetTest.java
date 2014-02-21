@@ -81,7 +81,7 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
     public void testMobileNotifierJSONResponse() throws OXException, IOException, JSONException {
         List<String> providerValue = new ArrayList<String>();
         providerValue.add("io.ox/mail");
-        // providerValue.add("io.ox/calendar");
+        providerValue.add("io.ox/calendar");
 
         ConfiggetMobileNotifierRequest req = new ConfiggetMobileNotifierRequest(providerValue);
         ConfiggetMobileNotifierResponse res = getClient().execute(req);

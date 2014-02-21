@@ -76,7 +76,15 @@ public class GetTest extends AbstractMobileNotifierTest {
 
     // TODO: update to correct mandatory items
     public void testMailProviderJSONResponse() throws OXException, IOException, JSONException {
-        singleProvider("io.ox/mail", new MandatoryFields("from", "received_date", "subject", "flags", "attachments", "id", "folder"));
+        singleProvider("io.ox/mail", new MandatoryFields(
+            "from",
+            "received_date",
+            "subject",
+            "teaser",
+            "flags",
+            "attachments",
+            "id",
+            "folder"));
     }
 
     // TODO: update to correct mandatory items
@@ -89,8 +97,9 @@ public class GetTest extends AbstractMobileNotifierTest {
             "start_date",
             "organizer",
             "status",
-            "comments",
-            "recurrence_"));
+            "note",
+            "recurrence",
+            "start_date_timestamp"));
     }
 
     public void testShouldGetExceptionIfUnknownProvider() throws OXException, IOException, JSONException {
@@ -121,16 +130,18 @@ public class GetTest extends AbstractMobileNotifierTest {
         List<String> missingFields = new ArrayList<String>();
         String[] mandatoryArr = mandatoryItems.getMandatory();
 
-        assertTrue("no items found ", itemsArray.length() > 0);
+        // TODO: notification items can be empty, if they are empty return test success
+        // otherwise go on with testing mandatory fields
+        if (itemsArray != null && itemsArray.length() > 0) {
+            // get only the first notification item
+            JSONObject itemObject = itemsArray.getJSONObject(0);
 
-        // get only the first notification item
-        JSONObject itemObject = itemsArray.getJSONObject(0);
-        for (int i = 0; i < mandatoryArr.length; i++) {
-            if (!itemObject.has(mandatoryArr[i])) {
-                missingFields.add(mandatoryArr[i]);
+            for (int i = 0; i < mandatoryArr.length; i++) {
+                if (!itemObject.has(mandatoryArr[i])) {
+                    missingFields.add(mandatoryArr[i]);
+                }
             }
+            assertFalse("could not found the mandatory item: " + missingFields, missingFields.size() > 0);
         }
-
-        assertFalse("could not found the mandatory item: " + missingFields, missingFields.size() > 0);
     }
 }
