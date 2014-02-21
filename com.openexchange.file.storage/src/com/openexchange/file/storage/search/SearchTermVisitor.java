@@ -51,7 +51,6 @@ package com.openexchange.file.storage.search;
 
 import com.openexchange.exception.OXException;
 
-
 /**
  * {@link SearchTermVisitor}
  *
@@ -60,10 +59,36 @@ import com.openexchange.exception.OXException;
  */
 public interface SearchTermVisitor {
 
+    /**
+     * The visitation for AND term.
+     *
+     * @param andTerm The visited AND term
+     * @throws OXException If visit attempt fails
+     */
     void visit(AndTerm andTerm) throws OXException;
 
+    /**
+     * The visitation for OR term.
+     *
+     * @param orTerm The visited OR term
+     * @throws OXException If visit attempt fails
+     */
     void visit(OrTerm orTerm) throws OXException;
 
+    /**
+     * The visitation for not term.
+     *
+     * @param notTerm The visited not term
+     * @throws OXException If visit attempt fails
+     */
     void visit(NotTerm notTerm) throws OXException;
+
+    /**
+     * The visitation for meta term.
+     *
+     * @param metaTerm The visited meta term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(MetaTerm metaTerm) throws OXException;
 
 }
