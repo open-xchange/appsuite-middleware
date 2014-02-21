@@ -59,6 +59,9 @@ import com.openexchange.calendar.itip.HumanReadableRecurrences;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.Order;
@@ -114,7 +117,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                     Appointment.FOLDER_ID, Appointment.OBJECT_ID, Appointment.TITLE, Appointment.LOCATION, Appointment.START_DATE,
                     Appointment.END_DATE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS, Appointment.RECURRENCE_CALCULATOR,
                     Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_ID, Appointment.NOTE,
-                    Appointment.PARTICIPANTS },
+                    Appointment.PARTICIPANTS, Appointment.USERS },
                 Appointment.START_DATE,
                 Order.DESCENDING);
 
@@ -127,7 +130,6 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                 final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                 final Locale locale = user.getLocale();
                 final String recurrence = readableRec.getString(locale);
-                appointment.getConfirmations()[0].getConfirm();
                 item.add(new NotifyItem("recurrence", recurrence));
                 item.add(new NotifyItem("id", appointment.getObjectID()));
                 item.add(new NotifyItem("folder", appointment.getParentFolderID()));
