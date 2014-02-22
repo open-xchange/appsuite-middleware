@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.cifs;
+package com.openexchange.file.storage.cmis;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -88,12 +88,12 @@ import com.openexchange.file.storage.search.VersionCommentTerm;
 import com.openexchange.file.storage.search.VersionTerm;
 
 /**
- * {@link CIFSSearchVisitor}
+ * {@link CMISSearchVisitor}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public final class CIFSSearchVisitor implements SearchTermVisitor {
+public final class CMISSearchVisitor implements SearchTermVisitor {
 
     private static final class Key {
 
@@ -146,24 +146,24 @@ public final class CIFSSearchVisitor implements SearchTermVisitor {
     // ------------------------------------------------------------------------------------------------------ //
 
     private final List<String> folderIds;
-    private final CIFSFileAccess fileAccess;
+    private final CMISFileAccess fileAccess;
     private final List<Field> fields;
     private Map<Key, File> results;
 
     /**
-     * Initializes a new {@link CIFSSearchVisitor}.
+     * Initializes a new {@link CMISSearchVisitor}.
      *
      * @param fields The fields to fill
      * @param fileAccess The file access to load files with
      */
-    public CIFSSearchVisitor(final List<Field> fields, final CIFSFileAccess fileAccess) {
+    public CMISSearchVisitor(final List<Field> fields, final CMISFileAccess fileAccess) {
         this(Collections.<String> emptyList(), fields, fileAccess);
     }
 
     /**
-     * Initializes a new {@link CIFSSearchVisitor}.
+     * Initializes a new {@link CMISSearchVisitor}.
      */
-    private CIFSSearchVisitor(final List<String> folderIds, final List<Field> fields, final CIFSFileAccess fileAccess) {
+    private CMISSearchVisitor(final List<String> folderIds, final List<Field> fields, final CMISFileAccess fileAccess) {
         super();
         this.folderIds = folderIds;
         this.fileAccess = fileAccess;
@@ -199,7 +199,7 @@ public final class CIFSSearchVisitor implements SearchTermVisitor {
         if (otherTerms.isEmpty()) {
             searchByTerm(term);
         } else {
-            final CIFSSearchVisitor newVisitor = new CIFSSearchVisitor(folderIds, fields, fileAccess);
+            final CMISSearchVisitor newVisitor = new CMISSearchVisitor(folderIds, fields, fileAccess);
             new AndTerm(otherTerms).visit(newVisitor);
             results = newVisitor.results;
         }
@@ -225,7 +225,7 @@ public final class CIFSSearchVisitor implements SearchTermVisitor {
         if (otherTerms.isEmpty()) {
             searchByTerm(term);
         } else {
-            final CIFSSearchVisitor newVisitor = new CIFSSearchVisitor(folderIds, fields, fileAccess);
+            final CMISSearchVisitor newVisitor = new CMISSearchVisitor(folderIds, fields, fileAccess);
             new OrTerm(otherTerms).visit(newVisitor);
             results = newVisitor.results;
             // Add those from folders

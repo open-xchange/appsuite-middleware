@@ -98,6 +98,15 @@ public abstract class AbstractCMISAccess {
     }
 
     /**
+     * Gets the root URL
+     *
+     * @return The root URL
+     */
+    public String getRootUrl() {
+        return rootUrl;
+    }
+
+    /**
      * Handles specified CMIS error.
      *
      * @param e The CMIS error
