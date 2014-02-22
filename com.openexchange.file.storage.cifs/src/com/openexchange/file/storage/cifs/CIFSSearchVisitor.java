@@ -50,8 +50,10 @@
 package com.openexchange.file.storage.cifs;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -93,10 +95,60 @@ import com.openexchange.file.storage.search.VersionTerm;
  */
 public final class CIFSSearchVisitor implements SearchTermVisitor {
 
+    private static final class Key {
+
+        final String folderId;
+        final String id;
+
+        Key(final String id, final String folderId) {
+            super();
+            this.id = id;
+            this.folderId = folderId;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((folderId == null) ? 0 : folderId.hashCode());
+            result = prime * result + ((id == null) ? 0 : id.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (folderId == null) {
+                if (other.folderId != null) {
+                    return false;
+                }
+            } else if (!folderId.equals(other.folderId)) {
+                return false;
+            }
+            if (id == null) {
+                if (other.id != null) {
+                    return false;
+                }
+            } else if (!id.equals(other.id)) {
+                return false;
+            }
+            return true;
+        }
+
+    }
+
+    // ------------------------------------------------------------------------------------------------------ //
+
     private final List<String> folderIds;
     private final CIFSFileAccess fileAccess;
     private final List<Field> fields;
-    private List<File> results;
+    private Map<Key, File> results;
 
     /**
      * Initializes a new {@link CIFSSearchVisitor}.
@@ -119,12 +171,12 @@ public final class CIFSSearchVisitor implements SearchTermVisitor {
     }
 
     /**
-     * Gets the results
+     * Gets the results in arbitrary order.
      *
      * @return The results
      */
     public List<File> getResults() {
-        return results;
+        return new LinkedList<File>(results.values());
     }
 
     @Override
@@ -149,7 +201,7 @@ public final class CIFSSearchVisitor implements SearchTermVisitor {
         } else {
             CIFSSearchVisitor newVisitor = new CIFSSearchVisitor(folderIds, fields, fileAccess);
             new AndTerm(otherTerms).visit(newVisitor);
-            results = newVisitor.getResults();
+            results = newVisitor.results;
         }
     }
 
@@ -175,10 +227,12 @@ public final class CIFSSearchVisitor implements SearchTermVisitor {
         } else {
             CIFSSearchVisitor newVisitor = new CIFSSearchVisitor(folderIds, fields, fileAccess);
             new OrTerm(otherTerms).visit(newVisitor);
-            results = newVisitor.getResults();
+            results = newVisitor.results;
             // Add those from folders
             for (final String folderId : folderIds) {
-                results.addAll(fileAccess.getFileList(folderId, fields));
+                for (final File file : fileAccess.getFileList(folderId, fields)) {
+                    results.put(new Key(file.getId(), file.getFolderId()), file);
+                }
             }
         }
     }
@@ -192,7 +246,11 @@ public final class CIFSSearchVisitor implements SearchTermVisitor {
         if (folderIds.isEmpty()) {
             final List<File> results = new LinkedList<File>();
             fileAccess.recursiveSearchFile(term, fileAccess.getRootUrl(), fields, results);
-            this.results = results;
+            final Map<Key, File> map = new HashMap<Key, File>(results.size());
+            for (final File file : results) {
+                map.put(new Key(file.getId(), file.getFolderId()), file);
+            }
+            this.results = map;
         } else {
             final List<File> results = new LinkedList<File>();
             for (final String folderId : folderIds) {
@@ -203,7 +261,11 @@ public final class CIFSSearchVisitor implements SearchTermVisitor {
                     }
                 }
             }
-            this.results = results;
+            final Map<Key, File> map = new HashMap<Key, File>(results.size());
+            for (final File file : results) {
+                map.put(new Key(file.getId(), file.getFolderId()), file);
+            }
+            this.results = map;
         }
     }
 
