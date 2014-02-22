@@ -49,7 +49,6 @@
 
 package com.openexchange.calendar;
 
-import static com.openexchange.calendar.Tools.getSqlInString;
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
@@ -60,7 +59,6 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.TIntSet;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -82,6 +80,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
@@ -1343,40 +1342,63 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+        List<Object> searchParameters = new ArrayList<Object>();
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
         sb.append("SELECT ");
         sb.append(columns);
         sb.append(", pdm.pfid");
-        sb.append(" FROM prg_dates pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ? AND pdm.cid = ? WHERE ");
+        sb.append(" FROM prg_dates pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ? AND pdm.cid = ?");
+        if (null != searchObj.getExternalParticipants() && 0 < searchObj.getExternalParticipants().size()) {
+            sb.append(" LEFT JOIN dateExternal de ON pd.intfield01 = de.objectId AND pd.cid = ? AND de.cid = ?");
+            searchParameters.add(Integer.valueOf(ctx.getContextId()));
+            searchParameters.add(Integer.valueOf(ctx.getContextId()));
+        }
+        if (null != searchObj.getResourceIDs() && 0 < searchObj.getResourceIDs().size()) {
+            sb.append(" LEFT JOIN prg_date_rights pdr ON pd.intfield01 = pdr.object_id AND pd.cid = ? AND pdr.cid = ?");
+            searchParameters.add(Integer.valueOf(ctx.getContextId()));
+            searchParameters.add(Integer.valueOf(ctx.getContextId()));
+        }
+        sb.append(" WHERE ");
 
-        if (searchObj.hasFolders()) {
-            final int folderId = searchObj.getFolders()[0];
-            final int folderType = folderAccess.getFolderType(folderId, uid);
-
-            if (folderType == FolderObject.PRIVATE) {
-                sb.append("(pd.fid = 0 AND pdm.pfid = " + folderId + " AND pdm.member_uid = " + uid + ")");
-            } else {
-                // Folder is shared or public
-
-                final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, uid);
-                final EffectivePermission folderPermission = folderAccess.getFolderPermission(folderId, uid, userConfig);
-
-                final boolean canReadAll = folderPermission.canReadAllObjects();
-                if (folderType == FolderObject.SHARED) {
-                    final int owner = folderAccess.getFolderOwner(folderId);
-                    if (canReadAll) {
-                        sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folderId + " AND pdm.member_uid = " + owner + ")");
-                    } else {
-                        sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folderId + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
+        /*
+         * folder ids
+         */
+        Set<Integer> folderIDs = searchObj.getFolderIDs();
+        if (null != folderIDs && 0 < folderIDs.size()) {
+            Integer[] folders = folderIDs.toArray(new Integer[folderIDs.size()]);
+            sb.append('(');
+            for (int i = 0; i < folders.length; i++) {
+                if (0 < i) {
+                    sb.append(" OR ");
+                }
+                int folderId = folders[i].intValue();
+                int folderType = folderAccess.getFolderType(folderId, uid);
+                if (FolderObject.PRIVATE == folderType) {
+                    sb.append("(pd.fid = 0 AND pdm.pfid = " + folderId + " AND pdm.member_uid = " + uid + ")");
+                } else {
+                    // Folder is shared or public
+                    UserConfiguration userConfig = Tools.getUserConfiguration(ctx, uid);
+                    EffectivePermission folderPermission = folderAccess.getFolderPermission(folderId, uid, userConfig);
+                    boolean canReadAll = folderPermission.canReadAllObjects();
+                    if (folderType == FolderObject.SHARED) {
+                        int owner = folderAccess.getFolderOwner(folderId);
+                        if (canReadAll) {
+                            sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folderId + " AND pdm.member_uid = " + owner + ")");
+                        } else {
+                            sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folderId + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
+                        }
+                    } else if (folderType == FolderObject.PUBLIC) {
+                        if (canReadAll) {
+                            sb.append("(pd.fid = " + folderId + ")");
+                        } else {
+                            sb.append("(pd.fid = " + folderId + " AND pd.created_from = " + uid + ")");
+                        }
                     }
-                } else if (folderType == FolderObject.PUBLIC) {
-                    if (canReadAll) {
-                        sb.append("(pd.fid = " + folderId + ")");
-                    } else {
-                        sb.append("(pd.fid = " + folderId + " AND pd.created_from = " + uid + ")");
-                    }
+
+
                 }
             }
+            sb.append(')');
         } else {
             // Perform search over all folders in which the user has the right to see elements.
 
@@ -1444,12 +1466,146 @@ public class CalendarMySQL implements CalendarSqlImp {
 
             sb.append(')');
         }
-
-        // Look for pattern
-        String pattern = searchObj.getPattern();
-        if (pattern != null) {
-            sb.append(" AND (pd.field01 LIKE ? OR pd.field09 LIKE ?)");
-            pattern = StringCollection.prepareForSearch(pattern);
+        /*
+         * general queries
+         */
+        Set<String> queries = searchObj.getQueries();
+        if (null != queries && 0 < queries.size()) {
+            for (String query : queries) {
+                String preparedPattern = StringCollection.prepareForSearch(query, false, true);
+                if (containsWildcards(preparedPattern)) {
+                    sb.append(" AND (pd.field01 LIKE ? OR pd.field09 LIKE ?)");
+                } else {
+                    sb.append(" AND (pd.field01 = ? OR pd.field09 = ?)");
+                }
+                searchParameters.add(preparedPattern);
+                searchParameters.add(preparedPattern);
+            }
+        }
+        /*
+         * titles
+         */
+        Set<String> titles = searchObj.getTitles();
+        if (null != titles) {
+            for (String title : titles) {
+                String preparedPattern = StringCollection.prepareForSearch(title, false, true);
+                sb.append(containsWildcards(preparedPattern) ? " AND pd.field01 LIKE ?" : " AND pd.field01 = ?");
+                searchParameters.add(preparedPattern);
+            }
+        }
+        /*
+         * location
+         */
+        Set<String> locations = searchObj.getLocations();
+        if (null != locations) {
+            for (String location : locations) {
+                String preparedPattern = StringCollection.prepareForSearch(location, false, true);
+                sb.append(containsWildcards(preparedPattern) ? " AND pd.field02 LIKE ?" : " AND pd.field02 = ?");
+                searchParameters.add(preparedPattern);
+            }
+        }
+        /*
+         * notes
+         */
+        Set<String> notes = searchObj.getNotes();
+        if (null != notes) {
+            for (String note : notes) {
+                String preparedPattern = StringCollection.prepareForSearch(note, false, true);
+                sb.append(containsWildcards(preparedPattern) ? " AND pd.field04 LIKE ?" : " AND pd.field04 = ?");
+                searchParameters.add(preparedPattern);
+            }
+        }
+        /*
+         * minimum end date
+         */
+        Date minimumEndDate = searchObj.getMinimumEndDate();
+        if (null != minimumEndDate) {
+            sb.append(" AND pd.timestampfield02 > ? ");
+            searchParameters.add(new Timestamp(minimumEndDate.getTime()));
+        }
+        /*
+         * maximum start date
+         */
+        Date maximumStartDate = searchObj.getMaximumStartDate();
+        if (null != maximumStartDate) {
+            sb.append(" AND pd.timestampfield01 < ? ");
+            searchParameters.add(new Timestamp(maximumStartDate.getTime()));
+        }
+        /*
+         * own status
+         */
+        Set<Integer> ownStatus = searchObj.getOwnStatus();
+        if (null != ownStatus && 0 < ownStatus.size()) {
+            searchParameters.add(uid);
+            if (1 == ownStatus.size()) {
+                sb.append(" AND (pdm.member_uid = ? AND pdm.confirm = ?)");
+                searchParameters.add(ownStatus.iterator().next());
+            } else {
+                sb.append(" AND (pdm.member_uid = ? AND pdm.confirm IN (").append(getPlaceholders(ownStatus.size()));
+                for (Integer status : ownStatus) {
+                    searchParameters.add(status);
+                }
+                sb.append("))");
+            }
+        }
+        /*
+         * user ids
+         */
+        Set<Integer> userIDs = searchObj.getUserIDs();
+        if (null != userIDs && 0 < userIDs.size()) {
+            if (1 == userIDs.size()) {
+                sb.append(" AND pdm.member_uid = ?");
+                searchParameters.add(userIDs.iterator().next());
+            } else {
+                sb.append(" AND pdm.member_uid IN (").append(getPlaceholders(userIDs.size()));
+                for (Integer userID : userIDs) {
+                    searchParameters.add(userID);
+                }
+                sb.append(')');
+            }
+        }
+        /*
+         * resource ids
+         */
+        Set<Integer> resourceIDs = searchObj.getResourceIDs();
+        if (null != resourceIDs && 0 < resourceIDs.size()) {
+            if (1 == resourceIDs.size()) {
+                sb.append(" AND (pdr.type = ? AND pdr.id = ?)");
+                searchParameters.add(Participant.RESOURCE);
+                searchParameters.add(resourceIDs.iterator().next());
+            } else {
+                sb.append(" AND (pdr.type = ? AND pdr.id = IN (").append(getPlaceholders(resourceIDs.size()));
+                searchParameters.add(Participant.RESOURCE);
+                for (Integer resourceID : resourceIDs) {
+                    searchParameters.add(resourceID);
+                }
+                sb.append("))");
+            }
+        }
+        /*
+         * external participants
+         */
+        Set<String> externalParticipants = searchObj.getExternalParticipants();
+        if (null != externalParticipants && 0 < externalParticipants.size()) {
+            if (1 == externalParticipants.size()) {
+                sb.append(" AND de.mailAddress = ?");
+                searchParameters.add(externalParticipants.iterator().next());
+            } else {
+                sb.append(" AND de.mailAddress IN (").append(getPlaceholders(externalParticipants.size()));
+                for (String externalParticipant : externalParticipants) {
+                    searchParameters.add(externalParticipant);
+                }
+                sb.append(')');
+            }
+        }
+        /*
+         * recurring type
+         */
+        if (searchObj.isExcludeRecurringAppointments()) {
+            sb.append(" AND pd.intfield02 IS NULL");
+        }
+        if (searchObj.isExcludeNonRecurringAppointments()) {
+            sb.append(" AND pd.intfield02 IS NOT NULL");
         }
 
         sb.append(" ORDER BY ");
@@ -1461,170 +1617,31 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(DBUtils.forSQLCommand(orderDir));
 
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        pst.setInt(1, ctx.getContextId());
-        pst.setInt(2, ctx.getContextId());
+        int parameterIndex = 0;
+        pst.setInt(++parameterIndex, ctx.getContextId());
+        pst.setInt(++parameterIndex, ctx.getContextId());
 
-        if (pattern != null) {
-            pst.setString(3, pattern);
-            pst.setString(4, pattern);
-        }
-
-        return pst;
-    }
-
-    @Override
-    public final PreparedStatement getSearchQuery(final String select, final int uid, final int groups[], final UserConfiguration uc, final int orderBy, final Order orderDir, final AppointmentSearchObject searchobject, final Context c, final Connection readcon, final CalendarFolderObject cfo, final boolean isShared) throws SQLException, OXException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
-        sb.append(parseSelect(select));
-        sb.append(JOIN_DATES);
-        sb.append(c.getContextId());
-        sb.append(PDM_CID_IS);
-        sb.append(c.getContextId());
-        sb.append(WHERE);
-
-        java.util.Date range[] = searchobject.getRange();
-
-        if (isShared) {
-            sb.append(" (pflag != 1)");
-            sb.append(PDM_AND);
-        }
-
-        if (range != null && range[0] != null && range[1] != null) {
-            range = searchobject.getRange();
-            getRange(sb);
-            sb.append(PDM_AND);
-        }
-
-        final int folder = searchobject.getFolder();
-        if (folder > 0) {
-            sb.append(" ((pd.fid = 0");
-            sb.append(PDM_PFID_IS);
-            sb.append(folder);
-            sb.append(PDM_MEMBER_UID_IS);
-            sb.append(uid);
-            sb.append(") OR (");
-            sb.append("pd.fid = ");
-            sb.append(folder);
-            sb.append(PDM_MEMBER_UID_IS);
-            sb.append(uid);
-            sb.append("))");
-        } else {
-
-            sb.append(" pdm.member_uid = ");
-            sb.append(uid);
-
-            if (cfo != null) {
-                boolean private_query = false;
-                boolean public_query = false;
-                boolean started = false;
-
-                final TIntSet private_read_all = cfo.getPrivateReadableAll();
-                if (!private_read_all.isEmpty()) {
-                    sb.append(" AND (");
-                    started = true;
-                    sb.append("pdm.pfid IN ");
-                    sb.append(getSqlInString(private_read_all));
-                    private_query = true;
-                }
-
-                final TIntSet private_read_own = cfo.getPrivateReadableOwn();
-                if (!private_read_own.isEmpty()) {
-                    if (!started) {
-                        sb.append(" AND (");
-                        started = true;
-                    }
-                    if (private_query) {
-                        sb.append(" OR pd.created_from = ");
-                    } else {
-                        sb.append(PD_CREATED_FROM_IS);
-                    }
-                    sb.append(uid);
-                    sb.append(" AND pdm.pfid IN ");
-                    sb.append(getSqlInString(private_read_own));
-                    private_query = true;
-                }
-
-                final TIntSet public_read_all = cfo.getPublicReadableAll();
-                if (!public_read_all.isEmpty()) {
-                    if (!started) {
-                        sb.append(" AND (");
-                        started = true;
-                    }
-                    if (private_query) {
-                        sb.append(" OR pd.fid IN ");
-                        sb.append(getSqlInString(public_read_all));
-                        public_query = true;
-                    } else {
-                        sb.append(" AND pd.fid IN ");
-                        sb.append(getSqlInString(public_read_all));
-                        public_query = true;
-                    }
-                }
-
-                final TIntSet public_read_own = cfo.getPublicReadableOwn();
-                if (!public_read_own.isEmpty()) {
-                    if (!started) {
-                        sb.append(" AND (");
-                        started = true;
-                    }
-                    if (private_query || public_query) {
-                        sb.append(" OR pd.fid IN ");
-                        sb.append(getSqlInString(public_read_own));
-                        sb.append(PD_CREATED_FROM_IS);
-                        sb.append(uid);
-                    } else {
-                        sb.append(" AND pd.fid IN ");
-                        sb.append(getSqlInString(public_read_own));
-                        sb.append(PD_CREATED_FROM_IS);
-                        sb.append(uid);
-                    }
-                }
-
-                if (private_query) {
-                    if (started) { // Something was appended
-                        sb.append(')');
-                    }
-                }
+        if (0 < searchParameters.size()) {
+            for (Object object : searchParameters) {
+                pst.setObject(++parameterIndex, object);
             }
         }
 
-        String pattern = searchobject.getPattern();
-        if (pattern != null) {
-            sb.append(PDM_AND);
-            sb.append(" (");
-            sb.append(COLLECTION.getFieldName(CalendarObject.TITLE));
-            sb.append(" LIKE ?");
-            sb.append(PDM_OR);
-            sb.append(COLLECTION.getFieldName(CommonObject.CATEGORIES));
-            sb.append(" LIKE ?");
-            sb.append(')');
-            pattern = StringCollection.prepareForSearch(pattern);
-        }
-
-        sb.append(PDM_ORDER_BY);
-        String orderby = COLLECTION.getFieldName(orderBy);
-        if (orderby == null) {
-            orderby = COLLECTION.getFieldName(CalendarObject.START_DATE);
-        }
-        sb.append(orderby);
-        sb.append(DBUtils.forSQLCommand(orderDir));
-
-        final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        int x = 1;
-
-        if (range != null && range[0] != null && range[1] != null) {
-            pst.setTimestamp(x++, new Timestamp(range[1].getTime()));
-            pst.setTimestamp(x++, new Timestamp(range[0].getTime()));
-        }
-
-        if (pattern != null) {
-            pst.setString(x++, pattern);
-            pst.setString(x++, pattern);
-        }
-
-        // TODO: This should be rewritten to be more flexible and to cover all
-        // expectations
+        System.out.println(pst);
         return pst;
+    }
+
+    private static boolean containsWildcards(String pattern) {
+        final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
+        return WILDCARD_PATTERN.matcher(pattern).find();
+    }
+
+    private static String getPlaceholders(int length) {
+        StringAllocator stringAllocator = new StringAllocator(length * 2);
+        for (int i = 0; i < length - 1; i++) {
+            stringAllocator.append("?,");
+        }
+        return stringAllocator.append('?').toString();
     }
 
     @Override

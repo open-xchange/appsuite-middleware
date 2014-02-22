@@ -264,11 +264,6 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
-    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchObject, final int orderBy, final Order orderDir, final int[] cols) throws OXException, SQLException {
-        return delegate.getAppointmentsByExtendedSearch(searchObject, orderBy, orderDir, cols);
-    }
-
-    @Override
     public SearchIterator<Appointment> getDeletedAppointmentsInFolder(final int folderId, final int[] cols, final Date since) throws OXException, SQLException {
         return delegate.getDeletedAppointmentsInFolder(folderId, cols, since);
     }

@@ -334,14 +334,6 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 	}
 
 	@Override
-    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(
-			final AppointmentSearchObject searchObject, final int orderBy, final Order orderDir,
-			final int[] cols) throws OXException, SQLException {
-		return delegate.getAppointmentsByExtendedSearch(searchObject, orderBy,
-				orderDir, cols);
-	}
-
-	@Override
     public SearchIterator<Appointment> searchAppointments(
 			final AppointmentSearchObject searchObj, final int orderBy, final Order orderDir,
 			final int[] cols) throws OXException {

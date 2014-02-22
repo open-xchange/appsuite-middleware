@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.configuration.ConfigurationException;
@@ -81,11 +82,9 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Charsets;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.DBPool;
@@ -95,7 +94,6 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -963,11 +961,6 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
-    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final Order orderDir, final int cols[]) throws OXException, SQLException {
-        return getAppointmentsByExtendedSearch(searchobject, orderBy, orderDir, cols, 0, 0);
-    }
-
-    @Override
     public SearchIterator<Appointment> searchAppointments(final AppointmentSearchObject searchObj, final int orderBy, final Order orderDir, int[] cols) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -988,8 +981,17 @@ public class CalendarSql implements AppointmentSQLInterface {
             final CalendarOperation co = new CalendarOperation();
 
             CalendarFolderObject cfo = null;
-            if (searchObj.hasFolders()) {
-                final int folderId = searchObj.getFolders()[0];
+            Set<Integer> folderIDs = searchObj.getFolderIDs();
+            if (null == folderIDs || 0 == folderIDs.size()) {
+                // Missing folder attribute indicates a search over all calendar folders the user can see,
+                // so create a list with all folders in which the user is allowed to see appointments
+                try {
+                    cfo = recColl.getAllVisibleAndReadableFolderObject(user.getId(), user.getGroups(), ctx, userConfig, readcon);
+                } catch (final SQLException e) {
+                    throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
+                }
+            } else if (1 == folderIDs.size()) {
+                final int folderId = folderIDs.iterator().next().intValue();
                 final EffectivePermission folderPermission = folderAccess.getFolderPermission(folderId, user.getId(), userConfig);
 
                 if (folderPermission.isFolderVisible() && (folderPermission.canReadAllObjects() || folderPermission.canReadOwnObjects())) {
@@ -998,17 +1000,20 @@ public class CalendarSql implements AppointmentSQLInterface {
                     throw OXCalendarExceptionCodes.NO_PERMISSIONS_TO_READ.create();
                 }
             } else {
-                // Missing folder attribute indicates a search over all calendar folders the user can see,
-                // so create a list with all folders in which the user is allowed to see appointments
-                try {
-                    cfo = recColl.getAllVisibleAndReadableFolderObject(user.getId(), user.getGroups(), ctx, userConfig, readcon);
-                } catch (final SQLException e) {
-                    throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
+                /*
+                 * build a custom CalendarFolderObject containing the requested folders
+                 */
+                cfo = new CalendarFolderObject(user.getId(), ctx.getContextId(), true);
+                for (Integer folderID : folderIDs) {
+                    FolderObject folder = folderAccess.getFolderObject(folderID);
+                    EffectivePermission permission = folder.getEffectiveUserPermission(user.getId(), userConfig);
+                    if (permission.isFolderVisible() && (permission.canReadAllObjects() || permission.canReadOwnObjects())) {
+                        cfo.addFolder(permission.canReadAllObjects(), permission.canReadOwnObjects(),
+                            folder.isShared(user.getId()), folder.getObjectID(), folder.getType());
+                    } else {
+                        throw OXCalendarExceptionCodes.NO_PERMISSIONS_TO_READ.create();
+                    }
                 }
-
-//                final int ara[] = new int[1];
-//                ara[0] = Appointment.PARTICIPANTS;
-//                cols = recColl.enhanceCols(cols, ara, 1);
             }
 
             final com.openexchange.java.StringAllocator columnBuilder = new com.openexchange.java.StringAllocator(cols.length << 4);
@@ -1049,74 +1054,6 @@ public class CalendarSql implements AppointmentSQLInterface {
             }
         }
     }
-
-    private SearchIterator<Appointment> getAppointmentsByExtendedSearch(final AppointmentSearchObject searchobject, final int orderBy, final Order orderDir, int cols[], final int from, final int to) throws OXException {
-        if (session == null) {
-            throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
-        }
-        Search.checkPatternLength(searchobject);
-        Connection readcon = null;
-        PreparedStatement prep = null;
-        ResultSet rs = null;
-        boolean close_connection = true;
-        final Context ctx = Tools.getContext(session);
-        final User user = Tools.getUser(session, ctx);
-        final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
-        try {
-            final CalendarOperation co = new CalendarOperation();
-            if (searchobject.getFolder() > 0) {
-                co.setRequestedFolder(searchobject.getFolder());
-            } else {
-                final int ara[] = new int[1];
-                ara[0] = CalendarObject.PARTICIPANTS;
-                cols = recColl.enhanceCols(cols, ara, 1);
-            }
-            cols = recColl.checkAndAlterCols(cols);
-            CalendarFolderObject cfo = null;
-            try {
-                cfo = recColl.getAllVisibleAndReadableFolderObject(session.getUserId(), user.getGroups(), ctx, userConfig);
-            } catch (final SearchIteratorException sie) {
-                throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(sie, Integer.valueOf(1));
-            }
-            readcon = DBPool.pickup(ctx);
-            final int userId;
-            final int[] groups;
-            final UserConfiguration uc;
-            final OXFolderAccess folderAccess = new OXFolderAccess(readcon, ctx);
-            boolean isShared = false;
-            if (isShared = (searchobject.getFolder() > 0 && folderAccess.isFolderShared(searchobject.getFolder(), session.getUserId()))) {
-                userId = folderAccess.getFolderOwner(searchobject.getFolder());
-                groups = UserStorage.getInstance().getUser(userId, ctx).getGroups();
-                uc = UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
-            } else {
-                userId = session.getUserId();
-                groups = user.getGroups();
-                uc = userConfig;
-            }
-            final CalendarSqlImp cimp = CalendarSql.cimp;
-            prep = cimp.getSearchQuery(StringCollection.getSelect(cols, DATES_TABLE_NAME), userId, groups, uc, orderBy, orderDir, searchobject, ctx, readcon, cfo, isShared);
-            rs = cimp.getResultSet(prep);
-            co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
-            close_connection = false;
-            return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
-        } catch(final SQLException sqle) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
-        } catch(final OXException oxc) {
-            throw oxc;
-        } catch(final RuntimeException e) {
-            LOG.error("", e); // Unfortunately the nested exception looses its stack trace.
-            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, I(33));
-        } finally {
-            if (close_connection) {
-                recColl.closeResultSet(rs);
-                recColl.closePreparedStatement(prep);
-            }
-            if (readcon != null && close_connection) {
-                DBPool.push(ctx, readcon);
-            }
-        }
-    }
-
 
     @Override
     public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments) throws OXException {

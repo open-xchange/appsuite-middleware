@@ -166,15 +166,6 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
 	}
 
 	@Override
-    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(
-			AppointmentSearchObject searchObject, int orderBy, Order orderDir,
-			int[] cols) throws com.openexchange.exception.OXException,
-			SQLException {
-		return delegate.getAppointmentsByExtendedSearch(searchObject, orderBy,
-				orderDir, cols);
-	}
-
-	@Override
     public SearchIterator<Appointment> searchAppointments(
 			AppointmentSearchObject searchObj, int orderBy, Order orderDir,
 			int[] cols) throws com.openexchange.exception.OXException {

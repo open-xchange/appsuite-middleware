@@ -55,11 +55,10 @@ import org.osgi.framework.Constants;
 import com.openexchange.contact.ContactService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.find.basic.Services;
-import com.openexchange.find.basic.calendar.MockCalendarDriver;
+import com.openexchange.find.basic.calendar.BasicCalendarDriver;
 import com.openexchange.find.basic.contacts.BasicContactsDriver;
 import com.openexchange.find.basic.drive.MockDriveDriver;
 import com.openexchange.find.basic.mail.BasicMailDriver;
-import com.openexchange.find.basic.mail.MockMailDriver;
 import com.openexchange.find.basic.tasks.MockTasksDriver;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.folderstorage.FolderService;
@@ -91,7 +90,7 @@ public class FindBasicActivator extends HousekeepingActivator {
         registerService(ModuleSearchDriver.class, new BasicMailDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new MockDriveDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicContactsDriver(), defaultProperties());
-        registerService(ModuleSearchDriver.class, new MockCalendarDriver(), defaultProperties());
+        registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new MockTasksDriver(), defaultProperties());
     }
 

@@ -100,7 +100,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MockCalendarDriver}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDriver {
@@ -168,12 +168,12 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
         // Relative Date
         List<FacetValue> dateValues = new ArrayList<FacetValue>();
         dateValues.add(new FacetValue(
-            RelativeDateDisplayItem.RelativeDate.COMMING.getIdentifier(),
+            RelativeDateDisplayItem.RelativeDate.COMING.getIdentifier(),
             new RelativeDateDisplayItem(
             CalendarStrings.RELATIVE_DATE_COMMING,
-            RelativeDateDisplayItem.RelativeDate.COMMING), FacetValue.UNKNOWN_COUNT, new Filter(
+            RelativeDateDisplayItem.RelativeDate.COMING), FacetValue.UNKNOWN_COUNT, new Filter(
             singleton("relative_date"),
-            RelativeDateDisplayItem.RelativeDate.COMMING.getIdentifier())));
+            RelativeDateDisplayItem.RelativeDate.COMING.getIdentifier())));
         dateValues.add(new FacetValue(
             RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier(),
             new RelativeDateDisplayItem(
@@ -260,7 +260,7 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
         return new AutocompleteResult(facets);
     }
 
-    private final static int[] FIELDS = {
+    final static int[] FIELDS = {
         DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
         FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION,
         CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
@@ -276,8 +276,9 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
 
         AppointmentSearchObject searchObj = new AppointmentSearchObject();
         OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
-        searchObj.addFolder(folderAccess.getDefaultFolder(session.getUserId(), FolderObject.CALENDAR).getObjectID());
-        searchObj.setPattern("*");
+        int folderID = folderAccess.getDefaultFolder(session.getUserId(), FolderObject.CALENDAR).getObjectID();
+        searchObj.setFolderIDs(Collections.singleton(Integer.valueOf(folderID)));
+        searchObj.setQueries(Collections.singleton("*"));
         SearchIterator<Appointment> appointments = appointmentSql.searchAppointments(
             searchObj,
             Appointment.START_DATE,

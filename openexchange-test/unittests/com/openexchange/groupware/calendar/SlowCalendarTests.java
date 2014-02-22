@@ -52,6 +52,7 @@ package com.openexchange.groupware.calendar;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -109,9 +110,9 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             assertContains(iter, cdao);
 
             final AppointmentSearchObject search = new AppointmentSearchObject();
-            search.setFolder(cdao.getParentFolderID());
-            search.setPattern("*");
-            iter = sqlInterface.getAppointmentsByExtendedSearch(search, Appointment.OBJECT_ID, null, COLS);
+            search.setFolderIDs(Collections.singleton(Integer.valueOf(cdao.getParentFolderID())));
+            search.setQueries(Collections.singleton("*"));
+            iter = sqlInterface.searchAppointments(search, Appointment.OBJECT_ID, null, COLS);
             assertContains(iter, cdao);
 
             iter = sqlInterface.getFreeBusyInformation(USER_ID, Participant.USER, SUPER_START, SUPER_END);
@@ -130,8 +131,8 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             iter = sqlInterface.getObjectsById(new int[][] { { cdao.getObjectID(), cdao.getParentFolderID() } }, COLS);
             assertContains(iter, cdao);
             final AppointmentSearchObject searchObj = new AppointmentSearchObject();
-            searchObj.setPattern("*");
-            searchObj.addFolder(cdao.getParentFolderID());
+            searchObj.setQueries(Collections.singleton("*"));
+            searchObj.setFolderIDs(Collections.singleton(Integer.valueOf(cdao.getParentFolderID())));
 
             iter = sqlInterface.searchAppointments(searchObj, Appointment.OBJECT_ID, null, COLS);
             assertContains(iter, cdao);

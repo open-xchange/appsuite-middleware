@@ -180,7 +180,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(AppointmentSearchObject searchObject, int orderBy, Order orderDir, int cols[]) throws OXException, SQLException;
+//    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(AppointmentSearchObject searchObject, int orderBy, Order orderDir, int cols[]) throws OXException, SQLException;
 
     /**
      * Lists all appointments where the title or description matches the given pattern in the {@link AppointmentSearchObject}.

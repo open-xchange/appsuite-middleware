@@ -50,7 +50,6 @@
 package com.openexchange.calendar.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -67,7 +66,6 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
@@ -135,7 +133,8 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
         Date timestamp = new Date(0);
 
         final AppointmentSearchObject searchObj = new AppointmentSearchObject();
-        searchObj.setRange(new Date[] { start, end });
+        searchObj.setMinimumEndDate(start);
+        searchObj.setMaximumStartDate(end);
 
         final LinkedList<Appointment> linkedAppointmentList = new LinkedList<Appointment>();
 
@@ -144,7 +143,7 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
         try {
             final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(req.getSession());
             final CalendarCollectionService recColl = getService(CalendarCollectionService.class);
-            searchIterator = appointmentsql.getAppointmentsByExtendedSearch(searchObj, orderBy, orderDir, _appointmentFields);
+            searchIterator = appointmentsql.searchAppointments(searchObj, orderBy, orderDir, _appointmentFields);
 
             final List<Appointment> appointmentList = new ArrayList<Appointment>();
             while (searchIterator.hasNext()) {
@@ -200,8 +199,6 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
             }
 
             return new AJAXRequestResult(appointmentList, timestamp, "appointment");
-        } catch (final SQLException e) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {
             if (searchIterator != null) {
                 searchIterator.close();
