@@ -1343,20 +1343,23 @@ public class CalendarMySQL implements CalendarSqlImp {
     @Override
     public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException {
         List<Object> searchParameters = new ArrayList<Object>();
+        Integer contextID = Integer.valueOf(ctx.getContextId());
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
         sb.append("SELECT ");
         sb.append(columns);
         sb.append(", pdm.pfid");
         sb.append(" FROM prg_dates pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ? AND pdm.cid = ?");
+        searchParameters.add(contextID);
+        searchParameters.add(contextID);
         if (null != searchObj.getExternalParticipants() && 0 < searchObj.getExternalParticipants().size()) {
             sb.append(" LEFT JOIN dateExternal de ON pd.intfield01 = de.objectId AND pd.cid = ? AND de.cid = ?");
-            searchParameters.add(Integer.valueOf(ctx.getContextId()));
-            searchParameters.add(Integer.valueOf(ctx.getContextId()));
+            searchParameters.add(contextID);
+            searchParameters.add(contextID);
         }
         if (null != searchObj.getResourceIDs() && 0 < searchObj.getResourceIDs().size()) {
             sb.append(" LEFT JOIN prg_date_rights pdr ON pd.intfield01 = pdr.object_id AND pd.cid = ? AND pdr.cid = ?");
-            searchParameters.add(Integer.valueOf(ctx.getContextId()));
-            searchParameters.add(Integer.valueOf(ctx.getContextId()));
+            searchParameters.add(contextID);
+            searchParameters.add(contextID);
         }
         sb.append(" WHERE ");
 
@@ -1617,17 +1620,12 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(DBUtils.forSQLCommand(orderDir));
 
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        int parameterIndex = 0;
-        pst.setInt(++parameterIndex, ctx.getContextId());
-        pst.setInt(++parameterIndex, ctx.getContextId());
-
         if (0 < searchParameters.size()) {
+            int parameterIndex = 0;
             for (Object object : searchParameters) {
                 pst.setObject(++parameterIndex, object);
             }
         }
-
-        System.out.println(pst);
         return pst;
     }
 
