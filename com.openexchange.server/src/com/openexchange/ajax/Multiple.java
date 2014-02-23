@@ -313,10 +313,19 @@ public class Multiple extends SessionServlet {
                 return true;
             }
 
-            // Check for a modifying operation
-            if (SERIAL_ON_MODIFICATION_MODULES.contains(module)) {
+            // Check for a folder action
+            if (MODULE_FOLDERS.equals(module)) {
+                // Check for either modifying operation or a mail folder list request
                 final String action = Strings.toLowerCase(dataObject.optString(ACTION, null));
-                return ((null != action) && MODIFYING_ACTIONS.contains(action));
+                if (MODIFYING_ACTIONS.contains(action) || isMailFolderList(action, dataObject.optString(PARENT, null))) {
+                    return true;
+                }
+            } else {
+                // Check for a modifying operation
+                if (SERIAL_ON_MODIFICATION_MODULES.contains(module)) {
+                    final String action = Strings.toLowerCase(dataObject.optString(ACTION, null));
+                    return ((null != action) && MODIFYING_ACTIONS.contains(action));
+                }
             }
         }
 
@@ -324,8 +333,8 @@ public class Multiple extends SessionServlet {
         return false;
     }
 
-    private static boolean isMailFolderList(final String module, final String action, final String parentId) {
-        return MODULE_FOLDERS.equals(module) && ACTION_LIST.equals(action) && MailFolderType.getInstance().servesParentId(parentId);
+    private static boolean isMailFolderList(final String action, final String parentId) {
+        return ACTION_LIST.equals(action) && MailFolderType.getInstance().servesParentId(parentId);
     }
 
     protected static final void performActionElement(final JsonInOut jsonInOut, final String module, final ServerSession session, final HttpServletRequest req) {
