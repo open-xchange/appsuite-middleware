@@ -49,6 +49,8 @@
 
 package com.openexchange.mailaccount.json.parser;
 
+import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.Strings.toLowerCase;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.Collection;
@@ -62,12 +64,15 @@ import org.json.JSONObject;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mailaccount.Attribute;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -144,7 +149,7 @@ public class MailAccountParser extends DataParser {
      * @throws OXException If parsing fails
      */
     public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings) throws OXException {
-        return parse(account, json, warnings, false);
+        return parse(account, json, warnings, false, null);
     }
 
     /**
@@ -154,18 +159,19 @@ public class MailAccountParser extends DataParser {
      * @param json A JSON object containing a reminder.
      * @param warnings A collection to add possible warnings to
      * @param asNewAccount <code>true</code> to parse in fashion of a new account; otherwise <code>false</code>
+     * @param session The associated session; may be <code>null</code>
      * @throws OXException If parsing fails.
      * @throws OXException If parsing fails
      */
-    public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings, final boolean asNewAccount) throws OXException {
+    public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings, final boolean asNewAccount, final Session session) throws OXException {
         try {
-            return parseElementAccount(account, json, warnings, asNewAccount);
+            return parseElementAccount(account, json, warnings, asNewAccount, session);
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json.toString());
         }
     }
 
-    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings, final boolean asNewAccount) throws JSONException, OXException {
+    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings, final boolean asNewAccount, final Session session) throws JSONException, OXException {
         final Set<Attribute> attributes = new HashSet<Attribute>();
         if (json.has(MailAccountFields.ID)) {
             account.setId(parseInt(json, MailAccountFields.ID));
@@ -281,45 +287,104 @@ public class MailAccountParser extends DataParser {
             attributes.add(Attribute.SPAM_HANDLER_LITERAL);
         }
         // Folder names
+        MailAccount defaultAccount = null;
         if (json.has(MailAccountFields.TRASH)) {
             final String string = parseString(json, MailAccountFields.TRASH);
             account.setTrash(null == string ? string : string.trim());
             attributes.add(Attribute.TRASH_LITERAL);
         } else if (asNewAccount && !json.has(MailAccountFields.TRASH_FULLNAME)) {
-            account.setTrash(MailStrings.TRASH);
-            attributes.add(Attribute.TRASH_LITERAL);
+            defaultAccount = loadDefaultAccount(session);
+            if (null == defaultAccount) {
+                account.setTrash(MailStrings.TRASH);
+                attributes.add(Attribute.TRASH_LITERAL);
+            } else {
+                String name = defaultAccount.getTrash();
+                if (isEmpty(name)) {
+                    name = MailStrings.TRASH;
+                }
+                account.setTrash(name);
+                attributes.add(Attribute.TRASH_LITERAL);
+            }
         }
         if (json.has(MailAccountFields.ARCHIVE)) {
             final String string = parseString(json, MailAccountFields.ARCHIVE);
             account.setTrash(null == string ? string : string.trim());
             attributes.add(Attribute.ARCHIVE_LITERAL);
         } else if (asNewAccount && !json.has(MailAccountFields.ARCHIVE_FULLNAME)) {
-            account.setArchive(MailStrings.ARCHIVE);
-            attributes.add(Attribute.ARCHIVE_LITERAL);
+            if (null == defaultAccount) {
+                defaultAccount = loadDefaultAccount(session);
+            }
+            if (null == defaultAccount) {
+                account.setArchive(MailStrings.ARCHIVE);
+                attributes.add(Attribute.ARCHIVE_LITERAL);
+            } else {
+                String name = defaultAccount.getArchive();
+                if (isEmpty(name)) {
+                    name = MailStrings.ARCHIVE;
+                }
+                account.setTrash(name);
+                attributes.add(Attribute.ARCHIVE_LITERAL);
+            }
         }
         if (json.has(MailAccountFields.SENT)) {
             final String string = parseString(json, MailAccountFields.SENT);
             account.setSent(null == string ? string : string.trim());
             attributes.add(Attribute.SENT_LITERAL);
         } else if (asNewAccount && !json.has(MailAccountFields.SENT_FULLNAME)) {
-            account.setSent(MailStrings.SENT_ALT);
-            attributes.add(Attribute.SENT_LITERAL);
+            if (null == defaultAccount) {
+                defaultAccount = loadDefaultAccount(session);
+            }
+            if (null == defaultAccount) {
+                account.setSent(MailStrings.SENT_ALT);
+                attributes.add(Attribute.SENT_LITERAL);
+            } else {
+                String name = defaultAccount.getSent();
+                if (isEmpty(name)) {
+                    name = MailStrings.SENT_ALT;
+                }
+                account.setTrash(name);
+                attributes.add(Attribute.SENT_LITERAL);
+            }
         }
         if (json.has(MailAccountFields.DRAFTS)) {
             final String string = parseString(json, MailAccountFields.DRAFTS);
             account.setDrafts(null == string ? string : string.trim());
             attributes.add(Attribute.DRAFTS_LITERAL);
         } else if (asNewAccount && !json.has(MailAccountFields.DRAFTS_FULLNAME)) {
-            account.setDrafts(MailStrings.DRAFTS);
-            attributes.add(Attribute.DRAFTS_LITERAL);
+            if (null == defaultAccount) {
+                defaultAccount = loadDefaultAccount(session);
+            }
+            if (null == defaultAccount) {
+                account.setDrafts(MailStrings.DRAFTS);
+                attributes.add(Attribute.DRAFTS_LITERAL);
+            } else {
+                String name = defaultAccount.getDrafts();
+                if (isEmpty(name)) {
+                    name = MailStrings.DRAFTS;
+                }
+                account.setTrash(name);
+                attributes.add(Attribute.DRAFTS_LITERAL);
+            }
         }
         if (json.has(MailAccountFields.SPAM)) {
             final String string = parseString(json, MailAccountFields.SPAM);
             account.setSpam(null == string ? string : string.trim());
             attributes.add(Attribute.SPAM_LITERAL);
         } else if (asNewAccount && !json.has(MailAccountFields.SPAM_FULLNAME)) {
-            account.setSpam(MailStrings.SPAM);
-            attributes.add(Attribute.SPAM_LITERAL);
+            if (null == defaultAccount) {
+                defaultAccount = loadDefaultAccount(session);
+            }
+            if (null == defaultAccount) {
+                account.setSpam(MailStrings.SPAM);
+                attributes.add(Attribute.SPAM_LITERAL);
+            } else {
+                String name = defaultAccount.getSpam();
+                if (isEmpty(name)) {
+                    name = MailStrings.SPAM;
+                }
+                account.setTrash(name);
+                attributes.add(Attribute.SPAM_LITERAL);
+            }
         }
         if (json.has(MailAccountFields.CONFIRMED_SPAM)) {
             final String string = parseString(json, MailAccountFields.CONFIRMED_SPAM);
@@ -453,31 +518,16 @@ public class MailAccountParser extends DataParser {
         }
     }
 
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
+    private static MailAccount loadDefaultAccount(final Session session) {
+        if (null == session) {
             return null;
         }
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        try {
+            final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            return null == mass ? null : mass.getDefaultMailAccount(session.getUserId(), session.getContextId());
+        } catch (final Exception e) {
+            return null;
         }
-        return builder.toString();
     }
 
 }
