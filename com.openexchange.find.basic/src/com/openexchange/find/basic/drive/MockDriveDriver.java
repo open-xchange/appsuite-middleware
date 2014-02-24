@@ -114,24 +114,25 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
         // Define facets
         final List<Facet> staticFacets = new LinkedList<Facet>();
         {
-            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_NAME, "file_name");
+            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_NAME, Constants.FIELD_FILE_NAME);
             staticFacets.add(fileNameFacet);
         }
         {
-            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_DESCRIPTION, "file_description");
+            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_DESCRIPTION, Constants.FIELD_FILE_DESC);
             staticFacets.add(fileNameFacet);
         }
         {
-            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_CONTENT, "file_content");
+            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_CONTENT, Constants.FIELD_FILE_CONTENT);
             staticFacets.add(fileNameFacet);
         }
         {
             final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.AUDIO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_AUDIO, FileTypeDisplayItem.Type.AUDIO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList("file_type"), FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS, FileTypeDisplayItem.Type.DOCUMENTS), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList("file_type"), FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.IMAGES.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_IMAGES, FileTypeDisplayItem.Type.IMAGES), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList("file_type"), FileTypeDisplayItem.Type.IMAGES.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.OTHER.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_OTHER, FileTypeDisplayItem.Type.OTHER), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList("file_type"), FileTypeDisplayItem.Type.OTHER.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.VIDEO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_VIDEO, FileTypeDisplayItem.Type.VIDEO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList("file_type"), FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
+            final String fieldFileType = Constants.FIELD_FILE_TYPE;
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.AUDIO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_AUDIO, FileTypeDisplayItem.Type.AUDIO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS, FileTypeDisplayItem.Type.DOCUMENTS), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.IMAGES.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_IMAGES, FileTypeDisplayItem.Type.IMAGES), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.IMAGES.getIdentifier())));
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.OTHER.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_OTHER, FileTypeDisplayItem.Type.OTHER), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.OTHER.getIdentifier())));
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.VIDEO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_VIDEO, FileTypeDisplayItem.Type.VIDEO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
             final Facet folderTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
             staticFacets.add(folderTypeFacet);
         }
@@ -192,6 +193,17 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
     @Override
     public SearchResult search(final SearchRequest searchRequest, final ServerSession session) throws OXException {
         final IDBasedFileAccessFactory factory = Services.requireService(IDBasedFileAccessFactory.class);
+
+        final List<Filter> filters = searchRequest.getFilters();
+        for (final Filter filter : filters) {
+            for (final String field : filter.getFields()) {
+                if (Constants.FIELD_FOLDER_TYPE.equals(field)) {
+
+                }
+
+            }
+        }
+
         final Field sortingField = Field.TITLE;
         final SortDirection sortingOrder = SortDirection.ASC;
         final IDBasedFileAccess fileAccess = factory.createAccess(session);
