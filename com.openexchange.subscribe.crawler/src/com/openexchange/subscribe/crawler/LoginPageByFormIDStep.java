@@ -101,20 +101,23 @@ public class LoginPageByFormIDStep extends AbstractStep<HtmlPage, Object> implem
         try {
             // Get the page, fill in the credentials and submit the login form identified by its action
             loginPage = webClient.getPage(url);
-            HtmlForm loginForm = (HtmlForm) loginPage.getElementById(idOfLoginForm);
+            if (loginPage != null) {
+                HtmlForm loginForm = (HtmlForm) loginPage.getElementById(idOfLoginForm);
 
-            if (loginForm != null) {
-                final HtmlTextInput userfield = (HtmlTextInput) loginForm.getInputByName("TextfieldEmail");
-                userfield.setValueAttribute(username);
-                final HtmlPasswordInput passwordfield = (HtmlPasswordInput) loginForm.getInputByName("TextfieldPassword");
-                passwordfield.setValueAttribute(password);
-                final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
-                output = pageAfterLogin;
+                if (loginForm != null) {
+                    final HtmlTextInput userfield = (HtmlTextInput) loginForm.getInputByName("TextfieldEmail");
+                    userfield.setValueAttribute(username);
+                    final HtmlPasswordInput passwordfield = (HtmlPasswordInput) loginForm.getInputByName("TextfieldPassword");
+                    passwordfield.setValueAttribute(password);
+                    final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
+                    output = pageAfterLogin;
 
-                openPageInBrowser(pageAfterLogin);
+                    openPageInBrowser(pageAfterLogin);
 
-                executedSuccessfully = true;
+                    executedSuccessfully = true;
+                }
             }
+            
         } catch (final FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (final MalformedURLException e) {
