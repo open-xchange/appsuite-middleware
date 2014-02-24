@@ -109,7 +109,7 @@ public class CaldavPerformer implements SessionHolder {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CaldavPerformer.class);
 
-    private static CaldavPerformer INSTANCE = null;
+    private static volatile CaldavPerformer INSTANCE = null;
 
     /**
      * Gets the instance of {@link InfostorePerformer}.
