@@ -1,3 +1,7 @@
+* 2014-02-24 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31238: Use the same properties map for the general login method of the LoginPerformer and the AuthenticationService.
+
 * 2014-02-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 30761: Do not occupy a database connection without using it.
