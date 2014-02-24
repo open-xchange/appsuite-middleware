@@ -4,7 +4,11 @@
 
 * 2014-02-24 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 31249: Be aware of infostore items without files when filtering, set appropriate HTTP status in download response 
+- Fix for bug 31249: Be aware of infostore items without files when filtering, set appropriate HTTP status in download response 
+
+* 2014-02-21 - marc.arens@open-xchange.com
+
+ - Fix for bug 31188: Use userId and contextId instead of names when enroling clients
 
 * 2014-02-21 - marcus.klein@open-xchange.com
 
