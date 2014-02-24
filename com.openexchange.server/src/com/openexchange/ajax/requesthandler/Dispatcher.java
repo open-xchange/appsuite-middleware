@@ -135,6 +135,18 @@ public interface Dispatcher {
     boolean mayUseFallbackSession(String module, String action) throws OXException;
 
     /**
+     * Indicates whether authentication via public session identifier is permitted
+     *
+     * @param module The module identifier
+     * @param action The action identifier
+     * @return <code>true</code> if permitted; otherwise <code>false</code>
+     * @throws OXException If check fails for any reason
+     * @see AJAXRequestDataTools#getModule(String, javax.servlet.http.HttpServletRequest)
+     * @see AJAXRequestDataTools#getAction(javax.servlet.http.HttpServletRequest)
+     */
+    boolean mayPerformPublicSessionAuth(String module, String action) throws OXException;
+
+    /**
      * Indicates that given action can be used without a session.
      *
      * @param module The module identifier

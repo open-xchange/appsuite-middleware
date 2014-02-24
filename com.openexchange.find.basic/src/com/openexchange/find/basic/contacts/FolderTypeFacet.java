@@ -56,6 +56,7 @@ import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
@@ -97,13 +98,13 @@ public class FolderTypeFacet extends ContactSearchFacet {
         List<FacetValue> facetValues = new ArrayList<FacetValue>(3);
         facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
             CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singleton(ID), FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
+            Collections.singletonList(ID), FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
         facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
             CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton(ID), FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
+                Collections.singletonList(ID), FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
         facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
             CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton(ID), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
+                Collections.singletonList(ID), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
         return facetValues;
     }
 
@@ -122,7 +123,7 @@ public class FolderTypeFacet extends ContactSearchFacet {
         } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(query)) {
             type = SharedType.getInstance();
         } else {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
+            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CommonFacetType.FOLDER_TYPE.getName());
         }
         FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
             FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, false, session, null);

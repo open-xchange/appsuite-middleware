@@ -111,6 +111,9 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
         if (null == callbackUrl || null == domain) {
             return super.modifyCallbackURL(callbackUrl, session);
         }
+
+        // TODO: Use com.openexchange.http.deferrer.DeferringURLService.getDeferredURL(String)
+
         try {
             final URL url = new URL(callbackUrl);
             final String host = url.getHost();

@@ -51,7 +51,6 @@ package com.openexchange.find.json.converters;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -135,13 +134,13 @@ public abstract class AbstractJSONConverter implements ResultConverter {
 
     protected JSONObject convertFilter(Filter filter) throws JSONException {
         // Put fields to JSON array
-        Set<String> fields = filter.getFields();
+        List<String> fields = filter.getFields();
         JSONArray jFields = new JSONArray(fields.size());
         for (String field : fields) {
             jFields.put(field);
         }
 
-        Set<String> queries = filter.getQueries();
+        List<String> queries = filter.getQueries();
         JSONArray jQueries = new JSONArray(queries.size());
         for (String query : queries) {
             jQueries.put(query);

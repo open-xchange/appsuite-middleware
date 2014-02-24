@@ -233,7 +233,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         }
         // Try public session
-        findPublicSessionId(req, session, sessiondService, false);
+        findPublicSessionId(req, session, sessiondService, false, false);
     }
 
     private static final String PARAM_ALTERNATIVE_ID = Session.PARAM_ALTERNATIVE_ID;
@@ -247,20 +247,26 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param session The looked-up session
      * @param sessiondService The SessionD service
      * @param mayUseFallbackSession <code>true</code> if request is allowed to use fall-back session, otherwise <code>false</code>
+     * @param mayPerformPublicSessionAuth <code>true</code> if public session authentication is allowed for specified request, otherwise <code>false</code>
      * @throws OXException If public session cannot be created
      */
-    protected void findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession) throws OXException {
+    protected void findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession, final boolean mayPerformPublicSessionAuth) throws OXException {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (cookies != null) {
             final Cookie cookie = cookies.get(getPublicSessionCookieName(req));
             if (null != cookie) {
-                handlePublicSessionCookie(req, session, sessiondService, cookie);
+                handlePublicSessionCookie(req, session, sessiondService, cookie.getValue(), false);
             } else {
-                if (mayUseFallbackSession && isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
-                    for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
-                        if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
-                            handlePublicSessionCookie(req, session, sessiondService, entry.getValue());
-                            return;
+                final String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
+                if (null != publicSessionId) {
+                    handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth);
+                } else {
+                    if (mayUseFallbackSession && isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
+                        for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
+                            if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
+                                handlePublicSessionCookie(req, session, sessiondService, entry.getValue().getValue(), false);
+                                return;
+                            }
                         }
                     }
                 }
@@ -268,8 +274,7 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private void handlePublicSessionCookie(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final Cookie cookie) throws OXException {
-        final String altId = cookie.getValue();
+    private void handlePublicSessionCookie(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final String altId, final boolean publicSessionAuth) throws OXException {
         if (null != altId && null != session && altId.equals(session.getParameter(PARAM_ALTERNATIVE_ID))) {
             // same session (thus already verified)
             rememberPublicSession(req, session);
@@ -278,7 +283,9 @@ public abstract class SessionServlet extends AJAXServlet {
             final ServerSession publicSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId));
             if (publicSession != null) {
                 try {
-                    checkSecret(hashSource, req, publicSession, false);
+                    if (false == publicSessionAuth) {
+                        checkSecret(hashSource, req, publicSession, false);
+                    }
                     verifySession(req, sessiondService, publicSession.getSessionID(), publicSession);
                     rememberPublicSession(req, publicSession);
                 } catch (final OXException e) {

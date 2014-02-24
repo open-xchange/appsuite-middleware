@@ -75,9 +75,9 @@ public enum FindExceptionCode implements DisplayableOXExceptionCode {
      */
     UNSUPPORTED_FILTER_FIELD("The filter field \"%1$s\" is not supported.", Category.CATEGORY_ERROR, 3),
     /**
-     * The filter query \"%1$s\" is not supported.
+     * The filter query \"%1$s\" is not supported for field \"%2$s\".
      */
-    UNSUPPORTED_FILTER_QUERY("The filter query \"%1$s\" is not supported.", Category.CATEGORY_ERROR, 4),
+    UNSUPPORTED_FILTER_QUERY("The filter query \"%1$s\" is not supported for field \"%2$s\".", Category.CATEGORY_ERROR, 4),
     /**
      * A filter for field \"%1$s\" is missing but is required to search in module %2$s.
      */

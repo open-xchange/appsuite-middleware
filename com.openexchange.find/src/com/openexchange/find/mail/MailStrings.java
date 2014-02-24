@@ -73,4 +73,16 @@ public class MailStrings implements LocalizableStrings {
     // Search in Persons.
     public static final String FACET_CONTACTS = "Contacts";
 
+    // Search criteria time
+    public static final String FACET_TIME = "Time";
+
+    // Search mails from last week
+    public static final String LAST_WEEK = "last week";
+
+    // Search mails from last month
+    public static final String LAST_MONTH = "last month";
+
+    // Search mails from last year
+    public static final String LAST_YEAR = "last year";
+
 }

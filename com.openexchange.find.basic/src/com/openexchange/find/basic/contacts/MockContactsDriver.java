@@ -53,10 +53,8 @@ import static com.openexchange.java.Strings.isEmpty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -88,16 +86,13 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * TODO {@link MockContactsDriver}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.0
  */
 public class MockContactsDriver extends AbstractContactFacetingModuleSearchDriver {
 
-    private static final Set<String> PERSONS_FILTER_FIELDS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
-        "from",
-        "to",
-        "cc")));
+    private static final List<String> PERSONS_FILTER_FIELDS = Arrays.asList("from", "to", "cc");
 
     /**
      * {@inheritDoc}
@@ -125,7 +120,7 @@ public class MockContactsDriver extends AbstractContactFacetingModuleSearchDrive
         {
             final String id = "address";
             final FacetValue staticFacetValue = new FacetValue(id, new SimpleDisplayItem(id), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton(id),
+                Collections.singletonList(id),
                 "override"));
             final Facet addressFacet = new Facet(ContactsFacetType.ADDRESS, Collections.singletonList(staticFacetValue));
             staticFacets.add(addressFacet);
@@ -134,7 +129,7 @@ public class MockContactsDriver extends AbstractContactFacetingModuleSearchDrive
         {
             final String id = "address_book";
             final FacetValue staticFacetValue = new FacetValue(id, new SimpleDisplayItem(id), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton(id),
+                Collections.singletonList(id),
                 "override"));
             final Facet addressBookFacet = new Facet(ContactsFacetType.ADDRESSBOOK, Collections.singletonList(staticFacetValue));
             staticFacets.add(addressBookFacet);
@@ -143,7 +138,7 @@ public class MockContactsDriver extends AbstractContactFacetingModuleSearchDrive
         {
             final String id = "email";
             final FacetValue staticFacetValue = new FacetValue(id, new SimpleDisplayItem(id), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton(id),
+                Collections.singletonList(id),
                 "override"));
             final Facet emailFacet = new Facet(ContactsFacetType.EMAIL, Collections.singletonList(staticFacetValue));
             staticFacets.add(emailFacet);
@@ -152,7 +147,7 @@ public class MockContactsDriver extends AbstractContactFacetingModuleSearchDrive
         {
             final String id = "name";
             final FacetValue staticFacetValue = new FacetValue(id, new SimpleDisplayItem(id), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton(id),
+                Collections.singletonList(id),
                 "override"));
             final Facet nameFacet = new Facet(ContactsFacetType.NAME, Collections.singletonList(staticFacetValue));
             staticFacets.add(nameFacet);
@@ -161,7 +156,7 @@ public class MockContactsDriver extends AbstractContactFacetingModuleSearchDrive
         {
             final String id = "phone";
             final FacetValue staticFacetValue = new FacetValue(id, new SimpleDisplayItem(id), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton(id),
+                Collections.singletonList(id),
                 "override"));
             final Facet phoneFacet = new Facet(ContactsFacetType.PHONE, Collections.singletonList(staticFacetValue));
             staticFacets.add(phoneFacet);
@@ -173,12 +168,12 @@ public class MockContactsDriver extends AbstractContactFacetingModuleSearchDrive
             contactTypes.add(new FacetValue(ContactTypeDisplayItem.Type.CONTACT.getIdentifier(), new ContactTypeDisplayItem(
                 CommonStrings.CONTACT_TYPE_CONTACT,
                 ContactTypeDisplayItem.Type.CONTACT), FacetValue.UNKNOWN_COUNT, new Filter(
-                    Collections.singleton(id),
+                    Collections.singletonList(id),
                     ContactTypeDisplayItem.Type.CONTACT.getIdentifier())));
             contactTypes.add(new FacetValue(ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier(), new ContactTypeDisplayItem(
                 CommonStrings.CONTACT_TYPE_DISTRIBUTION_LIST,
                 ContactTypeDisplayItem.Type.DISTRIBUTION_LIST), FacetValue.UNKNOWN_COUNT, new Filter(
-                    Collections.singleton(id),
+                    Collections.singletonList(id),
                     ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier())));
             final Facet contactTypeFacet = new Facet(ContactsFacetType.TYPE, contactTypes);
             staticFacets.add(contactTypeFacet);
@@ -190,17 +185,17 @@ public class MockContactsDriver extends AbstractContactFacetingModuleSearchDrive
             folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
                 CommonStrings.FOLDER_TYPE_PRIVATE,
                 FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(
-                    Collections.singleton(id),
+                    Collections.singletonList(id),
                     FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
             folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
                 CommonStrings.FOLDER_TYPE_PUBLIC,
                 FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(
-                    Collections.singleton(id),
+                    Collections.singletonList(id),
                     FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
             folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
                 CommonStrings.FOLDER_TYPE_SHARED,
                 FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(
-                    Collections.singleton(id),
+                    Collections.singletonList(id),
                     FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
 
             final Facet folderTypeFacet = new Facet(ContactsFacetType.FOLDERS, folderTypes);

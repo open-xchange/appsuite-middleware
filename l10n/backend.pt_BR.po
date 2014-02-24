@@ -6,14 +6,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-01-22 17:48-0200\n"
-"Last-Translator: Aracele Torres < aracele@bureau-cornavin.com>\n"
-"Language-Team: Brazilian Portuguese <>\n"
+"PO-Revision-Date: 2014-02-17 15:19-0300\n"
+"Last-Translator: \n"
+"Language-Team: Brazilian Portuguese <kde-i18n-pt_BR@kde.org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Lokalize 1.4\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
@@ -5062,7 +5062,7 @@ msgstr "Meus Arquivos"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
 msgid "Drive"
-msgstr "Unidade"
+msgstr "Drive"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:108
 msgid "Public files"

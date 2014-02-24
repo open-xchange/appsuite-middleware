@@ -97,6 +97,7 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -114,11 +115,6 @@ import com.openexchange.tx.AbstractService;
 import com.openexchange.tx.TransactionAwares;
 import com.openexchange.tx.TransactionException;
 
-/**
- * {@link AbstractCompositingIDBasedFileAccess}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
 /**
  * {@link AbstractCompositingIDBasedFileAccess}
  *
@@ -1078,6 +1074,99 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     }
 
     @Override
+    public SearchIterator<File> search(final SearchTerm<?> searchTerm, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        final List<FileStorageFileAccess> all = getAllFileStorageAccesses();
+        final int numOfStorages = all.size();
+        if (0 >= numOfStorages) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+        if (1 == numOfStorages) {
+            final FileStorageFileAccess files = all.get(0);
+            final SearchIterator<File> result = files.search(searchTerm, sort, order, start, end);
+            if (result == null) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
+            final FileStorageAccountAccess accountAccess = files.getAccountAccess();
+            return fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId());
+        }
+        /*-
+         * We have to consider multiple file storages
+         *
+         * Poll them concurrently...
+         */
+        final ConcurrentTIntObjectHashMap<SearchIterator<File>> resultMap = new ConcurrentTIntObjectHashMap<SearchIterator<File>>(numOfStorages);
+        final CompletionService<Void> completionService;
+        {
+            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+            if (null == threadPool) {
+                completionService = new CallerRunsCompletionService<Void>();
+                for (int i = 0; i < numOfStorages; i++) {
+                    final FileStorageFileAccess files = all.get(i);
+                    final int index = i;
+                    completionService.submit(new Callable<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            try {
+                                final SearchIterator<File> result = files.search(searchTerm, sort, order, start, end);
+                                if (result != null) {
+                                    final FileStorageAccountAccess accountAccess = files.getAccountAccess();
+                                    resultMap.put(index, fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
+                                }
+                            } catch (final Exception e) {
+                                // Ignore failed one in composite search results
+                            }
+                            return null;
+                        }
+                    });
+                }
+            } else {
+                final ThreadPoolCompletionService<Void> tcompletionService = new ThreadPoolCompletionService<Void>(threadPool);
+                for (int i = 0; i < numOfStorages; i++) {
+                    final FileStorageFileAccess files = all.get(i);
+                    final int index = i;
+                    tcompletionService.submit(new Callable<Void>() {
+
+                        @Override
+                        public Void call() throws OXException {
+                            try {
+                                final SearchIterator<File> result = files.search(searchTerm, sort, order, start, end);
+                                if (result != null) {
+                                    final FileStorageAccountAccess accountAccess = files.getAccountAccess();
+                                    resultMap.put(index, fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
+                                }
+                            } catch (final Exception e) {
+                                // Ignore failed one in composite search results
+                            }
+                            return null;
+                        }
+                    });
+                }
+                completionService = tcompletionService;
+            }
+        }
+        /*
+         * Take from completion service
+         */
+        for (int i = 0; i < numOfStorages; i++) {
+            try {
+                completionService.take();
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+        final List<SearchIterator<File>> results = new ArrayList<SearchIterator<File>>(numOfStorages);
+        for (int i = 0; i < numOfStorages; i++) {
+            final SearchIterator<File> result = resultMap.get(i);
+            if (null != result) {
+                results.add(result);
+            }
+        }
+        return new MergingSearchIterator<File>(order.comparatorBy(sort), results);
+    }
+
+    @Override
     public SearchIterator<File> search(final String query, final List<Field> columns, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         // Check pattern
         checkPatternLength(query);
@@ -1118,8 +1207,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
          *
          * Poll them concurrently...
          */
-        final ConcurrentTIntObjectHashMap<SearchIterator<File>> resultMap = new ConcurrentTIntObjectHashMap<SearchIterator<File>>(
-            numOfStorages);
+        final ConcurrentTIntObjectHashMap<SearchIterator<File>> resultMap = new ConcurrentTIntObjectHashMap<SearchIterator<File>>(numOfStorages);
         final CompletionService<Void> completionService;
         {
             final ThreadPoolService threadPool = ThreadPools.getThreadPool();

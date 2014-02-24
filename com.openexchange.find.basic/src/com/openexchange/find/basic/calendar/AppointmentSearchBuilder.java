@@ -56,9 +56,11 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.calendar.RecurringTypeDisplayItem;
 import com.openexchange.find.calendar.RelativeDateDisplayItem;
 import com.openexchange.find.calendar.StatusDisplayItem;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.folderstorage.FolderResponse;
@@ -83,7 +85,7 @@ public class AppointmentSearchBuilder {
 
     private final AppointmentSearchObject appointmentSearch;
     private final ServerSession session;
-    private boolean isFalse;
+    private boolean hasFolderFilter;
 
     /**
      * Initializes a new {@link AppointmentSearchBuilder}.
@@ -109,7 +111,13 @@ public class AppointmentSearchBuilder {
      * @return <code>true</code> if this search will lead to no results, <code>false</code>, otherwise
      */
     public boolean isFalse() {
-        return isFalse;
+        if (hasFolderFilter) {
+            Set<Integer> folderIDs = appointmentSearch.getFolderIDs();
+            if (null == folderIDs || 0 == folderIDs.size()) {
+                return true; // folders specified in filter, but no suitable folders available
+            }
+        }
+        return false;
     }
 
     /**
@@ -120,11 +128,28 @@ public class AppointmentSearchBuilder {
      * @throws OXException
      */
     public AppointmentSearchBuilder applyFilter(Filter filter) throws OXException {
-        Set<String> fields = filter.getFields();
-        Set<String> queries = filter.getQueries();
+        List<String> fields = filter.getFields();
         for (String field : fields) {
-            for (String query : queries) {
-                apply(field, query);
+            if ("subject".equals(field)) {
+                applySubject(filter.getQueries());
+            } else if ("description".equals(field)) {
+                applyDescription(filter.getQueries());
+            } else if ("location".equals(field)) {
+                applyLocation(filter.getQueries());
+            } else if ("relative_date".equals(field)) {
+                applyRelativeDate(filter.getQueries());
+            } else if ("status".equals(field)) {
+                applyStatus(filter.getQueries());
+            } else if ("recurring_type".equals(field)) {
+                applyRecurringType(filter.getQueries());
+            } else if ("folder_type".equals(field)) {
+                applyFolderType(filter.getQueries());
+            } else if ("participants".equals(field)) {
+                applyParticipants(filter.getQueries());
+            } else if ("users".equals(field)) {
+                applyUsers(filter.getQueries());
+            } else {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
             }
         }
         return this;
@@ -169,136 +194,145 @@ public class AppointmentSearchBuilder {
         return this;
     }
 
-    private AppointmentSearchBuilder apply(String field, String query) throws OXException {
-        if ("subject".equals(field)) {
-            applySubject(query);
-        } else if ("description".equals(field)) {
-            applyDescription(query);
-        } else if ("location".equals(field)) {
-            applyLocation(query);
-        } else if ("relative_date".equals(field)) {
-            applyRelativeDate(query);
-        } else if ("status".equals(field)) {
-            applyStatus(query);
-        } else if ("recurring_type".equals(field)) {
-            applyRecurringType(query);
-        } else if ("folder_type".equals(field)) {
-            applyFolderType(query);
-        } else if ("contact".equals(field)) {
-
-            // TODO
-
-        } else {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
+    private void applyParticipants(List<String> queries) throws OXException {
+        Set<String> externalParticipants = appointmentSearch.getExternalParticipants();
+        if (null == externalParticipants) {
+            externalParticipants = new HashSet<String>();
         }
-        return this;
+        for (String query : queries) {
+            if (false == isWildcardOnly(query)) {
+                externalParticipants.add(addWildcards(query, false, false));
+            }
+        }
+        appointmentSearch.setExternalParticipants(externalParticipants);
     }
 
-    private void applyFolderType(String query) throws OXException {
-        Type type;
-        if (FolderTypeDisplayItem.Type.PRIVATE.getIdentifier().equals(query)) {
-            type = PrivateType.getInstance();
-        } else if (FolderTypeDisplayItem.Type.PUBLIC.getIdentifier().equals(query)) {
-            type = PublicType.getInstance();
-        } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(query)) {
-            type = SharedType.getInstance();
-        } else {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
+    private void applyUsers(List<String> queries) throws OXException {
+        Set<Integer> userIDs = appointmentSearch.getUserIDs();
+        if (null == userIDs) {
+            userIDs = new HashSet<Integer>();
         }
-        FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
-            FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session, null);
-        UserizedFolder[] folders = visibleFolders.getResponse();
-        if (null != folders && 0 < folders.length) {
-            Set<Integer> folderIDs = new HashSet<Integer>(folders.length);
-            for (UserizedFolder folder : folders) {
-                try {
-                    folderIDs.add(Integer.valueOf(folder.getID()));
-                } catch (NumberFormatException e) {
-                    throw OXException.general("", e);
+        for (String query : queries) {
+            try {
+                userIDs.add(Integer.valueOf(query));
+            } catch (NumberFormatException e) {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, query);
+            }
+        }
+        appointmentSearch.setUserIDs(userIDs);
+    }
+
+    private void applyFolderType(List<String> queries) throws OXException {
+        Set<Integer> folderIDs = appointmentSearch.getFolderIDs();
+        if (null == folderIDs) {
+            folderIDs = new HashSet<Integer>();
+        }
+        for (String query : queries) {
+            Type type;
+            if (FolderTypeDisplayItem.Type.PRIVATE.getIdentifier().equals(query)) {
+                type = PrivateType.getInstance();
+            } else if (FolderTypeDisplayItem.Type.PUBLIC.getIdentifier().equals(query)) {
+                type = PublicType.getInstance();
+            } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(query)) {
+                type = SharedType.getInstance();
+            } else {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
+            }
+            FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
+                FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session, null);
+            UserizedFolder[] folders = visibleFolders.getResponse();
+            if (null != folders && 0 < folders.length) {
+                for (UserizedFolder folder : folders) {
+                    try {
+                        folderIDs.add(Integer.valueOf(folder.getID()));
+                    } catch (NumberFormatException e) {
+                        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, query, CommonFacetType.FOLDER_TYPE.getName());
+                    }
                 }
             }
-            appointmentSearch.setFolderIDs(folderIDs);
-        } else {
-            /*
-             * no folders found, assume empty search results
-             */
-            isFalse = true;
         }
+        appointmentSearch.setFolderIDs(folderIDs);
+        hasFolderFilter = true;
     }
 
-    private void applyStatus(String query) throws OXException {
-        int status;
-        if (StatusDisplayItem.Status.ACCEPTED.getIdentifier().equals(query)) {
-            status = CalendarDataObject.ACCEPT;
-        } else if (StatusDisplayItem.Status.NONE.getIdentifier().equals(query)) {
-            status = CalendarDataObject.NONE;
-        } else if (StatusDisplayItem.Status.TENTATIVE.getIdentifier().equals(query)) {
-            status = CalendarDataObject.TENTATIVE;
-        } else if (StatusDisplayItem.Status.DECLINED.getIdentifier().equals(query)) {
-            status = CalendarDataObject.DECLINE;
-        } else {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
-        }
+    private void applyStatus(List<String> queries) throws OXException {
         Set<Integer> ownStatus = appointmentSearch.getOwnStatus();
         if (null == ownStatus) {
             ownStatus = new HashSet<Integer>();
         }
-        ownStatus.add(status);
+        for (String query : queries) {
+            int status;
+            if (StatusDisplayItem.Status.ACCEPTED.getIdentifier().equals(query)) {
+                status = CalendarDataObject.ACCEPT;
+            } else if (StatusDisplayItem.Status.NONE.getIdentifier().equals(query)) {
+                status = CalendarDataObject.NONE;
+            } else if (StatusDisplayItem.Status.TENTATIVE.getIdentifier().equals(query)) {
+                status = CalendarDataObject.TENTATIVE;
+            } else if (StatusDisplayItem.Status.DECLINED.getIdentifier().equals(query)) {
+                status = CalendarDataObject.DECLINE;
+            } else {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.STATUS.getName());
+            }
+            ownStatus.add(status);
+        }
         appointmentSearch.setOwnStatus(ownStatus);
     }
 
-    private void applyRecurringType(String query) throws OXException {
-        if (RecurringTypeDisplayItem.RecurringType.SERIES.getIdentifier().equals(query)) {
-            appointmentSearch.setExcludeNonRecurringAppointments(true);
-        } else if (RecurringTypeDisplayItem.RecurringType.SINGLE.getIdentifier().equals(query)) {
-            appointmentSearch.setExcludeRecurringAppointments(true);
-        } else {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
-        }
-    }
-
-    private void applyRelativeDate(String query) throws OXException {
-        if (RelativeDateDisplayItem.RelativeDate.COMING.getIdentifier().equals(query)) {
-            appointmentSearch.setMinimumEndDate(new Date());
-        } else if (RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier().equals(query)) {
-            appointmentSearch.setMaximumStartDate(new Date());
-        } else {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
-        }
-    }
-
-    private void applySubject(String query) {
-        if (false == isWildcardOnly(query)) {
-            Set<String> titles = appointmentSearch.getTitles();
-            if (null == titles) {
-                titles = new HashSet<String>();
+    private void applyRecurringType(List<String> queries) throws OXException {
+        for (String query : queries) {
+            if (RecurringTypeDisplayItem.RecurringType.SERIES.getIdentifier().equals(query)) {
+                appointmentSearch.setExcludeNonRecurringAppointments(true);
+            } else if (RecurringTypeDisplayItem.RecurringType.SINGLE.getIdentifier().equals(query)) {
+                appointmentSearch.setExcludeRecurringAppointments(true);
+            } else {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
             }
+        }
+    }
+
+    private void applyRelativeDate(List<String> queries) throws OXException {
+        for (String query : queries) {
+            if (RelativeDateDisplayItem.RelativeDate.COMING.getIdentifier().equals(query)) {
+                appointmentSearch.setMinimumEndDate(new Date());
+            } else if (RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier().equals(query)) {
+                appointmentSearch.setMaximumStartDate(new Date());
+            } else {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RELATIVE_DATE.getName());
+            }
+        }
+    }
+
+    private void applySubject(List<String> queries) {
+        Set<String> titles = appointmentSearch.getTitles();
+        if (null == titles) {
+            titles = new HashSet<String>();
+        }
+        for (String query : queries) {
             titles.add(addWildcards(query, true, true));
-            appointmentSearch.setTitles(titles);
         }
+        appointmentSearch.setTitles(titles);
     }
 
-    private void applyLocation(String query) {
-        if (false == isWildcardOnly(query)) {
-            Set<String> locations = appointmentSearch.getLocations();
-            if (null == locations) {
-                locations = new HashSet<String>();
-            }
+    private void applyLocation(List<String> queries) {
+        Set<String> locations = appointmentSearch.getLocations();
+        if (null == locations) {
+            locations = new HashSet<String>();
+        }
+        for (String query : queries) {
             locations.add(addWildcards(query, true, true));
-            appointmentSearch.setLocations(locations);
-            return;
         }
+        appointmentSearch.setLocations(locations);
     }
 
-    private void applyDescription(String query) {
-        if (false == isWildcardOnly(query)) {
-            Set<String> notes = appointmentSearch.getNotes();
-            if (null == notes) {
-                notes = new HashSet<String>();
-            }
-            notes.add(addWildcards(query, true, true));
-            appointmentSearch.setNotes(notes);
+    private void applyDescription(List<String> queries) {
+        Set<String> notes = appointmentSearch.getNotes();
+        if (null == notes) {
+            notes = new HashSet<String>();
         }
+        for (String query : queries) {
+            notes.add(addWildcards(query, true, true));
+        }
+        appointmentSearch.setNotes(notes);
     }
 
     private static boolean isWildcardOnly(String query) {

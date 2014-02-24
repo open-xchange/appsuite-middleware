@@ -123,25 +123,40 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT HEX(uuid),COUNT(*) AS count FROM user_setting_server GROUP BY uuid HAVING count>1 ORDER BY count DESC");
+            stmt = con.prepareStatement("SELECT cid, user, HEX(uuid) FROM user_setting_server GROUP BY cid, user, uuid HAVING count(*) > 1");
             rs = stmt.executeQuery();
 
             if (!rs.next()) {
                 return;
             }
 
-            final List<UUID> dups = new LinkedList<UUID>();
+            class Dup {
+                final UUID uuid;
+                final int cid;
+                final int user;
+
+                Dup(int cid, int user, UUID uuid) {
+                    super();
+                    this.cid = cid;
+                    this.user = user;
+                    this.uuid = uuid;
+                }
+            }
+
+            final List<Dup> dups = new LinkedList<Dup>();
             do {
-                dups.add(UUIDs.fromUnformattedString(rs.getString(1)));
+                dups.add(new Dup(rs.getInt(1), rs.getInt(2), UUIDs.fromUnformattedString(rs.getString(3))));
             } while (rs.next());
 
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
-            for (final UUID uuid : dups) {
-                stmt = con.prepareStatement("SELECT cid, user, contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailAccess, contactCollectOnMailTransport, folderTree FROM user_setting_server WHERE ?=HEX(uuid)");
-                stmt.setString(1, UUIDs.getUnformattedString(uuid));
+            for (final Dup dup : dups) {
+                stmt = con.prepareStatement("SELECT cid, user, contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailAccess, contactCollectOnMailTransport, folderTree FROM user_setting_server WHERE cid=? AND user=? AND ?=HEX(uuid)");
+                stmt.setInt(1, dup.cid);
+                stmt.setInt(2, dup.user);
+                stmt.setString(3, UUIDs.getUnformattedString(dup.uuid));
                 rs = stmt.executeQuery();
 
                 if (rs.next()) {
@@ -158,8 +173,10 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
                     rs = null;
                     stmt = null;
 
-                    stmt = con.prepareStatement("DELETE FROM user_setting_server WHERE ?=HEX(uuid)");
-                    stmt.setString(1, UUIDs.getUnformattedString(uuid));
+                    stmt = con.prepareStatement("DELETE FROM user_setting_server WHERE cid=? AND user=? AND ?=HEX(uuid)");
+                    stmt.setInt(1, dup.cid);
+                    stmt.setInt(2, dup.user);
+                    stmt.setString(3, UUIDs.getUnformattedString(dup.uuid));
                     stmt.executeUpdate();
                     Databases.closeSQLStuff(stmt);
                     stmt = null;
@@ -174,7 +191,7 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
                     stmt.setInt(7, contactCollectOnMailAccess);
                     stmt.setInt(8, contactCollectOnMailTransport);
                     stmt.setInt(9, folderTree);
-                    stmt.setString(10, UUIDs.getUnformattedString(uuid));
+                    stmt.setString(10, UUIDs.getUnformattedString(dup.uuid));
                     stmt.executeUpdate();
                     Databases.closeSQLStuff(stmt);
                     stmt = null;

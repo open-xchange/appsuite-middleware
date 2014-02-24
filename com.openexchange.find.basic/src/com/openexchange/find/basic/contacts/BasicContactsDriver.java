@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -208,7 +207,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         List<FacetValue> contactValues = new ArrayList<FacetValue>(contacts.size());
         for (Contact contact : contacts) {
             String id = "contact";
-            Filter filter = new Filter(Collections.singleton(id), String.valueOf(contact.getObjectID()));
+            Filter filter = new Filter(Collections.singletonList(id), String.valueOf(contact.getObjectID()));
             contactValues.add(new FacetValue(prepareFacetValueId(id, session.getContextId(),
                 Integer.toString(contact.getObjectID())), new ContactDisplayItem(contact), 1, filter));
         }
@@ -256,8 +255,8 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
      * @throws OXException
      */
     private SearchTerm<?> getSearchTerm(ServerSession session, Filter filter) throws OXException {
-        Set<String> fields = filter.getFields();
-        Set<String> queries = filter.getQueries();
+        List<String> fields = filter.getFields();
+        List<String> queries = filter.getQueries();
         if (1 == fields.size() && 1 == queries.size()) {
             return createSearchTerm(session, fields.iterator().next(), queries.iterator().next());
         }

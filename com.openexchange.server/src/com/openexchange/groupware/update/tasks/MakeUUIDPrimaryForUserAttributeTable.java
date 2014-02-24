@@ -130,25 +130,37 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT HEX(uuid),COUNT(*) AS count FROM user_attribute GROUP BY uuid HAVING count>1 ORDER BY count DESC");
+            stmt = con.prepareStatement("SELECT cid, HEX(uuid) FROM user_setting_server GROUP BY cid, uuid HAVING count(*) > 1");
             rs = stmt.executeQuery();
 
             if (!rs.next()) {
                 return;
             }
 
-            final List<UUID> dups = new LinkedList<UUID>();
+            class Dup {
+                final UUID uuid;
+                final int cid;
+
+                Dup(int cid, UUID uuid) {
+                    super();
+                    this.cid = cid;
+                    this.uuid = uuid;
+                }
+            }
+
+            final List<Dup> dups = new LinkedList<Dup>();
             do {
-                dups.add(UUIDs.fromUnformattedString(rs.getString(1)));
+                dups.add(new Dup(rs.getInt(1), UUIDs.fromUnformattedString(rs.getString(2))));
             } while (rs.next());
 
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
-            for (final UUID uuid : dups) {
-                stmt = con.prepareStatement("SELECT cid, id, name, value FROM user_attribute WHERE ?=HEX(uuid)");
-                stmt.setString(1, UUIDs.getUnformattedString(uuid));
+            for (final Dup dup : dups) {
+                stmt = con.prepareStatement("SELECT cid, id, name, value FROM user_attribute WHERE cid=? AND ?=HEX(uuid)");
+                stmt.setInt(1, dup.cid);
+                stmt.setString(2, UUIDs.getUnformattedString(dup.uuid));
                 rs = stmt.executeQuery();
 
                 if (rs.next()) {
@@ -160,8 +172,9 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
                     rs = null;
                     stmt = null;
 
-                    stmt = con.prepareStatement("DELETE FROM user_attribute WHERE ?=HEX(uuid)");
-                    stmt.setString(1, UUIDs.getUnformattedString(uuid));
+                    stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND ?=HEX(uuid)");
+                    stmt.setInt(1, dup.cid);
+                    stmt.setString(2, UUIDs.getUnformattedString(dup.uuid));
                     stmt.executeUpdate();
                     Databases.closeSQLStuff(stmt);
                     stmt = null;
@@ -171,7 +184,7 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
                     stmt.setInt(2, id);
                     stmt.setString(3, name);
                     stmt.setString(4, value);
-                    stmt.setString(5, UUIDs.getUnformattedString(uuid));
+                    stmt.setString(5, UUIDs.getUnformattedString(dup.uuid));
                     stmt.executeUpdate();
                     Databases.closeSQLStuff(stmt);
                     stmt = null;

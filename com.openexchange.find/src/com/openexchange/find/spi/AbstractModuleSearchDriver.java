@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.6.0
  */
 public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
-    
+
     /**
      * Builds the facet for folder types (private, public , shared, external) that is indicated on {@link ModuleSearchDriver#getConfiguration(com.openexchange.tools.session.ServerSession) getConfiguration(ServerSession)} invocation.
      *
@@ -83,10 +83,10 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
     protected Facet buildFolderTypeFacet() {
         final List<FacetValue> folderTypes = new ArrayList<FacetValue>(4);
         final String sField = "folder_type";
-        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton(sField), FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
-        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton(sField), FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
-        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton(sField), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
-        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.EXTERNAL.getIdentifier(), new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_EXTERNAL, FolderTypeDisplayItem.Type.EXTERNAL), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton(sField), FolderTypeDisplayItem.Type.EXTERNAL.getIdentifier())));
+        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(sField), FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
+        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(sField), FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
+        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(sField), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
+        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.EXTERNAL.getIdentifier(), new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_EXTERNAL, FolderTypeDisplayItem.Type.EXTERNAL), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(sField), FolderTypeDisplayItem.Type.EXTERNAL.getIdentifier())));
         final Facet folderTypeFacet = new Facet(CommonFacetType.FOLDER_TYPE, folderTypes);
         return folderTypeFacet;
     }
@@ -140,7 +140,7 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
         return result;
     }
 
-    protected String prepareFacetValueId(String prefix, int contextId, String objectId) {
+    protected static String prepareFacetValueId(String prefix, int contextId, String objectId) {
         return prefix + '/' + Integer.toString(contextId) + '/' + objectId;
     }
 

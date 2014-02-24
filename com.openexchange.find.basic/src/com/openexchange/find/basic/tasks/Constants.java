@@ -49,13 +49,15 @@
 
 package com.openexchange.find.basic.tasks;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * {@link Constants}
- * 
+ *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  * @since v7.6.0
  */
@@ -74,14 +76,14 @@ public class Constants {
     public final static String FIELD_FOLDER = "folder";
 
     public final static String FIELD_STATUS = "status";
-    
+
     public final static String FIELD_LOCATION ="location";
-    
+
     public final static String FIELD_ATTACHMENT_NAME = "attachment_name";
 
     public final static String FIELD_TYPE = "type";
 
-    public static final Set<String> PERSONS_FILTER_FIELDS = createStringSet(FIELD_FROM, FIELD_TO, FIELD_CC);
+    public static final List<String> PERSONS_FILTER_FIELDS = Arrays.asList(new String[] { FIELD_FROM, FIELD_TO, FIELD_CC });
 
     public static final Set<String> FOLDERS_FILTER_FIELDS = createStringSet(FIELD_FOLDER);
 

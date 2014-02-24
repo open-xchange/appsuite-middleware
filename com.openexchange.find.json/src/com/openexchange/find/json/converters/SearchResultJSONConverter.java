@@ -90,7 +90,7 @@ public class SearchResultJSONConverter extends AbstractJSONConverter {
             JSONObject json = new JSONObject();
             try {
                 json.put("numFound", searchResult.getNumFound());
-                json.put("from", searchResult.getStart());
+                json.put("start", searchResult.getStart());
                 json.put("size", searchResult.getSize());
 
                 JSONResponseVisitor visitor = new JSONResponseVisitor(session, converterRegistry);

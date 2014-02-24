@@ -72,8 +72,9 @@ import com.openexchange.tools.session.ServerSession;
  * {@link ImageGetAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
+@DispatcherNotes(defaultFormat = "file", allowPublicSession = true, publicSessionAuth = true)
 public class ImageGetAction implements AJAXActionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageGetAction.class);

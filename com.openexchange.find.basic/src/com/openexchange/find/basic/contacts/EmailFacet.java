@@ -73,7 +73,7 @@ public class EmailFacet extends CommonContactSearchFacet {
 
     public EmailFacet() {
         super(ContactsFacetType.EMAIL, Collections.singletonList(
-            new FacetValue(ID, new SimpleDisplayItem(ID), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton(ID), "override"))));
+            new FacetValue(ID, new SimpleDisplayItem(ID), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(ID), "override"))));
     }
     @Override
     public String getID() {

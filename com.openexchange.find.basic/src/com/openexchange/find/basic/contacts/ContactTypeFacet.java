@@ -88,10 +88,10 @@ public class ContactTypeFacet extends ContactSearchFacet {
         List<FacetValue> facetValues = new ArrayList<FacetValue>(2);
         facetValues.add(new FacetValue(ContactTypeDisplayItem.Type.CONTACT.getIdentifier(),
             new ContactTypeDisplayItem(CommonStrings.CONTACT_TYPE_CONTACT, ContactTypeDisplayItem.Type.CONTACT),
-            FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton(ID), ContactTypeDisplayItem.Type.CONTACT.getIdentifier())));
+            FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(ID), ContactTypeDisplayItem.Type.CONTACT.getIdentifier())));
         facetValues.add(new FacetValue(ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier(),
             new ContactTypeDisplayItem(CommonStrings.CONTACT_TYPE_DISTRIBUTION_LIST, ContactTypeDisplayItem.Type.DISTRIBUTION_LIST),
-            FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton(ID), ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier())));
+            FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(ID), ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier())));
         return facetValues;
     }
 
@@ -119,7 +119,7 @@ public class ContactTypeFacet extends ContactSearchFacet {
             searchTerm.addOperand(new ConstantOperand<Boolean>(Boolean.TRUE));
             return searchTerm;
         }
-        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
+        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, ContactsFacetType.TYPE.getName());
     }
 
 }

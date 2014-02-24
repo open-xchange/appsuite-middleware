@@ -2057,6 +2057,26 @@ msgstr ""
 msgid "Mail Text"
 msgstr ""
 
+#. Search criteria time
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:77
+msgid "Time"
+msgstr ""
+
+#. Search mails from last week
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:80
+msgid "last week"
+msgstr ""
+
+#. Search mails from last month
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
+msgid "last month"
+msgstr ""
+
+#. Search mails from last year
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
+msgid "last year"
+msgstr ""
+
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Search in task name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:64
