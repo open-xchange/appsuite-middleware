@@ -156,6 +156,7 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
                     jFields.put(sField);
                 }
                 jFilter.put("fields", jFields);
+                jFilters.put(jFilter);
             }
             jBody.put("filters", jFilters);
         }

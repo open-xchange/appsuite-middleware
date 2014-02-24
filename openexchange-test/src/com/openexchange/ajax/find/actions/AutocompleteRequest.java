@@ -51,6 +51,7 @@ package com.openexchange.ajax.find.actions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -60,12 +61,18 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.find.Module;
+import com.openexchange.find.calendar.CalendarFacetType;
+import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.mail.MailFacetType;
+import com.openexchange.find.tasks.TasksFacetType;
 
 /**
  * {@link AutocompleteRequest}
@@ -77,22 +84,31 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
     private final boolean failOnError;
     private final String prefix;
     private final String module;
+    private final List<Facet> activeFacets;
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
      */
     public AutocompleteRequest(final String prefix, final String module) {
-        this(prefix, module, true);
+        this(prefix, module, null, true);
     }
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
      */
-    public AutocompleteRequest(final String prefix, final String module, final boolean failOnError) {
+    public AutocompleteRequest(final String prefix, final String module, final List<Facet> activeFacets) {
+        this(prefix, module, activeFacets, true);
+    }
+
+    /**
+     * Initializes a new {@link AutocompleteRequest}.
+     */
+    public AutocompleteRequest(final String prefix, final String module, final List<Facet> activeFacets, final boolean failOnError) {
         super();
         this.failOnError = failOnError;
         this.prefix = prefix;
         this.module = module;
+        this.activeFacets = activeFacets;
     }
 
     @Override
@@ -110,23 +126,40 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
 
     @Override
     public AbstractAJAXParser<? extends AutocompleteResponse> getParser() {
-        return new AutocompleteParser(failOnError);
+        return new AutocompleteParser(module, failOnError);
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
         final JSONObject jBody = new JSONObject(2);
         jBody.put("prefix", prefix);
+        if (activeFacets != null) {
+            JSONArray jFacets = new JSONArray();
+            for (Facet facet : activeFacets) {
+                JSONObject jFacet = new JSONObject();
+                jFacet.put("type", facet.getType().getName());
+                JSONArray jValues = new JSONArray();
+                for (FacetValue value : facet.getValues()) {
+                    jValues.put(new JSONObject(Collections.singletonMap("id", value.getId())));
+                }
+                jFacet.put("values", jValues);
+                jFacets.put(jFacet);
+            }
+            jBody.put("activeFacets", jFacets);
+        }
         return jBody;
     }
 
     private static class AutocompleteParser extends AbstractAJAXParser<AutocompleteResponse> {
 
+        private final String module;
+
         /**
          * Initializes a new {@link AutocompleteParser}.
          */
-        protected AutocompleteParser(final boolean failOnError) {
+        protected AutocompleteParser(final String module, final boolean failOnError) {
             super(failOnError);
+            this.module = module;
         }
 
         @Override
@@ -146,18 +179,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
             // Type information
             final String type = jFacet.getString("type");
             final String displayName = jFacet.getString("displayName");
-            final FacetType facetType = new FacetType() {
-
-                @Override
-                public String getName() {
-                    return type;
-                }
-
-                @Override
-                public String getDisplayName() {
-                    return displayName;
-                }
-            };
+            final FacetType facetType = facetTypeFor(Module.moduleFor(module), type);
 
             // Facets
             final JSONArray jFacetValues = jFacet.getJSONArray("values");
@@ -194,6 +216,28 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
             }
 
             return new Filter(fields, queries);
+        }
+
+        private FacetType facetTypeFor(Module module, String name) {
+            switch(module) {
+                case MAIL:
+                    return MailFacetType.getByName(name);
+
+                case CALENDAR:
+                    return CalendarFacetType.getByName(name);
+
+                case CONTACTS:
+                    return ContactsFacetType.getByName(name);
+
+                case DRIVE:
+                    return DriveFacetType.getByName(name);
+
+                case TASKS:
+                    return TasksFacetType.getByName(name);
+
+                default:
+                    return null;
+            }
         }
 
         private DisplayItem parseJDisplayItem(final JSONObject jDisplayItem) throws JSONException {
