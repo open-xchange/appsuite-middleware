@@ -311,6 +311,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     public static final String PARAMETER_SESSION = "session";
 
+    /**
+     * The parameter 'public_session' represents the public id of current active user session
+     */
+    public static final String PARAMETER_PUBLIC_SESSION = "public_session";
+
     public static final String PARAMETER_DATA = ResponseFields.DATA;
 
     /**

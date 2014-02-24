@@ -85,6 +85,7 @@ public class DefaultDispatcher implements Dispatcher {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultDispatcher.class);
 
     private final ConcurrentMap<StrPair, Boolean> fallbackSessionActionsCache;
+    private final ConcurrentMap<StrPair, Boolean> publicSessionAuthCache;
     private final ConcurrentMap<StrPair, Boolean> omitSessionActionsCache;
     private final ConcurrentMap<StrPair, Boolean> noSecretCallbackCache;
 
@@ -97,6 +98,7 @@ public class DefaultDispatcher implements Dispatcher {
     public DefaultDispatcher() {
         super();
         fallbackSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
+        publicSessionAuthCache = new ConcurrentHashMap<StrPair, Boolean>(128);
         omitSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
         noSecretCallbackCache = new ConcurrentHashMap<StrPair, Boolean>(128);
 
@@ -425,14 +427,29 @@ public class DefaultDispatcher implements Dispatcher {
 	    if (null == ret) {
 	        final AJAXActionServiceFactory factory = lookupFactory(module);
 	        if (factory == null) {
-	            ret = Boolean.FALSE;
-	        } else {
-    	        final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
-    	        ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.allowPublicSession());
+	            return false;
 	        }
+            final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
+            ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.allowPublicSession());
 	        fallbackSessionActionsCache.put(key, ret);
         }
 	    return ret.booleanValue();
+	}
+
+	@Override
+	public boolean mayPerformPublicSessionAuth(final String module, final String action) throws OXException {
+	    final StrPair key = new StrPair(module, action);
+        Boolean ret = publicSessionAuthCache.get(key);
+        if (null == ret) {
+            final AJAXActionServiceFactory factory = lookupFactory(module);
+            if (factory == null) {
+                return false;
+            }
+            final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
+            ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.publicSessionAuth());
+            publicSessionAuthCache.put(key, ret);
+        }
+        return ret.booleanValue();
 	}
 
 	@Override
@@ -442,11 +459,10 @@ public class DefaultDispatcher implements Dispatcher {
         if (null == ret) {
             final AJAXActionServiceFactory factory = lookupFactory(module);
             if (factory == null) {
-                return Boolean.FALSE;
-            } else {
-                final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
-                ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.noSession());
+                return false;
             }
+            final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
+            ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.noSession());
             omitSessionActionsCache.put(key, ret);
         }
         return ret.booleanValue();

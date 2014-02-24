@@ -279,6 +279,7 @@ public class DispatcherServlet extends SessionServlet {
         // Check if associated request allows no session (if no "session" parameter was found)
         boolean mayOmitSession = false;
         boolean mayUseFallbackSession = false;
+        boolean mayPerformPublicSessionAuth = false;
         if (!sessionParamFound) {
             final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
             final String module = requestDataTools.getModule(PREFIX.get(), req);
@@ -286,10 +287,11 @@ public class DispatcherServlet extends SessionServlet {
             final Dispatcher dispatcher = DISPATCHER.get();
             mayOmitSession = dispatcher.mayOmitSession(module, action);
             mayUseFallbackSession = dispatcher.mayUseFallbackSession(module, action);
+            mayPerformPublicSessionAuth = dispatcher.mayPerformPublicSessionAuth(module, action);
         }
         // Try public session
         if (!mayOmitSession) {
-            findPublicSessionId(req, session, sessiondService, mayUseFallbackSession);
+            findPublicSessionId(req, session, sessiondService, mayUseFallbackSession, mayPerformPublicSessionAuth);
         }
     }
 
