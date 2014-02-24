@@ -51,8 +51,12 @@ package com.openexchange.capabilities.osgi;
 
 import static com.openexchange.capabilities.internal.AbstractCapabilityService.getCapability;
 import java.io.ByteArrayInputStream;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
@@ -71,6 +75,8 @@ import com.openexchange.groupware.userconfiguration.service.PermissionAvailabili
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -81,7 +87,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, UserPermissionService.class, DatabaseService.class, TimerService.class, CacheService.class };
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, UserPermissionService.class, DatabaseService.class, TimerService.class, CacheService.class, SessiondService.class };
     }
 
     @Override
@@ -177,6 +183,12 @@ public class CapabilitiesActivator extends HousekeepingActivator {
                 "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
+        }
+        {
+            final EventHandler eventHandler = new CapabilitiesEventHandler(this);
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+            dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registerService(EventHandler.class, eventHandler, dict);
         }
 
         openTrackers();
