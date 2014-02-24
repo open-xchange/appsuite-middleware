@@ -2,6 +2,7 @@
 
  - Fix for bug 31252: Put error arguments into "error_params" field for compatibility reasons
  - Fix for bug 31287: Do not apply black-list on provisioning calls
+ - Fix for bug 30969: Fully leverage from folder cache within folder layer, do not use a custom one in IMAP bundle
 
 * 2014-02-24 - marcus.klein@open-xchange.com
 
