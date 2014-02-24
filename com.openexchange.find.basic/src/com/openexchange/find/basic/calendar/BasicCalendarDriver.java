@@ -50,18 +50,30 @@
 package com.openexchange.find.basic.calendar;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.AutocompleteRequest;
+import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.calendar.CalendarDocument;
+import com.openexchange.find.calendar.CalendarFacetType;
+import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -77,6 +89,13 @@ public class BasicCalendarDriver extends MockCalendarDriver {
      */
     public BasicCalendarDriver() {
         super();
+    }
+
+    @Override
+    public AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+        List<Facet> facets = new ArrayList<Facet>();
+        facets.add(new Facet(CalendarFacetType.CONTACTS, getAutocompleteContacts(autocompleteRequest, session)));
+        return new AutocompleteResult(facets);
     }
 
     @Override
@@ -110,6 +129,57 @@ public class BasicCalendarDriver extends MockCalendarDriver {
         }
         //TODO: start / limit
         return new SearchResult(appointmentDocuments.size(), searchRequest.getStart(), appointmentDocuments);
+    }
+
+    private List<FacetValue> getAutocompleteContacts(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+        /*
+         * search matching contacts (and users, implicitly)
+         */
+        List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
+        List<FacetValue> contactFacets = new ArrayList<FacetValue>();
+        for (Contact contact : contacts) {
+            Filter filter = null;
+            if (0 < contact.getInternalUserId()) {
+                /*
+                 * build "users" filter for internal user
+                 */
+                filter = new Filter(Collections.singletonList("users"), String.valueOf(contact.getInternalUserId()));
+            } else {
+                /*
+                 * build "participants" filter for email addresses
+                 */
+                Set<String> emailAddresses = extractEmailAddresses(contact);
+                if (null != emailAddresses && 0 < emailAddresses.size()) {
+                    filter = new Filter(Collections.singletonList("participants"), new ArrayList<String>(emailAddresses));
+                }
+            }
+            if (null != filter) {
+                contactFacets.add(new FacetValue(
+                    prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID())),
+                    new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
+            }
+        }
+        return contactFacets;
+    }
+
+    private List<FacetValue> getAutocompleteResources(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+        //TODO
+        return Collections.emptyList();
+    }
+
+    private List<FacetValue> getAutocompleteGroups(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+        //TODO
+        return Collections.emptyList();
+    }
+
+    private static Set<String> extractEmailAddresses(Contact contact) {
+        Set<String> emailAddresses = new HashSet<String>(3);
+        for (String email : new String[] { contact.getEmail1(), contact.getEmail2(), contact.getEmail3() } ) {
+            if (false == Strings.isEmpty(email)) {
+                emailAddresses.add(email);
+            }
+        }
+        return emailAddresses;
     }
 
 }
