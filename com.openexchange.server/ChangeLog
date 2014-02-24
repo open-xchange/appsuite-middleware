@@ -1,3 +1,7 @@
+* 2014-02-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31249: Be aware of infostore items without files when filtering, set appropriate HTTP status in download response 
+
 * 2014-02-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 30761: Do not occupy a database connection without using it.
