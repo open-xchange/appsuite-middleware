@@ -58,6 +58,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -191,7 +192,8 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
     private String getTeaser(final String folder, final String mailId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         final String[] idAsArr = new String[1];
         idAsArr[0] = mailId;
-        final int cutIndex = 200;
+        final ConfigurationService configurationService = services.getService(ConfigurationService.class);
+        final int cutIndex = configurationService.getIntProperty("com.openexchange.mobilenotifier.mail.maxContentSize", 200);
 
         final String[] message = mailAccess.getMessageStorage().getPrimaryContents(folder, idAsArr);
         String teaser = message[0];

@@ -6,7 +6,8 @@ Bundle-SymbolicName: com.openexchange.mobilenotifier.mail
 Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.mobilenotifier.mail.osgi.MobileNotifierMailActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
  com.openexchange.groupware.ldap,
  com.openexchange.mail,
  com.openexchange.mail.api,
@@ -18,5 +19,5 @@ Import-Package: com.openexchange.exception,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
- org.osgi.framework,
- javax.mail.internet
+ javax.mail.internet,
+ org.osgi.framework
