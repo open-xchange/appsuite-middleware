@@ -4,22 +4,22 @@
 #
 # Kalman Kemenczy <kkemenczy@opensuse.org>, 2011, 2012.
 # Gabor Kelemen <kelemeng at gnome dot hu>, 2011, 2012, 2013, 2014.
-# Kalman Kemenczy <kkemenczy@gmail.com>, 2011, 2013.
+# Kalman Kemenczy <kkemenczy@gmail.com>, 2011, 2013, 2014.
 # Antje Faber, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-01-27 08:57+0100\n"
-"Last-Translator: Gabor Kelemen <kelemeng at gnome dot hu>\n"
+"PO-Revision-Date: 2014-02-22 22:37+0900\n"
+"Last-Translator: Kálmán Kéménczy <kkemenczy@gmail.com>\n"
 "Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.4\n"
+"X-Generator: Lokalize 1.5\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
@@ -4972,7 +4972,7 @@ msgstr "Fájljaim"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
 msgid "Drive"
-msgstr "Meghajtó"
+msgstr "Drive"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:108
 msgid "Public files"
