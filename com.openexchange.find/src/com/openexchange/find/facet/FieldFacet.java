@@ -88,7 +88,7 @@ public class FieldFacet extends Facet {
         Filter filter = new Filter(filterFields, Collections.<String>singletonList(QUERY_PLACEHOLDER));
         values.add(new FacetValue(
             type.getName(),
-            new SimpleDisplayItem(type.getName()),
+            new SimpleDisplayItem(type.getDisplayName()),
             FacetValue.UNKNOWN_COUNT,
             filter));
         return values;
