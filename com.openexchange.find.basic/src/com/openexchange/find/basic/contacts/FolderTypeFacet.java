@@ -97,13 +97,13 @@ public class FolderTypeFacet extends ContactSearchFacet {
         List<FacetValue> facetValues = new ArrayList<FacetValue>(3);
         facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
             CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singleton(ID), FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
+            Collections.singletonList(ID), FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
         facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
             CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton(ID), FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
+                Collections.singletonList(ID), FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
         facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
             CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton(ID), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
+                Collections.singletonList(ID), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
         return facetValues;
     }
 

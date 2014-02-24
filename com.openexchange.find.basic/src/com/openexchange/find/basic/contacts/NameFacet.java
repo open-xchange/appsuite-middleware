@@ -74,7 +74,7 @@ public class NameFacet extends CommonContactSearchFacet {
 
     public NameFacet() {
         super(ContactsFacetType.NAME, Collections.singletonList(
-            new FacetValue(ID, new SimpleDisplayItem(ID), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton(ID), "override"))));
+            new FacetValue(ID, new SimpleDisplayItem(ID), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(ID), "override"))));
     }
     @Override
     public String getID() {

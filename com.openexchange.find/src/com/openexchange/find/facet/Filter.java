@@ -50,7 +50,7 @@ package com.openexchange.find.facet;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 import com.openexchange.find.SearchRequest;
 
 /**
@@ -63,20 +63,20 @@ import com.openexchange.find.SearchRequest;
  */
 public class Filter implements Serializable {
 
-    public static final Filter NO_FILTER = new Filter(Collections.<String>emptySet(), "");
+    public static final Filter NO_FILTER = new Filter(Collections.<String>emptyList(), "");
 
     private static final long serialVersionUID = -5712151560300214639L;
 
-    private final Set<String> fields;
+    private final List<String> fields;
 
-    private final Set<String> queries;
+    private final List<String> queries;
 
 
-    public Filter(Set<String> fields, String query) {
-        this(fields, Collections.singleton(query));
+    public Filter(List<String> fields, String query) {
+        this(fields, Collections.singletonList(query));
     }
 
-    public Filter(Set<String> fields, Set<String> queries) {
+    public Filter(List<String> fields, List<String> queries) {
         super();
         this.fields = fields;
         this.queries = queries;
@@ -87,7 +87,7 @@ public class Filter implements Serializable {
      * E.g. a mail folder or a contacts mail address.
      * Must neither be <code>null</code> nor empty.
      */
-    public Set<String> getFields() {
+    public List<String> getFields() {
         return fields;
     }
 
@@ -95,7 +95,7 @@ public class Filter implements Serializable {
      * The queries to filter on in the given fields.
      * Never <code>null</code> or empty.
      */
-    public Set<String> getQueries() {
+    public List<String> getQueries() {
         return queries;
     }
 

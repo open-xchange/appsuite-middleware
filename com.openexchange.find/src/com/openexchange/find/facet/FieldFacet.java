@@ -52,7 +52,6 @@ package com.openexchange.find.facet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.find.common.SimpleDisplayItem;
 
 
@@ -77,16 +76,16 @@ public class FieldFacet extends Facet {
     private static final String QUERY_PLACEHOLDER = "override";
 
     public FieldFacet(final FacetType type, final String filterField) {
-        super(type, buildValues(type, Collections.singleton(filterField)));
+        super(type, buildValues(type, Collections.singletonList(filterField)));
     }
 
-    public FieldFacet(final FacetType type, final Set<String> filterFields) {
+    public FieldFacet(final FacetType type, final List<String> filterFields) {
         super(type, buildValues(type, filterFields));
     }
 
-    private static List<FacetValue> buildValues(FacetType type, Set<String> filterFields) {
+    private static List<FacetValue> buildValues(FacetType type, List<String> filterFields) {
         ArrayList<FacetValue> values = new ArrayList<FacetValue>(1);
-        Filter filter = new Filter(filterFields, Collections.singleton(QUERY_PLACEHOLDER));
+        Filter filter = new Filter(filterFields, Collections.<String>singletonList(QUERY_PLACEHOLDER));
         values.add(new FacetValue(
             type.getName(),
             new SimpleDisplayItem(type.getName()),

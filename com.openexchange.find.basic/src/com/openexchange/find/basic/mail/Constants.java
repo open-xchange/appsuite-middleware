@@ -49,9 +49,8 @@
 
 package com.openexchange.find.basic.mail;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -76,18 +75,10 @@ public class Constants {
 
     public final static String FIELD_TIME_RANGE = "time_range";
 
-    public static final Set<String> PERSONS_FILTER_FIELDS = createStringSet(FIELD_FROM, FIELD_TO, FIELD_CC);
+    public static final List<String> PERSONS_FILTER_FIELDS = Arrays.asList(new String[] { FIELD_FROM, FIELD_TO, FIELD_CC });
 
-    public static final Set<String> FOLDERS_FILTER_FIELDS = createStringSet(FIELD_FOLDER);
+    public static final List<String> FOLDERS_FILTER_FIELDS = Arrays.asList(new String[] { FIELD_FOLDER });
 
-    public static final Set<String> QUERY_FIELDS = createStringSet(FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC);
-
-    private static Set<String> createStringSet(String... args) {
-        Set<String> set = new HashSet<String>(args.length);
-        for (String str : args) {
-            set.add(str);
-        }
-        return Collections.unmodifiableSet(set);
-    }
+    public static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC });
 
 }

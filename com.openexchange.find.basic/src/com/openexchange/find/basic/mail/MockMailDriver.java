@@ -48,6 +48,11 @@
  */
 package com.openexchange.find.basic.mail;
 
+import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
+import static com.openexchange.find.basic.mail.Constants.FIELD_FOLDER;
+import static com.openexchange.find.basic.mail.Constants.FIELD_SUBJECT;
+import static com.openexchange.find.basic.mail.Constants.FOLDERS_FILTER_FIELDS;
+import static com.openexchange.find.basic.mail.Constants.PERSONS_FILTER_FIELDS;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
@@ -99,7 +104,6 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-import static com.openexchange.find.basic.mail.Constants.*;
 
 /**
  * {@link MockMailDriver}
@@ -189,7 +193,7 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return new AutocompleteResult(facets);
     }
 
-    private Set<String> extractMailAddessesFrom(final Contact contact) {
+    private List<String> extractMailAddessesFrom(final Contact contact) {
         final Set<String> addrs = new HashSet<String>(4);
 
         String mailAddress = contact.getEmail1();
@@ -207,7 +211,7 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
             addrs.add(mailAddress);
         }
 
-        return addrs;
+        return new ArrayList<String>(addrs);
     }
 
     @Override
@@ -219,7 +223,7 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
         String folderName = null;
         for (Filter filter : filters) {
-            Set<String> fields = filter.getFields();
+            List<String> fields = filter.getFields();
             if (fields.size() == 1 && FIELD_FOLDER.equals(fields.iterator().next())) {
                 folderName = filter.getQueries().iterator().next();
                 break;

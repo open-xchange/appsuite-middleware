@@ -51,9 +51,7 @@ package com.openexchange.find.json;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -241,14 +239,14 @@ public class FindRequest {
 
                 final JSONArray jQueries = jFilter.getJSONArray("queries");
                 int len = jQueries.length();
-                final Set<String> queries = new LinkedHashSet<String>(len);
+                final List<String> queries = new ArrayList<String>(len);
                 for (int j = 0; j < len; j++) {
                     queries.add(jQueries.getString(j));
                 }
 
                 final JSONArray jFields = jFilter.getJSONArray("fields");
                 len = jFields.length();
-                final Set<String> fields = new LinkedHashSet<String>(len);
+                final List<String> fields = new ArrayList<String>(len);
                 for (int j = 0; j < len; j++) {
                     fields.add(jFields.getString(j));
                 }

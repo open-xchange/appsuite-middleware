@@ -49,13 +49,11 @@
 
 package com.openexchange.find.basic.calendar;
 
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
@@ -121,21 +119,21 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
 
         // Subject
         FacetValue subjectValue = new FacetValue("subject", new SimpleDisplayItem("subject"), FacetValue.UNKNOWN_COUNT, new Filter(
-            singleton("subject"),
+            singletonList("subject"),
             "override"));
         Facet subjectFacet = new Facet(CalendarFacetType.SUBJECT, singletonList(subjectValue));
         facets.add(subjectFacet);
 
         // Description
         FacetValue descriptionValue = new FacetValue("description", new SimpleDisplayItem("description"), FacetValue.UNKNOWN_COUNT, new Filter(
-            singleton("description"),
+            singletonList("description"),
             "override"));
         Facet descriptionFacet = new Facet(CalendarFacetType.DESCRIPTION, singletonList(descriptionValue));
         facets.add(descriptionFacet);
 
         // Location
         FacetValue locationValue = new FacetValue("location", new SimpleDisplayItem("location"), FacetValue.UNKNOWN_COUNT, new Filter(
-            singleton("location"),
+            singletonList("location"),
             "override"));
         Facet locationFacet = new Facet(CalendarFacetType.LOCATION, singletonList(locationValue));
         facets.add(locationFacet);
@@ -146,22 +144,22 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
             StatusDisplayItem.Status.ACCEPTED.getIdentifier(),
             new StatusDisplayItem(CalendarStrings.STATUS_ACCEPTED, StatusDisplayItem.Status.ACCEPTED),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(singleton("status"), StatusDisplayItem.Status.ACCEPTED.getIdentifier())));
+            new Filter(singletonList("status"), StatusDisplayItem.Status.ACCEPTED.getIdentifier())));
         statusValues.add(new FacetValue(
             StatusDisplayItem.Status.DECLINED.getIdentifier(),
             new StatusDisplayItem(CalendarStrings.STATUS_DECLINED, StatusDisplayItem.Status.DECLINED),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(singleton("status"), StatusDisplayItem.Status.DECLINED.getIdentifier())));
+            new Filter(singletonList("status"), StatusDisplayItem.Status.DECLINED.getIdentifier())));
         statusValues.add(new FacetValue(
             StatusDisplayItem.Status.TENTATIVE.getIdentifier(),
             new StatusDisplayItem(CalendarStrings.STATUS_TENTATIVE, StatusDisplayItem.Status.TENTATIVE),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(singleton("status"), StatusDisplayItem.Status.TENTATIVE.getIdentifier())));
+            new Filter(singletonList("status"), StatusDisplayItem.Status.TENTATIVE.getIdentifier())));
         statusValues.add(new FacetValue(
             StatusDisplayItem.Status.NONE.getIdentifier(),
             new StatusDisplayItem(CalendarStrings.STATUS_NONE, StatusDisplayItem.Status.NONE),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(singleton("status"), StatusDisplayItem.Status.NONE.getIdentifier())));
+            new Filter(singletonList("status"), StatusDisplayItem.Status.NONE.getIdentifier())));
         Facet statusFacet = new Facet(CalendarFacetType.STATUS, statusValues);
         facets.add(statusFacet);
 
@@ -172,14 +170,14 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
             new RelativeDateDisplayItem(
             CalendarStrings.RELATIVE_DATE_COMMING,
             RelativeDateDisplayItem.RelativeDate.COMING), FacetValue.UNKNOWN_COUNT, new Filter(
-            singleton("relative_date"),
+                singletonList("relative_date"),
             RelativeDateDisplayItem.RelativeDate.COMING.getIdentifier())));
         dateValues.add(new FacetValue(
             RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier(),
             new RelativeDateDisplayItem(
             CalendarStrings.RELATIVE_DATE_PAST,
             RelativeDateDisplayItem.RelativeDate.PAST), FacetValue.UNKNOWN_COUNT, new Filter(
-            singleton("relative_date"),
+                singletonList("relative_date"),
             RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier())));
         Facet dateFacet = new Facet(CalendarFacetType.RELATIVE_DATE, dateValues);
         facets.add(dateFacet);
@@ -191,14 +189,14 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
             new RecurringTypeDisplayItem(
             CalendarStrings.RECURRING_TYPE_SINGLE,
             RecurringTypeDisplayItem.RecurringType.SINGLE), FacetValue.UNKNOWN_COUNT, new Filter(
-            singleton("recurring_type"),
+                singletonList("recurring_type"),
             RecurringTypeDisplayItem.RecurringType.SINGLE.getIdentifier())));
         recurringTypeValues.add(new FacetValue(
             RecurringTypeDisplayItem.RecurringType.SERIES.getIdentifier(),
             new RecurringTypeDisplayItem(
             CalendarStrings.RECURRING_TYPE_SERIES,
             RecurringTypeDisplayItem.RecurringType.SERIES), FacetValue.UNKNOWN_COUNT, new Filter(
-            singleton("recurring_type"),
+                singletonList("recurring_type"),
             RecurringTypeDisplayItem.RecurringType.SERIES.getIdentifier())));
         Facet recurringTypeFacet = new Facet(CalendarFacetType.RECURRING_TYPE, recurringTypeValues);
         facets.add(recurringTypeFacet);
@@ -209,17 +207,17 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
             FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(),
             new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(singleton("folder_type"), FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
+            new Filter(singletonList("folder_type"), FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
         folderValues.add(new FacetValue(
             FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(),
             new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(singleton("folder_type"), FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
+            new Filter(singletonList("folder_type"), FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
         folderValues.add(new FacetValue(
             FolderTypeDisplayItem.Type.SHARED.getIdentifier(),
             new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(singleton("folder_type"), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
+            new Filter(singletonList("folder_type"), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
         Facet folderTypeFacet = new Facet(CommonFacetType.FOLDER_TYPE, folderValues);
         facets.add(folderTypeFacet);
 
@@ -229,7 +227,7 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
         return new ModuleConfig(Module.CALENDAR, facets, mandatoryFilters);
     }
 
-    private static final Set<String> PARTICIPANT_FILTER = singleton("participants");
+    private static final List<String> PARTICIPANT_FILTER = singletonList("participants");
 
     @Override
     public AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {

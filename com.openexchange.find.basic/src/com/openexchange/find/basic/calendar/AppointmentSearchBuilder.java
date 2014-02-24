@@ -120,8 +120,8 @@ public class AppointmentSearchBuilder {
      * @throws OXException
      */
     public AppointmentSearchBuilder applyFilter(Filter filter) throws OXException {
-        Set<String> fields = filter.getFields();
-        Set<String> queries = filter.getQueries();
+        List<String> fields = filter.getFields();
+        List<String> queries = filter.getQueries();
         for (String field : fields) {
             for (String query : queries) {
                 apply(field, query);
@@ -184,14 +184,24 @@ public class AppointmentSearchBuilder {
             applyRecurringType(query);
         } else if ("folder_type".equals(field)) {
             applyFolderType(query);
-        } else if ("contact".equals(field)) {
-
-            // TODO
-
+        } else if ("participants".equals(field)) {
+            applyContact(query);
         } else {
             throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
         }
         return this;
+    }
+
+    private void applyContact(String query) throws OXException {
+        if (false == isWildcardOnly(query)) {
+            Set<String> externalParticipants = appointmentSearch.getExternalParticipants();
+            if (null == externalParticipants) {
+                externalParticipants = new HashSet<String>();
+            }
+            externalParticipants.add(addWildcards(query, true, true));
+            appointmentSearch.setExternalParticipants(externalParticipants);
+            return;
+        }
     }
 
     private void applyFolderType(String query) throws OXException {

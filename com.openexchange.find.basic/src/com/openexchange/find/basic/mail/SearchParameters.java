@@ -57,12 +57,10 @@ import static com.openexchange.find.basic.mail.Constants.FIELD_SUBJECT;
 import static com.openexchange.find.basic.mail.Constants.FIELD_TIME_RANGE;
 import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
 import static com.openexchange.find.basic.mail.Constants.QUERY_FIELDS;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
@@ -145,7 +143,7 @@ public class SearchParameters {
             throw FindExceptionCode.MISSING_SEARCH_FILTER.create("folder", Module.MAIL.getIdentifier());
         }
 
-        SearchTerm<?> queryTerm = prepareQueryTerm(new HashSet<String>(searchRequest.getQueries()));
+        SearchTerm<?> queryTerm = prepareQueryTerm(searchRequest.getQueries());
         SearchTerm<?> filterTerm = prepareSearchTerm(filters);
         SearchTerm<?> searchTerm = null;
         if (filterTerm == null || queryTerm == null) {
@@ -180,7 +178,7 @@ public class SearchParameters {
         return folderName;
     }
 
-    private static SearchTerm<?> prepareQueryTerm(Set<String> queries) throws OXException {
+    private static SearchTerm<?> prepareQueryTerm(List<String> queries) throws OXException {
         if (queries == null || queries.isEmpty()) {
             return null;
         }
@@ -211,7 +209,7 @@ public class SearchParameters {
 
     private static String determineFolderName(Filter filter) {
         String folderName = null;
-        Set<String> fields = filter.getFields();
+        List<String> fields = filter.getFields();
         if (fields.size() == 1 && FIELD_FOLDER.equals(fields.iterator().next())) {
             try {
                 folderName = filter.getQueries().iterator().next();
@@ -224,12 +222,12 @@ public class SearchParameters {
     }
 
     private static SearchTerm<?> termFor(Filter filter) throws OXException {
-        Set<String> fields = filter.getFields();
+        List<String> fields = filter.getFields();
         if (fields == null || fields.isEmpty()) {
             throw FindExceptionCode.INVALID_FILTER_NO_FIELDS.create(filter);
         }
 
-        Set<String> queries = filter.getQueries();
+        List<String> queries = filter.getQueries();
         if (queries == null || queries.isEmpty()) {
             throw FindExceptionCode.INVALID_FILTER_NO_QUERIES.create(filter);
         }
@@ -237,7 +235,7 @@ public class SearchParameters {
         return termFor(fields, queries);
     }
 
-    private static SearchTerm<?> termFor(Set<String> fields, Set<String> queries) throws OXException {
+    private static SearchTerm<?> termFor(List<String> fields, List<String> queries) throws OXException {
         if (fields.size() > 1) {
             Iterator<String> it = fields.iterator();
             String f1 = it.next();
@@ -255,7 +253,7 @@ public class SearchParameters {
         return termForField(fields.iterator().next(), queries);
     }
 
-    private static SearchTerm<?> termForField(String field, Set<String> queries) throws OXException {
+    private static SearchTerm<?> termForField(String field, List<String> queries) throws OXException {
         if (queries.size() > 1) {
             Iterator<String> it = queries.iterator();
             String q1 = it.next();
