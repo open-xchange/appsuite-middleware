@@ -399,7 +399,7 @@ public class ID implements Serializable {
      * {@link ID}s that don't have real userId and userContextId values.
      * 
      * @return a ServerSession from a dummy SessionObject based on the user infos contained in this {@link ID}.
-     * @throws OXException if no ServerSession can be ceated based upon thi {@link ID}.
+     * @throws OXException if no ServerSession can be ceated based upon this {@link ID}.
      */
     public ServerSession toSession() throws OXException {
         UserAndContext userAndContextIDs = IdLookup.getUserAndContextIDs(this);
