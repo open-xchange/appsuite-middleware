@@ -101,7 +101,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 public class WebdavPrincipalPerformer implements SessionHolder{
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPrincipalPerformer.class);
 
-    private static volatile WebdavPrincipalPerformer INSTANCE = null;
+    private static WebdavPrincipalPerformer INSTANCE = null;
 
     private static volatile ServiceLookup services;
 

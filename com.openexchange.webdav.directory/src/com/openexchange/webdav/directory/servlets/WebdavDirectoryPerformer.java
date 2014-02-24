@@ -95,7 +95,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 public class WebdavDirectoryPerformer implements SessionHolder {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavDirectoryPerformer.class);
 
-    private static volatile WebdavDirectoryPerformer INSTANCE = null;
+    private static WebdavDirectoryPerformer INSTANCE = null;
 
     private final ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
 
