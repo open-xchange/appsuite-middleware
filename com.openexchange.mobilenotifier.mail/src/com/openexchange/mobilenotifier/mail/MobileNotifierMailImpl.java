@@ -198,7 +198,7 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
         // removes control character
         teaser = teaser.replaceAll("[\\u0000-\\u001f]", "");
         if (teaser.length() > cutIndex) {
-            teaser = message[0].substring(0, cutIndex) + " [...]";
+            teaser = message[0].substring(0, cutIndex);
         }
         return teaser;
     }
