@@ -1820,7 +1820,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (!isUnifiedMail) {
             // Check if black-listed
             final List<IPRange> ranges = MailProperties.getInstance().getAccountBlacklistRanges();
-            if (null != ranges && !ranges.isEmpty()) {
+            if ((false == mailAccount.isDefaultFlag()) && (null != ranges) && !ranges.isEmpty()) {
+                // Check non-primary account against IP range restriction
                 checkHostIfBlacklisted(mailAccount.getMailServer(), ranges);
                 checkHostIfBlacklisted(mailAccount.getTransportServer(), ranges);
             }
