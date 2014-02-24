@@ -117,11 +117,6 @@ import com.openexchange.tx.TransactionException;
 /**
  * {@link AbstractCompositingIDBasedFileAccess}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-/**
- * {@link AbstractCompositingIDBasedFileAccess}
- *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractCompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedRandomFileAccess, IDBasedSequenceNumberProvider {
