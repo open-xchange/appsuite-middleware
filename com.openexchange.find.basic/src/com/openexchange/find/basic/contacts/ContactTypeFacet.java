@@ -119,7 +119,7 @@ public class ContactTypeFacet extends ContactSearchFacet {
             searchTerm.addOperand(new ConstantOperand<Boolean>(Boolean.TRUE));
             return searchTerm;
         }
-        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
+        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, ContactsFacetType.TYPE.getName());
     }
 
 }

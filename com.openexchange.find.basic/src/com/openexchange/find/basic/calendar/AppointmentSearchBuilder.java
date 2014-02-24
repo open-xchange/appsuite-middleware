@@ -56,9 +56,11 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.calendar.RecurringTypeDisplayItem;
 import com.openexchange.find.calendar.RelativeDateDisplayItem;
 import com.openexchange.find.calendar.StatusDisplayItem;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.folderstorage.FolderResponse;
@@ -244,7 +246,7 @@ public class AppointmentSearchBuilder {
                     try {
                         folderIDs.add(Integer.valueOf(folder.getID()));
                     } catch (NumberFormatException e) {
-                        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, query);
+                        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, query, CommonFacetType.FOLDER_TYPE.getName());
                     }
                 }
             }
@@ -269,7 +271,7 @@ public class AppointmentSearchBuilder {
             } else if (StatusDisplayItem.Status.DECLINED.getIdentifier().equals(query)) {
                 status = CalendarDataObject.DECLINE;
             } else {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.STATUS.getName());
             }
             ownStatus.add(status);
         }
@@ -295,7 +297,7 @@ public class AppointmentSearchBuilder {
             } else if (RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier().equals(query)) {
                 appointmentSearch.setMaximumStartDate(new Date());
             } else {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RELATIVE_DATE.getName());
             }
         }
     }

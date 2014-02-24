@@ -56,6 +56,7 @@ import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
@@ -122,7 +123,7 @@ public class FolderTypeFacet extends ContactSearchFacet {
         } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(query)) {
             type = SharedType.getInstance();
         } else {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
+            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CommonFacetType.FOLDER_TYPE.getName());
         }
         FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
             FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, false, session, null);
