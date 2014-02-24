@@ -50,6 +50,7 @@
 package com.openexchange.mobilenotifier.reminder;
 
 import java.util.List;
+import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
@@ -83,6 +84,7 @@ public class MobileNotifierReminderImpl extends AbstractMobileNotifierService {
 
     @Override
     public List<List<NotifyItem>> getItems(Session session) throws OXException {
+        final ReminderService reminderService = services.getService(ReminderService.class);
         return null;
     }
 

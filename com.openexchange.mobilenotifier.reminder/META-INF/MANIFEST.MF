@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.mobilenotifier.reminder
 Bundle-Version: 7.6.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Open-Xchange Inc.
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.api2,
+ com.openexchange.exception,
  com.openexchange.mobilenotifier,
  com.openexchange.osgi,
  com.openexchange.server,
