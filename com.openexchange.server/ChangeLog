@@ -1,6 +1,18 @@
+* 2014-02-24 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31238: Use the same properties map for the general login method of the LoginPerformer and the AuthenticationService.
+
+* 2014-02-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31249: Be aware of infostore items without files when filtering, set appropriate HTTP status in download response 
+
 * 2014-02-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 30761: Do not occupy a database connection without using it.
+
+* 2014-02-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31251: Fixed possible NPE on authentication failed error during POP3 sync
 
 * 2014-02-20 - thorben.betten@open-xchange.com
 

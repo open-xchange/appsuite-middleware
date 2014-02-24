@@ -272,7 +272,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              * Check for filename
              */
             if (set.contains(Field.FILENAME) && false == isEmpty(file.getFileName()) && false == file.getFileName().equals(smbFile.getName())) {
-                SmbFile renamedFile = getSmbFile(folderId + file.getFileName());
+                final SmbFile renamedFile = getSmbFile(folderId + file.getFileName());
                 smbFile.renameTo(renamedFile);
                 smbFile = renamedFile;
             }
@@ -295,7 +295,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws OXException {
+    public IDTuple copy(final IDTuple source, final String version, final String destFolder, final File update, final InputStream newFil, final List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
             throw CIFSExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
@@ -313,7 +313,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 throw CIFSExceptionCodes.NOT_A_FILE.create(url);
             }
 
-            String targetFileName = null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
+            final String targetFileName = null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
             if (isEmpty(targetFileName)) {
                 throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
             }
@@ -322,7 +322,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              * Perform COPY
              */
             copyMe.copyTo(dest);
-            long now = System.currentTimeMillis();
+            final long now = System.currentTimeMillis();
             dest.setLastModified(now);
             dest.setCreateTime(now);
             dest.setReadWrite();
@@ -350,14 +350,14 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
+    public IDTuple move(final IDTuple source, final String destFolder, final long sequenceNumber, final File update, final List<Field> modifiedFields) throws OXException {
         try {
             /*
              * check source file
              */
-            String sourceFolderURL = checkFolderId(source.getFolder(), rootUrl);
-            String sourceFileURL = sourceFolderURL + source.getId();
-            SmbFile sourceFile = getSmbFile(sourceFileURL);
+            final String sourceFolderURL = checkFolderId(source.getFolder(), rootUrl);
+            final String sourceFileURL = sourceFolderURL + source.getId();
+            final SmbFile sourceFile = getSmbFile(sourceFileURL);
             if (false == sourceFile.exists()) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(sourceFileURL);
             } else if (false == sourceFile.isFile()) {
@@ -368,17 +368,17 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * check destination folder
              */
-            String targetFolderURL = checkFolderId(destFolder, rootUrl);
-            SmbFile targetFolder = getSmbFile(targetFolderURL);
+            final String targetFolderURL = checkFolderId(destFolder, rootUrl);
+            final SmbFile targetFolder = getSmbFile(targetFolderURL);
             if (false == exists(targetFolder)) {
                 throw CIFSExceptionCodes.NOT_FOUND.create(targetFolderURL);
             }
-            String targetFileName = null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
+            final String targetFileName = null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
             if (isEmpty(targetFileName)) {
                 throw CIFSExceptionCodes.MISSING_FILE_NAME.create();
             }
-            String targetFileURL = targetFolderURL + targetFileName;
-            SmbFile targetFile = getSmbFile(targetFileURL);
+            final String targetFileURL = targetFolderURL + targetFileName;
+            final SmbFile targetFile = getSmbFile(targetFileURL);
             if (exists(targetFile)) {
                 throw CIFSExceptionCodes.UPDATE_DENIED.create(targetFileURL);
             }
@@ -386,7 +386,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              * perform move operation
              */
             sourceFile.renameTo(targetFile);
-            long now = System.currentTimeMillis();
+            final long now = System.currentTimeMillis();
             targetFile.setLastModified(now);
             targetFile.setCreateTime(now);
             targetFile.setReadWrite();
@@ -398,11 +398,11 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              * return
              */
             return new IDTuple(targetFolderURL, targetFileName);
-        } catch (SmbException e) {
+        } catch (final SmbException e) {
             throw CIFSExceptionCodes.forSmbException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -940,15 +940,15 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
 //    @Override
-    public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
+    public Map<String, Long> getSequenceNumbers(final List<String> folderIds) throws OXException {
         if (null == folderIds || 0 == folderIds.size()) {
             return Collections.emptyMap();
         }
-        Map<String, Long> sequenceNumbers = new HashMap<String, Long>();
-        for (String folderId : folderIds) {
+        final Map<String, Long> sequenceNumbers = new HashMap<String, Long>();
+        for (final String folderId : folderIds) {
             try {
-                String fid = checkFolderId(folderId, rootUrl);
-                SmbFile smbFolder = getSmbFile(fid);
+                final String fid = checkFolderId(folderId, rootUrl);
+                final SmbFile smbFolder = getSmbFile(fid);
                 if (false == smbFolder.exists()) {
                     throw CIFSExceptionCodes.NOT_FOUND.create(folderId);
                 } else if (false == smbFolder.isDirectory()) {

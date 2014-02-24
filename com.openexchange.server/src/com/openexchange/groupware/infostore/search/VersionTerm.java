@@ -61,29 +61,50 @@ import com.openexchange.groupware.infostore.utils.Metadata;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class VersionTerm extends AbstractStringSearchTerm {
+public class VersionTerm extends AbstractNumberSearchTerm {
 
-    protected VersionTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
-        super(pattern, ignoreCase, substringSearch);
+    /**
+     * Initializes a new {@link VersionTerm}.
+     *
+     * @param versionId The version identifier to look for
+     */
+    public VersionTerm(final int versionId) {
+        super(new ComparablePattern<Number>() {
+
+            @Override
+            public ComparisonType getComparisonType() {
+                return ComparisonType.EQUALS;
+            }
+
+            @Override
+            public Integer getPattern() {
+                return Integer.valueOf(versionId);
+            }
+        });
     }
 
     @Override
-    public void visit(SearchTermVisitor visitor) throws OXException {
+    public void visit(final SearchTermVisitor visitor) throws OXException {
         if (null != visitor) {
             visitor.visit(this);
         }
     }
 
     @Override
-    public void addField(Collection<Metadata> col) {
+    public void addField(final Collection<Metadata> col) {
         if (null != col) {
             col.add(Metadata.VERSION_LITERAL);
         }
     }
 
     @Override
-    protected String getString(DocumentMetadata file) {
-        return Integer.toString(file.getVersion());
+    protected Integer getNumber(final DocumentMetadata file) {
+        return Integer.valueOf(file.getVersion());
+    }
+
+    @Override
+    protected boolean compareLongValues() {
+        return false;
     }
 
 }

@@ -54,13 +54,13 @@ import com.openexchange.find.facet.DisplayItemVisitor;
 
 /**
  * {@link RelativeDateDisplayItem}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class RelativeDateDisplayItem implements DisplayItem {
 
     public static enum RelativeDate {
-        COMMING("comming"), PAST("past");
+        COMING("coming"), PAST("past");
 
         private String identifier;
 
@@ -73,9 +73,9 @@ public class RelativeDateDisplayItem implements DisplayItem {
         }
     }
 
-    private String displayName;
+    private final String displayName;
 
-    private RelativeDate date;
+    private final RelativeDate date;
 
     public RelativeDateDisplayItem(String displayName, RelativeDate date) {
         this.displayName = displayName;

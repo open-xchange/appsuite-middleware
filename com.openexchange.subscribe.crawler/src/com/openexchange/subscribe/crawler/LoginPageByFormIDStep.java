@@ -101,6 +101,8 @@ public class LoginPageByFormIDStep extends AbstractStep<HtmlPage, Object> implem
         try {
             // Get the page, fill in the credentials and submit the login form identified by its action
             loginPage = webClient.getPage(url);
+
+            this.loginPage = loginPage;
             HtmlForm loginForm = (HtmlForm) loginPage.getElementById(idOfLoginForm);
 
             if (loginForm != null) {

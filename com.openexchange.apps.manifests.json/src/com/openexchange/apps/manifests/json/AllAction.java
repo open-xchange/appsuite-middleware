@@ -99,8 +99,10 @@ public class AllAction implements AJAXActionService {
         for(ManifestContributor contributors: registry.getContributors()) {
             try {
                 JSONArray additionalManifests = contributors.getAdditionalManifests(session);
-                for(int i = 0, size = additionalManifests.length(); i < size; i++) {
-                    manifests.put(additionalManifests.get(i));
+                if (additionalManifests != null) {
+                    for(int i = 0, size = additionalManifests.length(); i < size; i++) {
+                        manifests.put(additionalManifests.get(i));
+                    }                    
                 }
             } catch (OXException x) {
                 // TODO: Logging

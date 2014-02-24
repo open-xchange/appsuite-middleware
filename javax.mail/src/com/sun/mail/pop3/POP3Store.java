@@ -408,6 +408,10 @@ public class POP3Store extends Store {
      * @return  Reinitialized Map of capabilities
      */
     public synchronized Map<String, String> reinitCapabilities() throws MessagingException {
+    final Protocol port = this.port;
+    if (null == port) {
+        return capabilities();
+    }
     try {
         port.setCapabilities(port.capa());
         capabilities = port.getCapabilities(); // save for later, may be null

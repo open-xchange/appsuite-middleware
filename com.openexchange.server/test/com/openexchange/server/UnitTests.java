@@ -65,6 +65,7 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.ajax.LoginAddFragmentTest.class,
     com.openexchange.groupware.ldap.UserAttributeDiffTest.class,
     com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest.class,
+    com.openexchange.login.internal.LoginPerformerTest.class,
     com.openexchange.tools.collections.OXCollectionsTest.class,
     com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class,
     com.openexchange.tools.net.URIParserTest.class,

@@ -109,11 +109,11 @@ public final class SearchAction extends AppointmentAction {
 
         if (jData.has(AJAXServlet.PARAMETER_INFOLDER)) {
             final int inFolder = DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER);
-            searchObj.addFolder(inFolder);
+            searchObj.setFolderIDs(Collections.singleton(Integer.valueOf(inFolder)));
         }
 
         if (jData.has(SearchFields.PATTERN)) {
-            searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
+            searchObj.setQueries(Collections.singleton(DataParser.parseString(jData, SearchFields.PATTERN)));
         }
 
         final int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
