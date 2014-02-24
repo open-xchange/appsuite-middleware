@@ -101,7 +101,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 public class WebdavPrincipalPerformer implements SessionHolder{
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPrincipalPerformer.class);
 
-    private static WebdavPrincipalPerformer INSTANCE = null;
+    private static final WebdavPrincipalPerformer INSTANCE = new WebdavPrincipalPerformer();
 
     private static volatile ServiceLookup services;
 
@@ -115,9 +115,6 @@ public class WebdavPrincipalPerformer implements SessionHolder{
      * @return The instance of {@link InfostorePerformer}.
      */
     public static WebdavPrincipalPerformer getInstance() {
-        if (INSTANCE == null) {
-            return INSTANCE = new WebdavPrincipalPerformer();
-        }
         return INSTANCE;
     }
 
