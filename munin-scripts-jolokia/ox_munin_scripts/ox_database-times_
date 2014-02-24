@@ -58,10 +58,9 @@ if ( $ARGV[0] and $ARGV[0] eq "suggest")
 	exit 0;
 }
 
-$Database=$0;
-$Database =~ s/.*_//;
+my $Database=$0;
+$Database =~ s/.*_([0-9]+)/$1/;
 $Database += 0;
-
 
 if ( $ARGV[0] and $ARGV[0] eq "config")
 {
