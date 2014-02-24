@@ -69,7 +69,7 @@ import com.sun.mail.imap.IMAPStore;
 public final class RootSubfolderCache {
 
     private static final class Key {
-        
+
         private final String host;
         private final int port;
         private final int hash;
@@ -140,10 +140,13 @@ public final class RootSubfolderCache {
         final Key key = new Key(store.getHost(), store.getPort());
         Boolean b = CACHE.get(key);
         if (null == b) {
-            Boolean nb = canCreateSubfolder(f);
-            b = CACHE.putIfAbsent(key, nb);
-            if (null == b) {
-                b = nb;
+            synchronized (RootSubfolderCache.class) {
+                b = CACHE.get(key);
+                if (null == b) {
+                    final Boolean nb = canCreateSubfolder(f);
+                    CACHE.put(key, nb);
+                    b = nb;
+                }
             }
         }
         return b;
