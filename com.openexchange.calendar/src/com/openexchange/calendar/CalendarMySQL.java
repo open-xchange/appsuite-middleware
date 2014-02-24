@@ -1475,7 +1475,8 @@ public class CalendarMySQL implements CalendarSqlImp {
         Set<String> queries = searchObj.getQueries();
         if (null != queries && 0 < queries.size()) {
             for (String query : queries) {
-                String preparedPattern = StringCollection.prepareForSearch(query, false, true);
+                // surround with wildcards for backwards compatibility with previous "pattern"-only search
+                String preparedPattern = StringCollection.prepareForSearch(query, true, true);
                 if (containsWildcards(preparedPattern)) {
                     sb.append(" AND (pd.field01 LIKE ? OR pd.field09 LIKE ?)");
                 } else {
