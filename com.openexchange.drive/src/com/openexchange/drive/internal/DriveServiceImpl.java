@@ -263,7 +263,6 @@ public class DriveServiceImpl implements DriveService {
         DriveVersionValidator.validateFileVersion(fileVersion);
         SyncSession driveSession = new SyncSession(session);
         LOG.debug("Handling download: file version: {}, offset: {}, length: {}", fileVersion, offset, length);
-        IFileHolder fileHolder = new DownloadHelper(driveSession).perform(path, fileVersion, offset, length);
         /*
          * track sync result to represent the download as performed by client
          */
@@ -276,13 +275,12 @@ public class DriveServiceImpl implements DriveService {
         };
         action.getParameters().put(DriveAction.PARAMETER_OFFSET, Long.valueOf(offset));
         action.getParameters().put(DriveAction.PARAMETER_LENGTH, Long.valueOf(length));
-        List<AbstractAction<FileVersion>> actionsForServer = Collections.emptyList();
-        List<AbstractAction<FileVersion>> actionsForClient = Collections.singletonList(action);
-        new SyncTracker(driveSession).track(new IntermediateSyncResult<FileVersion>(actionsForServer, actionsForClient), path);
+        new SyncTracker(driveSession).track(new IntermediateSyncResult<FileVersion>(
+            Collections.<AbstractAction<FileVersion>>emptyList(), Collections.<AbstractAction<FileVersion>>singletonList(action)), path);
         /*
          * return file holder for download
          */
-        return fileHolder;
+        return new DownloadHelper(driveSession).perform(path, fileVersion, offset, length);
     }
 
     @Override
