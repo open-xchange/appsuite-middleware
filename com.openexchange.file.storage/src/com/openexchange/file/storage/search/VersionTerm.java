@@ -63,8 +63,13 @@ import com.openexchange.file.storage.File.Field;
  */
 public class VersionTerm extends AbstractStringSearchTerm {
 
-    protected VersionTerm(String pattern, boolean ignoreCase, boolean substringSearch) {
-        super(pattern, ignoreCase, substringSearch);
+    /**
+     * Initializes a new {@link VersionTerm}.
+     *
+     * @param versionId The version identifier to look for
+     */
+    public VersionTerm(final String versionId) {
+        super(versionId, false, false);
     }
 
     @Override
