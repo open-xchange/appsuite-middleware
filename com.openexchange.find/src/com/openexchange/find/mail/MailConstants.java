@@ -49,40 +49,17 @@
 
 package com.openexchange.find.mail;
 
-import com.openexchange.i18n.LocalizableStrings;
-
 
 /**
- * Mail-specific strings are potentially displayed in client applications and
- * should therefore be localized.
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class MailStrings implements LocalizableStrings {
+public class MailConstants {
 
-    // Search in mail field subject.
-    public static final String FACET_SUBJECT = "Subject";
+    public final static String FACET_VALUE_LAST_WEEK = "last_week";
 
-    // Search in mail field text.
-    public static final String FACET_MAIL_TEXT = "Mail Text";
+    public final static String FACET_VALUE_LAST_MONTH = "last_month";
 
-    // Search in folders.
-    public static final String FACET_FOLDERS = "Folders";
-
-    // Search in Persons.
-    public static final String FACET_CONTACTS = "Contacts";
-
-    // Search criteria time
-    public static final String FACET_TIME = "Time";
-
-    // Search mails from last week
-    public static final String LAST_WEEK = "last week";
-
-    // Search mails from last month
-    public static final String LAST_MONTH = "last month";
-
-    // Search mails from last year
-    public static final String LAST_YEAR = "last year";
+    public final static String FACET_VALUE_LAST_YEAR = "last_year";
 
 }

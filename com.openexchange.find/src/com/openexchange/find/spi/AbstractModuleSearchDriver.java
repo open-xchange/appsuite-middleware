@@ -140,7 +140,7 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
         return result;
     }
 
-    protected String prepareFacetValueId(String prefix, int contextId, String objectId) {
+    protected static String prepareFacetValueId(String prefix, int contextId, String objectId) {
         return prefix + '/' + Integer.toString(contextId) + '/' + objectId;
     }
 

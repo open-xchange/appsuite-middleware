@@ -50,6 +50,7 @@
 package com.openexchange.find.basic.mail;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -73,12 +74,16 @@ public class Constants {
 
     public final static String FIELD_FOLDER = "folder";
 
-    public final static String FIELD_TIME_RANGE = "time_range";
+    public final static String FIELD_TIME = "time";
 
     public static final List<String> PERSONS_FILTER_FIELDS = Arrays.asList(new String[] { FIELD_FROM, FIELD_TO, FIELD_CC });
 
     public static final List<String> FOLDERS_FILTER_FIELDS = Arrays.asList(new String[] { FIELD_FOLDER });
 
     public static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC });
+
+    public static List<String> asList(String str) {
+        return Collections.singletonList(str);
+    }
 
 }
