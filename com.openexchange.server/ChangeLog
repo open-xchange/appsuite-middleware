@@ -1,3 +1,7 @@
+* 2014-02-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31264: Added cache invalidator to capabilities caches
+
 * 2014-02-24 - marcus.klein@open-xchange.com
 
  - Fix for bug 31238: Use the same properties map for the general login method of the LoginPerformer and the AuthenticationService.
