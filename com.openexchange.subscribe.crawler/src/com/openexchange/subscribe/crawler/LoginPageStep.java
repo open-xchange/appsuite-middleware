@@ -100,26 +100,30 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
         try {
             // Get the page, fill in the credentials and submit the login form
             loginPage = webClient.getPage(url);
-            this.loginPage = loginPage;
-            final HtmlForm loginForm = loginPage.getFormByName(nameOfLoginForm);
-            final HtmlTextInput userfield = loginForm.getInputByName(nameOfUserField);
-            userfield.setValueAttribute(username);
-            final HtmlPasswordInput passwordfield = loginForm.getInputByName(nameOfPasswordField);
-            passwordfield.setValueAttribute(password);
-            final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
-            output = pageAfterLogin;
+            if (null != loginPage) {
+                this.loginPage = loginPage;
+                final HtmlForm loginForm = loginPage.getFormByName(nameOfLoginForm);
+                if (null != loginForm){
+                    final HtmlTextInput userfield = loginForm.getInputByName(nameOfUserField);
+                    userfield.setValueAttribute(username);
+                    final HtmlPasswordInput passwordfield = loginForm.getInputByName(nameOfPasswordField);
+                    passwordfield.setValueAttribute(password);
+                    final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
+                    output = pageAfterLogin;
 
-            // if this link is not on the page the login did not work
-            boolean linkAvailable = false;
-            for (final HtmlAnchor link : pageAfterLogin.getAnchors()) {
-                if (link.getHrefAttribute().contains(linkAvailableAfterLogin)) {
-                    linkAvailable = true;
+                    // if this link is not on the page the login did not work
+                    boolean linkAvailable = false;
+                    for (final HtmlAnchor link : pageAfterLogin.getAnchors()) {
+                        if (link.getHrefAttribute().contains(linkAvailableAfterLogin)) {
+                            linkAvailable = true;
+                        }
+                    }
+                    if (!linkAvailable) {
+                        throw SubscriptionErrorMessage.INVALID_LOGIN.create();
+                    }
+                    executedSuccessfully = true;
                 }
             }
-            if (!linkAvailable) {
-                throw SubscriptionErrorMessage.INVALID_LOGIN.create();
-            }
-            executedSuccessfully = true;
         } catch (final FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (final MalformedURLException e) {
@@ -127,7 +131,9 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
         } catch (final IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (final ElementNotFoundException e){
-            LOG.debug("The page that does not contain the needed form : \n{}", loginPage.getWebResponse().getContentAsString());
+            if (null != loginPage) {
+                LOG.debug("The page that does not contain the needed form : \n{}", loginPage.getWebResponse().getContentAsString());
+            }
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
     }
