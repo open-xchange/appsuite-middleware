@@ -56,6 +56,8 @@ package com.openexchange.mobilenotifier;
  */
 public class NotifyItem {
 
+    private static final String EMPTY_STRING = "";
+
     private String key;
 
     private Object value;
@@ -70,6 +72,10 @@ public class NotifyItem {
     }
 
     public Object getValue() {
+        // if value is null, return an empty string, so that json parses the key
+        if (value == null) {
+            return EMPTY_STRING;
+        }
         return value;
     }
 }
