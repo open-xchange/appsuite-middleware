@@ -179,17 +179,17 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
             if (attribute == Attribute.PASSWORD_LITERAL || attribute == Attribute.TRANSPORT_PASSWORD_LITERAL || attribute == Attribute.ARCHIVE_LITERAL) {
                 continue;
             } else if (attribute == Attribute.CONFIRMED_HAM_FULLNAME_LITERAL) {
-                compareByEnding(expectedSwitch, actualSwitch, attribute,Attribute.CONFIRMED_HAM_LITERAL);
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.CONFIRMED_HAM_LITERAL);
             } else if (attribute == Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL) {
-                compareByEnding(expectedSwitch, actualSwitch, attribute,Attribute.CONFIRMED_SPAM_LITERAL);
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.CONFIRMED_SPAM_LITERAL);
             } else if (attribute == Attribute.TRASH_FULLNAME_LITERAL) {
-                compareByEnding(expectedSwitch, actualSwitch, attribute,Attribute.TRASH_LITERAL);
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.TRASH_LITERAL);
             } else if (attribute == Attribute.SENT_FULLNAME_LITERAL) {
-                compareByEnding(expectedSwitch, actualSwitch, attribute,Attribute.SENT_LITERAL);
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.SENT_LITERAL);
             } else if (attribute == Attribute.DRAFTS_FULLNAME_LITERAL) {
-                compareByEnding(expectedSwitch, actualSwitch, attribute,Attribute.DRAFTS_LITERAL);
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.DRAFTS_LITERAL);
             } else if (attribute == Attribute.SPAM_FULLNAME_LITERAL) {
-                compareByEnding(expectedSwitch, actualSwitch, attribute,Attribute.SPAM_LITERAL);
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.SPAM_LITERAL);
             } else {
                 final Object expected = attribute.doSwitch(expectedSwitch);
                 final Object actual = attribute.doSwitch(actualSwitch);
@@ -199,7 +199,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         }
     }
 
-    private void compareByEnding(final GetSwitch expectedSwitch, final GetSwitch actualSwitch, final Attribute attribute, Attribute compareAttribute) throws OXException {
+    private void compareByEnding(final GetSwitch expectedSwitch, final GetSwitch actualSwitch, final Attribute attribute, final Attribute compareAttribute) throws OXException {
         final Object expected = attribute.doSwitch(expectedSwitch);
         final Object actual = attribute.doSwitch(actualSwitch);
         if (actual != null && expected == null) {
