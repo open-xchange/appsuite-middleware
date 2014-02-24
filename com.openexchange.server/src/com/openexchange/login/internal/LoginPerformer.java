@@ -140,7 +140,8 @@ public final class LoginPerformer {
      * @throws OXException If login fails
      */
     public LoginResult doAutoLogin(final LoginRequest request) throws OXException {
-        return doLogin(request, new HashMap<String, Object>(1), new AutoLoginMethod(request, new HashMap<String, Object>(1)));
+        final Map<String, Object> properties = new HashMap<String, Object>();
+        return doLogin(request, properties, new AutoLoginMethod(request, properties));
     }
 
     /**
@@ -150,8 +151,8 @@ public final class LoginPerformer {
      * @return The login providing login information
      * @throws OXException If login fails
      */
-    private LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties, final LoginMethodClosure loginMethod) throws OXException {
-        sanityChecks(request, properties);
+    private LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
+        sanityChecks(request);
         final LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         try {
@@ -228,7 +229,7 @@ public final class LoginPerformer {
         }
     }
 
-    private static void sanityChecks(LoginRequest request, Map<String, Object> properties) throws OXException {
+    private static void sanityChecks(LoginRequest request) throws OXException {
         // Check if somebody is using the User-Agent as client parameter
         String client = request.getClient();
         if (null != client && client.equals(request.getUserAgent())) {
