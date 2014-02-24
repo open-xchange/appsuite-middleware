@@ -322,7 +322,7 @@ public class MailAccountParser extends DataParser {
                 if (isEmpty(name)) {
                     name = MailStrings.ARCHIVE;
                 }
-                account.setTrash(name);
+                account.setArchive(name);
                 attributes.add(Attribute.ARCHIVE_LITERAL);
             }
         }
@@ -342,7 +342,7 @@ public class MailAccountParser extends DataParser {
                 if (isEmpty(name)) {
                     name = MailStrings.SENT_ALT;
                 }
-                account.setTrash(name);
+                account.setSent(name);
                 attributes.add(Attribute.SENT_LITERAL);
             }
         }
@@ -362,7 +362,7 @@ public class MailAccountParser extends DataParser {
                 if (isEmpty(name)) {
                     name = MailStrings.DRAFTS;
                 }
-                account.setTrash(name);
+                account.setDrafts(name);
                 attributes.add(Attribute.DRAFTS_LITERAL);
             }
         }
@@ -382,7 +382,7 @@ public class MailAccountParser extends DataParser {
                 if (isEmpty(name)) {
                     name = MailStrings.SPAM;
                 }
-                account.setTrash(name);
+                account.setSpam(name);
                 attributes.add(Attribute.SPAM_LITERAL);
             }
         }
