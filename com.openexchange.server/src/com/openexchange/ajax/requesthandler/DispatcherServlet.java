@@ -395,14 +395,15 @@ public class DispatcherServlet extends SessionServlet {
         } catch (final OXException e) {
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-                logException(e, LogLevel.DEBUG);
+                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
             if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
                 final Object[] logArgs = e.getLogArgs();
                 final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
-                httpResponse.sendError(((Integer) logArgs[0]).intValue(), null == statusMsg ? null : statusMsg.toString());
-                logException(e, LogLevel.DEBUG);
+                final int sc = ((Integer) logArgs[0]).intValue();
+                httpResponse.sendError(sc, null == statusMsg ? null : statusMsg.toString());
+                logException(e, LogLevel.DEBUG, sc);
                 return;
             }
             // Handle other OXExceptions
@@ -411,7 +412,7 @@ public class DispatcherServlet extends SessionServlet {
             } else {
                 // Ignore special "folder not found" error
                 if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
-                    logException(e, LogLevel.DEBUG);
+                    logException(e, LogLevel.DEBUG, -1);
                 } else {
                     logException(e);
                 }
@@ -431,11 +432,15 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     private void logException(final Exception e) {
-        logException(e, null);
+        logException(e, null, -1);
     }
 
     private void logException(final Exception e, final LogLevel logLevel) {
-        final String msg = "Error processing request.";
+        logException(e, logLevel, -1);
+    }
+
+    private void logException(final Exception e, final LogLevel logLevel, final int statusCode) {
+        final String msg = statusCode > 0 ? new StringAllocator("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
 
         if (null == logLevel) {
             LOG.error(msg, e);
