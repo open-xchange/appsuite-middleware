@@ -99,7 +99,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
     @Override
     public List<List<NotifyItem>> getItems(Session session) throws OXException {
         final AppointmentSqlFactoryService factory = services.getService(AppointmentSqlFactoryService.class);
-        final int user_id = session.getUserId();
+        final int userId = session.getUserId();
         final List<List<NotifyItem>> notifyItems = new ArrayList<List<NotifyItem>>();
 
         // range from now until end of day
@@ -108,7 +108,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
 
         try {
             final SearchIterator<Appointment> appointments = factory.createAppointmentSql(session).getAppointmentsBetween(
-                user_id,
+                userId,
                 currentDate,
                 endDay,
                 new int[] {
