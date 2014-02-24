@@ -53,11 +53,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -227,14 +225,14 @@ public class ConfigRequest extends AbstractFindRequest<ConfigResponse> {
         private Filter parseJFilter(final JSONObject jFilter) throws JSONException {
             final JSONArray jQueries = jFilter.getJSONArray("queries");
             int length = jQueries.length();
-            final Set<String> queries = new LinkedHashSet<String>(length);
+            final List<String> queries = new LinkedList<String>();
             for (int i = 0; i < length; i++) {
                 queries.add(jQueries.getString(i));
             }
 
             final JSONArray jFields = jFilter.getJSONArray("fields");
             length= jFields.length();
-            final Set<String> fields = new LinkedHashSet<String>(length);
+            final List<String> fields = new LinkedList<String>();
             for (int i = 0; i < length; i++) {
                 fields.add(jFields.getString(i));
             }

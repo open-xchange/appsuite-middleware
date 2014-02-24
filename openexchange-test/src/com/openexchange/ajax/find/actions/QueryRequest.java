@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -144,14 +143,14 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
             for (final Filter filter : filters) {
                 final JSONObject jFilter = new JSONObject(3);
 
-                final Set<String> filterQueries = filter.getQueries();
+                final List<String> filterQueries = filter.getQueries();
                 final JSONArray jQueries = new JSONArray(filterQueries.size());
                 for (final String sQuery : filterQueries) {
                     jQueries.put(sQuery);
                 }
                 jFilter.put("queries", jQueries);
 
-                final Set<String> fields = filter.getFields();
+                final List<String> fields = filter.getFields();
                 final JSONArray jFields = new JSONArray(fields.size());
                 for (final String sField : fields) {
                     jFields.put(sField);

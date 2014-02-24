@@ -52,7 +52,6 @@ package com.openexchange.find.basic.drive;
 import static com.openexchange.java.Strings.isEmpty;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.search.ContentTerm;
 import com.openexchange.file.storage.search.DescriptionTerm;
@@ -123,7 +122,7 @@ public final class Utils {
      * @return The appropriate search term or <code>null</code>
      * @throws OXException If field is unknown
      */
-    public static SearchTerm<?> termForField(final String field, final Set<String> queries) throws OXException {
+    public static SearchTerm<?> termForField(final String field, final List<String> queries) throws OXException {
         final int size = queries.size();
         if (size > 1) {
             final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(size);
@@ -152,7 +151,7 @@ public final class Utils {
      * @return The appropriate search term or <code>null</code>
      * @throws OXException If a field is unknown
      */
-    public static SearchTerm<?> termFor(final Set<String> fields, final Set<String> queries) throws OXException {
+    public static SearchTerm<?> termFor(final List<String> fields, final List<String> queries) throws OXException {
         final int size = fields.size();
         if (size > 1) {
             final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(size);
@@ -185,12 +184,12 @@ public final class Utils {
             return null;
         }
 
-        final Set<String> fields = filter.getFields();
+        final List<String> fields = filter.getFields();
         if (fields == null || fields.isEmpty()) {
             throw FindExceptionCode.INVALID_FILTER_NO_FIELDS.create(filter);
         }
 
-        final Set<String> queries = filter.getQueries();
+        final List<String> queries = filter.getQueries();
         if (queries == null || queries.isEmpty()) {
             throw FindExceptionCode.INVALID_FILTER_NO_QUERIES.create(filter);
         }
