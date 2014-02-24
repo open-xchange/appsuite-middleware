@@ -51,6 +51,7 @@ package com.openexchange.calendar.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -135,6 +136,7 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
         final AppointmentSearchObject searchObj = new AppointmentSearchObject();
         searchObj.setMinimumEndDate(start);
         searchObj.setMaximumStartDate(end);
+        searchObj.setUserIDs(Collections.singleton(Integer.valueOf(req.getSession().getUserId())));
 
         final LinkedList<Appointment> linkedAppointmentList = new LinkedList<Appointment>();
 
