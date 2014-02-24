@@ -78,7 +78,9 @@ public class AppointmentSearchObject /*extends CalendarSearchObject*/ {
 
     /**
      * Gets a set of general query patterns that are matched against all searchable properties of an appointment during search.
-     * Multiple pattern values are used with a logical <code>AND</code> conjunction.
+     * Multiple pattern values are used with a logical <code>AND</code> conjunction. <p/>
+     * Note that for backwards compatibility with the previous "pattern"-only search, each query is surrounded with wildcards implicitly
+     * at the storage layer.
      *
      * @return The queries
      */
@@ -88,7 +90,9 @@ public class AppointmentSearchObject /*extends CalendarSearchObject*/ {
 
     /**
      * Sets the general query patterns that are matched against all searchable properties of an appointment during search. Multiple
-     * pattern values are used with a logical <code>AND</code> conjunction.
+     * pattern values are used with a logical <code>AND</code> conjunction. <p/>
+     * Note that for backwards compatibility with the previous "pattern"-only search, each query is surrounded with wildcards implicitly
+     * at the storage layer.
      *
      * @param queries The queries to set
      */
