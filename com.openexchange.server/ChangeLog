@@ -1,3 +1,7 @@
+* 2014-02-25 - marc.arens@open-xchange.com
+
+ - Fix for bug 31300: Retrieve client state after blocking cleanup of local member
+ 
 * 2014-02-25 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31191: Fixed erroneous permission check.
