@@ -1,6 +1,7 @@
 * 2014-02-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 31252: Put error arguments into "error_params" field for compatibility reasons
+ - Fix for bug 31287: Do not apply black-list on provisioning calls
 
 * 2014-02-24 - marcus.klein@open-xchange.com
 
