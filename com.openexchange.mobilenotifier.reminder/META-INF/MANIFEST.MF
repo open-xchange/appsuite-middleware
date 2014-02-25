@@ -17,4 +17,5 @@ Import-Package: com.openexchange.api2,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.tools.iterator,
  org.osgi.framework

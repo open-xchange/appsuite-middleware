@@ -117,7 +117,8 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
         final MailService mailService = services.getService(MailService.class);
         final List<List<NotifyItem>> notifyItems = new ArrayList<List<NotifyItem>>();
         final MailField[] requestedFields = new MailField[] {
-            MailField.ID, MailField.FOLDER_ID, MailField.FROM, MailField.RECEIVED_DATE, MailField.SUBJECT, MailField.FLAGS };
+            MailField.ID, MailField.FOLDER_ID, MailField.FROM, MailField.RECEIVED_DATE, MailField.SUBJECT, MailField.FLAGS,
+            MailField.CONTENT_TYPE };
         final List<MailMessage> messages = new LinkedList<MailMessage>();
 
         MailAccount[] userMailAccounts;

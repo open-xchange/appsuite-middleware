@@ -49,6 +49,7 @@
 
 package com.openexchange.mobilenotifier.reminder;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.api2.ReminderService;
@@ -58,6 +59,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderHandler;
+import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
@@ -65,6 +67,7 @@ import com.openexchange.mobilenotifier.NotifyTemplate;
 import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtil;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link MobileNotifierReminderImpl}
@@ -91,12 +94,32 @@ public class MobileNotifierReminderImpl extends AbstractMobileNotifierService {
 
     @Override
     public List<List<NotifyItem>> getItems(final Session session) throws OXException {
-        //reminder test
+        /*****************************************reminder test**************************************************/
         Context cs = ContextStorage.getStorageContext(session.getContextId());
         User us = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
         final ReminderService reminderSql = new ReminderHandler(cs);
-        reminderSql.getArisingReminder(session, cs, us, new Date(System.currentTimeMillis() + (24L * 60L * 60L * 1000L)));
-        return null;
+        SearchIterator<ReminderObject> reminderObjects = reminderSql.getArisingReminder(
+            session,
+            cs,
+            us,
+            new Date(
+            System.currentTimeMillis() + (24L * 60L * 60L * 1000L)));
+        final List<List<NotifyItem>> items = new ArrayList<List<NotifyItem>>();
+        
+        while (reminderObjects.hasNext()) {
+            ReminderObject ro = reminderObjects.next();
+            final List<NotifyItem> notifyItem = new ArrayList<NotifyItem>();
+            notifyItem.add(new NotifyItem("module", ro.getModule()));
+            notifyItem.add(new NotifyItem("date", ro.getDate()));
+            notifyItem.add(new NotifyItem("folder", ro.getFolder()));
+            notifyItem.add(new NotifyItem("lastmodified", ro.getLastModified()));
+            notifyItem.add(new NotifyItem("recurrenceposition", ro.getRecurrencePosition()));
+            notifyItem.add(new NotifyItem("targetid", ro.getTargetId()));
+            notifyItem.add(new NotifyItem("user", ro.getUser()));
+            items.add(notifyItem);
+        }
+        return items;
+        /************************************************************************************************************************/
     }
 
     @Override
