@@ -127,62 +127,44 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
             while (appointments.hasNext()) {
                 final List<NotifyItem> item = new ArrayList<NotifyItem>();
                 final Appointment originalAppointment = appointments.next();
-                final Appointment copyAppointment = originalAppointment.clone();
+                final Appointment copyAppointment = setStartEndOfRecurringAppointment(
+                    originalAppointment.clone(),
+                    collectionService,
+                    currentDate);
 
-                /******************************* TODO Refactoring *****************************************************************/
-                // if appointment is recurrence calculate the end date of the specific occurrence
-                final RecurringResultsInterface recurringResult = collectionService.calculateRecurring(
-                    copyAppointment,
-                    convertDateToTimestamp(copyAppointment.getStartDate()),
-                    convertDateToTimestamp(copyAppointment.getEndDate()),
-                    0);
+                // skip appointments which end date have already past or appointments end date is after current end of day
+                // needs to be checked because of recalculated start and end time of recurring appointments
+                if (copyAppointment.getEndDate().before(currentDate) || false == endOfDay.after(copyAppointment.getEndDate())) {
+                    continue;
+                }
 
-                if (recurringResult != null) {
-                    // current date to lookup the specific occurrence
-                    int recurrencePosition = recurringResult.getPositionByLong(collectionService.normalizeLong(currentDate.getTime()));
-                    if (recurrencePosition > 0) {
-                        copyAppointment.setStartDate(new Date(recurringResult.getRecurringResultByPosition(recurrencePosition).getStart()));
-                        copyAppointment.setEndDate(new Date(recurringResult.getRecurringResultByPosition(recurrencePosition).getEnd()));
-                        // checking, if date of appointment is before the current date
-                        if (copyAppointment.getEndDate().before(currentDate)) {
-                            continue;
-                        }
-                    }
-                    if (copyAppointment.getChangeException() != null) {
-                        copyAppointment.getChangeException();
+                // localize recurrence string
+                final HumanReadableRecurrences readableRecurrence = new HumanReadableRecurrences(copyAppointment);
+                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+                final Locale locale = user.getLocale();
+                final String recurrence = readableRecurrence.getString(locale);
+
+                // get status of confirmation
+                int confirmed = Appointment.NONE;
+                final UserParticipant[] participants = copyAppointment.getUsers();
+                for (UserParticipant participant : participants) {
+                    if (participant.getIdentifier() == session.getUserId()) {
+                        confirmed = participant.getConfirm();
                     }
                 }
 
-                if (false == copyAppointment.getEndDate().after(endOfDay)) {
-                    // localize recurrence string
-                    final HumanReadableRecurrences readableRecurrence = new HumanReadableRecurrences(copyAppointment);
-                    final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
-                    final Locale locale = user.getLocale();
-                    final String recurrence = readableRecurrence.getString(locale);
-
-                    // get status of confirmation
-                    int confirmed = Appointment.NONE;
-                    final UserParticipant[] participants = copyAppointment.getUsers();
-                    for (UserParticipant participant : participants) {
-                        if (participant.getIdentifier() == session.getUserId()) {
-                            confirmed = participant.getConfirm();
-                        }
-                    }
-
-                    item.add(new NotifyItem("recurrence", recurrence));
-                    item.add(new NotifyItem("id", copyAppointment.getObjectID()));
-                    item.add(new NotifyItem("folder", copyAppointment.getParentFolderID()));
-                    item.add(new NotifyItem("title", copyAppointment.getTitle()));
-                    item.add(new NotifyItem("location", copyAppointment.getLocation()));
-                    item.add(new NotifyItem("start_date", copyAppointment.getStartDate()));
-                    item.add(new NotifyItem("end_date", copyAppointment.getEndDate()));
-                    item.add(new NotifyItem("start_date_timestamp", convertDateToTimestamp(copyAppointment.getStartDate())));
-                    item.add(new NotifyItem("organizer", copyAppointment.getOrganizer()));
-                    item.add(new NotifyItem("note", copyAppointment.getNote()));
-                    item.add(new NotifyItem("status", confirmed));
-                    notifyItems.add(item);
-                }
-                /******************************************************************************************************************/
+                item.add(new NotifyItem("recurrence", recurrence));
+                item.add(new NotifyItem("id", copyAppointment.getObjectID()));
+                item.add(new NotifyItem("folder", copyAppointment.getParentFolderID()));
+                item.add(new NotifyItem("title", copyAppointment.getTitle()));
+                item.add(new NotifyItem("location", copyAppointment.getLocation()));
+                item.add(new NotifyItem("start_date", copyAppointment.getStartDate()));
+                item.add(new NotifyItem("end_date", copyAppointment.getEndDate()));
+                item.add(new NotifyItem("start_date_timestamp", convertDateToTimestamp(copyAppointment.getStartDate())));
+                item.add(new NotifyItem("organizer", copyAppointment.getOrganizer()));
+                item.add(new NotifyItem("note", copyAppointment.getNote()));
+                item.add(new NotifyItem("status", confirmed));
+                notifyItems.add(item);
             }
         } catch (SQLException e) {
             throw MobileNotifierExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
@@ -217,4 +199,23 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
         calendar.set(Calendar.MILLISECOND, 999);
         return calendar.getTimeInMillis();
     }
+
+    private Appointment setStartEndOfRecurringAppointment(Appointment app, CalendarCollectionService collectionService, Date currentDate) throws OXException {
+        final RecurringResultsInterface recurringResult = collectionService.calculateRecurring(
+            app,
+            convertDateToTimestamp(app.getStartDate()),
+            convertDateToTimestamp(app.getEndDate()),
+            0);
+
+        if (recurringResult != null) {
+            // current date to lookup the specific occurrence
+            int recurrencePosition = recurringResult.getPositionByLong(collectionService.normalizeLong(currentDate.getTime()));
+            if (recurrencePosition > 0) {
+                app.setStartDate(new Date(recurringResult.getRecurringResultByPosition(recurrencePosition).getStart()));
+                app.setEndDate(new Date(recurringResult.getRecurringResultByPosition(recurrencePosition).getEnd()));
+            }
+        }
+        return app;
+    }
+
 }
