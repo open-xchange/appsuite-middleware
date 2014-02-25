@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.search.AndTerm;
 import com.openexchange.groupware.infostore.search.CategoriesTerm;
 import com.openexchange.groupware.infostore.search.ColorLabelTerm;
-import com.openexchange.groupware.infostore.search.ComparisonType;
+import com.openexchange.groupware.infostore.search.ComparablePattern;
 import com.openexchange.groupware.infostore.search.ContentTerm;
 import com.openexchange.groupware.infostore.search.CreatedByTerm;
 import com.openexchange.groupware.infostore.search.CreatedTerm;
@@ -156,19 +156,19 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(NumberOfVersionsTerm numberOfVersionsTerm) {
-        String comp = getOperatorFor(numberOfVersionsTerm.getPattern().getComparisonType());
+        String comp = getOperatorFor(numberOfVersionsTerm);
         sb.append(INFOSTORE).append("version").append(comp).append("MAX(").append(numberOfVersionsTerm.getPattern().getPattern()).append(") ");
     }
 
     @Override
     public void visit(LastModifiedUtcTerm lastModifiedUtcTerm) {
-        String comp = getOperatorFor(lastModifiedUtcTerm.getPattern().getComparisonType());
-        sb.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedUtcTerm.getPattern().getPattern().getTime()).append(" ");
+        String comp = getOperatorFor(lastModifiedUtcTerm);
+        sb.append(INFOSTORE).append("last_modified ").append(comp).append(lastModifiedUtcTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
     public void visit(ColorLabelTerm colorLabelTerm) {
-        String comp = getOperatorFor(colorLabelTerm.getPattern().getComparisonType());
+        String comp = getOperatorFor(colorLabelTerm);
         sb.append(INFOSTORE).append("color_label ").append(comp).append(colorLabelTerm.getPattern().getPattern()).append(" ");
     }
 
@@ -211,8 +211,8 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(LockedUntilTerm lockedUntilTerm) {
-        String comp = getOperatorFor(lockedUntilTerm.getPattern().getComparisonType());
-        sb.append(INFOSTORE).append("locked_until").append(comp).append(lockedUntilTerm.getPattern().getPattern().getTime()).append(" ");
+        String comp = getOperatorFor(lockedUntilTerm);
+        sb.append(INFOSTORE).append("locked_until ").append(comp).append(lockedUntilTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
@@ -270,19 +270,19 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(LastModifiedTerm lastModifiedTerm) {
-        String comp = getOperatorFor(lastModifiedTerm.getPattern().getComparisonType());
-        sb.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedTerm.getPattern().getPattern().getTime()).append(" ");
+        String comp = getOperatorFor(lastModifiedTerm);
+        sb.append(INFOSTORE).append("last_modified ").append(comp).append(lastModifiedTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
     public void visit(CreatedTerm createdTerm) {
-        String comp = getOperatorFor(createdTerm.getPattern().getComparisonType());
-        sb.append(INFOSTORE).append("creating_date").append(comp).append(createdTerm.getPattern().getPattern().getTime()).append(" ");
+        String comp = getOperatorFor(createdTerm);
+        sb.append(INFOSTORE).append("creating_date ").append(comp).append(createdTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
     public void visit(ModifiedByTerm modifiedByTerm) {
-        String comp = getOperatorFor(modifiedByTerm.getPattern().getComparisonType());
+        String comp = getOperatorFor(modifiedByTerm);
         sb.append(INFOSTORE).append("changed_by =").append(comp).append(modifiedByTerm.getPattern().getPattern()).append(" ");
     }
 
@@ -326,7 +326,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(FileSizeTerm fileSizeTerm) {
-        String comp = getOperatorFor(fileSizeTerm.getPattern().getComparisonType());
+        String comp = getOperatorFor(fileSizeTerm);
         sb.append(DOCUMENT).append("file_size ").append(comp).append(fileSizeTerm.getPattern().getPattern()).append(" ");
     }
 
@@ -364,12 +364,12 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(CreatedByTerm createdByTerm) {
-        String comp = getOperatorFor(createdByTerm.getPattern().getComparisonType());
+        String comp = getOperatorFor(createdByTerm);
         sb.append(INFOSTORE).append("created_by ").append(comp).append(createdByTerm.getPattern().getPattern()).append(" ");
     }
 
-    private static String getOperatorFor(ComparisonType comparisonType) {
-        switch (comparisonType) {
+    private static <N> String getOperatorFor(final SearchTerm<ComparablePattern<N>> term) {
+        switch (term.getPattern().getComparisonType()) {
         case LESS_THAN:
             return "<";
         case GREATER_THAN:
