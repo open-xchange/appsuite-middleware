@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,50 +47,84 @@
  *
  */
 
-package com.openexchange.hazelcast.mbean;
+package com.openexchange.java.util;
 
-import java.util.List;
-import javax.management.MBeanException;
 
 /**
- * {@link HazelcastMBean}
+ * A generic pair class.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public interface HazelcastMBean {
+public class Pair<T, V> {
 
-    static final String HAZELCAST_DOMAIN = "com.openexchange.hazelcast";
+    private T first = null;
 
-    /**
-     * Gets the list of (possible) cluster members.
-     *
-     * @return The members
-     * @throws MBeanException
-     */
-    List<String> listMembers() throws MBeanException;
+    private V second = null;
 
-    /**
-     * Adds a member to the list of (possible) cluster members.
-     *
-     * @param member The IP address or hostname of the member to add
-     * @throws MBeanException
-     */
-    void addMember(String member) throws MBeanException;
+    public Pair() {
+        super();
+    }
 
-    /**
-     * Removes a member from the list of (possible) cluster members.
-     *
-     * @param member The IP address or hostname of the member to add
-     * @throws MBeanException
-     */
-    void removeMember(String member) throws MBeanException;
+    public Pair(T first, V second) {
+        super();
+        this.first = first;
+        this.second = second;
+    }
 
-    /**
-     * Gets a list of the actual cluster members.
-     *
-     * @return The members
-     * @throws MBeanException
-     */
-    List<String> listClusterMembers() throws MBeanException;
 
+    public T getFirst() {
+        return first;
+    }
+
+
+    public void setFirst(T first) {
+        this.first = first;
+    }
+
+
+    public V getSecond() {
+        return second;
+    }
+
+
+    public void setSecond(V second) {
+        this.second = second;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((first == null) ? 0 : first.hashCode());
+        result = prime * result + ((second == null) ? 0 : second.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Pair<?, ?> other = (Pair<?, ?>) obj;
+        if (first == null) {
+            if (other.first != null)
+                return false;
+        } else if (!first.equals(other.first))
+            return false;
+        if (second == null) {
+            if (other.second != null)
+                return false;
+        } else if (!second.equals(other.second))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "Pair [first=" + first + ", second=" + second + "]";
+    }
 }

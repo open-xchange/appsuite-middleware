@@ -63,6 +63,7 @@ import com.openexchange.find.basic.tasks.MockTasksDriver;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -81,7 +82,7 @@ public class FindBasicActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContactService.class, FolderService.class, MailService.class,
             MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
-            AppointmentSqlFactoryService.class, ThreadPoolService.class };
+            AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class };
     }
 
     @Override

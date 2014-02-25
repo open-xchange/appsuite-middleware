@@ -640,8 +640,9 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String tmp = configuration.getProperty("com.openexchange.mail.account.blacklist", "").trim();
+            String tmp = configuration.getProperty("com.openexchange.mail.account.blacklist", "").trim();
             if (!Strings.isEmpty(tmp)) {
+                tmp = Strings.unquote(tmp);
                 final List<IPRange> ranges = new LinkedList<IPRange>();
                 final String[] sRanges = Strings.splitByComma(tmp);
                 for (String sRange : sRanges) {

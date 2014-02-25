@@ -410,12 +410,14 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                             } else {
                                 capabilities.remove(name);
                             }
-                        } else {
-                            // Check for a property handler
-                            final PropertyHandler handler = PROPERTY_HANDLERS.get(propName);
-                            if (null != handler) {
-                                handler.handleProperty(entry.getValue().get(), capabilities);
-                            }
+                        }
+                    }
+
+                    // Check for a property handler
+                    for (final Map.Entry<String, PropertyHandler> entry : PROPERTY_HANDLERS.entrySet()) {
+                        final ComposedConfigProperty<String> composedConfigProperty = all.get(entry.getKey());
+                        if (null != composedConfigProperty) {
+                            entry.getValue().handleProperty(composedConfigProperty.get(), capabilities);
                         }
                     }
 

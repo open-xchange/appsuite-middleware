@@ -85,8 +85,9 @@ public class CarddavActivator extends HousekeepingActivator {
             registerService(PathRegistration.class, new PathRegistration("carddav"));
 
             openTrackers();
-        } catch (Throwable t) {
-            org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).error("", t);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).error("", e);
+            throw e;
         }
     }
 

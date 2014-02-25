@@ -51,6 +51,8 @@ package com.openexchange.find.basic.calendar;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,7 +71,11 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
@@ -114,22 +120,120 @@ public class BasicCalendarDriver extends MockCalendarDriver {
         /*
          * perform search
          */
-        List<Document> appointmentDocuments = new ArrayList<Document>();
+        List<Appointment> appointments = new ArrayList<Appointment>();
         AppointmentSQLInterface appointmentSql = Services.requireService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
         SearchIterator<Appointment> searchIterator = null;
         try {
             searchIterator = appointmentSql.searchAppointments(appointmentSearch, Appointment.START_DATE, Order.ASCENDING, FIELDS);
             while (searchIterator.hasNext()) {
-                appointmentDocuments.add(new CalendarDocument(searchIterator.next()));
+                appointments.add(getBestMatchingOccurrence(searchIterator.next(), appointmentSearch.getMinimumEndDate(), appointmentSearch.getMaximumStartDate()));
             }
         } finally {
             if (null != searchIterator) {
                 searchIterator.close();
             }
         }
-        //TODO: start / limit
-        return new SearchResult(appointmentDocuments.size(), searchRequest.getStart(), appointmentDocuments);
+        if (1 < appointments.size()) {
+            Collections.sort(appointments, STARTTIME_COMPARATOR);
+        }
+        /*
+         * construct search result
+         */
+        return new SearchResult(appointments.size(), searchRequest.getStart(),
+            getDocuments(appointments, searchRequest.getStart(), searchRequest.getSize()));
     }
+
+    private static List<Document> getDocuments(List<Appointment> appointments, int start, int size) {
+        if (start > appointments.size()) {
+            return Collections.emptyList();
+        }
+        int startIndex = start;
+        int stopIndex = 0 < size ? Math.min(appointments.size(), startIndex + size) : appointments.size();
+        List<Document> documents = new ArrayList<Document>(stopIndex - startIndex);
+        for (int i = startIndex; i < stopIndex; i++) {
+            documents.add(new CalendarDocument(appointments.get(i)));
+        }
+        return documents;
+    }
+
+    /**
+     * Chooses a single occurrence from a recurring appointment series based on the supplied minimum end and maximum start date boundaries.
+     * Invoking this method on a non-recurring appointment has no effect.
+     *
+     * @param appointment The recurring appointment
+     * @param minimumEndDate The minimum end date to consider, or <code>null</code> if not defined
+     * @param maximumStartDate The maximum start date to consider, or <code>null</code> if not defined
+     * @return The supplied appointment, with the values of the best matching occurrence being applied
+     * @throws OXException
+     */
+    private static Appointment getBestMatchingOccurrence(Appointment appointment, Date minimumEndDate, Date maximumStartDate) throws OXException {
+        if (CalendarObject.NONE != appointment.getRecurrenceType() && 0 == appointment.getRecurrencePosition()) {
+            long rangeStart = 0;
+            long rangeEnd = Long.MAX_VALUE;
+            int pmaxtc =  CalendarCollectionService.MAX_OCCURRENCESE;
+            boolean first = true;
+            if (null == minimumEndDate && null == maximumStartDate) {
+                /*
+                 * choose "next" or "last" occurrence in case not specified
+                 */
+                Date until = appointment.getUntil();
+                long now = System.currentTimeMillis();
+                if (null != until && until.getTime() > now) {
+                    rangeStart = now;
+                    pmaxtc = 1;
+                } else {
+                    first = false;
+                }
+            } else {
+                /*
+                 * get first occurrence after minimum end date
+                 */
+                if (null != minimumEndDate) {
+                    rangeStart = minimumEndDate.getTime();
+                    pmaxtc = 1;
+                    first = true;
+                }
+                /*
+                 * get last occurrence before maximum start date
+                 */
+                if (null != maximumStartDate) {
+                    rangeEnd = maximumStartDate.getTime();
+                    first = false;
+                }
+            }
+            /*
+             * calculate & apply occurrence
+             */
+            RecurringResultsInterface recurringResults = Services.requireService(CalendarCollectionService.class).calculateRecurring(
+                appointment, rangeStart, rangeEnd, 0, pmaxtc, true);
+            if (0 < recurringResults.size()) {
+                RecurringResultInterface result = recurringResults.getRecurringResult(first ? 0 : recurringResults.size() - 1);
+                appointment.setStartDate(new Date(result.getStart()));
+                appointment.setEndDate(new Date(result.getEnd()));
+                appointment.setRecurrencePosition(result.getPosition());
+            }
+        }
+        return appointment;
+    }
+
+    private static final Comparator<Appointment> STARTTIME_COMPARATOR = new Comparator<Appointment>() {
+
+        @Override
+        public int compare(Appointment appointment1, Appointment appointment2) {
+            //TODO: startdate of whole day appts in user timezone
+            Date date1 = null != appointment1 ? appointment1.getStartDate() : null;
+            Date date2 = null != appointment2 ? appointment2.getStartDate() : null;
+            if (date1 == date2) {
+                return 0;
+            } else if (null == date1) {
+                return -1;
+            } else if (null == date2) {
+                return 1;
+            } else {
+                return date1.compareTo(date2);
+            }
+        }
+    };
 
     private List<FacetValue> getAutocompleteContacts(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         /*

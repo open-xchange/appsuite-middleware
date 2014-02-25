@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.hazelcast overrides" basedir=".">
+
+    <description>
+        Add start level to ini file.
+    </description>
+
+    <import file="build-project.xml" />
+
+    <!-- We use start level 5 here to ensure a later startup of this bundle than others, that use the default of 4. -->
+    <target name="makeIni" description="Creates the .ini file to include this bundle when starting the OSGi framework.">
+        <propertyregex property="bundleName" input="${bundleFileOrDir}" regexp="^.*/(.*?)(\.jar)?$" select="\1" />
+        <propertyregex property="fileOrDir" input="${bundleFileOrDir}" regexp="^.*/(.*?(\.jar)?)$" select="\1" />
+        <echo file="${destDir}/${bundle.dDir}/${bundleName}.ini" message="${bundlesDir}/${fileOrDir}@5:start${line.separator}" />
+    </target>
+
+</project>

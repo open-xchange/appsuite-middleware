@@ -61,8 +61,11 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.xing.RESTUtility.Method;
 import com.openexchange.xing.exception.XingException;
+import com.openexchange.xing.exception.XingIOException;
+import com.openexchange.xing.exception.XingServerException;
 import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.session.Session;
 
@@ -454,10 +457,132 @@ public class XingAPI<S extends Session> {
     }
 
     /**
+     * Initiates a contact request between the current user (<code>userId</code>) and the specified user (<code>recipientUserId</code>).
+     *
+     * @param userId The identifier of the user
+     * @param recipientUserId The identifier of the recipient
+     * @param optMessage The optional message
+     * @throws XingException If contact request fails
+     */
+    public void initiateContactRequest(final String userId, final String recipientUserId, final String optMessage) throws XingException {
+        assertAuthenticated();
+        try {
+            // Add parameters limit & offset
+            final List<String> params = new ArrayList<String>(4);
+
+            params.add("user_id");
+            params.add(recipientUserId);
+
+            if (!Strings.isEmpty(optMessage)) {
+                params.add("message");
+                params.add(optMessage);
+            }
+
+            RESTUtility.streamRequest(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/" + userId + "/contact_requests",
+                VERSION,
+                params.toArray(new String[0]),
+                session);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Send invitations via email to contacts who do not have a XING profile.
+     * <p>
+     * The user is allowed to invite 2000 people per week.
+     *
+     * @param userId The identifier of the user that attempts to invite others
+     * @param addresses A list of one or more E-Mail addresses. NOTE: The current user's email address will be filtered out.
+     * @param optMessage The message that is sent together with the invitation. The maximum length of this message is 150 characters for BASIC users and 600 characters for PREMIUM users. Defaults to the XING standard text for invitations.
+     * @param optUserFields A list of user attributes to be returned. If this parameter is not used, only the ID will be returned. For a list of available profile user attributes, please refer to the get user details call.
+     * @return A invitation response
+     * @throws XingException If invitation attempt fails
+     */
+    public InvitationStats invite(final String userId, final List<String> addresses, final String optMessage, Collection<UserField> optUserFields) throws XingException {
+        if (null == addresses || addresses.isEmpty()) {
+            throw new XingException("Invalid addresses");
+        }
+        assertAuthenticated();
+        try {
+            // Add parameters limit & offset
+            final List<String> params = new ArrayList<String>(6);
+
+            params.add("to_emails");
+            params.add(collectionToCsv(addresses));
+
+            if (!Strings.isEmpty(optMessage)) {
+                params.add("message");
+                params.add(optMessage);
+            }
+
+            if (null != optMessage && !optUserFields.isEmpty()) {
+                params.add("user_fields");
+                params.add(collectionToCsv(optUserFields, new Stringer<UserField>() {
+
+                    @Override
+                    public String getString(final UserField element) {
+                        return element.getFieldName();
+                    }
+                }));
+            }
+
+            final JSONObject responseInformation = RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/" + userId + "/invite",
+                VERSION,
+                params.toArray(new String[0]),
+                session).toObject();
+            return new InvitationStats(responseInformation.getJSONObject("invitation_stats"));
+        } catch (final JSONException e) {
+            throw new XingException(e);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
      * Gets the associated session.
      */
     public S getSession() {
         return session;
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
+
+    private static interface Stringer<E> {
+
+        String getString(E element);
+    }
+
+    private static final Stringer<Object> DEFAULT_STRINGER = new Stringer<Object>() {
+
+        @Override
+        public String getString(final Object e) {
+            return null == e ? "null" : e.toString();
+        }
+    };
+
+    private static <E> String collectionToCsv(final Collection<E> col) {
+        return collectionToCsv(col, null);
+    }
+
+    private static <E> String collectionToCsv(final Collection<E> col, final Stringer<E> stringer) {
+        if (null == col || col.isEmpty()) {
+            return null;
+        }
+        final Stringer<E> str = (Stringer<E>) (null == stringer ? DEFAULT_STRINGER : stringer);
+        final Iterator<E> iter = col.iterator();
+        final StringAllocator sb = new StringAllocator(col.size() << 4);
+        sb.append(str.getString(iter.next()));
+        while (iter.hasNext()) {
+            sb.append(',').append(str.getString(iter.next()));
+        }
+        return sb.toString();
     }
 
 }
