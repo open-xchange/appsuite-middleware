@@ -397,7 +397,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             // Determine standard folders
             {
                 final StringHelper stringHelper = StringHelper.valueOf(locale);
-                for (int index = 0; index < 6; index++) {
+                for (int index = 0; index < 7; index++) {
                     final String fn = getChecker().getDefaultFolder(index);
                     if (null != fn) {
                         final MailFolderInfo mfi = map.get(fn);
@@ -427,6 +427,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             case StorageUtility.INDEX_TRASH:
                                 mfi.setDefaultFolderType(DefaultFolderType.TRASH);
                                 mfi.setDisplayName(stringHelper.getString(MailStrings.TRASH));
+                                break;
+                            case StorageUtility.INDEX_INBOX:
+                                mfi.setDefaultFolderType(DefaultFolderType.INBOX);
+                                mfi.setDisplayName(stringHelper.getString(MailStrings.INBOX));
                                 break;
                             default:
                                 break;
