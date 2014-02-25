@@ -49,47 +49,49 @@
 
 package com.openexchange.mail.autoconfig;
 
+
 /**
  * {@link Autoconfig} - Represents an auto-configuration.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Autoconfig implements Comparable<Autoconfig> {
+public class Autoconfig {
 
     private String mailServer;
     private String transportServer;
     private String mailProtocol;
     private String transportProtocol;
-    private int mailPort;
-    private int transportPort;
-    private boolean mailSecure;
-    private boolean transportSecure;
+    private Integer mailPort;
+    private Integer transportPort;
+    private Boolean mailSecure;
+    private Boolean transportSecure;
     private String username;
-    private final int ranking;
+    private String source;
 
     /**
      * Initializes a new ranked {@link Autoconfig}.
      */
-    public Autoconfig(final int ranking) {
+    public Autoconfig() {
         super();
-        this.ranking = ranking;
     }
 
     /**
-     * Gets the ranking
+     * Gets the source
      *
-     * @return The ranking
+     * @return The source
      */
-    public int getRanking() {
-        return ranking;
+    public String getSource() {
+        return source;
     }
 
-    @Override
-    public int compareTo(final Autoconfig o) {
-        final int thisRank = getRanking();
-        final int otherRank = o.getRanking();
-        return (thisRank < otherRank ? -1 : (thisRank == otherRank ? 0 : 1));
+    /**
+     * Sets the source
+     *
+     * @param source The source to set
+     */
+    public void setSource(String source) {
+        this.source = source;
     }
 
     /**
@@ -169,7 +171,7 @@ public class Autoconfig implements Comparable<Autoconfig> {
      *
      * @return The mail port
      */
-    public int getMailPort() {
+    public Integer getMailPort() {
         return mailPort;
     }
 
@@ -179,7 +181,7 @@ public class Autoconfig implements Comparable<Autoconfig> {
      * @param mailPort The mail port to set
      */
     public void setMailPort(int mailPort) {
-        this.mailPort = mailPort;
+        this.mailPort = Integer.valueOf(mailPort);
     }
 
     /**
@@ -187,7 +189,7 @@ public class Autoconfig implements Comparable<Autoconfig> {
      *
      * @return The transport port
      */
-    public int getTransportPort() {
+    public Integer getTransportPort() {
         return transportPort;
     }
 
@@ -197,7 +199,7 @@ public class Autoconfig implements Comparable<Autoconfig> {
      * @param transportPort The transport port to set
      */
     public void setTransportPort(int transportPort) {
-        this.transportPort = transportPort;
+        this.transportPort = Integer.valueOf(transportPort);
     }
 
     /**
@@ -205,7 +207,7 @@ public class Autoconfig implements Comparable<Autoconfig> {
      *
      * @return The mail secure flag
      */
-    public boolean isMailSecure() {
+    public Boolean isMailSecure() {
         return mailSecure;
     }
 
@@ -215,7 +217,7 @@ public class Autoconfig implements Comparable<Autoconfig> {
      * @param mailSecure The mail secure flag to set
      */
     public void setMailSecure(boolean mailSecure) {
-        this.mailSecure = mailSecure;
+        this.mailSecure = Boolean.valueOf(mailSecure);
     }
 
     /**
@@ -223,7 +225,7 @@ public class Autoconfig implements Comparable<Autoconfig> {
      *
      * @return The transport secure flag
      */
-    public boolean isTransportSecure() {
+    public Boolean isTransportSecure() {
         return transportSecure;
     }
 
@@ -233,7 +235,7 @@ public class Autoconfig implements Comparable<Autoconfig> {
      * @param transportSecure The transport secure flag to set
      */
     public void setTransportSecure(boolean transportSecure) {
-        this.transportSecure = transportSecure;
+        this.transportSecure = Boolean.valueOf(transportSecure);
     }
 
     /**

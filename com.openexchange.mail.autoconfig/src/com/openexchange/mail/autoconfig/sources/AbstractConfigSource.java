@@ -72,13 +72,8 @@ public abstract class AbstractConfigSource implements ConfigSource {
         super();
     }
 
-    @Override
-    public int getRanking() {
-        return 0;
-    }
-
     protected Autoconfig getBestConfiguration(ClientConfig clientConfig, String domain) {
-        Autoconfig autoconfig = new Autoconfig(getRanking());
+        Autoconfig autoconfig = new Autoconfig();
         for (EmailProvider emailProvider : clientConfig.getEmailProvider()) {
             if (!emailProvider.getDomains().contains(domain)) {
                 continue;
