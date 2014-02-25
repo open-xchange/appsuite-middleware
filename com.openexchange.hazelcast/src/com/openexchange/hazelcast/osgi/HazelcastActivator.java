@@ -50,13 +50,18 @@
 
 package com.openexchange.hazelcast.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.java.Strings;
-import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for this JVM)
@@ -73,17 +78,13 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HazelcastActivator extends HousekeepingActivator {
+public class HazelcastActivator implements BundleActivator {
 
-    /**
-     * The {@code AtomicReference} for {@code HazelcastInstance}.
-     */
-    public static final AtomicReference<HazelcastInstance> REF_HAZELCAST_INSTANCE = new AtomicReference<HazelcastInstance>();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastActivator.class);
 
-    /**
-     * The logger for HazelcastActivator.
-     */
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastActivator.class);
+    private volatile ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> tracker;
+    private volatile ServiceRegistration<HazelcastInstance> serviceRegistration;
+    private volatile HazelcastInstance hazelcastInstance;
 
     /**
      * Initializes a new {@link HazelcastActivator}.
@@ -93,22 +94,88 @@ public class HazelcastActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { HazelcastConfigurationService.class };
+    public void start(final BundleContext context) throws Exception {
+        ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> customizer =
+            new ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService>() {
+
+            @Override
+            public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> arg0) {
+                HazelcastConfigurationService configService = context.getService(arg0);
+                try {
+                    if (false == configService.isEnabled()) {
+                        LOG.info("{}Hazelcast:{}    Startup of Hazelcast clustering and data distribution platform denied per configuration.{}",
+                            Strings.getLineSeparator(), Strings.getLineSeparator(), Strings.getLineSeparator());
+                    }
+                    HazelcastInstance hazelcast = startHazelcast(configService);
+                    serviceRegistration = context.registerService(HazelcastInstance.class, hazelcast, null);
+                    hazelcastInstance = hazelcast;
+                } catch (Exception e) {
+                    String msg = "Error starting \"com.openexchange.hazelcast\"";
+                    LOG.error(msg, e);
+                    throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR, e));
+                }
+                return configService;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<HazelcastConfigurationService> arg0, HazelcastConfigurationService arg1) {
+                // nothing to do
+            }
+
+            @Override
+            public void removedService(ServiceReference<HazelcastConfigurationService> arg0, HazelcastConfigurationService arg1) {
+                ServiceRegistration<HazelcastInstance> registration = serviceRegistration;
+                if (null != registration) {
+                    registration.unregister();
+                    serviceRegistration = null;
+                }
+                try {
+                    stopHazelcast();
+                } catch (Exception e) {
+                    String msg = "Error stopping \"com.openexchange.hazelcast\"";
+                    LOG.error(msg, e);
+                    throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR, e));
+                }
+                context.ungetService(arg0);
+            }
+        };
+        tracker = new ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService>(context, HazelcastConfigurationService.class, customizer);
+        tracker.open();
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    public void stop(BundleContext arg0) throws Exception {
+        ServiceRegistration<HazelcastInstance> serviceRegistration = this.serviceRegistration;
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+            this.serviceRegistration = null;
+        }
+        ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> tracker = this.tracker;
+        if (null != tracker) {
+            tracker.close();
+            this.tracker = null;
+        }
+        stopHazelcast();
+    }
+
+    private void stopHazelcast() throws Exception {
+        String lf = Strings.getLineSeparator();
+        LOG.info("{}Hazelcast:{}    Shutting down...{}", lf, lf, lf);
+        long start = System.currentTimeMillis();
+        HazelcastInstance hazelcast = this.hazelcastInstance;
+        if (null != hazelcast) {
+            hazelcast.getLifecycleService().shutdown();
+            this.hazelcastInstance = null;
+        }
+        LOG.info("{}Hazelcast:{}    Shutdown completed after {} msec.{}", lf, lf, (System.currentTimeMillis() - start), lf);
+    }
+
+    private HazelcastInstance startHazelcast(HazelcastConfigurationService configService) throws Exception {
         String lf = Strings.getLineSeparator();
         LOG.info("{}Hazelcast:{}    Starting...{}", lf, lf, lf);
-        long bundleStart = System.currentTimeMillis();
-        /*
-         * Get hazelcast config service
-         */
-        HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
         if (false == configService.isEnabled()) {
             LOG.info("{}Hazelcast:{}    Startup of Hazelcast clustering and data distribution platform denied per configuration.{}", lf, lf, lf);
-            return;
+            return null;
         }
         /*
          * Create hazelcast instance from configuration
@@ -124,34 +191,10 @@ public class HazelcastActivator extends HousekeepingActivator {
             }
         }
         long hzStart = System.currentTimeMillis();
-        HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
+        HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(config);
         LOG.info("{}Hazelcast:{}    New hazelcast instance successfully created in {} msec.{}", lf, lf, (System.currentTimeMillis() - hzStart), lf);
-        /*
-         * Register instance
-         */
-        registerService(HazelcastInstance.class, hazelcastInstance);
-        REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
-        LOG.info("{}Hazelcast:{}    Started in {} msec.{}", lf, lf, (System.currentTimeMillis() - bundleStart), lf);
-        /*
-         * Register management mbean dynamically
-         */
-        // deactivated for now
-//        track(ManagementService.class, new ManagementRegisterer(context));
-//        openTrackers();
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        String lf = Strings.getLineSeparator();
-        LOG.info("{}Hazelcast:{}    Shutting down...{}", lf, lf, lf);
-        long start = System.currentTimeMillis();
-        HazelcastInstance instance = REF_HAZELCAST_INSTANCE.get();
-        if (null != instance) {
-            instance.getLifecycleService().shutdown();
-            REF_HAZELCAST_INSTANCE.set(null);
-        }
-        LOG.info("{}Hazelcast:{}    Shutdown completed after {} msec.{}", lf, lf, (System.currentTimeMillis() - start), lf);
-        super.stopBundle();
+        this.hazelcastInstance = hazelcast;
+        return hazelcast;
     }
 
 }
