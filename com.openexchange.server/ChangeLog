@@ -7,6 +7,7 @@
  - Fix for bug 31252: Put error arguments into "error_params" field for compatibility reasons
  - Fix for bug 31287: Do not apply black-list on provisioning calls
  - Fix for bug 31222: Signal support for SSLv3 protocol on secure connect to POP3 server
+ - Fix for bug 31302: Set reasonable timeouts when checking connectivity + several other improvements
 
 * 2014-02-24 - thorben.betten@open-xchange.com
 
