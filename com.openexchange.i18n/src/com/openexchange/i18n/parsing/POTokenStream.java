@@ -161,7 +161,9 @@ final class POTokenStream {
          * POToken.COMMENT; element(data.toString());
          */
         // Ignore comments
-        while (read() != '\n') {
+        byte b;
+        while ((b = read()) != '\n' && b > 0) {
+            // Discard
         }
         initNextToken();
     }
