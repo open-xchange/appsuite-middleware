@@ -75,7 +75,7 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
      */
     IO_ERROR("An I/O error occured %1$s", Category.CATEGORY_ERROR, 3, MobileNotifierExceptionMessages.MESSAGE),
     /**
-     * No notification items defined
+     * An unexpected SQL error occured
      */
     SQL_ERROR("An unexpected SQL error occured.", CATEGORY_ERROR, 4, MobileNotifierExceptionMessages.SQL_ERROR_MSG);
     /**

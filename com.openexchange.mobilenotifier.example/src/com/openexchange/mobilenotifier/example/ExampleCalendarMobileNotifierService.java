@@ -62,12 +62,12 @@ import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtil;
 import com.openexchange.session.Session;
 
 /**
- * {@link ExampleAppointmentMobileNotifierService} - Example calendar implementation of a mobile notifier service
+ * {@link ExampleCalendarMobileNotifierService} - Example calendar implementation of a mobile notifier service
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ExampleAppointmentMobileNotifierService extends AbstractMobileNotifierService {
-    public ExampleAppointmentMobileNotifierService() {
+public class ExampleCalendarMobileNotifierService extends AbstractMobileNotifierService {
+    public ExampleCalendarMobileNotifierService() {
         super();
     }
 
@@ -83,7 +83,7 @@ public class ExampleAppointmentMobileNotifierService extends AbstractMobileNotif
 
     // public List<List<NotifyItem>> ?
     @Override
-    public List<List<NotifyItem>> getItems(Session session) throws OXException {
+    public List<List<NotifyItem>> getItems(final Session session) throws OXException {
         List<NotifyItem> item1 = new ArrayList<NotifyItem>();
         item1.add(new NotifyItem("title", "This is a test title1"));
         item1.add(new NotifyItem("location", "This is a test location1"));

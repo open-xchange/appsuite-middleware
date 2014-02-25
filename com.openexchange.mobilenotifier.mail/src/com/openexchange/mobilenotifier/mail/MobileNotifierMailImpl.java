@@ -113,7 +113,7 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
     }
 
     @Override
-    public List<List<NotifyItem>> getItems(Session session) throws OXException {
+    public List<List<NotifyItem>> getItems(final Session session) throws OXException {
         final MailService mailService = services.getService(MailService.class);
         final List<List<NotifyItem>> notifyItems = new ArrayList<List<NotifyItem>>();
         final MailField[] requestedFields = new MailField[] {

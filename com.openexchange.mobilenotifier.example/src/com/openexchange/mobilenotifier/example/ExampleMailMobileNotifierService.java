@@ -81,7 +81,7 @@ public class ExampleMailMobileNotifierService extends AbstractMobileNotifierServ
     }
 
     @Override
-    public List<List<NotifyItem>> getItems(Session session) throws OXException {
+    public List<List<NotifyItem>> getItems(final Session session) throws OXException {
         List<NotifyItem> item1 = new ArrayList<NotifyItem>();
         item1.add(new NotifyItem("from", "heinrich@example.com"));
         item1.add(new NotifyItem("subject", "a subject"));

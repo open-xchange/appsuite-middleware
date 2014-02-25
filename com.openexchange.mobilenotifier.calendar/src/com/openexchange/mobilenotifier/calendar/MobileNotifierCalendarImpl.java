@@ -100,7 +100,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
     }
 
     @Override
-    public List<List<NotifyItem>> getItems(Session session) throws OXException {
+    public List<List<NotifyItem>> getItems(final Session session) throws OXException {
         final AppointmentSqlFactoryService factory = services.getService(AppointmentSqlFactoryService.class);
         final int userId = session.getUserId();
         final List<List<NotifyItem>> notifyItems = new ArrayList<List<NotifyItem>>();
@@ -120,7 +120,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                     Appointment.FOLDER_ID, Appointment.OBJECT_ID, Appointment.TITLE, Appointment.LOCATION, Appointment.START_DATE,
                     Appointment.END_DATE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS, Appointment.RECURRENCE_CALCULATOR,
                     Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_ID, Appointment.NOTE,
-                    Appointment.USERS, Appointment.TIMEZONE, Appointment.CHANGE_EXCEPTIONS },
+                    Appointment.USERS, Appointment.TIMEZONE },
                 Appointment.START_DATE,
                 Order.DESCENDING);
 
@@ -134,7 +134,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
 
                 // skip appointments which end date have already past or appointments end date is after current end of day
                 // needs to be checked because of recalculated start and end time of recurring appointments
-                if (copyAppointment.getEndDate().before(currentDate) || false == endOfDay.after(copyAppointment.getEndDate())) {
+                if (copyAppointment.getEndDate().before(currentDate) || endOfDay.before(copyAppointment.getEndDate())) {
                     continue;
                 }
 
@@ -193,14 +193,23 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
     private long getEndOfDay(Date date) {
         final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(date);
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-        calendar.set(Calendar.MILLISECOND, 999);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
         return calendar.getTimeInMillis();
     }
 
-    private Appointment setStartEndOfRecurringAppointment(Appointment app, CalendarCollectionService collectionService, Date currentDate) throws OXException {
+    /**
+     * Sets the correct start and end time of recurring appointment of the current date
+     * 
+     * @param app The appointment
+     * @param collectionService The collection service
+     * @param currentDate The current date
+     * @return The appointment with the correct start and end time or if it's not an recurring appointment return the original appointment
+     * @throws OXException
+     */
+    private Appointment setStartEndOfRecurringAppointment(final Appointment app, final CalendarCollectionService collectionService, final Date currentDate) throws OXException {
         final RecurringResultsInterface recurringResult = collectionService.calculateRecurring(
             app,
             convertDateToTimestamp(app.getStartDate()),
