@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.json;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
@@ -63,17 +65,25 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Utils {
+    private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     
     public static ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        String userLogin = session.getUserlogin();
-        String contextName = session.getContext().getName();
+        String fullLogin = session.getLogin();
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        String resourceId = request.getParameter("resource");
 
-        String resource = request.getParameter("resource");
-
-        if (resource == null) {
-            throw RealtimeExceptionCodes.INVALID_ID.create();
+        if (resourceId == null) {
+            throw RealtimeExceptionCodes.INVALID_ID.create("Request parameter resource is missing.");
         }
-        
-        return new ID(JSONChannel.PROTOCOL, null, userLogin, contextName, resource);
+
+        LOG.debug("Constructing new realtime ID for user {} based on userId: {}, contextID: {} and resourceId: {}",
+            fullLogin,
+            userId,
+            contextId,
+            resourceId);
+
+        return new ID(JSONChannel.PROTOCOL, null, String.valueOf(userId), String.valueOf(contextId), resourceId);
     }
+
 }
