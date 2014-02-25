@@ -12,6 +12,7 @@
  - Fix for bug 31287: Do not apply black-list on provisioning calls
  - Fix for bug 31222: Signal support for SSLv3 protocol on secure connect to POP3 server
  - Fix for bug 31302: Set reasonable timeouts when checking connectivity + several other improvements
+ - Fix for bug 31177: Only invoke 'java.util.concurrent.locks.Condition.signalAll()' when holding associated lock
 
 * 2014-02-24 - thorben.betten@open-xchange.com
 
