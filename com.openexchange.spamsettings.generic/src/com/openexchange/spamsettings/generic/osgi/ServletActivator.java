@@ -77,19 +77,23 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-
-        SpamSettingsServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
-        servletRegisterer.registerServlet();
-        SpamSettingsModulePreferences.setModule(true);
+        if (servletRegisterer != null) {
+            LOG.warn("Absent service: {}", clazz.getName());
+    
+            SpamSettingsServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
+            servletRegisterer.registerServlet();
+            SpamSettingsModulePreferences.setModule(true);
+        }
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-        servletRegisterer.unregisterServlet();
-        SpamSettingsModulePreferences.setModule(false);
-        SpamSettingsServiceRegistry.getServiceRegistry().removeService(clazz);
+        if (servletRegisterer != null) {
+            LOG.info("Re-available service: {}", clazz.getName());
+            servletRegisterer.unregisterServlet();
+            SpamSettingsModulePreferences.setModule(false);
+            SpamSettingsServiceRegistry.getServiceRegistry().removeService(clazz);
+        }
 
     }
 
@@ -111,10 +115,12 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        servletRegisterer.unregisterServlet();
-        servletRegisterer = null;
-        SpamSettingsModulePreferences.setModule(false);
-        SpamSettingsServiceRegistry.getServiceRegistry().clearRegistry();
-        SpamSettingsServletRegisterer.PREFIX.set(null);
+        if (servletRegisterer != null) {
+            servletRegisterer.unregisterServlet();
+            servletRegisterer = null;
+            SpamSettingsModulePreferences.setModule(false);
+            SpamSettingsServiceRegistry.getServiceRegistry().clearRegistry();
+            SpamSettingsServletRegisterer.PREFIX.set(null);
+        }
     }
 }
