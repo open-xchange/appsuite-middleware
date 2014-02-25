@@ -1,3 +1,9 @@
+open-xchange-calendar-printing (7.4.2-9) stable; urgency=low
+
+  * Build for patch 2014-02-26
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 25 Feb 2014 14:08:04 +0100
+
 open-xchange-calendar-printing (7.4.2-8) stable; urgency=low
 
   * Build for patch 2014-02-28
