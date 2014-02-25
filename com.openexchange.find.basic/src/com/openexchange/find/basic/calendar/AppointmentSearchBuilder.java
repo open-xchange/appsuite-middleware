@@ -285,7 +285,7 @@ public class AppointmentSearchBuilder {
             } else if (RecurringTypeDisplayItem.RecurringType.SINGLE.getIdentifier().equals(query)) {
                 appointmentSearch.setExcludeRecurringAppointments(true);
             } else {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RECURRING_TYPE.getName());
             }
         }
     }
