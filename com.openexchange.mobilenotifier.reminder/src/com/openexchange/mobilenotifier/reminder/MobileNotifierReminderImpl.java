@@ -89,10 +89,6 @@ public class MobileNotifierReminderImpl extends AbstractMobileNotifierService {
 
     @Override
     public List<List<NotifyItem>> getItems(final Session session) throws OXException {
-        final ReminderService reminderService = services.getService(ReminderService.class);
-        Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
-        User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
-        reminderService.getArisingReminder(session, ctx, user, new Date(System.currentTimeMillis() + (24L * 60L * 60L * 100L)));
         return null;
     }
 

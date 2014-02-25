@@ -207,7 +207,7 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
     }
 
     /**
-     * Converts date to localized string. If receivedDate is current date, only the time will be displayed otherwise only the date is shown
+     * Converts date to localized string. If date is current date, only the time will be displayed otherwise only the date is shown
      * 
      * @param date The date which should be localized
      * @param session The session of the user

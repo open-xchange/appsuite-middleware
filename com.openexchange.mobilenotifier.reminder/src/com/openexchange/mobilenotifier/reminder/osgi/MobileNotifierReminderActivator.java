@@ -9,7 +9,7 @@ public class MobileNotifierReminderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ReminderService.class };
+        return new Class[] {};
     }
 
     @Override
