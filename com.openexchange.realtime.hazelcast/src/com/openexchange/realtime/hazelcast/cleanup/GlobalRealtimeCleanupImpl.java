@@ -50,8 +50,11 @@
 package com.openexchange.realtime.hazelcast.cleanup;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
@@ -59,6 +62,8 @@ import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiTask;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
+import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.packet.ID;
@@ -94,13 +99,26 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
             LOG.error("Unable to remove {} from ResourceDirectory.", id, oxe);
         }
 
+        //Do the local cleanup via a simple service call
+        LocalRealtimeCleanup localRealtimeCleanup = Services.getService(LocalRealtimeCleanup.class);
+        localRealtimeCleanup.cleanForId(id);
+
+        //Remote cleanup via distributed MultiTask to remaining members of the cluster
         HazelcastInstance hazelcastInstance;
         try {
             hazelcastInstance = HazelcastAccess.getHazelcastInstance();
+            Member localMember = HazelcastAccess.getLocalMember();
             ExecutorService executorService = hazelcastInstance.getExecutorService();
-            Set<Member> clusterMembers = hazelcastInstance.getCluster().getMembers();
-            MultiTask<Void> cleanUpTask = new MultiTask<Void>(new CleanupDispatcher(id), clusterMembers);
-            executorService.execute(cleanUpTask);
+            Set<Member> clusterMembers = new HashSet<Member>(hazelcastInstance.getCluster().getMembers());
+            if(!clusterMembers.remove(localMember)) {
+                LOG.warn("Couldn't remove local member from cluster members.");
+            }
+            if(!clusterMembers.isEmpty()) {
+                MultiTask<Void> cleanUpTask = new MultiTask<Void>(new CleanupDispatcher(id), clusterMembers);
+                executorService.execute(cleanUpTask);
+            } else {
+                LOG.debug("No other cluster members besides the local member. No further clean up necessary.");
+            }
         } catch (Exception e) {
             LOG.error("Unable to cleanup for {}.", id, e);
         }
