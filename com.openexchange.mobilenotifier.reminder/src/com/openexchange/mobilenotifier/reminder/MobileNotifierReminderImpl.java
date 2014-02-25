@@ -49,9 +49,14 @@
 
 package com.openexchange.mobilenotifier.reminder;
 
+import java.util.Date;
 import java.util.List;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
@@ -85,6 +90,9 @@ public class MobileNotifierReminderImpl extends AbstractMobileNotifierService {
     @Override
     public List<List<NotifyItem>> getItems(Session session) throws OXException {
         final ReminderService reminderService = services.getService(ReminderService.class);
+        // Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
+        // User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+        // reminderService.getArisingReminder(session, ctx, user, new Date(System.currentTimeMillis() + (24L * 60L * 60L * 100L)));
         return null;
     }
 

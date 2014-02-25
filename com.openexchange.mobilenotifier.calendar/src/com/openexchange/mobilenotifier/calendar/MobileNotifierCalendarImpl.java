@@ -55,9 +55,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import com.openexchange.calendar.itip.HumanReadableRecurrences;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.User;
@@ -104,52 +107,82 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
 
         // range from now until end of day
         final Date currentDate = new Date(System.currentTimeMillis());
-        final Date endDay = new Date(getEndOfDay(currentDate));
+        final Date endOfDay = new Date(getEndOfDay(currentDate));
+
+        final CalendarCollectionService collectionService = services.getService(CalendarCollectionService.class);
 
         try {
             final SearchIterator<Appointment> appointments = factory.createAppointmentSql(session).getAppointmentsBetween(
                 userId,
                 currentDate,
-                endDay,
+                endOfDay,
                 new int[] {
                     Appointment.FOLDER_ID, Appointment.OBJECT_ID, Appointment.TITLE, Appointment.LOCATION, Appointment.START_DATE,
                     Appointment.END_DATE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS, Appointment.RECURRENCE_CALCULATOR,
                     Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_ID, Appointment.NOTE,
-                    Appointment.USERS },
+                    Appointment.USERS, Appointment.TIMEZONE, Appointment.CHANGE_EXCEPTIONS },
                 Appointment.START_DATE,
                 Order.DESCENDING);
 
             while (appointments.hasNext()) {
                 final List<NotifyItem> item = new ArrayList<NotifyItem>();
-                final Appointment appointment = appointments.next();
+                final Appointment originalAppointment = appointments.next();
+                final Appointment copyAppointment = originalAppointment.clone();
 
-                // localize recurrence string
-                final HumanReadableRecurrences readableRecurrence = new HumanReadableRecurrences(appointment);
-                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
-                final Locale locale = user.getLocale();
-                final String recurrence = readableRecurrence.getString(locale);
+                /******************************* TODO Refactoring *****************************************************************/
+                // if appointment is recurrence calculate the end date of the specific occurrence
+                final RecurringResultsInterface recurringResult = collectionService.calculateRecurring(
+                    copyAppointment,
+                    convertDateToTimestamp(copyAppointment.getStartDate()),
+                    convertDateToTimestamp(copyAppointment.getEndDate()),
+                    0);
 
-                // get status of confirmation
-                int confirmed = Appointment.NONE;
-                final UserParticipant[] participants = appointment.getUsers();
-                for (UserParticipant participant : participants) {
-                    if (participant.getIdentifier() == session.getUserId()) {
-                        confirmed = participant.getConfirm();
+                if (recurringResult != null) {
+                    // current date to lookup the specific occurrence
+                    int recurrencePosition = recurringResult.getPositionByLong(collectionService.normalizeLong(currentDate.getTime()));
+                    if (recurrencePosition > 0) {
+                        copyAppointment.setStartDate(new Date(recurringResult.getRecurringResultByPosition(recurrencePosition).getStart()));
+                        copyAppointment.setEndDate(new Date(recurringResult.getRecurringResultByPosition(recurrencePosition).getEnd()));
+                        // checking, if date of appointment is before the current date
+                        if (copyAppointment.getEndDate().before(currentDate)) {
+                            continue;
+                        }
+                    }
+                    if (copyAppointment.getChangeException() != null) {
+                        copyAppointment.getChangeException();
                     }
                 }
 
-                item.add(new NotifyItem("recurrence", recurrence));
-                item.add(new NotifyItem("id", appointment.getObjectID()));
-                item.add(new NotifyItem("folder", appointment.getParentFolderID()));
-                item.add(new NotifyItem("title", appointment.getTitle()));
-                item.add(new NotifyItem("location", appointment.getLocation()));
-                item.add(new NotifyItem("start_date", appointment.getStartDate()));
-                item.add(new NotifyItem("end_date", appointment.getEndDate()));
-                item.add(new NotifyItem("start_date_timestamp", convertDateToTimestamp(appointment.getStartDate())));
-                item.add(new NotifyItem("organizer", appointment.getOrganizer()));
-                item.add(new NotifyItem("note", appointment.getNote()));
-                item.add(new NotifyItem("status", confirmed));
-                notifyItems.add(item);
+                if (false == copyAppointment.getEndDate().after(endOfDay)) {
+                    // localize recurrence string
+                    final HumanReadableRecurrences readableRecurrence = new HumanReadableRecurrences(copyAppointment);
+                    final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+                    final Locale locale = user.getLocale();
+                    final String recurrence = readableRecurrence.getString(locale);
+
+                    // get status of confirmation
+                    int confirmed = Appointment.NONE;
+                    final UserParticipant[] participants = copyAppointment.getUsers();
+                    for (UserParticipant participant : participants) {
+                        if (participant.getIdentifier() == session.getUserId()) {
+                            confirmed = participant.getConfirm();
+                        }
+                    }
+
+                    item.add(new NotifyItem("recurrence", recurrence));
+                    item.add(new NotifyItem("id", copyAppointment.getObjectID()));
+                    item.add(new NotifyItem("folder", copyAppointment.getParentFolderID()));
+                    item.add(new NotifyItem("title", copyAppointment.getTitle()));
+                    item.add(new NotifyItem("location", copyAppointment.getLocation()));
+                    item.add(new NotifyItem("start_date", copyAppointment.getStartDate()));
+                    item.add(new NotifyItem("end_date", copyAppointment.getEndDate()));
+                    item.add(new NotifyItem("start_date_timestamp", convertDateToTimestamp(copyAppointment.getStartDate())));
+                    item.add(new NotifyItem("organizer", copyAppointment.getOrganizer()));
+                    item.add(new NotifyItem("note", copyAppointment.getNote()));
+                    item.add(new NotifyItem("status", confirmed));
+                    notifyItems.add(item);
+                }
+                /******************************************************************************************************************/
             }
         } catch (SQLException e) {
             throw MobileNotifierExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
@@ -170,13 +203,13 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
     }
 
     private long convertDateToTimestamp(final Date date){
-        final Calendar c = Calendar.getInstance();
-        c.setTime(date);
-        return c.getTimeInMillis();
+        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(date);
+        return calendar.getTimeInMillis();
     }
 
     private long getEndOfDay(Date date) {
-        final Calendar calendar = Calendar.getInstance();
+        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(date);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
