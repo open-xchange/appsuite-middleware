@@ -74,13 +74,4 @@ public interface ConfigSource {
      */
     Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException;
 
-    /**
-     * Gets the ranking for this {@code ConfigSource} instance.
-     * <p>
-     * Default is <code>0</code> (zero).
-     *
-     * @return The ranking
-     */
-    int getRanking();
-
 }
