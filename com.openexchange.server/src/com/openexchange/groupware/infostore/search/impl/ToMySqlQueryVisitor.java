@@ -84,7 +84,6 @@ import com.openexchange.groupware.infostore.search.TitleTerm;
 import com.openexchange.groupware.infostore.search.UrlTerm;
 import com.openexchange.groupware.infostore.search.VersionCommentTerm;
 import com.openexchange.groupware.infostore.search.VersionTerm;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ToMySqlQueryVisitor}
@@ -95,26 +94,25 @@ import com.openexchange.tools.session.ServerSession;
 public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     private final StringBuilder sb;
+
     private final MySQLCodec codec;
 
     private static final String INFOSTORE = "infostore.";
 
     private static final String DOCUMENT = "infostore_document.";
 
-    private static final String PREFIX = " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid"
-        + " AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE"
-        + " infostore.cid = ";
+    private static final String PREFIX = " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ";
 
-    private static final char[] IMMUNE = new char[] {' '};
+    private static final char[] IMMUNE = new char[] { ' ' };
 
     /**
      * Initializes a new {@link ToMySqlQueryVisitor}.
      */
-    public ToMySqlQueryVisitor(ServerSession session) {
+    public ToMySqlQueryVisitor(int contextId) {
         super();
         this.sb = new StringBuilder();
         sb.append("SELECT *");
-        sb.append(PREFIX).append(session.getContextId()).append(" WHERE ");
+        sb.append(PREFIX).append(contextId).append(" AND ");
         this.codec = new MySQLCodec(Mode.STANDARD);
     }
 
@@ -158,19 +156,21 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(NumberOfVersionsTerm numberOfVersionsTerm) {
         String comp = getComparionType(numberOfVersionsTerm.getPattern());
-        sb.append(INFOSTORE).append("version").append(comp).append("MAX(").append(numberOfVersionsTerm.getPattern().getPattern()).append(") ");
+        sb.append(INFOSTORE).append("version").append(comp).append("MAX(").append(numberOfVersionsTerm.getPattern().getPattern()).append(
+            ") ");
     }
 
     @Override
     public void visit(LastModifiedUtcTerm lastModifiedUtcTerm) {
         String comp = getComparionType(lastModifiedUtcTerm.getPattern());
-        sb.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedUtcTerm.getPattern().getPattern().getTime()).append(" ");
+        sb.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedUtcTerm.getPattern().getPattern().getTime()).append(
+            " ");
     }
 
     @Override
     public void visit(ColorLabelTerm colorLabelTerm) {
         String comp = getComparionType(colorLabelTerm.getPattern());
-        sb.append(INFOSTORE).append("color_label ").append(comp).append(colorLabelTerm.getPattern().getPattern()).append(" ");
+        sb.append(INFOSTORE).append("color_label").append(comp).append(colorLabelTerm.getPattern().getPattern()).append(" ");
     }
 
     @Override
@@ -180,13 +180,13 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(VersionCommentTerm versionCommentTerm) {
-        String field = "file_version_comment ";
+        String field = "file_version_comment";
         parseStringSearchTerm(versionCommentTerm, field);
     }
 
     @Override
     public void visit(FileMd5SumTerm fileMd5SumTerm) {
-        String field = "file_md5sum ";
+        String field = "file_md5sum";
         parseStringSearchTerm(fileMd5SumTerm, field);
     }
 
@@ -198,7 +198,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(CategoriesTerm categoriesTerm) {
-        String field = "categories ";
+        String field = "categories";
         parseStringSearchTerm(categoriesTerm, field);
     }
 
@@ -209,13 +209,13 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(FileMimeTypeTerm fileMimeTypeTerm) {
-        String field = "file_mimetype ";
+        String field = "file_mimetype";
         parseStringSearchTerm(fileMimeTypeTerm, field);
     }
 
     @Override
     public void visit(FileNameTerm fileNameTerm) {
-        String field = "filename ";
+        String field = "filename";
         parseStringSearchTerm(fileNameTerm, field);
     }
 
@@ -245,7 +245,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(TitleTerm titleTerm) {
-        String field = "title ";
+        String field = "title";
         parseStringSearchTerm(titleTerm, field);
     }
 
@@ -268,7 +268,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(FileSizeTerm fileSizeTerm) {
         String comp = getComparionType(fileSizeTerm.getPattern());
-        sb.append(DOCUMENT).append("file_size ").append(comp).append(fileSizeTerm.getPattern().getPattern()).append(" ");
+        sb.append(DOCUMENT).append("file_size").append(comp).append(fileSizeTerm.getPattern().getPattern()).append(" ");
     }
 
     @Override
@@ -286,7 +286,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(CreatedByTerm createdByTerm) {
         String comp = getComparionType(createdByTerm.getPattern());
-        sb.append(INFOSTORE).append("created_by ").append(comp).append(createdByTerm.getPattern().getPattern()).append(" ");
+        sb.append(INFOSTORE).append("created_by").append(comp).append(createdByTerm.getPattern().getPattern()).append(" ");
     }
 
     private <T> String getComparionType(ComparablePattern<T> pattern) {
@@ -309,15 +309,20 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     private void parseStringSearchTerm(AbstractStringSearchTerm searchTerm, String field) {
         String pattern = codec.encode(IMMUNE, searchTerm.getPattern());
+        field = DOCUMENT + field;
         if (searchTerm.isIgnoreCase()) {
             field = "UPPER(" + field + ") ";
-            pattern = "UPPER(" + pattern + ")";
+            if (searchTerm.isSubstringSearch()) {
+                pattern = "UPPER('" + pattern + "%')";
+            } else {
+                pattern = "UPPER('" + pattern + "')";
+            }
         }
-        sb.append(DOCUMENT).append(field).append(" ");
+        sb.append(field);
         if (searchTerm.isSubstringSearch()) {
-            sb.append("LIKE '%").append(pattern).append("%' ");
+            sb.append(" LIKE ").append(pattern).append(" ");
         } else {
-            sb.append(" = '").append(pattern).append("' ");
+            sb.append(" = ").append(pattern).append(" ");
         }
     }
 
