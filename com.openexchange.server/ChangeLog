@@ -2,6 +2,10 @@
 
  - Fix for bug 31448: [L3] Backend mistakes IMAP with SMTP password entries by updating external mail account credentials 
 
+* 2014-02-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31222: Signal support for SSLv3 protocol on secure connect to POP3 server
+
 * 2014-02-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 31110: Proper re-initialize POP3 server's capabilities of successful authentication
