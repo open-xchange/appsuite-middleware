@@ -159,11 +159,9 @@ public final class CacheFolderStorage implements FolderStorage {
     // ------------------------------------------------------------------------ //
 
     private final String realTreeId;
-
     private final CacheFolderStorageRegistry registry;
 
     private volatile CacheService cacheService;
-
     private volatile Cache globalCache;
 
     /**
