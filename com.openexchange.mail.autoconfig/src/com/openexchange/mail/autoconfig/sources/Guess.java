@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -107,7 +107,7 @@ public class Guess extends AbstractConfigSource {
             String host = (String) guessedHost[0];
             boolean secure = (Boolean) guessedHost[1];
             Integer port = (Integer) guessedHost[2];
-            String login = guessLogin(protocol, host, port, secure, emailLocalPart, emailDomain, password, properties);
+            String login = guessLogin(protocol, host, port.intValue(), secure, emailLocalPart, emailDomain, password, properties);
             if (login == null) {
                 return false;
             }
