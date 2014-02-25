@@ -457,6 +457,40 @@ public class XingAPI<S extends Session> {
     }
 
     /**
+     * Initiates a contact request between the current user (<code>userId</code>) and the specified user (<code>recipientUserId</code>).
+     *
+     * @param userId The identifier of the user
+     * @param recipientUserId The identifier of the recipient
+     * @param optMessage The optional message
+     * @throws XingException If contact request fails
+     */
+    public void initiateContactRequest(final String userId, final String recipientUserId, final String optMessage) throws XingException {
+        assertAuthenticated();
+        try {
+            // Add parameters limit & offset
+            final List<String> params = new ArrayList<String>(4);
+
+            params.add("user_id");
+            params.add(recipientUserId);
+
+            if (!Strings.isEmpty(optMessage)) {
+                params.add("message");
+                params.add(optMessage);
+            }
+
+            RESTUtility.streamRequest(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/" + userId + "/contact_requests",
+                VERSION,
+                params.toArray(new String[0]),
+                session);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
      * Send invitations via email to contacts who do not have a XING profile.
      * <p>
      * The user is allowed to invite 2000 people per week.
