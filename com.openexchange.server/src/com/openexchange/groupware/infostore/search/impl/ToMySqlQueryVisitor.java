@@ -53,6 +53,7 @@ import java.util.List;
 import org.owasp.esapi.codecs.MySQLCodec;
 import org.owasp.esapi.codecs.MySQLCodec.Mode;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.infostore.search.AbstractStringSearchTerm;
 import com.openexchange.groupware.infostore.search.AndTerm;
 import com.openexchange.groupware.infostore.search.CategoriesTerm;
 import com.openexchange.groupware.infostore.search.ColorLabelTerm;
@@ -156,19 +157,19 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(NumberOfVersionsTerm numberOfVersionsTerm) {
-        String comp = getOperatorFor(numberOfVersionsTerm);
+        String comp = getComparionType(numberOfVersionsTerm.getPattern());
         sb.append(INFOSTORE).append("version").append(comp).append("MAX(").append(numberOfVersionsTerm.getPattern().getPattern()).append(") ");
     }
 
     @Override
     public void visit(LastModifiedUtcTerm lastModifiedUtcTerm) {
-        String comp = getOperatorFor(lastModifiedUtcTerm);
-        sb.append(INFOSTORE).append("last_modified ").append(comp).append(lastModifiedUtcTerm.getPattern().getPattern().getTime()).append(" ");
+        String comp = getComparionType(lastModifiedUtcTerm.getPattern());
+        sb.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedUtcTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
     public void visit(ColorLabelTerm colorLabelTerm) {
-        String comp = getOperatorFor(colorLabelTerm);
+        String comp = getComparionType(colorLabelTerm.getPattern());
         sb.append(INFOSTORE).append("color_label ").append(comp).append(colorLabelTerm.getPattern().getPattern()).append(" ");
     }
 
@@ -180,55 +181,25 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(VersionCommentTerm versionCommentTerm) {
         String field = "file_version_comment ";
-        String pattern = codec.encode(IMMUNE, versionCommentTerm.getPattern());
-        if (versionCommentTerm.isIgnoreCase()) {
-            field = "UPPER(file_version_comment) ";
-            pattern = "UPPER(" + pattern + ")";
-        }
-        sb.append(DOCUMENT).append(field).append(" ");
-        if (versionCommentTerm.isSubstringSearch()) {
-            sb.append("LIKE '%").append(pattern).append("%' ");
-        } else {
-            sb.append(" = '").append(pattern).append("' ");
-        }
+        parseStringSearchTerm(versionCommentTerm, field);
     }
 
     @Override
     public void visit(FileMd5SumTerm fileMd5SumTerm) {
         String field = "file_md5sum ";
-        String pattern = codec.encode(IMMUNE, fileMd5SumTerm.getPattern());
-        if (fileMd5SumTerm.isIgnoreCase()) {
-            field = "UPPER(file_md5sum) ";
-            pattern = "UPPER(" + pattern + ")";
-        }
-        sb.append(DOCUMENT).append(field).append(" ");
-        if (fileMd5SumTerm.isSubstringSearch()) {
-            sb.append("LIKE '%").append(pattern).append("%' ");
-        } else {
-            sb.append(" = '").append(pattern).append("' ");
-        }
+        parseStringSearchTerm(fileMd5SumTerm, field);
     }
 
     @Override
     public void visit(LockedUntilTerm lockedUntilTerm) {
-        String comp = getOperatorFor(lockedUntilTerm);
-        sb.append(INFOSTORE).append("locked_until ").append(comp).append(lockedUntilTerm.getPattern().getPattern().getTime()).append(" ");
+        String comp = getComparionType(lockedUntilTerm.getPattern());
+        sb.append(INFOSTORE).append("locked_until").append(comp).append(lockedUntilTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
     public void visit(CategoriesTerm categoriesTerm) {
         String field = "categories ";
-        String pattern = codec.encode(IMMUNE, categoriesTerm.getPattern());
-        if (categoriesTerm.isIgnoreCase()) {
-            field = "UPPER(categories) ";
-            pattern = "UPPER(" + pattern + ")";
-        }
-        sb.append(DOCUMENT).append(field).append(" ");
-        if (categoriesTerm.isSubstringSearch()) {
-            sb.append("LIKE '%").append(pattern).append("%' ");
-        } else {
-            sb.append(" = '").append(pattern).append("' ");
-        }
+        parseStringSearchTerm(categoriesTerm, field);
     }
 
     @Override
@@ -239,50 +210,30 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(FileMimeTypeTerm fileMimeTypeTerm) {
         String field = "file_mimetype ";
-        String pattern = codec.encode(IMMUNE, fileMimeTypeTerm.getPattern());
-        if (fileMimeTypeTerm.isIgnoreCase()) {
-            field = "UPPER(file_mimetype) ";
-            pattern = "UPPER(" + pattern + ")";
-        }
-        sb.append(DOCUMENT).append(field).append(" ");
-        if (fileMimeTypeTerm.isSubstringSearch()) {
-            sb.append("LIKE '%").append(pattern).append("%' ");
-        } else {
-            sb.append(" = '").append(pattern).append("' ");
-        }
+        parseStringSearchTerm(fileMimeTypeTerm, field);
     }
 
     @Override
     public void visit(FileNameTerm fileNameTerm) {
         String field = "filename ";
-        String pattern = codec.encode(IMMUNE, fileNameTerm.getPattern());
-        if (fileNameTerm.isIgnoreCase()) {
-            field = "UPPER(filename) ";
-            pattern = "UPPER(" + pattern + ")";
-        }
-        sb.append(DOCUMENT).append(field).append(" ");
-        if (fileNameTerm.isSubstringSearch()) {
-            sb.append("LIKE '%").append(pattern).append("%' ");
-        } else {
-            sb.append(" = '").append(pattern).append("' ");
-        }
+        parseStringSearchTerm(fileNameTerm, field);
     }
 
     @Override
     public void visit(LastModifiedTerm lastModifiedTerm) {
-        String comp = getOperatorFor(lastModifiedTerm);
-        sb.append(INFOSTORE).append("last_modified ").append(comp).append(lastModifiedTerm.getPattern().getPattern().getTime()).append(" ");
+        String comp = getComparionType(lastModifiedTerm.getPattern());
+        sb.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
     public void visit(CreatedTerm createdTerm) {
-        String comp = getOperatorFor(createdTerm);
-        sb.append(INFOSTORE).append("creating_date ").append(comp).append(createdTerm.getPattern().getPattern().getTime()).append(" ");
+        String comp = getComparionType(createdTerm.getPattern());
+        sb.append(INFOSTORE).append("creating_date").append(comp).append(createdTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
     public void visit(ModifiedByTerm modifiedByTerm) {
-        String comp = getOperatorFor(modifiedByTerm);
+        String comp = getComparionType(modifiedByTerm.getPattern());
         sb.append(INFOSTORE).append("changed_by =").append(comp).append(modifiedByTerm.getPattern().getPattern()).append(" ");
     }
 
@@ -295,17 +246,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(TitleTerm titleTerm) {
         String field = "title ";
-        String pattern = codec.encode(IMMUNE, titleTerm.getPattern());
-        if (titleTerm.isIgnoreCase()) {
-            field = "UPPER(title) ";
-            pattern = "UPPER(" + pattern + ")";
-        }
-        sb.append(DOCUMENT).append(field).append(" ");
-        if (titleTerm.isSubstringSearch()) {
-            sb.append("LIKE '%").append(pattern).append("%' ");
-        } else {
-            sb.append(" = '").append(pattern).append("' ");
-        }
+        parseStringSearchTerm(titleTerm, field);
     }
 
     @Override
@@ -326,58 +267,57 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(FileSizeTerm fileSizeTerm) {
-        String comp = getOperatorFor(fileSizeTerm);
+        String comp = getComparionType(fileSizeTerm.getPattern());
         sb.append(DOCUMENT).append("file_size ").append(comp).append(fileSizeTerm.getPattern().getPattern()).append(" ");
     }
 
     @Override
     public void visit(DescriptionTerm descriptionTerm) {
         String field = "description ";
-        String pattern = codec.encode(IMMUNE, descriptionTerm.getPattern());
-        if (descriptionTerm.isIgnoreCase()) {
-            field = "UPPER(description) ";
-            pattern = "UPPER(" + pattern + ")";
-        }
-        sb.append(DOCUMENT).append(field).append(" ");
-        if (descriptionTerm.isSubstringSearch()) {
-            sb.append("LIKE '%").append(pattern).append("%' ");
-        } else {
-            sb.append(" = '").append(pattern).append("' ");
-        }
+        parseStringSearchTerm(descriptionTerm, field);
     }
 
     @Override
     public void visit(UrlTerm urlTerm) {
         String field = "url ";
-        String pattern = codec.encode(IMMUNE, urlTerm.getPattern());
-        if (urlTerm.isIgnoreCase()) {
-            field = "UPPER(url) ";
-            pattern = "UPPER(" + pattern + ")";
-        }
-        sb.append(DOCUMENT).append(field).append(" ");
-        if (urlTerm.isSubstringSearch()) {
-            sb.append("LIKE '%").append(pattern).append("%' ");
-        } else {
-            sb.append(" = '").append(pattern).append("' ");
-        }
+        parseStringSearchTerm(urlTerm, field);
     }
 
     @Override
     public void visit(CreatedByTerm createdByTerm) {
-        String comp = getOperatorFor(createdByTerm);
+        String comp = getComparionType(createdByTerm.getPattern());
         sb.append(INFOSTORE).append("created_by ").append(comp).append(createdByTerm.getPattern().getPattern()).append(" ");
     }
 
-    private static <N> String getOperatorFor(final SearchTerm<ComparablePattern<N>> term) {
-        switch (term.getPattern().getComparisonType()) {
+    private <T> String getComparionType(ComparablePattern<T> pattern) {
+        String comp;
+        switch (pattern.getComparisonType()) {
         case LESS_THAN:
-            return "<";
+            comp = "<";
+            break;
         case GREATER_THAN:
-            return ">";
+            comp = ">";
+            break;
         case EQUALS:
-            return "=";
+            comp = "=";
+            break;
         default:
-            return "";
+            comp = "";
+        }
+        return comp;
+    }
+
+    private void parseStringSearchTerm(AbstractStringSearchTerm searchTerm, String field) {
+        String pattern = codec.encode(IMMUNE, searchTerm.getPattern());
+        if (searchTerm.isIgnoreCase()) {
+            field = "UPPER(" + field + ") ";
+            pattern = "UPPER(" + pattern + ")";
+        }
+        sb.append(DOCUMENT).append(field).append(" ");
+        if (searchTerm.isSubstringSearch()) {
+            sb.append("LIKE '%").append(pattern).append("%' ");
+        } else {
+            sb.append(" = '").append(pattern).append("' ");
         }
     }
 
