@@ -118,7 +118,7 @@ public class CapabilitiesActivatorTest {
     public void testStartBundle_EverythingFine_AllServicesRegistered() throws Exception {
         this.capabilitiesActivator.startBundle();
 
-        ServiceMockActivatorAsserter.verifyAllServicesRegistered(this.capabilitiesActivator, 4);
+        ServiceMockActivatorAsserter.verifyAllServicesRegistered(this.capabilitiesActivator, 5);
     }
 
     @Test
