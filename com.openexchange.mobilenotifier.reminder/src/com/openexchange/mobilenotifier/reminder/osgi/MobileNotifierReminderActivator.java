@@ -1,6 +1,5 @@
 package com.openexchange.mobilenotifier.reminder.osgi;
 
-import com.openexchange.api2.ReminderService;
 import com.openexchange.mobilenotifier.MobileNotifierService;
 import com.openexchange.mobilenotifier.reminder.MobileNotifierReminderImpl;
 import com.openexchange.osgi.HousekeepingActivator;

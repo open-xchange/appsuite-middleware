@@ -104,7 +104,7 @@ public class ExampleMailMobileNotifierService extends AbstractMobileNotifierServ
     @Override
     public NotifyTemplate getTemplate() throws OXException {
         final String fileName = MobileNotifierProviders.MAIL.getTemplateFileName();
-        final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
+        final String htmlTemplate = MobileNotifierFileUtil.getTemplateFileContent(fileName);
         final String title = MobileNotifierProviders.MAIL.getTitle();
         int index = 1;
 

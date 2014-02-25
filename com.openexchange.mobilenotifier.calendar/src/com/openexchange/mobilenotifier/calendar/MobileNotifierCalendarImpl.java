@@ -82,10 +82,9 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
+    private final ServiceLookup services;
 
     private static final String EMPTY_STRING = "";
-
-    private final ServiceLookup services;
 
     public MobileNotifierCalendarImpl(ServiceLookup services) {
         this.services = services;
@@ -161,9 +160,9 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
 
     @Override
     public NotifyTemplate getTemplate() throws OXException {
-        final String template = MobileNotifierFileUtil.getTeamplateFileContent(MobileNotifierProviders.APPOINTMENT.getTemplateFileName());
+        final String template = MobileNotifierFileUtil.getTemplateFileContent(MobileNotifierProviders.APPOINTMENT.getTemplateFileName());
         final String title = MobileNotifierProviders.APPOINTMENT.getTitle();
-        return new NotifyTemplate(title, template, true, 2);
+        return new NotifyTemplate(title, template, true, MobileNotifierProviders.APPOINTMENT.getIndex());
     }
 
     @Override

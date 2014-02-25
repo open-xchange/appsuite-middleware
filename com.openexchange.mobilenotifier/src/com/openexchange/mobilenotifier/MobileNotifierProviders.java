@@ -60,27 +60,27 @@ public enum MobileNotifierProviders {
     /**
      * Enum field for mail provider
      */
-    MAIL("mail", "io.ox/mail", "Mail", "Mail.tmpl"),
+    MAIL("mail", "io.ox/mail", "Mail", "Mail.tmpl", 1),
 
     /**
      * Enum field for appointment provider
      */
-    APPOINTMENT("appointment", "io.ox/calendar", "Calendar", "Appointment.tmpl"),
+    APPOINTMENT("appointment", "io.ox/calendar", "Calendar", "Appointment.tmpl", 2),
     
     /**
      * Enum field for task provider
      */
-    TASKS("tasks", "io.ox/tasks", "Tasks", "Task.tmpl"),
+    TASKS("tasks", "io.ox/tasks", "Tasks", "Task.tmpl", 3),
     
     /**
      * Enum field for reminder provider
      */
-    REMINDER("reminder", "io.ox/reminder", "Reminder", "Reminder.tmpl"),
+    REMINDER("reminder", "io.ox/reminder", "Reminder", "Reminder.tmpl", 4),
     
     /**
      * Enum field for drive provider
      */
-    DRIVE("drive", "io.ox/drive", "Drive", "Drive.tmpl");
+    DRIVE("drive", "io.ox/drive", "Drive", "Drive.tmpl", 5);
 
     private final String providerName;
 
@@ -90,11 +90,14 @@ public enum MobileNotifierProviders {
     
     private final String templateFileName;
 
-    private MobileNotifierProviders(final String providerName, final String frontendName, final String title, final String templateFileName) {
+    private final int index;
+
+    private MobileNotifierProviders(final String providerName, final String frontendName, final String title, final String templateFileName, final int index) {
         this.providerName = providerName;
         this.frontendName = frontendName;
         this.title = title;
         this.templateFileName = templateFileName;
+        this.index = index;
     }
 
     public String getProviderName() {
@@ -111,5 +114,9 @@ public enum MobileNotifierProviders {
 
     public String getTitle() {
         return title;
+    }
+
+    public int getIndex() {
+        return index;
     }
 }

@@ -103,7 +103,7 @@ public class ExampleCalendarMobileNotifierService extends AbstractMobileNotifier
         // main attributes
         final String fileName = MobileNotifierProviders.APPOINTMENT.getTemplateFileName();
         final String title = MobileNotifierProviders.APPOINTMENT.getTitle();
-        final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
+        final String htmlTemplate = MobileNotifierFileUtil.getTemplateFileContent(fileName);
         int index = 2;
         // additional attribute
         Map<String, Object> attributes = new HashMap<String, Object>();

@@ -77,7 +77,7 @@ public abstract class MobileNotifierFileUtil {
      * @param templateFileName - The file name of the template
      * @return String - The content of the file
      */
-    public static String getTeamplateFileContent(final String templateFileName) throws OXException {
+    public static String getTemplateFileContent(final String templateFileName) throws OXException {
         final File file = new File(getTemplatePath() + templateFileName);
         BufferedReader br = null;
         try {

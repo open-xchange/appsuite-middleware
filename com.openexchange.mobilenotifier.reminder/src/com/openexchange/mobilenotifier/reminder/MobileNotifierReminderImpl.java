@@ -57,10 +57,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
+import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtil;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -89,16 +91,23 @@ public class MobileNotifierReminderImpl extends AbstractMobileNotifierService {
 
     @Override
     public List<List<NotifyItem>> getItems(final Session session) throws OXException {
+        //reminder test
+        Context cs = ContextStorage.getStorageContext(session.getContextId());
+        User us = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+        final ReminderService reminderSql = new ReminderHandler(cs);
+        reminderSql.getArisingReminder(session, cs, us, new Date(System.currentTimeMillis() + (24L * 60L * 60L * 1000L)));
         return null;
     }
 
     @Override
     public NotifyTemplate getTemplate() throws OXException {
-        return null;
+        final String template = MobileNotifierFileUtil.getTemplateFileContent(MobileNotifierProviders.REMINDER.getTemplateFileName());
+        final String title = MobileNotifierProviders.REMINDER.getTitle();
+        return new NotifyTemplate(title, template, true, MobileNotifierProviders.REMINDER.getIndex());
     }
 
     @Override
     public void putTemplate(String changedTemplate) throws OXException {
-
+        MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.REMINDER.getTemplateFileName(), changedTemplate);
     }
 }
