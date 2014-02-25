@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.search.AndTerm;
 import com.openexchange.groupware.infostore.search.CategoriesTerm;
 import com.openexchange.groupware.infostore.search.ColorLabelTerm;
+import com.openexchange.groupware.infostore.search.ComparisonType;
 import com.openexchange.groupware.infostore.search.ContentTerm;
 import com.openexchange.groupware.infostore.search.CreatedByTerm;
 import com.openexchange.groupware.infostore.search.CreatedTerm;
@@ -92,8 +93,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
-    private StringBuilder sb;
-    private MySQLCodec codec;
+    private final StringBuilder sb;
+    private final MySQLCodec codec;
 
     private static final String INFOSTORE = "infostore.";
 
@@ -155,58 +156,19 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(NumberOfVersionsTerm numberOfVersionsTerm) {
-        String comp;
-        switch (numberOfVersionsTerm.getPattern().getComparisonType()) {
-        case LESS_THAN:
-            comp = "<";
-            break;
-        case GREATER_THAN:
-            comp = ">";
-            break;
-        case EQUALS:
-            comp = "=";
-            break;
-        default:
-            comp = "";
-        }
+        String comp = getOperatorFor(numberOfVersionsTerm.getPattern().getComparisonType());
         sb.append(INFOSTORE).append("version").append(comp).append("MAX(").append(numberOfVersionsTerm.getPattern().getPattern()).append(") ");
     }
 
     @Override
     public void visit(LastModifiedUtcTerm lastModifiedUtcTerm) {
-        String comp;
-        switch (lastModifiedUtcTerm.getPattern().getComparisonType()) {
-        case LESS_THAN:
-            comp = "<";
-            break;
-        case GREATER_THAN:
-            comp = ">";
-            break;
-        case EQUALS:
-            comp = "=";
-            break;
-        default:
-            comp = "";
-        }
+        String comp = getOperatorFor(lastModifiedUtcTerm.getPattern().getComparisonType());
         sb.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedUtcTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
     public void visit(ColorLabelTerm colorLabelTerm) {
-        String comp;
-        switch (colorLabelTerm.getPattern().getComparisonType()) {
-        case LESS_THAN:
-            comp = "<";
-            break;
-        case GREATER_THAN:
-            comp = ">";
-            break;
-        case EQUALS:
-            comp = "=";
-            break;
-        default:
-            comp = "";
-        }
+        String comp = getOperatorFor(colorLabelTerm.getPattern().getComparisonType());
         sb.append(INFOSTORE).append("color_label ").append(comp).append(colorLabelTerm.getPattern().getPattern()).append(" ");
     }
 
@@ -249,20 +211,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(LockedUntilTerm lockedUntilTerm) {
-        String comp;
-        switch (lockedUntilTerm.getPattern().getComparisonType()) {
-        case LESS_THAN:
-            comp = "<";
-            break;
-        case GREATER_THAN:
-            comp = ">";
-            break;
-        case EQUALS:
-            comp = "=";
-            break;
-        default:
-            comp = "";
-        }
+        String comp = getOperatorFor(lockedUntilTerm.getPattern().getComparisonType());
         sb.append(INFOSTORE).append("locked_until").append(comp).append(lockedUntilTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
@@ -321,58 +270,19 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(LastModifiedTerm lastModifiedTerm) {
-        String comp;
-        switch (lastModifiedTerm.getPattern().getComparisonType()) {
-        case LESS_THAN:
-            comp = "<";
-            break;
-        case GREATER_THAN:
-            comp = ">";
-            break;
-        case EQUALS:
-            comp = "=";
-            break;
-        default:
-            comp = "";
-        }
+        String comp = getOperatorFor(lastModifiedTerm.getPattern().getComparisonType());
         sb.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
     public void visit(CreatedTerm createdTerm) {
-        String comp;
-        switch (createdTerm.getPattern().getComparisonType()) {
-        case LESS_THAN:
-            comp = "<";
-            break;
-        case GREATER_THAN:
-            comp = ">";
-            break;
-        case EQUALS:
-            comp = "=";
-            break;
-        default:
-            comp = "";
-        }
+        String comp = getOperatorFor(createdTerm.getPattern().getComparisonType());
         sb.append(INFOSTORE).append("creating_date").append(comp).append(createdTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
     public void visit(ModifiedByTerm modifiedByTerm) {
-        String comp;
-        switch (modifiedByTerm.getPattern().getComparisonType()) {
-        case LESS_THAN:
-            comp = "<";
-            break;
-        case GREATER_THAN:
-            comp = ">";
-            break;
-        case EQUALS:
-            comp = "=";
-            break;
-        default:
-            comp = "";
-        }
+        String comp = getOperatorFor(modifiedByTerm.getPattern().getComparisonType());
         sb.append(INFOSTORE).append("changed_by =").append(comp).append(modifiedByTerm.getPattern().getPattern()).append(" ");
     }
 
@@ -416,20 +326,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(FileSizeTerm fileSizeTerm) {
-        String comp;
-        switch (fileSizeTerm.getPattern().getComparisonType()) {
-        case LESS_THAN:
-            comp = "<";
-            break;
-        case GREATER_THAN:
-            comp = ">";
-            break;
-        case EQUALS:
-            comp = "=";
-            break;
-        default:
-            comp = "";
-        }
+        String comp = getOperatorFor(fileSizeTerm.getPattern().getComparisonType());
         sb.append(DOCUMENT).append("file_size ").append(comp).append(fileSizeTerm.getPattern().getPattern()).append(" ");
     }
 
@@ -467,21 +364,21 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(CreatedByTerm createdByTerm) {
-        String comp;
-        switch (createdByTerm.getPattern().getComparisonType()) {
-        case LESS_THAN:
-            comp = "<";
-            break;
-        case GREATER_THAN:
-            comp = ">";
-            break;
-        case EQUALS:
-            comp = "=";
-            break;
-        default:
-            comp = "";
-        }
+        String comp = getOperatorFor(createdByTerm.getPattern().getComparisonType());
         sb.append(INFOSTORE).append("created_by ").append(comp).append(createdByTerm.getPattern().getPattern()).append(" ");
+    }
+
+    private static String getOperatorFor(ComparisonType comparisonType) {
+        switch (comparisonType) {
+        case LESS_THAN:
+            return "<";
+        case GREATER_THAN:
+            return ">";
+        case EQUALS:
+            return "=";
+        default:
+            return "";
+        }
     }
 
 }
