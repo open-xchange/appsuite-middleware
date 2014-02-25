@@ -449,7 +449,22 @@ public final class ResponseWriter {
         /*
          * Put argument JSON array for compatibility reasons
          */
-        json.put(ERROR_PARAMS, new JSONArray(0));
+        {
+            Object[] args = exception.getLogArgs();
+            if ((null == args) || (0 == args.length)) {
+                args = exception.getDisplayArgs();
+            }
+            // For compatibility
+            if ((null == args) || (0 == args.length)) {
+                json.put(ERROR_PARAMS, new JSONArray(0));
+            } else {
+                final JSONArray jArgs = new JSONArray(args.length);
+                for (int i = 0; i < args.length; i++) {
+                    jArgs.put(args[i]);
+                }
+                json.put(ERROR_PARAMS, jArgs);
+            }
+        }
         /*
          * Categories
          */
@@ -740,7 +755,22 @@ public final class ResponseWriter {
         /*
          * Put argument JSON array for compatibility reasons
          */
-        writer.key(ResponseFields.ERROR_PARAMS).value(new JSONArray(0));
+        {
+            Object[] args = exc.getLogArgs();
+            if ((null == args) || (0 == args.length)) {
+                args = exc.getDisplayArgs();
+            }
+            // For compatibility
+            if ((null == args) || (0 == args.length)) {
+                writer.key(ResponseFields.ERROR_PARAMS).value(new JSONArray(0));
+            } else {
+                final JSONArray jArgs = new JSONArray(args.length);
+                for (int i = 0; i < args.length; i++) {
+                    jArgs.put(args[i]);
+                }
+                writer.key(ResponseFields.ERROR_PARAMS).value(jArgs);
+            }
+        }
         {
             final List<Category> categories = exc.getCategories();
             if (1 == categories.size()) {
