@@ -65,6 +65,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.impl.AbstractSetting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
@@ -215,7 +216,7 @@ public final class PUTAction extends AbstractConfigAction {
                     try {
                         sub = ConfigTree.getSettingByPath(setting, new String[] { key });
                     } catch (final OXException e) {
-                        if (path.indexOf("/io.ox/") < 0) {
+                        if (!SettingExceptionCodes.UNKNOWN_PATH.equals(e) && (path.indexOf("/io.ox/") < 0)) {
                             throw e;
                         }
                         // Swallow

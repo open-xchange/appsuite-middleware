@@ -168,10 +168,30 @@ public class IMAPDefaultFolderChecker {
         if (StorageUtility.INDEX_INBOX == index) {
             return INBOX;
         }
-        final String retval = getDefaultMailFolder(index, mailSessionCache);
+
+        // Get default folder array
+        final String[] arr = mailSessionCache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
+        final String retval = arr == null ? null : arr[index];
         if (retval != null) {
             return retval;
         }
+
+        // Check for confirmed_spam / confirmed-ham
+        if (null != arr) {
+            if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
+                final SpamHandler spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session, accountId);
+                if (!spamHandler.isCreateConfirmedHam()) {
+                    return retval;
+                }
+            } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
+                final SpamHandler spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session, accountId);
+                if (!spamHandler.isCreateConfirmedSpam()) {
+                    return retval;
+                }
+            }
+        }
+
+        // Continue (re-)checking default folders
         setDefaultFoldersChecked(key, false, mailSessionCache);
         checkDefaultFolders();
         return getDefaultMailFolder(index, mailSessionCache);
