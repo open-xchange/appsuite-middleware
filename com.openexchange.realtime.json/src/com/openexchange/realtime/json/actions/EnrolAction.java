@@ -121,7 +121,6 @@ public class EnrolAction extends RTAction {
         IDMap<Resource> idMap = resourceDirectory.get(constructedId);
         if (!idMap.isEmpty()) {
             GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
-            LOG.info("Cleaning during enrol for ID {}", constructedId);
             globalRealtimeCleanup.cleanForId(constructedId);
         }
 
