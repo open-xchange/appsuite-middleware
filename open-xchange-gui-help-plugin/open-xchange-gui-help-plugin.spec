@@ -60,6 +60,8 @@ Fifth release candidate for 7.4.2
 Build for patch 2014-02-11
 * Tue Feb 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth release candidate for 7.4.2
+* Fri Jan 31 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-02-03
 * Thu Jan 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-02-03
 * Wed Jan 29 2014 Marcus Klein <marcus.klein@open-xchange.com>

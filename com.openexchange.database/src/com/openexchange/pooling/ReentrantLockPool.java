@@ -376,7 +376,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     }
 
     private static <T> void logThreads(Collection<PooledData<T>> active) {
-        final Logger log = LoggerFactory.getLogger(ReentrantLockPool.class.getName() + ".logThreads");
+        Logger log = LoggerFactory.getLogger(ReentrantLockPool.class.getName() + ".logThreads");
         if (!log.isDebugEnabled()) {
             return;
         }
