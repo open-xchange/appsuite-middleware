@@ -233,7 +233,7 @@ public class ReplicationMonitor {
                     }
                     // Warn if a master connection was only used for reading.
                     if (checkWriteCons && !state.isUsedAsRead() && !state.isUpdateCommitted()) {
-                        Exception e = new Exception();
+                        Exception e = new Exception("A writable connection was used but no data has been manipulated.");
                         LOG.warn("A writable connection was used but no data has been manipulated.", e);
                     }
                 }

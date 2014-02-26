@@ -147,4 +147,9 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
         return map;
     }
 
+    @Override
+    public boolean registerTokenBasedDeferrer() {
+        return true;
+    }
+
 }

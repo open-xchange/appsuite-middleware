@@ -101,6 +101,7 @@ public final class UUIDs {
      *
      * @param unformattedString The unformatted string; e.g. <code>067e61623b6f4ae2a1712470b63dff00</code>
      * @return The UUID
+     * @throws IllegalArgumentException If passed string in invalid
      */
     public static UUID fromUnformattedString(final String unformattedString) {
         return toUUID(decodeHex(unformattedString));

@@ -309,7 +309,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Register deferrer
              */
             if (metaData.registerTokenBasedDeferrer() && null != scribeToken) {
-                callbackRegistry.add(cbUrl, scribeToken.getToken());
+                callbackRegistry.add(scribeToken.getToken(), cbUrl);
             }
             /*
              * Return interaction
