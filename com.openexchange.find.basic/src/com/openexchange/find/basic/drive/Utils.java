@@ -177,7 +177,7 @@ public final class Utils {
      *
      * @param filter The filter
      * @return The appropriate search term or <code>null</code>
-     * @throws OXException If a filter is invalid
+     * @throws OXException If filter is invalid
      */
     public static SearchTerm<?> termFor(final Filter filter) throws OXException {
         if (null == filter) {

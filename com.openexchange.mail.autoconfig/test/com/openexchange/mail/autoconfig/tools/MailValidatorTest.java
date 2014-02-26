@@ -67,23 +67,24 @@ public class MailValidatorTest extends TestCase {
     private static final String PASSWORD = "blubb";
 
     public void testPOP3() throws Exception {
-        assertTrue("Non secure POP3 Connection failed", MailValidator.validatePop3(HOST_POP3, 110, USER, PASSWORD));
-        assertTrue("Secure POP3 Connection failed", MailValidator.validatePop3(HOST_POP3, 995, USER, PASSWORD));
-        assertTrue("Host check failed.", MailValidator.checkForPop3(HOST_POP3, 110));
-        assertTrue("Host check failed.", MailValidator.checkForPop3(HOST_POP3, 995));
+        assertTrue("Non secure POP3 Connection failed", MailValidator.validatePop3(HOST_POP3, 110, false, USER, PASSWORD));
+        assertTrue("Secure POP3 Connection failed", MailValidator.validatePop3(HOST_POP3, 995, true, USER, PASSWORD));
+        assertTrue("Host check failed.", MailValidator.checkForPop3(HOST_POP3, 110, false));
+        assertTrue("Host check failed.", MailValidator.checkForPop3(HOST_POP3, 995, true));
     }
 
     public void testIMAP() throws Exception {
-        assertTrue("Non secure IMAP Connection failed", MailValidator.validateImap(HOST_IMAP, 143, USER, PASSWORD));
-        assertTrue("Secure IMAP Connection failed", MailValidator.validateImap(HOST_IMAP, 993, USER, PASSWORD));
-        assertTrue("Host check failed.", MailValidator.checkForImap(HOST_IMAP, 143));
-        assertTrue("Host check failed.", MailValidator.checkForImap(HOST_IMAP, 993));
+        assertTrue("Non secure IMAP Connection failed", MailValidator.validateImap(HOST_IMAP, 143, false, USER, PASSWORD));
+        assertTrue("Secure IMAP Connection failed", MailValidator.validateImap(HOST_IMAP, 993, true, USER, PASSWORD));
+        assertTrue("Host check failed.", MailValidator.checkForImap(HOST_IMAP, 143, false));
+        assertTrue("Host check failed.", MailValidator.checkForImap(HOST_IMAP, 993, true));
     }
 
     public void testSMTP() throws Exception {
-        assertTrue("Non secure SMTP Connection failed", MailValidator.validateSmtp(HOST_SMTP, 25, USER, PASSWORD));
-        assertTrue("Secure SMTP Connection failed", MailValidator.validateSmtp(HOST_SMTP, 465, USER, PASSWORD));
-        assertTrue("Host check failed.", MailValidator.checkForSmtp(HOST_SMTP, 25));
-        assertTrue("Host check failed.", MailValidator.checkForSmtp(HOST_SMTP, 465));
+        assertTrue("Non secure SMTP Connection failed", MailValidator.validateSmtp(HOST_SMTP, 25, false, USER, PASSWORD));
+        assertTrue("Secure SMTP Connection failed", MailValidator.validateSmtp(HOST_SMTP, 465, true, USER, PASSWORD));
+        //assertTrue("Secure SMTP Connection failed", MailValidator.validateSmtp(HOST_SMTP, 587, true, USER, PASSWORD));
+        assertTrue("Host check failed.", MailValidator.checkForSmtp(HOST_SMTP, 25, false));
+        assertTrue("Host check failed.", MailValidator.checkForSmtp(HOST_SMTP, 465, true));
     }
 }

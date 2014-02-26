@@ -75,7 +75,7 @@ public class Guess extends AbstractConfigSource {
 
     @Override
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) {
-        Autoconfig config = new Autoconfig(getRanking());
+        Autoconfig config = new Autoconfig();
         boolean imapSuccess = fillProtocol(URIDefaults.IMAP, emailLocalPart, emailDomain, password, config);
         boolean generalSuccess = imapSuccess;
         if (!imapSuccess) {
@@ -91,18 +91,19 @@ public class Guess extends AbstractConfigSource {
         if (guessedHost != null) {
             String host = (String) guessedHost[0];
             boolean secure = (Boolean) guessedHost[1];
-            String login = guessLogin(protocol, host, secure, emailLocalPart, emailDomain, password);
+            Integer port = (Integer) guessedHost[2];
+            String login = guessLogin(protocol, host, port, secure, emailLocalPart, emailDomain, password);
             if (login == null) {
                 return false;
             }
             if (protocol == URIDefaults.SMTP) {
-                config.setTransportPort(secure ? protocol.getSSLPort() : protocol.getPort());
+                config.setTransportPort(port);
                 config.setTransportProtocol(protocol.getProtocol());
                 config.setTransportSecure(secure);
                 config.setTransportServer(host);
                 config.setUsername(login);
             } else {
-                config.setMailPort(secure ? protocol.getSSLPort() : protocol.getPort());
+                config.setMailPort(port);
                 config.setMailProtocol(protocol.getProtocol());
                 config.setMailSecure(secure);
                 config.setMailServer(host);
@@ -113,20 +114,20 @@ public class Guess extends AbstractConfigSource {
         return false;
     }
 
-    private String guessLogin(URIDefaults protocol, String host, boolean secure, String emailLocalPart, String emailDomain, String password) {
+    private String guessLogin(URIDefaults protocol, String host, int port, boolean secure, String emailLocalPart, String emailDomain, String password) {
         List<String> logins = Arrays.asList(emailLocalPart, emailLocalPart+"@"+emailDomain);
 
         for (String login : logins) {
             if (protocol == URIDefaults.IMAP) {
-                if (MailValidator.validateImap(host, secure ? protocol.getSSLPort() : protocol.getPort() , login, password)) {
+                if (MailValidator.validateImap(host, port, secure, login, password)) {
                     return login;
                 }
             } else if (protocol == URIDefaults.POP3) {
-                if (MailValidator.validatePop3(host, secure ? protocol.getSSLPort() : protocol.getPort() , login, password)) {
+                if (MailValidator.validatePop3(host, port, secure, login, password)) {
                     return login;
                 }
             } else if (protocol == URIDefaults.SMTP) {
-                if (MailValidator.validateSmtp(host, secure ? protocol.getSSLPort() : protocol.getPort() , login, password)) {
+                if (MailValidator.validateSmtp(host, port, secure, login, password)) {
                     return login;
                 }
             }
@@ -136,10 +137,12 @@ public class Guess extends AbstractConfigSource {
 
     private Object[] guessHost(URIDefaults protocol, String emailDomain) {
         List<String> prefixes = null;
+        int altPort = 0;
         if (protocol == URIDefaults.IMAP) {
             prefixes = IMAP_PREFIXES;
         } else if (protocol == URIDefaults.SMTP) {
             prefixes = SMTP_PREFIXES;
+            altPort = 587;
         } else if (protocol == URIDefaults.POP3) {
             prefixes = POP3_PREFIXES;
         }
@@ -150,23 +153,25 @@ public class Guess extends AbstractConfigSource {
 
         for (String prefix : prefixes) {
             String host = prefix + emailDomain;
-            if (checkSave(protocol, host, true)) {
-                return new Object[] { host, true };
-            } else if (checkSave(protocol, host, false)) {
-                return new Object[] { host, false };
+            if (checkSave(protocol, host, protocol.getSSLPort(), true)) {
+                return new Object[] { host, true, protocol.getSSLPort() };
+            } else if (altPort > 0 && checkSave(protocol, host, altPort, false)) {
+                return new Object[] { host, false, altPort };
+            } else if (checkSave(protocol, host, protocol.getPort(), false)) {
+                return new Object[] { host, false, protocol.getPort() };
             }
         }
         return null;
     }
 
-    private boolean checkSave(URIDefaults protocol, String emailDomain, boolean secure) {
+    private boolean checkSave(URIDefaults protocol, String emailDomain, int port, boolean secure) {
         try {
             if (protocol == URIDefaults.IMAP) {
-                return MailValidator.checkForImap(emailDomain, secure ? protocol.getSSLPort() : protocol.getPort());
+                return MailValidator.checkForImap(emailDomain, port, secure);
             } else if (protocol == URIDefaults.SMTP) {
-                return MailValidator.checkForSmtp(emailDomain, secure ? protocol.getSSLPort() : protocol.getPort());
+                return MailValidator.checkForSmtp(emailDomain, port, secure);
             } else if (protocol == URIDefaults.POP3) {
-                return MailValidator.checkForPop3(emailDomain, secure ? protocol.getSSLPort() : protocol.getPort());
+                return MailValidator.checkForPop3(emailDomain, port, secure);
             } else {
                 return false;
             }

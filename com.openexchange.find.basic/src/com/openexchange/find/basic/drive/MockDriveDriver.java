@@ -194,15 +194,14 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
     public SearchResult search(final SearchRequest searchRequest, final ServerSession session) throws OXException {
         final IDBasedFileAccessFactory factory = Services.requireService(IDBasedFileAccessFactory.class);
 
-        final List<Filter> filters = searchRequest.getFilters();
-        for (final Filter filter : filters) {
-            for (final String field : filter.getFields()) {
-                if (Constants.FIELD_FOLDER_TYPE.equals(field)) {
 
-                }
 
-            }
-        }
+
+
+
+
+
+
 
         final Field sortingField = Field.TITLE;
         final SortDirection sortingOrder = SortDirection.ASC;

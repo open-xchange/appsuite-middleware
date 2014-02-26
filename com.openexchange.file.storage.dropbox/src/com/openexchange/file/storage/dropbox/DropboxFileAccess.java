@@ -514,7 +514,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
-    public SearchIterator<File> search(final SearchTerm<?> searchTerm, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+    public SearchIterator<File> search(final SearchTerm<?> searchTerm, List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

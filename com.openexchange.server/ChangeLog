@@ -1,3 +1,7 @@
+* 2014-02-25 - marc.arens@open-xchange.com
+
+ - Fix for bug 31300: Retrieve client state after blocking cleanup of local member
+ 
 * 2014-02-25 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31191: Fixed erroneous permission check.
@@ -7,6 +11,9 @@
  - Fix for bug 31252: Put error arguments into "error_params" field for compatibility reasons
  - Fix for bug 31287: Do not apply black-list on provisioning calls
  - Fix for bug 31222: Signal support for SSLv3 protocol on secure connect to POP3 server
+ - Fix for bug 31302: Set reasonable timeouts when checking connectivity + several other improvements
+ - Fix for bug 31177: Only invoke 'java.util.concurrent.locks.Condition.signalAll()' when holding associated lock
+ - Fix for bug 31091: Stop reading from stream if EOF is reached
 
 * 2014-02-24 - thorben.betten@open-xchange.com
 

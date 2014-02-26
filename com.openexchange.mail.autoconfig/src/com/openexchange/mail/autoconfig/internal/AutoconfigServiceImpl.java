@@ -80,12 +80,10 @@ public class AutoconfigServiceImpl implements AutoconfigService {
 
     public AutoconfigServiceImpl(final ServiceLookup services) {
         sources = new LinkedList<ConfigSource>();
-        sources.add(new OutlookComConfigSource());
         sources.add(new ConfigurationFile(services));
         sources.add(new ConfigServer());
         sources.add(new ISPDB(services));
-        // Deactivated because of Bug 27473
-        // sources.add(new Database(services));
+        sources.add(new OutlookComConfigSource());
         sources.add(new Guess());
     }
 
@@ -107,15 +105,15 @@ public class AutoconfigServiceImpl implements AutoconfigService {
             return null;
         }
 
-        Autoconfig candidate = null;
         for (final ConfigSource source : sources) {
             final Autoconfig config = source.getAutoconfig(mailLocalPart, mailDomain, password, user, context);
-            if (config != null && (null == candidate || config.getRanking() > candidate.getRanking())) {
-                candidate = config;
+            if (config != null) {
+                config.setSource(source.getClass().getSimpleName());
+                return config;
             }
         }
 
-        return candidate;
+        return null;
     }
 
     private static final Pattern PATTERN_SPLIT = Pattern.compile("@");
