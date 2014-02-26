@@ -74,7 +74,7 @@ public enum ContactsFacetType implements FacetType {
     private static final Map<String, ContactsFacetType> typesByName = new HashMap<String, ContactsFacetType>();
     static {
         for (ContactsFacetType type : values()) {
-            typesByName.put(type.getName(), type);
+            typesByName.put(type.getId(), type);
         }
     }
 
@@ -96,7 +96,7 @@ public enum ContactsFacetType implements FacetType {
      * {@inheritDoc}
      */
     @Override
-    public String getName() {
+    public String getId() {
         return toString().toLowerCase();
     }
 

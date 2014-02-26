@@ -73,7 +73,7 @@ public enum TasksFacetType implements FacetType {
     private static final Map<String, TasksFacetType> typesByName = new HashMap<String, TasksFacetType>();
     static {
         for (TasksFacetType type : values()) {
-            typesByName.put(type.getName(), type);
+            typesByName.put(type.getId(), type);
         }
     }
 
@@ -84,7 +84,7 @@ public enum TasksFacetType implements FacetType {
     }
 
     @Override
-    public String getName() {
+    public String getId() {
         return toString().toLowerCase();
     }
 

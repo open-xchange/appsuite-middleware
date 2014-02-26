@@ -137,7 +137,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
             JSONArray jFacets = new JSONArray();
             for (Facet facet : activeFacets) {
                 JSONObject jFacet = new JSONObject();
-                jFacet.put("type", facet.getType().getName());
+                jFacet.put("id", facet.getType().getId());
                 JSONArray jValues = new JSONArray();
                 for (FacetValue value : facet.getValues()) {
                     jValues.put(new JSONObject(Collections.singletonMap("id", value.getId())));
@@ -177,7 +177,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
 
         private Facet parseJFacet(final JSONObject jFacet) throws JSONException {
             // Type information
-            final String type = jFacet.getString("type");
+            final String type = jFacet.getString("id");
             final String displayName = jFacet.getString("displayName");
             final FacetType facetType = facetTypeFor(Module.moduleFor(module), type);
 

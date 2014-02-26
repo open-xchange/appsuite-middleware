@@ -94,7 +94,7 @@ public abstract class AbstractJSONConverter implements ResultConverter {
 
             // Type information
             FacetType type = facet.getType();
-            facetJSON.put("type", type.getName());
+            facetJSON.put("id", type.getId());
             facetJSON.put("displayName", translator.translate(locale, type.getDisplayName()));
 
             // Facet values

@@ -123,7 +123,7 @@ public class FolderTypeFacet extends ContactSearchFacet {
         } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(query)) {
             type = SharedType.getInstance();
         } else {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CommonFacetType.FOLDER_TYPE.getName());
+            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CommonFacetType.FOLDER_TYPE.getId());
         }
         FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
             FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, false, session, null);

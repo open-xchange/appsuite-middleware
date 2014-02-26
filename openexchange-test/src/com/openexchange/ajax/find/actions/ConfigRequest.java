@@ -171,7 +171,7 @@ public class ConfigRequest extends AbstractFindRequest<ConfigResponse> {
             final FacetType facetType = new FacetType() {
 
                 @Override
-                public String getName() {
+                public String getId() {
                     return facetName;
                 }
 
@@ -188,13 +188,13 @@ public class ConfigRequest extends AbstractFindRequest<ConfigResponse> {
 
         private Facet parseJFacet(final JSONObject jFacet) throws JSONException {
             // Type information
-            final String type = jFacet.getString("type");
+            final String id = jFacet.getString("id");
             final String displayName = jFacet.getString("displayName");
             final FacetType facetType = new FacetType() {
 
                 @Override
-                public String getName() {
-                    return type;
+                public String getId() {
+                    return id;
                 }
 
                 @Override

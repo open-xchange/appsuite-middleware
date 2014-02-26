@@ -61,11 +61,11 @@ import com.openexchange.i18n.I18nService;
 public interface FacetType {
 
     /**
-     * Gets the name of this type, that uniquely identifies
+     * Gets the id of this type, that uniquely identifies
      * a facet within a module.
-     * @return The name, never <code>null</code>.
+     * @return The id, never <code>null</code>.
      */
-    String getName();
+    String getId();
 
     /**
      * Gets the display name of this type, that might be shown in

@@ -118,7 +118,7 @@ public class ConfigJSONConverter extends AbstractJSONConverter {
         JSONArray result = new JSONArray();
         for (MandatoryFilter mandatoryFilter : mandatoryFilters) {
             JSONObject filterJSON = new JSONObject();
-            filterJSON.put("facet", mandatoryFilter.getFacet().getType().getName());
+            filterJSON.put("facet", mandatoryFilter.getFacet().getType().getId());
             filterJSON.put("defaultValue", convertFacetValue(locale, mandatoryFilter.getDefaultValue()));
             result.put(filterJSON);
         }

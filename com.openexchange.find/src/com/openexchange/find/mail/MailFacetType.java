@@ -72,7 +72,7 @@ public enum MailFacetType implements FacetType {
     private static final Map<String, MailFacetType> typesByName = new HashMap<String, MailFacetType>();
     static {
         for (MailFacetType type : values()) {
-            typesByName.put(type.getName(), type);
+            typesByName.put(type.getId(), type);
         }
     }
 
@@ -84,7 +84,7 @@ public enum MailFacetType implements FacetType {
     }
 
     @Override
-    public String getName() {
+    public String getId() {
         return toString().toLowerCase();
     }
 

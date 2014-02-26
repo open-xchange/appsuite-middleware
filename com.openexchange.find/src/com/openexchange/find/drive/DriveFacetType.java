@@ -73,7 +73,7 @@ public enum DriveFacetType implements FacetType {
     private static final Map<String, DriveFacetType> typesByName = new HashMap<String, DriveFacetType>();
     static {
         for (DriveFacetType type : values()) {
-            typesByName.put(type.getName(), type);
+            typesByName.put(type.getId(), type);
         }
     }
 
@@ -85,7 +85,7 @@ public enum DriveFacetType implements FacetType {
     }
 
     @Override
-    public String getName() {
+    public String getId() {
         return toString().toLowerCase();
     }
 

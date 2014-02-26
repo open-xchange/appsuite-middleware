@@ -129,7 +129,7 @@ public class SimpleFindTest extends AbstractFindTest {
             for (int i = 0; i < size; i++) {
                 final Facet facet = facets.get(i);
 
-                final boolean isContactFacet = "contacts".equals(facet.getType().getName());
+                final boolean isContactFacet = "contacts".equals(facet.getType().getId());
 
                 foundContacFacet |= isContactFacet;
 
@@ -173,8 +173,8 @@ public class SimpleFindTest extends AbstractFindTest {
             boolean foundFileContentFacet = false;
 
             for (final Facet staticFacet : staticFacets) {
-                foundFileNameFacet |= "file_name".equals(staticFacet.getType().getName());
-                foundFileContentFacet |= "file_content".equals(staticFacet.getType().getName());
+                foundFileNameFacet |= "file_name".equals(staticFacet.getType().getId());
+                foundFileContentFacet |= "file_content".equals(staticFacet.getType().getId());
             }
 
             assertTrue("Missing \"file_name\" in static facets.", foundFileNameFacet);

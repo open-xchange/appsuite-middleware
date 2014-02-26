@@ -73,7 +73,7 @@ public enum CommonFacetType implements FacetType {
     }
 
     @Override
-    public String getName() {
+    public String getId() {
         return toString().toLowerCase();
     }
 

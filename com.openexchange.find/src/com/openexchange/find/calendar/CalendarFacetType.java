@@ -72,7 +72,7 @@ public enum CalendarFacetType implements FacetType {
     private static final Map<String, CalendarFacetType> typesByName = new HashMap<String, CalendarFacetType>();
     static {
         for (CalendarFacetType type : values()) {
-            typesByName.put(type.getName(), type);
+            typesByName.put(type.getId(), type);
         }
     }
 
@@ -84,7 +84,7 @@ public enum CalendarFacetType implements FacetType {
     }
 
     @Override
-    public String getName() {
+    public String getId() {
         return toString().toLowerCase();
     }
 

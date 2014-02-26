@@ -246,7 +246,7 @@ public class AppointmentSearchBuilder {
                     try {
                         folderIDs.add(Integer.valueOf(folder.getID()));
                     } catch (NumberFormatException e) {
-                        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, query, CommonFacetType.FOLDER_TYPE.getName());
+                        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, query, CommonFacetType.FOLDER_TYPE.getId());
                     }
                 }
             }
@@ -271,7 +271,7 @@ public class AppointmentSearchBuilder {
             } else if (StatusDisplayItem.Status.DECLINED.getIdentifier().equals(query)) {
                 status = CalendarDataObject.DECLINE;
             } else {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.STATUS.getName());
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.STATUS.getId());
             }
             ownStatus.add(status);
         }
@@ -285,7 +285,7 @@ public class AppointmentSearchBuilder {
             } else if (RecurringTypeDisplayItem.RecurringType.SINGLE.getIdentifier().equals(query)) {
                 appointmentSearch.setExcludeRecurringAppointments(true);
             } else {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RECURRING_TYPE.getName());
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RECURRING_TYPE.getId());
             }
         }
     }
@@ -297,7 +297,7 @@ public class AppointmentSearchBuilder {
             } else if (RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier().equals(query)) {
                 appointmentSearch.setMaximumStartDate(new Date());
             } else {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RELATIVE_DATE.getName());
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RELATIVE_DATE.getId());
             }
         }
     }
