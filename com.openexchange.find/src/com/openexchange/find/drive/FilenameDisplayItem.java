@@ -47,42 +47,45 @@
  *
  */
 
-package com.openexchange.oauth.xing.osgi;
+package com.openexchange.find.drive;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.xing.XingOAuthServiceMetaData;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.file.storage.File;
+import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.facet.DisplayItemVisitor;
 
 
 /**
- * {@link XingOAuthActivator}
+ * {@link FilenameDisplayItem}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since 7.6.0
  */
-public final class XingOAuthActivator extends HousekeepingActivator {
+public class FilenameDisplayItem implements DisplayItem {
 
-    public XingOAuthActivator() {
+    private final File file;
+
+    /**
+     * Initializes a new {@link FilenameDisplayItem}.
+     */
+    public FilenameDisplayItem(File file) {
         super();
+        this.file = file;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class };
+    public String getDefaultValue() {
+        return file.getTitle();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            XingOAuthServiceMetaData xingService = new XingOAuthServiceMetaData(this);
-            registerService(OAuthServiceMetaData.class, xingService);
-            registerService(Reloadable.class, xingService);
-        } catch (final Exception e) {
-            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(XingOAuthActivator.class);
-            log.warn("Could not start-up XING OAuth service", e);
-            throw e;
+    public File getItem() {
+        return file;
+    }
+
+    @Override
+    public void accept(DisplayItemVisitor visitor) {
+        if (null != visitor) {
+            visitor.visit(this);
         }
     }
 

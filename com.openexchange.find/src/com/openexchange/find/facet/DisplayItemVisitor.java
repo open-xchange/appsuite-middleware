@@ -58,6 +58,7 @@ import com.openexchange.find.common.FolderDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.FileTypeDisplayItem;
+import com.openexchange.find.drive.FilenameDisplayItem;
 import com.openexchange.find.tasks.TaskStatusDisplayItem;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
 
@@ -80,11 +81,11 @@ public interface DisplayItemVisitor {
     void visit(FolderTypeDisplayItem item);
 
     void visit(FileTypeDisplayItem fileTypeDisplayItem);
-    
+
     void visit(StatusDisplayItem item);
-    
+
     void visit(RelativeDateDisplayItem item);
-    
+
     void visit(RecurringTypeDisplayItem item);
 
     void visit(TaskStatusDisplayItem item);
@@ -94,5 +95,7 @@ public interface DisplayItemVisitor {
     void visit(NoDisplayItem item);
 
     void visit(ContactTypeDisplayItem contactTypeDisplayItem);
+
+    void visit(FilenameDisplayItem filenameDisplayItem);
 
 }

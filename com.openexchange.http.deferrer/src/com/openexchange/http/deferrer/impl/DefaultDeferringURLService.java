@@ -52,6 +52,7 @@ package com.openexchange.http.deferrer.impl;
 import static com.openexchange.ajax.AJAXServlet.encodeUrl;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
 /**
@@ -81,7 +82,7 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
             return url;
         }
         // Return deferred URL
-        return deferrerURL + PREFIX.get().getPrefix() + "defer?redirect=" + encodeUrl(url, false, false);
+        return new StringAllocator(deferrerURL).append(PREFIX.get().getPrefix()).append("defer?redirect=").append(encodeUrl(url, false, false)).toString();
     }
 
     private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL) {
@@ -105,7 +106,10 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
     @Override
     public String getBasicDeferrerURL() {
     	final String deferrerURL = getDeferrerURL();
-        return deferrerURL == null ? PREFIX.get().getPrefix() + "defer" : deferrerURL + PREFIX.get().getPrefix() + "defer";
+        if (deferrerURL == null) {
+            return new StringAllocator(PREFIX.get().getPrefix()).append("defer").toString();
+        }
+        return new StringAllocator(deferrerURL).append(PREFIX.get().getPrefix()).append("defer").toString();
     }
 
 }

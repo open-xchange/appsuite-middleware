@@ -124,8 +124,30 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
     @Override
     public SearchIterator<DocumentMetadata> search(final SearchTerm<?> searchTerm, final Metadata[] cols, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(ctx.getContextId());
+        searchTerm.visit(visitor);
+        String sqlQuery = visitor.getMySqlQuery();
+
+        Connection con = getReadConnection(ctx);
+        boolean keepConnection = false;
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(sqlQuery);
+            final InfostoreSearchIterator iter = new InfostoreSearchIterator(stmt.executeQuery(), this, cols, ctx, con, stmt);
+            // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
+            keepConnection = true;
+            return iter;
+        } catch (final SQLException e) {
+            LOG.error("", e);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery);
+        } catch (final OXException e) {
+            LOG.error("", e);
+            throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
+        } finally {
+            if (con != null && !keepConnection) {
+                releaseReadConnection(ctx, con);
+            }
+        }
     }
 
     @Override
@@ -145,7 +167,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                         user.getGroups(),
                         userPermissions.getAccessibleModules(),
                         FolderObject.INFOSTORE,
-                        ctx, con)).asQueue();
+                        ctx,
+                        con)).asQueue();
                     for (final FolderObject folder : queue) {
                         final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userPermissions);
                         if (perm.canReadAllObjects()) {
@@ -186,8 +209,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             } else {
                 maxResults = NOT_SET;
             }
-            if (NOT_SET != maxResults && own.size() + all.size() > maxResults &&
-                (null == sortedBy || InfostoreQueryCatalog.Table.INFOSTORE.getFieldSet().contains(sortedBy))) {
+            if (NOT_SET != maxResults && own.size() + all.size() > maxResults && (null == sortedBy || InfostoreQueryCatalog.Table.INFOSTORE.getFieldSet().contains(
+                sortedBy))) {
                 /*
                  * no pattern, ordering possible, and more folders queried than results needed - use optimized query
                  */
@@ -360,8 +383,9 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
          */
         sqlQuery = new StringAllocator();
         sqlQuery.append(getResultFieldsSelect(cols));
-        sqlQuery.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ")
-            .append(context.getContextId()).append(" AND infostore.id IN (").append(join(objectIDs)).append(")");
+        sqlQuery.append(
+            " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(
+            context.getContextId()).append(" AND infostore.id IN (").append(join(objectIDs)).append(")");
         appendOrderBy(sqlQuery, sortedBy, dir);
         boolean keepConnection = false;
         PreparedStatement stmt = null;
@@ -521,15 +545,21 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
     public static class InfostoreSearchIterator implements SearchIterator<DocumentMetadata> {
 
         private Statement stmt;
+
         private Connection readCon;
+
         private ResultSet rs;
 
         private DocumentMetadata next;
 
         private final Metadata[] columns;
+
         private final SearchEngineImpl s;
+
         private final Context ctx;
+
         private final List<OXException> warnings;
+
         private final SearchIterator<DocumentMetadata> delegate;
 
         public InfostoreSearchIterator(final ResultSet rs, final SearchEngineImpl s, final Metadata[] columns, final Context ctx, final Connection readCon, final Statement stmt) throws OXException {
@@ -545,7 +575,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             try {
                 if (rs.next()) {
                     // Preload?
-                    if (false && Arrays.asList(columns).contains(Metadata.CONTENT_LITERAL)) { // Metadata.CONTENT_LITERAL is mapped to description in fillDocumentMetadata()
+                    if (false && Arrays.asList(columns).contains(Metadata.CONTENT_LITERAL)) { // Metadata.CONTENT_LITERAL is mapped to
+                                                                                              // description in fillDocumentMetadata()
                         next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
                     } else {
                         final List<DocumentMetadata> list = new LinkedList<DocumentMetadata>();
