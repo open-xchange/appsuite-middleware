@@ -47,57 +47,47 @@
  *
  */
 
-package com.openexchange.find.basic.tasks;
+package com.openexchange.ajax.find.tasks;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.exception.OXException;
-import com.openexchange.find.Document;
-import com.openexchange.find.SearchRequest;
-import com.openexchange.find.SearchResult;
-import com.openexchange.find.tasks.TasksDocument;
-import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.search.Order;
-import com.openexchange.groupware.search.TaskSearchObject;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.session.ServerSession;
+import org.junit.Test;
+import com.openexchange.ajax.find.AbstractFindTest;
+import com.openexchange.ajax.find.actions.QueryRequest;
+import com.openexchange.ajax.find.actions.QueryResponse;
+import com.openexchange.find.facet.Filter;
 
 
 /**
- * {@link BasicTasksDriver}
+ * {@link SimpleTest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BasicTasksDriver extends MockTasksDriver {
-    
-    private final static int TASKS_FIELDS[] = {DataObject.OBJECT_ID, DataObject.CREATED_BY, Task.TITLE, Task.STATUS, Task.NOTE};
+public class SimpleTest extends AbstractFindTest {
 
     /**
-     * Initializes a new {@link BasicTasksDriver}.
+     * Initializes a new {@link SimpleTest}.
      */
-    public BasicTasksDriver() {
-        super();
+    public SimpleTest(String name) {
+        super(name);
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.find.basic.tasks.MockTasksDriver#search(com.openexchange.find.SearchRequest, com.openexchange.tools.session.ServerSession)
-     */
-    @Override
-    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
-        TaskSearchObjectBuilder builder = new TaskSearchObjectBuilder();
-        TaskSearchObject searchObject = builder.addFilters(searchRequest.getFilters()).addQueries(searchRequest.getQueries()).build();
-        
-        final TasksSQLInterface tasksSQL = new TasksSQLImpl(session);
-        SearchIterator<Task> si = tasksSQL.findTask(searchObject, Task.TITLE, Order.ASCENDING, TASKS_FIELDS);
-        List<Document> documents = new ArrayList<Document>();
-        while(si.hasNext()) {
-            documents.add(new TasksDocument(si.next()));
+    @Test
+    public void testSimpleSearch() {
+        try {
+
+            List<String> queries = Collections.singletonList("test");
+            List<Filter> filters = Collections.emptyList();
+            final QueryResponse queryResponse = getClient().execute(new QueryRequest(0, 10, queries, filters, "tasks"));
+
+            assertNotNull(queryResponse);
+
+            System.err.println(queryResponse.getData());
+
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
         }
-        return new SearchResult(-1, searchRequest.getStart(), documents);
     }
 
 }
