@@ -50,6 +50,7 @@
 package com.openexchange.groupware.search;
 
 import java.util.Date;
+import java.util.Set;
 
 public class TaskSearchObject extends CalendarSearchObject {
 
@@ -71,6 +72,12 @@ public class TaskSearchObject extends CalendarSearchObject {
     private int status = NO_STATUS;
 
     private int priority = NO_PRIORITY;
+    
+    private Set<String> titleFilters;
+    
+    private Set<String> descriptionFilters;
+    
+    private Set<String> queries;
 
     /**
      * This array contains 2 values between them the task ends. If the task has
@@ -104,5 +111,57 @@ public class TaskSearchObject extends CalendarSearchObject {
 
     public void setRange(final Date[] range) {
         this.range = range;
+    }
+    
+    /**
+     * Set filters for the title field
+     * @param tf title filters
+     */
+    public void setTitleFilters(Set<String> tf) {
+        titleFilters = tf;
+    }
+    
+    /**
+     * Gets the title filters
+     *
+     * @return The title filters
+     */
+    public Set<String> getTitleFilters() {
+        return titleFilters;
+    }
+    
+    /**
+     * Set the filters for the description field
+     * @param df description filters
+     */
+    public void setDescriptionFilters(Set<String> df) {
+        descriptionFilters = df;
+    }
+    
+    /**
+     * Gets the description filters
+     *
+     * @return The description filters
+     */
+    public Set<String> getDescriptionFilters() {
+        return descriptionFilters;
+    }
+
+    /**
+     * Gets the queries
+     *
+     * @return The queries
+     */
+    public Set<String> getQueries() {
+        return queries;
+    }
+
+    /**
+     * Sets the queries
+     *
+     * @param queries The queries to set
+     */
+    public void setQueries(Set<String> queries) {
+        this.queries = queries;
     }
 }
