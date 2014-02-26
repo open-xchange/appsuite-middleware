@@ -52,6 +52,7 @@ package com.openexchange.test;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.ajax.find.FindTestSuite;
 
 /**
  * Test suite for all AJAX interface tests.
@@ -119,6 +120,7 @@ public final class InterfaceTests {
         tests.addTestSuite(com.openexchange.ajax.tokenloginV2.TokenLoginV2Test.class);
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.oauth.OAuthTests.class));
         tests.addTestSuite(com.openexchange.test.resourcecache.ResourceCacheTest.class);
+        tests.addTest(FindTestSuite.suite());
         return tests;
     }
 }
