@@ -108,10 +108,6 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
         final List<Parameter> list = new LinkedList<Parameter>();
         list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "query"));
         list.add(new Parameter("module", module));
-        if (start >= 0 && size > 0) {
-            list.add(new Parameter("start", start));
-            list.add(new Parameter("size", size));
-        }
         return list.toArray(new Parameter[0]);
     }
 
@@ -135,7 +131,13 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
                 jBody.put("queries", jQueries);
             }
         }
-
+        // Add size / start if present
+        if (0 < start) {
+            jBody.put("start", start);
+        }
+        if (0 < size) {
+            jBody.put("size", size);
+        }
         // Add filters if present
         final List<Filter> filters = this.filters;
         if (null != filters) {
