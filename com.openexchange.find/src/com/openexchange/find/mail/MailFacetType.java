@@ -63,10 +63,10 @@ import com.openexchange.java.Strings;
  */
 public enum MailFacetType implements FacetType {
 
+    SUBJECT,
+    MAIL_TEXT,
     CONTACTS(MailStrings.FACET_CONTACTS),
-    FOLDERS(MailStrings.FACET_FOLDERS),
-    SUBJECT(MailStrings.FACET_SUBJECT),
-    MAIL_TEXT(MailStrings.FACET_MAIL_TEXT),
+    FOLDERS(MailStrings.FACET_FOLDERS, false, true),
     TIME(MailStrings.FACET_TIME);
 
     private static final Map<String, MailFacetType> typesByName = new HashMap<String, MailFacetType>();
@@ -79,8 +79,26 @@ public enum MailFacetType implements FacetType {
 
     private final String displayName;
 
+    private final boolean isFieldFacet;
+
+    private final boolean isMandatory;
+
+    private MailFacetType() {
+        this(null, true, false);
+    }
+
+    private MailFacetType(final boolean isMandatory) {
+        this(null, true, isMandatory);
+    }
+
     private MailFacetType(final String displayName) {
+        this(displayName, false, false);
+    }
+
+    private MailFacetType(final String displayName, final boolean isFieldFacet, final boolean isMandatory) {
         this.displayName = displayName;
+        this.isFieldFacet = isFieldFacet;
+        this.isMandatory = isMandatory;
     }
 
     @Override
@@ -91,6 +109,16 @@ public enum MailFacetType implements FacetType {
     @Override
     public String getDisplayName() {
         return displayName;
+    }
+
+    @Override
+    public boolean isFieldFacet() {
+        return isFieldFacet;
+    }
+
+    @Override
+    public boolean isMandatory() {
+        return isMandatory;
     }
 
     /**

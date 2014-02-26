@@ -59,6 +59,13 @@ import com.openexchange.find.facet.FacetType;
 public enum CommonFacetType implements FacetType {
 
     /**
+     * The global facet is a field facet,
+     * that applies to all modules and is meant
+     * to be used as a filter that searches in an
+     * implementation-defined set of fields.
+     */
+    GLOBAL,
+    /**
      * The facet type for folder type.
      */
     FOLDER_TYPE(CommonStrings.FACET_TYPE_FOLDER_TYPE),
@@ -68,8 +75,19 @@ public enum CommonFacetType implements FacetType {
 
     private final String displayName;
 
-    private CommonFacetType(String displayName) {
+    private final boolean isFieldFacet;
+
+    private CommonFacetType() {
+        this(null, true);
+    }
+
+    private CommonFacetType(final String displayName) {
+        this(displayName, false);
+    }
+
+    private CommonFacetType(final String displayName, final boolean isFieldFacet) {
         this.displayName = displayName;
+        this.isFieldFacet = isFieldFacet;
     }
 
     @Override
@@ -80,6 +98,16 @@ public enum CommonFacetType implements FacetType {
     @Override
     public String getDisplayName() {
         return displayName;
+    }
+
+    @Override
+    public boolean isFieldFacet() {
+        return isFieldFacet;
+    }
+
+    @Override
+    public boolean isMandatory() {
+        return false;
     }
 
 }

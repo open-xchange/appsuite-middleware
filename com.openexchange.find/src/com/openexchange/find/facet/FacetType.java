@@ -71,8 +71,22 @@ public interface FacetType {
      * Gets the display name of this type, that might be shown in
      * a user interface. Should be localizable and therefore a be valid
      * key for {@link I18nService}.
-     * @return The display name, never <code>null</code>.
+     * @return The display name. Should be <code>null</code> if and
+     * only if this facet is a field facet.
      */
     String getDisplayName();
+
+    /**
+     * @return if this facet is meant to provide
+     * exactly one value, that does never change.
+     */
+    boolean isFieldFacet();
+
+    /**
+     * @return if this facet is mandatory, meaning
+     * that this facet must be set when performing a
+     * search.
+     */
+    boolean isMandatory();
 
 }

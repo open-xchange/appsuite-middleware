@@ -73,19 +73,21 @@ public class FieldFacet extends Facet {
 
     private static final long serialVersionUID = -5699454846328204928L;
 
-    private static final String QUERY_PLACEHOLDER = "override";
-
     public FieldFacet(final FacetType type, final String filterField) {
-        super(type, buildValues(type, Collections.singletonList(filterField)));
+        this(type, Collections.singletonList(filterField), null);
     }
 
-    public FieldFacet(final FacetType type, final List<String> filterFields) {
-        super(type, buildValues(type, filterFields));
+    public FieldFacet(final FacetType type, final String filterField, final String filterValue) {
+        this(type, Collections.singletonList(filterField), filterValue);
     }
 
-    private static List<FacetValue> buildValues(FacetType type, List<String> filterFields) {
+    public FieldFacet(final FacetType type, final List<String> filterFields, final String filterValue) {
+        super(type, buildValues(type, filterFields, filterValue));
+    }
+
+    private static List<FacetValue> buildValues(FacetType type, List<String> filterFields, String filterValue) {
         ArrayList<FacetValue> values = new ArrayList<FacetValue>(1);
-        Filter filter = new Filter(filterFields, Collections.<String>singletonList(QUERY_PLACEHOLDER));
+        Filter filter = new Filter(filterFields, Collections.<String>singletonList(filterValue));
         values.add(new FacetValue(
             type.getId(),
             new SimpleDisplayItem(type.getDisplayName()),

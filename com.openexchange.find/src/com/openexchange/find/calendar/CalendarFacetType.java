@@ -93,6 +93,16 @@ public enum CalendarFacetType implements FacetType {
         return displayName;
     }
 
+    @Override
+    public boolean isFieldFacet() {
+        return false;
+    }
+
+    @Override
+    public boolean isMandatory() {
+        return false;
+    }
+
     /**
      * Gets a {@link CalendarFacetType} by its name.
      * @return The type or <code>null</code>, if the name is invalid.

@@ -88,14 +88,21 @@ public abstract class AbstractJSONConverter implements ResultConverter {
 
     protected JSONArray convertFacets(Locale locale, List<Facet> facets) throws JSONException {
         JSONArray result = new JSONArray(facets.size());
-
         for (Facet facet : facets) {
             JSONObject facetJSON = new JSONObject(4);
 
             // Type information
             FacetType type = facet.getType();
             facetJSON.put("id", type.getId());
-            facetJSON.put("displayName", translator.translate(locale, type.getDisplayName()));
+            if (type.isFieldFacet()) {
+                facetJSON.put("isFieldFacet", true);
+            } else {
+                facetJSON.put("displayName", translator.translate(locale, type.getDisplayName()));
+            }
+
+            if (type.isMandatory()) {
+                facetJSON.put("isMandatory", true);
+            }
 
             // Facet values
             List<FacetValue> values = facet.getValues();
