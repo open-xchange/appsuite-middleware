@@ -145,7 +145,7 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
         return new ModuleConfig(Module.DRIVE, staticFacets);
     }
 
-    private static final List<String> PERSONS_FILTER_FIELDS = Arrays.asList("created_from","changed_from","author");
+    protected static final List<String> PERSONS_FILTER_FIELDS = Arrays.asList("created_from","changed_from","author");
 
     @Override
     public AutocompleteResult doAutocomplete(final AutocompleteRequest autocompleteRequest, final ServerSession session) throws OXException {

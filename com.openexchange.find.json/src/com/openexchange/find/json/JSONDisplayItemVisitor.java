@@ -64,6 +64,7 @@ import com.openexchange.find.common.FolderDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.FileTypeDisplayItem;
+import com.openexchange.find.drive.FilenameDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.find.facet.NoDisplayItem;
@@ -170,6 +171,7 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         }
     }
 
+    @Override
     public void visit(StatusDisplayItem item) {
         StatusDisplayItem.Status status = item.getItem();
         try {
@@ -191,6 +193,7 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         }
     }
 
+    @Override
     public void visit(RelativeDateDisplayItem item) {
         RelativeDateDisplayItem.RelativeDate date = item.getItem();
         try {
@@ -233,6 +236,11 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         } catch (JSONException e) {
             errors.add(e);
         }
+    }
+
+    @Override
+    public void visit(FilenameDisplayItem filenameDisplayItem) {
+        //
     }
 
     private void addDefaultValue(DisplayItem item) throws JSONException {

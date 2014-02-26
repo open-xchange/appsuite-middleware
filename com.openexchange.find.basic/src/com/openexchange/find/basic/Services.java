@@ -51,6 +51,8 @@ package com.openexchange.find.basic;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -90,6 +92,14 @@ public class Services {
 
     public static ThreadPoolService getThreadPoolService() throws OXException {
         return requireService(ThreadPoolService.class);
+    }
+
+    public static IDBasedFileAccessFactory getIdBasedFileAccessFactory() throws OXException {
+        return requireService(IDBasedFileAccessFactory.class);
+    }
+
+    public static IDBasedFolderAccessFactory getIdBasedFolderAccessFactory() throws OXException {
+        return requireService(IDBasedFolderAccessFactory.class);
     }
 
     public static void setServiceLookup(ServiceLookup lookup) {

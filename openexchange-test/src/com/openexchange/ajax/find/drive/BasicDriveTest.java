@@ -54,6 +54,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.find.AbstractFindTest;
+import com.openexchange.ajax.find.actions.AutocompleteRequest;
+import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.ConfigRequest;
 import com.openexchange.ajax.find.actions.ConfigResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
@@ -82,6 +84,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
 public class BasicDriveTest extends AbstractFindTest {
 
     private DocumentMetadata metadata;
+    private static final String FILENAME = "BasicDriveTest";
 
     /**
      * Initializes a new {@link BasicDriveTest}.
@@ -98,7 +101,8 @@ public class BasicDriveTest extends AbstractFindTest {
         metadata = new DocumentMetadataImpl();
         metadata.setCreationDate(new Date());
         metadata.setFolderId(client.getValues().getPrivateInfostoreFolder());
-        metadata.setFileName("BasicDriveTest");
+        metadata.setFileName(FILENAME);
+        metadata.setTitle(FILENAME);
         metadata.setLastModified(new Date());
         metadata.setDescription("Test file for testing new find api");
         NewInfostoreRequest request = new NewInfostoreRequest(metadata);
@@ -137,6 +141,12 @@ public class BasicDriveTest extends AbstractFindTest {
         QueryResponse response = client.execute(request);
         SearchResult result = response.getSearchResult();
         assertTrue("Nothing found in BasicDriveTest", result.getNumFound() > 0);
+    }
+
+    public void testAutocompletion() throws Exception {
+        AutocompleteRequest request = new AutocompleteRequest(FILENAME.substring(0, 3), Module.DRIVE.getIdentifier());
+        AutocompleteResponse response = client.execute(request);
+        assertNotNull("Autocompletion failed in BasicDriveTest", response.getFacets());
     }
 
 }

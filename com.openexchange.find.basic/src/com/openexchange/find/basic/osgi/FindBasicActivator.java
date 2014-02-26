@@ -54,10 +54,11 @@ import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import com.openexchange.contact.ContactService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.basic.calendar.BasicCalendarDriver;
 import com.openexchange.find.basic.contacts.BasicContactsDriver;
-import com.openexchange.find.basic.drive.MockDriveDriver;
+import com.openexchange.find.basic.drive.BasicDriveDriver;
 import com.openexchange.find.basic.mail.BasicMailDriver;
 import com.openexchange.find.basic.tasks.MockTasksDriver;
 import com.openexchange.find.spi.ModuleSearchDriver;
@@ -82,14 +83,15 @@ public class FindBasicActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContactService.class, FolderService.class, MailService.class,
             MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
-            AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class };
+            AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class,
+            IDBasedFolderAccessFactory.class};
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
         registerService(ModuleSearchDriver.class, new BasicMailDriver(), defaultProperties());
-        registerService(ModuleSearchDriver.class, new MockDriveDriver(), defaultProperties());
+        registerService(ModuleSearchDriver.class, new BasicDriveDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicContactsDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new MockTasksDriver(), defaultProperties());

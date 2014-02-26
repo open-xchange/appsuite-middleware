@@ -47,55 +47,46 @@
  *
  */
 
-package com.openexchange.find.facet;
+package com.openexchange.find.drive;
 
-import com.openexchange.find.calendar.RecurringTypeDisplayItem;
-import com.openexchange.find.calendar.RelativeDateDisplayItem;
-import com.openexchange.find.calendar.StatusDisplayItem;
-import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.ContactTypeDisplayItem;
-import com.openexchange.find.common.FolderDisplayItem;
-import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.drive.FileTypeDisplayItem;
-import com.openexchange.find.drive.FilenameDisplayItem;
-import com.openexchange.find.tasks.TaskStatusDisplayItem;
-import com.openexchange.find.tasks.TaskTypeDisplayItem;
-
+import com.openexchange.file.storage.File;
+import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.facet.DisplayItemVisitor;
 
 
 /**
- * {@link DisplayItemVisitor}
+ * {@link FilenameDisplayItem}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since 7.6.0
  */
-public interface DisplayItemVisitor {
+public class FilenameDisplayItem implements DisplayItem {
 
-    void visit(FolderDisplayItem item);
+    private final File file;
 
-    void visit(ContactDisplayItem item);
+    /**
+     * Initializes a new {@link FilenameDisplayItem}.
+     */
+    public FilenameDisplayItem(File file) {
+        super();
+        this.file = file;
+    }
 
-    void visit(SimpleDisplayItem item);
+    @Override
+    public String getDefaultValue() {
+        return file.getTitle();
+    }
 
-    void visit(FolderTypeDisplayItem item);
+    @Override
+    public File getItem() {
+        return file;
+    }
 
-    void visit(FileTypeDisplayItem fileTypeDisplayItem);
-
-    void visit(StatusDisplayItem item);
-
-    void visit(RelativeDateDisplayItem item);
-
-    void visit(RecurringTypeDisplayItem item);
-
-    void visit(TaskStatusDisplayItem item);
-
-    void visit(TaskTypeDisplayItem item);
-
-    void visit(NoDisplayItem item);
-
-    void visit(ContactTypeDisplayItem contactTypeDisplayItem);
-
-    void visit(FilenameDisplayItem filenameDisplayItem);
+    @Override
+    public void accept(DisplayItemVisitor visitor) {
+        if (null != visitor) {
+            visitor.visit(this);
+        }
+    }
 
 }
