@@ -124,22 +124,29 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     public void visit(AndTerm andTerm) throws OXException {
         final List<SearchTerm<?>> terms = andTerm.getPattern();
         final int size = terms.size();
+        sb.append("(");
         for (int i = 0; i < size; i++) {
             final SearchTerm<?> searchTerm = terms.get(i);
             searchTerm.visit(this);
             sb.append("AND ");
         }
+        sb.delete(sb.length() - 4, sb.length());
+        sb.append(")");
+
     }
 
     @Override
     public void visit(OrTerm orTerm) throws OXException {
         final List<SearchTerm<?>> terms = orTerm.getPattern();
         final int size = terms.size();
+        sb.append("(");
         for (int i = 0; i < size; i++) {
             final SearchTerm<?> searchTerm = terms.get(i);
             searchTerm.visit(this);
             sb.append("OR ");
         }
+        sb.delete(sb.length() - 3, sb.length());
+        sb.append(")");
     }
 
     @Override
