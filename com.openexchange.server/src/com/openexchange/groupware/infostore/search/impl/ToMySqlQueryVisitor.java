@@ -151,7 +151,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(NotTerm notTerm) throws OXException {
-        sb.append("NOT ");
+        sb.append("IS NOT ");
         notTerm.getPattern().visit(this);
     }
 
