@@ -95,6 +95,10 @@ public class I18nTracker implements ServiceTrackerCustomizer<I18nService, I18nSe
 
     @Override
     public String translate(Locale locale, String localizable) {
+        if (localizable == null) {
+            return null;
+        }
+
         I18nService i18nService = services.get(locale);
         if (i18nService == null) {
             return localizable;

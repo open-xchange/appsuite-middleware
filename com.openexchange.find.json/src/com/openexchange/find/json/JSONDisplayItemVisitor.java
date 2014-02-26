@@ -49,30 +49,23 @@
 
 package com.openexchange.find.json;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.find.calendar.RecurringTypeDisplayItem;
 import com.openexchange.find.calendar.RelativeDateDisplayItem;
 import com.openexchange.find.calendar.StatusDisplayItem;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.ContactTypeDisplayItem;
-import com.openexchange.find.common.DefaultFolderType;
 import com.openexchange.find.common.FolderDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.drive.FilenameDisplayItem;
-import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.find.facet.NoDisplayItem;
 import com.openexchange.find.json.converters.StringTranslator;
 import com.openexchange.find.tasks.TaskStatusDisplayItem;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.MailFolderInfo;
 
 /**
@@ -81,186 +74,96 @@ import com.openexchange.mail.dataobjects.MailFolderInfo;
  */
 public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
-    private final List<JSONException> errors;
-
-    private final JSONObject json;
-
     private final StringTranslator translator;
 
     private final Locale locale;
+
+    private String result;
 
     public JSONDisplayItemVisitor(final StringTranslator translator, final Locale locale) {
         super();
         this.translator = translator;
         this.locale = locale;
-        json = new JSONObject();
-        errors = new ArrayList<JSONException>();
     }
 
     @Override
     public void visit(FolderDisplayItem item) {
         MailFolderInfo folder = item.getItem();
-        try {
-            addDefaultValue(item);
-            json.put("accountName", convertString(item.getAccountName()));
-            json.put("isDefaultAccount", item.isDefaultAccount());
-            json.put("folderName", folder.getName());
-            if (item.getDefaultType() != DefaultFolderType.NONE) {
-                json.put("defaultType", item.getDefaultType().getTypeName());
-            }
-        } catch (JSONException e) {
-            errors.add(e);
+        if (!item.isDefaultAccount()) {
+            result = folder.getDisplayName() + " (" + item.getAccountName() + ")";
+        } else {
+            result = folder.getDisplayName();
         }
     }
 
     @Override
     public void visit(ContactDisplayItem item) {
-        Contact contact = item.getItem();
-        try {
-            addDefaultValue(item);
-            json.put("givenName", convertString(contact.getGivenName()));
-            json.put("surName", convertString(contact.getSurName()));
-            json.put("displayName", convertString(contact.getDisplayName()));
-            json.put("email1", convertString(contact.getEmail1()));
-            json.put("email2", convertString(contact.getEmail2()));
-            json.put("email3", convertString(contact.getEmail3()));
-        } catch (JSONException e) {
-            errors.add(e);
-        }
+        result = item.getDefaultValue();
     }
 
     @Override
     public void visit(SimpleDisplayItem item) {
-        try {
-            addDefaultValue(item);
-        } catch (JSONException e) {
-            errors.add(e);
-        }
+        result = item.getDefaultValue();
     }
 
     @Override
     public void visit(final FolderTypeDisplayItem item) {
-        final FolderTypeDisplayItem.Type type = item.getItem();
-        try {
-            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
-            json.put("folder_type", Strings.toLowerCase(type.toString()));
-        } catch (JSONException e) {
-            errors.add(e);
-        }
+        result = translator.translate(locale, item.getDefaultValue());
     }
 
     @Override
     public void visit(FileTypeDisplayItem item) {
-        final FileTypeDisplayItem.Type type = item.getItem();
-        try {
-            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
-            json.put("file_type", Strings.toLowerCase(type.toString()));
-        } catch (JSONException e) {
-            errors.add(e);
-        }
+        result = translator.translate(locale, item.getDefaultValue());
     }
 
     @Override
     public void visit(TaskStatusDisplayItem item) {
-        final TaskStatusDisplayItem.Type type = item.getItem();
-        try {
-            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
-            json.put("task_status", Strings.toLowerCase(type.toString()));
-        } catch (JSONException e) {
-            errors.add(e);
-        }
+        result = translator.translate(locale, item.getDefaultValue());
     }
 
     @Override
     public void visit(StatusDisplayItem item) {
-        StatusDisplayItem.Status status = item.getItem();
-        try {
-            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
-            json.put("status", Strings.toLowerCase(status.toString()));
-        } catch (JSONException e) {
-            errors.add(e);
-        }
+        result = translator.translate(locale, item.getDefaultValue());
     }
 
     @Override
     public void visit(TaskTypeDisplayItem item) {
-        final TaskTypeDisplayItem.Type type = item.getItem();
-        try {
-            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
-            json.put("task_type", Strings.toLowerCase(type.toString()));
-        } catch (JSONException e) {
-            errors.add(e);
-        }
+        result = translator.translate(locale, item.getDefaultValue());
     }
 
     @Override
     public void visit(RelativeDateDisplayItem item) {
-        RelativeDateDisplayItem.RelativeDate date = item.getItem();
-        try {
-            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
-            json.put("relative_date", Strings.toLowerCase(date.toString()));
-        } catch (JSONException e) {
-            errors.add(e);
-        }
+        result = translator.translate(locale, item.getDefaultValue());
     }
 
     @Override
     public void visit(NoDisplayItem item) {
-        try {
-            addDefaultValue(item);
-        } catch (JSONException e) {
-            errors.add(e);
-        }
+        result = item.getDefaultValue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void visit(ContactTypeDisplayItem item) {
-        final ContactTypeDisplayItem.Type type = item.getItem();
-        try {
-            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
-            json.put("contact_type", Strings.toLowerCase(type.toString()));
-        } catch (JSONException e) {
-            errors.add(e);
-        }
+        result = translator.translate(locale, item.getDefaultValue());
     }
 
     @Override
     public void visit(RecurringTypeDisplayItem item) {
-        RecurringTypeDisplayItem.RecurringType type = item.getItem();
-        try {
-            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
-            json.put("recurring_type", Strings.toLowerCase(type.toString()));
-        } catch (JSONException e) {
-            errors.add(e);
-        }
+        result = translator.translate(locale, item.getDefaultValue());
     }
 
     @Override
-    public void visit(FilenameDisplayItem filenameDisplayItem) {
-        try {
-            json.put("defaultValue", translator.translate(locale, filenameDisplayItem.getDefaultValue()));
-        } catch (JSONException e) {
-            errors.add(e);
-        }
+    public void visit(FilenameDisplayItem item) {
+        result = item.getDefaultValue();
     }
 
-    private void addDefaultValue(DisplayItem item) throws JSONException {
-        json.put("defaultValue", item.getDefaultValue());
+    @Override
+    public void visit(FormattableDisplayItem item) {
+        Object[] args = item.getItem();
+        String defaultValue = translator.translate(locale, item.getDefaultValue());
+        result = String.format(locale, defaultValue, args);
     }
 
-    public JSONObject getJSONObject() {
-        return json;
+    public String getResult() {
+        return result;
     }
-
-    public List<JSONException> getErrors() {
-        return errors;
-    }
-
-    private Object convertString(String str) {
-        return str == null ? JSONObject.NULL : str;
-    }
-
 }

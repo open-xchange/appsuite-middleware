@@ -50,18 +50,50 @@
 package com.openexchange.find.common;
 
 import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.facet.DisplayItemVisitor;
 
 
 /**
- * Provides some static helper methods to cope with {@link DisplayItem}s.
+ * A display item that is localizable and shall be string formatted after localizing.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class DisplayItems {
+public class FormattableDisplayItem implements DisplayItem {
 
-    private DisplayItems() {
+    private final String defaultValue;
+
+    private final Object args[];
+
+    /**
+     * Initializes a new {@link FormattableDisplayItem}.
+     * @param defaultValue The default value. Never <code>null</code>.
+     * @param args The format arguments. Never <code>null</code>.
+     */
+    public FormattableDisplayItem(final String defaultValue, final Object... args) {
         super();
+        this.defaultValue = defaultValue;
+        this.args = args;
+    }
+
+    @Override
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    @Override
+    public boolean isLocalizable() {
+        return true;
+    }
+
+    @Override
+    public Object[] getItem() {
+        return args;
+    }
+
+    @Override
+    public void accept(DisplayItemVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

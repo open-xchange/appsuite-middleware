@@ -66,26 +66,31 @@ public class AutocompleteRequest implements Serializable {
 
     private final String prefix;
 
+    private final String folder;
+
     private final List<Facet> activeFacets;
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
      *
      * @param prefix The prefix to autocomplete on; must not be <code>null</code>
+     * @param folder The folder. Can be <code>null</code>
      */
-    public AutocompleteRequest(final String prefix) {
-        this(prefix, Collections.<Facet>emptyList());
+    public AutocompleteRequest(final String prefix, final String folder) {
+        this(prefix, folder, Collections.<Facet>emptyList());
     }
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
      *
      * @param prefix The prefix to autocomplete on; must not be <code>null</code>
+     * @param folder The folder. Can be <code>null</code>
      * @param activeFacets The list of currently active facets; must not be <code>null</code>
      */
-    public AutocompleteRequest(final String prefix, final List<Facet> activeFacets) {
+    public AutocompleteRequest(final String prefix, final String folder, final List<Facet> activeFacets) {
         super();
         this.prefix = prefix;
+        this.folder = folder;
         this.activeFacets = activeFacets;
     }
 
@@ -107,39 +112,54 @@ public class AutocompleteRequest implements Serializable {
         return activeFacets;
     }
 
+    /**
+     * Gets the folder.
+     * @return <code>null</code> if not set by client.
+     */
+    public String getFolder() {
+        return folder;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((activeFacets == null) ? 0 : activeFacets.hashCode());
+        result = prime * result + ((folder == null) ? 0 : folder.hashCode());
         result = prime * result + ((prefix == null) ? 0 : prefix.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null) {
+        if (obj == null)
             return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass())
             return false;
-        }
         AutocompleteRequest other = (AutocompleteRequest) obj;
-        if (prefix == null) {
-            if (other.prefix != null) {
+        if (activeFacets == null) {
+            if (other.activeFacets != null)
                 return false;
-            }
-        } else if (!prefix.equals(other.prefix)) {
+        } else if (!activeFacets.equals(other.activeFacets))
             return false;
-        }
+        if (folder == null) {
+            if (other.folder != null)
+                return false;
+        } else if (!folder.equals(other.folder))
+            return false;
+        if (prefix == null) {
+            if (other.prefix != null)
+                return false;
+        } else if (!prefix.equals(other.prefix))
+            return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "AutocompleteRequest [prefix=" + prefix + "]";
+        return "AutocompleteRequest [prefix=" + prefix + ", folder=" + folder + ", activeFacets=" + activeFacets + "]";
     }
 
 }

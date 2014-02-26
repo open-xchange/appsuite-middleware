@@ -98,9 +98,10 @@ public class AutocompleteAction extends AbstractFindAction {
     protected AJAXRequestResult doPerform(FindRequest request) throws OXException {
         SearchService searchService = getSearchService();
         String prefix = request.requirePrefix();
+        String folder = request.getFolder();
         List<Facet> activeFactes = parseActiveFacets(request);
         AutocompleteResult result = searchService.autocomplete(
-            new AutocompleteRequest(prefix, activeFactes),
+            new AutocompleteRequest(prefix, folder, activeFactes),
             request.requireModule(),
             request.getServerSession());
         return new AJAXRequestResult(result, AutocompleteResult.class.getName());

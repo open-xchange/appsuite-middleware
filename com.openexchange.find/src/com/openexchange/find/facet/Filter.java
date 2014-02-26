@@ -63,23 +63,96 @@ import com.openexchange.find.SearchRequest;
  */
 public class Filter implements Serializable {
 
+    // TODO: remove
     public static final Filter NO_FILTER = new Filter(Collections.<String>emptyList(), "");
 
     private static final long serialVersionUID = -5712151560300214639L;
+
+    private final String id;
+
+    private final String displayName;
 
     private final List<String> fields;
 
     private final List<String> queries;
 
-
+    /**
+     * Convenient constructor for {@link Filter#Filter(String, String, List, List)}.
+     * Id and display name are set to null, query is wrapped within {@link Collections#singletonList(Object)}.
+     *
+     * @param fields
+     *   The fields to filter on.
+     * @param query
+     *   The query to search for.
+     */
     public Filter(List<String> fields, String query) {
         this(fields, Collections.singletonList(query));
     }
 
+    /**
+     * Convenient constructor for {@link Filter#Filter(String, String, List, List)}.
+     * Query is wrapped within {@link Collections#singletonList(Object)}.
+     *
+     * @param id
+     *   The unique id of this filter within a list of filters of a {@link FacetValue}.
+     *   If this filter is meant to be the only one for a facet value, it should be <code>null</code>.
+     * @param displayName
+     *   The display name of this filter (shown within a client).
+     *   If this filter is meant to be the only one for a facet value, it should be <code>null</code>.
+     * @param fields
+     *   The fields to filter on.
+     * @param query
+     *   The query to search for.
+     */
+    public Filter(String id, String displayName, List<String> fields, String query) {
+        this(id, displayName, fields, Collections.singletonList(query));
+    }
+
+    /**
+     * Convenient constructor for {@link Filter#Filter(String, String, List, List)}.
+     * Id and display name are set to null.
+     *
+     * @param fields
+     *   The fields to filter on.
+     * @param queries
+     *   The queries to search for.
+     */
     public Filter(List<String> fields, List<String> queries) {
+        this(null, null, fields, queries);
+    }
+
+    /**
+     * @param id
+     *   The unique id of this filter within a list of filters of a {@link FacetValue}.
+     *   If this filter is meant to be the only one for a facet value, it should be <code>null</code>.
+     * @param displayName
+     *   The display name of this filter (shown within a client).
+     *   If this filter is meant to be the only one for a facet value, it should be <code>null</code>.
+     * @param fields
+     *   The fields to filter on.
+     * @param queries
+     *   The queries to search for.
+     */
+    public Filter(String id, String displayName, List<String> fields, List<String> queries) {
         super();
+        this.id = id;
+        this.displayName = displayName;
         this.fields = fields;
         this.queries = queries;
+    }
+
+    /**
+     * @return the filters id, possibly <code>null</code>
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * @return the filters display name, possibly <code>null</code>
+     */
+    public String getDisplayName() {
+        return displayName;
     }
 
     /**
@@ -103,6 +176,8 @@ public class Filter implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
         result = prime * result + ((fields == null) ? 0 : fields.hashCode());
         result = prime * result + ((queries == null) ? 0 : queries.hashCode());
         return result;
@@ -117,6 +192,16 @@ public class Filter implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         Filter other = (Filter) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (displayName == null) {
+            if (other.displayName != null)
+                return false;
+        } else if (!displayName.equals(other.displayName))
+            return false;
         if (fields == null) {
             if (other.fields != null)
                 return false;
@@ -132,7 +217,18 @@ public class Filter implements Serializable {
 
     @Override
     public String toString() {
-        return "Filter [fields=" + fields + ", queries=" + queries + "]";
+        StringBuilder sb = new StringBuilder("Filter [");
+        if (id != null) {
+            sb.append("id=").append(id).append(", ");
+        }
+        if (displayName != null) {
+            sb.append("displayName=").append(displayName).append(", ");
+        }
+
+        sb.append("fields=").append(fields);
+        sb.append("queries=").append(queries);
+        sb.append("]");
+        return sb.toString();
     }
 
 }

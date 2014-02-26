@@ -52,18 +52,21 @@ package com.openexchange.find.spi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.tools.session.ServerSession;
 
@@ -94,15 +97,23 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
     /**
      * Removes a list of facets from another one. Indeed only the facet values
      * of the second list are removed from the first one. If the facet is empty
-     * afterwards, it's completely removed from the list. The modified list
-     * is returned. The original one stays unmodified.
+     * afterwards, it's completely removed from the list. The original list stays unmodified.
+     * All remaining facets are added to the result list.
      * @param facets The list to remove facets from.
      * @param toRemove The facets (values) to remove.
+     * @param results The list to append the filtered facets to.
      * @return The modified facet list.
      */
-    protected List<Facet> filterFacets(List<Facet> facets, List<Facet> toRemove) {
-        if (facets.isEmpty() || toRemove.isEmpty()) {
-            return facets;
+    protected void filterFacets(List<Facet> facets, List<Facet> toRemove, List<Facet> results) {
+        if (facets.isEmpty()) {
+            return;
+        }
+
+        if (toRemove.isEmpty()) {
+            for (Facet facet : facets) {
+                results.add(facet);
+            }
+            return;
         }
 
         Map<FacetType, Map<String, FacetValue>> typeMap = new HashMap<FacetType, Map<String, FacetValue>>(facets.size());
@@ -127,17 +138,12 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
             }
         }
 
-        List<Facet> result;
-        if (typeMap.isEmpty()) {
-            result = Collections.emptyList();
-        } else {
-            result = new ArrayList<Facet>(typeMap.size());
-            for (Entry<FacetType, Map<String, FacetValue>> entry : typeMap.entrySet()) {
-                result.add(new Facet(entry.getKey(), new ArrayList<FacetValue>(entry.getValue().values())));
+        for (Facet facet : facets) {
+            Map<String, FacetValue> map = typeMap.get(facet.getType());
+            if (map != null) {
+                results.add(new Facet(facet.getType(), new LinkedList<FacetValue>(map.values())));
             }
         }
-
-        return result;
     }
 
     protected static String prepareFacetValueId(String prefix, int contextId, String objectId) {
@@ -146,10 +152,26 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
 
     @Override
     public final AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+        Facet globalFacet = new FieldFacet(
+            CommonFacetType.GLOBAL,
+            getDisplayItemForGlobalFacet(autocompleteRequest),
+            getFilterForGlobalFacet(autocompleteRequest));
         AutocompleteResult autocompleteResult = doAutocomplete(autocompleteRequest, session);
-        List<Facet> filteredFacets = filterFacets(autocompleteResult.getFacets(), autocompleteRequest.getActiveFactes());
-        autocompleteResult.setFacets(filteredFacets);
+        List<Facet> modifiedFacets = new LinkedList<Facet>();
+        modifiedFacets.add(globalFacet);
+        filterFacets(autocompleteResult.getFacets(), autocompleteRequest.getActiveFactes(), modifiedFacets);
+        autocompleteResult.setFacets(modifiedFacets);
         return autocompleteResult;
+    }
+
+    // TODO: make abstract
+    protected DisplayItem getDisplayItemForGlobalFacet(AutocompleteRequest autocompleteRequest) {
+        return new SimpleDisplayItem("");
+    }
+
+    // TODO: make abstract
+    protected Filter getFilterForGlobalFacet(AutocompleteRequest autocompleteRequest) {
+        return new Filter((List<String>)null, (List<String>)null);
     }
 
     /**

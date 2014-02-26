@@ -149,6 +149,13 @@ public class FindRequest {
     }
 
     /**
+     * Gets the folder parameter or <code>null</code> if not set.
+     */
+    public String getFolder() {
+        return request.getParameter("folder");
+    }
+
+    /**
      * Gets the module associated with this request.
      *
      * @return The module

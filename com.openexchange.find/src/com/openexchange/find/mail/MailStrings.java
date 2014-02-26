@@ -61,17 +61,26 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class MailStrings implements LocalizableStrings {
 
+    // Search in emails
+    public static final String FACET_GLOBAL = "%1$s <i>in emails</i>";
+
     // Search in mail field subject.
-    public static final String FACET_SUBJECT = "Subject";
+    public static final String FACET_SUBJECT = "%1$s <i>in subject</i>";
 
     // Search in mail field text.
-    public static final String FACET_MAIL_TEXT = "Mail Text";
+    public static final String FACET_MAIL_TEXT = "%1$s <i>in mail text</i>";
 
     // Search in folders.
-    public static final String FACET_FOLDERS = "Folders";
+    public static final String FACET_FOLDERS = "Folder";
 
-    // Search in Persons.
-    public static final String FACET_CONTACTS = "Contacts";
+    // Search in senders and recipients.
+    public static final String FACET_SENDER_AND_RECIPIENT = "Sender/Recipient";
+
+    // Search in for sender.
+    public static final String FACET_SENDER = "Sender";
+
+    // Search in for recipient.
+    public static final String FACET_RECIPIENT = "Recipient";
 
     // Search criteria time
     public static final String FACET_TIME = "Time";

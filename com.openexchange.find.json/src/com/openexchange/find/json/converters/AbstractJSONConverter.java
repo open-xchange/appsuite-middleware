@@ -123,28 +123,35 @@ public abstract class AbstractJSONConverter implements ResultConverter {
     protected JSONObject convertFacetValue(Locale locale, FacetValue value) throws JSONException {
         JSONObject valueJSON = new JSONObject(4);
         valueJSON.put("id", value.getId());
-        DisplayItem item = value.getDisplayItem();
-        String displayName;
-        if (item.isLocalizable()) {
-            displayName = translator.translate(locale, item.getDefaultValue());
-        } else {
-            displayName = item.getDefaultValue();
-        }
-
+        String displayName = convertDisplayItem(locale, value.getDisplayItem());
         valueJSON.put("displayName", displayName);
         int count = value.getCount();
         if (count >= 0) {
             valueJSON.put("count", value.getCount());
         }
-        valueJSON.put("filter", convertFilter(value.getFilter()));
+
+        List<Filter> filters = value.getFilters();
+        if (filters.size() > 1) {
+            JSONArray filtersJSON = new JSONArray();
+            for (Filter filter : filters) {
+                JSONObject filterJSON = new JSONObject();
+                filterJSON.put("id", filter.getId());
+                filterJSON.put("displayName", translator.translate(locale, filter.getDisplayName()));
+                filterJSON.put("filter", convertFilter(filter));
+                filtersJSON.put(filterJSON);
+            }
+            valueJSON.put("filters", filtersJSON);
+        } else {
+            valueJSON.put("filter", convertFilter(filters.get(0)));
+        }
 
         return valueJSON;
     }
 
-    protected JSONObject convertDisplayItem(Locale locale, DisplayItem displayItem) {
+    protected String convertDisplayItem(Locale locale, DisplayItem displayItem) {
         JSONDisplayItemVisitor visitor = new JSONDisplayItemVisitor(translator, locale);
         displayItem.accept(visitor);
-        return visitor.getJSONObject();
+        return visitor.getResult();
     }
 
     protected JSONObject convertFilter(Filter filter) throws JSONException {

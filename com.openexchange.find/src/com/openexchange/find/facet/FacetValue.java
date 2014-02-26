@@ -49,6 +49,8 @@
 package com.openexchange.find.facet;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.find.SearchRequest;
 
 /**
@@ -70,7 +72,7 @@ public class FacetValue implements Serializable {
 
     private final int count;
 
-    private final Filter filter;
+    private final List<Filter> filters;
 
 
     /**
@@ -88,11 +90,29 @@ public class FacetValue implements Serializable {
      *   The filter.
      */
     public FacetValue(String id, DisplayItem displayItem, int count, Filter filter) {
+        this(id, displayItem, count, Collections.singletonList(filter));
+    }
+
+    /**
+     * Initializes a new {@link FacetValue}.
+     *
+     * @param id
+     *   The values id which identifies it uniquely within all values of a facet.
+     * @param displayItem
+     *   The display item. May be {@link FacetValue#NO_DISPLAY_ITEM} if
+     *   and only if this value is the only one for its facet.
+     * @param count
+     *   The number of result documents that apply to the given filter.
+     *   {@link FacetValue#UNKNOWN_COUNT} if unknown.
+     * @param filters
+     *   The filters.
+     */
+    public FacetValue(String id, DisplayItem displayItem, int count, List<Filter> filters) {
         super();
         this.id = id;
         this.displayItem = displayItem;
         this.count = count;
-        this.filter = filter;
+        this.filters = filters;
     }
 
     /**
@@ -119,12 +139,12 @@ public class FacetValue implements Serializable {
     }
 
     /**
-     * @return The filter that has to be applied to
+     * @return The filters of which one has to be applied to
      * {@link SearchRequest}s to filter on this value.
      * Never <code>null</code>.
      */
-    public Filter getFilter() {
-        return filter;
+    public List<Filter> getFilters() {
+        return filters;
     }
 
     @Override
@@ -133,7 +153,7 @@ public class FacetValue implements Serializable {
         int result = 1;
         result = prime * result + count;
         result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((filter == null) ? 0 : filter.hashCode());
+        result = prime * result + ((filters == null) ? 0 : filters.hashCode());
         result = prime * result + ((displayItem == null) ? 0 : displayItem.hashCode());
         return result;
     }
@@ -151,10 +171,10 @@ public class FacetValue implements Serializable {
             return false;
         if (count != other.count)
             return false;
-        if (filter == null) {
-            if (other.filter != null)
+        if (filters == null) {
+            if (other.filters != null)
                 return false;
-        } else if (!filter.equals(other.filter))
+        } else if (!filters.equals(other.filters))
             return false;
         if (displayItem == null) {
             if (other.displayItem != null)
@@ -166,6 +186,6 @@ public class FacetValue implements Serializable {
 
     @Override
     public String toString() {
-        return "FacetValue [id=" + id + ", name=" + displayItem + ", count=" + count + ", filter=" + filter + "]";
+        return "FacetValue [id=" + id + ", name=" + displayItem + ", count=" + count + ", filters=" + filters + "]";
     }
 }

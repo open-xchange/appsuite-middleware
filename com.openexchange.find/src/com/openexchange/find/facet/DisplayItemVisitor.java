@@ -56,6 +56,7 @@ import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.ContactTypeDisplayItem;
 import com.openexchange.find.common.FolderDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.drive.FilenameDisplayItem;
@@ -97,5 +98,7 @@ public interface DisplayItemVisitor {
     void visit(ContactTypeDisplayItem contactTypeDisplayItem);
 
     void visit(FilenameDisplayItem filenameDisplayItem);
+
+    void visit(FormattableDisplayItem formattableDisplayItem);
 
 }

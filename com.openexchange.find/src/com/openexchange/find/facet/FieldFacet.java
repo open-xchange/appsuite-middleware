@@ -52,7 +52,6 @@ package com.openexchange.find.facet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.find.common.SimpleDisplayItem;
 
 
 /**
@@ -74,23 +73,37 @@ public class FieldFacet extends Facet {
     private static final long serialVersionUID = -5699454846328204928L;
 
     public FieldFacet(final FacetType type, final String filterField) {
-        this(type, Collections.singletonList(filterField), null);
+        this(type, null, Collections.singletonList(filterField), null);
     }
 
-    public FieldFacet(final FacetType type, final String filterField, final String filterValue) {
-        this(type, Collections.singletonList(filterField), filterValue);
+    public FieldFacet(final FacetType type, final DisplayItem displayItem, final Filter filter) {
+        super(type, buildValues(type, displayItem, filter));
     }
 
-    public FieldFacet(final FacetType type, final List<String> filterFields, final String filterValue) {
-        super(type, buildValues(type, filterFields, filterValue));
+    public FieldFacet(final FacetType type, final DisplayItem displayItem, final String filterField, final String filterValue) {
+        this(type, displayItem, Collections.singletonList(filterField), filterValue);
     }
 
-    private static List<FacetValue> buildValues(FacetType type, List<String> filterFields, String filterValue) {
+    public FieldFacet(final FacetType type, final DisplayItem displayItem, final List<String> filterFields, final String filterValue) {
+        super(type, buildValues(type, displayItem, filterFields, filterValue));
+    }
+
+    private static List<FacetValue> buildValues(FacetType type, DisplayItem displayItem, Filter filter) {
+        ArrayList<FacetValue> values = new ArrayList<FacetValue>(1);
+        values.add(new FacetValue(
+            type.getId(),
+            displayItem,
+            FacetValue.UNKNOWN_COUNT,
+            filter));
+        return values;
+    }
+
+    private static List<FacetValue> buildValues(FacetType type, DisplayItem displayItem, List<String> filterFields, String filterValue) {
         ArrayList<FacetValue> values = new ArrayList<FacetValue>(1);
         Filter filter = new Filter(filterFields, Collections.<String>singletonList(filterValue));
         values.add(new FacetValue(
             type.getId(),
-            new SimpleDisplayItem(type.getDisplayName()),
+            displayItem,
             FacetValue.UNKNOWN_COUNT,
             filter));
         return values;

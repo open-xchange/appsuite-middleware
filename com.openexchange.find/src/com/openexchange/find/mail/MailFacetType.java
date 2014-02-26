@@ -65,7 +65,7 @@ public enum MailFacetType implements FacetType {
 
     SUBJECT,
     MAIL_TEXT,
-    CONTACTS(MailStrings.FACET_CONTACTS),
+    CONTACTS(MailStrings.FACET_SENDER_AND_RECIPIENT),
     FOLDERS(MailStrings.FACET_FOLDERS, false, true),
     TIME(MailStrings.FACET_TIME);
 
