@@ -87,4 +87,12 @@ public interface DeferringURLService {
      */
     String getBasicDeferrerURL();
 
+    /**
+     * Performs a check if passed URL seems to be deferred.
+     *
+     * @param url The URL to check if deferred
+     * @return <code>true</code> if deferred; otherwise <code>false</code>
+     */
+    boolean seemsDeferred(String url);
+
 }

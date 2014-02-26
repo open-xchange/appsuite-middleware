@@ -85,6 +85,19 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
         return new StringAllocator(deferrerURL).append(PREFIX.get().getPrefix()).append("defer?redirect=").append(encodeUrl(url, false, false)).toString();
     }
 
+    @Override
+    public boolean seemsDeferred(String url) {
+        if (url == null) {
+            return false;
+        }
+        String deferrerURL = getDeferrerURL();
+        if (Strings.isEmpty(deferrerURL)) {
+            return false;
+        }
+        deferrerURL = deferrerURL.trim();
+        return (seemsAlreadyDeferred(url, deferrerURL));
+    }
+
     private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL) {
         final String str = "://";
         final int pos1 = url.indexOf(str);
