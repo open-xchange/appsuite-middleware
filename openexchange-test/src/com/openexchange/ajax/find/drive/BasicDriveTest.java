@@ -50,6 +50,7 @@
 package com.openexchange.ajax.find.drive;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +73,6 @@ import com.openexchange.find.basic.drive.Constants;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 
 /**
