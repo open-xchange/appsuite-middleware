@@ -49,15 +49,42 @@
 
 package com.openexchange.http.deferrer;
 
-
 /**
- * {@link DeferringURLService}
+ * {@link DeferringURLService} - The service to create a deferring URL.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DeferringURLService {
 
-    public String getDeferredURL(String url);
+    /**
+     * Generates a deferred URL for specified URL. Useful for a multi-domain setup to allow certain operations to jump to an extra step in a
+     * singular domain; e.g. certain OAuth provider require a single domain for call-back actions.
+     * <p>
+     * If a single domain is configured through <code>com.openexchange.http.deferrer.url</code> property (<i>deferrer.properties</i>), the
+     * resulting URL looks like:
+     * <p>
+     * &lt;deferrer-url&gt; + <code>"ajax/defer?redirect="</code> + <i>URLENC</i>(&lt;url&gt;)
+     * <p>
+     * If no such property is set, passed URL is returned unchanged
+     *
+     * @param url The URL to defer
+     * @return The deferred URL
+     */
+    String getDeferredURL(String url);
 
-    public String getBasicDeferrerURL();
+    /**
+     * Gets the basic defer URL.
+     * <p>
+     * If a single domain is configured through <code>com.openexchange.http.deferrer.url</code> property (<i>deferrer.properties</i>), the
+     * resulting basic URL looks like:
+     * <p>
+     * &lt;deferrer-url&gt; + <code>"ajax/defer"</code>
+     * <p>
+     * If no such property is set, return value is a relative one according to <code>"ajax/defer"</code>.
+     *
+     * @return The basic defer URL
+     */
+    String getBasicDeferrerURL();
+
 }

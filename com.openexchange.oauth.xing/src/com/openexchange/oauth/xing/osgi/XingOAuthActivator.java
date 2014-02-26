@@ -51,6 +51,7 @@ package com.openexchange.oauth.xing.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.xing.XingOAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -69,19 +70,19 @@ public final class XingOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final ConfigurationService config = getService(ConfigurationService.class);
         try {
-            XingOAuthServiceMetaData xingService = new XingOAuthServiceMetaData(config);
+            XingOAuthServiceMetaData xingService = new XingOAuthServiceMetaData(this);
             registerService(OAuthServiceMetaData.class, xingService);
             registerService(Reloadable.class, xingService);
-        } catch (final IllegalStateException e) {
+        } catch (final Exception e) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(XingOAuthActivator.class);
             log.warn("Could not start-up XING OAuth service", e);
+            throw e;
         }
     }
 

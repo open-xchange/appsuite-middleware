@@ -49,18 +49,17 @@
 
 package com.openexchange.oauth.xing;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.java.StringAllocator;
+import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -73,19 +72,26 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.xing.apiKey",
         "com.openexchange.oauth.xing.apiSecret"};
 
-    private final String domain;
+    // -------------------------------------------------------------------------------------------------- //
+
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link XingOAuthServiceMetaData}.
      *
-     * @param configService The configuration service
+     * @param services The service look-up
      * @throws IllegalStateException If either API key or secret is missing
      */
-    public XingOAuthServiceMetaData(final ConfigurationService configService) {
+    public XingOAuthServiceMetaData(final ServiceLookup services) {
         super();
+        this.services = services;
         id = "com.openexchange.oauth.xing";
         displayName = "XING OAuth";
 
+        final ConfigurationService configService = services.getService(ConfigurationService.class);
+        if (null == configService) {
+            throw new IllegalStateException("Missing configuration service");
+        }
         final String apiKey = configService.getProperty("com.openexchange.oauth.xing.apiKey");
         if (Strings.isEmpty(apiKey)) {
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiKey");
@@ -97,92 +103,16 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiSecret");
         }
         this.apiSecret = apiSecret;
-
-        final String domain = configService.getProperty("com.openexchange.oauth.xing.domain");
-        if (Strings.isEmpty(domain)) {
-            this.domain = null;
-        } else {
-            this.domain = domain;
-        }
     }
 
     @Override
     public String modifyCallbackURL(final String callbackUrl, final Session session) {
-        if (null == callbackUrl || null == domain) {
+        if (null == callbackUrl) {
             return super.modifyCallbackURL(callbackUrl, session);
         }
 
-        // TODO: Use com.openexchange.http.deferrer.DeferringURLService.getDeferredURL(String)
-
-        try {
-            final URL url = new URL(callbackUrl);
-            final String host = url.getHost();
-            final StringAllocator sb = new StringAllocator(callbackUrl.length());
-
-            // Cut off trailing slash character
-            String domain = this.domain;
-            if (domain.endsWith("/")) {
-                domain = domain.substring(0, domain.length() - 1);
-            }
-
-            // Determine & append protocol
-            final String protocol;
-            if (domain.startsWith("http://")) {
-                if (domain.substring(7).equals(host)) {
-                    return callbackUrl;
-                }
-                protocol = "http";
-            } else if (domain.startsWith("https://")) {
-                if (domain.substring(8).equals(host)) {
-                    return callbackUrl;
-                }
-                protocol = "https";
-            } else {
-                if (domain.equals(host)) {
-                    return callbackUrl;
-                }
-                protocol = toLowerCase(url.getProtocol());
-                sb.append(protocol).append("://");
-            }
-
-            // Append domain & rest of call-back URL
-            sb.append(domain);
-            final int port = url.getPort();
-            if (port >= 0) {
-                if ("http".equals(protocol)) {
-                    if (port != 80) {
-                        sb.append(':').append(url.getPort());
-                    }
-                } else if ("https".equals(protocol)) {
-                    if (port != 443) {
-                        sb.append(':').append(url.getPort());
-                    }
-                } else {
-                    sb.append(':').append(port);
-                }
-            }
-            {
-                final String path = url.getPath();
-                if (!Strings.isEmpty(path)) {
-                    sb.append(path);
-                }
-            }
-            {
-                final String query = url.getQuery();
-                if (!Strings.isEmpty(query)) {
-                    sb.append('?').append(query);
-                }
-            }
-            {
-                final String ref = url.getRef();
-                if (!Strings.isEmpty(ref)) {
-                    sb.append('#').append(ref);
-                }
-            }
-            return sb.toString();
-        } catch (final MalformedURLException e) {
-            return callbackUrl;
-        }
+        final DeferringURLService deferrer = services.getService(DeferringURLService.class);
+        return null == deferrer ? callbackUrl : deferrer.getDeferredURL(callbackUrl);
     }
 
     @Override
@@ -193,20 +123,6 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     @Override
     public Class<? extends Api> getScribeService() {
         return XingApi.class;
-    }
-
-    /** ASCII-wise to lower-case */
-    private String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     @Override
