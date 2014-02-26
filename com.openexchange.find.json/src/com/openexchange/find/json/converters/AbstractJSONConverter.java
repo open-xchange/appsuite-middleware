@@ -123,7 +123,15 @@ public abstract class AbstractJSONConverter implements ResultConverter {
     protected JSONObject convertFacetValue(Locale locale, FacetValue value) throws JSONException {
         JSONObject valueJSON = new JSONObject(4);
         valueJSON.put("id", value.getId());
-        valueJSON.put("displayItem", convertDisplayItem(locale, value.getDisplayItem()));
+        DisplayItem item = value.getDisplayItem();
+        String displayName;
+        if (item.isLocalizable()) {
+            displayName = translator.translate(locale, item.getDefaultValue());
+        } else {
+            displayName = item.getDefaultValue();
+        }
+
+        valueJSON.put("displayName", displayName);
         int count = value.getCount();
         if (count >= 0) {
             valueJSON.put("count", value.getCount());

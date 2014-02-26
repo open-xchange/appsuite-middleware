@@ -259,6 +259,11 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
                 public Map<String, Object> getItem() {
                     return item;
                 }
+
+                @Override
+                public boolean isLocalizable() {
+                    return false;
+                }
             };
         }
     }

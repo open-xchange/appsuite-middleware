@@ -57,7 +57,7 @@ package com.openexchange.find.facet;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class NoDisplayItem implements DisplayItem {
+public class NoDisplayItem extends DefaultDisplayItem {
 
     NoDisplayItem() {
         super();

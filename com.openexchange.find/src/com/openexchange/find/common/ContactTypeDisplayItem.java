@@ -82,7 +82,7 @@ public class ContactTypeDisplayItem implements DisplayItem {
 
         /**
          * Gets the identifier
-         * 
+         *
          * @return The identifier
          */
         public String getIdentifier() {
@@ -96,7 +96,7 @@ public class ContactTypeDisplayItem implements DisplayItem {
 
     /**
      * Initializes a new {@link FolderTypeDisplayItem}.
-     * 
+     *
      * @param type The folder type associated with this display item
      */
     public ContactTypeDisplayItem(final String displayName, final Type type) {
@@ -113,6 +113,11 @@ public class ContactTypeDisplayItem implements DisplayItem {
     @Override
     public Type getItem() {
         return type;
+    }
+
+    @Override
+    public boolean isLocalizable() {
+        return true;
     }
 
     @Override

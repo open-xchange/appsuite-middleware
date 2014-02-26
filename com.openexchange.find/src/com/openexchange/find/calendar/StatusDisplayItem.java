@@ -54,7 +54,7 @@ import com.openexchange.find.facet.DisplayItemVisitor;
 
 /**
  * {@link StatusDisplayItem}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class StatusDisplayItem implements DisplayItem {
@@ -95,6 +95,11 @@ public class StatusDisplayItem implements DisplayItem {
     @Override
     public void accept(DisplayItemVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public boolean isLocalizable() {
+        return true;
     }
 
 }

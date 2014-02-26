@@ -93,6 +93,11 @@ public class RelativeDateDisplayItem implements DisplayItem {
     }
 
     @Override
+    public boolean isLocalizable() {
+        return true;
+    }
+
+    @Override
     public void accept(DisplayItemVisitor visitor) {
         visitor.visit(this);
     }

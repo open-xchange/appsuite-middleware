@@ -49,6 +49,8 @@
 
 package com.openexchange.find.facet;
 
+import com.openexchange.i18n.I18nService;
+
 /**
  * Interface for several kinds objects that can be displayed by a client. Inheritors must implement hashCode() and equals().
  *
@@ -71,6 +73,13 @@ public interface DisplayItem {
      * @return The default value. Never <code>null</code>.
      */
     String getDefaultValue();
+
+    /**
+     * Whether the default value is a localizable String.
+     * If true, the default value is translated using {@link I18nService},
+     * before it is written out to the client.
+     */
+    boolean isLocalizable();
 
     /**
      * Gets the item associated with this instance.

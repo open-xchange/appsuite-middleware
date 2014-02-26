@@ -54,7 +54,7 @@ import com.openexchange.find.facet.DisplayItemVisitor;
 
 /**
  * {@link RecurringTypeDisplayItem}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class RecurringTypeDisplayItem implements DisplayItem {
@@ -90,6 +90,11 @@ public class RecurringTypeDisplayItem implements DisplayItem {
     @Override
     public RecurringType getItem() {
         return type;
+    }
+
+    @Override
+    public boolean isLocalizable() {
+        return true;
     }
 
     @Override

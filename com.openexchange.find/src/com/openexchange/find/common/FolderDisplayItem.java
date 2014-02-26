@@ -49,7 +49,7 @@
 
 package com.openexchange.find.common;
 
-import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.facet.DefaultDisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.mail.dataobjects.MailFolderInfo;
 
@@ -57,7 +57,7 @@ import com.openexchange.mail.dataobjects.MailFolderInfo;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class FolderDisplayItem implements DisplayItem {
+public class FolderDisplayItem extends DefaultDisplayItem {
 
     private final MailFolderInfo folder;
     private final DefaultFolderType defaultFolderType;

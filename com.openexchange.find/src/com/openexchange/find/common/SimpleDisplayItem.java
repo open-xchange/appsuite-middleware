@@ -49,7 +49,7 @@
 
 package com.openexchange.find.common;
 
-import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.facet.DefaultDisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 
 
@@ -59,7 +59,7 @@ import com.openexchange.find.facet.DisplayItemVisitor;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class SimpleDisplayItem implements DisplayItem {
+public class SimpleDisplayItem extends DefaultDisplayItem {
 
     private final String defaultValue;
 

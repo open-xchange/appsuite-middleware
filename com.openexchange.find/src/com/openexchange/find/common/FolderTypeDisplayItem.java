@@ -130,4 +130,9 @@ public class FolderTypeDisplayItem implements DisplayItem {
         return displayName;
     }
 
+    @Override
+    public boolean isLocalizable() {
+        return true;
+    }
+
 }

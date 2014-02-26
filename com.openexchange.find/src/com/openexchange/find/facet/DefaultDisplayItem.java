@@ -47,46 +47,20 @@
  *
  */
 
-package com.openexchange.find.drive;
-
-import com.openexchange.file.storage.File;
-import com.openexchange.find.facet.DefaultDisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
+package com.openexchange.find.facet;
 
 
 /**
- * {@link FilenameDisplayItem}
+ * An abstract display item that is marked as non-localizable.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public class FilenameDisplayItem extends DefaultDisplayItem {
-
-    private final File file;
-
-    /**
-     * Initializes a new {@link FilenameDisplayItem}.
-     */
-    public FilenameDisplayItem(File file) {
-        super();
-        this.file = file;
-    }
+public abstract class DefaultDisplayItem implements DisplayItem {
 
     @Override
-    public String getDefaultValue() {
-        return file.getTitle();
-    }
-
-    @Override
-    public File getItem() {
-        return file;
-    }
-
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        if (null != visitor) {
-            visitor.visit(this);
-        }
+    public boolean isLocalizable() {
+        return false;
     }
 
 }

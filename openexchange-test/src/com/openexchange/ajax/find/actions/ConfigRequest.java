@@ -179,6 +179,16 @@ public class ConfigRequest extends AbstractFindRequest<ConfigResponse> {
                 public String getDisplayName() {
                     return "<unknwon>";
                 }
+
+                @Override
+                public boolean isFieldFacet() {
+                    return false;
+                }
+
+                @Override
+                public boolean isMandatory() {
+                    return false;
+                }
             };
 
             final FacetValue facetValue = parseJFacetValue(jMandatoryFilter.getJSONObject("defaultValue"));
@@ -200,6 +210,16 @@ public class ConfigRequest extends AbstractFindRequest<ConfigResponse> {
                 @Override
                 public String getDisplayName() {
                     return displayName;
+                }
+
+                @Override
+                public boolean isFieldFacet() {
+                    return false;
+                }
+
+                @Override
+                public boolean isMandatory() {
+                    return false;
                 }
             };
 
@@ -258,6 +278,11 @@ public class ConfigRequest extends AbstractFindRequest<ConfigResponse> {
                 @Override
                 public Map<String, Object> getItem() {
                     return item;
+                }
+
+                @Override
+                public boolean isLocalizable() {
+                    return false;
                 }
             };
         }

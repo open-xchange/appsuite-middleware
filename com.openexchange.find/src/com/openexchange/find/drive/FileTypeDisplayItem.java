@@ -135,4 +135,9 @@ public class FileTypeDisplayItem implements DisplayItem {
         return displayName;
     }
 
+    @Override
+    public boolean isLocalizable() {
+        return true;
+    }
+
 }
