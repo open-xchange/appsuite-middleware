@@ -133,9 +133,11 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                     collectionService,
                     currentDate);
 
-                // skip appointments which end date have already past or appointments end date is after current end of day
+                // skip appointments which end date have already past or appointments end date is after current end of day and start date is
+                // after current date
                 // needs to be checked because of recalculated start and end time of recurring appointments
-                if (copyAppointment.getEndDate().before(currentDate) || endOfDay.before(copyAppointment.getEndDate())) {
+                if (copyAppointment.getEndDate().before(currentDate) || (copyAppointment.getEndDate().after(endOfDay) && copyAppointment.getStartDate().after(
+                    currentDate))) {
                     continue;
                 }
 
