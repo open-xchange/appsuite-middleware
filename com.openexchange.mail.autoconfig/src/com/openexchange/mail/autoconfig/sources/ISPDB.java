@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.Autoconfig;
+import com.openexchange.mail.autoconfig.IndividualAutoconfig;
 import com.openexchange.mail.autoconfig.tools.TrustAllAdapter;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
@@ -115,7 +116,7 @@ public class ISPDB extends AbstractConfigSource {
         {
             Autoconfig autoconfig = autoConfigCache.getIfPresent(sUrl);
             if (null != autoconfig) {
-                return autoconfig;
+                return generateIndividualAutoconfig(emailLocalPart, emailDomain, autoconfig);
             }
         }
 
@@ -166,11 +167,10 @@ public class ISPDB extends AbstractConfigSource {
             ClientConfig clientConfig = new AutoconfigParser().getConfig(getMethod.getResponseBodyAsStream());
 
             Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
-            replaceUsername(autoconfig, emailLocalPart, emailDomain);
 
             autoConfigCache.put(sUrl, autoconfig);
 
-            return autoconfig;
+            return generateIndividualAutoconfig(emailLocalPart, emailDomain, autoconfig);
         } catch (HttpException e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
@@ -178,6 +178,13 @@ public class ISPDB extends AbstractConfigSource {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
         }
+    }
+
+    private Autoconfig generateIndividualAutoconfig(String emailLocalPart, String emailDomain, Autoconfig autoconfig) {
+        IndividualAutoconfig retval = new IndividualAutoconfig(autoconfig);
+        retval.setUsername(autoconfig.getUsername());
+        replaceUsername(retval, emailLocalPart, emailDomain);
+        return retval;
     }
 
 }
