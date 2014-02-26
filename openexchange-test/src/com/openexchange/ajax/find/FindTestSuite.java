@@ -71,6 +71,7 @@ public final class FindTestSuite {
 
     public static Test suite() {
         final TestSuite tests = new TestSuite("com.openexchange.ajax.find.FindTestSuite");
+        tests.addTestSuite(SimpleFindTest.class);
         tests.addTestSuite(BasicDriveTest.class);
         tests.addTestSuite(com.openexchange.ajax.find.mail.SimpleTest.class);
         tests.addTestSuite(com.openexchange.ajax.find.tasks.SimpleTest.class);
