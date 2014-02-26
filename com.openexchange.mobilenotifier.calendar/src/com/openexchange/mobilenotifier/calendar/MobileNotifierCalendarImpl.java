@@ -121,7 +121,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                     Appointment.FOLDER_ID, Appointment.OBJECT_ID, Appointment.TITLE, Appointment.LOCATION, Appointment.START_DATE,
                     Appointment.END_DATE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS, Appointment.RECURRENCE_CALCULATOR,
                     Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_ID, Appointment.NOTE,
-                    Appointment.USERS, Appointment.TIMEZONE },
+                    Appointment.USERS, Appointment.TIMEZONE, Appointment.DELETE_EXCEPTIONS },
                 Appointment.START_DATE,
                 Order.DESCENDING);
 
@@ -133,11 +133,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                     collectionService,
                     currentDate);
 
-                // skip appointments which end date have already past or appointments end date is after current end of day and start date is
-                // after current date
-                // needs to be checked because of recalculated start and end time of recurring appointments
-                if (copyAppointment.getEndDate().before(currentDate) || (copyAppointment.getEndDate().after(endOfDay) && copyAppointment.getStartDate().after(
-                    currentDate))) {
+                if (!isValidAppointmentInRange(copyAppointment, currentDate, endOfDay)) {
                     continue;
                 }
 
@@ -146,9 +142,8 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                 item.add(new NotifyItem("folder", copyAppointment.getParentFolderID()));
                 item.add(new NotifyItem("title", copyAppointment.getTitle()));
                 item.add(new NotifyItem("location", copyAppointment.getLocation()));
-                item.add(new NotifyItem("start_date", copyAppointment.getStartDate()));
-                item.add(new NotifyItem("end_date", copyAppointment.getEndDate()));
-                item.add(new NotifyItem("start_date_timestamp", convertDateToTimestamp(copyAppointment.getStartDate())));
+                item.add(new NotifyItem("start_date", convertDateToTimestamp(copyAppointment.getStartDate())));
+                item.add(new NotifyItem("end_date", convertDateToTimestamp(copyAppointment.getEndDate())));
                 item.add(new NotifyItem("organizer", copyAppointment.getOrganizer()));
                 item.add(new NotifyItem("note", copyAppointment.getNote()));
                 item.add(new NotifyItem("status", getUserConfirmation(copyAppointment, session)));
@@ -188,6 +183,18 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
             recurrence = EMPTY_STRING;
         }
         return recurrence;
+    }
+
+    private boolean isValidAppointmentInRange(final Appointment appointment, final Date currentDate, final Date endOfDay) {
+        /*** TODO ***/
+        // skip appointments which end date have already past or appointments end date is after current end of day and start date is
+        // after current date
+        // needs to be checked because of recalculated start and end time of recurring appointments
+        if (appointment.getEndDate().before(currentDate) || (appointment.getEndDate().after(endOfDay) && appointment.getStartDate().after(
+            currentDate)) || appointment.getDeleteException() != null) {
+            return false;
+        }
+        return true;
     }
 
     /**
