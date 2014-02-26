@@ -312,4 +312,13 @@ public abstract class TaskStorage {
      * @throws OXException if reading from the persistent storage fails.
      */
     abstract int countTasks(Context ctx) throws OXException;
+    
+    /**
+     * Search for tasks via the find API
+     * TODO: javadoc
+     * 
+     * @return
+     * @throws OXException
+     */
+    public abstract TaskIterator find() throws OXException;
 }

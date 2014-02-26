@@ -88,6 +88,18 @@ public interface TasksSQLInterface {
      * @throws OXException
      */
     SearchIterator<Task> getTasksByExtendedSearch(TaskSearchObject searchObj, int orderBy, Order order, int[] cols) throws OXException;
+    
+    /**
+     * Find all tasks that match the criteria specified in the {@link TaskSearchObject}
+     *  
+     * @param searchObj the search object
+     * @param orderBy order by the specified column
+     * @param order order (asc or desc)
+     * @param cols extend the search only to the predefined columns
+     * @return a {@link SearchIterator} with all found tasks
+     * @throws OXException
+     */
+    SearchIterator<Task> findTask(TaskSearchObject searchObj, int orderBy, Order order, int[] cols) throws OXException;
 
     /**
      * Loads one tasks by the given ID
