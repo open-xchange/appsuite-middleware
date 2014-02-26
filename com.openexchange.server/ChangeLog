@@ -1,6 +1,7 @@
 * 2014-02-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 31316: Check for a syntactically empty-element tag prior to marking it
+ - Fix for bug 31298: Enforce to use secure connection to Twitter API; since Jan 14th, 2014, api.twitter.com only accepts SSL connections
 
 * 2014-02-25 - marc.arens@open-xchange.com
 
