@@ -47,68 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.find.tasks;
+package com.openexchange.ajax.find;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import org.junit.Test;
-import com.openexchange.ajax.find.AbstractFindTest;
-import com.openexchange.ajax.find.actions.QueryRequest;
-import com.openexchange.ajax.find.actions.QueryResponse;
-import com.openexchange.find.facet.Filter;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import com.openexchange.ajax.find.drive.BasicDriveTest;
 
 
 /**
- * {@link SimpleTest}
+ * {@link FindTestSuite}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since 7.6.0
  */
-public class SimpleTest extends AbstractFindTest {
+public final class FindTestSuite {
 
     /**
-     * Initializes a new {@link SimpleTest}.
+     * Initializes a new {@link FindTestSuite}.
      */
-    public SimpleTest(String name) {
-        super(name);
+    private FindTestSuite() {
+        super();
     }
-    
-    @Test
-    public void testSimpleSearch() {
-        try {
 
-            List<String> queries = Collections.singletonList("test");
-            List<Filter> filters = Collections.emptyList();
-            final QueryResponse queryResponse = getClient().execute(new QueryRequest(0, 10, queries, filters, "tasks"));
-
-            assertNotNull(queryResponse);
-
-            System.err.println(queryResponse.getData());
-
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-    }
-    
-    @Test
-    public void testSimpleFilter() {
-        try {
-
-            List<String> queries = Collections.singletonList("test");
-            List<Filter> filters = new ArrayList<Filter>(2);
-            filters.add(new Filter(Collections.singletonList("title"), "bug"));
-            filters.add(new Filter(Collections.singletonList("status"), "done"));
-            final QueryResponse queryResponse = getClient().execute(new QueryRequest(0, 10, queries, filters, "tasks"));
-
-            assertNotNull(queryResponse);
-
-            System.err.println(queryResponse.getData());
-
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
+    public static Test suite() {
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.find.FindTestSuite");
+        tests.addTestSuite(SimpleFindTest.class);
+        tests.addTestSuite(BasicDriveTest.class);
+        tests.addTestSuite(com.openexchange.ajax.find.mail.SimpleTest.class);
+        tests.addTestSuite(com.openexchange.ajax.find.tasks.SimpleTest.class);
+        return tests;
     }
 
 }

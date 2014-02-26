@@ -240,7 +240,11 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     @Override
     public void visit(FilenameDisplayItem filenameDisplayItem) {
-        //
+        try {
+            json.put("defaultValue", translator.translate(locale, filenameDisplayItem.getDefaultValue()));
+        } catch (JSONException e) {
+            errors.add(e);
+        }
     }
 
     private void addDefaultValue(DisplayItem item) throws JSONException {
