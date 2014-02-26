@@ -107,11 +107,12 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     /**
      * Initializes a new {@link ToMySqlQueryVisitor}.
+     * @param cols
      */
-    public ToMySqlQueryVisitor(int contextId) {
+    public ToMySqlQueryVisitor(int contextId, String cols) {
         super();
         this.sb = new StringBuilder();
-        sb.append("SELECT *");
+        sb.append(cols).append(" ");
         sb.append(PREFIX).append(contextId).append(" AND ");
         this.codec = new MySQLCodec(Mode.STANDARD);
     }
@@ -320,7 +321,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         if (searchTerm.isIgnoreCase()) {
             field = "UPPER(" + field + ") ";
             if (searchTerm.isSubstringSearch()) {
-                pattern = "UPPER('" + pattern + "%')";
+                pattern = "UPPER('%" + pattern + "%')";
             } else {
                 pattern = "UPPER('" + pattern + "')";
             }

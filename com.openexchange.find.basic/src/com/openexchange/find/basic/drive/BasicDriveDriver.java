@@ -72,17 +72,14 @@ import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.FileDocument;
-import com.openexchange.find.drive.FilenameDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.i18n.LocaleTools;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -172,17 +169,10 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         List<FacetValue> facets = new LinkedList<FacetValue>();
         while (it.hasNext()) {
             File file = it.next();
-            FolderService folderService = Services.getFolderService();
-            UserizedFolder folder = folderService.getFolder("0", file.getFolderId(), session, null);
             Filter fileName = new Filter(Collections.singletonList("filename"), file.getFileName());
-            Filter folderName = new Filter(Collections.singletonList("folder"), folder.getLocalizedName(LocaleTools.DEFAULT_LOCALE));
             if (null != fileName) {
                 String facetValue = prepareFacetValueId(request.getPrefix(), session.getContextId(), file.getId());
-                facets.add(new FacetValue(facetValue, new FilenameDisplayItem(file), FacetValue.UNKNOWN_COUNT, fileName));
-            }
-            if (null != folderName) {
-                String facetValue = prepareFacetValueId(request.getPrefix(), session.getContextId(), folder.getID());
-                facets.add(new FacetValue(facetValue, new FilenameDisplayItem(file), FacetValue.UNKNOWN_COUNT, folderName));
+                facets.add(new FacetValue(facetValue, new SimpleDisplayItem(file.getTitle()), FacetValue.UNKNOWN_COUNT, fileName));
             }
         }
         return facets;

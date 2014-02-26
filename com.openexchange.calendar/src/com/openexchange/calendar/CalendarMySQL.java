@@ -1351,11 +1351,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(" FROM prg_dates pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ? AND pdm.cid = ?");
         searchParameters.add(contextID);
         searchParameters.add(contextID);
-        if (null != searchObj.getExternalParticipants() && 0 < searchObj.getExternalParticipants().size()) {
-            sb.append(" LEFT JOIN dateExternal de ON pd.intfield01 = de.objectId AND pd.cid = ? AND de.cid = ?");
-            searchParameters.add(contextID);
-            searchParameters.add(contextID);
-        }
         if (null != searchObj.getResourceIDs() && 0 < searchObj.getResourceIDs().size()) {
             sb.append(" LEFT JOIN prg_date_rights pdr ON pd.intfield01 = pdr.object_id AND pd.cid = ? AND pdr.cid = ?");
             searchParameters.add(contextID);
@@ -1557,15 +1552,11 @@ public class CalendarMySQL implements CalendarSqlImp {
          */
         Set<Integer> userIDs = searchObj.getUserIDs();
         if (null != userIDs && 0 < userIDs.size()) {
-            if (1 == userIDs.size()) {
-                sb.append(" AND pdm.member_uid = ?");
-                searchParameters.add(userIDs.iterator().next());
-            } else {
-                sb.append(" AND pdm.member_uid IN (").append(getPlaceholders(userIDs.size()));
-                for (Integer userID : userIDs) {
-                    searchParameters.add(userID);
-                }
-                sb.append(')');
+            for (Integer userID : userIDs) {
+                sb.append(" AND EXISTS (SELECT 1 FROM prg_dates_members WHERE prg_dates_members.cid = ? AND " +
+                    "prg_dates_members.object_id = pd.intfield01 AND prg_dates_members.member_uid = ?)");
+                searchParameters.add(contextID);
+                searchParameters.add(userID);
             }
         }
         /*
@@ -1591,15 +1582,11 @@ public class CalendarMySQL implements CalendarSqlImp {
          */
         Set<String> externalParticipants = searchObj.getExternalParticipants();
         if (null != externalParticipants && 0 < externalParticipants.size()) {
-            if (1 == externalParticipants.size()) {
-                sb.append(" AND de.mailAddress = ?");
-                searchParameters.add(externalParticipants.iterator().next());
-            } else {
-                sb.append(" AND de.mailAddress IN (").append(getPlaceholders(externalParticipants.size()));
-                for (String externalParticipant : externalParticipants) {
-                    searchParameters.add(externalParticipant);
-                }
-                sb.append(')');
+            for (String externalParticipant : externalParticipants) {
+                sb.append(" AND EXISTS (SELECT 1 FROM dateExternal WHERE dateExternal.cid = ? AND " +
+                    "dateExternal.objectId = pd.intfield01 AND dateExternal.mailAddress = ?)");
+                searchParameters.add(contextID);
+                searchParameters.add(StringCollection.prepareForSearch(externalParticipant, false, true));
             }
         }
         /*
