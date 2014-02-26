@@ -62,7 +62,6 @@ import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
-import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
@@ -77,7 +76,6 @@ import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -110,11 +108,7 @@ public class MockContactsDriver extends AbstractContactFacetingModuleSearchDrive
         return session.getUserConfiguration().hasContact();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ModuleConfig getConfiguration(ServerSession session) throws OXException {
+    public void getConfiguration(ServerSession session) throws OXException {
 
         final List<Facet> staticFacets = new LinkedList<Facet>();
         {
@@ -202,10 +196,6 @@ public class MockContactsDriver extends AbstractContactFacetingModuleSearchDrive
             staticFacets.add(folderTypeFacet);
         }
 
-        // No mandatory filters to define for contacts
-        final List<MandatoryFilter> mandatoryFilters = Collections.emptyList();
-
-        return new ModuleConfig(getModule(), staticFacets, mandatoryFilters);
     }
 
     /**

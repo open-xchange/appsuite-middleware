@@ -68,7 +68,6 @@ import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
-import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
@@ -140,15 +139,13 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         return new AutocompleteResult(facets);
     }
 
-    @Override
-    public ModuleConfig getConfiguration(final ServerSession session) {
+    public void getConfiguration(final ServerSession session) {
         Facet folderNameFacet = new FieldFacet(DriveFacetType.FOLDERS, Constants.FIELD_FOLDER_TYPE);
         Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_NAME, Constants.FIELD_FILE_NAME);
         // Define facets
         final List<Facet> facets = new LinkedList<Facet>();
         facets.add(fileNameFacet);
         facets.add(folderNameFacet);
-        return new ModuleConfig(Module.DRIVE, facets);
     }
 
     @Override

@@ -57,7 +57,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.json.actions.AbstractFindAction;
 import com.openexchange.find.json.actions.AutocompleteAction;
-import com.openexchange.find.json.actions.ConfigAction;
 import com.openexchange.find.json.actions.QueryAction;
 import com.openexchange.server.ServiceLookup;
 
@@ -75,7 +74,6 @@ public class FindActionFactory implements AJAXActionServiceFactory {
     public FindActionFactory(ServiceLookup lookup) {
         super();
         actions = new HashMap<String, AbstractFindAction>(3);
-        actions.put("config", new ConfigAction(lookup));
         actions.put("autocomplete", new AutocompleteAction(lookup));
         actions.put("query", new QueryAction(lookup));
     }

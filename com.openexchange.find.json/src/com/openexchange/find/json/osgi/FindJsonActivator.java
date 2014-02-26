@@ -54,7 +54,6 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindActionFactory;
 import com.openexchange.find.json.converters.AutocompleteResultJSONConverter;
-import com.openexchange.find.json.converters.ConfigJSONConverter;
 import com.openexchange.find.json.converters.SearchResultJSONConverter;
 import com.openexchange.i18n.I18nService;
 
@@ -84,7 +83,6 @@ public class FindJsonActivator extends AJAXModuleActivator {
 
         openTrackers();
 
-        registerService(ResultConverter.class, new ConfigJSONConverter(translator));
         registerService(ResultConverter.class, new AutocompleteResultJSONConverter(translator));
         registerService(ResultConverter.class, new SearchResultJSONConverter(translator, converterRegistry));
         registerModule(new FindActionFactory(this), MODULE_PATH);

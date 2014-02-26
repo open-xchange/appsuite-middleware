@@ -76,7 +76,6 @@ import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
-import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
@@ -88,7 +87,6 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.find.mail.DefaultMailFolderType;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.mail.MailFacetType;
@@ -150,8 +148,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return session.getUserConfiguration().hasWebMail() && session.getUserConfiguration().hasContact();
     }
 
-    @Override
-    public ModuleConfig getConfiguration(ServerSession session) throws OXException {
+    public void getConfiguration(ServerSession session) throws OXException {
         final TIntObjectMap<MailAccount> accountCache = new TIntObjectHashMap<MailAccount>(8);
         final List<MailFolderInfo> mailFolders = loadMailFolders(session, new MailFolderFilter() {
             @Override
@@ -188,7 +185,6 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         final FacetValue defaultValue = buildFolderFacetValue(defaultFolder, mailAccount, session.getContextId());
         final Facet folderFacet = buildFolderFacet(mailFolders, session.getUserId(), session.getContextId(), accountCache);
         folderFacet.getValues().add(defaultValue);
-        final MandatoryFilter folderFilter = new MandatoryFilter(folderFacet, defaultValue);
 
         final List<Facet> staticFacets = new ArrayList<Facet>(4);
         final Facet subjectFacet = new FieldFacet(MailFacetType.SUBJECT, FIELD_SUBJECT);
@@ -201,7 +197,6 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             staticFacets.add(folderFacet);
         }
 
-        return new ModuleConfig(getModule(), staticFacets, Collections.singletonList(folderFilter));
     }
 
     @Override

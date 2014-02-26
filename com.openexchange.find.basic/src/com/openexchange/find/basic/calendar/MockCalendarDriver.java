@@ -60,7 +60,6 @@ import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
-import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
@@ -80,7 +79,6 @@ import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -113,8 +111,7 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
         return session.getUserConfiguration().hasCalendar() && session.getUserConfiguration().hasContact();
     }
 
-    @Override
-    public ModuleConfig getConfiguration(ServerSession session) throws OXException {
+    public void getConfiguration(ServerSession session) throws OXException {
         List<Facet> facets = new LinkedList<Facet>();
 
         // Subject
@@ -220,11 +217,6 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
             new Filter(singletonList("folder_type"), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
         Facet folderTypeFacet = new Facet(CommonFacetType.FOLDER_TYPE, folderValues);
         facets.add(folderTypeFacet);
-
-        // Filters
-        List<MandatoryFilter> mandatoryFilters = Collections.emptyList();
-
-        return new ModuleConfig(Module.CALENDAR, facets, mandatoryFilters);
     }
 
     private static final List<String> PARTICIPANT_FILTER = singletonList("participants");

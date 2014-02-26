@@ -62,7 +62,6 @@ import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
-import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
@@ -73,7 +72,6 @@ import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.search.CompositeSearchTerm;
@@ -142,11 +140,6 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
     @Override
     public boolean isValidFor(ServerSession session) {
         return session.getUserConfiguration().hasContact();
-    }
-
-    @Override
-    public ModuleConfig getConfiguration(ServerSession session) throws OXException {
-        return new ModuleConfig(getModule(), new ArrayList<Facet>(staticFacets.values()), Collections.<MandatoryFilter>emptyList());
     }
 
     @Override

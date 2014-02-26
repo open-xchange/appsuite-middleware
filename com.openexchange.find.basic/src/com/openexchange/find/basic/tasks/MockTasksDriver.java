@@ -66,7 +66,6 @@ import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
-import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
@@ -75,7 +74,6 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.tasks.TaskStatusDisplayItem;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
@@ -117,8 +115,7 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
         return session.getUserConfiguration().hasTask();
     }
 
-    @Override
-    public ModuleConfig getConfiguration(ServerSession session) throws OXException {
+    public void getConfiguration(ServerSession session) throws OXException {
         List<Facet> staticFacets = new ArrayList<Facet>(7);
 
         // subject or task name
@@ -194,9 +191,6 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
             final Facet taskTypeFacet = new Facet(TasksFacetType.TASK_TYPE, staticFacetValues);
             staticFacets.add(taskTypeFacet);
         }
-
-        List<MandatoryFilter> mandatoryFilters = Collections.emptyList();
-        return new ModuleConfig(getModule(), staticFacets, mandatoryFilters);
     }
 
     @Override

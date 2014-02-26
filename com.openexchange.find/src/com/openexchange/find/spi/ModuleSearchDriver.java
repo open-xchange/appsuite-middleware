@@ -53,7 +53,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Module;
-import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.tools.session.ServerSession;
@@ -79,13 +78,6 @@ public interface ModuleSearchDriver {
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
     boolean isValidFor(ServerSession session) throws OXException;
-
-    /**
-     * Gets the configuration for this driver based on a given session.
-     *
-     * @return The {@link ModuleConfig}. Never <code>null</code>.
-     */
-    ModuleConfig getConfiguration(ServerSession session) throws OXException;
 
     /**
      * Performs an auto-complete request.

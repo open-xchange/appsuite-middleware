@@ -49,7 +49,6 @@
 
 package com.openexchange.find;
 
-import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -61,14 +60,6 @@ import com.openexchange.tools.session.ServerSession;
  * @since 7.6.0
  */
 public interface SearchService {
-
-    /**
-     * Gets a mapping of {@link Module}s to their according {@link ModuleConfig}s.
-     *
-     * @param session The associated session
-     * @return A map containing available module configurations. Never <code>null</code>.
-     */
-    Map<Module, ModuleConfig> getConfiguration(ServerSession session) throws OXException;
 
     /**
      * Performs an auto-complete request for a given module.

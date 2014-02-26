@@ -50,8 +50,6 @@
 package com.openexchange.find.internal;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,7 +63,6 @@ import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
-import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.SearchService;
@@ -92,19 +89,6 @@ public class SearchServiceImpl implements SearchService, ServiceTrackerCustomize
         super();
         this.context = context;
         driversByModule = new ConcurrentHashMap<Module, SortedSet<ComparableDriver>>();
-    }
-
-    @Override
-    public Map<Module, ModuleConfig> getConfiguration(ServerSession session) throws OXException {
-        Map<Module, ModuleConfig> configs = new HashMap<Module, ModuleConfig>(driversByModule.size());
-        for (Module module : driversByModule.keySet()) {
-            ModuleSearchDriver driver = determineDriver(session, module);
-            if (driver != null) {
-                configs.put(module, driver.getConfiguration(session));
-            }
-        }
-
-        return configs;
     }
 
     @Override

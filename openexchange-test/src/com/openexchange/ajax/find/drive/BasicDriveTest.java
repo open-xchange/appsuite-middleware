@@ -53,12 +53,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
-import com.openexchange.ajax.find.actions.ConfigRequest;
-import com.openexchange.ajax.find.actions.ConfigResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -67,7 +64,6 @@ import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.find.Module;
-import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.drive.Constants;
 import com.openexchange.find.facet.Filter;
@@ -121,14 +117,6 @@ public class BasicDriveTest extends AbstractFindTest {
             client.execute(request);
         }
         super.tearDown();
-    }
-
-    public void testConfig() throws Exception {
-        ConfigRequest configRequest = new ConfigRequest();
-        ConfigResponse configResponse = client.execute(configRequest);
-        Map<Module, ModuleConfig> config = configResponse.getConfiguration();
-        ModuleConfig drive = config.get(Module.DRIVE);
-        assertNotNull("Drive configuration is null", drive);
     }
 
     public void testSearch() throws Exception {

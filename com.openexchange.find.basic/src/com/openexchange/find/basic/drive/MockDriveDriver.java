@@ -66,7 +66,6 @@ import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
-import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
@@ -109,8 +108,7 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
         return session.getUserPermissionBits().hasInfostore();
     }
 
-    @Override
-    public ModuleConfig getConfiguration(final ServerSession session) throws OXException {
+    public void getConfiguration(final ServerSession session) throws OXException {
         // Define facets
         final List<Facet> staticFacets = new LinkedList<Facet>();
         {
@@ -140,9 +138,6 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
             final Facet folderTypeFacet = buildFolderTypeFacet();
             staticFacets.add(folderTypeFacet);
         }
-
-        // Return configuration
-        return new ModuleConfig(Module.DRIVE, staticFacets);
     }
 
     protected static final List<String> PERSONS_FILTER_FIELDS = Arrays.asList("created_from","changed_from","author");

@@ -58,8 +58,6 @@ import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
-import com.openexchange.ajax.find.actions.ConfigRequest;
-import com.openexchange.ajax.find.actions.ConfigResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -70,7 +68,6 @@ import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
-import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
@@ -113,14 +110,6 @@ public class SimpleTest extends AbstractFindTest {
             client.execute(deleteRequestReq);
         }
         super.tearDown();
-    }
-
-    public void testConfiguration() throws Exception {
-        ConfigRequest configRequest = new ConfigRequest();
-        ConfigResponse configResponse = client.execute(configRequest);
-        Map<Module, ModuleConfig> configurations = configResponse.getConfiguration();
-        ModuleConfig mailConfig = configurations.get(Module.MAIL);
-        assertNotNull(mailConfig);
     }
 
     public void testAutocomplete() throws Exception {

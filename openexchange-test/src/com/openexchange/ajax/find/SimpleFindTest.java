@@ -57,12 +57,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
-import com.openexchange.ajax.find.actions.ConfigRequest;
-import com.openexchange.ajax.find.actions.ConfigResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
-import com.openexchange.find.Module;
-import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
@@ -126,8 +122,13 @@ public class SimpleFindTest extends AbstractFindTest {
 
             boolean foundContacFacet = false;
             boolean foundSteffen = false;
+            boolean foundFileNameFacet = false;
+            boolean foundFileContentFacet = false;
             for (int i = 0; i < size; i++) {
                 final Facet facet = facets.get(i);
+
+                foundFileNameFacet |= "file_name".equals(facet.getType().getId());
+                foundFileContentFacet |= "file_content".equals(facet.getType().getId());
 
                 final boolean isContactFacet = "contacts".equals(facet.getType().getId());
 
@@ -143,43 +144,14 @@ public class SimpleFindTest extends AbstractFindTest {
                 }
             }
 
+            assertTrue("Missing \"file_name\" in static facets.", foundFileNameFacet);
+
+            assertTrue("Missing \"file_content\" in static facets.", foundFileContentFacet);
+
             assertTrue("Contacts facet missing in auto-complete response", foundContacFacet);
 
             assertTrue("Expected facet value missing in auto-complete response", foundSteffen);
 
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testConfigSimple() {
-        try {
-            final ConfigResponse configResponse = getClient().execute(new ConfigRequest());
-
-            assertNotNull(configResponse);
-
-            final Map<Module, ModuleConfig> configuration = configResponse.getConfiguration();
-            assertNotNull(configuration);
-
-            final ModuleConfig moduleConfig = configuration.get(Module.DRIVE);
-            assertNotNull(moduleConfig);
-
-            final List<Facet> staticFacets = moduleConfig.getStaticFacets();
-            assertFalse("No static facets, but expected", staticFacets.isEmpty());
-
-            boolean foundFileNameFacet = false;
-            boolean foundFileContentFacet = false;
-
-            for (final Facet staticFacet : staticFacets) {
-                foundFileNameFacet |= "file_name".equals(staticFacet.getType().getId());
-                foundFileContentFacet |= "file_content".equals(staticFacet.getType().getId());
-            }
-
-            assertTrue("Missing \"file_name\" in static facets.", foundFileNameFacet);
-
-            assertTrue("Missing \"file_content\" in static facets.", foundFileContentFacet);
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
