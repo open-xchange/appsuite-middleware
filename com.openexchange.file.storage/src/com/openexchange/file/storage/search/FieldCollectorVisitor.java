@@ -101,143 +101,145 @@ public class FieldCollectorVisitor implements SearchTermVisitor {
         return fields;
     }
 
+    private void handleTerm(final SearchTerm<?> term) {
+        if (null != term) {
+            term.addField(fields);
+        }
+    }
+
     @Override
     public void visit(final AndTerm term) throws OXException {
-        for (final SearchTerm<?> st : term.getPattern()) {
-            st.visit(this);
-        }
+        handleTerm(term);
     }
 
     @Override
     public void visit(final OrTerm term) throws OXException {
-        for (final SearchTerm<?> st : term.getPattern()) {
-            st.visit(this);
-        }
+        handleTerm(term);
     }
 
     @Override
     public void visit(final NotTerm term) throws OXException {
-        term.getPattern().visit(this);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final MetaTerm term) throws OXException {
-        fields.add(Field.META);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final NumberOfVersionsTerm term) throws OXException {
-        fields.add(Field.NUMBER_OF_VERSIONS);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final LastModifiedUtcTerm term) throws OXException {
-        fields.add(Field.LAST_MODIFIED_UTC);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final ColorLabelTerm term) throws OXException {
-        fields.add(Field.COLOR_LABEL);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final CurrentVersionTerm term) throws OXException {
-        fields.add(Field.CURRENT_VERSION);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final VersionCommentTerm term) throws OXException {
-        fields.add(Field.VERSION_COMMENT);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final FileMd5SumTerm term) throws OXException {
-        fields.add(Field.FILE_MD5SUM);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final LockedUntilTerm term) throws OXException {
-        fields.add(Field.LOCKED_UNTIL);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final CategoriesTerm term) throws OXException {
-        fields.add(Field.CATEGORIES);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final SequenceNumberTerm term) throws OXException {
-        fields.add(Field.SEQUENCE_NUMBER);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final FileMimeTypeTerm term) throws OXException {
-        fields.add(Field.FILE_MIMETYPE);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final FileNameTerm term) throws OXException {
-        fields.add(Field.FILENAME);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final LastModifiedTerm term) throws OXException {
-        fields.add(Field.LAST_MODIFIED);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final CreatedTerm term) throws OXException {
-        fields.add(Field.CREATED);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final ModifiedByTerm term) throws OXException {
-        fields.add(Field.MODIFIED_BY);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final FolderIdTerm term) throws OXException {
-        fields.add(Field.FOLDER_ID);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final TitleTerm term) throws OXException {
-        fields.add(Field.TITLE);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final VersionTerm term) throws OXException {
-        fields.add(Field.VERSION);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final ContentTerm term) throws OXException {
-        fields.add(Field.CONTENT);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final IdTerm term) throws OXException {
-        fields.add(Field.ID);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final FileSizeTerm term) throws OXException {
-        fields.add(Field.FILE_SIZE);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final DescriptionTerm term) throws OXException {
-        fields.add(Field.DESCRIPTION);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final UrlTerm term) throws OXException {
-        fields.add(Field.URL);
+        handleTerm(term);
     }
 
     @Override
     public void visit(final CreatedByTerm term) throws OXException {
-        fields.add(Field.CREATED_BY);
+        handleTerm(term);
     }
 
 }

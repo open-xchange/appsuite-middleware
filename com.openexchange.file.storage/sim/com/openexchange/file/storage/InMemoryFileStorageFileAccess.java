@@ -396,7 +396,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public SearchIterator<File> search(SearchTerm<?> searchTerm, Field sort, SortDirection order, int start, int end) throws OXException {
+    public SearchIterator<File> search(SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
         return SearchIteratorAdapter. <File> emptyIterator();
     }
 

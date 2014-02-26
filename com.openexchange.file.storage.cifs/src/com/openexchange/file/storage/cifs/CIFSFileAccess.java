@@ -805,13 +805,16 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
     }
 
     @Override
-    public SearchIterator<File> search(final SearchTerm<?> searchTerm, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+    public SearchIterator<File> search(final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         final List<File> results;
         {
             final FieldCollectorVisitor fieldCollector = new FieldCollectorVisitor(Field.ID, Field.FOLDER_ID);
             searchTerm.visit(fieldCollector);
 
-            final CIFSSearchVisitor visitor = new CIFSSearchVisitor(new ArrayList<Field>(fieldCollector.getFields()), this);
+            final List<Field> fieldz = new ArrayList<Field>(fields);
+            fieldz.addAll(fieldCollector.getFields());
+
+            final CIFSSearchVisitor visitor = new CIFSSearchVisitor(fieldz, this);
             searchTerm.visit(visitor);
             results = visitor.getResults();
         }

@@ -68,7 +68,7 @@ public interface InfostoreSearchEngine extends TransactionAware{
 
 	public SearchIterator<DocumentMetadata> search(String query, Metadata[] cols, int folderId, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
 
-	public SearchIterator<DocumentMetadata> search(SearchTerm<?> searchTerm, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
+	public SearchIterator<DocumentMetadata> search(SearchTerm<?> searchTerm, Metadata[] cols, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
 
 	public void index(DocumentMetadata document, Context ctx, User user, UserPermissionBits userPermissions) throws  OXException;
 

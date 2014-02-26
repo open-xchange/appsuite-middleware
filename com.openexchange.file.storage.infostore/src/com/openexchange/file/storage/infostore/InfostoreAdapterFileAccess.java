@@ -481,19 +481,19 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     }
 
     @Override
-    public SearchIterator<File> search(SearchTerm<?> searchTerm, Field sort, SortDirection order, int start, int end) throws OXException {
+    public SearchIterator<File> search(SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
         final ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
         searchTerm.visit(visitor);
         final SearchIterator<DocumentMetadata> iterator =
             search.search(
                 visitor.getInfstoreTerm(),
+                FieldMapping.getMatching(fields),
                 FieldMapping.getMatching(sort),
                 FieldMapping.getSortDirection(order),
                 start,
                 end,
                 ctx,
-                user,
-                userPermissions);
+                user, userPermissions);
         return new InfostoreSearchIterator(iterator);
     }
 

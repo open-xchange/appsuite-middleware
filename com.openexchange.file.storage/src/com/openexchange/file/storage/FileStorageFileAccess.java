@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileComparator;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
@@ -524,7 +525,7 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @param pattern The search pattern possibly containing wild-cards
      * @param fields Which fields to load
      * @param folderId In which folder to search. Pass ALL_FOLDERS to search in all folders.
-     * @param sort Which field to sort by. May be null.
+     * @param sort Which field to sort by. May be <code>null</code>.
      * @param order The order in which to sort
      * @param start A start index (inclusive) for the search results. Useful for paging.
      * @param end An end index (exclusive) for the search results. Useful for paging.
@@ -537,14 +538,15 @@ public interface FileStorageFileAccess extends TransactionAware {
      * Search for a given file.
      *
      * @param searchTerm The search term
-     * @param sort Which field to sort by. May be null.
+     * @param fields The fields to load
+     * @param sort Which field to sort by. May be <code>null</code>.
      * @param order The order in which to sort
      * @param start A start index (inclusive) for the search results. Useful for paging.
      * @param end An end index (exclusive) for the search results. Useful for paging.
      * @return
      * @throws OXException If operation fails
      */
-    SearchIterator<File> search(SearchTerm<?> searchTerm, File.Field sort, SortDirection order, int start, int end) throws OXException;
+    SearchIterator<File> search(SearchTerm<?> searchTerm, List<Field> fields, File.Field sort, SortDirection order, int start, int end) throws OXException;
 
     /**
      * Retrieve the parent account access.
