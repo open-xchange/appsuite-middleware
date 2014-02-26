@@ -124,7 +124,6 @@ public final class MsDriveEventHandler implements DriveEventPublisher, MessageLi
         if (null != message && message.isRemote()) {
             PortableDriveEvent driveEvent = message.getMessageObject();
             if (null != driveEvent) {
-                System.out.println("onMessage: " + message.getMessageObject());
                 LOG.debug("onMessage: {} [{}]", message.getMessageObject(), message.getSenderId());
                 driveEventService.notifyPublishers(PortableDriveEvent.unwrap(driveEvent));
             } else {
