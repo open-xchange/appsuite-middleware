@@ -325,7 +325,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
     public SearchIterator<Task> findTask(TaskSearchObject searchObj, int orderBy, Order order, int[] cols) throws OXException {
         //TODO: impl
         final Context ctx = Tools.getContext(session.getContextId());
-        FindTask ft = new FindTask(ctx, session.getUserId(), searchObj, cols);
+        FindTask ft = new FindTask(ctx, session.getUserId(), searchObj, cols, orderBy, order);
         
         return ft.perform();
     }

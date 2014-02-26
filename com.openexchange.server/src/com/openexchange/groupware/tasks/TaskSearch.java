@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -118,8 +119,10 @@ abstract class TaskSearch {
      * @param userID TODO
      * @param searchObject TODO
      * @param columns TODO
+     * @param orderBy TODO
+     * @param order TODO
      * @return
      * @throws OXException
      */
-    public abstract SearchIterator<Task> find(Context context, int userID, TaskSearchObject searchObject, int[] columns) throws OXException;
+    public abstract SearchIterator<Task> find(Context context, int userID, TaskSearchObject searchObject, int[] columns, int orderBy, Order order) throws OXException;
 }

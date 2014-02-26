@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.find.tasks;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
@@ -78,6 +79,26 @@ public class SimpleTest extends AbstractFindTest {
 
             List<String> queries = Collections.singletonList("test");
             List<Filter> filters = Collections.emptyList();
+            final QueryResponse queryResponse = getClient().execute(new QueryRequest(0, 10, queries, filters, "tasks"));
+
+            assertNotNull(queryResponse);
+
+            System.err.println(queryResponse.getData());
+
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testSimpleFilter() {
+        try {
+
+            List<String> queries = Collections.singletonList("test");
+            List<Filter> filters = new ArrayList<Filter>(2);
+            filters.add(new Filter(Collections.singletonList("title"), "bug"));
+            filters.add(new Filter(Collections.singletonList("status"), "done"));
             final QueryResponse queryResponse = getClient().execute(new QueryRequest(0, 10, queries, filters, "tasks"));
 
             assertNotNull(queryResponse);

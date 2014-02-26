@@ -61,12 +61,14 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Implementation of search for tasks interface using a relational database
@@ -211,16 +213,18 @@ public class RdbTaskSearch extends TaskSearch {
      * @see com.openexchange.groupware.tasks.TaskSearch#find()
      */
     @Override
-    public SearchIterator<Task> find(final Context context, final int userID, TaskSearchObject searchObject, int[] columns) throws OXException {
+    public SearchIterator<Task> find(final Context context, final int userID, TaskSearchObject searchObject, int[] columns, int orderBy, Order order) throws OXException {
         final List<Object> searchParameters = new ArrayList<Object>();
         StringBuilder builder = new StringBuilder();
         String fields = SQL.getFields(columns, false, "t");
         builder.append("SELECT ").append(fields);
         builder.append(" FROM task AS t ");
-        builder.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task) ");
+        builder.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)")
+               .append(" LEFT JOIN user AS u ON (tp.user = u.id)");
         
-        //possible joins here
-        builder.append(" WHERE t.cid = ? ");
+        builder.append(" WHERE t.cid = ? AND u.id = ?");
+        searchParameters.add(context.getContextId());
+        searchParameters.add(userID);
         
         //set titles
         Set<String> titleFilters = searchObject.getTitleFilters();
@@ -229,7 +233,7 @@ public class RdbTaskSearch extends TaskSearch {
                 builder.append(" AND ");
                 String preparedPattern = StringCollection.prepareForSearch(t, true, true);
                 builder.append(containsWildcards(preparedPattern) ? " t.title LIKE ? " : " t.title = ? ");
-                searchParameters.add(t);
+                searchParameters.add(preparedPattern);
             }
         }
         
@@ -240,7 +244,7 @@ public class RdbTaskSearch extends TaskSearch {
                 builder.append(" AND ");
                 String preparedPattern = StringCollection.prepareForSearch(t, true, true);
                 builder.append(containsWildcards(preparedPattern) ? " t.description LIKE ? " : " t.description = ? ");
-                searchParameters.add(t);
+                searchParameters.add(preparedPattern);
             }
         }
         
@@ -252,18 +256,19 @@ public class RdbTaskSearch extends TaskSearch {
                 builder.append(containsWildcards(preparedPattern) ? 
                                                     " AND (t.description LIKE ? OR t.title LIKE ? OR tp.description LIKE ? ) " : 
                                                     " AND (t.description = ? OR t.title = ? OR tp.description = ? ) ");
-                searchParameters.add(q);
-                searchParameters.add(q);
-                searchParameters.add(q);
+                searchParameters.add(preparedPattern);
+                searchParameters.add(preparedPattern);
+                searchParameters.add(preparedPattern);
             }
         }
+        
+        builder.append(SQL.getOrder(orderBy, order));
         
         //set parameters
         StatementSetter ss = new StatementSetter() {
             @Override
             public void perform(PreparedStatement stmt) throws SQLException {
                 int pos = 1;
-                stmt.setInt(pos++, context.getContextId());
                 for (Object o : searchParameters) {
                     stmt.setObject(pos++, o);
                 }

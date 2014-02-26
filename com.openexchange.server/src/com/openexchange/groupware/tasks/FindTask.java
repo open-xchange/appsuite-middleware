@@ -53,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -73,17 +74,22 @@ public class FindTask {
     private final TaskSearchObject searchObject;
     
     private final int[] columns;
+    
+    private final int orderBy;
+    
+    private final Order order;
 
     /**
      * Initializes a new {@link FindTask}.
      */
-    public FindTask(Context c, int uid, TaskSearchObject so, int cols[]) {
+    public FindTask(Context c, int uid, TaskSearchObject so, int cols[], int ob, Order o) {
         super();
         context = c;
         userID = uid;
         searchObject = so;
         columns = cols;
-
+        orderBy = ob;
+        order = o;
     }
     
     /**
@@ -94,7 +100,7 @@ public class FindTask {
      */
     public SearchIterator<Task> perform() throws OXException {
         //TODO: impl
-        return TaskSearch.getInstance().find(context, userID, searchObject, columns);
+        return TaskSearch.getInstance().find(context, userID, searchObject, columns, orderBy, order);
     }
     
     
