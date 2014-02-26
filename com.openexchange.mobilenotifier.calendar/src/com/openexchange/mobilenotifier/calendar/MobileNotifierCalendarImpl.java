@@ -60,6 +60,8 @@ import com.openexchange.calendar.itip.HumanReadableRecurrences;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.Constants;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
@@ -78,10 +80,11 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link MobileNotifierCalendarImpl}
- *
+ * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
+
     private final ServiceLookup services;
 
     private static final String EMPTY_STRING = "";
@@ -121,21 +124,36 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                     Appointment.FOLDER_ID, Appointment.OBJECT_ID, Appointment.TITLE, Appointment.LOCATION, Appointment.START_DATE,
                     Appointment.END_DATE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS, Appointment.RECURRENCE_CALCULATOR,
                     Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_ID, Appointment.NOTE,
-                    Appointment.USERS, Appointment.TIMEZONE, Appointment.DELETE_EXCEPTIONS },
+                    Appointment.USERS, Appointment.TIMEZONE, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS, },
                 Appointment.START_DATE,
                 Order.DESCENDING);
 
             while (appointments.hasNext()) {
                 final List<NotifyItem> item = new ArrayList<NotifyItem>();
                 final Appointment originalAppointment = appointments.next();
-                final Appointment copyAppointment = setStartEndOfRecurringAppointment(
-                    originalAppointment.clone(),
-                    collectionService,
-                    currentDate);
+                Appointment copyAppointment = originalAppointment.clone();
 
-                if (!isValidAppointmentInRange(copyAppointment, currentDate, endOfDay)) {
-                    continue;
+                /** TODO refactor *******************************************************************************/
+                final RecurringResultsInterface recurringResult = collectionService.calculateRecurring(
+                    copyAppointment,
+                    convertDateToTimestamp(currentDate),
+                    convertDateToTimestamp(endOfDay),
+                    0);
+
+                if (recurringResult != null) {
+                    int position = recurringResult.getPositionByLong(normalizeLong(currentDate.getTime()));
+                    // appointment is changed or deleted in recurrency and cant be found anymore
+                    if (position == -1) {
+                        continue;
+                    }
+
+                    for (int i = 0; i < recurringResult.size(); i++) {
+                        RecurringResultInterface rri = recurringResult.getRecurringResultByPosition(position);
+                        copyAppointment.setStartDate(new Date(rri.getStart()));
+                        copyAppointment.setEndDate(new Date(rri.getEnd()));
+                    }
                 }
+                /***************************************************************************************************/
 
                 item.add(new NotifyItem("recurrence", localizeRecurrence(copyAppointment, session)));
                 item.add(new NotifyItem("id", copyAppointment.getObjectID()));
@@ -185,18 +203,6 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
         return recurrence;
     }
 
-    private boolean isValidAppointmentInRange(final Appointment appointment, final Date currentDate, final Date endOfDay) {
-        /*** TODO ***/
-        // skip appointments which end date have already past or appointments end date is after current end of day and start date is
-        // after current date
-        // needs to be checked because of recalculated start and end time of recurring appointments
-        if (appointment.getEndDate().before(currentDate) || (appointment.getEndDate().after(endOfDay) && appointment.getStartDate().after(
-            currentDate)) || appointment.getDeleteException() != null) {
-            return false;
-        }
-        return true;
-    }
-
     /**
      * Gets the confirmation status of the user
      * 
@@ -215,33 +221,6 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
         return confirmed;
     }
 
-    /**
-     * Sets the correct start and end time of recurring appointment of the current date
-     * 
-     * @param app The appointment
-     * @param collectionService The collection service
-     * @param currentDate The current date
-     * @return The appointment with the correct start and end time or if it's not an recurring appointment return the original appointment
-     * @throws OXException
-     */
-    private Appointment setStartEndOfRecurringAppointment(final Appointment appointment, final CalendarCollectionService collectionService, final Date currentDate) throws OXException {
-        final RecurringResultsInterface recurringResult = collectionService.calculateRecurring(
-            appointment,
-            convertDateToTimestamp(appointment.getStartDate()),
-            convertDateToTimestamp(appointment.getEndDate()),
-            0);
-
-        if (recurringResult != null) {
-            // current date to lookup the specific occurrence
-            int recurrencePosition = recurringResult.getPositionByLong(collectionService.normalizeLong(currentDate.getTime()));
-            if (recurrencePosition > 0) {
-                appointment.setStartDate(new Date(recurringResult.getRecurringResultByPosition(recurrencePosition).getStart()));
-                appointment.setEndDate(new Date(recurringResult.getRecurringResultByPosition(recurrencePosition).getEnd()));
-            }
-        }
-        return appointment;
-    }
-
     private long convertDateToTimestamp(final Date date) {
         final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(date);
@@ -256,5 +235,9 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
         calendar.set(Calendar.SECOND, 0);
         calendar.add(Calendar.DAY_OF_YEAR, 1);
         return calendar.getTimeInMillis();
+    }
+
+    private long normalizeLong(final long millis) {
+        return millis - (millis % Constants.MILLI_DAY);
     }
 }
