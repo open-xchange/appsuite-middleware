@@ -202,4 +202,13 @@ public class RdbTaskSearch extends TaskSearch {
         }
         return iter1;
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.tasks.TaskSearch#find()
+     */
+    @Override
+    public TaskIterator find() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

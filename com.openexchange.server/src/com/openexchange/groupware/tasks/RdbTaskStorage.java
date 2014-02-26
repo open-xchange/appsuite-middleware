@@ -633,14 +633,4 @@ public class RdbTaskStorage extends TaskStorage {
         }
         return retval;
     }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.tasks.TaskStorage#find()
-     */
-    @Override
-    public TaskIterator find() {
-        //TODO: impl
-        return null;
-    }
 }

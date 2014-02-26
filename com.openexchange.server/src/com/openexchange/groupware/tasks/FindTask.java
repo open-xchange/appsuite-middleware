@@ -49,74 +49,41 @@
 
 package com.openexchange.groupware.tasks;
 
-import java.sql.Connection;
-import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.iterator.SearchIterator;
 
+
 /**
- * Interface to different SQL implementations for searching for tasks and its
- * participants.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link FindTask} is used to execute find queries from the 'find' api.
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class TaskSearch {
+public class FindTask {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(FindTask.class);
 
     /**
-     * Singleton instance.
+     * Initializes a new {@link FindTask}.
      */
-    private static final TaskSearch SINGLETON = new RdbTaskSearch();
-
-    /**
-     * Default constructor.
-     */
-    protected TaskSearch() {
+    public FindTask() {
         super();
+
     }
-
-    /**
-     * @return the singleton implementation.
-     */
-    public static TaskSearch getInstance() {
-        return SINGLETON;
-    }
-
-    /**
-     * Finds all delegated tasks of one user.
-     * @param ctx Context.
-     * @param con readable database connection.
-     * @param userId unique identifier of the user.
-     * @param type storage type of task that should be searched.
-     * @return an int array with all task identifier found.
-     * @throws OXException if an exception occurs.
-     */
-    abstract int[] findUserTasks(Context ctx, Connection con, int userId, StorageType type) throws OXException;
-
-    /**
-     * List tasks in a folder that are modified since the specified date.
-     * @param ctx Context.
-     * @param folderId unique identifier of the folder.
-     * @param type ACTIVE or DELETED.
-     * @param columns Columns of the tasks that should be loaded.
-     * @param since timestamp since that the task are modified.
-     * @param onlyOwn <code>true</code> if only own tasks can be seen.
-     * @param userId unique identifier of the user (own tasks).
-     * @param noPrivate <code>true</code> if private tasks should not be listed
-     * (shared folder).
-     * @return a SearchIterator for iterating over all returned tasks.
-     * @throws OXException if an error occurs while listing modified tasks.
-     */
-    abstract SearchIterator<Task> listModifiedTasks(Context ctx, int folderId,
-        StorageType type, int[] columns, Date since, boolean onlyOwn,
-        int userId, boolean noPrivate) throws OXException;
-    
     
     /**
-     * Search for tasks via the find API
-     * TODO: javadoc
+     * Execute the 'find' query
      * 
      * @return
-     * @throws OXException
+     * @throws OXException 
      */
-    public abstract TaskIterator find() throws OXException;
+    public SearchIterator<Task> perform() throws OXException {
+        //TODO: impl
+        return TaskSearch.getInstance().find();
+    }
+    
+    
+    
+
 }
