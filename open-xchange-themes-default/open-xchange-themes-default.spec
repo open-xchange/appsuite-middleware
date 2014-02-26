@@ -51,6 +51,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Tue Feb 25 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-02-26
 * Fri Feb 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-02-28
 * Fri Feb 21 2014 Marcus Klein <marcus.klein@open-xchange.com>
