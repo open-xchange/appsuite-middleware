@@ -155,10 +155,17 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 UserField.ID,
                 Arrays.asList(UserField.values()));
 
-            final List<Contact> ret = new ArrayList<Contact>(xingContacts.getTotal());
+            final int total = xingContacts.getTotal();
+            final List<Contact> ret = new ArrayList<Contact>(total);
+            final Map<String, String> photoUrlsMap = new HashMap<String, String>(total);
+            LOG.info("Going to converted {} XING contacts for user {} in context {}", total, session.getUserId(), session.getContextId());
             for (final User xingContact : xingContacts.getUsers()) {
-                ret.add(convert(xingContact));
+                ret.add(convert(xingContact, photoUrlsMap));
             }
+            LOG.info("Converted {} XING contacts for user {} in context {}", total, session.getUserId(), session.getContextId());
+
+            // TODO: Schedule a separate task to fill photos
+
             return ret;
         } catch (final XingUnlinkedException e) {
             throw XingSubscribeExceptionCodes.UNLINKED_ERROR.create();
@@ -226,15 +233,15 @@ public class XingSubscribeService extends AbstractSubscribeService {
         removeWhereConfigMatches(context, query);
     }
 
-    private Contact convert(final User xingUser) {
+    private Contact convert(final User xingUser, final Map<String, String> optPhotoUrlsMap) {
         if (null == xingUser) {
             return null;
         }
         final Contact oxContact = new Contact();
+        final String id = xingUser.getId();
         {
-            final String s = xingUser.getId();
-            if (isNotNull(s)) {
-                oxContact.setUserField20(s);
+            if (isNotNull(id)) {
+                oxContact.setUserField20(id);
             }
         }
         {
@@ -401,17 +408,13 @@ public class XingSubscribeService extends AbstractSubscribeService {
             }
 
         }
-        {
+        if (null != optPhotoUrlsMap) {
             final Map<String, Object> photoUrls = xingUser.getPhotoUrls();
             if (null != photoUrls) {
                 final Object pic = photoUrls.get("maxi_thumb");
                 if (null != pic && !"null".equals(pic.toString())) {
-                    try {
-                        final String sUrl = pic.toString();
-                        loadImageFromURL(oxContact, sUrl);
-                    } catch (final OXException e) {
-                        final Throwable cause = e.getCause();
-                        LOG.warn("Couldn't load XING user's image", null == cause ? e : cause);
+                    if (isNotNull(id)) {
+                        optPhotoUrlsMap.put(id, pic.toString());
                     }
                 }
             }
