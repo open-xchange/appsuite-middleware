@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Eclipse-RegisterBuddy: com.hazelcast
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Message Dispatcher Framework
 Bundle-SymbolicName: com.openexchange.realtime
@@ -6,6 +7,7 @@ Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.realtime.osgi.RealtimeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: com.hazelcast;resolution:=optional
 Import-Package: com.google.common.base,
  com.google.common.collect,
  com.openexchange.config,
