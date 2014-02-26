@@ -1,0 +1,186 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.find.basic.tasks;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import com.openexchange.exception.OXException;
+import com.openexchange.find.FindExceptionCode;
+import com.openexchange.find.facet.Filter;
+import com.openexchange.groupware.search.TaskSearchObject;
+
+/**
+ * {@link TaskSearchBuilder}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
+public class TaskSearchObjectBuilder {
+    
+    private final TaskSearchObject searchObject;
+    
+    /**
+     * Initializes a new {@link TaskSearchBuilder}.
+     */
+    public TaskSearchObjectBuilder() {
+        super();
+        searchObject = new TaskSearchObject();
+    }
+    
+    /**
+     * Build the {@link TaskSearchObject}
+     * 
+     * @return the {@link TaskSearchObject}
+     */
+    public TaskSearchObject build() {
+        return searchObject;
+    }
+    
+    /**
+     * Add the specified {@link Filter}s to the search object
+     * @param filters
+     * @return
+     * @throws OXException if the provided {@Filter} contains an unsupported field (@see {@link SupportedFields}). 
+     */
+    public TaskSearchObjectBuilder addFilters(List<Filter> filters) throws OXException {
+        for(Filter f : filters) {
+            addFilter(f);
+        }
+        return this;
+    }
+    
+    /**
+     * Add a {@link Filter} to the search object 
+     * @param filter
+     * @return
+     * @throws OXException if the provided {@link Filter} either contains an unsupported field (@see {@link SupportedFields})
+     * or a field that is <code>null</code>.
+     */
+    public TaskSearchObjectBuilder addFilter(Filter filter) throws OXException {
+        for(String f : filter.getFields()) {
+            SupportedFields sf;
+            try {
+                sf = SupportedFields.valueOf(f);
+            } catch (IllegalArgumentException e) {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(f);
+            } catch (NullPointerException e) { //should never happen
+                throw FindExceptionCode.NULL_FIELD.create(f);
+            }
+            
+            switch(sf) {
+                case title:
+                    addTitleFilters(filter.getQueries());
+                break;
+                case description:
+                    addDescriptionFilters(filter.getQueries());
+                break;
+                default: //should never happen
+                    throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(f);
+            }
+        }
+        return this;
+    }
+    
+    /**
+     * Add the specified queries to the search object
+     * @param queries
+     * @return
+     */
+    public TaskSearchObjectBuilder addQueries(List<String> queries) {
+        for (String q : queries) {
+            addQuery(q);
+        }
+        return this;
+    }
+    
+    /**
+     * Add a query to the search object
+     * @param query
+     * @return
+     */
+    public TaskSearchObjectBuilder addQuery(String query) {
+        Set<String> queries = searchObject.getQueries();
+        if (queries == null)
+            queries = new HashSet<String>();
+        queries.add(query);
+        searchObject.setQueries(queries);
+        return this;
+    }
+    
+    /**
+     * Append the title queries to the search object.
+     * 
+     * @param filters
+     */
+    private void addTitleFilters(List<String> filters) {
+        Set<String> tf = searchObject.getTitleFilters();
+        if (tf == null)
+            tf = new HashSet<String>(filters.size());
+        for(String q : filters) {
+            tf.add(q);
+        }
+        searchObject.setTitleFilters(tf);
+    }
+    
+    /**
+     * Append the description queries to the search object.
+     * 
+     * @param filters
+     */
+    private void addDescriptionFilters(List<String> filters) {
+        Set<String> df = searchObject.getDescriptionFilters();
+        if (df == null)
+            df = new HashSet<String>(filters.size());
+        for(String q : filters) {
+            df.add(q);
+        }
+        searchObject.setDescriptionFilters(df);
+    }
+}
