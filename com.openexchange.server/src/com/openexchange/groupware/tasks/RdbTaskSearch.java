@@ -221,9 +221,8 @@ public class RdbTaskSearch extends TaskSearch {
         builder.append(" FROM task AS t ");
         builder.append(" LEFT JOIN task_folder AS tf ON (tf.id = t.id AND tf.cid = t.cid)");
         
-        if (searchObject.hasInternalParticipants()) {
+        if (searchObject.hasInternalParticipants())
             builder.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)");
-        }
 
         if (searchObject.hasExternalParticipants())
             builder.append(" LEFT JOIN task_eparticipant AS etp ON (t.cid = etp.cid AND t.id = etp.task)");
@@ -287,7 +286,6 @@ public class RdbTaskSearch extends TaskSearch {
         if (searchObject.hasParticipants()) {
             builder.append(" AND ( ");
             int i = 0;
-            int size = searchObject.getInternalParticipants().size();
             for(Integer id : searchObject.getInternalParticipants()) {
                 if (i++ > 1)
                     builder.append(" AND ");
@@ -295,7 +293,6 @@ public class RdbTaskSearch extends TaskSearch {
                 searchParameters.add(id);
             }
             i = 0;
-            size = searchObject.getExternalParticipants().size();
             for(String mail : searchObject.getExternalParticipants()) {
                 if (searchObject.hasInternalParticipants() || i++ > 1)
                     builder.append(" AND ");

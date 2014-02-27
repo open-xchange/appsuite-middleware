@@ -177,7 +177,7 @@ public class TaskSearchObjectBuilder {
         Set<String> queries = searchObject.getQueries();
         if (queries == null)
             queries = new HashSet<String>();
-        queries.add(query);
+        queries.add(wrapWithWildcards(query));
         searchObject.setQueries(queries);
         return this;
     }
@@ -192,7 +192,7 @@ public class TaskSearchObjectBuilder {
         if (tf == null)
             tf = new HashSet<String>(filters.size());
         for(String q : filters) {
-            tf.add(q);
+            tf.add(wrapWithWildcards(q));
         }
         searchObject.setTitleFilters(tf);
     }
@@ -207,7 +207,7 @@ public class TaskSearchObjectBuilder {
         if (df == null)
             df = new HashSet<String>(filters.size());
         for(String q : filters) {
-            df.add(q);
+            df.add(wrapWithWildcards(q));
         }
         searchObject.setDescriptionFilters(df);
     }
@@ -295,5 +295,20 @@ public class TaskSearchObjectBuilder {
         
         searchObject.setHasInternalParticipants(intP.size() > 0);
         searchObject.setHasExternalParticipants(extP.size() > 0);
+    }
+    
+    /**
+     * Wrap query with wildcards
+     * 
+     * @param query
+     * @return
+     */
+    private String wrapWithWildcards(String query) {
+        String wrapped = null;
+        if (query.charAt(0) != '*')
+            wrapped = '*' + query;
+        if (query.charAt(query.length() - 1) != '*')
+            wrapped = query + '*';
+        return wrapped;
     }
 }
