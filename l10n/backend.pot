@@ -3000,6 +3000,11 @@ msgstr ""
 msgid "Message %1$s not found in folder %2$s."
 msgstr ""
 
+#. Invalid OAuth account specified.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:100
+msgid "Invalid OAuth account specified."
+msgstr ""
+
 #. Account not found with identifier %1$s for user %2$s in context %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:63
 msgid "Account not found with identifier %1$s for user %2$s"
