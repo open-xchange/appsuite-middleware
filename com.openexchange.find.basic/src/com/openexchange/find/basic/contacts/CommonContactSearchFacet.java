@@ -50,10 +50,14 @@
 package com.openexchange.find.basic.contacts;
 
 import java.util.List;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactFieldOperand;
+import com.openexchange.exception.OXException;
+import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.java.SearchStrings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -82,7 +86,8 @@ public abstract class CommonContactSearchFacet extends ContactSearchFacet {
     }
 
     @Override
-    public SearchTerm<?> getSearchTerm(ServerSession session, String query) {
+    public SearchTerm<?> getSearchTerm(ServerSession session, String query) throws OXException {
+        checkPatternLength(query);
         String pattern = addWildcards(query, true, true);
         CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
         for (ContactField field : getFields()) {
@@ -106,16 +111,24 @@ public abstract class CommonContactSearchFacet extends ContactSearchFacet {
     }
 
     private static String addWildcards(String pattern, boolean prepend, boolean append) {
-        if (null != pattern && 0 < pattern.length() && false == "*".equals(pattern)) {
+        if ((null == pattern || 0 == pattern.length()) && (append || prepend)) {
+            return "*";
+        }
+        if (null != pattern) {
             if (prepend && '*' != pattern.charAt(0)) {
                 pattern = "*" + pattern;
             }
             if (append && '*' != pattern.charAt(pattern.length() - 1)) {
                 pattern = pattern + "*";
             }
-            return pattern;
         }
-        return null;
+        return pattern;
     }
 
+    private static void checkPatternLength(String pattern) throws OXException {
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (null != pattern && 0 < minimumSearchCharacters && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
+            throw FindExceptionCode.QUERY_TOO_SHORT.create(Integer.valueOf(minimumSearchCharacters));
+        }
+    }
 }

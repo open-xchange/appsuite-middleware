@@ -347,7 +347,10 @@ public class AppointmentSearchBuilder {
     }
 
     private static String addWildcards(String pattern, boolean prepend, boolean append) {
-        if (null != pattern && 0 < pattern.length() && false == "*".equals(pattern)) {
+        if ((null == pattern || 0 == pattern.length()) && (append || prepend)) {
+            return "*";
+        }
+        if (null != pattern) {
             if (prepend && '*' != pattern.charAt(0)) {
                 pattern = "*" + pattern;
             }
