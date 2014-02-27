@@ -221,7 +221,7 @@ public class RdbTaskSearch extends TaskSearch {
         builder.append("SELECT ").append(fields);
         builder.append(" FROM task AS t ");
         
-        if (searchObject.getParticipants().length > 0)
+        if (searchObject.getParticipants() != null && searchObject.getParticipants().length > 0)
             builder.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)");
         
         builder.append(" LEFT JOIN task_folder AS tf ON (tf.id = t.id AND tf.cid = t.cid)");
@@ -273,9 +273,8 @@ public class RdbTaskSearch extends TaskSearch {
             for(String q : queries) {
                 String preparedPattern = StringCollection.prepareForSearch(q, true, true);
                 builder.append(containsWildcards(preparedPattern) ? 
-                                                    " AND (t.description LIKE ? OR t.title LIKE ? OR tp.description LIKE ? ) " : 
-                                                    " AND (t.description = ? OR t.title = ? OR tp.description = ? ) ");
-                searchParameters.add(preparedPattern);
+                                                    " AND (t.description LIKE ? OR t.title LIKE ? ) " : 
+                                                    " AND (t.description = ? OR t.title = ? ) ");
                 searchParameters.add(preparedPattern);
                 searchParameters.add(preparedPattern);
             }
