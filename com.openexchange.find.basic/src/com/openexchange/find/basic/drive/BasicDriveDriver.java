@@ -49,7 +49,7 @@
 
 package com.openexchange.find.basic.drive;
 
-import static com.openexchange.find.basic.mail.Constants.QUERY_FIELDS;
+import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

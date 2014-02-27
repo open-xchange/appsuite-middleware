@@ -49,6 +49,9 @@
 
 package com.openexchange.find.basic.drive;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 /**
  * {@link Constants}
@@ -78,5 +81,9 @@ public final class Constants {
 
     /** The field for folder type */
     public static final String FIELD_FOLDER_TYPE = "folder_type";
+
+    // ---------------------------------------------------------------------------------------------------------- //
+
+    public static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_FILE_NAME, FIELD_FILE_DESC });
 
 }
