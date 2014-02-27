@@ -54,8 +54,18 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
+import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.TaskContentType;
+import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.search.TaskSearchObject;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link TaskSearchBuilder}
@@ -66,13 +76,16 @@ public class TaskSearchObjectBuilder {
     
     private final TaskSearchObject searchObject;
     
-    private enum SupportedFields {title, description, status};
+    private final ServerSession session;
+    
+    private enum SupportedFields {title, description, status, folder_type, type};
     
     /**
      * Initializes a new {@link TaskSearchBuilder}.
      */
-    public TaskSearchObjectBuilder() {
+    public TaskSearchObjectBuilder(ServerSession ss) {
         super();
+        session = ss;
         searchObject = new TaskSearchObject();
     }
     
@@ -125,6 +138,11 @@ public class TaskSearchObjectBuilder {
                     break;
                 case status:
                     addStateFilters(filter.getQueries());
+                    break;
+                case folder_type:
+                    addFolderTypeFilters(filter.getQueries());
+                    break;
+                case type:
                     break;
                 default:
                     throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(f);
@@ -205,5 +223,31 @@ public class TaskSearchObjectBuilder {
             sf.add(s);
         }
         searchObject.setStateFilters(sf);
+    }
+    
+    /**
+     * Prefetch all relevant folder ids, according to the specified filters  
+     * @param filters
+     * @throws OXException
+     */
+    private void addFolderTypeFilters(List<String> filters) throws OXException {
+        for(String q : filters) {
+            Type t;
+            if (FolderTypeDisplayItem.Type.PUBLIC.getIdentifier().equals(q)) {
+                t = PublicType.getInstance();
+            } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(q)) {
+                t = SharedType.getInstance();
+            } else if (FolderTypeDisplayItem.Type.PRIVATE.getIdentifier().equals(q)) {
+                t = PrivateType.getInstance();
+            } else {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(q);
+            }
+            UserizedFolder[] folders = Services.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, TaskContentType.getInstance(), t, false, session, null).getResponse();
+            if (folders != null && folders.length > 0) {
+                for (UserizedFolder uf : folders) {
+                    searchObject.addFolder(Integer.valueOf(uf.getID()));
+                }
+            }
+        }
     }
 }

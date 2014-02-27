@@ -80,7 +80,7 @@ public class TaskSearchObject extends CalendarSearchObject {
     private Set<Integer> stateFilters;
     
     private Set<String> queries;
-
+    
     /**
      * This array contains 2 values between them the task ends. If the task has
      * no end date it won't appear if the range is defined.

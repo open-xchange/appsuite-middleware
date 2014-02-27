@@ -219,9 +219,12 @@ public class RdbTaskSearch extends TaskSearch {
         StringBuilder builder = new StringBuilder();
         String fields = SQL.getFields(columns, false, "t");
         builder.append("SELECT ").append(fields);
-        builder.append(" FROM task AS t ")
-               //.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)")
-               .append(" LEFT JOIN task_folder AS tf ON (tf.id = t.id AND tf.cid = t.cid)");
+        builder.append(" FROM task AS t ");
+        
+        if (searchObject.getParticipants().length > 0)
+            builder.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)");
+        
+        builder.append(" LEFT JOIN task_folder AS tf ON (tf.id = t.id AND tf.cid = t.cid)");
         
         builder.append(" WHERE t.cid = ? AND ");
         builder.append(SQL.allFoldersWhere(all, own, shared));

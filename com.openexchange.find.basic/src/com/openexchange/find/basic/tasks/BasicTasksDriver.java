@@ -88,7 +88,7 @@ public class BasicTasksDriver extends MockTasksDriver {
      */
     @Override
     public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
-        TaskSearchObjectBuilder builder = new TaskSearchObjectBuilder();
+        TaskSearchObjectBuilder builder = new TaskSearchObjectBuilder(session);
         TaskSearchObject searchObject = builder.addFilters(searchRequest.getFilters()).addQueries(searchRequest.getQueries()).build();
         
         final TasksSQLInterface tasksSQL = new TasksSQLImpl(session);
