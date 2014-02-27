@@ -77,4 +77,7 @@ public class FindExceptionMessages implements LocalizableStrings {
     // A search filter contained an unknown field: '%1$s'.
     public static final String INVALID_FILTER_UNKNOWN_FIELD = "A search filter contained an unknown field: '%1$s'.";
 
+    // In order to accomplish the search, %1$d or more characters are required.
+    public static final String QUERY_TOO_SHORT = "In order to accomplish the search, %1$d or more characters are required.";
+
 }

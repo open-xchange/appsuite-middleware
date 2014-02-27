@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n.parsing;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,6 +62,56 @@ import com.openexchange.java.Charsets;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 final class POTokenStream {
+
+    public static void main(String[] args) throws Exception {
+
+        byte[] bytes = ("# #-#-#-#-#  server.de_DE.po (server.de_DE)  #-#-#-#-#\n" +
+            "# translation of server.de_DE.po to deutsch\n" +
+            "# translation of server.new.de_DE.po to\n" +
+            "# translation of server.de_DE.po to\n" +
+            "# #-#-#-#-#  errors.de_DE.po (errors.de_DE)  #-#-#-#-#\n" +
+            "# translation of errors.de_DE.po to deutsch\n" +
+            "# translation of errors.de_DE.po to\n" +
+            "# translation of errors.de-new.po to\n" +
+            "# translation of errors.de.po to\n" +
+            "# translation of errors.po to\n" +
+            "# This file is distributed under the same license as the PACKAGE package.\n" +
+            "# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.\n" +
+            "#\n" +
+            "# Antje Faber, 2007.\n" +
+            "# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009, 2010, 2011.\n" +
+            "# Antje Faber, 2006, 2012, 2013.\n" +
+            "msgid \"\"\n" +
+            "msgstr \"\"\n" +
+            "\"Project-Id-Version: errors.de_DE\\n\"\n" +
+            "\"Report-Msgid-Bugs-To: \\n\"\n" +
+            "\"POT-Creation-Date: \\n\"\n" +
+            "\"PO-Revision-Date: 2014-01-20 11:50+0100\\n\"\n" +
+            "\"Last-Translator: Antje Faber\\n\"\n" +
+            "\"Language-Team: German <kde-i18n-de@kde.org>\\n\"\n" +
+            "\"Language: de\\n\"\n" +
+            "\"MIME-Version: 1.0\\n\"\n" +
+            "\"Content-Type: text/plain; charset=UTF-8\\n\"\n" +
+            "\"Content-Transfer-Encoding: 8bit\\n\"\n" +
+            "\"Plural-Forms: nplurals=2; plural=n != 1;\\n\"\n" +
+            "\"X-Generator: Poedit 1.6.3\\n\"\n" +
+            "\"X-Generator: Lokalize 1.0\\n\"\n" +
+            "\"Plural-Forms: nplurals=2; plural=n != 1;\\n\"\n" +
+            "\n" +
+            "#. The client send a ticket within the browser request and the verification of this ticket failed.\n" +
+            "#. %1$s will be replaced with a detailed exception message.\n" +
+            "#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:63\n" +
+            "msgid \"Verification of client ticket failed: %1$s\"\n" +
+            "msgstr \"Die Verifizierung des Client-Tickets ist fehlgeschlagen: %1$s\"").getBytes();
+        ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+
+
+        Translations parsed = new POParser().parse(stream, "foobar.po");
+
+        System.out.println(parsed);
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------//
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POTokenStream.class);
 
@@ -112,35 +163,42 @@ final class POTokenStream {
     }
 
     private void initNextToken() throws OXException {
-        byte c = read();
-        while (Character.isWhitespace(c)) {
-            c = read();
-        }
-        switch (c) {
-        case 'm':
-            msgIdOrMsgStr();
-            break;
-        case '"':
-            string();
-            break;
-        case '#':
-            comment();
-            break;
-        case -1:
-            eof();
-            break;
-        default:
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(c);
-            while ((c = read()) != -1 && c != '\n') {
-                baos.write(c);
+        boolean repeat = true;
+        while (repeat) {
+            repeat = false;
+            byte c = read();
+            while (Character.isWhitespace(c)) {
+                c = read();
             }
-            throw I18NExceptionCode.UNEXPECTED_TOKEN.create(
-                toString(baos.toByteArray()),
-                filename,
-                Integer.valueOf(line - 1),
-                "[msgid, msgctxt, msgstr, string, comment, eof]");
+            switch (c) {
+            case 'm':
+                msgIdOrMsgStr();
+                break;
+            case '"':
+                string();
+                break;
+            case '#':
+                // Discard comment and repeat look-up for next token
+                comment();
+                repeat = true;
+                break;
+            case -1:
+                eof();
+                break;
+            default:
+                final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                baos.write(c);
+                while ((c = read()) != -1 && c != '\n') {
+                    baos.write(c);
+                }
+                throw I18NExceptionCode.UNEXPECTED_TOKEN.create(
+                    toString(baos.toByteArray()),
+                    filename,
+                    Integer.valueOf(line - 1),
+                    "[msgid, msgctxt, msgstr, string, comment, eof]");
+            }
         }
+
     }
 
     private byte read() throws OXException {
@@ -165,7 +223,7 @@ final class POTokenStream {
         while ((b = read()) != '\n' && b > 0) {
             // Discard
         }
-        initNextToken();
+        //initNextToken();
     }
 
     private String toString(final byte[] b) {

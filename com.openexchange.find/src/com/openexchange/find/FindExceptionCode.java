@@ -94,12 +94,15 @@ public enum FindExceptionCode implements DisplayableOXExceptionCode {
      * The facet \"%1$s\" is not supported by module \"%2$s\".
      */
     UNSUPPORTED_FACET("The facet \"%1$s\" is not supported by module \"%2$s\".", Category.CATEGORY_ERROR, 8),
-    
     /**
      * Null field on filter
      */
     NULL_FIELD("A search filter contains a 'null' field: '%1$s'.", Category.CATEGORY_ERROR, 9),
-    
+    /**
+     * In order to accomplish the search, %1$d or more characters are required.
+     */
+    QUERY_TOO_SHORT(FindExceptionMessages.QUERY_TOO_SHORT, Category.CATEGORY_USER_INPUT, 10, FindExceptionMessages.QUERY_TOO_SHORT),
+
     ;
 
     public static final String PREFIX = "FIND";
