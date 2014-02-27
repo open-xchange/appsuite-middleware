@@ -96,6 +96,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // Message %1$s not found in folder %2$s.
     public static final String MESSAGE_NOT_FOUND_MSG = "Message %1$s not found in folder %2$s.";
 
+    // Invalid OAuth account specified.
+    public static final String INVALID_OAUTH_ACCOUNT_MSG = "Invalid OAuth account specified.";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */

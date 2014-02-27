@@ -84,6 +84,10 @@ public class NewAction extends AbstractMessagingAccountAction {
     protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
         final MessagingAccount account = parser.parse((JSONObject) request.requireData(), session.getUserId(), session.getContextId());
         saneConfiguration(account);
+
+        // Check integrity of messaging service and configuration
+        checkAccountConfiguration(account, session);
+
         final int id = account.getMessagingService().getAccountManager().addAccount(account, session);
         return new AJAXRequestResult(Integer.valueOf(id));
     }

@@ -166,14 +166,21 @@ public enum MessagingExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Message %1$s not found in folder %2$s.
      */
-    MESSAGE_NOT_FOUND("Message %1$s not found in folder %2$s.", CATEGORY_ERROR, 25, MessagingExceptionMessages.MESSAGE_NOT_FOUND_MSG);
+    MESSAGE_NOT_FOUND("Message %1$s not found in folder %2$s.", CATEGORY_ERROR, 25, MessagingExceptionMessages.MESSAGE_NOT_FOUND_MSG),
+    /**
+     * Invalid OAuth account specified. OAuth account of type '%1$s' cannot be mapped to messaging service '%2$s'.
+     */
+    INVALID_OAUTH_ACCOUNT("Invalid OAuth account specified. OAuth account of type '%1$s' cannot be mapped to messaging service '%2$s'.", CATEGORY_ERROR, 26, MessagingExceptionMessages.INVALID_OAUTH_ACCOUNT_MSG),
+
+    ;
+
 
     private final Category category;
 
     private final int detailNumber;
 
     private final String message;
-    
+
     private String displayMessage;
 
     private MessagingExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
@@ -197,7 +204,7 @@ public enum MessagingExceptionCodes implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

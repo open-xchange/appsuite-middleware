@@ -1,3 +1,7 @@
+* 2014-02-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31299: Check validity of associated OAuth account prior to creating a messaging account
+
 * 2014-02-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 31316: Check for a syntactically empty-element tag prior to marking it
