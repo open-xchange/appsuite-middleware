@@ -73,7 +73,7 @@ import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
-import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtil;
+import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -133,7 +133,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                 final Appointment originalAppointment = appointments.next();
                 Appointment copyAppointment = originalAppointment.clone();
 
-                /** TODO refactor *******************************************************************************/
+                /***************** Calculates the time of specific appointment **********************/
                 final RecurringResultsInterface recurringResult = collectionService.calculateRecurring(
                     copyAppointment,
                     convertDateToTimestamp(currentDate),
@@ -141,8 +141,8 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                     0);
 
                 if (recurringResult != null) {
-                    int position = recurringResult.getPositionByLong(normalizeLong(currentDate.getTime()));
-                    // appointment is changed or deleted in recurrency and cant be found anymore
+                    int position = recurringResult.getPositionByLong(collectionService.normalizeLong(currentDate.getTime()));
+                    // appointment is changed or deleted in recurrency and can't be found anymore
                     if (position == -1) {
                         continue;
                     }
@@ -175,14 +175,14 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
 
     @Override
     public NotifyTemplate getTemplate() throws OXException {
-        final String template = MobileNotifierFileUtil.getTemplateFileContent(MobileNotifierProviders.APPOINTMENT.getTemplateFileName());
+        final String template = MobileNotifierFileUtility.getTemplateFileContent(MobileNotifierProviders.APPOINTMENT.getTemplateFileName());
         final String title = MobileNotifierProviders.APPOINTMENT.getTitle();
         return new NotifyTemplate(title, template, true, MobileNotifierProviders.APPOINTMENT.getIndex());
     }
 
     @Override
     public void putTemplate(String changedTemplate) throws OXException {
-        MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.APPOINTMENT.getTemplateFileName(), changedTemplate);
+        MobileNotifierFileUtility.writeTemplateFileContent(MobileNotifierProviders.APPOINTMENT.getTemplateFileName(), changedTemplate);
     }
 
     /**
@@ -235,9 +235,5 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
         calendar.set(Calendar.SECOND, 0);
         calendar.add(Calendar.DAY_OF_YEAR, 1);
         return calendar.getTimeInMillis();
-    }
-
-    private long normalizeLong(final long millis) {
-        return millis - (millis % Constants.MILLI_DAY);
     }
 }

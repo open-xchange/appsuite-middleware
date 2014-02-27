@@ -58,7 +58,7 @@ import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
-import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtil;
+import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtility;
 import com.openexchange.session.Session;
 
 /**
@@ -103,7 +103,7 @@ public class ExampleCalendarMobileNotifierService extends AbstractMobileNotifier
         // main attributes
         final String fileName = MobileNotifierProviders.APPOINTMENT.getTemplateFileName();
         final String title = MobileNotifierProviders.APPOINTMENT.getTitle();
-        final String htmlTemplate = MobileNotifierFileUtil.getTemplateFileContent(fileName);
+        final String htmlTemplate = MobileNotifierFileUtility.getTemplateFileContent(fileName);
         int index = 2;
         // additional attribute
         Map<String, Object> attributes = new HashMap<String, Object>();
@@ -116,6 +116,6 @@ public class ExampleCalendarMobileNotifierService extends AbstractMobileNotifier
 
     @Override
     public void putTemplate(String changedTemplate) throws OXException {
-        MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.APPOINTMENT.getTemplateFileName(), changedTemplate);
+        MobileNotifierFileUtility.writeTemplateFileContent(MobileNotifierProviders.APPOINTMENT.getTemplateFileName(), changedTemplate);
     }
 }

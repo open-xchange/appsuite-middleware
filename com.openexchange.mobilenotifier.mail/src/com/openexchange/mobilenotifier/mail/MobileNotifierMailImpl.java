@@ -78,7 +78,7 @@ import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
 import com.openexchange.mobilenotifier.utility.LocaleAndTimeZone;
 import com.openexchange.mobilenotifier.utility.LocalizationUtility;
-import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtil;
+import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtility;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -171,14 +171,14 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
 
     @Override
     public NotifyTemplate getTemplate() throws OXException {
-        final String template = MobileNotifierFileUtil.getTemplateFileContent(MobileNotifierProviders.MAIL.getTemplateFileName());
+        final String template = MobileNotifierFileUtility.getTemplateFileContent(MobileNotifierProviders.MAIL.getTemplateFileName());
         final String title = MobileNotifierProviders.MAIL.getTitle();
         return new NotifyTemplate(title, template, true, MobileNotifierProviders.MAIL.getIndex());
     }
 
     @Override
     public void putTemplate(String changedTemplate) throws OXException {
-        MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.MAIL.getTemplateFileName(), changedTemplate);
+        MobileNotifierFileUtility.writeTemplateFileContent(MobileNotifierProviders.MAIL.getTemplateFileName(), changedTemplate);
     }
 
     /**

@@ -56,7 +56,7 @@ import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
-import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtil;
+import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtility;
 import com.openexchange.session.Session;
 
 /**
@@ -104,7 +104,7 @@ public class ExampleMailMobileNotifierService extends AbstractMobileNotifierServ
     @Override
     public NotifyTemplate getTemplate() throws OXException {
         final String fileName = MobileNotifierProviders.MAIL.getTemplateFileName();
-        final String htmlTemplate = MobileNotifierFileUtil.getTemplateFileContent(fileName);
+        final String htmlTemplate = MobileNotifierFileUtility.getTemplateFileContent(fileName);
         final String title = MobileNotifierProviders.MAIL.getTitle();
         int index = 1;
 
@@ -113,6 +113,6 @@ public class ExampleMailMobileNotifierService extends AbstractMobileNotifierServ
 
     @Override
     public void putTemplate(String changedTemplate) throws OXException {
-        MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.MAIL.getTemplateFileName(), changedTemplate);
+        MobileNotifierFileUtility.writeTemplateFileContent(MobileNotifierProviders.MAIL.getTemplateFileName(), changedTemplate);
     }
 }

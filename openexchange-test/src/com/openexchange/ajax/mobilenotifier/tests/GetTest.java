@@ -95,6 +95,7 @@ public class GetTest extends AbstractMobileNotifierTest {
             "title",
             "location",
             "start_date",
+            "end_date",
             "organizer",
             "status",
             "note",

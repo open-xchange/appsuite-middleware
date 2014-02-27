@@ -62,12 +62,12 @@ import com.openexchange.java.StringAllocator;
 import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 
 /**
- * {@link MobileNotifierFileUtil} - Util for file handling
+ * {@link MobileNotifierFileUtility} - Util for file handling
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public abstract class MobileNotifierFileUtil {
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierFileUtil.class);
+public abstract class MobileNotifierFileUtility {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierFileUtility.class);
 
     private static final String TEMPLATEPATH = "/templates/";
 
