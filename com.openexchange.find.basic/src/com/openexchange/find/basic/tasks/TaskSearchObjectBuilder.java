@@ -57,6 +57,7 @@ import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.tasks.TaskTypeDisplayItem;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -143,6 +144,7 @@ public class TaskSearchObjectBuilder {
                     addFolderTypeFilters(filter.getQueries());
                     break;
                 case type:
+                    addRecurrenceTypeFilters(filter.getQueries());
                     break;
                 default:
                     throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(f);
@@ -248,6 +250,22 @@ public class TaskSearchObjectBuilder {
                     searchObject.addFolder(Integer.valueOf(uf.getID()));
                 }
             }
+        }
+    }
+    
+    /**
+     * Set the reccurence type filter
+     * @param filters
+     * @throws OXException
+     */
+    private void addRecurrenceTypeFilters(List<String> filters) throws OXException {
+        for(String r : filters) {
+            if (TaskTypeDisplayItem.Type.SERIES.getIdentifier().equals(r))
+                searchObject.setSeriesFilter(true);
+            else if(TaskTypeDisplayItem.Type.SINGLE_TASK.getIdentifier().equals(r))
+                searchObject.setSingleOccurrenceFilter(true);
+            else
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(r, "type");
         }
     }
 }

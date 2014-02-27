@@ -52,6 +52,7 @@ package com.openexchange.ajax.find.tasks;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.actions.QueryRequest;
@@ -97,14 +98,17 @@ public class SimpleTest extends AbstractFindTest {
 
             List<String> queries = Collections.singletonList("test");
             List<Filter> filters = new ArrayList<Filter>();
-            filters.add(new Filter(Collections.singletonList("folder_type"), "private"));
+            //filters.add(new Filter(Collections.singletonList("folder_type"), "shared"));
+            //filters.add(new Filter(Collections.singletonList("folder_type"), "private"));
+            filters.add(new Filter(Collections.singletonList("type"), "single_task"));
             //filters.add(new Filter(Collections.singletonList("status"), "1"));
             //filters.add(new Filter(Collections.singletonList("status"), "2"));
             final QueryResponse queryResponse = getClient().execute(new QueryRequest(0, 10, queries, filters, "tasks"));
 
             assertNotNull(queryResponse);
 
-            System.err.println(queryResponse.getData());
+            JSONObject j = (JSONObject) queryResponse.getData();
+            System.err.println("RESULTS: " + j.getJSONArray("results").length());
 
         } catch (final Exception e) {
             e.printStackTrace();

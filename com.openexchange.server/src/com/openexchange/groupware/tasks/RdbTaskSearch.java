@@ -280,6 +280,12 @@ public class RdbTaskSearch extends TaskSearch {
             }
         }
         
+        //set the recurrence type (mutually exclusive)
+        if (searchObject.isSingleOccurenceFilter())
+            builder.append(" AND t.recurrence_type = 0 ");
+        else if (searchObject.isSeriesFilter())
+            builder.append(" AND t.recurrence_type > 0 ");
+        
         builder.append(SQL.getOrder(orderBy, order));
         
         //set parameters

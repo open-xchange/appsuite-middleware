@@ -81,6 +81,10 @@ public class TaskSearchObject extends CalendarSearchObject {
     
     private Set<String> queries;
     
+    private boolean seriesFilter;
+    
+    private boolean singleOccurrenceFilter;
+    
     /**
      * This array contains 2 values between them the task ends. If the task has
      * no end date it won't appear if the range is defined.
@@ -183,5 +187,41 @@ public class TaskSearchObject extends CalendarSearchObject {
      */
     public void setStateFilters(Set<Integer> stateFilters) {
         this.stateFilters = stateFilters;
+    }
+
+    /**
+     * Gets the seriesFilter
+     *
+     * @return The seriesFilter
+     */
+    public boolean isSeriesFilter() {
+        return seriesFilter;
+    }
+
+    /**
+     * Sets the seriesFilter
+     *
+     * @param seriesFilter The seriesFilter to set
+     */
+    public void setSeriesFilter(boolean seriesFilter) {
+        this.seriesFilter = seriesFilter;
+    }
+
+    /**
+     * Gets the singleFilter
+     *
+     * @return The singleFilter
+     */
+    public boolean isSingleOccurenceFilter() {
+        return singleOccurrenceFilter;
+    }
+
+    /**
+     * Sets the singleFilter
+     *
+     * @param singleFilter The singleFilter to set
+     */
+    public void setSingleOccurrenceFilter(boolean singleFilter) {
+        this.singleOccurrenceFilter = singleFilter;
     }
 }
