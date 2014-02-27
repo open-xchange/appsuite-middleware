@@ -73,7 +73,7 @@ import com.openexchange.tools.sql.SearchStrings;
  */
 public class Search {
 
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Search.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Search.class);
 
     protected final Context ctx;
 

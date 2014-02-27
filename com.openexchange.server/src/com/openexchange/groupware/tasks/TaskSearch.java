@@ -123,9 +123,9 @@ abstract class TaskSearch {
      * @param columns columns to select
      * @param orderBy order by column
      * @param order asc or desc
-     * @param all TODO
-     * @param own TODO
-     * @param shared TODO
+     * @param all a list of folders ids where all tasks can be seen.
+     * @param own a list of folder ids owned by the user
+     * @param shared a list of folder ids where the user has at least read access
      * @return
      * @throws OXException
      */

@@ -78,21 +78,6 @@ public class FindTask extends Search {
     public FindTask(Context ctx, User user, UserPermissionBits permissionBits, TaskSearchObject search, int orderBy, Order order, int[] columns) {
         super(ctx, user, permissionBits, search, orderBy, order, columns);
     }
-
-    /**
-     * Initializes a new {@link FindTask}.
-     * @param permissionBits TODO
-     */
-    /*public FindTask(Context c, int uid, UserPermissionBits upb, TaskSearchObject so, int cols[], int ob, Order o) {
-        super();
-        context = c;
-        userID = uid;
-        searchObject = so;
-        columns = cols;
-        orderBy = ob;
-        order = o;
-        permissionBits = upb;
-    }*/
     
     /**
      * Execute the 'find' query
@@ -102,13 +87,8 @@ public class FindTask extends Search {
      */
     @Override
     public SearchIterator<Task> perform() throws OXException {
-        //TODO: impl
         checkConditions();
         prepareFolder();
         return TaskSearch.getInstance().find(ctx, user.getId(), search, columns, orderBy, order, all, own, shared);
     }
-    
-    
-    
-
 }
