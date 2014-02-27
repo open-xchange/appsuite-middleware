@@ -96,9 +96,10 @@ public class SimpleTest extends AbstractFindTest {
         try {
 
             List<String> queries = Collections.singletonList("test");
-            List<Filter> filters = new ArrayList<Filter>(2);
+            List<Filter> filters = new ArrayList<Filter>();
             filters.add(new Filter(Collections.singletonList("title"), "bug"));
-            filters.add(new Filter(Collections.singletonList("status"), "done"));
+            filters.add(new Filter(Collections.singletonList("status"), "1"));
+            filters.add(new Filter(Collections.singletonList("status"), "2"));
             final QueryResponse queryResponse = getClient().execute(new QueryRequest(0, 10, queries, filters, "tasks"));
 
             assertNotNull(queryResponse);

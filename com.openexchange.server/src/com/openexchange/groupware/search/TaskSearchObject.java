@@ -77,6 +77,8 @@ public class TaskSearchObject extends CalendarSearchObject {
     
     private Set<String> descriptionFilters;
     
+    private Set<Integer> stateFilters;
+    
     private Set<String> queries;
 
     /**
@@ -163,5 +165,23 @@ public class TaskSearchObject extends CalendarSearchObject {
      */
     public void setQueries(Set<String> queries) {
         this.queries = queries;
+    }
+
+    /**
+     * Gets the stateFilters
+     *
+     * @return The stateFilters
+     */
+    public Set<Integer> getStateFilters() {
+        return stateFilters;
+    }
+
+    /**
+     * Sets the stateFilters
+     *
+     * @param stateFilters The stateFilters to set
+     */
+    public void setStateFilters(Set<Integer> stateFilters) {
+        this.stateFilters = stateFilters;
     }
 }

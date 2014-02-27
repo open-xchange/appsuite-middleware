@@ -66,6 +66,8 @@ public class TaskSearchObjectBuilder {
     
     private final TaskSearchObject searchObject;
     
+    private enum SupportedFields {title, description, status};
+    
     /**
      * Initializes a new {@link TaskSearchBuilder}.
      */
@@ -110,18 +112,21 @@ public class TaskSearchObjectBuilder {
                 sf = SupportedFields.valueOf(f);
             } catch (IllegalArgumentException e) {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(f);
-            } catch (NullPointerException e) { //should never happen
+            } catch (NullPointerException e) {
                 throw FindExceptionCode.NULL_FIELD.create(f);
             }
             
             switch(sf) {
                 case title:
                     addTitleFilters(filter.getQueries());
-                break;
+                    break;
                 case description:
                     addDescriptionFilters(filter.getQueries());
-                break;
-                default: //should never happen
+                    break;
+                case status:
+                    addStateFilters(filter.getQueries());
+                    break;
+                default:
                     throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(f);
             }
         }
@@ -182,5 +187,23 @@ public class TaskSearchObjectBuilder {
             df.add(q);
         }
         searchObject.setDescriptionFilters(df);
+    }
+    
+    /**
+     * Add the status filter
+     * @param filters
+     * @throws OXException
+     */
+    private void addStateFilters(List<String> filters) throws OXException {
+        Set<Integer> sf = searchObject.getStateFilters();
+        if (sf == null)
+            sf = new HashSet<Integer>(filters.size());
+        for(String q : filters) {
+            int s = Integer.parseInt(q);
+            if (s > 5 || s < 1)
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(q, "status");
+            sf.add(s);
+        }
+        searchObject.setStateFilters(sf);
     }
 }

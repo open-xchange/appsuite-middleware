@@ -74,6 +74,7 @@ import com.openexchange.tools.sql.DBUtils;
  * Implementation of search for tasks interface using a relational database
  * currently MySQL.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> (find method)
  */
 public class RdbTaskSearch extends TaskSearch {
 
@@ -220,9 +221,9 @@ public class RdbTaskSearch extends TaskSearch {
         builder.append("SELECT ").append(fields);
         builder.append(" FROM task AS t ");
         builder.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)")
-               .append(" LEFT JOIN user AS u ON (tp.user = u.id)");
+               .append(" LEFT JOIN task_folder AS tf ON (tf.id = t.id AND tf.cid = t.cid)");
         
-        builder.append(" WHERE t.cid = ? AND u.id = ?");
+        builder.append(" WHERE t.cid = ? AND tf.user = ?");
         searchParameters.add(context.getContextId());
         searchParameters.add(userID);
         
@@ -246,6 +247,20 @@ public class RdbTaskSearch extends TaskSearch {
                 builder.append(containsWildcards(preparedPattern) ? " t.description LIKE ? " : " t.description = ? ");
                 searchParameters.add(preparedPattern);
             }
+        }
+        
+        //set status
+        Set<Integer> statusFilters = searchObject.getStateFilters();
+        if (statusFilters != null && statusFilters.size() > 0) {
+            builder.append(" AND (");
+            int i = 0;
+            for(Integer s : statusFilters) {
+                if (i++ > 0)
+                    builder.append(" OR ");
+                builder.append(" t.state = ? ");
+                searchParameters.add(s);
+            }
+            builder.append(" ) ");
         }
         
         //set queries

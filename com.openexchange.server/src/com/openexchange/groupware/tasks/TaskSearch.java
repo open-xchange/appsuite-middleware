@@ -61,6 +61,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * Interface to different SQL implementations for searching for tasks and its
  * participants.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> (find method)
  */
 abstract class TaskSearch {
 
@@ -115,12 +116,12 @@ abstract class TaskSearch {
     
     /**
      * Search for tasks via the find API
-     * @param context TODO
-     * @param userID TODO
-     * @param searchObject TODO
-     * @param columns TODO
-     * @param orderBy TODO
-     * @param order TODO
+     * @param context context
+     * @param userID userID
+     * @param searchObject the search object
+     * @param columns columns to select
+     * @param orderBy order by column
+     * @param order asc or desc
      * @return
      * @throws OXException
      */

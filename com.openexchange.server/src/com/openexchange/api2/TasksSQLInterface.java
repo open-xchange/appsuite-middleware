@@ -95,7 +95,7 @@ public interface TasksSQLInterface {
      * @param searchObj the search object
      * @param orderBy order by the specified column
      * @param order order (asc or desc)
-     * @param cols extend the search only to the predefined columns
+     * @param cols The columns filled to the dataobject
      * @return a {@link SearchIterator} with all found tasks
      * @throws OXException
      */

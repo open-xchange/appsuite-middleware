@@ -67,6 +67,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 /**
  * This class implements the methods needed by the tasks interface of the API version 2.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> (findTask method)
  */
 public class TasksSQLImpl implements TasksSQLInterface {
 
