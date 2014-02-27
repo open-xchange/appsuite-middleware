@@ -913,7 +913,6 @@ public class FolderTest extends AbstractAJAXTest {
     public void testSharedFolder() throws OXException, OXException, IOException, SAXException, JSONException, OXException {
         int fuid01 = -1;
         int fuid02 = -1;
-        String anotherSessionId = null;
         /*
          * Create a shared folder with login as creator and define share right for second user
          */
@@ -948,21 +947,13 @@ public class FolderTest extends AbstractAJAXTest {
             assertFalse(fuid02 == -1);
             /*
              * Connect with second user and verify that folder is visible beneath system shared folder
-             * Also allow thread to wait some ms so the shared folder will appear
              */
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            anotherSessionId = LoginTest.getSessionId(getSecondWebConversation(), getHostName(), getSeconduser(), getPassword());
             boolean found01 = false;
             boolean found02 = false;
             final List<FolderObject> l = getSubfolders(
                 getSecondWebConversation(),
                 getHostName(),
-                anotherSessionId,
+                getSecondSessionId(),
                 "" + FolderObject.SYSTEM_SHARED_FOLDER_ID,
                 true);
             assertFalse(l == null || l.size() == 0);
@@ -971,7 +962,7 @@ public class FolderTest extends AbstractAJAXTest {
                 final List<FolderObject> subList = getSubfolders(
                     getSecondWebConversation(),
                     getHostName(),
-                    anotherSessionId,
+                    getSecondSessionId(),
                     virtualFO.getFullName(),
                     true);
                 for (Object element2 : subList) {

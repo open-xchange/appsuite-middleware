@@ -204,7 +204,7 @@ public abstract class AbstractAJAXTest extends TestCase {
         return sessionId;
     }
 
-    protected String getSecondSessionId() throws Exception {
+    protected String getSecondSessionId() throws IOException, JSONException, OXException {
         if(null == sessionId2) {
             sessionId2 = LoginTest.getSessionId(getSecondWebConversation(),
                     getHostName(), getSeconduser(), getPassword());
