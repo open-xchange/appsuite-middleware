@@ -296,8 +296,9 @@ public class RdbTaskSearch extends TaskSearch {
             for(String mail : searchObject.getExternalParticipants()) {
                 if (searchObject.hasInternalParticipants() || i++ > 1)
                     builder.append(" AND ");
+                String preparedPattern = StringCollection.prepareForSearch(mail, true, true);
                 builder.append(" etp.mail = ? ");
-                searchParameters.add(mail);
+                searchParameters.add(preparedPattern);
             }
             builder.append(" ) ");
         }

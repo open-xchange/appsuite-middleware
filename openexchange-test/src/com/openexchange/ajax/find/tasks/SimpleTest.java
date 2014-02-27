@@ -96,7 +96,7 @@ public class SimpleTest extends AbstractFindTest {
     public void testSimpleFilter() {
         try {
 
-            List<String> queries = Collections.singletonList("test");
+            List<String> queries = Collections.singletonList("%test%");
             List<Filter> filters = new ArrayList<Filter>();
             //filters.add(new Filter(Collections.singletonList("folder_type"), "shared"));
             //filters.add(new Filter(Collections.singletonList("folder_type"), "private"));
