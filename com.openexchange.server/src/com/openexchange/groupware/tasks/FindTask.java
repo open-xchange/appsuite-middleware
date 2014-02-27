@@ -49,12 +49,12 @@
 
 package com.openexchange.groupware.tasks;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.iterator.SearchIterator;
 
 
@@ -63,26 +63,27 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class FindTask {
+public class FindTask extends Search {
     
-    private static final Logger LOG = LoggerFactory.getLogger(FindTask.class);
-    
-    private final Context context;
-    
-    private final int userID;
-    
-    private final TaskSearchObject searchObject;
-    
-    private final int[] columns;
-    
-    private final int orderBy;
-    
-    private final Order order;
+    /**
+     * Initializes a new {@link FindTask}.
+     * @param ctx
+     * @param user
+     * @param permissionBits
+     * @param search
+     * @param orderBy
+     * @param order
+     * @param columns
+     */
+    public FindTask(Context ctx, User user, UserPermissionBits permissionBits, TaskSearchObject search, int orderBy, Order order, int[] columns) {
+        super(ctx, user, permissionBits, search, orderBy, order, columns);
+    }
 
     /**
      * Initializes a new {@link FindTask}.
+     * @param permissionBits TODO
      */
-    public FindTask(Context c, int uid, TaskSearchObject so, int cols[], int ob, Order o) {
+    /*public FindTask(Context c, int uid, UserPermissionBits upb, TaskSearchObject so, int cols[], int ob, Order o) {
         super();
         context = c;
         userID = uid;
@@ -90,7 +91,8 @@ public class FindTask {
         columns = cols;
         orderBy = ob;
         order = o;
-    }
+        permissionBits = upb;
+    }*/
     
     /**
      * Execute the 'find' query
@@ -98,9 +100,12 @@ public class FindTask {
      * @return
      * @throws OXException 
      */
+    @Override
     public SearchIterator<Task> perform() throws OXException {
         //TODO: impl
-        return TaskSearch.getInstance().find(context, userID, searchObject, columns, orderBy, order);
+        checkConditions();
+        prepareFolder();
+        return TaskSearch.getInstance().find(ctx, user.getId(), search, columns, orderBy, order, all, own, shared);
     }
     
     

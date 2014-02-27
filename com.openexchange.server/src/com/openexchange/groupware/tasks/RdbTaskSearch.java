@@ -214,18 +214,19 @@ public class RdbTaskSearch extends TaskSearch {
      * @see com.openexchange.groupware.tasks.TaskSearch#find()
      */
     @Override
-    public SearchIterator<Task> find(final Context context, final int userID, TaskSearchObject searchObject, int[] columns, int orderBy, Order order) throws OXException {
+    public SearchIterator<Task> find(final Context context, final int userID, TaskSearchObject searchObject, int[] columns, int orderBy, Order order, final List<Integer> all, final List<Integer> own, final List<Integer> shared) throws OXException {
         final List<Object> searchParameters = new ArrayList<Object>();
         StringBuilder builder = new StringBuilder();
         String fields = SQL.getFields(columns, false, "t");
         builder.append("SELECT ").append(fields);
-        builder.append(" FROM task AS t ");
-        builder.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)")
+        builder.append(" FROM task AS t ")
+               //.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)")
                .append(" LEFT JOIN task_folder AS tf ON (tf.id = t.id AND tf.cid = t.cid)");
         
-        builder.append(" WHERE t.cid = ? AND tf.user = ?");
-        searchParameters.add(context.getContextId());
-        searchParameters.add(userID);
+        builder.append(" WHERE t.cid = ? AND ");
+        builder.append(SQL.allFoldersWhere(all, own, shared));
+        //searchParameters.add(context.getContextId());
+        //searchParameters.add(userID);
         
         //set titles
         Set<String> titleFilters = searchObject.getTitleFilters();
@@ -284,6 +285,19 @@ public class RdbTaskSearch extends TaskSearch {
             @Override
             public void perform(PreparedStatement stmt) throws SQLException {
                 int pos = 1;
+                stmt.setInt(pos++, context.getContextId());
+                for (final int i : all) {
+                    stmt.setInt(pos++, i);
+                }
+                for (final int i : own) {
+                    stmt.setInt(pos++, i);
+                }
+                if (own.size() > 0) {
+                    stmt.setInt(pos++, userID);
+                }
+                for (final int i : shared) {
+                    stmt.setInt(pos++, i);
+                }
                 for (Object o : searchParameters) {
                     stmt.setObject(pos++, o);
                 }
@@ -291,7 +305,7 @@ public class RdbTaskSearch extends TaskSearch {
         };
         
         System.err.println(builder.toString());
-        TaskIterator it = new TaskIterator2(context, userID, builder.toString(), ss, 0, columns, StorageType.ACTIVE);
+        TaskIterator it = new TaskIterator2(context, userID, builder.toString(), ss, -1, columns, StorageType.ACTIVE);
         
         return it;
     }
