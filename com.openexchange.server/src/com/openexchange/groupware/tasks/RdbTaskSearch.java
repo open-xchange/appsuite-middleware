@@ -68,7 +68,6 @@ import com.openexchange.tools.Collections;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Implementation of search for tasks interface using a relational database
