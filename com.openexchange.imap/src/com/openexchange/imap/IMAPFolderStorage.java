@@ -357,6 +357,38 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     @Override
+    public MailFolderInfo getFolderInfo(final String fullName) throws OXException {
+        try {
+            final String fn = (DEFAULT_FOLDER_ID.equals(fullName) ? "" : fullName);
+            final ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(fn, accountId, imapStore, session);
+            if (entry.exists()) {
+                return toFolderInfo(entry);
+            }
+
+            // Retrieve folder...
+            IMAPFolder f;
+            if (0 == fn.length()) {
+                f = (IMAPFolder) imapStore.getDefaultFolder();
+            } else {
+                f = (IMAPFolder) imapStore.getFolder(fullName);
+            }
+            // ... and check existence
+            if (!f.exists()) {
+                f = checkForNamespaceFolder(fn);
+                if (null == f) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                }
+            }
+
+            return IMAPFolderConverter.convertFolder(f, session, imapAccess, ctx).asMailFolderInfo(accountId);
+        } catch (final MessagingException e) {
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, new HashMap<String, Object>(0));
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    @Override
     public List<MailFolderInfo> getAllFolderInfos(final boolean subscribedOnly) throws OXException {
         return getFolderInfos(null, subscribedOnly);
     }

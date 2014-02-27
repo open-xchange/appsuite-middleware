@@ -69,6 +69,15 @@ public interface IMailFolderStorageInfoSupport extends IMailFolderStorage {
     boolean isInfoSupported() throws OXException;
 
     /**
+     * Gets the folder information for specified full name.
+     *
+     * @param fullName the folder full name
+     * @return The folder information
+     * @throws OXException If an error occurs
+     */
+    MailFolderInfo getFolderInfo(String fullName) throws OXException;
+
+    /**
      * Gets the folder information listing for this folder storage
      *
      * @param subscribedOnly <code>true</code> to return only subscribed folder information; otherwise <code>false</code> to return all regardless of subscribed flag
