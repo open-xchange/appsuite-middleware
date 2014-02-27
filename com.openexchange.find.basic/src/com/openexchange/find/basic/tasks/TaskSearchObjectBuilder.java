@@ -240,7 +240,7 @@ public class TaskSearchObjectBuilder {
             } else if (FolderTypeDisplayItem.Type.PRIVATE.getIdentifier().equals(q)) {
                 t = PrivateType.getInstance();
             } else {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(q);
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(q, "folder_type");
             }
             UserizedFolder[] folders = Services.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, TaskContentType.getInstance(), t, false, session, null).getResponse();
             if (folders != null && folders.length > 0) {
