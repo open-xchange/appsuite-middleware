@@ -58,7 +58,7 @@ import java.util.List;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Constants {
+final class Constants {
 
     /**
      * Initializes a new {@link Constants}.
@@ -68,22 +68,23 @@ public final class Constants {
     }
 
     /** The field for file name */
-    public static final String FIELD_FILE_NAME = "file_name";
+    static final String FIELD_FILE_NAME = "file_name";
 
     /** The field for file description */
-    public static final String FIELD_FILE_DESC = "file_description";
+    static final String FIELD_FILE_DESC = "file_description";
 
     /** The field for file content */
-    public static final String FIELD_FILE_CONTENT = "file_content";
+    static final String FIELD_FILE_CONTENT = "file_content";
 
     /** The field for file MIME type */
-    public static final String FIELD_FILE_TYPE = "file_type";
+    static final String FIELD_FILE_TYPE = "file_type";
 
     /** The field for folder type */
-    public static final String FIELD_FOLDER_TYPE = "folder_type";
+    static final String FIELD_FOLDER_TYPE = "folder_type";
 
     // ---------------------------------------------------------------------------------------------------------- //
 
-    public static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_FILE_NAME, FIELD_FILE_DESC });
+    /** The fields to query for */
+    static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_FILE_NAME, FIELD_FILE_DESC });
 
 }

@@ -60,33 +60,33 @@ import java.util.List;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class Constants {
+class Constants {
 
-    public final static String FIELD_FROM = "from";
+    final static String FIELD_FROM = "from";
 
-    public final static String FIELD_TO = "to";
+    final static String FIELD_TO = "to";
 
-    public final static String FIELD_CC = "cc";
+    final static String FIELD_CC = "cc";
 
-    public final static String FIELD_SUBJECT = "subject";
+    final static String FIELD_SUBJECT = "subject";
 
-    public final static String FIELD_BODY = "body";
+    final static String FIELD_BODY = "body";
 
-    public final static String FIELD_FOLDER = "folder";
+    final static String FIELD_FOLDER = "folder";
 
-    public final static String FIELD_TIME = "time";
+    final static String FIELD_TIME = "time";
 
-    public static final List<String> SENDER_FIELDS = asList(FIELD_FROM);
+    static final List<String> SENDER_FIELDS = asList(FIELD_FROM);
 
-    public static final List<String> RECIPIENT_FIELDS = Arrays.asList(new String[] { FIELD_TO, FIELD_CC });
+    static final List<String> RECIPIENT_FIELDS = Arrays.asList(new String[] { FIELD_TO, FIELD_CC });
 
-    public static final List<String> SENDER_AND_RECIPIENT_FIELDS = Arrays.asList(new String[] { FIELD_FROM, FIELD_TO, FIELD_CC });
+    static final List<String> SENDER_AND_RECIPIENT_FIELDS = Arrays.asList(new String[] { FIELD_FROM, FIELD_TO, FIELD_CC });
 
-    public static final List<String> FOLDERS_FIELDS = Arrays.asList(new String[] { FIELD_FOLDER });
+    static final List<String> FOLDERS_FIELDS = Arrays.asList(new String[] { FIELD_FOLDER });
 
-    public static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC });
+    static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC });
 
-    public static List<String> asList(String str) {
+    static List<String> asList(String str) {
         return Collections.singletonList(str);
     }
 
