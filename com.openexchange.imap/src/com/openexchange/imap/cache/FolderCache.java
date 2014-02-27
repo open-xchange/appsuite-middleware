@@ -89,6 +89,10 @@ public final class FolderCache {
         super();
     }
 
+    private static boolean cacheEnabled() {
+        return false && IMAPProperties.getInstance().allowFolderCaches();
+    }
+
     /**
      * Gets cached IMAP folder.
      *
@@ -97,7 +101,7 @@ public final class FolderCache {
      * @return The cached IMAP folder or <code>null</code>
      */
     public static MailFolder optCachedFolder(final String fullName, final IMAPFolderStorage folderStorage) {
-        if (!IMAPProperties.getInstance().allowFolderCaches()) {
+        if (!cacheEnabled()) {
             return null;
         }
         final Session session = folderStorage.getSession();
@@ -141,7 +145,7 @@ public final class FolderCache {
      * @throws OXException If loading the folder fails
      */
     public static void updateCachedFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws OXException {
-        if (!IMAPProperties.getInstance().allowFolderCaches()) {
+        if (!cacheEnabled()) {
             return;
         }
         final Session session = folderStorage.getSession();
@@ -183,7 +187,7 @@ public final class FolderCache {
      * @throws OXException If loading the folder fails
      */
     public static MailFolder getCachedFolder(final String fullName, final IMAPFolderStorage folderStorage, final IMAPFolder imapFolder) throws OXException {
-        if (!IMAPProperties.getInstance().allowFolderCaches()) {
+        if (!cacheEnabled()) {
             return loadFolder(fullName, folderStorage, imapFolder);
         }
         final Session session = folderStorage.getSession();
@@ -227,7 +231,7 @@ public final class FolderCache {
                      */
                     return newFld;
                 }
-                newFld.setLiveAccess(false);
+                //newFld.setLiveAccess(false);
                 mailFolder = folderMap.putIfAbsent(fullName, newFld);
                 if (null == mailFolder) {
                     mailFolder = newFld;
@@ -237,7 +241,7 @@ public final class FolderCache {
             }
         } else {
             // Fetched from cache
-            mailFolder.setLiveAccess(false);
+            //mailFolder.setLiveAccess(false);
         }
         /*
          * Return
