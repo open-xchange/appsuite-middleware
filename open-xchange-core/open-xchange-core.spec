@@ -908,6 +908,7 @@ ox_set_property readProperty.5 autoReconnect=false /opt/open-xchange/etc/configd
 ox_set_property writeProperty.5 autoReconnect=false /opt/open-xchange/etc/configdb.properties
 
 # Change jolokia.properties comment by reloading properties
+pfile=/opt/open-xchange/etc/jolokia.properties
 VALUE=$(ox_read_property com.openexchange.jolokia.user $pfile)
 if [ -n "$VALUE" ]; then
     ox_set_property com.openexchange.jolokia.user "$VALUE" $pfile
@@ -918,6 +919,8 @@ VALUE=$(ox_read_property com.openexchange.jolokia.password $pfile)
 if [ -n "$VALUE" ]; then
     ox_set_property com.openexchange.jolokia.password "$VALUE" $pfile
 else
+    ox_set_property com.openexchange.jolokia.password "" $pfile
+fi
     
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
