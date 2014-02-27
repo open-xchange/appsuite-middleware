@@ -8,6 +8,9 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.api2,
  com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.groupware.calendar,
+ com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.ldap,

@@ -89,7 +89,7 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
         assertNotNull(res.getData());
         JSONObject notifyTemplateJSON = (JSONObject) res.getData();
 
-        assertNotNull("could not find element \"provider\" in json structure", notifyTemplateJSON.get("provider"));
+        assertNotNull("could not find key \"provider\" in json structure", notifyTemplateJSON.get("provider"));
         JSONObject providersArray = (JSONObject) notifyTemplateJSON.get("provider");
 
         assertEquals(
@@ -101,12 +101,12 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
             assertNotNull(providersArray.get(providerValue.get(i)));
             JSONObject providerObject = (JSONObject) providersArray.get(providerValue.get(i));
 
-            assertTrue("could not find attribute template", providerObject.has("template"));
-            assertTrue("value of attribute template is empty ", providerObject.getString("template").length() > 0);
-            assertTrue("could not find attribute slow", providerObject.has("slow"));
-            assertTrue("value of attribute template is empty ", providerObject.getString("slow").length() > 0);
-            assertTrue("could not find attribute index", providerObject.has("index"));
-            assertTrue("value of attribute index is empty ", providerObject.getString("index").length() > 0);
+            assertTrue("could not find key \"template\"", providerObject.has("template"));
+            assertTrue("value of key template is empty ", providerObject.getString("template").length() > 0);
+            assertTrue("could not find key \"slow\"", providerObject.has("slow"));
+            assertTrue("value of key \"template\" is empty ", providerObject.getString("slow").length() > 0);
+            assertTrue("could not find key \"index\"", providerObject.has("index"));
+            assertTrue("value of key \"index\" is empty ", providerObject.getString("index").length() > 0);
         }
     }
 
@@ -117,7 +117,7 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
         assertNotNull(res.getData());
         JSONObject notifyTemplateJSON = (JSONObject) res.getData();
 
-        assertNotNull("could not find element \"provider\" in json structure", notifyTemplateJSON.get("provider"));
+        assertNotNull("could not find key \"provider\" in json structure", notifyTemplateJSON.get("provider"));
         JSONObject providersObject = (JSONObject) notifyTemplateJSON.get("provider");
 
         Map<String, Object> map = providersObject.asMap();
@@ -129,12 +129,14 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
 
             assertNotNull(providersObject.get(key));
             JSONObject providerObject = (JSONObject) providersObject.get(key);
-            assertTrue("could not find attribute template", providerObject.has("template"));
-            assertTrue("value of attribute template is empty ", providerObject.getString("template").length() > 0);
-            assertTrue("could not find attribute slow", providerObject.has("slow"));
-            assertTrue("value of attribute template is empty ", providerObject.getString("slow").length() > 0);
-            assertTrue("could not find attribute index", providerObject.has("index"));
-            assertTrue("value of attribute index is empty ", providerObject.getString("index").length() > 0);
+            assertTrue("could not find key \"template\"", providerObject.has("template"));
+            assertTrue("value of key \"template\" is empty ", providerObject.getString("template").length() > 0);
+            assertTrue("could not find key \"title\"", providerObject.has("title"));
+            assertTrue("value of key \"title\" is empty ", providerObject.getString("title").length() > 0);
+            assertTrue("could not find key \"slow\"", providerObject.has("slow"));
+            assertTrue("value of key \"slow\" is empty ", providerObject.getString("slow").length() > 0);
+            assertTrue("could not find key \"index\"", providerObject.has("index"));
+            assertTrue("value of key \"index\" is empty ", providerObject.getString("index").length() > 0);
         }
     }
 

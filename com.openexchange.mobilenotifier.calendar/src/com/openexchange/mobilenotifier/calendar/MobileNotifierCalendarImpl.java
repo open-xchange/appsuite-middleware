@@ -51,16 +51,13 @@ package com.openexchange.mobilenotifier.calendar;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 import com.openexchange.calendar.itip.HumanReadableRecurrences;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
@@ -73,6 +70,7 @@ import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
+import com.openexchange.mobilenotifier.utility.DateUtility;
 import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -111,7 +109,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
 
         // range from now until end of day
         final Date currentDate = new Date(System.currentTimeMillis());
-        final Date endOfDay = new Date(getEndOfDay(currentDate));
+        final Date endOfDay = new Date(DateUtility.getEndOfDay(currentDate));
 
         final CalendarCollectionService collectionService = services.getService(CalendarCollectionService.class);
 
@@ -136,8 +134,8 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                 /***************** Calculates the time of specific appointment **********************/
                 final RecurringResultsInterface recurringResult = collectionService.calculateRecurring(
                     copyAppointment,
-                    convertDateToTimestamp(currentDate),
-                    convertDateToTimestamp(endOfDay),
+                    DateUtility.convertDateToTimestamp(currentDate),
+                    DateUtility.convertDateToTimestamp(endOfDay),
                     0);
 
                 if (recurringResult != null) {
@@ -148,7 +146,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                     }
 
                     for (int i = 0; i < recurringResult.size(); i++) {
-                        RecurringResultInterface rri = recurringResult.getRecurringResultByPosition(position);
+                        final RecurringResultInterface rri = recurringResult.getRecurringResultByPosition(position);
                         copyAppointment.setStartDate(new Date(rri.getStart()));
                         copyAppointment.setEndDate(new Date(rri.getEnd()));
                     }
@@ -160,8 +158,8 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
                 item.add(new NotifyItem("folder", copyAppointment.getParentFolderID()));
                 item.add(new NotifyItem("title", copyAppointment.getTitle()));
                 item.add(new NotifyItem("location", copyAppointment.getLocation()));
-                item.add(new NotifyItem("start_date", convertDateToTimestamp(copyAppointment.getStartDate())));
-                item.add(new NotifyItem("end_date", convertDateToTimestamp(copyAppointment.getEndDate())));
+                item.add(new NotifyItem("start_date", DateUtility.convertDateToTimestamp(copyAppointment.getStartDate())));
+                item.add(new NotifyItem("end_date", DateUtility.convertDateToTimestamp(copyAppointment.getEndDate())));
                 item.add(new NotifyItem("organizer", copyAppointment.getOrganizer()));
                 item.add(new NotifyItem("note", copyAppointment.getNote()));
                 item.add(new NotifyItem("status", getUserConfirmation(copyAppointment, session)));
@@ -177,7 +175,7 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
     public NotifyTemplate getTemplate() throws OXException {
         final String template = MobileNotifierFileUtility.getTemplateFileContent(MobileNotifierProviders.APPOINTMENT.getTemplateFileName());
         final String title = MobileNotifierProviders.APPOINTMENT.getTitle();
-        return new NotifyTemplate(title, template, true, MobileNotifierProviders.APPOINTMENT.getIndex());
+        return new NotifyTemplate(title, template, false, MobileNotifierProviders.APPOINTMENT.getIndex());
     }
 
     @Override
@@ -219,21 +217,5 @@ public class MobileNotifierCalendarImpl extends AbstractMobileNotifierService {
             }
         }
         return confirmed;
-    }
-
-    private long convertDateToTimestamp(final Date date) {
-        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.setTime(date);
-        return calendar.getTimeInMillis();
-    }
-
-    private long getEndOfDay(Date date) {
-        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.setTime(date);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.add(Calendar.DAY_OF_YEAR, 1);
-        return calendar.getTimeInMillis();
     }
 }

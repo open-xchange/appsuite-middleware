@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,33 @@
  *
  */
 
-package com.openexchange.mobilenotifier.json.convert;
+package com.openexchange.mobilenotifier.utility;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.mobilenotifier.NotifyItem;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
 
 /**
- * {@link NotifyItemWriter} - Converts a list of notify items to a JSON structure.
+ * {@link DateUtility} - Utility class for date calculations
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class NotifyItemWriter {
+public class DateUtility {
 
-    private NotifyItemWriter() {
-        super();
+    public static long convertDateToTimestamp(final Date date) {
+        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(date);
+        return calendar.getTimeInMillis();
     }
 
-    /**
-     * Writes the JSON structure of notify items
-     * 
-     * @param notifyItem List of notify items
-     * @return The JSON structure
-     * @throws JSONException
-     */
-    public static JSONObject write(final List<List<NotifyItem>> notifyItem) throws JSONException {
-        final JSONObject itemsJSON = new JSONObject();
-        final JSONArray itemsArray = transformListIntoJSONArray(notifyItem);
-        itemsJSON.put(MobileNotifyField.ITEMS, itemsArray);
-        return itemsJSON;
-    }
-
-    private static JSONArray transformListIntoJSONArray(List<List<NotifyItem>> items) throws JSONException {
-        final JSONArray itemsArray = new JSONArray();
-        for (List<NotifyItem> listItem : items) {
-            final JSONObject itemJSON = new JSONObject();
-            for (NotifyItem item : listItem) {
-                itemJSON.put(item.getKey(), item.getValue());
-            }
-            itemsArray.put(itemJSON);
-        }
-        return itemsArray;
+    public static long getEndOfDay(Date date) {
+        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        return calendar.getTimeInMillis();
     }
 }

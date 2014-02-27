@@ -74,9 +74,8 @@ public class GetTest extends AbstractMobileNotifierTest {
         super(name);
     }
 
-    // TODO: update to correct mandatory items
     public void testMailProviderJSONResponse() throws OXException, IOException, JSONException {
-        singleProvider("io.ox/mail", new MandatoryFields(
+        singleProviderTest("io.ox/mail", new MandatoryFields(
             "from",
             "received_date",
             "subject",
@@ -87,9 +86,8 @@ public class GetTest extends AbstractMobileNotifierTest {
             "folder"));
     }
 
-    // TODO: update to correct mandatory items
     public void testCalendarProviderJSONResponse() throws OXException, IOException, JSONException {
-        singleProvider("io.ox/calendar", new MandatoryFields(
+        singleProviderTest("io.ox/calendar", new MandatoryFields(
             "id",
             "folder",
             "title",
@@ -99,8 +97,20 @@ public class GetTest extends AbstractMobileNotifierTest {
             "organizer",
             "status",
             "note",
-            "recurrence",
-            "start_date_timestamp"));
+            "recurrence"));
+    }
+
+    public void testReminderProviderJSONResponse() throws OXException, IOException, JSONException {
+        singleProviderTest("io.ox/reminder", new MandatoryFields(
+            "id",
+            "folder",
+            "title",
+            "location",
+            "start_date",
+            "end_date",
+            "alarm",
+            "server_time",
+            "last_modified"));
     }
 
     public void testShouldGetExceptionIfUnknownProvider() throws OXException, IOException, JSONException {
@@ -109,7 +119,7 @@ public class GetTest extends AbstractMobileNotifierTest {
         assertNotNull("exception should have thrown ", res.getException());
     }
 
-    private void singleProvider(String providerName, MandatoryFields mandatoryItems) throws OXException, IOException, JSONException {
+    private void singleProviderTest(String providerName, MandatoryFields mandatoryItems) throws OXException, IOException, JSONException {
         GetMobileNotifierRequest req = new GetMobileNotifierRequest(providerName);
         GetMobileNotifierResponse res = getClient().execute(req);
 
@@ -117,32 +127,32 @@ public class GetTest extends AbstractMobileNotifierTest {
 
         assertNotNull("no data in response", res.getData());
         JSONObject providerObject = (JSONObject) res.getData();
-        assertTrue("could not find element \"provider\" in json structure", providerObject.has("provider"));
+        assertTrue("could not find key \"provider\" in json structure", providerObject.has("provider"));
         JSONObject singleProviderObject = (JSONObject) providerObject.get("provider");
 
-        assertTrue("could not find provider " + providerName, singleProviderObject.has(providerName));
+        assertTrue("could not find key \"provider\" " + providerName, singleProviderObject.has(providerName));
         JSONObject providerJSON = (JSONObject) singleProviderObject.get(providerName);
 
         singleProviderObject = (JSONObject) singleProviderObject.get(providerName);
 
-        assertTrue("could not find element \"items\"", providerJSON.has("items"));
+        assertTrue("could not find key \"items\"", providerJSON.has("items"));
         JSONArray itemsArray = (JSONArray) providerJSON.get("items");
 
         List<String> missingFields = new ArrayList<String>();
         String[] mandatoryArr = mandatoryItems.getMandatory();
 
-        // TODO: notification items can be empty, if they are empty return test success
-        // otherwise go on with testing mandatory fields
+        // If there is no value for an item the key should still appear with an empty value
+        // No notification should return an empty json array
         if (itemsArray != null && itemsArray.length() > 0) {
-            // get only the first notification item
-            JSONObject itemObject = itemsArray.getJSONObject(0);
-
-            for (int i = 0; i < mandatoryArr.length; i++) {
-                if (!itemObject.has(mandatoryArr[i])) {
-                    missingFields.add(mandatoryArr[i]);
+            for (int i = 0; i < itemsArray.length(); i++) {
+                JSONObject itemObject = itemsArray.getJSONObject(i);
+                for (int j = 0; j < mandatoryArr.length; j++) {
+                    if (!itemObject.has(mandatoryArr[j])) {
+                        missingFields.add(mandatoryArr[j]);
+                    }
                 }
             }
-            assertFalse("could not found the mandatory item: " + missingFields, missingFields.size() > 0);
+            assertFalse("could not found the mandatory key(s): " + missingFields, missingFields.size() > 0);
         }
     }
 }

@@ -49,11 +49,18 @@
 
 package com.openexchange.mobilenotifier.reminder;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -61,9 +68,11 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
+import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
+import com.openexchange.mobilenotifier.utility.DateUtility;
 import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -95,28 +104,57 @@ public class MobileNotifierReminderImpl extends AbstractMobileNotifierService {
     @Override
     public List<List<NotifyItem>> getItems(final Session session) throws OXException {
         Context cs = ContextStorage.getStorageContext(session.getContextId());
-        User us = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+        User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+        final Date currentDate = new Date(System.currentTimeMillis());
+        final Date range = new Date(currentDate.getTime() + (60L * 60L * 1000L)); // one hour
         final ReminderService reminderSql = new ReminderHandler(cs);
-        SearchIterator<ReminderObject> reminderObjects = reminderSql.getArisingReminder(
-            session,
-            cs,
-            us,
-            new Date(System.currentTimeMillis() + (24L * 60L * 60L * 100L)));
+        SearchIterator<ReminderObject> reminderObjects = reminderSql.getArisingReminder(session, cs, user, range);
 
         final List<List<NotifyItem>> items = new ArrayList<List<NotifyItem>>();
 
         while (reminderObjects.hasNext()) {
             ReminderObject ro = reminderObjects.next();
             final List<NotifyItem> notifyItem = new ArrayList<NotifyItem>();
-            notifyItem.add(new NotifyItem("folder", ro.getFolder()));
-            notifyItem.add(new NotifyItem("targetid", ro.getTargetId()));
-            notifyItem.add(new NotifyItem("date", ro.getDate()));
-            notifyItem.add(new NotifyItem("lastmodified", ro.getLastModified()));
-            notifyItem.add(new NotifyItem("module", ro.getModule()));
-            // calendar specific?
-            notifyItem.add(new NotifyItem("recurrenceposition", ro.getRecurrencePosition()));
-            notifyItem.add(new NotifyItem("user", ro.getUser()));
-            items.add(notifyItem);
+            int module = ro.getModule();
+
+            if (module == Types.APPOINTMENT) {
+                final int folderId = ro.getFolder();
+                final int objectId = ro.getTargetId();
+                final AppointmentSqlFactoryService factory = services.getService(AppointmentSqlFactoryService.class);
+                final CalendarCollectionService collectionService = services.getService(CalendarCollectionService.class);
+                try {
+                    final Appointment appointment = factory.createAppointmentSql(session).getObjectById(objectId, folderId);
+                    final Appointment copyAppointment = appointment.clone();
+
+                    /***************** Calculates the time of appointment in a serie **********************/
+                    final RecurringResultsInterface recurringResult = collectionService.calculateRecurring(
+                        copyAppointment,
+                        DateUtility.convertDateToTimestamp(currentDate),
+                        DateUtility.getEndOfDay(currentDate),
+                        0);
+
+                    if (recurringResult != null) {
+                        final RecurringResultInterface rri = recurringResult.getRecurringResult(0);
+                        copyAppointment.setStartDate(new Date(rri.getStart()));
+                        copyAppointment.setEndDate(new Date(rri.getEnd()));
+                    }
+                    /***************************************************************************************/
+
+                    notifyItem.add(new NotifyItem("folder", ro.getFolder()));
+                    notifyItem.add(new NotifyItem("id", ro.getTargetId()));
+                    notifyItem.add(new NotifyItem("alarm", ro.getDate()));
+                    notifyItem.add(new NotifyItem("title", copyAppointment.getTitle()));
+                    notifyItem.add(new NotifyItem("location", copyAppointment.getLocation()));
+                    notifyItem.add(new NotifyItem("alarm", DateUtility.convertDateToTimestamp(ro.getDate())));
+                    notifyItem.add(new NotifyItem("last_modified", DateUtility.convertDateToTimestamp(ro.getLastModified())));
+                    notifyItem.add(new NotifyItem("start_date", DateUtility.convertDateToTimestamp(copyAppointment.getStartDate())));
+                    notifyItem.add(new NotifyItem("end_date", DateUtility.convertDateToTimestamp(copyAppointment.getEndDate())));
+                    notifyItem.add(new NotifyItem("server_time", System.currentTimeMillis()));
+                    items.add(notifyItem);
+                } catch (SQLException e) {
+                    throw MobileNotifierExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+                }
+            }
         }
         return items;
     }
@@ -125,7 +163,7 @@ public class MobileNotifierReminderImpl extends AbstractMobileNotifierService {
     public NotifyTemplate getTemplate() throws OXException {
         final String template = MobileNotifierFileUtility.getTemplateFileContent(MobileNotifierProviders.REMINDER.getTemplateFileName());
         final String title = MobileNotifierProviders.REMINDER.getTitle();
-        return new NotifyTemplate(title, template, true, MobileNotifierProviders.REMINDER.getIndex());
+        return new NotifyTemplate(title, template, false, MobileNotifierProviders.REMINDER.getIndex());
     }
 
     @Override
