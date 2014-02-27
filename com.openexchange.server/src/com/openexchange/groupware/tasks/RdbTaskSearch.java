@@ -219,13 +219,17 @@ public class RdbTaskSearch extends TaskSearch {
         String fields = SQL.getFields(columns, false, "t");
         builder.append("SELECT ").append(fields);
         builder.append(" FROM task AS t ");
-        
-        if (searchObject.getParticipants() != null && searchObject.getParticipants().length > 0)
-            builder.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)");
-        
         builder.append(" LEFT JOIN task_folder AS tf ON (tf.id = t.id AND tf.cid = t.cid)");
         
-        builder.append(" WHERE t.cid = ? AND ");
+        if (searchObject.hasInternalParticipants()) {
+            builder.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)");
+        }
+
+        if (searchObject.hasExternalParticipants())
+            builder.append(" LEFT JOIN task_eparticipant AS etp ON (t.cid = etp.cid AND t.id = etp.task)");
+        
+        builder.append(" WHERE ");
+        builder.append(" t.cid = ? AND ");
         builder.append(SQL.allFoldersWhere(all, own, shared));
         //searchParameters.add(context.getContextId());
         //searchParameters.add(userID);
@@ -277,6 +281,28 @@ public class RdbTaskSearch extends TaskSearch {
                 searchParameters.add(preparedPattern);
                 searchParameters.add(preparedPattern);
             }
+        }
+        
+        //set participants
+        if (searchObject.hasParticipants()) {
+            builder.append(" AND ( ");
+            int i = 0;
+            int size = searchObject.getInternalParticipants().size();
+            for(Integer id : searchObject.getInternalParticipants()) {
+                if (i++ > 1)
+                    builder.append(" AND ");
+                builder.append(" tp.user = ? ");
+                searchParameters.add(id);
+            }
+            i = 0;
+            size = searchObject.getExternalParticipants().size();
+            for(String mail : searchObject.getExternalParticipants()) {
+                if (searchObject.hasInternalParticipants() || i++ > 1)
+                    builder.append(" AND ");
+                builder.append(" etp.mail = ? ");
+                searchParameters.add(mail);
+            }
+            builder.append(" ) ");
         }
         
         //set the recurrence type (mutually exclusive)

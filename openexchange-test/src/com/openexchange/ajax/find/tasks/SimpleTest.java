@@ -100,7 +100,10 @@ public class SimpleTest extends AbstractFindTest {
             List<Filter> filters = new ArrayList<Filter>();
             //filters.add(new Filter(Collections.singletonList("folder_type"), "shared"));
             //filters.add(new Filter(Collections.singletonList("folder_type"), "private"));
-            filters.add(new Filter(Collections.singletonList("type"), "single_task"));
+            //filters.add(new Filter(Collections.singletonList("type"), "single_task"));
+            filters.add(new Filter(Collections.singletonList("participant"), "5"));
+            filters.add(new Filter(Collections.singletonList("participant"), "foo@bar.org"));
+            filters.add(new Filter(Collections.singletonList("participant"), "bar@foo.org"));
             //filters.add(new Filter(Collections.singletonList("status"), "1"));
             //filters.add(new Filter(Collections.singletonList("status"), "2"));
             final QueryResponse queryResponse = getClient().execute(new QueryRequest(0, 10, queries, filters, "tasks"));

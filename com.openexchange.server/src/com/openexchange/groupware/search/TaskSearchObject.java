@@ -85,6 +85,14 @@ public class TaskSearchObject extends CalendarSearchObject {
     
     private boolean singleOccurrenceFilter;
     
+    private Set<Integer> internalParticipants;
+    
+    private Set<String> externalParticipants;
+    
+    private boolean hasInternalParticipants;
+    
+    private boolean hasExternalParticipants;
+    
     /**
      * This array contains 2 values between them the task ends. If the task has
      * no end date it won't appear if the range is defined.
@@ -223,5 +231,86 @@ public class TaskSearchObject extends CalendarSearchObject {
      */
     public void setSingleOccurrenceFilter(boolean singleFilter) {
         this.singleOccurrenceFilter = singleFilter;
+    }
+
+    /**
+     * Gets the internalParticipants
+     *
+     * @return The internalParticipants
+     */
+    public Set<Integer> getInternalParticipants() {
+        return internalParticipants;
+    }
+
+    /**
+     * Sets the internalParticipants
+     *
+     * @param internalParticipants The internalParticipants to set
+     */
+    public void setInternalParticipants(Set<Integer> internalParticipants) {
+        this.internalParticipants = internalParticipants;
+    }
+
+    /**
+     * Gets the externalParticipants
+     *
+     * @return The externalParticipants
+     */
+    public Set<String> getExternalParticipants() {
+        return externalParticipants;
+    }
+
+    /**
+     * Sets the externalParticipants
+     *
+     * @param externalParticipants The externalParticipants to set
+     */
+    public void setExternalParticipants(Set<String> externalParticipants) {
+        this.externalParticipants = externalParticipants;
+    }
+
+    /**
+     * Gets the hasInternalParticipants
+     *
+     * @return The hasInternalParticipants
+     */
+    public boolean hasInternalParticipants() {
+        return hasInternalParticipants;
+    }
+
+    /**
+     * Sets the hasInternalParticipants
+     *
+     * @param hasInternalParticipants The hasInternalParticipants to set
+     */
+    public void setHasInternalParticipants(boolean hasInternalParticipants) {
+        this.hasInternalParticipants = hasInternalParticipants;
+    }
+
+    /**
+     * Gets the hasExternalParticipants
+     *
+     * @return The hasExternalParticipants
+     */
+    public boolean hasExternalParticipants() {
+        return hasExternalParticipants;
+    }
+
+    /**
+     * Sets the hasExternalParticipants
+     *
+     * @param hasExternalParticipants The hasExternalParticipants to set
+     */
+    public void setHasExternalParticipants(boolean hasExternalParticipants) {
+        this.hasExternalParticipants = hasExternalParticipants;
+    }
+
+    /**
+     * Gets the hasParticipants
+     *
+     * @return The hasParticipants
+     */
+    public boolean hasParticipants() {
+        return (hasInternalParticipants || hasExternalParticipants);
     }
 }

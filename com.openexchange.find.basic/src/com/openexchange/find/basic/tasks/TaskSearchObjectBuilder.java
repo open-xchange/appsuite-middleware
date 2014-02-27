@@ -79,7 +79,7 @@ public class TaskSearchObjectBuilder {
     
     private final ServerSession session;
     
-    private enum SupportedFields {title, description, status, folder_type, type};
+    private enum SupportedFields {title, description, status, folder_type, type, participant};
     
     /**
      * Initializes a new {@link TaskSearchBuilder}.
@@ -145,6 +145,9 @@ public class TaskSearchObjectBuilder {
                     break;
                 case type:
                     addRecurrenceTypeFilters(filter.getQueries());
+                    break;
+                case participant:
+                    addParticipantFilters(filter.getQueries());
                     break;
                 default:
                     throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(f);
@@ -267,5 +270,30 @@ public class TaskSearchObjectBuilder {
             else
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(r, "type");
         }
+    }
+    
+    private void addParticipantFilters(List<String> filters) throws OXException {
+        Set<Integer> intP = searchObject.getInternalParticipants();
+        Set<String> extP = searchObject.getExternalParticipants();
+        
+        if (intP == null)
+            intP = new HashSet<Integer>();
+        
+        if (extP == null)
+            extP = new HashSet<String>();
+        
+        for(String f : filters) {
+            if (f.matches("\\d+")) {
+                intP.add(Integer.parseInt(f));
+            } else {
+                extP.add(f);
+            }
+        }
+        
+        searchObject.setInternalParticipants(intP);
+        searchObject.setExternalParticipants(extP);
+        
+        searchObject.setHasInternalParticipants(intP.size() > 0);
+        searchObject.setHasExternalParticipants(extP.size() > 0);
     }
 }
