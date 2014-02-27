@@ -127,14 +127,14 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // Search...
         SearchIterator<File> it = null;
         try {
-            it = fileAccess.search(term, Arrays.asList(fields), File.Field.TITLE, SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+            final int start = searchRequest.getStart();
+            it = fileAccess.search(term, Arrays.asList(fields), File.Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
             final List<Document> results = new LinkedList<Document>();
             while (it.hasNext()) {
                 final File file = it.next();
                 results.add(new FileDocument(file));
             }
-            final int start = searchRequest.getStart();
-            return new SearchResult(results.size(), start, results.subList(start, start + searchRequest.getSize()));
+            return new SearchResult(-1, start, results);
         } finally {
             SearchIterators.close(it);
         }
