@@ -49,18 +49,7 @@
 
 package com.openexchange.find.basic.mail;
 
-import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
-import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
-import static com.openexchange.find.basic.mail.Constants.FIELD_FOLDER;
-import static com.openexchange.find.basic.mail.Constants.FIELD_FROM;
-import static com.openexchange.find.basic.mail.Constants.FIELD_SUBJECT;
-import static com.openexchange.find.basic.mail.Constants.FIELD_TIME;
-import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
-import static com.openexchange.find.basic.mail.Constants.FOLDERS_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.QUERY_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.RECIPIENT_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.SENDER_AND_RECIPIENT_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.SENDER_FIELDS;
+import static com.openexchange.find.basic.mail.Constants.*;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
@@ -441,17 +430,29 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             }
 
             if (optFullName != null) {
-                infos.addFirst(folderStorage.getFolder(optFullName).asMailFolderInfo(accountId));
+                infos.addFirst(getFolderInfo(optFullName, accountId, folderStorage));
             }
 
             for (String folder : foldersToLoad) {
-                infos.add(folderStorage.getFolder(folder).asMailFolderInfo(accountId));
+                infos.add(getFolderInfo(folder, accountId, folderStorage));
             }
         } finally {
             if (null != mailAccess) {
                 mailAccess.close(true);
             }
         }
+    }
+
+    private static MailFolderInfo getFolderInfo(final String fullName, final int accountId, final IMailFolderStorage folderStorage) throws OXException {
+        if (folderStorage instanceof IMailFolderStorageInfoSupport) {
+            final IMailFolderStorageInfoSupport infoSupport = (IMailFolderStorageInfoSupport) folderStorage;
+            if (infoSupport.isInfoSupported()) {
+                return infoSupport.getFolderInfo(fullName);
+            }
+        }
+
+        // Alternative way
+        return folderStorage.getFolder(fullName).asMailFolderInfo(accountId);
     }
 
     private static List<MailFolderInfo> getFolderInfos(final int accountId, final MailService mailService, final MailFolderFilter filter, final Session session) throws OXException {
