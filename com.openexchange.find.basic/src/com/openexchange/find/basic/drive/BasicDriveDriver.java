@@ -49,6 +49,8 @@
 
 package com.openexchange.find.basic.drive;
 
+import static com.openexchange.find.basic.mail.Constants.QUERY_FIELDS;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -60,6 +62,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.search.AndTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
@@ -81,6 +84,7 @@ import com.openexchange.find.facet.Filter;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -95,17 +99,11 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     private final Field[] fields = new File.Field[] { Field.ID, Field.MODIFIED_BY, Field.LAST_MODIFIED, Field.FOLDER_ID, Field.TITLE,
         Field.FILENAME, Field.FILE_MIMETYPE, Field.FILE_SIZE, Field.VERSION, Field.LOCKED_UNTIL};
 
-    private final IDBasedFileAccessFactory fileAccessFactory;
-//    private final IDBasedFolderAccessFactory folderAccessFactory;
-
     /**
      * Initializes a new {@link BasicDriveDriver}.
-     * @throws OXException
      */
-    public BasicDriveDriver() throws OXException {
+    public BasicDriveDriver() {
         super();
-        fileAccessFactory = Services.getIdBasedFileAccessFactory();
-//        folderAccessFactory = Services.getIdBasedFolderAccessFactory();
     }
 
     @Override
@@ -114,22 +112,48 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
-        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
-        if (null != fileAccess) {
-            List<Document> result = new LinkedList<Document>();
-            for (Filter filter : searchRequest.getFilters()) {
-                SearchTerm<?> searchTerm = Utils.termFor(filter);
-                SearchIterator<File> it = fileAccess.search(searchTerm, Arrays.asList(fields), File.Field.TITLE, SortDirection.DEFAULT,
-                    FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
-                while (it.hasNext()) {
-                    File file = it.next();
-                    result.add(new FileDocument(file));
-                }
-                return new SearchResult(result.size(), 0, result);
-            }
+    public SearchResult search(final SearchRequest searchRequest, final ServerSession session) throws OXException {
+        final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
+        if (null == fileAccessFactory) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
         }
-        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccess.class.getName());
+
+        // Create file access
+        final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+
+        // Yield search term from search request
+        final SearchTerm<?> term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
+
+        // Search...
+        SearchIterator<File> it = null;
+        try {
+            it = fileAccess.search(term, Arrays.asList(fields), File.Field.TITLE, SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+            final List<Document> results = new LinkedList<Document>();
+            while (it.hasNext()) {
+                final File file = it.next();
+                results.add(new FileDocument(file));
+            }
+            final int start = searchRequest.getStart();
+            return new SearchResult(results.size(), start, results.subList(start, start + searchRequest.getSize()));
+        } finally {
+            SearchIterators.close(it);
+        }
+
+//        final List<Document> result = new LinkedList<Document>();
+//        for (final Filter filter : searchRequest.getFilters()) {
+//            final SearchTerm<?> searchTerm = Utils.termFor(filter);
+//            SearchIterator<File> it = null;
+//            try {
+//                it = fileAccess.search(searchTerm, Arrays.asList(fields), File.Field.TITLE, SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+//                while (it.hasNext()) {
+//                    final File file = it.next();
+//                    result.add(new FileDocument(file));
+//                }
+//            } finally {
+//                SearchIterators.close(it);
+//            }
+//        }
+//        return new SearchResult(result.size(), 0, result);
     }
 
     @Override
@@ -154,7 +178,13 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     private List<FacetValue> getAutocompleteFiles(ServerSession session, AutocompleteRequest request) throws OXException {
-        IDBasedFileAccess access = fileAccessFactory.createAccess(session);
+        final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
+        if (null == fileAccessFactory) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
+        }
+
+        // Create file access
+        final IDBasedFileAccess access = fileAccessFactory.createAccess(session);
         SearchTerm<String> titleTerm = new TitleTerm(request.getPrefix(), true, true);
         SearchTerm<String> filenameTerm = new FileNameTerm(request.getPrefix(), true, true);
         List<SearchTerm<?>> terms = new LinkedList<SearchTerm<?>>();
@@ -167,12 +197,53 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         while (it.hasNext()) {
             File file = it.next();
             Filter fileName = new Filter(Collections.singletonList("filename"), file.getFileName());
-            if (null != fileName) {
+            {
                 String facetValue = prepareFacetValueId(request.getPrefix(), session.getContextId(), file.getId());
                 facets.add(new FacetValue(facetValue, new SimpleDisplayItem(file.getTitle()), FacetValue.UNKNOWN_COUNT, fileName));
             }
         }
         return facets;
+    }
+
+    private static SearchTerm<?> prepareSearchTerm(final List<String> queries, final List<Filter> filters) throws OXException {
+        final SearchTerm<?> queryTerm = prepareQueryTerm(queries);
+        final SearchTerm<?> filterTerm = prepareFilterTerm(filters);
+        SearchTerm<?> searchTerm = null;
+        if (filterTerm == null || queryTerm == null) {
+            if (filterTerm != null) {
+                searchTerm = filterTerm;
+            } else {
+                searchTerm = queryTerm;
+            }
+        } else {
+            searchTerm = new AndTerm(Arrays.<SearchTerm<?>> asList(queryTerm, filterTerm));
+        }
+        return searchTerm;
+    }
+
+    private static SearchTerm<?> prepareQueryTerm(final List<String> queries) throws OXException {
+        if (queries == null || queries.isEmpty()) {
+            return null;
+        }
+
+        return Utils.termFor(QUERY_FIELDS, queries);
+    }
+
+    private static SearchTerm<?> prepareFilterTerm(final List<Filter> filters) throws OXException {
+        if (filters == null || filters.isEmpty()) {
+            return null;
+        }
+
+        final int size = filters.size();
+        if (size == 1) {
+            return Utils.termFor(filters.get(0));
+        }
+
+        final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(size);
+        for (final Filter filter : filters) {
+            terms.add(Utils.termFor(filter));
+        }
+        return new AndTerm(terms);
     }
 
 }
