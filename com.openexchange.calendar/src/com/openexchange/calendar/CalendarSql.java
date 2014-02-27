@@ -86,7 +86,7 @@ import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Charsets;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
@@ -118,8 +118,6 @@ public class CalendarSql implements AppointmentSQLInterface {
     public static final String PARTICIPANT_TABLE_NAME = "prg_dates_members";
 
     private static volatile CalendarSqlImp cimp;
-
-    private static ServiceLookup services;
 
     private final Session session;
 
@@ -792,7 +790,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     @Override
     public boolean checkIfFolderContainsForeignObjects(final int uid, final int fid, final Connection readCon) throws OXException,
-            SQLException {
+    SQLException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }
@@ -891,8 +889,19 @@ public class CalendarSql implements AppointmentSQLInterface {
             return setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
         }
 
-        // TODO: Support occurrence confirmation
-        return setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
+        if (session == null) {
+            throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
+        }
+        final Context ctx = Tools.getContext(session);
+        if (confirmMessage != null) {
+            String error = null;
+            error = Check.containsInvalidChars(confirmMessage);
+            if (error != null) {
+                throw OXCalendarExceptionCodes.INVALID_CHARACTER.create("Confirm Message", error);
+            }
+        }
+
+        return cimp.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage, session, ctx);
     }
 
     @Override
@@ -916,9 +925,22 @@ public class CalendarSql implements AppointmentSQLInterface {
         if (optOccurrenceId <= 0) {
             return setExternalConfirmation(objectId, folderId, mail, confirm, message);
         }
+        if (session == null) {
+            throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
+        }
+        if ((mail == null) || Strings.isEmpty(mail)) {
+            throw OXCalendarExceptionCodes.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD.create();
+        }
+        final Context ctx = Tools.getContext(session);
+        if (message != null) {
+            String error = null;
+            error = Check.containsInvalidChars(message);
+            if (error != null) {
+                throw OXCalendarExceptionCodes.INVALID_CHARACTER.create("Confirm Message", error);
+            }
+        }
+        return cimp.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message, session, ctx);
 
-        // TODO: Support occurrence confirmation
-        return setExternalConfirmation(objectId, folderId, mail, confirm, message);
     }
 
     @Override
@@ -1018,8 +1040,8 @@ public class CalendarSql implements AppointmentSQLInterface {
 
             final com.openexchange.java.StringAllocator columnBuilder = new com.openexchange.java.StringAllocator(cols.length << 4);
             boolean first = true;
-            for (int i = 0; i < cols.length; i++) {
-                final String temp = recColl.getFieldName(cols[i]);
+            for (int col : cols) {
+                final String temp = recColl.getFieldName(col);
 
                 if (temp != null) {
                     if (first) {
@@ -1081,21 +1103,21 @@ public class CalendarSql implements AppointmentSQLInterface {
             readcon = DBPool.pickup(ctx);
             final CalendarSqlImp cimp = CalendarSql.cimp;
             switch(type) {
-                case Participant.USER:
-                    private_folder_information = calendarsqlimp.getAllPrivateAppointmentAndFolderIdsForUser(ctx, user.getId(), readcon);
-                    prep = cimp.getFreeBusy(uid, ctx, start, end, readcon);
-                    break;
-                case Participant.RESOURCE:
-                    final long whole_day_start = recColl.getUserTimeUTCDate(start, user.getTimeZone());
-                    long whole_day_end = recColl.getUserTimeUTCDate(end, user.getTimeZone());
-                    if (whole_day_end <= whole_day_start) {
-                        whole_day_end = whole_day_start+Constants.MILLI_DAY;
-                    }
-                    private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, wrapParenthesis(uid));
-                    prep = cimp.getResourceFreeBusy(uid, ctx, start, end, readcon);
-                    break;
-                default:
-                    throw OXCalendarExceptionCodes.FREE_BUSY_UNSUPPOTED_TYPE.create(Integer.valueOf(type));
+            case Participant.USER:
+                private_folder_information = calendarsqlimp.getAllPrivateAppointmentAndFolderIdsForUser(ctx, user.getId(), readcon);
+                prep = cimp.getFreeBusy(uid, ctx, start, end, readcon);
+                break;
+            case Participant.RESOURCE:
+                final long whole_day_start = recColl.getUserTimeUTCDate(start, user.getTimeZone());
+                long whole_day_end = recColl.getUserTimeUTCDate(end, user.getTimeZone());
+                if (whole_day_end <= whole_day_start) {
+                    whole_day_end = whole_day_start+Constants.MILLI_DAY;
+                }
+                private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, wrapParenthesis(uid));
+                prep = cimp.getResourceFreeBusy(uid, ctx, start, end, readcon);
+                break;
+            default:
+                throw OXCalendarExceptionCodes.FREE_BUSY_UNSUPPOTED_TYPE.create(Integer.valueOf(type));
             }
             rs = cimp.getResultSet(prep);
             //final SearchIterator si = new FreeBusyResults(rs, prep, ctx, readcon, start.getTime(), end.getTime());
