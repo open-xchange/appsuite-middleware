@@ -208,17 +208,10 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     private static SearchTerm<?> prepareSearchTerm(final List<String> queries, final List<Filter> filters) throws OXException {
         final SearchTerm<?> queryTerm = prepareQueryTerm(queries);
         final SearchTerm<?> filterTerm = prepareFilterTerm(filters);
-        SearchTerm<?> searchTerm = null;
         if (filterTerm == null || queryTerm == null) {
-            if (filterTerm != null) {
-                searchTerm = filterTerm;
-            } else {
-                searchTerm = queryTerm;
-            }
-        } else {
-            searchTerm = new AndTerm(Arrays.<SearchTerm<?>> asList(queryTerm, filterTerm));
+            return (filterTerm == null) ? queryTerm : filterTerm;
         }
-        return searchTerm;
+        return new AndTerm(Arrays.<SearchTerm<?>> asList(queryTerm, filterTerm));
     }
 
     private static SearchTerm<?> prepareQueryTerm(final List<String> queries) throws OXException {
