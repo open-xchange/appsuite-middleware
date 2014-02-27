@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.basic.Services;
@@ -73,6 +74,7 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.java.SearchStrings;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
@@ -169,12 +171,13 @@ public class AppointmentSearchBuilder {
         return this;
     }
 
-    private AppointmentSearchBuilder applyQuery(String query) {
+    private AppointmentSearchBuilder applyQuery(String query) throws OXException {
         if (false == isWildcardOnly(query)) {
             Set<String> queries = appointmentSearch.getQueries();
             if (null == queries) {
                 queries = new HashSet<String>();
             }
+            checkPatternLength(query);
             queries.add(addWildcards(query, true, true));
             appointmentSearch.setQueries(queries);
         }
@@ -186,8 +189,9 @@ public class AppointmentSearchBuilder {
      *
      * @param queries The queries to append
      * @return The builder
+     * @throws OXException
      */
-    public AppointmentSearchBuilder applyQueries(List<String> queries) {
+    public AppointmentSearchBuilder applyQueries(List<String> queries) throws OXException {
         for (String query : queries) {
             applyQuery(query);
         }
@@ -302,34 +306,37 @@ public class AppointmentSearchBuilder {
         }
     }
 
-    private void applySubject(List<String> queries) {
+    private void applySubject(List<String> queries) throws OXException {
         Set<String> titles = appointmentSearch.getTitles();
         if (null == titles) {
             titles = new HashSet<String>();
         }
         for (String query : queries) {
+            checkPatternLength(query);
             titles.add(addWildcards(query, true, true));
         }
         appointmentSearch.setTitles(titles);
     }
 
-    private void applyLocation(List<String> queries) {
+    private void applyLocation(List<String> queries) throws OXException {
         Set<String> locations = appointmentSearch.getLocations();
         if (null == locations) {
             locations = new HashSet<String>();
         }
         for (String query : queries) {
+            checkPatternLength(query);
             locations.add(addWildcards(query, true, true));
         }
         appointmentSearch.setLocations(locations);
     }
 
-    private void applyDescription(List<String> queries) {
+    private void applyDescription(List<String> queries) throws OXException {
         Set<String> notes = appointmentSearch.getNotes();
         if (null == notes) {
             notes = new HashSet<String>();
         }
         for (String query : queries) {
+            checkPatternLength(query);
             notes.add(addWildcards(query, true, true));
         }
         appointmentSearch.setNotes(notes);
@@ -349,6 +356,13 @@ public class AppointmentSearchBuilder {
             }
         }
         return pattern;
+    }
+
+    private static void checkPatternLength(String pattern) throws OXException {
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (null != pattern && 0 < minimumSearchCharacters && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
+            throw FindExceptionCode.QUERY_TOO_SHORT.create(Integer.valueOf(minimumSearchCharacters));
+        }
     }
 
 }
