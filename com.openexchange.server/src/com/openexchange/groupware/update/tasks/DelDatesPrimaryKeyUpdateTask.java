@@ -66,8 +66,9 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class DelDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
-    
+
     private static final String DEL_DATES = "del_dates";
+    private static final String DEL_DATE_EXTERNAL = "delDateExternal";
 
     /**
      * Initializes a new {@link DelDatesPrimaryKeyUpdateTask}.
@@ -76,15 +77,21 @@ public class DelDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
         Connection con = Database.getNoTimeout(cid, true);
         try {
             con.setAutoCommit(false);
+            String foreignKey = Tools.existsForeignKey(
+                con,
+                DEL_DATES,
+                new String[] { "cid", "intfield01" },
+                DEL_DATE_EXTERNAL,
+                new String[] { "cid", "objectId" });
+            if (null != foreignKey && !foreignKey.equals("")) {
+                Tools.dropForeignKey(con, DEL_DATE_EXTERNAL, foreignKey);
+            }
             if (Tools.hasPrimaryKey(con, DEL_DATES)) {
                 Tools.dropPrimaryKey(con, DEL_DATES);
             }
@@ -102,12 +109,9 @@ public class DelDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.DelDateExternalDropForeignKeyUpdateTask" };
+        return new String[0];
     }
 
 }

@@ -68,6 +68,7 @@ import com.openexchange.tools.update.Tools;
 public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
 
     private static final String INFOSTORE = "infostore";
+    private static final String INFOSTORE_DOCUMENT = "infostore_document";
 
     /**
      * Initializes a new {@link InfostorePrimaryKeyUpdateTask}.
@@ -76,9 +77,6 @@ public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
@@ -87,18 +85,15 @@ public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
             con.setAutoCommit(false);
 
             // Drop foreign key
-            String foreignKey = Tools.existsForeignKey(con, "infostore", new String[] {"cid", "id"}, "infostore_document", new String[] {"cid", "infostore_id"});
+            String foreignKey = Tools.existsForeignKey(con, "infostore", new String[] {"cid", "id"}, INFOSTORE_DOCUMENT, new String[] {"cid", "infostore_id"});
             if (null != foreignKey && !foreignKey.equals("")) {
-                Tools.dropForeignKey(con, "infostore_document", foreignKey);
+                Tools.dropForeignKey(con, INFOSTORE_DOCUMENT, foreignKey);
             }
 
             if (Tools.hasPrimaryKey(con, INFOSTORE)) {
                 Tools.dropPrimaryKey(con, INFOSTORE);
             }
             Tools.createPrimaryKey(con, INFOSTORE, new String[] { "cid", "id", "folder_id" });
-
-            // Re-create foreign key
-            Tools.createForeignKey(con, "infostore_document", new String[] {"cid", "infostore_id"}, "infostore", new String[] {"cid", "id"});
 
             con.commit();
         } catch (SQLException e) {
@@ -113,12 +108,9 @@ public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.InfostoreDocumentDropForeignKeyUpdateTask" };
+        return new String[0];
     }
 
 }

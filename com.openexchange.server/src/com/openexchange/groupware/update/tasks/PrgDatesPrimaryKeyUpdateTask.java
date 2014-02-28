@@ -68,6 +68,7 @@ import com.openexchange.tools.update.Tools;
 public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
 
     private static final String PRG_DATES = "prg_dates";
+    private static final String DATE_EXTERNAL = "dateExternal";
 
     /**
      * Initializes a new {@link PrgDatesPrimaryKeyUpdateTask}.
@@ -82,6 +83,11 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         Connection con = Database.getNoTimeout(cid, true);
         try {
             con.setAutoCommit(false);
+            String foreignKey = Tools.existsForeignKey(con, PRG_DATES, new String[] { "cid", "intfield01" }, DATE_EXTERNAL, new String[] {
+                "cid", "objectId" });
+            if (null != foreignKey && !foreignKey.equals("")) {
+                Tools.dropForeignKey(con, DATE_EXTERNAL, foreignKey);
+            }
             if (Tools.hasPrimaryKey(con, PRG_DATES)) {
                 Tools.dropPrimaryKey(con, PRG_DATES);
             }
@@ -101,7 +107,7 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { DateExternalDropForeignKeyUpdateTask.class.getName() };
+        return new String[0];
     }
 
 }

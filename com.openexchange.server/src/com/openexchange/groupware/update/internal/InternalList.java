@@ -76,6 +76,7 @@ import com.openexchange.groupware.update.tasks.DelDateExternalCreateForeignKeyUp
 import com.openexchange.groupware.update.tasks.DelDateExternalDropForeignKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelDatesMembersPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTaskV2;
 import com.openexchange.groupware.update.tasks.DelInfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DropDuplicateEntryFromUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
@@ -86,6 +87,7 @@ import com.openexchange.groupware.update.tasks.InfostoreClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.InfostoreDocumentCreateForeignKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.InfostoreDocumentDropForeignKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.InfostorePrimaryKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.InfostorePrimaryKeyUpdateTaskV2;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 import com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForDListTables;
@@ -96,6 +98,7 @@ import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUp
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTaskV2;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.RemoveRedundantKeysForBug26913UpdateTask;
@@ -725,6 +728,15 @@ public final class InternalList {
 
         // Adapts the keys for those calendar tables that carry confirmation information to new "occurrence" column
         list.add(new com.openexchange.groupware.update.tasks.CalendarAddNewPrimaryKeyForConfirmPerOccurrence());
+
+        // Fix for bug 31335
+        list.add(new PrgDatesPrimaryKeyUpdateTaskV2());
+
+        // Fix for bug 31335
+        list.add(new DelDatesPrimaryKeyUpdateTaskV2());
+
+        // Fix for bug 31335
+        list.add(new InfostorePrimaryKeyUpdateTaskV2());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
