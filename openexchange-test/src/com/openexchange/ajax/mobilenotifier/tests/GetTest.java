@@ -113,6 +113,10 @@ public class GetTest extends AbstractMobileNotifierTest {
             "last_modified"));
     }
 
+    public void testRemindedrProviderJSONResponse() throws OXException, IOException, JSONException {
+        singleProviderTest("io.ox/reminder", new MandatoryFields());
+    }
+
     public void testShouldGetExceptionIfUnknownProvider() throws OXException, IOException, JSONException {
         GetMobileNotifierRequest req = new GetMobileNotifierRequest("io.ox/mehl");
         GetMobileNotifierResponse res = getClient().execute(req);

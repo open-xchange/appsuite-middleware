@@ -57,7 +57,7 @@ package com.openexchange.ajax.mobilenotifier.tests;
  */
 public class MandatoryFields {
 
-    String[] mandatory;
+    private String[] mandatory;
 
     public MandatoryFields(String... mandatory) {
         this.mandatory = mandatory;

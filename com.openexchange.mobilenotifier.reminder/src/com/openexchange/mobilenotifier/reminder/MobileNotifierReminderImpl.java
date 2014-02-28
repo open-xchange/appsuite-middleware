@@ -133,7 +133,7 @@ public class MobileNotifierReminderImpl extends AbstractMobileNotifierService {
                         DateUtility.getEndOfDay(currentDate),
                         0);
 
-                    if (recurringResult != null) {
+                    if (recurringResult != null && recurringResult.size() > 0) {
                         final RecurringResultInterface rri = recurringResult.getRecurringResult(0);
                         copyAppointment.setStartDate(new Date(rri.getStart()));
                         copyAppointment.setEndDate(new Date(rri.getEnd()));
@@ -145,7 +145,7 @@ public class MobileNotifierReminderImpl extends AbstractMobileNotifierService {
                     notifyItem.add(new NotifyItem("alarm", ro.getDate()));
                     notifyItem.add(new NotifyItem("title", copyAppointment.getTitle()));
                     notifyItem.add(new NotifyItem("location", copyAppointment.getLocation()));
-                    notifyItem.add(new NotifyItem("alarm", DateUtility.convertDateToTimestamp(ro.getDate())));
+                    notifyItem.add(new NotifyItem("alarm", ro.getDate().getTime()));
                     notifyItem.add(new NotifyItem("last_modified", DateUtility.convertDateToTimestamp(ro.getLastModified())));
                     notifyItem.add(new NotifyItem("start_date", DateUtility.convertDateToTimestamp(copyAppointment.getStartDate())));
                     notifyItem.add(new NotifyItem("end_date", DateUtility.convertDateToTimestamp(copyAppointment.getEndDate())));

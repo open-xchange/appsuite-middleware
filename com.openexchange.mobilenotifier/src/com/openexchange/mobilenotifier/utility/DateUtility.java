@@ -61,12 +61,24 @@ import java.util.TimeZone;
  */
 public class DateUtility {
 
+    /**
+     * Converts a date to a UTC timestamp
+     * 
+     * @param date - The date to convert
+     * @return Timestamp for date as UTC timestamp
+     */
     public static long convertDateToTimestamp(final Date date) {
         final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(date);
         return calendar.getTimeInMillis();
     }
 
+    /**
+     * Gets the end of the day
+     * 
+     * @param date - The date
+     * @return Calculated end of the day
+     */
     public static long getEndOfDay(Date date) {
         final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(date);
