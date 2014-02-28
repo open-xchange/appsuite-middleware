@@ -49,27 +49,30 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 
 /**
- * {@link DelDateExternalDropForeignKeyUpdateTask}
+ * {@link InfostorePrimaryKeyUpdateTaskV2}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class DelDateExternalDropForeignKeyUpdateTask extends UpdateTaskAdapter {
+public class InfostorePrimaryKeyUpdateTaskV2 extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link DelDateExternalDropForeignKeyUpdateTask}.
+     * Initializes a new {@link InfostorePrimaryKeyUpdateTaskV2}.
      */
-    public DelDateExternalDropForeignKeyUpdateTask() {
+    public InfostorePrimaryKeyUpdateTaskV2() {
         super();
     }
 
     @Override
-    public void perform(PerformParameters params) {
-        // nothing to do
+    public void perform(PerformParameters params) throws OXException {
+        perform(new InfostoreDocumentDropForeignKeyUpdateTask(), params.getSchema(), params.getContextId());
+        perform(new InfostorePrimaryKeyUpdateTask(), params.getSchema(), params.getContextId());
+        perform(new InfostoreDocumentCreateForeignKeyUpdateTask(), params.getSchema(), params.getContextId());
     }
 
     @Override
