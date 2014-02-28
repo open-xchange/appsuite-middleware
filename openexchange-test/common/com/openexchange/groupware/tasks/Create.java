@@ -114,4 +114,19 @@ public class Create {
         task.setTitle(title);
         return task;
     }
+    
+    /**
+     * Creates a task with the specified title, description status and folder
+     * @param title task's title
+     * @param description task's description
+     * @param status task's status
+     * @param folder task's parent folder
+     * @return the task
+     */
+    public static final Task createWithDefaults(final String title, final String description, final int status, final int folder) {
+        Task task = createWithDefaults(folder, title);
+        task.setNote(description);
+        task.setStatus(status);
+        return task;
+    }
 }
