@@ -231,8 +231,6 @@ public class RdbTaskSearch extends TaskSearch {
         builder.append(" WHERE ");
         builder.append(" t.cid = ? AND ");
         builder.append(SQL.allFoldersWhere(all, own, shared));
-        //searchParameters.add(context.getContextId());
-        //searchParameters.add(userID);
         
         //set titles
         Set<String> titleFilters = searchObject.getTitleFilters();
@@ -348,7 +346,6 @@ public class RdbTaskSearch extends TaskSearch {
             }
         };
         
-        System.err.println(builder.toString());
         TaskIterator it = new TaskIterator2(context, userID, builder.toString(), ss, -1, columns, StorageType.ACTIVE);
         
         return it;
