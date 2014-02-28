@@ -71,5 +71,4 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
     }
-
 }
