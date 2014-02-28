@@ -287,8 +287,9 @@ public class RdbTaskSearch extends TaskSearch {
             for(String q : queries) {
                 String preparedPattern = StringCollection.prepareForSearch(q, true, true);
                 builder.append(containsWildcards(preparedPattern) ? 
-                                                    " AND (t.description LIKE ? OR t.title LIKE ? ) " : 
-                                                    " AND (t.description = ? OR t.title = ? ) ");
+                                                    " AND (t.description LIKE ? OR t.title LIKE ? OR a.filename LIKE ? ) " : 
+                                                    " AND (t.description = ? OR t.title = ? OR a.filename = ?) ");
+                searchParameters.add(preparedPattern);
                 searchParameters.add(preparedPattern);
                 searchParameters.add(preparedPattern);
             }
