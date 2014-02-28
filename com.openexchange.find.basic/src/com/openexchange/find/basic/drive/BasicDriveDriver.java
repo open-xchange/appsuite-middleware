@@ -63,6 +63,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.search.AndTerm;
+import com.openexchange.file.storage.search.DescriptionTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
@@ -184,12 +185,15 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         }
 
         // Create file access
-        final IDBasedFileAccess access = fileAccessFactory.createAccess(session);
-        SearchTerm<String> titleTerm = new TitleTerm(request.getPrefix(), true, true);
-        SearchTerm<String> filenameTerm = new FileNameTerm(request.getPrefix(), true, true);
+        IDBasedFileAccess access = fileAccessFactory.createAccess(session);
+        String prefix = request.getPrefix();
+        SearchTerm<String> titleTerm = new TitleTerm(prefix, true, true);
+        SearchTerm<String> filenameTerm = new FileNameTerm(prefix, true, true);
+        SearchTerm<String> descriptionTerm = new DescriptionTerm(prefix, true, true);
         List<SearchTerm<?>> terms = new LinkedList<SearchTerm<?>>();
         terms.add(titleTerm);
         terms.add(filenameTerm);
+        terms.add(descriptionTerm);
         SearchTerm<List<SearchTerm<?>>> orTerm = new OrTerm(terms);
         SearchIterator<File> it = access.search(orTerm, Arrays.asList(fields), Field.TITLE, SortDirection.ASC, FileStorageFileAccess.NOT_SET,
             FileStorageFileAccess.NOT_SET);
@@ -197,10 +201,13 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         while (it.hasNext()) {
             File file = it.next();
             Filter fileName = new Filter(Collections.singletonList("filename"), file.getFileName());
-            {
-                String facetValue = prepareFacetValueId(request.getPrefix(), session.getContextId(), file.getId());
+            if (null != fileName) {
+                String facetValue = prepareFacetValueId(prefix, session.getContextId(), file.getId());
                 facets.add(new FacetValue(facetValue, new SimpleDisplayItem(file.getTitle()), FacetValue.UNKNOWN_COUNT, fileName));
             }
+            Filter description = new Filter(Collections.singletonList("description"), file.getDescription());
+            String facetValue2 = prepareFacetValueId(prefix, session.getContextId(), file.getId());
+            facets.add(new FacetValue(facetValue2, new SimpleDisplayItem(file.getTitle()), FacetValue.UNKNOWN_COUNT, description));
         }
         return facets;
     }
