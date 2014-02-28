@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConflictObject;
-import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -82,6 +81,10 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
     private Appointment appointment;
 
     private int nextYear;
+
+    private int occurrence = 5;
+
+    private static int NOT_EXISTENT = -9999;
 
     private static final int[] COLS = new int[] {
         Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.TITLE,
@@ -122,7 +125,13 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm.insert(appointment);
     }
 
+    public void testConfirmationSetCorrectlyForOccurrence() throws Exception {
+        // TODO when possible to get participant info for an occurrence test correct set confirmation status for occurrence
+
+    }
+
     public void testConfirmSeries() throws Exception {
+        ctm.setClient(client1);
         ctm.confirm(appointment, Appointment.TENTATIVE, "tentative");
         ctm.confirmExternal(appointment, "external1@example.com", Appointment.TENTATIVE, "tentative");
         ctm.confirmExternal(appointment, "external2@example.com", Appointment.TENTATIVE, "tentative");
@@ -131,17 +140,18 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm.setClient(client1);
 
         Appointment loadedAppointment = ctm.get(appointment);
-        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative");
+        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2, 0);
 
         Appointment[] apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
             if (app.getObjectID() == appointment.getObjectID()) {
-                checkConfirmations(app, Appointment.TENTATIVE, "tentative");
+                checkConfirmations(app, Appointment.TENTATIVE, "tentative", 2);
             }
         }
     }
-    
+
     public void testException() throws Exception {
+        ctm.setClient(client1);
         ctm.confirm(appointment, Appointment.TENTATIVE, "tentative");
         ctm.confirmExternal(appointment, "external1@example.com", Appointment.TENTATIVE, "tentative");
         ctm.confirmExternal(appointment, "external2@example.com", Appointment.TENTATIVE, "tentative");
@@ -152,7 +162,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         Appointment exception = ctm.createIdentifyingCopy(appointment);
         exception.setStartDate(D("05.02." + nextYear + " 10:00"));
         exception.setEndDate(D("05.02." + nextYear + " 12:00"));
-        exception.setRecurrencePosition(5);
+        exception.setRecurrencePosition(this.occurrence);
         exception.setTitle(appointment.getTitle() + " - Exception");
         exception.setLastModified(new Date(Long.MAX_VALUE));
         ctm.update(exception);
@@ -164,22 +174,23 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm.setClient(client2);
         ctm.confirm(exception, Appointment.DECLINE, "decline");
         ctm.setClient(client1);
-        
+
         Appointment loadedAppointment = ctm.get(appointment);
-        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative");
+        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2, 0);
 
         Appointment[] apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
             if (app.getObjectID() == appointment.getObjectID()) {
-                checkConfirmations(app, Appointment.TENTATIVE, "tentative");
+                checkConfirmations(app, Appointment.TENTATIVE, "tentative", 2);
             }
         }
-        
+
         loadedAppointment = ctm.get(exception);
-        checkConfirmations(loadedAppointment, Appointment.DECLINE, "decline");
+        checkConfirmations(loadedAppointment, Appointment.DECLINE, "decline", 2);
     }
-    
+
     public void testOccurrence() throws Exception {
+        ctm.setClient(client1);
         ctm.confirm(appointment, Appointment.TENTATIVE, "tentative");
         ctm.confirmExternal(appointment, "external1@example.com", Appointment.TENTATIVE, "tentative");
         ctm.confirmExternal(appointment, "external2@example.com", Appointment.TENTATIVE, "tentative");
@@ -187,29 +198,30 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm.confirm(appointment, Appointment.TENTATIVE, "tentative");
         ctm.setClient(client1);
 
-        ctm.confirm(appointment, Appointment.DECLINE, "decline", 5);
-        ctm.confirmExternal(appointment, "external1@example.com", Appointment.DECLINE, "decline", 5);
-        ctm.confirmExternal(appointment, "external2@example.com", Appointment.DECLINE, "decline", 5);
+        ctm.confirm(appointment, Appointment.DECLINE, "decline", this.occurrence);
+        ctm.confirmExternal(appointment, "external1@example.com", Appointment.DECLINE, "decline", this.occurrence);
+        ctm.confirmExternal(appointment, "external2@example.com", Appointment.DECLINE, "decline", this.occurrence);
         ctm.setClient(client2);
-        ctm.confirm(appointment, Appointment.DECLINE, "decline", 5);
+        ctm.confirm(appointment, Appointment.DECLINE, "decline", this.occurrence);
         ctm.setClient(client1);
 
         Appointment loadedAppointment = ctm.get(appointment);
-        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative");
-        
+        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2, 0);
+
         Appointment[] apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
             if (app.getObjectID() == appointment.getObjectID()) {
-                if (app.getRecurrencePosition() == 5) {
-                    checkConfirmations(app, Appointment.DECLINE, "decline");
+                if (app.getRecurrencePosition() == this.occurrence) {
+                    checkConfirmations(app, Appointment.DECLINE, "decline", 2);
                 } else {
-                    checkConfirmations(app, Appointment.TENTATIVE, "tentative");
+                    checkConfirmations(app, Appointment.TENTATIVE, "tentative", 2);
                 }
             }
         }
     }
-    
+
     public void testOccurrenceOnExistingException() throws Exception {
+        ctm.setClient(client1);
         ctm.confirm(appointment, Appointment.TENTATIVE, "tentative");
         ctm.confirmExternal(appointment, "external1@example.com", Appointment.TENTATIVE, "tentative");
         ctm.confirmExternal(appointment, "external2@example.com", Appointment.TENTATIVE, "tentative");
@@ -220,7 +232,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         Appointment exception = ctm.createIdentifyingCopy(appointment);
         exception.setStartDate(D("05.02." + nextYear + " 10:00"));
         exception.setEndDate(D("05.02." + nextYear + " 12:00"));
-        exception.setRecurrencePosition(5);
+        exception.setRecurrencePosition(this.occurrence);
         exception.setTitle(appointment.getTitle() + " - Exception");
         exception.setLastModified(new Date(Long.MAX_VALUE));
         ctm.update(exception);
@@ -232,42 +244,43 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm.setClient(client2);
         ctm.confirm(exception, Appointment.DECLINE, "decline");
         ctm.setClient(client1);
-        
+
         Appointment loadedAppointment = ctm.get(appointment);
-        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative");
+        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2);
 
         Appointment[] apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
             if (app.getObjectID() == appointment.getObjectID()) {
-                checkConfirmations(app, Appointment.TENTATIVE, "tentative");
+                checkConfirmations(app, Appointment.TENTATIVE, "tentative", 2);
             }
         }
-        
-        loadedAppointment = ctm.get(exception);
-        checkConfirmations(loadedAppointment, Appointment.DECLINE, "decline");
 
-        ctm.confirm(appointment, Appointment.ACCEPT, "accept", 5);
-        ctm.confirmExternal(appointment, "external1@example.com", Appointment.ACCEPT, "accept", 5);
-        ctm.confirmExternal(appointment, "external2@example.com", Appointment.ACCEPT, "accept", 5);
+        loadedAppointment = ctm.get(exception);
+        checkConfirmations(loadedAppointment, Appointment.DECLINE, "decline", 2, 0);
+
+        ctm.confirm(appointment, Appointment.ACCEPT, "accept", this.occurrence);
+        ctm.confirmExternal(appointment, "external1@example.com", Appointment.ACCEPT, "accept", this.occurrence);
+        ctm.confirmExternal(appointment, "external2@example.com", Appointment.ACCEPT, "accept", this.occurrence);
         ctm.setClient(client2);
-        ctm.confirm(appointment, Appointment.ACCEPT, "accept", 5);
+        ctm.confirm(appointment, Appointment.ACCEPT, "accept", this.occurrence);
         ctm.setClient(client1);
 
         loadedAppointment = ctm.get(appointment);
-        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative");
+        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2);
 
         apps = ctm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
             if (app.getObjectID() == appointment.getObjectID()) {
-                checkConfirmations(app, Appointment.TENTATIVE, "tentative");
+                checkConfirmations(app, Appointment.TENTATIVE, "tentative", 2);
             }
         }
-        
+
         loadedAppointment = ctm.get(exception);
-        checkConfirmations(loadedAppointment, Appointment.ACCEPT, "accept");
+        checkConfirmations(loadedAppointment, Appointment.ACCEPT, "accept", 2, 0);
     }
-    
+
     public void testConflicts() throws Exception {
+        ctm.setClient(client1);
         ctm.confirm(appointment, Appointment.ACCEPT, "accept");
         ctm.confirmExternal(appointment, "external1@example.com", Appointment.ACCEPT, "accept");
         ctm.confirmExternal(appointment, "external2@example.com", Appointment.ACCEPT, "accept");
@@ -275,15 +288,15 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm.confirm(appointment, Appointment.ACCEPT, "accept");
         ctm.setClient(client1);
 
-        ctm.confirm(appointment, Appointment.DECLINE, "decline", 5);
-        ctm.confirmExternal(appointment, "external1@example.com", Appointment.DECLINE, "decline", 5);
-        ctm.confirmExternal(appointment, "external2@example.com", Appointment.DECLINE, "decline", 5);
+        ctm.confirm(appointment, Appointment.DECLINE, "decline", this.occurrence);
+        ctm.confirmExternal(appointment, "external1@example.com", Appointment.DECLINE, "decline", this.occurrence);
+        ctm.confirmExternal(appointment, "external2@example.com", Appointment.DECLINE, "decline", this.occurrence);
         ctm.setClient(client2);
-        ctm.confirm(appointment, Appointment.DECLINE, "decline", 5);
+        ctm.confirm(appointment, Appointment.DECLINE, "decline", this.occurrence);
         ctm.setClient(client1);
 
         Appointment loadedAppointment = ctm.get(appointment);
-        checkConfirmations(loadedAppointment, Appointment.ACCEPT, "accept");
+        checkConfirmations(loadedAppointment, Appointment.ACCEPT, "accept", 2, 0);
 
         Appointment conflict = new Appointment();
         conflict.setTitle("Test for occurrence based confirmations. - CONFLICT");
@@ -291,7 +304,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         conflict.setEndDate(D("05.02." + nextYear + " 09:00"));
         conflict.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
         conflict.setIgnoreConflicts(false);
-        
+
         ctm.insert(conflict);
         List<ConflictObject> conflicts = ((AppointmentInsertResponse) ctm.getLastResponse()).getConflicts();
         boolean foundBadConflict = false;
@@ -306,9 +319,15 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         assertFalse("Found conflict", foundBadConflict);
     }
 
-    private void checkConfirmations(Appointment appointment, int status, String message) {
-        assertEquals("Wrong amount of participants.", 2, appointment.getConfirmations().length);
-        assertEquals("Wrong amount of participants.", 2, appointment.getUsers().length);
+    // TODO tests for
+
+    private void checkConfirmations(Appointment appointment, int status, String message, int participantAmount) {
+        this.checkConfirmations(appointment, status, message, participantAmount, NOT_EXISTENT);
+    }
+
+    private void checkConfirmations(Appointment appointment, int status, String message, int participantAmount, int expectedOccurrence) {
+        assertEquals("Wrong amount of participants.", participantAmount, appointment.getConfirmations().length);
+        assertEquals("Wrong amount of participants.", participantAmount, appointment.getUsers().length);
         for (ConfirmableParticipant p : appointment.getConfirmations()) {
             assertEquals("Wrong confirmation status.", status, p.getConfirm());
             assertEquals("Wrong confirmation message.", message, p.getMessage());
@@ -316,6 +335,9 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         for (UserParticipant p : appointment.getUsers()) {
             assertEquals("Wrong confirmation status.", status, p.getConfirm());
             assertEquals("Wrong confirmation message.", message, p.getConfirmMessage());
+            if (expectedOccurrence != NOT_EXISTENT) {
+                assertEquals(expectedOccurrence, p.getOccurrence());
+            }
         }
     }
 

@@ -65,6 +65,7 @@ public class AppointmentAJAXSuite extends TestSuite{
         final TestSuite tests = new TestSuite("com.openexchange.ajax.appointment.AppointmentAJAXSuite");
         tests.addTestSuite(AllTest.class);
         tests.addTestSuite(ConfirmTest.class);
+        tests.addTestSuite(ConfirmOccurrencesTest.class);
         tests.addTestSuite(ConfirmOthers.class);
         tests.addTestSuite(CopyTest.class);
         tests.addTestSuite(DeleteTest.class);
