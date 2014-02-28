@@ -47,35 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier.json.osgi;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
-
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
+import com.openexchange.mobilenotifier.json.MobileNotifierActionFactory;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link MobileNotifierJsonActivator}
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public class MobileNotifierJsonActivator extends AJAXModuleActivator {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    /**
+     * Initializes a new {@link MobileNotifierJsonActivator}.
+     */
+    public MobileNotifierJsonActivator() {
+        super();
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { MobileNotifierServiceRegistry.class, ConfigViewFactory.class };
+    }
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(new MobileNotifierActionFactory(this), "mobilenotifier");
     }
 }

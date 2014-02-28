@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier.reminder.osgi;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
-
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.mobilenotifier.MobileNotifierService;
+import com.openexchange.mobilenotifier.reminder.MobileNotifierReminderImpl;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link MobileNotifierReminderActivator}
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public class MobileNotifierReminderActivator extends HousekeepingActivator {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { AppointmentSqlFactoryService.class, CalendarCollectionService.class };
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
-
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(MobileNotifierService.class, new MobileNotifierReminderImpl(this));
     }
+
 }

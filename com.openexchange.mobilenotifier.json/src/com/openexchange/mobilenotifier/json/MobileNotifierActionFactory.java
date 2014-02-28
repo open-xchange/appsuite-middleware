@@ -47,35 +47,49 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier.json;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.mobilenotifier.json.actions.AbstractMobileNotifierAction;
+import com.openexchange.mobilenotifier.json.actions.ConfigGetAction;
+import com.openexchange.mobilenotifier.json.actions.ConfigPutAction;
+import com.openexchange.mobilenotifier.json.actions.GetAction;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link MobileNotifierActionFactory} - The mobile notifier action factory.
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+@Module(name = "mobilenotifier", description = "Provides access to mobile notifier module.")
+public class MobileNotifierActionFactory implements AJAXActionServiceFactory {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    private final Map<String, AbstractMobileNotifierAction> actions;
+
+    /**
+     * Initializes a new {@link MobileNotifierActionFactory}.
+     */
+    public MobileNotifierActionFactory(final ServiceLookup serviceLookup) {
+        super();
+        actions = new ConcurrentHashMap<String, AbstractMobileNotifierAction>(3);
+        actions.put("get", new GetAction(serviceLookup));
+        actions.put("configget", new ConfigGetAction(serviceLookup));
+        actions.put("configput", new ConfigPutAction(serviceLookup));
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
+    }
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 }

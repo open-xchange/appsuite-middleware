@@ -47,35 +47,65 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
+import java.util.List;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.session.Session;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link MobileNotifierService} - The mobile notifier service.
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @since 7.6.0
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public interface MobileNotifierService {
+    
+    /**
+     * Get the provider name
+     * 
+     * @return The provider name
+     */
+    String getProviderName();
 
-    public GetPublicationTest(String name) {
-        super(name);
-    }
+    /**
+     * Get the frontend application name
+     * 
+     * @return The frontend application name
+     */
+    String getFrontendName();
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    /**
+     * Checks if a provider is enabled
+     * 
+     * @param uid The user id
+     * @param cid The context id
+     * @return <code>true</code> if a provider is enabled otherwise <code>false</code>
+     * @throws OXException
+     */
+    boolean isEnabled(int uid, int cid) throws OXException;
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
-    }
+    /**
+     * Gets the notify items
+     * 
+     * @return List of NotifyItems
+     * @throws OXException
+     */
+    List<List<NotifyItem>> getItems(Session session) throws OXException;
+
+    /**
+     * Gets a template
+     * 
+     * @return The notification template
+     * @throws OXException
+     */
+    NotifyTemplate getTemplate() throws OXException;
+
+    /**
+     * Writes changes to a template
+     * 
+     * @param changedTemplate - The template
+     * @throws OXException
+     */
+    void putTemplate(String changedTemplate) throws OXException;
 }

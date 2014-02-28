@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,58 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.ajax.mobilenotifier.actions;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
-
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.mobilenotifier.json.convert.ParsedNotifyTemplate;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
+ * {@link ConfigputMobileNotifierRequest}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public class ConfigputMobileNotifierRequest extends AbstractMobileNotifierRequest<ConfigputMobileNotifierResponse> {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    final private ParsedNotifyTemplate notifyTemplate;
+
+    public ConfigputMobileNotifierRequest(final ParsedNotifyTemplate notifyTemplate) {
+        this.notifyTemplate = notifyTemplate;
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.PUT;
+    }
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "configput") };
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends ConfigputMobileNotifierResponse> getParser() {
+        return new AbstractAJAXParser<ConfigputMobileNotifierResponse>(isFailOnError()) {
+
+            @Override
+            protected ConfigputMobileNotifierResponse createResponse(final Response response) throws JSONException {
+                return new ConfigputMobileNotifierResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws JSONException {
+        final JSONObject providerJSON = new JSONObject();
+        final JSONObject frontend = new JSONObject();
+        final JSONObject attributes = new JSONObject();
+        attributes.put("template", notifyTemplate.getHtmlTemplate());
+        frontend.put(notifyTemplate.getFrontendName(), attributes);
+        providerJSON.put("provider", frontend);
+        return providerJSON;
     }
 }

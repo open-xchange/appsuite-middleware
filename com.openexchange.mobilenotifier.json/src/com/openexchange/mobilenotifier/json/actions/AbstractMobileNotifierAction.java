@@ -47,35 +47,61 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier.json.actions;
 
-import java.io.IOException;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link AbstractMobileNotifierAction} - The abstract mobile notifier action.
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public abstract class AbstractMobileNotifierAction implements AJAXActionService {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link AbstractMobileNotifierAction}.
+     */
+    protected AbstractMobileNotifierAction(final ServiceLookup services) {
+        super();
+        this.services = services;
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
-
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    protected <S> S getService(final Class<? extends S> clazz) {
+        return services.getService(clazz);
     }
+
+    @Override
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        try {
+            return perform(new MobileNotifierRequest(requestData, session));
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Performs specified MobileNotifierRequest request.
+     * 
+     * @param req The mobile notifier request
+     * @return The result
+     * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult perform(MobileNotifierRequest req) throws OXException, JSONException;
 }

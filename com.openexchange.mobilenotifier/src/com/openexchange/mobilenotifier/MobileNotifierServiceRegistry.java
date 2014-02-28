@@ -47,35 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
+import java.util.List;
 import com.openexchange.exception.OXException;
 
-
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link MobileNotifierServiceRegistry}
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public interface MobileNotifierServiceRegistry {
 
-    public GetPublicationTest(String name) {
-        super(name);
-    }
+    /**
+     * Gets a specific mobile notifier service by a provider
+     * 
+     * @param provider Identifies the service
+     * @param uid The user id
+     * @param cid The context id
+     * @return A mobile notifier service
+     * @throws OXException
+     */
+    MobileNotifierService getService(String provider, int uid, int cid) throws OXException;
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
-
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
-    }
+    /**
+     * Gets all mobile notifier services
+     * 
+     * @param uid The user id
+     * @param cid The context id
+     * @return All mobile notifier services as list
+     * @throws OXException
+     */
+    List<MobileNotifierService> getAllServices(int uid, int cid) throws OXException;
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,43 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.mobilenotifier.osgi.Services;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
+ * {@link AbstractMobileNotifierService}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public abstract class AbstractMobileNotifierService implements MobileNotifierService {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    @Override
+    public final boolean isEnabled(int uid, int cid) throws OXException {
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = configViewFactory.getView(uid, cid);
+        ComposedConfigProperty<Boolean> property;
+
+        property = view.property("com.openxchange.mobilenotifier.enabled", Boolean.class);
+
+        if (!property.isDefined()) {
+            return isEnabledCustom(uid, cid) ? true : false;
+        }
+        return property.get().booleanValue();
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
-
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    /**
+     * Can be used to implement a custom enabled method by a provider
+     * 
+     * @param uid The user id
+     * @param cid The context id
+     * @return <code>true</code> provider is enabled, otherwise <code>false</code>
+     */
+    protected boolean isEnabledCustom(int uid, int cid) {
+        return true;
     }
 }

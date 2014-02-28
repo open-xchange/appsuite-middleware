@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,51 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.ajax.mobilenotifier.tests;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
+import com.openexchange.ajax.mobilenotifier.actions.ConfigputMobileNotifierRequest;
+import com.openexchange.ajax.mobilenotifier.actions.ConfigputMobileNotifierResponse;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.mobilenotifier.json.convert.ParsedNotifyTemplate;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
+ * {@link ConfigputTest}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public class ConfigputTest extends AbstractMobileNotifierTest {
 
-    public GetPublicationTest(String name) {
+    /**
+     * Initializes a new {@link ConfigputTest}.
+     * 
+     * @param name
+     */
+    public ConfigputTest(String name) {
         super(name);
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    public void testShouldUpdateTemplate() throws OXException, IOException, JSONException {
+        ParsedNotifyTemplate notifyTemplate = new ParsedNotifyTemplate();
+        notifyTemplate.setFrontendName("io.ox/mail");
+        final String template = "<div class=\"mail-listitem\">\n" + "\t<div class=\"from\"><%= from %></div>\n" + "\t<div class=\"received_date\"><%= received_date %></div>\n" + "\t<div class=\"subject\"><%= subject %></div>\n" + "\t<div class=\"flags\"><%= flags %></div>\n" + "\t<div class=\"attachments\"><%= attachments %></div>\n" + "</div>";
+        notifyTemplate.setHtmlTemplate(template);
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+        ConfigputMobileNotifierRequest updReq = new ConfigputMobileNotifierRequest(notifyTemplate);
+        ConfigputMobileNotifierResponse updResp = getClient().execute(updReq);
+
+        assertFalse("should have been successful, but got: " + updResp.getErrorMessage(), updResp.hasError());
+
+        assertEquals("Should return true in case of success", new Boolean(true), updResp.getData());
+    }
+
+    public void testShouldThrowExceptionIfUnknownService() throws OXException, IOException, JSONException {
+        ParsedNotifyTemplate notifyTemplate = new ParsedNotifyTemplate();
+        notifyTemplate.setFrontendName("io.ox/mehl");
+        notifyTemplate.setHtmlTemplate("<div></div>");
+        ConfigputMobileNotifierRequest updReq = new ConfigputMobileNotifierRequest(notifyTemplate);
+        ConfigputMobileNotifierResponse updResp = getClient().execute(updReq);
+        assertTrue("should get an exception, but no error occured", updResp.hasError());
     }
 }

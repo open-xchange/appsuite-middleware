@@ -47,35 +47,48 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier.json.convert;
 
-import java.io.IOException;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
-
+import org.json.JSONObject;
+import com.openexchange.mobilenotifier.NotifyItem;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link NotifyItemWriter} - Converts a list of notify items to a JSON structure.
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public class NotifyItemWriter {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    private NotifyItemWriter() {
+        super();
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    /**
+     * Writes the JSON structure of notify items
+     * 
+     * @param notifyItem List of notify items
+     * @return The JSON structure
+     * @throws JSONException
+     */
+    public static JSONObject write(final List<List<NotifyItem>> notifyItem) throws JSONException {
+        final JSONObject itemsJSON = new JSONObject();
+        final JSONArray itemsArray = transformListIntoJSONArray(notifyItem);
+        itemsJSON.put(MobileNotifyField.ITEMS, itemsArray);
+        return itemsJSON;
+    }
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    private static JSONArray transformListIntoJSONArray(List<List<NotifyItem>> items) throws JSONException {
+        final JSONArray itemsArray = new JSONArray();
+        for (List<NotifyItem> listItem : items) {
+            final JSONObject itemJSON = new JSONObject();
+            for (NotifyItem item : listItem) {
+                itemJSON.put(item.getKey(), item.getValue());
+            }
+            itemsArray.put(itemJSON);
+        }
+        return itemsArray;
     }
 }

@@ -47,35 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link MobileNotifierExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @since 7.6.0
  */
-public class GetPublicationTest extends AbstractPublicationTest {
-
-    public GetPublicationTest(String name) {
-        super(name);
+public class MobileNotifierExceptionMessages implements LocalizableStrings {
+    /**
+     * Initializes a new {@link OXExceptionMessages}.
+     */
+    private MobileNotifierExceptionMessages() {
+        super();
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    // The default message displayed to user.
+    public static final String MESSAGE = "An error occurred inside the server which prevented it from fulfilling the request.";
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
-    }
+    // SQL error message
+    public static final String SQL_ERROR_MSG = "Error while reading/writing data from/to the database.";
+
 }

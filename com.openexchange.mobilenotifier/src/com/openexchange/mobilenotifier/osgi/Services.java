@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,57 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier.osgi;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link Services} - The static service lookup.
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public final class Services {
 
-    public GetPublicationTest(String name) {
-        super(name);
-    }
+   /**
+    * Initializes a new {@link Services}.
+    */
+   private Services() {
+       super();
+   }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+   private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
-    }
+   /**
+    * Sets the service lookup.
+    *
+    * @param serviceLookup The service lookup or <code>null</code>
+    */
+   public static void setServiceLookup(final ServiceLookup serviceLookup) {
+       REF.set(serviceLookup);
+   }
+
+   /**
+    * Gets the service lookup.
+    *
+    * @return The service lookup or <code>null</code>
+    */
+   public static ServiceLookup getServiceLookup() {
+       return REF.get();
+   }
+
+   /**
+    * Gets the service of specified type
+    *
+    * @param clazz The service's class
+    * @return The service
+    * @throws IllegalStateException If an error occurs while returning the demanded service
+    */
+   public static <S extends Object> S getService(final Class<? extends S> clazz) {
+       final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+       if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.mobilenotifier\" not started?");
+       }
+       return serviceLookup.getService(clazz);
+   }
 }

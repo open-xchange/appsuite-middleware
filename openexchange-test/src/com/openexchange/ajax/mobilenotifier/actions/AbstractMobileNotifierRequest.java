@@ -47,35 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.ajax.mobilenotifier.actions;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
-
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
+ * {@link AbstractPublicationRequest}
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public abstract class AbstractMobileNotifierRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    private boolean failOnError;
+
+    @Override
+    public String getServletPath() {
+        return "/ajax/mobilenotifier";
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    public boolean isFailOnError() {
+        return failOnError;
     }
 }

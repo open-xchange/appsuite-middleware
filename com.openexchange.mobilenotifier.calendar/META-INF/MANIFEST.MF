@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-Name: Open-Xchange Mobilenotifier Calendar Bundle
+Bundle-SymbolicName: com.openexchange.mobilenotifier.calendar
+Bundle-Version: 7.6.0
+Bundle-Activator: com.openexchange.mobilenotifier.calendar.osgi.MobileNotifierCalendarActivator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.api2,
+ com.openexchange.calendar.itip,
+ com.openexchange.exception,
+ com.openexchange.groupware.calendar,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.search,
+ com.openexchange.mobilenotifier,
+ com.openexchange.mobilenotifier.utility,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.iterator,
+ org.osgi.framework
+Bundle-ActivationPolicy: lazy

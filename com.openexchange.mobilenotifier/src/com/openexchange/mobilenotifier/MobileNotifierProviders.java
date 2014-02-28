@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,76 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
-
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
+package com.openexchange.mobilenotifier;
 
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link MobileNotifierProviders} - Enumeration of values for the provider
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public enum MobileNotifierProviders {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    /**
+     * Enum field for mail provider
+     */
+    MAIL("mail", "io.ox/mail", "Mail", "Mail.tmpl", 1),
+
+    /**
+     * Enum field for appointment provider
+     */
+    APPOINTMENT("appointment", "io.ox/calendar", "Calendar", "Appointment.tmpl", 2),
+    
+    /**
+     * Enum field for task provider
+     */
+    TASKS("tasks", "io.ox/tasks", "Tasks", "Task.tmpl", 3),
+    
+    /**
+     * Enum field for reminder provider
+     */
+    REMINDER("reminder", "io.ox/reminder", "Reminder", "Reminder.tmpl", 4),
+    
+    /**
+     * Enum field for drive provider
+     */
+    DRIVE("drive", "io.ox/drive", "Drive", "Drive.tmpl", 5);
+
+    private final String providerName;
+
+    private final String frontendName;
+
+    private final String title;
+    
+    private final String templateFileName;
+
+    private final int index;
+
+    private MobileNotifierProviders(final String providerName, final String frontendName, final String title, final String templateFileName, final int index) {
+        this.providerName = providerName;
+        this.frontendName = frontendName;
+        this.title = title;
+        this.templateFileName = templateFileName;
+        this.index = index;
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    public String getProviderName() {
+        return providerName;
+    }
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    public String getFrontendName() {
+        return frontendName;
+    }
+
+    public String getTemplateFileName() {
+        return templateFileName;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public int getIndex() {
+        return index;
     }
 }

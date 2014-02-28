@@ -47,35 +47,27 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier.example.osgi;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
-
+import com.openexchange.mobilenotifier.MobileNotifierService;
+import com.openexchange.mobilenotifier.example.ExampleCalendarMobileNotifierService;
+import com.openexchange.mobilenotifier.example.ExampleMailMobileNotifierService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link ExampleMobileNotifierActivator}
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
-
-    public GetPublicationTest(String name) {
-        super(name);
+public class ExampleMobileNotifierActivator extends HousekeepingActivator {
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] {};
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
-
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(MobileNotifierService.class, new ExampleMailMobileNotifierService());
+        registerService(MobileNotifierService.class, new ExampleCalendarMobileNotifierService());
     }
 }

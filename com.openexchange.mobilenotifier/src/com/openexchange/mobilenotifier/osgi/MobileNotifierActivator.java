@@ -47,35 +47,59 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier.osgi;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
-
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link MobileNotifierActivator}
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public class MobileNotifierActivator extends HousekeepingActivator {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierActivator.class);
+    private MobileNotifierServiceRegistryImpl registryImpl;
+
+    private ServiceRegistration<MobileNotifierServiceRegistry> registeredService;
+
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            Services.setServiceLookup(this);
+            LOG.info("starting bundle: com.openxchange.mobilenotifier");
+            this.registryImpl = new MobileNotifierServiceRegistryImpl(context);
+            this.registryImpl.open();
+            registeredService = context.registerService(MobileNotifierServiceRegistry.class, registryImpl, null);
+        } catch (Exception e) {
+            LOG.error("starting bundle \"com.openxchange.mobilenotifier\" failed: ", e);
+            throw e;
+        }
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { ConfigViewFactory.class };
+    }
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    @Override
+    public void stopBundle() throws Exception {
+        try {
+            LOG.info("stopping bundle: com.openxchange.mobilenotifier");
+            if (registeredService != null) {
+                registeredService.unregister();
+                registeredService = null;
+            }
+            if (registryImpl != null) {
+                this.registryImpl.close();
+                this.registryImpl = null;
+            }
+        } catch (Exception e) {
+            LOG.error("stopping bundle: \"com.openxchange.mobilenotifier\"", e);
+            throw e;
+        }
     }
 }

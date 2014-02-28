@@ -47,35 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
-
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
-
+package com.openexchange.mobilenotifier;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link NotifyItem} - Represents a notify item
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public class NotifyItem {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    private static final String EMPTY_STRING = "";
+
+    private String key;
+
+    private Object value;
+
+    public NotifyItem(String key, Object value) {
+        this.key = key;
+        this.value = value;
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    public String getKey() {
+        return key;
+    }
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    public Object getValue() {
+        // if value is null, return an empty string, so that json parses the key
+        if (value == null) {
+            return EMPTY_STRING;
+        }
+        return value;
     }
 }

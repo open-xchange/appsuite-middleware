@@ -47,35 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier.json.convert;
 
-import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
-
+import org.json.JSONObject;
+import com.openexchange.mobilenotifier.NotifyTemplate;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link NotifyTemplateWriter} - Converts a notification template to a JSON structure.
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public class NotifyTemplateWriter {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    private NotifyTemplateWriter() {
+        super();
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    /**
+     * Writes the JSON structure of notify templates
+     * 
+     * @param template The notify template
+     * @return The JSON structure
+     * @throws JSONException
+     */
+    public static JSONObject write(final NotifyTemplate template) throws JSONException {
+        final JSONObject attributes = new JSONObject();
+        attributes.put(MobileNotifyField.TITLE, template.getTitle());
+        attributes.put(MobileNotifyField.TEMPLATE, template.getHtmlTemplate());
+        attributes.put(MobileNotifyField.SLOW, template.isSlow());
+        attributes.put(MobileNotifyField.INDEX, template.getIndex());
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+        // writes additional attributes
+        final Iterator<Entry<String, Object>> iter = template.getAttributes().entrySet().iterator();
+        while (iter.hasNext()) {
+            final Entry<String, Object> additionalAttribute = iter.next();
+            attributes.put(additionalAttribute.getKey(), additionalAttribute.getValue());
+        }
+        return attributes;
     }
 }

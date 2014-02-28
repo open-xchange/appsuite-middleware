@@ -47,35 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier.utility;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
-
+import java.util.Locale;
+import java.util.TimeZone;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link LocaleAndTimeZone} - Helper class to pack up {@link Locale} and {@link TimeZone} combination.
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public class LocaleAndTimeZone {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    /**
+     * The locale.
+     */
+    private final Locale locale;
+
+    /**
+     * The time zone.
+     */
+    private final TimeZone timeZone;
+
+    /**
+     * Initializes a new {@link LocaleAndTimeZone}.
+     *
+     * @param locale The locale
+     * @param timeZoneId The time zone ID
+     */
+    public LocaleAndTimeZone(final Locale locale, final String timeZoneId) {
+        this.locale = locale;
+        this.timeZone = TimeZoneUtils.getTimeZone(timeZoneId);
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    public Locale getLocale() {
+        return locale;
+    }
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    public TimeZone getTimeZone() {
+        return timeZone;
     }
 }

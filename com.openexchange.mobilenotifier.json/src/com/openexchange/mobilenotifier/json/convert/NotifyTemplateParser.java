@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,52 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier.json.convert;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 
-
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link NotifyTemplateParser} - Parses notify templates
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public class NotifyTemplateParser {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    /**
+     * Initializes a new {@link NotifyTemplateParser}.
+     */
+    private NotifyTemplateParser() {
+        super();
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
-
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    /**
+     * Parse a notify template from a JSONObject
+     * 
+     * @param json The JSON object which should be parsed
+     * @return List of parsed notify templates
+     * @throws OXException
+     * @throws JSONException
+     */
+    public static List<ParsedNotifyTemplate> parseJSON(JSONObject json) throws JSONException {
+        final List<ParsedNotifyTemplate> parsedNotifiyTemplates = new ArrayList<ParsedNotifyTemplate>();
+        final JSONObject providerJSON = (JSONObject) json.get(MobileNotifyField.PROVIDER);
+        final Iterator<Entry<String, Object>> iter = providerJSON.entrySet().iterator();
+        while (iter.hasNext()) {
+            final Entry<String, Object> notifyTemplate = iter.next();
+            final ParsedNotifyTemplate parsedTemplate = new ParsedNotifyTemplate();
+            // get frontend name to find the service
+            parsedTemplate.setFrontendName(notifyTemplate.getKey());
+            // get template attribute
+            final JSONObject templateJSON = (JSONObject) notifyTemplate.getValue();
+            parsedTemplate.setHtmlTemplate(templateJSON.getString(MobileNotifyField.TEMPLATE));
+            parsedNotifiyTemplates.add(parsedTemplate);
+        }
+        return parsedNotifiyTemplates;
     }
 }

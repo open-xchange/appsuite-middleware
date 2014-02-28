@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,47 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier.utility;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
+ * {@link LocalizationUtility}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
-
-    public GetPublicationTest(String name) {
-        super(name);
+public class LocalizationUtility {
+    /**
+     * Formats specified date in given style with given locale and time zone.
+     * 
+     * @param date The date to format
+     * @param style The style to use
+     * @param locale The locale
+     * @param timeZone The time zone
+     * @return The formatted date
+     */
+    public static final String getFormattedDate(final Date date, final int style, final Locale locale, final TimeZone timeZone) {
+        final DateFormat dateFormat = DateFormat.getDateInstance(style, locale);
+        dateFormat.setTimeZone(timeZone);
+        return dateFormat.format(date);
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
-
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    /**
+     * Formats specified time in given style with given locale and time zone.
+     * 
+     * @param date The time to format
+     * @param style The style to use
+     * @param locale The locale
+     * @param timeZone The time zone
+     * @return The formatted time
+     */
+    public static final String getFormattedTime(final Date date, final int style, final Locale locale, final TimeZone timeZone) {
+        final DateFormat dateFormat = DateFormat.getTimeInstance(style, locale);
+        dateFormat.setTimeZone(timeZone);
+        return dateFormat.format(date);
     }
 }

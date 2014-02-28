@@ -47,35 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.publish.tests;
+package com.openexchange.mobilenotifier;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.publish.actions.GetPublicationRequest;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.exception.OXException;
-
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * {@link GetPublicationTest}
- * action=get is used in nearly all tests for verification purposes,
- * therefore you won't find many positive tests here,
- * because that would be redundant.
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link NotifyTemplate} - Represents a notify template
+ * 
+ * @author <a href="mailto:Lars.Hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetPublicationTest extends AbstractPublicationTest {
+public class NotifyTemplate {
 
-    public GetPublicationTest(String name) {
-        super(name);
+    private String title;
+
+    private String htmlTemplate;
+
+    private boolean slow;
+
+    private int index;
+
+    private Map<String, Object> attributes = new HashMap<String, Object>();
+
+    public NotifyTemplate(final String title, final String htmlTemplate, final boolean slow, final int index) {
+        this.title = title;
+        this.htmlTemplate = htmlTemplate;
+        this.slow = slow;
+        this.index = index;
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
-        GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
+    public String getHtmlTemplate() {
+        return htmlTemplate;
+    }
 
-        GetPublicationResponse res = getClient().execute(req);
-        OXException exception = res.getException();
-        assertNotNull("Should contain an exception" , exception);
+    public String getTitle() {
+        return title;
+    }
+
+    public boolean isSlow() {
+        return slow;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
     }
 }
