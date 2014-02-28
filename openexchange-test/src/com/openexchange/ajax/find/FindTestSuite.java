@@ -74,7 +74,7 @@ public final class FindTestSuite {
         tests.addTestSuite(SimpleFindTest.class);
         tests.addTestSuite(BasicDriveTest.class);
         tests.addTestSuite(com.openexchange.ajax.find.mail.SimpleTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.tasks.FindTasksTestsSingleFilter.class);
+        //tests.addTestSuite(com.openexchange.ajax.find.tasks.FindTasksTestsSingleFilter.class);
         return tests;
     }
 
