@@ -1,3 +1,7 @@
+* 2014-02-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23141: Remember parsed uploaded and temporarily stored files even if too much form fields are sent in the upload.
+
 * 2014-02-28 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 31335: Re-run update-tasks in correct order
