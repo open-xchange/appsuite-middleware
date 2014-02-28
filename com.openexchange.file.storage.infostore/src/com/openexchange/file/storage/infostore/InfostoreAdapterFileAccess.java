@@ -483,7 +483,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     @Override
     public SearchIterator<File> search(SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
         final ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
-        searchTerm.addField(fields);
+//        searchTerm.addField(fields);
         searchTerm.visit(visitor);
         final SearchIterator<DocumentMetadata> iterator =
             search.search(
