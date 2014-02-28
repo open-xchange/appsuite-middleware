@@ -1,3 +1,7 @@
+* 2014-02-28 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 31335: Re-run update-tasks in correct order
+
 * 2014-02-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 31347: Dropped tabs in empty lines
