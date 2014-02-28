@@ -308,6 +308,8 @@ public class LoginServlet extends AJAXServlet {
                     randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
                 }
                 if (randomToken == null) {
+                    final String msg = "Random token is disable (as per default since considered as insecure). See \"com.openexchange.ajax.login.randomToken\" in 'login.properties' file.";
+                    LOG.warn(msg, new Throwable(msg));
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     return;
                 }
@@ -469,6 +471,8 @@ public class LoginServlet extends AJAXServlet {
                     randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
                 }
                 if (randomToken == null) {
+                    final String msg = "Random token is disable (as per default since considered as insecure). See \"com.openexchange.ajax.login.randomToken\" in 'login.properties' file.";
+                    LOG.warn(msg, new Throwable(msg));
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     return;
                 }
