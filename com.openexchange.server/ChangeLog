@@ -15,6 +15,10 @@
 
  - Fix for bug 31300: Retrieve client state after blocking cleanup of local member
  
+* 2024-02-25 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 30773: NullPointerException at com.openexchange.spamsettings.generic.osgi.Activator.stop()
+ 
 * 2014-02-25 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31191: Fixed erroneous permission check.
@@ -36,6 +40,10 @@
 * 2014-02-24 - marcus.klein@open-xchange.com
 
  - Fix for bug 31238: Use the same properties map for the general login method of the LoginPerformer and the AuthenticationService.
+ 
+* 2014-02-24 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 30708: Incorrect credentials for "clearpreviewcache" don't return an error-code 
 
 * 2014-02-24 - tobias.friedrich@open-xchange.com
 
