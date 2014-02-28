@@ -111,7 +111,8 @@ public class ReloadConfigurationCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        mbsc.invoke(getObjectName(ConfigReloadMBean.class.getName(), ConfigReloadMBean.DOMAIN), "reloadConfiguration", null, null);
+        final ConfigReloadMBean configReloadMBean = getMBean(mbsc, ConfigReloadMBean.class);
+        configReloadMBean.reloadConfiguration();
         System.out.println("Configuration reloaded.");
         return null;
     }

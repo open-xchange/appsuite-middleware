@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 
 
 /**
- * {@link ConfigProviderService}
+ * {@link ConfigProviderService} - Provides access to properties/attributes obeying a certain scope.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added JavaDoc

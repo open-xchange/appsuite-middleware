@@ -49,14 +49,18 @@
 
 package com.openexchange.config.mbean;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import org.slf4j.Logger;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.internal.ConfigurationImpl;
-
 
 /**
  * {@link ConfigReloadMBeanImpl}
@@ -70,34 +74,53 @@ public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReload
 
     /**
      * Initializes a new {@link ConfigReloadMBeanImpl}.
+     *
      * @param mbeanInterface
      * @throws NotCompliantMBeanException
      */
-    public ConfigReloadMBeanImpl(Class<?> mbeanInterface, ConfigurationImpl configService) throws NotCompliantMBeanException {
+    public ConfigReloadMBeanImpl(Class<? extends ConfigReloadMBean> mbeanInterface, ConfigurationImpl configService) throws NotCompliantMBeanException {
         super(mbeanInterface);
         this.configService = configService;
     }
 
     @Override
-    public void reloadConfiguration() {
-        if (null != configService) {
-            configService.reloadConfiguration();
+    public void reloadConfiguration() throws MBeanException {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigReloadMBeanImpl.class);
+        try {
+            final ConfigurationImpl configService = this.configService;
+            if (null != configService) {
+                configService.reloadConfiguration();
+            }
+        } catch (final Exception e) {
+            logger.error("", e);
+            final String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
         }
     }
 
     @Override
-    public Map<String, String[]> listReloadables() {
-        Map<String, String[]> map = new HashMap<String, String[]>();
-        if (null != configService) {
+    public Map<String, List<String>> listReloadables() throws MBeanException {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigReloadMBeanImpl.class);
+        try {
+            final ConfigurationImpl configService = this.configService;
+            if (null == configService) {
+                return Collections.emptyMap();
+            }
+
+            Map<String, List<String>> map = new HashMap<String, List<String>>();
             Iterator<Reloadable> i = configService.getReloadables().iterator();
             while (i.hasNext()) {
-                Map<String, String[]> configs = i.next().getConfigfileNames();
+                Map<String, String[]> configs = i.next().getConfigFileNames();
                 for (String file : configs.keySet()) {
-                    map.put(file, configs.get(file));
+                    map.put(file, Arrays.asList(configs.get(file)));
                 }
             }
+            return map;
+        } catch (final Exception e) {
+            logger.error("", e);
+            final String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
         }
-        return map;
     }
 
 }

@@ -2478,7 +2478,7 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public Map<String, String[]> getConfigfileNames() {
+            public Map<String, String[]> getConfigFileNames() {
                 return null;
             }
         });

@@ -750,8 +750,8 @@ public final class ConfigurationImpl implements ConfigurationService {
      * Propagates the reloaded configuration among registered listeners.
      */
     public void reloadConfiguration() {
+        LOG.info("Reloading configuration...");
 
-        LOG.info("Reloading configuration");
         // Copy current content to get associated files on check for expired PropertyWatchers
         final Map<String, Properties> oldPropertiesByFile = new HashMap<String, Properties>(propertiesByFile);
         final Map<String, byte[]> oldXml = new HashMap<String, byte[]>(xmlFiles);
@@ -766,7 +766,6 @@ public final class ConfigurationImpl implements ConfigurationService {
         xmlFiles.clear();
 
         // (Re-)load configuration
-        // final Map<String, PropertyWatcher> watchers = PropertyWatcher.getAllWatchers();
         loadConfiguration(getDirectories());
 
         // Check if properties have been changed, abort if not
@@ -774,20 +773,24 @@ public final class ConfigurationImpl implements ConfigurationService {
         if (changes.isEmpty()) {
             LOG.info("No changes in configuration files detected, nothing to do");
             return;
-        } else {
-            LOG.info("Detected changes in the following configuration files: {}", changes);
         }
 
-        final ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
-        if (configProvider != null) {
-            configProvider.invalidate();
+        // Continue to reload
+        LOG.info("Detected changes in the following configuration files: {}", changes);
+
+        // Drop cache in config-cascade
+        {
+            final ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
+            if (configProvider != null) {
+                configProvider.invalidate();
+            }
         }
 
         // Propagate reloaded configuration among Reloadables
         for (final Reloadable reloadable : reloadableServices.values()) {
             try {
-                final Set<String> configfileNames = reloadable.getConfigfileNames().keySet();
-                if (null == configfileNames || configfileNames.isEmpty()) {
+                final Set<String> configFileNames = reloadable.getConfigFileNames().keySet();
+                if (null == configFileNames || configFileNames.isEmpty()) {
                     // Reloadable does not indicate the files of interest
 
                     reloadable.reloadConfiguration(this);
@@ -795,11 +798,10 @@ public final class ConfigurationImpl implements ConfigurationService {
                     // Reloadable does indicate the files of interest; thus check against changed ones
 
                     boolean doReload = false;
-                    final Iterator<String> it = configfileNames.iterator();
-                    while (!doReload && it.hasNext()) {
-                        String next = it.next();
-                        for (String changedFile : changes) {
-                            if (changedFile.endsWith(next)) {
+                    for (final Iterator<String> it = configFileNames.iterator(); !doReload && it.hasNext();) {
+                        final String fileName = it.next();
+                        for (final String changedFilePath : changes) {
+                            if (changedFilePath.endsWith(fileName)) {
                                 doReload = true;
                                 break;
                             }
@@ -810,7 +812,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                     }
                 }
             } catch (final Exception e) {
-                LOG.warn("Failed to handle reloaded configuration to {}.", reloadable.getClass().getName(), e);
+                LOG.warn("Failed to let reloaded configuration be handled by: {}", reloadable.getClass().getName(), e);
             }
         }
 
@@ -831,6 +833,12 @@ public final class ConfigurationImpl implements ConfigurationService {
          */
     }
 
+    /**
+     * Adds specified <code>Reloadable</code> instance.
+     *
+     * @param service The instance to add
+     * @return <code>true</code> if successfully added; otherwise <code>false</code> if already present
+     */
     public boolean addReloadable(Reloadable service) {
         if (null != service) {
             return null == reloadableServices.putIfAbsent(service.getClass().getName(), service);
@@ -839,6 +847,11 @@ public final class ConfigurationImpl implements ConfigurationService {
         return false;
     }
 
+    /**
+     * Removes specified <code>Reloadable</code> instance.
+     *
+     * @param service The instance to remove
+     */
     public void removeReloadable(Reloadable service) {
         if (null != service) {
             reloadableServices.remove(service.getClass().getName());
@@ -887,6 +900,11 @@ public final class ConfigurationImpl implements ConfigurationService {
         return result;
     }
 
+    /**
+     * Gets all currently tracked <code>Reloadable</code> instances.
+     *
+     * @return The <code>Reloadable</code> instances
+     */
     public Collection<Reloadable> getReloadables() {
         return reloadableServices.values();
     }

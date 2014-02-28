@@ -49,21 +49,35 @@
 
 package com.openexchange.config.mbean;
 
+import java.util.List;
 import java.util.Map;
+import javax.management.MBeanException;
 
 
 /**
- * {@link ConfigReloadMBean}
+ * {@link ConfigReloadMBean} - The MBean for configuration reload.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @since 7.6.0
  */
 public interface ConfigReloadMBean {
 
     public static final String DOMAIN = "com.openexchange.configuration";
 
-    void reloadConfiguration();
+    /**
+     * Reloads the configuration of Open-Xchange Server.
+     *
+     * @throws MBeanException If reload attempt fails
+     */
+    void reloadConfiguration() throws MBeanException;
 
-    Map<String, String[]> listReloadables();
+    /**
+     * Gets a listing for all properties that are reloadable.
+     *
+     * @return The listing for all reloadable properties
+     * @throws MBeanException If retrieval fails
+     */
+    Map<String, List<String>> listReloadables() throws MBeanException;
 
 }

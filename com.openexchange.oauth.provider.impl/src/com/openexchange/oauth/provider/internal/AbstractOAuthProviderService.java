@@ -339,7 +339,7 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
     }
 
     @Override
-    public Map<String, String[]> getConfigfileNames() {
+    public Map<String, String[]> getConfigFileNames() {
         Map<String, String[]> map = new HashMap<String, String[]>(1);
         map.put("oauth-provider.properties", PROPERTIES);
         return map;

@@ -114,7 +114,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
             }
 
             @Override
-            public Map<String, String[]> getConfigfileNames() {
+            public Map<String, String[]> getConfigFileNames() {
                 return null;
             }
         });

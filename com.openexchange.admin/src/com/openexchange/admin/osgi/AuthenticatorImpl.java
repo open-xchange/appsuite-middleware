@@ -147,7 +147,7 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigfileNames() {
+    public Map<String, String[]> getConfigFileNames() {
         Map<String, String[]> map = new HashMap<String, String[]>(2);
         map.put("mpasswd", new String[] {"all properties in file"});
         map.put("ModuleAccessDefinitions.properties", new String[] {"all properties in file"});

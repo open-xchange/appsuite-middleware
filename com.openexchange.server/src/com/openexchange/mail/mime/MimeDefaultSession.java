@@ -107,7 +107,7 @@ public final class MimeDefaultSession {
             }
 
             @Override
-            public Map<String, String[]> getConfigfileNames() {
+            public Map<String, String[]> getConfigFileNames() {
                 return null;
             }
         });

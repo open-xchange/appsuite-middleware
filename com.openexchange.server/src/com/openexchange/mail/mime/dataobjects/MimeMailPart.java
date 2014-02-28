@@ -142,7 +142,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             }
 
             @Override
-            public Map<String, String[]> getConfigfileNames() {
+            public Map<String, String[]> getConfigFileNames() {
                 return null;
             }
         });

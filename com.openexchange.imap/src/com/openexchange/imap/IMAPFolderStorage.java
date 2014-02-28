@@ -175,7 +175,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             @Override
-            public Map<String, String[]> getConfigfileNames() {
+            public Map<String, String[]> getConfigFileNames() {
                 return null;
             }
         });

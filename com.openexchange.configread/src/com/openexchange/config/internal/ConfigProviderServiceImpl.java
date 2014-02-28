@@ -62,7 +62,7 @@ import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ConfigProviderServiceImpl}
+ * {@link ConfigProviderServiceImpl} - The implementation of ConfigProviderService for the scope <code>"server"</code>.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */

@@ -171,7 +171,7 @@ public final class OperationKey implements Serializable {
             }
 
             @Override
-            public Map<String, String[]> getConfigfileNames() {
+            public Map<String, String[]> getConfigFileNames() {
                 return null;
             }
         });

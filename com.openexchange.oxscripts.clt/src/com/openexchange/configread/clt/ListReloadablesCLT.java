@@ -49,6 +49,7 @@
 
 package com.openexchange.configread.clt;
 
+import java.util.List;
 import java.util.Map;
 import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
@@ -97,19 +98,23 @@ public class ListReloadablesCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        Object result = null;
-        result = mbsc.invoke(getObjectName(ConfigReloadMBean.class.getName(), ConfigReloadMBean.DOMAIN), "listReloadables", null, null);
-        Map<String, String[]> res = (Map<String, String[]>) result;
-        StringBuilder sb = new StringBuilder();
-        for (String configfile : res.keySet()) {
+        final ConfigReloadMBean configReloadMBean = getMBean(mbsc, ConfigReloadMBean.class);
+        final Map<String, List<String>> res = configReloadMBean.listReloadables();
+
+        final String lineSeparator = System.getProperty("line.separator", "\n");
+
+        StringBuilder sb = new StringBuilder(8192);
+        for (Map.Entry<String, List<String>> configfileEntry : res.entrySet()) {
+            final String configfile = configfileEntry.getKey();
             if (null != configfile && !configfile.isEmpty()) {
-                sb.append(configfile).append(":\n");
-                for (String property : res.get(configfile)) {
-                    sb.append(property).append("\n");
+                sb.append(configfile).append(':').append(lineSeparator);
+                for (String property : configfileEntry.getValue()) {
+                    sb.append(property).append(lineSeparator);
                 }
-                sb.append("\n");
+                sb.append(lineSeparator);
             }
         }
+
         System.out.println(sb.toString());
         return null;
     }

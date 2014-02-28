@@ -74,6 +74,6 @@ public interface Reloadable {
      * Returns a set of configfile names, which are needed for the reloadable service.
      * @return Set of configfile names
      */
-    Map<String, String[]> getConfigfileNames();
+    Map<String, String[]> getConfigFileNames();
 
 }

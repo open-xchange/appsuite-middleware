@@ -315,7 +315,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
 
             @Override
-            public Map<String, String[]> getConfigfileNames() {
+            public Map<String, String[]> getConfigFileNames() {
                 return null;
             }
         });

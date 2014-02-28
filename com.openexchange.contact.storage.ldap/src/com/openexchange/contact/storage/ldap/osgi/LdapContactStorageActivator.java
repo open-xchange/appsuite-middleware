@@ -170,7 +170,7 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
     }
 
     @Override
-    public Map<String, String[]> getConfigfileNames() {
+    public Map<String, String[]> getConfigFileNames() {
         Map<String, String[]> map = new HashMap<String, String[]>();
         try {
             File[] newProperties = Tools.listPropertyFiles();

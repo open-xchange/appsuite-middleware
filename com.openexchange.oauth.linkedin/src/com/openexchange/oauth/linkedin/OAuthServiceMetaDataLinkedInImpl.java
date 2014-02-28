@@ -136,7 +136,7 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     }
 
     @Override
-    public Map<String, String[]> getConfigfileNames() {
+    public Map<String, String[]> getConfigFileNames() {
         Map<String, String[]> map = new HashMap<String, String[]>(1);
         map.put("linkedin.properties", PROPERTIES);
         return map;

@@ -250,7 +250,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData im
     }
 
     @Override
-    public Map<String, String[]> getConfigfileNames() {
+    public Map<String, String[]> getConfigFileNames() {
         Map<String, String[]> map = new HashMap<String, String[]>(1);
         map.put("msnoauth.properties", PROPERTIES);
         return map;
