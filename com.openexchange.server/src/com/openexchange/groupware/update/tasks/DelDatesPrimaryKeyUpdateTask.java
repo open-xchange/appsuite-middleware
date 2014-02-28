@@ -92,10 +92,10 @@ public class DelDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
             if (null != foreignKey && !foreignKey.equals("")) {
                 Tools.dropForeignKey(con, DEL_DATE_EXTERNAL, foreignKey);
             }
-            if (Tools.hasPrimaryKey(con, DEL_DATES)) {
+            if (!Tools.existsPrimaryKey(con, DEL_DATES, new String[] { "cid", "intfield01", "fid" })) {
                 Tools.dropPrimaryKey(con, DEL_DATES);
+                Tools.createPrimaryKey(con, DEL_DATES, new String[] { "cid", "intfield01", "fid" });
             }
-            Tools.createPrimaryKey(con, DEL_DATES, new String[] { "cid", "intfield01", "fid" });
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
