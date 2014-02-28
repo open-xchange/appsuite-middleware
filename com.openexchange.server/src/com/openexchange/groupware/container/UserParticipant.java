@@ -76,6 +76,8 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     private int confirm = CalendarObject.NONE;
 
     private String confirmMessage;
+    
+    private int occurrence;
 
     private String displayName;
 
@@ -175,6 +177,14 @@ public class UserParticipant implements Participant, Comparable<Participant> {
 
     public String getConfirmMessage() {
         return confirmMessage;
+    }
+
+    public int getOccurrence() {
+        return occurrence;
+    }
+
+    public void setOccurrence(int occurrence) {
+        this.occurrence = occurrence;
     }
 
     /**
