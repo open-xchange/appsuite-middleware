@@ -59,7 +59,6 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
-
 /**
  * {@link PrgDatesPrimaryKeyUpdateTask}
  *
@@ -68,6 +67,7 @@ import com.openexchange.tools.update.Tools;
 public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
 
     private static final String PRG_DATES = "prg_dates";
+
     private static final String DATE_EXTERNAL = "dateExternal";
 
     /**
@@ -88,10 +88,10 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
             if (null != foreignKey && !foreignKey.equals("")) {
                 Tools.dropForeignKey(con, DATE_EXTERNAL, foreignKey);
             }
-            if (Tools.hasPrimaryKey(con, PRG_DATES)) {
+            if (!Tools.existsPrimaryKey(con, PRG_DATES, new String[] { "cid", "intfield01", "fid" })) {
                 Tools.dropPrimaryKey(con, PRG_DATES);
+                Tools.createPrimaryKey(con, PRG_DATES, new String[] { "cid", "intfield01", "fid" });
             }
-            Tools.createPrimaryKey(con, PRG_DATES, new String[] { "cid", "intfield01", "fid" });
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
