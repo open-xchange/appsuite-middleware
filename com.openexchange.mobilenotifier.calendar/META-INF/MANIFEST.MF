@@ -11,16 +11,13 @@ Import-Package: com.openexchange.api2,
  com.openexchange.exception,
  com.openexchange.groupware.calendar,
  com.openexchange.groupware.container,
- com.openexchange.groupware.container.participants,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.search,
- com.openexchange.mail,
  com.openexchange.mobilenotifier,
  com.openexchange.mobilenotifier.utility,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.iterator,
- org.osgi.framework,
- org.slf4j
+ org.osgi.framework
 Bundle-ActivationPolicy: lazy

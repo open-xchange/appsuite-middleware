@@ -21,11 +21,6 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.tools.session,
  javax.servlet,
  javax.servlet.http,
- javax.servlet.resources,
- org.apache.commons.lang,
  org.json,
- org.osgi.framework,
- org.osgi.service.event,
- org.osgi.util.tracker,
- org.slf4j
+ org.osgi.framework
 Bundle-Activator: com.openexchange.mobilenotifier.json.osgi.MobileNotifierJsonActivator
