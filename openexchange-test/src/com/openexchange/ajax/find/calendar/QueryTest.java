@@ -1,0 +1,251 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.ajax.find.calendar;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.ajax.find.PropDocument;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.find.facet.Filter;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.UserParticipant;
+
+/**
+ * {@link QueryTest}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class QueryTest extends CalendarFindTest {
+
+    /**
+     * Initializes a new {@link QueryTest}.
+     *
+     * @param name The test name
+     */
+    public QueryTest(String name) {
+        super(name);
+    }
+
+    public void testFilterChaining() throws Exception {
+        Appointment appointment = randomAppointment();
+        List<Filter> filters = new ArrayList<Filter>();
+        filters.add(new Filter(Collections.singletonList("subject"), randomSubstring(appointment.getTitle())));
+        filters.add(new Filter(Collections.singletonList("location"), randomSubstring(appointment.getLocation())));
+        filters.add(new Filter(Collections.singletonList("description"), randomSubstring(appointment.getNote())));
+        filters.add(new Filter(Collections.singletonList("relative_date"), "coming"));
+        filters.add(new Filter(Collections.singletonList("status"), "accepted"));
+        filters.add(new Filter(Collections.singletonList("recurring_type"), "single"));
+        filters.add(new Filter(Collections.singletonList("users"), String.valueOf(client.getValues().getUserId())));
+        appointment = manager.insert(appointment);
+        List<PropDocument> documents = query(Collections.<String>emptyList(), filters);
+        assertTrue("no appointments found", 0 < documents.size());
+        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+    }
+
+    public void testFilterSubject() throws Exception {
+        Appointment appointment = randomAppointment();
+        appointment.setTitle(randomUID());
+        appointment = manager.insert(appointment);
+        List<PropDocument> documents = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("subject"), randomSubstring(appointment.getTitle()))));
+        assertTrue("no appointments found", 0 < documents.size());
+        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+    }
+
+    public void testEmptyFilter() throws Exception {
+        Appointment appointment = randomAppointment();
+        appointment.setTitle(randomUID());
+        appointment = manager.insert(appointment);
+        List<PropDocument> documents = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("subject"), "")));
+        assertTrue("no appointments found", 0 < documents.size());
+        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+    }
+
+    public void testFilterLocation() throws Exception {
+        Appointment appointment = randomAppointment();
+        appointment.setLocation(randomUID());
+        appointment = manager.insert(appointment);
+        List<PropDocument> documents = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("location"), randomSubstring(appointment.getLocation()))));
+        assertTrue("no appointments found", 0 < documents.size());
+        assertNotNull("appointment not found", findByProperty(documents, "location", appointment.getLocation()));
+    }
+
+    public void testFilterDescription() throws Exception {
+        Appointment appointment = randomAppointment();
+        appointment.setNote(randomUID());
+        appointment = manager.insert(appointment);
+        List<PropDocument> documents = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("description"), randomSubstring(appointment.getNote()))));
+        assertTrue("no appointments found", 0 < documents.size());
+        assertNotNull("appointment not found", findByProperty(documents, "note", appointment.getNote()));
+    }
+
+    public void testFilterRelativeDate() throws Exception {
+        Appointment comingAppointment = randomAppointment();
+        comingAppointment.setStartDate(TimeTools.D("tomorrow at noon"));
+        comingAppointment.setEndDate(TimeTools.D("tomorrow at noon"));
+        comingAppointment = manager.insert(comingAppointment);
+        Appointment pastAppointment = randomAppointment();
+        pastAppointment.setStartDate(TimeTools.D("yesterday at noon"));
+        pastAppointment.setEndDate(TimeTools.D("yesterday at noon"));
+        pastAppointment = manager.insert(pastAppointment);
+
+        List<PropDocument> comingDocuments = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("relative_date"), "coming")));
+        assertTrue("no appointments found", 0 < comingDocuments.size());
+        assertNotNull("coming appointment not found", findByProperty(comingDocuments, "title", comingAppointment.getTitle()));
+        assertNull("past appointment found", findByProperty(comingDocuments, "title", pastAppointment.getTitle()));
+
+        List<PropDocument> pastDocuments = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("relative_date"), "past")));
+        assertTrue("no appointments found", 0 < pastDocuments.size());
+        assertNotNull("past appointment not found", findByProperty(pastDocuments, "title", pastAppointment.getTitle()));
+        assertNull("coming appointment found", findByProperty(pastDocuments, "title", comingAppointment.getTitle()));
+    }
+
+    public void testFilterStatus() throws Exception {
+        Appointment acceptedAppointment = randomAppointment();
+        acceptedAppointment = manager.insert(acceptedAppointment);
+        manager.confirm(acceptedAppointment, Appointment.ACCEPT, "accept");
+        Appointment declinedAppointment = randomAppointment();
+        declinedAppointment = manager.insert(declinedAppointment);
+        manager.confirm(declinedAppointment, Appointment.DECLINE, "decline");
+        Appointment tentativeAppointment = randomAppointment();
+        tentativeAppointment = manager.insert(tentativeAppointment);
+        manager.confirm(tentativeAppointment, Appointment.TENTATIVE, "tentative");
+        Appointment noneAppointment = randomAppointment();
+        noneAppointment = manager.insert(noneAppointment);
+        manager.confirm(noneAppointment, Appointment.NONE, "none");
+
+        List<PropDocument> acceptDocuments = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("status"), "accepted")));
+        assertTrue("no appointments found", 0 < acceptDocuments.size());
+        assertNotNull("accepted appointment not found", findByProperty(acceptDocuments, "title", acceptedAppointment.getTitle()));
+        assertNull("declined appointment found", findByProperty(acceptDocuments, "title", declinedAppointment.getTitle()));
+        assertNull("tentative appointment found", findByProperty(acceptDocuments, "title", tentativeAppointment.getTitle()));
+        assertNull("no status appointment found", findByProperty(acceptDocuments, "title", noneAppointment.getTitle()));
+
+        List<PropDocument> declineDocuments = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("status"), "declined")));
+        assertTrue("no appointments found", 0 < declineDocuments.size());
+        assertNull("accepted appointment found", findByProperty(declineDocuments, "title", acceptedAppointment.getTitle()));
+        assertNotNull("declined appointment not found", findByProperty(declineDocuments, "title", declinedAppointment.getTitle()));
+        assertNull("tentative appointment found", findByProperty(declineDocuments, "title", tentativeAppointment.getTitle()));
+        assertNull("no status appointment found", findByProperty(declineDocuments, "title", noneAppointment.getTitle()));
+
+        List<PropDocument> tentativeDocuments = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("status"), "tentative")));
+        assertTrue("no appointments found", 0 < declineDocuments.size());
+        assertNull("accepted appointment found", findByProperty(tentativeDocuments, "title", acceptedAppointment.getTitle()));
+        assertNull("declined appointment found", findByProperty(tentativeDocuments, "title", declinedAppointment.getTitle()));
+        assertNotNull("tentative appointment not found", findByProperty(tentativeDocuments, "title", tentativeAppointment.getTitle()));
+        assertNull("no status appointment found", findByProperty(tentativeDocuments, "title", noneAppointment.getTitle()));
+
+        List<PropDocument> noStatusDocuments = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("status"), "none")));
+        assertTrue("no appointments found", 0 < declineDocuments.size());
+        assertNull("accepted appointment found", findByProperty(noStatusDocuments, "title", acceptedAppointment.getTitle()));
+        assertNull("declined appointment found", findByProperty(noStatusDocuments, "title", declinedAppointment.getTitle()));
+        assertNull("tentative appointment found", findByProperty(noStatusDocuments, "title", tentativeAppointment.getTitle()));
+        assertNotNull("no status appointment not found", findByProperty(noStatusDocuments, "title", noneAppointment.getTitle()));
+    }
+
+    public void testFilterRecurringType() throws Exception {
+        Appointment appointment = manager.insert(randomAppointment());
+        Appointment recurringAppointment = randomAppointment();
+        recurringAppointment.setRecurrenceType(Appointment.DAILY);
+        recurringAppointment.setInterval(1);
+        recurringAppointment = manager.insert(recurringAppointment);
+
+        List<PropDocument> singleDocuments = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("recurring_type"), "single")));
+        assertTrue("no appointments found", 0 < singleDocuments.size());
+        assertNotNull("single appointment not found", findByProperty(singleDocuments, "title", appointment.getTitle()));
+        assertNull("recurring appointment found", findByProperty(singleDocuments, "title", recurringAppointment.getTitle()));
+
+        List<PropDocument> recurringDocuments = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("recurring_type"), "series")));
+        assertTrue("no appointments found", 0 < recurringDocuments.size());
+        assertNull("single appointment found", findByProperty(recurringDocuments, "title", appointment.getTitle()));
+        assertNotNull("recurring appointment not found", findByProperty(recurringDocuments, "title", recurringAppointment.getTitle()));
+    }
+
+    public void testFilterParticipants() throws Exception {
+        ExternalUserParticipant participant = new ExternalUserParticipant(randomUID() + "example.com");
+        Appointment appointment = randomAppointment();
+        appointment.addParticipant(participant);
+        appointment = manager.insert(appointment);
+        List<PropDocument> documents = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("participants"), participant.getEmailAddress())));
+        assertTrue("no appointments found", 0 < documents.size());
+        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+    }
+
+    public void testFilterUsers() throws Exception {
+        AJAXClient client2 = new AJAXClient(User.User2);
+        int userId = client2.getValues().getUserId();
+        client2.logout();
+        UserParticipant userParticipant = new UserParticipant(userId);
+        Appointment appointment = randomAppointment();
+        appointment.addParticipant(userParticipant);
+        appointment = manager.insert(appointment);
+        List<PropDocument> documents = query(Collections.<String>emptyList(),
+            Collections.singletonList(new Filter(Collections.singletonList("users"), String.valueOf(userParticipant.getIdentifier()))));
+        assertTrue("no appointments found", 0 < documents.size());
+        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+    }
+
+}

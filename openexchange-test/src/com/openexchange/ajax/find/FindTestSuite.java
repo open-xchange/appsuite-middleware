@@ -75,6 +75,11 @@ public final class FindTestSuite {
         tests.addTestSuite(BasicDriveTest.class);
         tests.addTestSuite(com.openexchange.ajax.find.mail.SimpleTest.class);
         tests.addTestSuite(com.openexchange.ajax.find.tasks.SimpleTest.class);
+        tests.addTestSuite(com.openexchange.ajax.find.calendar.AutocompleteTest.class);
+        tests.addTestSuite(com.openexchange.ajax.find.calendar.QueryTest.class);
+        tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
+        tests.addTestSuite(com.openexchange.ajax.find.contacts.QueryTest.class);
+
         return tests;
     }
 
