@@ -96,7 +96,7 @@ public class SimpleTest extends AbstractFindTest {
     public void testSimpleFilter() {
         try {
 
-            List<String> queries = Collections.singletonList("%test%");
+            List<String> queries = Collections.singletonList("test");
             List<Filter> filters = new ArrayList<Filter>();
             //filters.add(new Filter(Collections.singletonList("folder_type"), "shared"));
             //filters.add(new Filter(Collections.singletonList("folder_type"), "private"));
@@ -106,6 +106,7 @@ public class SimpleTest extends AbstractFindTest {
             //filters.add(new Filter(Collections.singletonList("participant"), "bar@foo.org"));
             //filters.add(new Filter(Collections.singletonList("status"), "1"));
             //filters.add(new Filter(Collections.singletonList("status"), "2"));
+            filters.add(new Filter(Collections.singletonList("attachment"), "mail.png"));
             final QueryResponse queryResponse = getClient().execute(new QueryRequest(0, 10, queries, filters, "tasks"));
 
             assertNotNull(queryResponse);

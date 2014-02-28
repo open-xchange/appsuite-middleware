@@ -97,7 +97,7 @@ public class BasicTasksDriver extends MockTasksDriver {
         while(si.hasNext()) {
             documents.add(new TasksDocument(si.next()));
         }
-        return new SearchResult(-1, searchRequest.getStart(), documents);
+        return new SearchResult(documents.size(), searchRequest.getStart(), documents);
     }
 
 }

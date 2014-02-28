@@ -220,6 +220,7 @@ public class RdbTaskSearch extends TaskSearch {
         builder.append("SELECT ").append(fields);
         builder.append(" FROM task AS t ");
         builder.append(" LEFT JOIN task_folder AS tf ON (tf.id = t.id AND tf.cid = t.cid)");
+        builder.append(" LEFT JOIN prg_attachment AS a ON (t.cid = a.cid AND t.id = a.attached)");
         
         if (searchObject.hasInternalParticipants())
             builder.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)");
@@ -267,6 +268,17 @@ public class RdbTaskSearch extends TaskSearch {
                 searchParameters.add(s);
             }
             builder.append(" ) ");
+        }
+        
+        //set attachment
+        Set<String> attachmentFilters = searchObject.getAttachmentFilters();
+        if (attachmentFilters != null && attachmentFilters.size() > 0) {
+            for(String t : attachmentFilters) {
+                builder.append(" AND ");
+                String preparedPattern = StringCollection.prepareForSearch(t, true, true);
+                builder.append(containsWildcards(preparedPattern) ? " a.filename LIKE ? " : " a.filename = ? ");
+                searchParameters.add(preparedPattern);
+            }
         }
         
         //set queries

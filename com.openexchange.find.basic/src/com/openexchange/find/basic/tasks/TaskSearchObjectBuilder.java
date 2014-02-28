@@ -79,7 +79,7 @@ public class TaskSearchObjectBuilder {
     
     private final ServerSession session;
     
-    private enum SupportedFields {title, description, status, folder_type, type, participant};
+    private enum SupportedFields {title, description, status, folder_type, type, participant, attachment};
     
     /**
      * Initializes a new {@link TaskSearchBuilder}.
@@ -148,6 +148,9 @@ public class TaskSearchObjectBuilder {
                     break;
                 case participant:
                     addParticipantFilters(filter.getQueries());
+                    break;
+                case attachment:
+                    addAttachmentFilters(filter.getQueries());
                     break;
                 default:
                     throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(f);
@@ -254,6 +257,20 @@ public class TaskSearchObjectBuilder {
                 }
             }
         }
+    }
+    
+    /**
+     * Add the attachment filters
+     * @param filters
+     */
+    private void addAttachmentFilters(List<String> filters) {
+        Set<String> af = searchObject.getAttachmentFilters();
+        if (af == null)
+            af = new HashSet<String>(filters.size());
+        for(String q : filters) {
+            af.add(wrapWithWildcards(q));
+        }
+        searchObject.setAttachmentFilters(af);
     }
     
     /**
