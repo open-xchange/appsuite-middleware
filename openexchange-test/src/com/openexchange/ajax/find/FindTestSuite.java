@@ -49,9 +49,12 @@
 
 package com.openexchange.ajax.find;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.find.drive.BasicDriveTest;
+import com.openexchange.ajax.find.tasks.FindTasksTestEnvironment;
 
 
 /**
@@ -74,8 +77,25 @@ public final class FindTestSuite {
         tests.addTestSuite(SimpleFindTest.class);
         tests.addTestSuite(BasicDriveTest.class);
         tests.addTestSuite(com.openexchange.ajax.find.mail.SimpleTest.class);
-        //tests.addTestSuite(com.openexchange.ajax.find.tasks.FindTasksTestsSingleFilter.class);
+        tests.addTestSuite(com.openexchange.ajax.find.tasks.FindTasksTestsSingleFilter.class);
         return tests;
     }
-
+    
+    /**
+     * Initialize the test environment
+     * @throws Exception 
+     */
+    @BeforeClass
+    public static void initTestEnvironment() throws Exception {
+        FindTasksTestEnvironment.getInstance().init();
+    }
+    
+    /**
+     * Clean up
+     * @throws Exception 
+     */
+    @AfterClass
+    public static void cleanup() throws Exception {
+        FindTasksTestEnvironment.getInstance().cleanup();
+    }
 }
