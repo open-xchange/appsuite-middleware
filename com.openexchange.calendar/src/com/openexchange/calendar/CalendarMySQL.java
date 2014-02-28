@@ -4094,7 +4094,8 @@ public class CalendarMySQL implements CalendarSqlImp {
             return this.setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage, session, ctx);
         }
 
-        // TODO verify parameters
+        int objectToUpdate = objectId;
+        int occurrenceToUpdate = optOccurrenceId;
 
         Connection writecon = null;
         PreparedStatement stmt = null;
@@ -4102,10 +4103,15 @@ public class CalendarMySQL implements CalendarSqlImp {
         final Date changeTimestamp = new Date();
 
         try {
+            int exceptionObjectId = getExceptionId(objectToUpdate, optOccurrenceId, ctx);
+            if (exceptionObjectId != -1) {
+                objectToUpdate = exceptionObjectId;// Take id from exception to set or update confirmation
+                occurrenceToUpdate = 0; // Occurrence for exception is 0
+            }
+
             boolean confirmationForOccurrenceExisting = isUserConfirmationForOccurrenceExisting(
-                objectId,
-                folderId,
-                optOccurrenceId,
+                objectToUpdate,
+                occurrenceToUpdate,
                 userId,
                 ctx);
 
@@ -4123,12 +4129,12 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
                 stmt.setInt(3, ctx.getContextId());
                 stmt.setInt(4, userId);
-                stmt.setInt(5, objectId);
-                stmt.setInt(6, optOccurrenceId);
+                stmt.setInt(5, objectToUpdate);
+                stmt.setInt(6, occurrenceToUpdate);
             } else {
                 final String insertSql = "INSERT INTO prg_dates_members (object_id, member_uid, pfid, confirm, reason, cid, occurrence) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 stmt = writecon.prepareStatement(insertSql);
-                stmt.setInt(1, objectId);
+                stmt.setInt(1, objectToUpdate);
                 stmt.setInt(2, userId);
                 stmt.setInt(3, folderId);
                 stmt.setInt(4, confirm);
@@ -4138,7 +4144,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     stmt.setString(5, confirmMessage);
                 }
                 stmt.setInt(6, ctx.getContextId());
-                stmt.setInt(7, optOccurrenceId);
+                stmt.setInt(7, occurrenceToUpdate);
             }
 
             final int changes = stmt.executeUpdate();
@@ -4146,17 +4152,17 @@ public class CalendarMySQL implements CalendarSqlImp {
                 appointmentUpdate = writecon.prepareStatement(SQL_CONFIRM2);
                 appointmentUpdate.setLong(1, changeTimestamp.getTime());
                 appointmentUpdate.setInt(2, userId);
-                appointmentUpdate.setInt(3, objectId);
+                appointmentUpdate.setInt(3, objectToUpdate);
                 appointmentUpdate.setInt(4, session.getContextId());
                 appointmentUpdate.executeUpdate();
             } else if (changes == 0) {
-                final OXException e = OXException.notFound("Object: " + objectId + ", Context: " + session.getContextId() + ", User: " + userId);
+                final OXException e = OXException.notFound("Object: " + objectToUpdate + ", Context: " + session.getContextId() + ", User: " + userId);
                 LOG.error("", e);
                 throw e;
             } else {
                 LOG.warn(StringCollection.convertArraytoString(new Object[] {
                     "Result of setUserConfirmation was ", Integer.valueOf(changes), ". Check prg_dates_members object_id = ",
-                    Integer.valueOf(objectId), " cid = ", Integer.valueOf(session.getContextId()), " uid = ", Integer.valueOf(userId) }));
+                    Integer.valueOf(objectToUpdate), " cid = ", Integer.valueOf(session.getContextId()), " uid = ", Integer.valueOf(userId) }));
             }
 
         } catch (final SQLException sqlException) {
@@ -4181,9 +4187,55 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         }
 
-        triggerEvent(objectId, userId, confirm, session, ctx);
+        triggerEvent(objectToUpdate, userId, confirm, session, ctx);
 
         return changeTimestamp;
+    }
+
+    /**
+     * Returns the object id of the appointment exception if the given occurrence id has an entry.
+     * 
+     * @param objectId - id of the confirmed object
+     * @param optOccurrenceId - id of the occurrence of a series to set the confirmation for
+     * @param ctx - used context
+     * @return int - id of the appointment exception or -1, if there is no exception
+     * @throws OXException
+     * @throws SQLException
+     */
+    protected int getExceptionId(final int objectId, final int optOccurrenceId, final Context ctx) throws OXException, SQLException {
+        Connection readcon = null;
+        int exceptionObjectId = -1;
+        PreparedStatement pst = null;
+        ResultSet resultSet = null;
+
+        try {
+            readcon = DBPool.pickup(ctx);
+
+            String sql = "SELECT intfield01 FROM prg_dates WHERE intfield02 = ? AND intfield05 = ? AND cid = ?";
+            pst = readcon.prepareStatement(sql);
+
+            try {
+                pst.setInt(1, objectId);
+                pst.setInt(2, optOccurrenceId);
+                pst.setInt(3, ctx.getContextId());
+                resultSet = getResultSet(pst);
+
+                if (resultSet.next()) {
+                    exceptionObjectId = resultSet.getInt(1);
+                }
+
+            } finally {
+                COLLECTION.closeResultSet(resultSet);
+                COLLECTION.closePreparedStatement(pst);
+            }
+        } finally {
+            if (readcon != null) {
+                DBPool.push(ctx, readcon);
+                DBUtils.closeSQLStuff(resultSet, pst);
+            }
+        }
+        return exceptionObjectId;
+
     }
 
     /**
@@ -4199,22 +4251,21 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @throws OXException
      * @throws SQLException
      */
-    private boolean isUserConfirmationForOccurrenceExisting(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final Context ctx) throws OXException, SQLException {
+    protected boolean isUserConfirmationForOccurrenceExisting(final int objectId, final int optOccurrenceId, final int userId, final Context ctx) throws OXException, SQLException {
         Connection readcon = null;
         boolean sameOccurrenceAvailable = false;
         try {
             ResultSet resultSet = null;
             readcon = DBPool.pickup(ctx);
 
-            String sql = "SELECT confirm FROM prg_dates_members WHERE object_id = ? AND cid = ? AND pfid = ? AND member_uid = ? AND occurrence = ?";
+            String sql = "SELECT confirm FROM prg_dates_members WHERE object_id = ? AND cid = ? AND member_uid = ? AND occurrence = ?";
             final PreparedStatement pst = readcon.prepareStatement(sql);
 
             try {
                 pst.setInt(1, objectId);
                 pst.setInt(2, ctx.getContextId());
-                pst.setInt(3, folderId);
-                pst.setInt(4, userId);
-                pst.setInt(5, optOccurrenceId);
+                pst.setInt(3, userId);
+                pst.setInt(4, optOccurrenceId);
                 resultSet = getResultSet(pst);
 
                 if (resultSet.next()) {
