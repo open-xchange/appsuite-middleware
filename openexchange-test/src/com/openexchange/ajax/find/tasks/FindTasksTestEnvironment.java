@@ -148,7 +148,6 @@ public class FindTasksTestEnvironment {
             createFolderStructure();
             createAndInsertTasks();
             createFilters();
-            logout();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -207,7 +206,7 @@ public class FindTasksTestEnvironment {
         }
         
         if (userAprivateTestFolder.getObjectID() == 0) {
-            userAprivateTestFolder = foldersA.get("UserA - findAPIPrivateTaskFolder");
+            userAprivateTestFolder.setObjectID(foldersA.get("UserA - findAPIPrivateTaskFolder").getObjectID());
         }
         
         //create public test folder
@@ -220,7 +219,7 @@ public class FindTasksTestEnvironment {
         }
         
         if (userApublicTestFolder.getObjectID() == 0) {
-            userApublicTestFolder = foldersA.get("UserA - findAPIPublicTaskFolder");
+            userApublicTestFolder.setObjectID(foldersA.get("UserA - findAPIPublicTaskFolder").getObjectID());
         }
         
         try {
@@ -237,7 +236,7 @@ public class FindTasksTestEnvironment {
         }
         
         if (userBsharedTestFolderRO.getObjectID() == 0) {
-            userBsharedTestFolderRO = foldersB.get("UserB - findAPIPrivateSharedTaskFolder - RO");
+            userBsharedTestFolderRO.setObjectID(foldersB.get("UserB - findAPIPrivateSharedTaskFolder - RO").getObjectID());
         }
         
         try {
@@ -266,7 +265,7 @@ public class FindTasksTestEnvironment {
         }
         
         if (userBsharedTestFolderRW.getObjectID() == 0) {
-            userBsharedTestFolderRW = foldersB.get("UserB - findAPIPrivateSharedTaskFolder - RW");
+            userBsharedTestFolderRW.setObjectID(foldersB.get("UserB - findAPIPrivateSharedTaskFolder - RW").getObjectID());
         }
         
         try {
@@ -295,7 +294,7 @@ public class FindTasksTestEnvironment {
         }
         
         if (userBprivateTestFolder.getObjectID() == 0) {
-            userBprivateTestFolder = foldersB.get("UserB - findAPIPrivateTaskFolder - NA");
+            userBprivateTestFolder.setObjectID(foldersB.get("UserB - findAPIPrivateTaskFolder - NA").getObjectID());
         }
         
         try {
@@ -308,7 +307,7 @@ public class FindTasksTestEnvironment {
         }
         
         if (userBpublicTestFolder.getObjectID() == 0) {
-            userBpublicTestFolder = foldersB.get("UserB - findAPIPublicTaskFolder");
+            userBpublicTestFolder.setObjectID(foldersB.get("UserB - findAPIPublicTaskFolder").getObjectID());
         }
     }
     
