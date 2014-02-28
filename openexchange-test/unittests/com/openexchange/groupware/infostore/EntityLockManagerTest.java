@@ -15,9 +15,11 @@ import com.openexchange.groupware.infostore.webdav.LockManager;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.test.AjaxInit;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionFactory;
 
 public class EntityLockManagerTest extends TestCase {
 
@@ -30,9 +32,10 @@ public class EntityLockManagerTest extends TestCase {
     private static final long MILLIS_WEEK = 604800000L;
     private static final long MILLIS_YEAR = 52 * MILLIS_WEEK;
     private static final long MILLIS_10_YEARS = 10 * MILLIS_YEAR;
-    
+
 	private Context ctx = new ContextImpl(1);
 	private User user = null;
+	private ServerSession session;
 	private final UserConfiguration userConfig = null;
 
 	@Override
@@ -46,6 +49,9 @@ public class EntityLockManagerTest extends TestCase {
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
 
 		user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(getUsername(), ctx), ctx); //FIXME
+
+		session = ServerSessionFactory.createServerSession(user.getId(), ctx, "blupp");
+
 		lockManager = new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock");
 		lockManager.startTransaction();
 
@@ -60,7 +66,7 @@ public class EntityLockManagerTest extends TestCase {
 	@Override
 	public void tearDown() throws Exception {
 		for(final int id : clean) {
-			lockManager.unlock(id, ctx, user);
+			lockManager.unlock(id, session);
 		}
 		lockManager.commit();
 		lockManager.finish();
@@ -80,7 +86,7 @@ public class EntityLockManagerTest extends TestCase {
 		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
 
-		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user);
+		final List<Lock> locks =  lockManager.findLocks(entity, session);
 		assertEquals(1, locks.size());
 		final Lock lock = locks.get(0);
 		assertEquals(lockId, lock.getId());
@@ -103,9 +109,9 @@ public class EntityLockManagerTest extends TestCase {
 		final int lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
 
-		lockManager.unlock(lockId, ctx, user);
+		lockManager.unlock(lockId, session);
 
-		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user);
+		final List<Lock> locks =  lockManager.findLocks(entity, session);
 		assertTrue(locks.isEmpty());
 
 	}
@@ -114,7 +120,7 @@ public class EntityLockManagerTest extends TestCase {
 		final int lockId = lockManager.lock(entity ,-23, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
 
-		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user);
+		final List<Lock> locks =  lockManager.findLocks(entity, session);
 		assertEquals(0, locks.size());
 
 	}
@@ -125,7 +131,7 @@ public class EntityLockManagerTest extends TestCase {
         lockManager.addExpiryListener(spy);
 	    clean.add(lockId);
 
-        final List<Lock> locks =  lockManager.findLocks(entity, ctx, user);
+        final List<Lock> locks =  lockManager.findLocks(entity, session);
         assertEquals("A lock remained, though it should have timed out", 0, locks.size());
         assertEquals("Expected notification about expired lock", 1, spy.getExpired().size());
 	}
@@ -138,9 +144,9 @@ public class EntityLockManagerTest extends TestCase {
 		lockId = lockManager.lock(entity ,LockManager.INFINITE, LockManager.Scope.EXCLUSIVE, LockManager.Type.WRITE, "Me",  ctx, user);
 		clean.add(lockId);
 
-		lockManager.removeAll(entity, ctx, user);
+		lockManager.removeAll(entity, session);
 
-		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user);
+		final List<Lock> locks =  lockManager.findLocks(entity, session);
 		assertTrue(locks.isEmpty());
 
 	}
@@ -154,7 +160,7 @@ public class EntityLockManagerTest extends TestCase {
 		clean.add(lockId);
 		lockManager.transferLocks(ctx, user.getId(), user.getId()+1);
 
-		final List<Lock> locks =  lockManager.findLocks(entity, ctx, user);
+		final List<Lock> locks =  lockManager.findLocks(entity, session);
 		assertEquals("locks are assigned to dest", 3,locks.size());
 		for(final Lock lock : locks) {
 			assertEquals(user.getId()+1, lock.getOwner());

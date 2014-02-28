@@ -5,6 +5,7 @@
 * 2014-02-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 31347: Dropped tabs in empty lines
+ - Fix for bug 31001: Changed lock manager API to have a session as argument for safe access to user's session
 
 * 2014-02-27 - thorben.betten@open-xchange.com
 

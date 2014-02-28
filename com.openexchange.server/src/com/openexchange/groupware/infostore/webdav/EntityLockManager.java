@@ -53,23 +53,24 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 
 public interface EntityLockManager extends LockManager {
 
     void transferLocks(Context ctx, int from_user, int to_user) throws OXException;
 
     @Override
-    void unlock(int id, Context ctx, User user) throws OXException;
+    void unlock(int id, Session session) throws OXException;
 
     int lock(int entity, long timeout, Scope exclusive, Type write, String ownerDesc, Context ctx, User user) throws OXException;
 
     @Override
-    List<Lock> findLocks(int entity, Context ctx, User user) throws OXException;
+    List<Lock> findLocks(int entity, Session session) throws OXException;
 
     boolean isLocked(int entity, Context context, User userObject) throws OXException;
 
     @Override
-    void removeAll(int entity, Context context, User userObject) throws OXException;
+    void removeAll(int entity, Session session) throws OXException;
 
     void relock(int lockId, long timeout, Scope scope, Type write, String owner, Context context, User userObject) throws OXException;
 
