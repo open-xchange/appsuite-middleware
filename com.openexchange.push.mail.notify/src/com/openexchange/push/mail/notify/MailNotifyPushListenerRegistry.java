@@ -52,6 +52,8 @@ package com.openexchange.push.mail.notify;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -61,6 +63,8 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.push.PushListener;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.ReadOnlyIterator;
 
 /**
@@ -72,10 +76,10 @@ public final class MailNotifyPushListenerRegistry {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailNotifyPushListenerRegistry.class);
 
     private final ConcurrentMap<String, MailNotifyPushListener> listenerMap;
-
     private final boolean useOXLogin;
-
     private final boolean useEmailAddress;
+    private final MailNotifyDelayQueue notificationsQueue;
+    private final ScheduledTimerTask timerTask;
 
     /**
      * Initializes a new {@link MailNotifyPushListenerRegistry}.
@@ -85,6 +89,73 @@ public final class MailNotifyPushListenerRegistry {
         listenerMap = new ConcurrentHashMap<String, MailNotifyPushListener>();
         this.useOXLogin = useOXLogin;
         this.useEmailAddress = useEmailAddress;
+        notificationsQueue = new MailNotifyDelayQueue();
+        // Timer task
+        final TimerService timerService = Services.optService(TimerService.class);
+        final org.slf4j.Logger log = LOG;
+        final Runnable r = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    triggerNotification();
+                } catch (final Exception e) {
+                    log.warn("Failed to trigger notifications.", e);
+                }
+            }
+        };
+        final int delay = 3000;
+        timerTask = timerService.scheduleWithFixedDelay(r, delay, delay);
+    }
+
+    /**
+     * Cancels the timer.
+     */
+    public void cancel() {
+        timerTask.cancel();
+    }
+
+    /**
+     * Schedules to notify specified mbox identifier (if not yet scheduled).
+     *
+     * @param mboxid The mbox identifier
+     */
+    public void scheduleEvent(final String mboxid) {
+        notificationsQueue.offerIfAbsent(new DelayedNotification(mboxid, false));
+        triggerNotification();
+    }
+
+    /**
+     * Triggers all due notifications.
+     */
+    public synchronized void triggerNotification() {
+        DelayedNotification polled = notificationsQueue.poll();
+        if (null != polled) {
+            final List<String> mboxIds = new LinkedList<String>();
+            do {
+                mboxIds.add(polled.getMboxid());
+                polled = notificationsQueue.poll();
+            } while (polled != null);
+            notifyNow(mboxIds);
+        }
+    }
+
+    /**
+     * (Immediately) Notifies specified mbox identifiers.
+     *
+     * @param mboxIds The mbox identifiers to notify
+     */
+    private void notifyNow(final Collection<String> mboxIds) {
+        if (mboxIds.isEmpty()) {
+            return;
+        }
+        for (final String mboxId : mboxIds) {
+            try {
+                fireEvent(mboxId);
+            } catch (final OXException e) {
+                LOG.error("Failed to create push event", e);
+            }
+        }
     }
 
     /**
@@ -93,7 +164,7 @@ public final class MailNotifyPushListenerRegistry {
      * @param mboxid
      * @throws OXException
      */
-    public void fireEvent(final String mboxid) throws OXException {
+    private void fireEvent(final String mboxid) throws OXException {
         LOG.debug("checking whether to fire event for {}", mboxid);
         final PushListener listener = listenerMap.get(mboxid);
         if (null != listener) {
