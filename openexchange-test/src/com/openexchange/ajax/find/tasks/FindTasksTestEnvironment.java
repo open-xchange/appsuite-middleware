@@ -49,18 +49,29 @@
 
 package com.openexchange.ajax.find.tasks;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
+import com.openexchange.ajax.folder.actions.ListRequest;
+import com.openexchange.ajax.folder.actions.ListResponse;
+import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
+import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.exception.OXException;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
@@ -170,54 +181,169 @@ public class FindTasksTestEnvironment {
     /**
      * Create the test folder structure
      * TODO: handle duplicate folder creation
+     * @throws IOException 
+     * @throws OXException 
      * @throws Exception
      */
-    private final void createFolderStructure() throws Exception {
-        //create private test folder
-        userAprivateTestFolder = Create.createPrivateFolder("UserA - findAPIPrivateTaskFolder", FolderObject.TASK, userA.getUserId());
-        userAprivateTestFolder.setParentFolderID(userA.getPrivateTaskFolder());
-        InsertRequest insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userAprivateTestFolder);
-        InsertResponse insertResponseResp = clientA.execute(insertRequestReq);
-        insertResponseResp.fillObject(userAprivateTestFolder);
+    private final void createFolderStructure() throws OXException, IOException, Exception {
+        InsertRequest insertRequestReq;
+        InsertResponse insertResponseResp;
+        
+        //Get current structure
+        Map<String, FolderObject> foldersA = getFolderStructure(clientA, userA.getPrivateTaskFolder());
+        Map<String, FolderObject> foldersB = getFolderStructure(clientB, userB.getPrivateTaskFolder());
+        
+        try {
+            //create private test folder
+            userAprivateTestFolder = Create.createPrivateFolder("UserA - findAPIPrivateTaskFolder", FolderObject.TASK, userA.getUserId());
+            userAprivateTestFolder.setParentFolderID(userA.getPrivateTaskFolder());
+            insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userAprivateTestFolder, false);
+            insertResponseResp = clientA.execute(insertRequestReq);
+            insertResponseResp.fillObject(userAprivateTestFolder);
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        if (userAprivateTestFolder.getObjectID() == 0) {
+            userAprivateTestFolder = foldersA.get("UserA - findAPIPrivateTaskFolder");
+        }
         
         //create public test folder
-        userApublicTestFolder = Create.createPublicFolder(clientA, "UserA - findAPIPublicTaskFolder", FolderObject.TASK);
+        try {
+            userApublicTestFolder = Create.createPublicFolder(clientA, "UserA - findAPIPublicTaskFolder", FolderObject.TASK, false);
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
-        //create shared folder, read-only
-        userBsharedTestFolderRO = Create.createPrivateFolder("UserB - findAPIPrivateSharedTaskFolder - RO", FolderObject.TASK, userB.getUserId());
-        userBsharedTestFolderRO.setParentFolderID(userB.getPrivateTaskFolder());
-        insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO);
-        insertResponseResp = clientB.execute(insertRequestReq);
-        insertResponseResp.fillObject(userBsharedTestFolderRO);
+        if (userApublicTestFolder.getObjectID() == 0) {
+            userApublicTestFolder = foldersA.get("UserA - findAPIPublicTaskFolder");
+        }
         
-        //share read only folder to userA
-        FolderTools.shareFolder(clientB, EnumAPI.OX_NEW, userBsharedTestFolderRO.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, 
-                                                                                                                   OCLPermission.READ_ALL_OBJECTS, 
-                                                                                                                   OCLPermission.NO_PERMISSIONS, 
-                                                                                                                   OCLPermission.NO_PERMISSIONS);
+        try {
+            //create shared folder, read-only
+            userBsharedTestFolderRO = Create.createPrivateFolder("UserB - findAPIPrivateSharedTaskFolder - RO", FolderObject.TASK, userB.getUserId());
+            userBsharedTestFolderRO.setParentFolderID(userB.getPrivateTaskFolder());
+            insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, false);
+            insertResponseResp = clientB.execute(insertRequestReq);
+            insertResponseResp.fillObject(userBsharedTestFolderRO);
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
-        //create shared folder, read/write
-        userBsharedTestFolderRW = Create.createPrivateFolder("UserB - findAPIPrivateSharedTaskFolder - RW", FolderObject.TASK, userB.getUserId());
-        userBsharedTestFolderRW.setParentFolderID(userB.getPrivateTaskFolder());
-        insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBsharedTestFolderRW);
-        insertResponseResp = clientB.execute(insertRequestReq);
-        insertResponseResp.fillObject(userBsharedTestFolderRW);
+        if (userBsharedTestFolderRO.getObjectID() == 0) {
+            userBsharedTestFolderRO = foldersB.get("UserB - findAPIPrivateSharedTaskFolder - RO");
+        }
         
-        //share read/write folder to userA
-        FolderTools.shareFolder(clientB, EnumAPI.OX_NEW, userBsharedTestFolderRW.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, 
-                                                                                                                   OCLPermission.WRITE_ALL_OBJECTS, 
-                                                                                                                   OCLPermission.WRITE_ALL_OBJECTS, 
-                                                                                                                   OCLPermission.WRITE_ALL_OBJECTS);
+        try {
+            //share read only folder to userA
+            FolderTools.shareFolder(clientB, EnumAPI.OX_NEW, userBsharedTestFolderRO.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, 
+                                                                                                                       OCLPermission.READ_ALL_OBJECTS, 
+                                                                                                                       OCLPermission.NO_PERMISSIONS, 
+                                                                                                                       OCLPermission.NO_PERMISSIONS);
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
-        //create userB's private folder
-        userBprivateTestFolder = Create.createPrivateFolder("UserB - findAPIPrivateTaskFolder - NA", FolderObject.TASK, userB.getUserId());
-        userBprivateTestFolder.setParentFolderID(userB.getPrivateTaskFolder());
-        insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBprivateTestFolder);
-        insertResponseResp = clientB.execute(insertRequestReq);
-        insertResponseResp.fillObject(userBprivateTestFolder);
+        try {
+            //create shared folder, read/write
+            userBsharedTestFolderRW = Create.createPrivateFolder("UserB - findAPIPrivateSharedTaskFolder - RW", FolderObject.TASK, userB.getUserId());
+            userBsharedTestFolderRW.setParentFolderID(userB.getPrivateTaskFolder());
+            insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBsharedTestFolderRW, false);
+            insertResponseResp = clientB.execute(insertRequestReq);
+            insertResponseResp.fillObject(userBsharedTestFolderRW);
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
-        //create public test folder for user B
-        userBpublicTestFolder = Create.createPublicFolder(clientB, "UserB - findAPIPublicTaskFolder", FolderObject.TASK);
+        if (userBsharedTestFolderRW.getObjectID() == 0) {
+            userBsharedTestFolderRW = foldersB.get("UserB - findAPIPrivateSharedTaskFolder - RW");
+        }
+        
+        try {
+            //share read/write folder to userA
+            FolderTools.shareFolder(clientB, EnumAPI.OX_NEW, userBsharedTestFolderRW.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, 
+                                                                                                                       OCLPermission.WRITE_ALL_OBJECTS, 
+                                                                                                                       OCLPermission.WRITE_ALL_OBJECTS, 
+                                                                                                                       OCLPermission.WRITE_ALL_OBJECTS);
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            //create userB's private folder
+            userBprivateTestFolder = Create.createPrivateFolder("UserB - findAPIPrivateTaskFolder - NA", FolderObject.TASK, userB.getUserId());
+            userBprivateTestFolder.setParentFolderID(userB.getPrivateTaskFolder());
+            insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, userBprivateTestFolder, false);
+            insertResponseResp = clientB.execute(insertRequestReq);
+            insertResponseResp.fillObject(userBprivateTestFolder);
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        if (userBprivateTestFolder.getObjectID() == 0) {
+            userBprivateTestFolder = foldersB.get("UserB - findAPIPrivateTaskFolder - NA");
+        }
+        
+        try {
+            //create public test folder for user B
+            userBpublicTestFolder = Create.createPublicFolder(clientB, "UserB - findAPIPublicTaskFolder", FolderObject.TASK, false);
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        if (userBpublicTestFolder.getObjectID() == 0) {
+            userBpublicTestFolder = foldersB.get("UserB - findAPIPublicTaskFolder");
+        }
+    }
+    
+    /**
+     * Get the folder structure of the specified folder 
+     * @param client
+     * @param folderID
+     * @return
+     * @throws JSONException 
+     * @throws IOException 
+     * @throws OXException 
+     */
+    private final Map<String, FolderObject> getFolderStructure(AJAXClient client, int folderID) throws Exception {
+        Map<String, FolderObject> folders = new HashMap<String, FolderObject>();
+        VisibleFoldersRequest lr = new VisibleFoldersRequest(EnumAPI.OX_NEW, "tasks");
+        VisibleFoldersResponse response = client.execute(lr);
+        Iterator<FolderObject> it = response.getPrivateFolders();
+        while (it.hasNext()) {
+            FolderObject fo = it.next();
+            folders.put(fo.getFolderName(), fo);
+        }
+        
+        it = response.getPublicFolders();
+        while (it.hasNext()) {
+            FolderObject fo = it.next();
+            folders.put(fo.getFolderName(), fo);
+        }
+        
+        it = response.getSharedFolders();
+        while (it.hasNext()) {
+            FolderObject fo = it.next();
+            folders.put(fo.getFolderName(), fo);
+        }
+
+        return folders;
     }
     
     /**
@@ -254,6 +380,7 @@ public class FindTasksTestEnvironment {
         //create single filters
         //participants
         List<Filter> l = new ArrayList<Filter>(2);
+        l.add(createFilter("participant", Integer.toString(userA.getUserId()))); 
         l.add(createFilter("participant", Integer.toString(userB.getUserId()))); //internal
         l.add(createFilter("participant", "foo@bar.org"));                       //external
         lolFilters.add(l);
@@ -298,13 +425,12 @@ public class FindTasksTestEnvironment {
      */
     public void cleanup() throws Exception {
         if (cleanup) {
-            if (clientA != null)
-                clientA.execute(new DeleteRequest(EnumAPI.OX_NEW, userAprivateTestFolder, userApublicTestFolder));
+            if (clientA == null || clientB == null)
+                initUsers();
+            clientA.execute(new DeleteRequest(EnumAPI.OX_NEW, userAprivateTestFolder, userApublicTestFolder));
+            clientB.execute(new DeleteRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, userBsharedTestFolderRW, userBprivateTestFolder, userBpublicTestFolder));
             
-            if (clientB != null) {
-                clientB.execute(new DeleteRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, userBsharedTestFolderRW, userBprivateTestFolder, userBpublicTestFolder));
-                clientB.logout();
-            }
+            logout();
         }
     }
     

@@ -110,7 +110,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
     private static final List<Filter> getRelevantFilters(char[] combination) {
         List<Filter> filters = new ArrayList<Filter>();
         for (int i = 0; i < combination.length; i++) {
-            if (combination[i] == 1)
+            if (combination[i] == '1')
                 filters.addAll(FindTasksTestEnvironment.getInstance().getLolFilters().get(i));
         }
         return filters;
