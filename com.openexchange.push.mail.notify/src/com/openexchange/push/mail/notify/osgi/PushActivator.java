@@ -69,6 +69,7 @@ import com.openexchange.push.mail.notify.Services;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link PushActivator} - The push activator.
@@ -116,7 +117,7 @@ public final class PushActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailService.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class, SessiondService.class };
+        return new Class<?>[] { MailService.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class, SessiondService.class, TimerService.class };
     }
 
     @Override
@@ -154,6 +155,7 @@ public final class PushActivator extends HousekeepingActivator {
              */
             final MailNotifyPushListenerRegistry registry = this.registry;
             if (null != registry) {
+                registry.cancel();
                 registry.clear();
                 this.registry = null;
             }
