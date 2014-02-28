@@ -12,6 +12,10 @@
 
  - Fix for bug 31329: Multi-line calculation has now also been added for PGP_ENCRYPT commands
 
+* 2014-02-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23141: Remember parsed uploaded and temporarily stored files even if too much form fields are sent in the upload.
+
 * 2014-02-25 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31191: Fixed erroneous permission check.
