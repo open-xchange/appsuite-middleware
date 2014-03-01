@@ -578,6 +578,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     final int amount = AJAXRequestDataTools.parseIntParameter(req.getParameter("len"), -1);
                     if (off >= 0 && amount > 0) {
                         try {
+                            resp.setHeader("Content-Length", Long.toString(amount));
                             copy(documentData, outputStream, off, amount);
                         } catch (final OffsetOutOfRangeIOException e) {
                             setHeaderSafe("Content-Range", "bytes */" + e.getAvailable(), resp); // Required in 416.

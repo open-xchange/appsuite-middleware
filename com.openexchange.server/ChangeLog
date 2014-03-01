@@ -1,3 +1,7 @@
+* 2014-03-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30701: Signal proper "Content-Length" in case "off"/"len" parameters were specified
+
 * 2014-02-28 - marcus.klein@open-xchange.com
 
  - Fix for bug 23141: Remember parsed uploaded and temporarily stored files even if too much form fields are sent in the upload.
