@@ -63,7 +63,7 @@ import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
 
 /**
  * {@link MobileNotifierServiceRegistryImpl}
- * 
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class MobileNotifierServiceRegistryImpl extends ServiceTracker<MobileNotifierService, MobileNotifierService> implements MobileNotifierServiceRegistry {
@@ -104,17 +104,14 @@ public class MobileNotifierServiceRegistryImpl extends ServiceTracker<MobileNoti
 
     @Override
     public MobileNotifierService addingService(final ServiceReference<MobileNotifierService> reference) {
-        final MobileNotifierService service = context.getService(reference);
-        {
-            final MobileNotifierService addMe = service;
-            if (null == map.putIfAbsent(addMe.getFrontendName(), addMe)) {
-                return service;
-            }
-            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MobileNotifierServiceRegistry.class);
-            logger.warn(
-                "MobileNotifier service could not be added to registry. Another service meta data is already registered with identifier: {}",
-                addMe.getFrontendName());
+        final MobileNotifierService addMe = context.getService(reference);
+        if (null == map.putIfAbsent(addMe.getFrontendName(), addMe)) {
+            return context.getService(reference);
         }
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MobileNotifierServiceRegistry.class);
+        logger.warn(
+            "MobileNotifier service could not be added to registry. Another notifier service is already registered with identifier: {}",
+            addMe.getFrontendName());
         /*
          * Adding to registry failed
          */
