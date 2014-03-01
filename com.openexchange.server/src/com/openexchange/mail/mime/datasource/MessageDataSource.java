@@ -71,15 +71,10 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class MessageDataSource implements DataSource {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(MessageDataSource.class);
-
     private static final int DEFAULT_BUF_SIZE = 0x1000;
 
     private final byte[] data;
-
     private String contentType;
-
     private String name;
 
     /**
