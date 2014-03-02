@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,23 +49,59 @@
 
 package com.openexchange.html;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
+import java.util.Map;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link ConformHtmlTest}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({ Bug26237Test.class, Bug26611Test.class, Bug27335Test.class, Bug27708Test.class, CSSMatcherTest.class, Bug30114Test.class, ConformHtmlTest.class })
-public class UnitTests {
+public class ConformHtmlTest {
 
-    private UnitTests() {
+    private HtmlService service;
+
+    public ConformHtmlTest() {
         super();
+    }
+
+    @Before
+    public void setUp() {
+        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked")
+        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+
+        htmlEntityMap.put("apos", Character.valueOf('\''));
+
+        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
+    }
+
+    @After
+    public void tearDown() {
+        service = null;
+    }
+
+    @Test
+    public void testConformHtml() {
+        String content = "<table><tr>\n" +
+            "<td style=\"background-color:#FFFFFF; height:52px; width:100px;\">\n" +
+            "<span style = \"font-size:48px; font-family: Veranda; font-weight: bold; color: #6666FF;\">OX</span>\n" +
+            "</td><td align=\"center\" style=\"width:300px;\"><h1>${doc.translate.email.secure_email}</h1></td>\n" +
+            "</tr>\n" +
+            "</table>";
+
+        String test = service.getConformHTML(content, "us-ascii");
+
+        Assert.assertTrue("Missing DOCTYPE declaration", test.startsWith("<!DOCTYPE html"));
+        Assert.assertTrue("Missing <head> section.", test.indexOf("<head>") >= 0);
+        Assert.assertTrue("Missing <meta> tag.", test.indexOf("<meta") >= 0);
     }
 }
