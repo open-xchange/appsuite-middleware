@@ -84,7 +84,7 @@ public abstract class AbstractXingAction implements AJAXActionService {
      * @return The service or <code>null</code> if absent
      */
     protected <S> S getService(final Class<? extends S> clazz) {
-        return services.getService(clazz);
+        return services.getOptionalService(clazz);
     }
 
     @Override
