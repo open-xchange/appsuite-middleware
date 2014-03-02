@@ -1406,12 +1406,15 @@ public final class HtmlServiceImpl implements HtmlService {
         /*
          * Check URLs
          */
-        if (!replaceUrls) {
-            return html;
+        if (replaceUrls) {
+            final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
+            HtmlParser.parse(html, handler);
+            html = handler.getHTML();
         }
-        final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
-        HtmlParser.parse(html, handler);
-        return handler.getHTML();
+        /*
+         * Retun...
+         */
+        return html;
     }
 
     private static boolean occursWithin(final String str, final int start, final int end, final boolean ignorecase, final String... searchStrings) {
