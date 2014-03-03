@@ -610,7 +610,10 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                     LOG.error("Error while shutting down \"{}\" bundle", bundleName, e);
                 }
             }
-            m_context.addBundleListener(listener);
+            // Need to check if the context is still there, because it might be that the bundles stop method was called before and the context is null
+            if (null != this.m_context) {
+                m_context.addBundleListener(listener);
+            }
         }
     }
 

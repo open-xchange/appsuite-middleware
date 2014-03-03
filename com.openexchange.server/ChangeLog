@@ -1,3 +1,7 @@
+* 2014-03-03 - dennis.sieben@open-xchange.com
+
+ - Added null check for possible NPE in OSGiAbstractor
+
 * 2014-03-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 31364: Marked autoconfig.properties as configuration file.
