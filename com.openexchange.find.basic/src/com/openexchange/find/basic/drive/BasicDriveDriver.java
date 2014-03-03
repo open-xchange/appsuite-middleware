@@ -77,7 +77,9 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.DriveFacetType;
+import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.drive.FileDocument;
+import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FieldFacet;
@@ -109,7 +111,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
     @Override
     public boolean isValidFor(ServerSession session) {
-        return true;
+        return session.getUserConfiguration().hasInfostore() && session.getUserConfiguration().hasContact();
     }
 
     @Override
@@ -160,7 +162,21 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     @Override
     public AutocompleteResult doAutocomplete(final AutocompleteRequest autocompleteRequest, final ServerSession session) throws OXException {
         final List<Facet> facets = new LinkedList<Facet>();
+
         facets.add(new Facet(DriveFacetType.FILE_NAME, getAutocompleteFiles(session, autocompleteRequest)));
+
+        {
+            final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
+            final String fieldFileType = Constants.FIELD_FILE_TYPE;
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.AUDIO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_AUDIO, FileTypeDisplayItem.Type.AUDIO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS, FileTypeDisplayItem.Type.DOCUMENTS), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.IMAGES.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_IMAGES, FileTypeDisplayItem.Type.IMAGES), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.IMAGES.getIdentifier())));
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.OTHER.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_OTHER, FileTypeDisplayItem.Type.OTHER), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.OTHER.getIdentifier())));
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.VIDEO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_VIDEO, FileTypeDisplayItem.Type.VIDEO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
+            final Facet folderTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
+            facets.add(folderTypeFacet);
+        }
+
         return new AutocompleteResult(facets);
     }
 
@@ -187,14 +203,13 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // Create file access
         IDBasedFileAccess access = fileAccessFactory.createAccess(session);
         String prefix = request.getPrefix();
-        SearchTerm<String> titleTerm = new TitleTerm(prefix, true, true);
-        SearchTerm<String> filenameTerm = new FileNameTerm(prefix, true, true);
-        SearchTerm<String> descriptionTerm = new DescriptionTerm(prefix, true, true);
+
         List<SearchTerm<?>> terms = new LinkedList<SearchTerm<?>>();
-        terms.add(titleTerm);
-        terms.add(filenameTerm);
-        terms.add(descriptionTerm);
+        terms.add(new TitleTerm(prefix, true, true));
+        terms.add(new FileNameTerm(prefix, true, true));
+        terms.add(new DescriptionTerm(prefix, true, true));
         SearchTerm<List<SearchTerm<?>>> orTerm = new OrTerm(terms);
+
         SearchIterator<File> it = access.search(orTerm, Arrays.asList(fields), Field.TITLE, SortDirection.ASC, FileStorageFileAccess.NOT_SET,
             FileStorageFileAccess.NOT_SET);
         List<FacetValue> facets = new LinkedList<FacetValue>();
