@@ -84,9 +84,6 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
 final class ActionCommandMapper implements Mapper<Rule> {
 
-    private static final String ERR_PREFIX_INVALID_ADDRESS = OXMailfilterExceptionCode.ERR_PREFIX_INVALID_ADDRESS;
-    private static final String ERR_PREFIX_REJECTED_ADDRESS = OXMailfilterExceptionCode.ERR_PREFIX_REJECTED_ADDRESS;
-
     @Override
     public String getAttrName() {
         return RuleFields.ACTIONCMDS;
@@ -216,13 +213,13 @@ final class ActionCommandMapper implements Mapper<Rule> {
             try {
                 new QuotedInternetAddress(stringparam, true);
             } catch (final AddressException e) {
-                throw new SieveException(ERR_PREFIX_INVALID_ADDRESS);
+                throw OXMailfilterExceptionCode.INVALID_REDIRECT_ADDRESS.create(e, stringparam);
             }
             // And finally check of that forward address is allowed
             final ConfigurationService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
             final Filter filter;
             if (null != service && (null != (filter = service.getFilterFromProperty("com.openexchange.mail.filter.redirectWhitelist"))) && !filter.accepts(stringparam)) {
-                throw new SieveException(ERR_PREFIX_REJECTED_ADDRESS + stringparam);
+                throw OXMailfilterExceptionCode.REJECTED_REDIRECT_ADDRESS.create(stringparam);
             }
         }
         return new ActionCommand(command, createArrayArray(stringparam));

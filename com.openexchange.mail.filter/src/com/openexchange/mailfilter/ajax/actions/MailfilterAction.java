@@ -967,15 +967,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
     private static OXException handleSieveException(final SieveException e) {
         final String msg = e.getMessage();
-        final OXException ret = OXMailfilterExceptionCode.SIEVE_ERROR.create(e, msg);
-        if (null != msg) {
-            if (msg.startsWith(OXMailfilterExceptionCode.ERR_PREFIX_REJECTED_ADDRESS)) {
-                ret.setCategory(Category.CATEGORY_USER_INPUT);
-            } else if (msg.startsWith(OXMailfilterExceptionCode.ERR_PREFIX_INVALID_ADDRESS)) {
-                ret.setCategory(Category.CATEGORY_USER_INPUT);
-            }
-        }
-        return ret;
+        return OXMailfilterExceptionCode.SIEVE_ERROR.create(e, msg);
     }
 
     // private int getIndexOfRightRuleForUniqueId(final ArrayList<Rule>

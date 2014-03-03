@@ -1,6 +1,7 @@
 * 2014-03-03 - tobias.friedrich@open-xchange.com
 
-- Fix for bug 31258: Add (cid,changing_date) index to calendar tables to speed up change detection 
+ - Fix for bug 31258: Add (cid,changing_date) index to calendar tables to speed up change detection 
+ - Fix for bug 30995: Introduced displayable exception in case the redirect address is invalid or rejected 
 
 * 2014-03-01 - thorben.betten@open-xchange.com
 
