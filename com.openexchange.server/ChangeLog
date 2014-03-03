@@ -1,3 +1,7 @@
+* 2014-03-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31324: Fixed parsing of .po file that contain non-ascii characters
+
 * 2014-03-03 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 31137: Ignore conversion error on referencing inline images
