@@ -92,4 +92,15 @@ public class DriveStrings implements LocalizableStrings {
 
     public static final String FILE_TYPE_OTHER = "Other";
 
+    // ---------------------------------------------------------------------------------- //
+
+    // Search in file field file name.
+    public static final String SEARCH_IN_FILE_NAME = "%1$s <i>in file name</i>";
+
+    // Search in file field file description.
+    public static final String SEARCH_IN_FILE_DESC = "%1$s <i>in file description</i>";
+
+    // Search in file field file content.
+    public static final String SEARCH_IN_FILE_CONTENT = "%1$s <i>in file content</i>";
+
 }

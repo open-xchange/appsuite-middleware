@@ -75,6 +75,7 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
@@ -161,9 +162,26 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
     @Override
     public AutocompleteResult doAutocomplete(final AutocompleteRequest autocompleteRequest, final ServerSession session) throws OXException {
+        // The auto-complete prefix
+        final String prefix = autocompleteRequest.getPrefix();
+
+        // List of supported facets
         final List<Facet> facets = new LinkedList<Facet>();
 
-        facets.add(new Facet(DriveFacetType.FILE_NAME, getAutocompleteFiles(session, autocompleteRequest)));
+        {
+            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix), Constants.FIELD_FILE_NAME, prefix);
+            facets.add(fileNameFacet);
+        }
+
+        {
+            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix), Constants.FIELD_FILE_DESC, prefix);
+            facets.add(fileNameFacet);
+        }
+
+        {
+            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix), Constants.FIELD_FILE_CONTENT, prefix);
+            facets.add(fileNameFacet);
+        }
 
         {
             final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
@@ -192,36 +210,6 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     @Override
     public Module getModule() {
         return Module.DRIVE;
-    }
-
-    private List<FacetValue> getAutocompleteFiles(ServerSession session, AutocompleteRequest request) throws OXException {
-        final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
-        if (null == fileAccessFactory) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
-        }
-
-        // Create file access
-        IDBasedFileAccess access = fileAccessFactory.createAccess(session);
-        String prefix = request.getPrefix();
-
-        List<SearchTerm<?>> terms = new LinkedList<SearchTerm<?>>();
-        terms.add(new TitleTerm(prefix, true, true));
-        terms.add(new FileNameTerm(prefix, true, true));
-        terms.add(new DescriptionTerm(prefix, true, true));
-        SearchTerm<List<SearchTerm<?>>> orTerm = new OrTerm(terms);
-
-        SearchIterator<File> it = access.search(orTerm, Arrays.asList(fields), Field.TITLE, SortDirection.ASC, FileStorageFileAccess.NOT_SET,
-            FileStorageFileAccess.NOT_SET);
-        List<FacetValue> facets = new LinkedList<FacetValue>();
-        while (it.hasNext()) {
-            File file = it.next();
-            Filter fileName = new Filter(Collections.singletonList("filename"), file.getFileName());
-            if (null != fileName) {
-                String facetValue = prepareFacetValueId(request.getPrefix(), session.getContextId(), file.getId());
-                facets.add(new FacetValue(facetValue, new SimpleDisplayItem(file.getTitle()), FacetValue.UNKNOWN_COUNT, fileName));
-            }
-        }
-        return facets;
     }
 
     private static SearchTerm<?> prepareSearchTerm(final List<String> queries, final List<Filter> filters) throws OXException {
@@ -256,6 +244,40 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             terms.add(Utils.termFor(filter));
         }
         return new AndTerm(terms);
+    }
+
+    private List<FacetValue> getAutocompleteFiles(ServerSession session, AutocompleteRequest request) throws OXException {
+        final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
+        if (null == fileAccessFactory) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
+        }
+
+        // Create file access
+        IDBasedFileAccess access = fileAccessFactory.createAccess(session);
+
+        // Compose term
+        String prefix = request.getPrefix();
+        List<SearchTerm<?>> terms = new LinkedList<SearchTerm<?>>();
+        terms.add(new TitleTerm(prefix, true, true));
+        terms.add(new FileNameTerm(prefix, true, true));
+        terms.add(new DescriptionTerm(prefix, true, true));
+        SearchTerm<List<SearchTerm<?>>> orTerm = new OrTerm(terms);
+
+        // Fire search
+        SearchIterator<File> it = null;
+        try {
+            it = access.search(orTerm, Arrays.asList(fields), Field.TITLE, SortDirection.ASC, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+            List<FacetValue> facets = new LinkedList<FacetValue>();
+            while (it.hasNext()) {
+                File file = it.next();
+                Filter fileName = new Filter(Collections.singletonList("filename"), file.getFileName());
+                String facetValue = prepareFacetValueId(request.getPrefix(), session.getContextId(), file.getId());
+                facets.add(new FacetValue(facetValue, new SimpleDisplayItem(file.getTitle()), FacetValue.UNKNOWN_COUNT, fileName));
+            }
+            return facets;
+        } finally {
+            SearchIterators.close(it);
+        }
     }
 
 }
