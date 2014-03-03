@@ -49,7 +49,6 @@
 
 package com.openexchange.i18n.parsing;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,36 +62,6 @@ import com.openexchange.java.Streams;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 final class POTokenStream {
-
-    public static void main(String[] args) throws Exception {
-
-        byte[] bytes = ("#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522\n" +
-            "msgid \"Zulu\"\n" +
-            "msgstr \"Zulu\"\n" +
-            "\n" +
-            "#~ msgid \"\"\n" +
-            "#~ \"This message could not be moved to trash folder, possibly because your \"\n" +
-            "#~ \"mailbox is nearly full.\"\n" +
-            "#~ msgstr \"\"\n" +
-            "#~ \"Die Nachricht konnte nicht in den Papierkorb verschoben werden. \"\n" +
-            "#~ \"Wahrscheinlich ist Ihre Mailbox fast voll.\"\n" +
-            "\n" +
-            "#~ msgid \"\"\n" +
-            "#~ \"In that case, please try to empty your deleted items first, or delete \"\n" +
-            "#~ \"smaller messages first.\"\n" +
-            "#~ msgstr \"\"\n" +
-            "#~ \"Entfernen Sie in diesem Fall zunaechst Ihre geloeschten Objekte oder \"\n" +
-            "#~ \"loeschen Sie zunaechst kleinere Nachrichten.\"\n" +
-            "\n" +
-            "#~ msgid \"Error message from server: %5$s\"\n" +
-            "#~ msgstr \"Fehlermeldung vom Server: %5$s\"").getBytes();
-        ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
-
-
-        Translations parsed = new POParser().parse(stream, "foobar.po");
-
-        System.out.println(parsed);
-    }
 
     // ---------------------------------------------------------------------------------------------------------------//
 
