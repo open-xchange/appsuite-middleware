@@ -70,6 +70,8 @@ public class AutocompleteRequest implements Serializable {
 
     private final List<Facet> activeFacets;
 
+    private final int limit;
+
     /**
      * Initializes a new {@link AutocompleteRequest}.
      *
@@ -88,10 +90,23 @@ public class AutocompleteRequest implements Serializable {
      * @param activeFacets The list of currently active facets; must not be <code>null</code>
      */
     public AutocompleteRequest(final String prefix, final String folder, final List<Facet> activeFacets) {
+        this(prefix, folder, activeFacets, 0);
+    }
+
+    /**
+     * Initializes a new {@link AutocompleteRequest}.
+     *
+     * @param prefix The prefix to autocomplete on; must not be <code>null</code>
+     * @param folder The folder. Can be <code>null</code>
+     * @param activeFacets The list of currently active facets; must not be <code>null</code>
+     * @param limit The maximum number of results to return, or <code>0</code> if not defined
+     */
+    public AutocompleteRequest(final String prefix, final String folder, final List<Facet> activeFacets, final int limit) {
         super();
         this.prefix = prefix;
         this.folder = folder;
         this.activeFacets = activeFacets;
+        this.limit = limit;
     }
 
     /**
@@ -118,6 +133,15 @@ public class AutocompleteRequest implements Serializable {
      */
     public String getFolder() {
         return folder;
+    }
+
+    /**
+     * Gets the maximum number of results to return.
+     *
+     * @return The limit, or <code>0</code> if not defined
+     */
+    public int getLimit() {
+        return limit;
     }
 
     @Override
