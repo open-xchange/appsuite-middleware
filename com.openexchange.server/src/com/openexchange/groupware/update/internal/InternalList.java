@@ -738,6 +738,9 @@ public final class InternalList {
         // Fix for bug 31335
         list.add(new InfostorePrimaryKeyUpdateTaskV2());
 
+        // Adds (cid,changing_date) index to calendar tables if missing
+        list.add(new com.openexchange.groupware.update.tasks.CalendarAddChangingDateIndexTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }
