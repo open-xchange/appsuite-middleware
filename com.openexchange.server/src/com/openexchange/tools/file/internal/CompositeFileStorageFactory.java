@@ -119,7 +119,7 @@ public class CompositeFileStorageFactory implements FileStorageFactory, ServiceT
 
             return cStorage;
         } catch (final IllegalArgumentException e) {
-            throw OXException.general("Cannot create file storage for URI: \"" + uri + "\". Wrong or missing FileStorage bundle?", e);
+            throw OXException.general("Cannot create file storage for URI: \"" + uri + "\". Wrong or missing FileStorage bundle for scheme " + uri.getScheme() + "?", e);
         }
     }
 
