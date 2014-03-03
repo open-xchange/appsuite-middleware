@@ -527,7 +527,7 @@ public final class SieveTextFilter {
         int size = 0;
         if (null != actioncommands) {
             for (final ActionCommand actionCommand : actioncommands) {
-                if (Commands.VACATION.equals(actionCommand.getCommand()) || Commands.ENOTIFY.equals(actionCommand.getCommand())) {
+                if (Commands.VACATION.equals(actionCommand.getCommand()) || Commands.ENOTIFY.equals(actionCommand.getCommand()) || Commands.PGP_ENCRYPT.equals(actionCommand.getCommand())) {
                     // The text arguments for vacation end method for enotify are the last in the list
                     final ArrayList<Object> arguments = actionCommand.getArguments();
                     final int size2 = arguments.size();

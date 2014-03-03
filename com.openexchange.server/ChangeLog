@@ -1,3 +1,7 @@
+* 2014-03-03 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 31329: Multi-line calculation has now also been added for PGP_ENCRYPT commands
+
 * 2014-02-25 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31191: Fixed erroneous permission check.
