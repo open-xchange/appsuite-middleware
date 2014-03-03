@@ -2844,6 +2844,14 @@ msgstr ""
 msgid "The E-Mail address %1$s is invalid."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/ajax/exceptions/MailfilterExceptionMessages.java:60
+msgid "The redirect address \"%1$s\" is not valid."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/ajax/exceptions/MailfilterExceptionMessages.java:62
+msgid "The redirect address \"%1$s\" has been rejected."
+msgstr ""
+
 #. Missing property: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:65
 msgid "Missing property: %1$s"
