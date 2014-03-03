@@ -57,6 +57,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -65,44 +66,26 @@ final class POTokenStream {
 
     public static void main(String[] args) throws Exception {
 
-        byte[] bytes = ("# #-#-#-#-#  server.de_DE.po (server.de_DE)  #-#-#-#-#\n" +
-            "# translation of server.de_DE.po to deutsch\n" +
-            "# translation of server.new.de_DE.po to\n" +
-            "# translation of server.de_DE.po to\n" +
-            "# #-#-#-#-#  errors.de_DE.po (errors.de_DE)  #-#-#-#-#\n" +
-            "# translation of errors.de_DE.po to deutsch\n" +
-            "# translation of errors.de_DE.po to\n" +
-            "# translation of errors.de-new.po to\n" +
-            "# translation of errors.de.po to\n" +
-            "# translation of errors.po to\n" +
-            "# This file is distributed under the same license as the PACKAGE package.\n" +
-            "# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.\n" +
-            "#\n" +
-            "# Antje Faber, 2007.\n" +
-            "# Antje Faber <antje.faber@open-xchange.com>, 2008, 2009, 2010, 2011.\n" +
-            "# Antje Faber, 2006, 2012, 2013.\n" +
-            "msgid \"\"\n" +
-            "msgstr \"\"\n" +
-            "\"Project-Id-Version: errors.de_DE\\n\"\n" +
-            "\"Report-Msgid-Bugs-To: \\n\"\n" +
-            "\"POT-Creation-Date: \\n\"\n" +
-            "\"PO-Revision-Date: 2014-01-20 11:50+0100\\n\"\n" +
-            "\"Last-Translator: Antje Faber\\n\"\n" +
-            "\"Language-Team: German <kde-i18n-de@kde.org>\\n\"\n" +
-            "\"Language: de\\n\"\n" +
-            "\"MIME-Version: 1.0\\n\"\n" +
-            "\"Content-Type: text/plain; charset=UTF-8\\n\"\n" +
-            "\"Content-Transfer-Encoding: 8bit\\n\"\n" +
-            "\"Plural-Forms: nplurals=2; plural=n != 1;\\n\"\n" +
-            "\"X-Generator: Poedit 1.6.3\\n\"\n" +
-            "\"X-Generator: Lokalize 1.0\\n\"\n" +
-            "\"Plural-Forms: nplurals=2; plural=n != 1;\\n\"\n" +
+        byte[] bytes = ("#: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522\n" +
+            "msgid \"Zulu\"\n" +
+            "msgstr \"Zulu\"\n" +
             "\n" +
-            "#. The client send a ticket within the browser request and the verification of this ticket failed.\n" +
-            "#. %1$s will be replaced with a detailed exception message.\n" +
-            "#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:63\n" +
-            "msgid \"Verification of client ticket failed: %1$s\"\n" +
-            "msgstr \"Die Verifizierung des Client-Tickets ist fehlgeschlagen: %1$s\"").getBytes();
+            "#~ msgid \"\"\n" +
+            "#~ \"This message could not be moved to trash folder, possibly because your \"\n" +
+            "#~ \"mailbox is nearly full.\"\n" +
+            "#~ msgstr \"\"\n" +
+            "#~ \"Die Nachricht konnte nicht in den Papierkorb verschoben werden. \"\n" +
+            "#~ \"Wahrscheinlich ist Ihre Mailbox fast voll.\"\n" +
+            "\n" +
+            "#~ msgid \"\"\n" +
+            "#~ \"In that case, please try to empty your deleted items first, or delete \"\n" +
+            "#~ \"smaller messages first.\"\n" +
+            "#~ msgstr \"\"\n" +
+            "#~ \"Entfernen Sie in diesem Fall zunaechst Ihre geloeschten Objekte oder \"\n" +
+            "#~ \"loeschen Sie zunaechst kleinere Nachrichten.\"\n" +
+            "\n" +
+            "#~ msgid \"Error message from server: %5$s\"\n" +
+            "#~ msgstr \"Fehlermeldung vom Server: %5$s\"").getBytes();
         ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
 
 
@@ -186,7 +169,7 @@ final class POTokenStream {
                 eof();
                 break;
             default:
-                final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream();
                 baos.write(c);
                 while ((c = read()) != -1 && c != '\n') {
                     baos.write(c);
@@ -220,7 +203,7 @@ final class POTokenStream {
          */
         // Ignore comments
         byte b;
-        while ((b = read()) != '\n' && b > 0) {
+        while ((b = read()) != '\n' && b != -1) {
             // Discard
         }
         //initNextToken();
