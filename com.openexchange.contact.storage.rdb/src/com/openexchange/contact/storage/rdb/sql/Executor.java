@@ -975,23 +975,33 @@ public class Executor {
     }
 
     private static ResultSet logExecuteQuery(final PreparedStatement stmt) throws SQLException {
-        if (false == LOG.isDebugEnabled()) {
-            return stmt.executeQuery();
+        try {
+            if (false == LOG.isDebugEnabled()) {
+                return stmt.executeQuery();
+            }
+            long start = System.currentTimeMillis();
+            ResultSet resultSet = stmt.executeQuery();
+            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
+            return resultSet;
+        } catch (SQLException e) {
+            LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());
+            throw e;
         }
-        long start = System.currentTimeMillis();
-        ResultSet resultSet = stmt.executeQuery();
-        LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
-        return resultSet;
     }
 
     private static int logExecuteUpdate(final PreparedStatement stmt) throws SQLException {
-        if (false == LOG.isDebugEnabled()) {
-            return stmt.executeUpdate();
+        try {
+            if (false == LOG.isDebugEnabled()) {
+                return stmt.executeUpdate();
+            }
+            long start = System.currentTimeMillis();
+            final int rowCount = stmt.executeUpdate();
+            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
+            return rowCount;
+        } catch (SQLException e) {
+            LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());
+            throw e;
         }
-        long start = System.currentTimeMillis();
-        final int rowCount = stmt.executeUpdate();
-        LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
-        return rowCount;
     }
 
 }
