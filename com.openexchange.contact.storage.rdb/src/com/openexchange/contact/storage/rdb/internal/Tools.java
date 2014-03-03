@@ -300,7 +300,7 @@ public final class Tools {
                 final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
                 stringBuilder.append(getOrderClause(order[0], collator));
                 for (int i = 1; i < order.length; i++) {
-                    stringBuilder.append(' ').append(getOrderClause(order[i], collator));
+                    stringBuilder.append(", ").append(getOrderClause(order[i], collator));
                 }
             }
         }
