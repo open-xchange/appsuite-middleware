@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.find.tasks;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,23 +61,25 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
+import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.folder.actions.ListRequest;
-import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.tasks.ExternalParticipant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -350,15 +356,73 @@ public class FindTasksTestEnvironment {
      * @throws Exception 
      */
     private final void createAndInsertTasks() throws Exception {
+        // Prepare assets
+        UserParticipant usrPartA = new UserParticipant(userA.getUserId());
+        UserParticipant usrPartB = new UserParticipant(userB.getUserId());
+        ExternalUserParticipant extPart = new ExternalUserParticipant("foo@bar.org");
+        String attachment = readFile("attachment.base64");
+        
         //insert some tasks
-        insertTask(clientA, FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID());
-        insertTask(clientA, FolderType.PRIVATE, Status.DEFERRED, userAprivateTestFolder.getObjectID());
-        insertTask(clientA, FolderType.PRIVATE, Status.DONE, userApublicTestFolder.getObjectID());
-        insertTask(clientA, FolderType.PUBLIC, Status.DONE, userApublicTestFolder.getObjectID());
+        for (Status s : Status.values()) {
+            for (FolderType ft : FolderType.values()) {
+                switch(ft) {
+                case PUBLIC:
+                    insertTask(clientA, ft, s, userApublicTestFolder.getObjectID());
+                    insertTask(clientB, ft, s, userBpublicTestFolder.getObjectID());
+                    break;
+                    
+                case PRIVATE:
+                    insertTask(clientA, ft, s, userAprivateTestFolder.getObjectID());
+                    insertTask(clientB, ft, s, userBprivateTestFolder.getObjectID());
+                    break;
+                
+                case SHARED:
+                    insertTask(clientB, ft, s, userBsharedTestFolderRO.getObjectID());
+                    insertTask(clientB, ft, s, userBsharedTestFolderRW.getObjectID());
+                    break;
+                }
+            }
+        }
+        //insertTask(clientA, FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID());
+        //insertTask(clientA, FolderType.PRIVATE, Status.DEFERRED, userAprivateTestFolder.getObjectID());
+        //insertTask(clientA, FolderType.PRIVATE, Status.DONE, userApublicTestFolder.getObjectID());
+        //insertTask(clientA, FolderType.PUBLIC, Status.DONE, userApublicTestFolder.getObjectID());
+    }
+    
+    /**
+     * Read a file into a string
+     * 
+     * @param fileName
+     * @return
+     * @throws IOException 
+     */
+    private final String readFile(String fileName) throws IOException{
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + fileName));
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while (line != null) {
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
+            }
+            return sb.toString();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null)
+                br.close();
+        }
+        return null;
     }
     
     /**
      * Helper method to insert tasks
+     * 
      * @param client the AJAXClient
      * @param ft FolderType 
      * @param status Task's status
@@ -366,9 +430,22 @@ public class FindTasksTestEnvironment {
      * @throws Exception
      */
     private final void insertTask(AJAXClient client, FolderType ft, Status status, int folder) throws Exception {
-        Task t = com.openexchange.groupware.tasks.Create.createWithDefaults("Find me, I am in " + ft + " - Hint User " + client.getValues().getDefaultAddress(), 
-                      "User " + client.getValues().getDefaultAddress()+ "'s private task in his " + ft + " folder and " + status, status.ordinal() + 1, folder);
+        Task t = com.openexchange.groupware.tasks.Create.createWithDefaults("Find me, I am in a " + ft + " Folder - Hint User " + client.getValues().getDefaultAddress(), 
+                      "User " + client.getValues().getDefaultAddress()+ "'s private task in his " + ft + " folder and have status: " + status, status.ordinal() + 1, folder);
         client.execute(new com.openexchange.ajax.task.actions.InsertRequest(t, client.getValues().getTimeZone()));
+    }
+    
+    /**
+     * Attach the specified attachment to the specified task
+     * 
+     * @param client
+     * @param task
+     * @param attachmentName
+     * @param attachment
+     * @throws Exception
+     */
+    private final void attach(AJAXClient client, Task task, String attachmentName, String attachment) throws Exception {
+        client.execute(new AttachRequest(task, attachmentName, new ByteArrayInputStream(attachment.getBytes()), "text/plain")).getId();
     }
     
     /**
@@ -440,5 +517,4 @@ public class FindTasksTestEnvironment {
     public List<List<Filter>> getLolFilters() {
         return lolFilters;
     }
-
 }

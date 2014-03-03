@@ -146,8 +146,8 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
             assertNotNull(queryResponse);
 
             //assert the response
-            //JSONArray results  = getResults(queryResponse);
-            
+            JSONArray results  = getResults(queryResponse);
+            results.asList();
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
