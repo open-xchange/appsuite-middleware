@@ -1,5 +1,9 @@
 * 2014-03-03 - dennis.sieben@open-xchange.com
 
+ - Fix for bug 31329: Multi-line calculation has now also been added for PGP_ENCRYPT commands
+
+* 2014-03-03 - dennis.sieben@open-xchange.com
+
  - Added null check for possible NPE in OSGiAbstractor
 
 * 2014-03-03 - marcus.klein@open-xchange.com
