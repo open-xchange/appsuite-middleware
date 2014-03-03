@@ -162,6 +162,21 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         }
     }
 
+    static int compareByReceivedDate(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
+        final Date d1 = msg1.getReceivedDate();
+        final Date d2 = msg2.getReceivedDate();
+        if (null == d1) {
+            if (null == d2) {
+                return 0;
+            }
+            return -1;
+        } else if (null == d2) {
+            return 1;
+        } else {
+            return d1.compareTo(d2);
+        }
+    }
+
     private static final EnumMap<MailSortField, FieldComparer> COMPARERS;
 
     static {
@@ -188,18 +203,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
             @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
-                final Date d1 = msg1.getReceivedDate();
-                final Date d2 = msg2.getReceivedDate();
-                if (null == d1) {
-                    if (null == d2) {
-                        return 0;
-                    }
-                    return -1;
-                } else if (null == d2) {
-                    return 1;
-                } else {
-                    return d1.compareTo(d2);
-                }
+                return compareByReceivedDate(msg1, msg2);
             }
         });
         COMPARERS.put(MailSortField.FLAG_SEEN, new FieldComparer() {
@@ -209,12 +213,12 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                 final boolean isSeen1 = msg1.isSeen();
                 final boolean isSeen2 = msg2.isSeen();
                 if (isSeen1 && isSeen2) {
-                    return 0;
+                    return compareByReceivedDate(msg1, msg2);
                 } else if (!isSeen1 && !isSeen2) {
                     final boolean isRecent1 = msg1.isRecent();
                     final boolean isRecent2 = msg2.isRecent();
                     if ((isRecent1 && isRecent2) || (!isRecent1 && !isRecent2)) {
-                        return 0;
+                        return compareByReceivedDate(msg1, msg2);
                     } else if (isRecent1 && !isRecent2) {
                         return 1;
                     } else if (!isRecent1 && isRecent2) {
@@ -225,7 +229,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                 } else if (!isSeen1 && isSeen2) {
                     return -1;
                 }
-                return 0;
+                return compareByReceivedDate(msg1, msg2);
             }
         });
         COMPARERS.put(MailSortField.SIZE, new FieldComparer() {
