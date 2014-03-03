@@ -82,7 +82,7 @@ public final class SendResponse extends AbstractAJAXResponse {
 	public String[] getFolderAndID() {
 		if (null == folderAndID) {
 			final String str;
-			if (getData() == null || (str = getData().toString()).length() == 0) {
+			if (getData() == null || (str = getData().toString()).length() == 0 || "null".equalsIgnoreCase(str)) {
 				return null;
 			}
 			try {
