@@ -109,20 +109,6 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     }
 
     @Override
-    public String modifyCallbackURL(final String callbackUrl, final String currentHost, final Session session) {
-        if (null == callbackUrl) {
-            return super.modifyCallbackURL(callbackUrl, currentHost, session);
-        }
-
-        final DeferringURLService deferrer = services.getService(DeferringURLService.class);
-        if (null != deferrer && deferrer.isDeferrerURLAvailable()) {
-            return deferrer.getDeferredURL(callbackUrl);
-        }
-
-        return deferredURLUsing(callbackUrl, "https://" + currentHost);
-    }
-
-    @Override
     public API getAPI() {
         return API.XING;
     }
@@ -157,6 +143,20 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     @Override
     public boolean registerTokenBasedDeferrer() {
         return true;
+    }
+
+    @Override
+    public String modifyCallbackURL(final String callbackUrl, final String currentHost, final Session session) {
+        if (null == callbackUrl) {
+            return super.modifyCallbackURL(callbackUrl, currentHost, session);
+        }
+
+        final DeferringURLService deferrer = services.getService(DeferringURLService.class);
+        if (null != deferrer && deferrer.isDeferrerURLAvailable()) {
+            return deferrer.getDeferredURL(callbackUrl);
+        }
+
+        return deferredURLUsing(callbackUrl, "https://" + currentHost);
     }
 
     private String deferredURLUsing(final String url, final String domain) {
