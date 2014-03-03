@@ -102,6 +102,11 @@ public final class OAuthConstants {
      */
     public static final String ARGUMENT_SESSION = "session";
 
+    /**
+     * The argument name for current host name. <code>java.lang.String</code>
+     */
+    public static final String ARGUMENT_CURRENT_HOST = null;
+
     /*-
      * ------------------- URL parameters -------------------
      */

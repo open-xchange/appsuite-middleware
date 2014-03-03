@@ -128,7 +128,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     }
 
     @Override
-    public String modifyCallbackURL(final String callbackUrl, Session session) {
+    public String modifyCallbackURL(final String callbackUrl, String currentHost, Session session) {
         if (deferrer == null) {
             return callbackUrl;
         }
@@ -147,7 +147,10 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) {
         final String code = parameter.get("code");
         arguments.put(OAuthConstants.ARGUMENT_PIN, code);
-        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, modifyCallbackURL((String)state.get(OAuthConstants.ARGUMENT_CALLBACK), (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION)));
+        final String callbackUrl = (String)state.get(OAuthConstants.ARGUMENT_CALLBACK);
+        final String currentHost = (String)state.get(OAuthConstants.ARGUMENT_CURRENT_HOST);
+        final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, modifyCallbackURL(callbackUrl, currentHost, session));
     }
 
     private static final int BUFSIZE = 8192;

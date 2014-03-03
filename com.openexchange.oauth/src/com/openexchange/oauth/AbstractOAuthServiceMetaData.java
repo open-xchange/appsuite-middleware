@@ -106,9 +106,9 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public boolean isEnabled(int userId, int contextId) throws OXException {
-        ConfigView view = Services.getService(ConfigViewFactory.class).getView(userId, contextId);
-        ComposedConfigProperty<Boolean> property = view.property(getEnabledProperty(), Boolean.class);
+    public boolean isEnabled(final int userId, final int contextId) throws OXException {
+        final ConfigView view = Services.getService(ConfigViewFactory.class).getView(userId, contextId);
+        final ComposedConfigProperty<Boolean> property = view.property(getEnabledProperty(), Boolean.class);
         if (!property.isDefined()) {
             return true;
         }
@@ -130,7 +130,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      *
      * @param apiKeyName The apiKeyName to set
      */
-    public void setAPIKeyName(String apiKeyName) {
+    public void setAPIKeyName(final String apiKeyName) {
         this.apiKeyName = apiKeyName;
     }
 
@@ -140,12 +140,12 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      *
      * @param apiSecretName The apiSecretName to set
      */
-    public void setAPISecretName(String apiSecretName) {
+    public void setAPISecretName(final String apiSecretName) {
         this.apiSecretName = apiSecretName;
     }
 
     @Override
-    public String getAPIKey(Session session) throws OXException {
+    public String getAPIKey(final Session session) throws OXException {
         if (session == null || apiKeyName == null) {
             return getAPIKey();
         }
@@ -169,7 +169,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
 
     @Override
-    public String getAPISecret(Session session) throws OXException {
+    public String getAPISecret(final Session session) throws OXException {
         if (session == null || apiSecretName == null) {
             return getAPISecret();
         }
@@ -227,7 +227,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String callbackUrl, Session session) throws OXException {
+    public OAuthInteraction initOAuth(final String callbackUrl, final Session session) throws OXException {
         return null;
     }
 
@@ -252,7 +252,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public String modifyCallbackURL(final String callbackUrl, Session session) {
+    public String modifyCallbackURL(final String callbackUrl, String currentHost, final Session session) {
         return callbackUrl;
     }
 

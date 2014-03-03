@@ -80,7 +80,7 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
         registerService(DeferringURLService.class, new DefaultDeferringURLService() {
 
             @Override
-            public String getDeferrerURL() {
+            protected String getDeferrerURL() {
                 return getService(ConfigurationService.class).getProperty("com.openexchange.http.deferrer.url");
             }
 
