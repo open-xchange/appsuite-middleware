@@ -108,6 +108,11 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
         return session.getUserPermissionBits().hasInfostore();
     }
 
+    @Override
+    protected String getFormatStringForGlobalFacet() {
+        return DriveStrings.FACET_GLOBAL;
+    }
+
     public void getConfiguration(final ServerSession session) throws OXException {
         // Define facets
         final List<Facet> staticFacets = new LinkedList<Facet>();
@@ -225,7 +230,7 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
             }
 
             // TODO: Does ui need the numFound value? Could become expensive to implement here
-            return new SearchResult(-1, searchRequest.getStart(), documents);
+            return new SearchResult(-1, searchRequest.getStart(), documents, searchRequest.getActiveFacets());
         } finally {
             SearchIterators.close(results);
         }

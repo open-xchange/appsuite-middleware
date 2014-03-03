@@ -69,10 +69,10 @@ public enum CalendarFacetType implements FacetType {
     RELATIVE_DATE(CalendarStrings.RELATIVE_DATE),
     RECURRING_TYPE(CalendarStrings.RECURRING_TYPE);
 
-    private static final Map<String, CalendarFacetType> typesByName = new HashMap<String, CalendarFacetType>();
+    private static final Map<String, CalendarFacetType> typesById = new HashMap<String, CalendarFacetType>();
     static {
         for (CalendarFacetType type : values()) {
-            typesByName.put(type.getId(), type);
+            typesById.put(type.getId(), type);
         }
     }
 
@@ -99,20 +99,20 @@ public enum CalendarFacetType implements FacetType {
     }
 
     @Override
-    public boolean isMandatory() {
+    public boolean appliesOnce() {
         return false;
     }
 
     /**
-     * Gets a {@link CalendarFacetType} by its name.
-     * @return The type or <code>null</code>, if the name is invalid.
+     * Gets a {@link CalendarFacetType} by its id.
+     * @return The type or <code>null</code>, if the id is invalid.
      */
-    public static CalendarFacetType getByName(String name) {
-        if (Strings.isEmpty(name)) {
+    public static CalendarFacetType getById(String id) {
+        if (Strings.isEmpty(id)) {
             return null;
         }
 
-        return typesByName.get(name);
+        return typesById.get(id);
     }
 
 }

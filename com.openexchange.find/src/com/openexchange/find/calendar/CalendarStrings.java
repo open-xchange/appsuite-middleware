@@ -53,10 +53,12 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link CalendarStrings}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class CalendarStrings implements LocalizableStrings {
+
+    public static final String GLOBAL = "%1$s <i>in appointments</i>";
 
     public static final String CONTACTS = "Contacts";
 

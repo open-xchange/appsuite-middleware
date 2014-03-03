@@ -49,32 +49,15 @@
 
 package com.openexchange.find.json.actions;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
-import com.openexchange.find.FindExceptionCode;
-import com.openexchange.find.Module;
 import com.openexchange.find.SearchService;
-import com.openexchange.find.calendar.CalendarFacetType;
-import com.openexchange.find.contacts.ContactsFacetType;
-import com.openexchange.find.drive.DriveFacetType;
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.FacetType;
-import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.json.FindRequest;
-import com.openexchange.find.mail.MailFacetType;
-import com.openexchange.find.tasks.TasksFacetType;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
@@ -98,73 +81,14 @@ public class AutocompleteAction extends AbstractFindAction {
     protected AJAXRequestResult doPerform(FindRequest request) throws OXException {
         SearchService searchService = getSearchService();
         String prefix = request.requirePrefix();
-        String folder = request.getFolder();
-        List<Facet> activeFactes = parseActiveFacets(request);
+        List<ActiveFacet> activeFactes = request.getActiveFacets();
         AutocompleteResult result = searchService.autocomplete(
-            new AutocompleteRequest(prefix, folder, activeFactes),
+            new AutocompleteRequest(prefix, activeFactes),
             request.requireModule(),
             request.getServerSession());
         return new AJAXRequestResult(result, AutocompleteResult.class.getName());
     }
 
-    private List<Facet> parseActiveFacets(FindRequest request) throws OXException {
-        JSONArray activeFacets = request.optActiveFacets();
-        if (activeFacets == null || activeFacets.isEmpty()) {
-            return Collections.emptyList();
-        }
 
-        try {
-            Module module = request.getModule();
-            List<Facet> facets = new ArrayList<Facet>(activeFacets.length());
-            for (int i = 0; i < activeFacets.length(); i++) {
-                JSONObject facetJSON = activeFacets.getJSONObject(i);
-                String typeName = facetJSON.getString("type");
-                FacetType type = facetTypeFor(module, typeName);
-                if (type == null) {
-                    throw FindExceptionCode.UNSUPPORTED_FACET.create(typeName, module.getIdentifier());
-                }
-
-                JSONArray valuesJSON = facetJSON.getJSONArray("values");
-                List<FacetValue> valueList = new ArrayList<FacetValue>(valuesJSON.length());
-                for (int j = 0; j < valuesJSON.length(); j++) {
-                    JSONObject valueJSON = valuesJSON.getJSONObject(j);
-                    String valueId = valueJSON.getString("id");
-                    valueList.add(new FacetValue(
-                        valueId,
-                        DisplayItem.NO_DISPLAY_ITEM,
-                        FacetValue.UNKNOWN_COUNT,
-                        Filter.NO_FILTER));
-                }
-                Facet facet = new Facet(type, valueList);
-                facets.add(facet);
-            }
-
-            return facets;
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        }
-    }
-
-    private FacetType facetTypeFor(Module module, String name) {
-        switch(module) {
-            case MAIL:
-                return MailFacetType.getByName(name);
-
-            case CALENDAR:
-                return CalendarFacetType.getByName(name);
-
-            case CONTACTS:
-                return ContactsFacetType.getByName(name);
-
-            case DRIVE:
-                return DriveFacetType.getByName(name);
-
-            case TASKS:
-                return TasksFacetType.getByName(name);
-
-            default:
-                return null;
-        }
-    }
 
 }

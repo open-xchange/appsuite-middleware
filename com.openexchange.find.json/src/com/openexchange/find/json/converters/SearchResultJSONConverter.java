@@ -48,6 +48,8 @@
  */
 package com.openexchange.find.json.converters;
 
+import java.util.List;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,6 +59,7 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Document;
 import com.openexchange.find.SearchResult;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.json.JSONResponseVisitor;
 import com.openexchange.find.json.osgi.ResultConverterRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -89,7 +92,7 @@ public class SearchResultJSONConverter extends AbstractJSONConverter {
             SearchResult searchResult = (SearchResult) resultObject;
             JSONObject json = new JSONObject();
             try {
-                json.put("numFound", searchResult.getNumFound());
+                json.put("num_found", searchResult.getNumFound());
                 json.put("start", searchResult.getStart());
                 json.put("size", searchResult.getSize());
 
@@ -100,11 +103,25 @@ public class SearchResultJSONConverter extends AbstractJSONConverter {
                 JSONArray jsonDocuments = visitor.getJSONArray();
                 // TODO: handle possible exceptions from visitor.getErrors()
                 json.put("results", jsonDocuments);
+                json.put("facets", convertActiveFacets(session.getUser().getLocale(), searchResult.getActiveFacets()));
                 result.setResultObject(json, "json");
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
             }
         }
+    }
+
+    private JSONArray convertActiveFacets(Locale locale, List<ActiveFacet> activeFacets) throws JSONException {
+        JSONArray jFacets = new JSONArray(activeFacets.size());
+        for (ActiveFacet facet : activeFacets) {
+            JSONObject jFacet = new JSONObject(3);
+            jFacet.put("facet", facet.getType().getId());
+            jFacet.put("value", facet.getValueId());
+            jFacet.put("filter", convertFilter(facet.getFilter()));
+            jFacets.put(jFacet);
+        }
+
+        return jFacets;
     }
 
 }

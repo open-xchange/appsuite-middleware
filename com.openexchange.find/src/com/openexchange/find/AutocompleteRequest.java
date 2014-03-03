@@ -51,8 +51,7 @@ package com.openexchange.find;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.ActiveFacet;
 
 /**
  * Encapsulates an autocomplete request.
@@ -66,9 +65,7 @@ public class AutocompleteRequest implements Serializable {
 
     private final String prefix;
 
-    private final String folder;
-
-    private final List<Facet> activeFacets;
+    private final List<ActiveFacet> activeFacets;
 
     private final int limit;
 
@@ -76,63 +73,50 @@ public class AutocompleteRequest implements Serializable {
      * Initializes a new {@link AutocompleteRequest}.
      *
      * @param prefix The prefix to autocomplete on; must not be <code>null</code>
-     * @param folder The folder. Can be <code>null</code>
      */
-    public AutocompleteRequest(final String prefix, final String folder) {
-        this(prefix, folder, Collections.<Facet>emptyList());
+    public AutocompleteRequest(final String prefix) {
+        this(prefix, Collections.<ActiveFacet>emptyList());
     }
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
      *
      * @param prefix The prefix to autocomplete on; must not be <code>null</code>
-     * @param folder The folder. Can be <code>null</code>
      * @param activeFacets The list of currently active facets; must not be <code>null</code>
      */
-    public AutocompleteRequest(final String prefix, final String folder, final List<Facet> activeFacets) {
-        this(prefix, folder, activeFacets, 0);
+    public AutocompleteRequest(final String prefix, final List<ActiveFacet> activeFacets) {
+        this(prefix, activeFacets, 0);
     }
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
      *
      * @param prefix The prefix to autocomplete on; must not be <code>null</code>
-     * @param folder The folder. Can be <code>null</code>
      * @param activeFacets The list of currently active facets; must not be <code>null</code>
      * @param limit The maximum number of results to return, or <code>0</code> if not defined
      */
-    public AutocompleteRequest(final String prefix, final String folder, final List<Facet> activeFacets, final int limit) {
+    public AutocompleteRequest(final String prefix, final List<ActiveFacet> activeFacets, final int limit) {
         super();
         this.prefix = prefix;
-        this.folder = folder;
         this.activeFacets = activeFacets;
         this.limit = limit;
     }
 
     /**
      * @return The prefix to autocomplete on. Must not end
-     * with a wildcard character. Must never be <code>null</code>.
+     * with a wildcard character. Must never be <code>null</code>,
+     * but may be empty.
      */
     public String getPrefix() {
         return prefix;
     }
 
     /**
-     * Gets a list of facets that are currently set. The
-     * according {@link FacetValue}s have to be removed from
-     * the response object.
+     * Gets a list of active facets that are currently set.
      * @return The list of facets. May be empty but never <code>null</code>.
      */
-    public List<Facet> getActiveFactes() {
+    public List<ActiveFacet> getActiveFactes() {
         return activeFacets;
-    }
-
-    /**
-     * Gets the folder.
-     * @return <code>null</code> if not set by client.
-     */
-    public String getFolder() {
-        return folder;
     }
 
     /**
@@ -149,7 +133,6 @@ public class AutocompleteRequest implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((activeFacets == null) ? 0 : activeFacets.hashCode());
-        result = prime * result + ((folder == null) ? 0 : folder.hashCode());
         result = prime * result + ((prefix == null) ? 0 : prefix.hashCode());
         return result;
     }
@@ -168,11 +151,6 @@ public class AutocompleteRequest implements Serializable {
                 return false;
         } else if (!activeFacets.equals(other.activeFacets))
             return false;
-        if (folder == null) {
-            if (other.folder != null)
-                return false;
-        } else if (!folder.equals(other.folder))
-            return false;
         if (prefix == null) {
             if (other.prefix != null)
                 return false;
@@ -183,7 +161,7 @@ public class AutocompleteRequest implements Serializable {
 
     @Override
     public String toString() {
-        return "AutocompleteRequest [prefix=" + prefix + ", folder=" + folder + ", activeFacets=" + activeFacets + "]";
+        return "AutocompleteRequest [prefix=" + prefix + ", activeFacets=" + activeFacets + "]";
     }
 
 }

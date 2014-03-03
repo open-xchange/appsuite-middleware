@@ -87,13 +87,7 @@ public abstract class CommonContactSearchFacet extends ContactSearchFacet {
 
     @Override
     public SearchTerm<?> getSearchTerm(ServerSession session, String query) throws OXException {
-        checkPatternLength(query);
-        String pattern = addWildcards(query, true, true);
-        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        for (ContactField field : getFields()) {
-            orTerm.addSearchTerm(getFieldEqualsPatternTerm(field, pattern));
-        }
-        return orTerm;
+        return getSearchTerm(session, getFields(), query);
     }
 
     /**
@@ -102,6 +96,16 @@ public abstract class CommonContactSearchFacet extends ContactSearchFacet {
      * @return The contact fields used by the facet
      */
     protected abstract ContactField[] getFields();
+
+    public static SearchTerm<?> getSearchTerm(ServerSession session, ContactField[] fields, String query) throws OXException {
+        checkPatternLength(query);
+        String pattern = addWildcards(query, true, true);
+        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        for (ContactField field : fields) {
+            orTerm.addSearchTerm(getFieldEqualsPatternTerm(field, pattern));
+        }
+        return orTerm;
+    }
 
     private static SingleSearchTerm getFieldEqualsPatternTerm(ContactField field, String pattern) {
         SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);

@@ -115,6 +115,11 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
         return session.getUserConfiguration().hasTask();
     }
 
+    @Override
+    protected String getFormatStringForGlobalFacet() {
+        return TasksStrings.FACET_GLOBAL;
+    }
+
     public void getConfiguration(ServerSession session) throws OXException {
         List<Facet> staticFacets = new ArrayList<Facet>(7);
 
@@ -261,7 +266,7 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
             documents.add(new TasksDocument(task));
         }
 
-        return new SearchResult(-1, searchRequest.getStart(), documents);
+        return new SearchResult(-1, searchRequest.getStart(), documents, searchRequest.getActiveFacets());
     }
 
 }

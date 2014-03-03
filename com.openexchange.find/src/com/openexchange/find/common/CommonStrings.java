@@ -70,6 +70,8 @@ public final class CommonStrings implements LocalizableStrings {
 
     public static final String FACET_TYPE_FOLDER_TYPE = "Folder type";
 
+    public static final String FACET_TYPE_FOLDER = "Folder";
+
     // ------------------------- i18n strings for folder types ------------------------------------- //
 
     public static final String FOLDER_TYPE_PRIVATE = "Private";

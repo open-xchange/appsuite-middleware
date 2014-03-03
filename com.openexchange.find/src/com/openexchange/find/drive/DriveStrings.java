@@ -59,6 +59,9 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class DriveStrings implements LocalizableStrings {
 
+    // Search in drive
+    public static final String FACET_GLOBAL = "%1$s <i>in drive</i>";
+
     // Search in file name.
     public static final String FACET_FILE_NAME = "File name";
 

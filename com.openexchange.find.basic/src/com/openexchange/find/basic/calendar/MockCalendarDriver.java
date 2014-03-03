@@ -219,6 +219,11 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
         facets.add(folderTypeFacet);
     }
 
+    @Override
+    protected String getFormatStringForGlobalFacet() {
+        return CalendarStrings.GLOBAL;
+    }
+
     private static final List<String> PARTICIPANT_FILTER = singletonList("participants");
 
     @Override
@@ -279,7 +284,7 @@ public class MockCalendarDriver extends AbstractContactFacetingModuleSearchDrive
         while (appointments.hasNext()) {
             documents.add(new CalendarDocument(appointments.next()));
         }
-        return new SearchResult(documents.size(), searchRequest.getStart(), documents);
+        return new SearchResult(documents.size(), searchRequest.getStart(), documents, searchRequest.getActiveFacets());
     }
 
 }

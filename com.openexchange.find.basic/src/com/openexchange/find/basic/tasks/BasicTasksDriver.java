@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class BasicTasksDriver extends MockTasksDriver {
-    
+
     private final static int TASKS_FIELDS[] = {DataObject.OBJECT_ID, DataObject.CREATED_BY, Task.TITLE, Task.STATUS, Task.NOTE};
 
     /**
@@ -81,7 +81,7 @@ public class BasicTasksDriver extends MockTasksDriver {
     public BasicTasksDriver() {
         super();
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.find.basic.tasks.MockTasksDriver#search(com.openexchange.find.SearchRequest, com.openexchange.tools.session.ServerSession)
@@ -90,14 +90,14 @@ public class BasicTasksDriver extends MockTasksDriver {
     public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
         TaskSearchObjectBuilder builder = new TaskSearchObjectBuilder(session);
         TaskSearchObject searchObject = builder.addFilters(searchRequest.getFilters()).addQueries(searchRequest.getQueries()).build();
-        
+
         final TasksSQLInterface tasksSQL = new TasksSQLImpl(session);
         SearchIterator<Task> si = tasksSQL.findTask(searchObject, Task.TITLE, Order.ASCENDING, TASKS_FIELDS);
         List<Document> documents = new ArrayList<Document>();
         while(si.hasNext()) {
             documents.add(new TasksDocument(si.next()));
         }
-        return new SearchResult(documents.size(), searchRequest.getStart(), documents);
+        return new SearchResult(documents.size(), searchRequest.getStart(), documents, searchRequest.getActiveFacets());
     }
 
 }

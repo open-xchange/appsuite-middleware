@@ -51,6 +51,7 @@ package com.openexchange.find;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.find.facet.ActiveFacet;
 
 /**
  * The result of a {@link SearchRequest}.
@@ -63,7 +64,7 @@ public class SearchResult implements Serializable {
     /**
      * The empty search result.
      */
-    public static final SearchResult EMPTY = new SearchResult(0, 0, Collections.<Document>emptyList());
+    public static final SearchResult EMPTY = new SearchResult(0, 0, Collections.<Document>emptyList(), Collections.<ActiveFacet>emptyList());
 
     private static final long serialVersionUID = -4937862789320521401L;
 
@@ -73,12 +74,15 @@ public class SearchResult implements Serializable {
 
     private final List<Document> documents;
 
+    private final List<ActiveFacet> facets;
 
-    public SearchResult(int numFound, int start, List<Document> documents) {
+
+    public SearchResult(int numFound, int start, List<Document> documents, List<ActiveFacet> facets) {
         super();
         this.numFound = numFound;
         this.start = start;
         this.documents = documents;
+        this.facets = facets;
     }
 
     /**
@@ -115,11 +119,20 @@ public class SearchResult implements Serializable {
         return documents;
     }
 
+    /**
+     * Gets the active facets that have been set on the according request.
+     * @return May be empty but never <code>null</code>.
+     */
+    public List<ActiveFacet> getActiveFacets() {
+        return facets;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((documents == null) ? 0 : documents.hashCode());
+        result = prime * result + ((facets == null) ? 0 : facets.hashCode());
         result = prime * result + numFound;
         result = prime * result + start;
         return result;
@@ -139,6 +152,11 @@ public class SearchResult implements Serializable {
                 return false;
         } else if (!documents.equals(other.documents))
             return false;
+        if (facets == null) {
+            if (other.facets != null)
+                return false;
+        } else if (!facets.equals(other.facets))
+            return false;
         if (numFound != other.numFound)
             return false;
         if (start != other.start)
@@ -148,7 +166,7 @@ public class SearchResult implements Serializable {
 
     @Override
     public String toString() {
-        return "SearchResult [numFound=" + numFound + ", start=" + start + ", documents=" + documents + "]";
+        return "SearchResult [numFound=" + numFound + ", start=" + start + ", documents=" + documents + ", facets=" + facets + "]";
     }
 
 }

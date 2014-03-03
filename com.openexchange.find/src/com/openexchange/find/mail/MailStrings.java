@@ -70,9 +70,6 @@ public class MailStrings implements LocalizableStrings {
     // Search in mail field text.
     public static final String FACET_MAIL_TEXT = "%1$s <i>in mail text</i>";
 
-    // Search in folders.
-    public static final String FACET_FOLDERS = "Folder";
-
     // Search in senders and recipients.
     public static final String FACET_SENDER_AND_RECIPIENT = "Sender/Recipient";
 

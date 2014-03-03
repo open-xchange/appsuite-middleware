@@ -70,10 +70,10 @@ public enum DriveFacetType implements FacetType {
     FILE_CONTENT(DriveStrings.FACET_FILE_CONTENT),
     ;
 
-    private static final Map<String, DriveFacetType> typesByName = new HashMap<String, DriveFacetType>();
+    private static final Map<String, DriveFacetType> typesById = new HashMap<String, DriveFacetType>();
     static {
         for (DriveFacetType type : values()) {
-            typesByName.put(type.getId(), type);
+            typesById.put(type.getId(), type);
         }
     }
 
@@ -100,20 +100,20 @@ public enum DriveFacetType implements FacetType {
     }
 
     @Override
-    public boolean isMandatory() {
+    public boolean appliesOnce() {
         return false;
     }
 
     /**
-     * Gets a {@link DriveFacetType} by its name.
-     * @return The type or <code>null</code>, if the name is invalid.
+     * Gets a {@link DriveFacetType} by its id.
+     * @return The type or <code>null</code>, if the id is invalid.
      */
-    public static DriveFacetType getByName(String name) {
-        if (Strings.isEmpty(name)) {
+    public static DriveFacetType getById(String id) {
+        if (Strings.isEmpty(id)) {
             return null;
         }
 
-        return typesByName.get(name);
+        return typesById.get(id);
     }
 
 }

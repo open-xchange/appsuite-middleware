@@ -73,6 +73,7 @@ import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.contacts.ContactsStrings;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
@@ -118,15 +119,6 @@ public class MockContactsDriver extends AbstractContactFacetingModuleSearchDrive
                 "override"));
             final Facet addressFacet = new Facet(ContactsFacetType.ADDRESS, Collections.singletonList(staticFacetValue));
             staticFacets.add(addressFacet);
-        }
-
-        {
-            final String id = "address_book";
-            final FacetValue staticFacetValue = new FacetValue(id, new SimpleDisplayItem(id), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singletonList(id),
-                "override"));
-            final Facet addressBookFacet = new Facet(ContactsFacetType.ADDRESSBOOK, Collections.singletonList(staticFacetValue));
-            staticFacets.add(addressBookFacet);
         }
 
         {
@@ -225,7 +217,7 @@ public class MockContactsDriver extends AbstractContactFacetingModuleSearchDrive
             SearchIterators.close(it);
         }
 
-        return new SearchResult(-1, searchRequest.getStart(), documents);
+        return new SearchResult(-1, searchRequest.getStart(), documents, searchRequest.getActiveFacets());
     }
 
     /**
@@ -270,5 +262,10 @@ public class MockContactsDriver extends AbstractContactFacetingModuleSearchDrive
         }
 
         return new AutocompleteResult(facets);
+    }
+
+    @Override
+    protected String getFormatStringForGlobalFacet() {
+        return ContactsStrings.FACET_GLOBAL;
     }
 }
