@@ -53,6 +53,7 @@ import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
@@ -168,6 +169,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // List of supported facets
         final List<Facet> facets = new LinkedList<Facet>();
 
+        // Add field factes
         {
             final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix), Constants.FIELD_FILE_NAME, prefix);
             facets.add(fileNameFacet);
@@ -183,7 +185,19 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             facets.add(fileNameFacet);
         }
 
-        {
+        // Add static file type facet
+        boolean hasFileTypeFacet = false;
+        final List<Facet> activeFactes = autocompleteRequest.getActiveFactes();
+        if (null != activeFactes && !activeFactes.isEmpty()) {
+            final String idToLookFor = DriveFacetType.FILE_TYPE.getId();
+            for (final Iterator<Facet> it = activeFactes.iterator(); !hasFileTypeFacet && it.hasNext();) {
+                if (idToLookFor.equals(it.next().getType().getId())) {
+                    hasFileTypeFacet = true;
+                }
+            }
+        }
+
+        if (!hasFileTypeFacet) {
             final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
             final String fieldFileType = Constants.FIELD_FILE_TYPE;
             fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.AUDIO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_AUDIO, FileTypeDisplayItem.Type.AUDIO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
