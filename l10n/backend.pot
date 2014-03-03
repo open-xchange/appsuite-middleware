@@ -2050,6 +2050,22 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
+#. ---------------------------------------------------------------------------------- //
+#. Search in file field file name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:98
+msgid "%1$s <i>in file name</i>"
+msgstr ""
+
+#. Search in file field file description.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:101
+msgid "%1$s <i>in file description</i>"
+msgstr ""
+
+#. Search in file field file content.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
+msgid "%1$s <i>in file content</i>"
+msgstr ""
+
 #. Search in emails
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:65
 msgid "%1$s <i>in emails</i>"
