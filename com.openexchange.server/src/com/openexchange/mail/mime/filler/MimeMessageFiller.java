@@ -96,6 +96,7 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -1801,7 +1802,7 @@ public class MimeMessageFiller {
                         try {
                             imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                         } catch (final OXException e) {
-                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.ATTACHMENT_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
+                            if (isIgnorableException(e)) {
                                 m.appendLiteralReplacement(sb, blankSrc(imageTag));
                                 continue;
                             }
@@ -1839,6 +1840,13 @@ public class MimeMessageFiller {
         }
         m.appendTail(sb);
         return sb.toString();
+    }
+
+    private static boolean isIgnorableException(OXException e) {
+        if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || DataExceptionCodes.ERROR.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.ATTACHMENT_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
+            return true;
+        }
+        return false;
     }
 
     private static String urlDecode(final String s) {
