@@ -383,6 +383,9 @@ public class FindTasksTestEnvironment {
                 }
             }
         }
+        
+        
+        
         //insertTask(clientA, FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID());
         //insertTask(clientA, FolderType.PRIVATE, Status.DEFERRED, userAprivateTestFolder.getObjectID());
         //insertTask(clientA, FolderType.PRIVATE, Status.DONE, userApublicTestFolder.getObjectID());
@@ -397,27 +400,18 @@ public class FindTasksTestEnvironment {
      * @throws IOException 
      */
     private final String readFile(String fileName) throws IOException{
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + fileName));
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
+        BufferedReader br = new BufferedReader(new FileReader(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + fileName));
+        StringBuilder sb = new StringBuilder();
+        String line = br.readLine();
 
-            while (line != null) {
-                sb.append(line);
-                sb.append("\n");
-                line = br.readLine();
-            }
-            return sb.toString();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (br != null)
-                br.close();
+        while (line != null) {
+            sb.append(line);
+            sb.append("\n");
+            line = br.readLine();
         }
-        return null;
+        if (br != null)
+            br.close();
+        return sb.toString();
     }
     
     /**
