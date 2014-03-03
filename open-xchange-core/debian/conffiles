@@ -1,4 +1,5 @@
 opt/open-xchange/etc/attachment.properties
+opt/open-xchange/etc/autoconfig.properties
 opt/open-xchange/etc/cache.ccf
 opt/open-xchange/etc/cache.properties
 opt/open-xchange/etc/calendar.properties

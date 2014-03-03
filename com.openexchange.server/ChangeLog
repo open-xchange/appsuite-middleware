@@ -185,6 +185,10 @@
 
  - Fix for bug 31684: Prefer look-up by user identifier over look-up by object/folder identifier pair
 
+* 2014-03-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31364: Marked autoconfig.properties as configuration file.
+
 * 2014-03-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 31582: Invalidate affected users' LIST/LSUB cache on IMAP folder changes & remotely distribute this
