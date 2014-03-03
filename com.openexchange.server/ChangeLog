@@ -5,6 +5,9 @@
 * 2014-03-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 31364: Marked autoconfig.properties as configuration file.
+ - Fix for bug 29975: Committing now first the context data to the user database before committing the context to the config database. This
+   is possible by writing the context database mapping through the database pooling component that writes the information in their own
+   caches, too. This allows later committing to the config database.
 
 * 2014-03-03 - thorben.betten@open-xchange.com
 
