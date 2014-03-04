@@ -185,19 +185,6 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.DEFERRED, TasksStrings.TASK_STATUS_DEFERRED);
         facets.add(new Facet(TasksFacetType.TASK_STATUS, statusFacets));
         
-        //ignore folder facets?
-        List<String> fields = Collections.singletonList(ContactsFacetType.FOLDER_TYPE.getId());
-        List<FacetValue> facetValues = new ArrayList<FacetValue>(3);
-        facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
-            CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(
-            fields, FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
-        facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
-            CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(
-            fields, FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
-        facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
-            CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(
-            fields, FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
-        
         //add folder type facets
         List<FacetValue> folderFacets = new ArrayList<FacetValue>(3);
         addFolderFacet(folderFacets, FolderTypeDisplayItem.Type.PRIVATE, CommonStrings.FOLDER_TYPE_PRIVATE);
