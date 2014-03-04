@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.find.calendar;
 
-import static com.openexchange.find.calendar.CalendarFacetType.CONTACTS;
 import static com.openexchange.find.calendar.CalendarFacetType.DESCRIPTION;
 import static com.openexchange.find.calendar.CalendarFacetType.LOCATION;
+import static com.openexchange.find.calendar.CalendarFacetType.PARTICIPANT;
 import static com.openexchange.find.calendar.CalendarFacetType.RECURRING_TYPE;
 import static com.openexchange.find.calendar.CalendarFacetType.RELATIVE_DATE;
 import static com.openexchange.find.calendar.CalendarFacetType.STATUS;
@@ -96,7 +96,7 @@ public class QueryTest extends CalendarFindTest {
         facets.add(createActiveFacet(RELATIVE_DATE, "coming", "relative_date", "coming"));
         facets.add(createActiveFacet(STATUS, "accepted", "status", "accepted"));
         facets.add(createActiveFacet(RECURRING_TYPE, "single", "recurring_type", "single"));
-        facets.add(createActiveFacet(CONTACTS, String.valueOf(client.getValues().getUserId()), "users", String.valueOf(client.getValues().getUserId())));
+        facets.add(createActiveFacet(PARTICIPANT, String.valueOf(client.getValues().getUserId()), "users", String.valueOf(client.getValues().getUserId())));
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(facets);
         assertTrue("no appointments found", 0 < documents.size());
@@ -226,7 +226,7 @@ public class QueryTest extends CalendarFindTest {
         Appointment appointment = randomAppointment();
         appointment.addParticipant(participant);
         appointment = manager.insert(appointment);
-        List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(CONTACTS, participant.getEmailAddress(), "participants", participant.getEmailAddress())));
+        List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(PARTICIPANT, participant.getEmailAddress(), "participants", participant.getEmailAddress())));
         assertTrue("no appointments found", 0 < documents.size());
         assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
     }
@@ -239,7 +239,7 @@ public class QueryTest extends CalendarFindTest {
         Appointment appointment = randomAppointment();
         appointment.addParticipant(userParticipant);
         appointment = manager.insert(appointment);
-        List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(CONTACTS, String.valueOf(userParticipant.getIdentifier()), "users", String.valueOf(userParticipant.getIdentifier()))));
+        List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(PARTICIPANT, String.valueOf(userParticipant.getIdentifier()), "users", String.valueOf(userParticipant.getIdentifier()))));
         assertTrue("no appointments found", 0 < documents.size());
         assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
     }
