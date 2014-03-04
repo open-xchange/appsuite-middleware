@@ -156,7 +156,11 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             return deferrer.getDeferredURL(callbackUrl);
         }
 
-        return deferredURLUsing(callbackUrl, new StringAllocator("https://").append(currentHost).toString());
+        return deferredURLUsing(callbackUrl, new StringAllocator(extractProtocol(callbackUrl)).append("://").append(currentHost).toString());
+    }
+
+    private String extractProtocol(final String url) {
+        return Strings.toLowerCase(url).startsWith("https") ? "https" : "http";
     }
 
     private String deferredURLUsing(final String url, final String domain) {
