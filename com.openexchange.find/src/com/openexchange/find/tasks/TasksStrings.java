@@ -81,9 +81,6 @@ public class TasksStrings implements LocalizableStrings {
     // Search in task description
     public static final String FACET_TASK_DESCRIPTION = "%1$s <i>in description</i>";
 
-    // Search in task location
-    public static final String FACET_TASK_LOCATION = "Task location";
-
     // Search in task attachment name
     public static final String FACET_TASK_ATTACHMENT_NAME = "%1$s <i>in attachment name</i>";
 
