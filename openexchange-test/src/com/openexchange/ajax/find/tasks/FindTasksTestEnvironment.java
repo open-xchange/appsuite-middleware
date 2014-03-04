@@ -51,15 +51,17 @@ package com.openexchange.ajax.find.tasks;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import org.json.JSONException;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.folder.Create;
@@ -78,8 +80,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.tasks.ExternalParticipant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -120,14 +122,18 @@ public class FindTasksTestEnvironment {
     private AJAXClient clientB;
     
     /** List of Lists with filters */
-    public List<List<Filter>> lolFilters = new ArrayList<List<Filter>>();
+    private List<List<Filter>> lolFilters = new ArrayList<List<Filter>>();
     
     private enum FolderType {PRIVATE, PUBLIC, SHARED};
     
     private enum Status {NOT_STARTED, IN_PROGRESS, DONE, WAITING, DEFERRED};
     
     private boolean cleanup = true;
-
+    
+    private Set<Integer> tasksToFind = new HashSet<Integer>();
+    
+    private final static UUID trackingID = UUID.randomUUID();
+    
     /**
      * Initializes a new {@link FindTasksTestEnvironment}.
      */
@@ -148,16 +154,14 @@ public class FindTasksTestEnvironment {
      * @return true if the environment was successfully initialized; false otherwise
      * @throws Exception
      */
-    public boolean init() {
+    public void init() {
         try {
             initUsers();
             createFolderStructure();
             createAndInsertTasks();
             createFilters();
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
     }
     
@@ -185,7 +189,7 @@ public class FindTasksTestEnvironment {
     
     /**
      * Create the test folder structure
-     * TODO: handle duplicate folder creation
+     * 
      * @throws IOException 
      * @throws OXException 
      * @throws Exception
@@ -212,7 +216,7 @@ public class FindTasksTestEnvironment {
         }
         
         if (userAprivateTestFolder.getObjectID() == 0) {
-            userAprivateTestFolder.setObjectID(foldersA.get("UserA - findAPIPrivateTaskFolder").getObjectID());
+            userAprivateTestFolder.setObjectID(foldersA.get("UserA - findAPIPrivateTaskFolder").getObjectID()); //maybe contains to avoid null?
         }
         
         //create public test folder
@@ -353,6 +357,17 @@ public class FindTasksTestEnvironment {
     
     /**
      * Create and insert tasks to the previously created folder structure
+     * Inserting :
+     * - 5 tasks in both users' private folder
+     * - 5 tasks in both users' public folder
+     * - 5 tasks in user's B both shared folder (ro, rw for user A)
+     * - 1 task with attachment in user's A private folder
+     * - 1 task with 1 participants (1int) in user's B private folder
+     * - 1 task with 2 participants (2int) in user's A private folder
+     * - 1 task with 3 participants (2int,1ext) in user's B private folder
+     * - 1 task with 2 participants (1int,1ext) in user's A private folder
+     *    (1 shared task will indirectly be inserted in user's A root task folder)
+     * Total: 31 tasks
      * @throws Exception 
      */
     private final void createAndInsertTasks() throws Exception {
@@ -360,36 +375,50 @@ public class FindTasksTestEnvironment {
         UserParticipant usrPartA = new UserParticipant(userA.getUserId());
         UserParticipant usrPartB = new UserParticipant(userB.getUserId());
         ExternalUserParticipant extPart = new ExternalUserParticipant("foo@bar.org");
-        String attachment = readFile("attachment.base64");
         
         //insert some tasks
         for (Status s : Status.values()) {
             for (FolderType ft : FolderType.values()) {
                 switch(ft) {
                 case PUBLIC:
-                    insertTask(clientA, ft, s, userApublicTestFolder.getObjectID());
-                    insertTask(clientB, ft, s, userBpublicTestFolder.getObjectID());
+                    insertTask(clientA, ft, s, userApublicTestFolder.getObjectID(), Collections.<Participant>emptyList(), false);
+                    insertTask(clientB, ft, s, userBpublicTestFolder.getObjectID(), Collections.<Participant>emptyList(), false);
                     break;
                     
                 case PRIVATE:
-                    insertTask(clientA, ft, s, userAprivateTestFolder.getObjectID());
-                    insertTask(clientB, ft, s, userBprivateTestFolder.getObjectID());
+                    insertTask(clientA, ft, s, userAprivateTestFolder.getObjectID(), Collections.<Participant>emptyList(), false);
+                    insertTask(clientB, ft, s, userBprivateTestFolder.getObjectID(), Collections.<Participant>emptyList(), false);
                     break;
                 
                 case SHARED:
-                    insertTask(clientB, ft, s, userBsharedTestFolderRO.getObjectID());
-                    insertTask(clientB, ft, s, userBsharedTestFolderRW.getObjectID());
+                    insertTask(clientB, ft, s, userBsharedTestFolderRO.getObjectID(), Collections.<Participant>emptyList(), false);
+                    insertTask(clientB, ft, s, userBsharedTestFolderRW.getObjectID(), Collections.<Participant>emptyList(), false);
                     break;
                 }
             }
         }
         
+        //insert a task with attachment in private with status not started for user a
+        insertTask(clientA, FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID(), Collections.<Participant>emptyList(), true);
         
+        //insert a task with no attachment in private with status deferred and 1 internal participants (b) for user B
+        List<Participant> list  = new ArrayList<Participant>();
+        list.add(usrPartB);
+        insertTask(clientB, FolderType.PRIVATE, Status.DEFERRED, userBprivateTestFolder.getObjectID(), list, false);
         
-        //insertTask(clientA, FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID());
-        //insertTask(clientA, FolderType.PRIVATE, Status.DEFERRED, userAprivateTestFolder.getObjectID());
-        //insertTask(clientA, FolderType.PRIVATE, Status.DONE, userApublicTestFolder.getObjectID());
-        //insertTask(clientA, FolderType.PUBLIC, Status.DONE, userApublicTestFolder.getObjectID());
+        //insert a task with no attachment in private with status in progress and 2 internal participants (a+b) for user A
+        list.add(usrPartA);
+        insertTask(clientA, FolderType.PRIVATE, Status.IN_PROGRESS, userAprivateTestFolder.getObjectID(), list, false);
+        
+        //insert a task with attachment in private with status deferred and 2 internal (a+b) and 1 external participant for user b
+        list.add(extPart);
+        insertTask(clientB, FolderType.PRIVATE, Status.IN_PROGRESS, userBprivateTestFolder.getObjectID(), list, true);
+
+        //insert a task with attachment in private with status done and 1 internal (a) and 1 external participant for user a
+        list.clear();
+        list.add(usrPartA);
+        list.add(extPart);
+        insertTask(clientA, FolderType.PRIVATE, Status.DONE, userAprivateTestFolder.getObjectID(), list, true);
     }
     
     /**
@@ -421,25 +450,41 @@ public class FindTasksTestEnvironment {
      * @param ft FolderType 
      * @param status Task's status
      * @param folder parent folder
+     * @return inserted task
      * @throws Exception
      */
-    private final void insertTask(AJAXClient client, FolderType ft, Status status, int folder) throws Exception {
-        Task t = com.openexchange.groupware.tasks.Create.createWithDefaults("Find me, I am in a " + ft + " Folder - Hint User " + client.getValues().getDefaultAddress(), 
-                      "User " + client.getValues().getDefaultAddress()+ "'s private task in his " + ft + " folder and have status: " + status, status.ordinal() + 1, folder);
-        client.execute(new com.openexchange.ajax.task.actions.InsertRequest(t, client.getValues().getTimeZone()));
-    }
-    
-    /**
-     * Attach the specified attachment to the specified task
-     * 
-     * @param client
-     * @param task
-     * @param attachmentName
-     * @param attachment
-     * @throws Exception
-     */
-    private final void attach(AJAXClient client, Task task, String attachmentName, String attachment) throws Exception {
-        client.execute(new AttachRequest(task, attachmentName, new ByteArrayInputStream(attachment.getBytes()), "text/plain")).getId();
+    private final Task insertTask(AJAXClient client, FolderType ft, Status status, int folder, List<Participant> participants, boolean attachment) throws Exception {
+        StringBuilder builder = new StringBuilder();
+        String title = builder.append("Find me, I am in a ").append(ft)
+                              .append(" Folder - Hint User ").append(client.getValues().getDefaultAddress())
+                              .append(", trackingID: ").append(trackingID.toString()).toString();
+        builder.setLength(0);
+        String body = builder.append("User ").append(client.getValues().getDefaultAddress()).append("'s task in his ").append(ft).append(" folder and have status: ").append(status).toString();
+        
+        Task t = com.openexchange.groupware.tasks.Create.createWithDefaults(title, body, status.ordinal() + 1, folder);
+        if (participants.size() > 0) {
+            t.setParticipants(participants);
+            builder.setLength(0);
+            builder.append(t.getNote()).append(" and have ").append(participants.size()).append(" participants");
+            t.setNote(builder.toString());
+        }
+        
+        if (attachment) {
+            builder.setLength(0);
+            builder.append(t.getNote()).append(" and have ATTACHMENT");
+            t.setNote(builder.toString());
+        }
+        
+        
+        
+        client.execute(new com.openexchange.ajax.task.actions.InsertRequest(t, client.getValues().getTimeZone())).fillTask(t);
+        
+        if (attachment)
+            client.execute(new AttachRequest(t, "my cool attachment", new ByteArrayInputStream(readFile("attachment.base64").getBytes()), "image/jpeg")).getId();
+        
+        tasksToFind.add(t.getObjectID());
+        
+        return t;
     }
     
     /**
@@ -510,5 +555,21 @@ public class FindTasksTestEnvironment {
      */
     public List<List<Filter>> getLolFilters() {
         return lolFilters;
+    }
+    
+    /**
+     * Set of task ids to find 
+     * @return
+     */
+    public final Set<Integer> getTasksToFind() {
+        return tasksToFind;
+    }
+    
+    /**
+     * Get the tracking id for this test run
+     * @return
+     */
+    public static final String getTrackingID() {
+        return trackingID.toString();
     }
 }

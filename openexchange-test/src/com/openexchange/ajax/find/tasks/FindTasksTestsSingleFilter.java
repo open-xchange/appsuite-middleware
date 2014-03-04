@@ -52,6 +52,7 @@ package com.openexchange.ajax.find.tasks;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -91,15 +92,11 @@ import com.openexchange.find.facet.Filter;
  */
 public class FindTasksTestsSingleFilter extends AbstractFindTest {
     
-    private static boolean testEnvironmentInitialized = false;
-    
     /**
      * Initializes a new {@link FindTasksTests}.
      */
     public FindTasksTestsSingleFilter(String name) {
         super(name);
-        if (!testEnvironmentInitialized)
-            testEnvironmentInitialized = FindTasksTestEnvironment.getInstance().init();
     }
     
     /**
@@ -134,28 +131,36 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
     
     /**
      * Test with simple query with no filters
+     * Should find 28 tasks.
+     * 
+     * @throws JSONException 
+     * @throws IOException 
+     * @throws OXException 
+     *  
+     * @see {@link FindTasksTestEnvironment.createAndInsertTasks}
      */
     @Test
-    public void testWithSimpleQuery() {
-        try {
+    public void testWithSimpleQuery() throws OXException, IOException, JSONException {
+        List<String> queries = Collections.singletonList(FindTasksTestEnvironment.getTrackingID());
+        List<Filter> filters = Collections.emptyList();
+        final QueryResponse queryResponse = client.execute(new QueryRequest(0, 10, queries, filters, "tasks"));
 
-            List<String> queries = Collections.singletonList("task");
-            List<Filter> filters = Collections.emptyList();
-            final QueryResponse queryResponse = client.execute(new QueryRequest(0, 10, queries, filters, "tasks"));
-
-            assertNotNull(queryResponse);
-
-            //assert the response
-            JSONArray results  = getResults(queryResponse);
-            results.asList();
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
+        assertNotNull(queryResponse);
+        
+        //assert the response
+        JSONArray results  = getResults(queryResponse);
+        int expectedResultCount = 29;
+        int actualResultCount = results.asList().size();
+        assertEquals(expectedResultCount, actualResultCount);
     }
     
     /**
      * Test filter combination 1, i.e. with Participant (internal)
+     * 
+     * 3 requests: 
+     *  - find all tasks with userA as participant (should find 3 tasks)
+     *  - find all tasks with userB as participant (should find 2 tasks)
+     *  - find all tasks with userA and userB as participant (should find 3 tasks)
      * 
      * @throws OXException
      * @throws IOException
@@ -164,25 +169,83 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
     @Test
     public void testWithInternalParticipant() throws OXException, IOException, JSONException {
         List<Filter> f = getRelevantFilters(Integer.toBinaryString(1).toCharArray());
-        List<String> queries = Collections.singletonList("task");
-        final QueryResponse queryResponse = client.execute(new QueryRequest(0, 10, queries, Collections.singletonList(f.get(0)), "tasks"));
+        List<String> queries = Collections.singletonList(FindTasksTestEnvironment.getTrackingID());
+        QueryResponse queryResponse = client.execute(new QueryRequest(0, 10, queries, Collections.singletonList(f.get(0)), "tasks"));
+        
         //assert the response
-        //JSONArray results  = getResults(queryResponse);
+        JSONArray results  = getResults(queryResponse);
+        int expectedResultCount = 3;
+        int actualResultCount = results.asList().size();
+        assertEquals(expectedResultCount, actualResultCount);
+        
+        queryResponse = client.execute(new QueryRequest(0, 10, queries, Collections.singletonList(f.get(1)), "tasks"));
+        
+        results  = getResults(queryResponse);
+        expectedResultCount = 2;
+        actualResultCount = results.asList().size();
+        assertEquals(expectedResultCount, actualResultCount);
+        
+        List<Filter> filters = new ArrayList<Filter>(2);
+        filters.add(f.get(0));
+        filters.add(f.get(1));
+        queryResponse = client.execute(new QueryRequest(0, 10, queries, filters, "tasks"));
+        results  = getResults(queryResponse);
+        expectedResultCount = 3;
+        actualResultCount = results.asList().size();
+        assertEquals(expectedResultCount, actualResultCount);
     }
     
     /**
      * Test filter combination 1, i.e. with Participant (external)
+     * 
+     * Should find 1 task
+     * 
+     * @throws JSONException 
+     * @throws IOException 
+     * @throws OXException 
      */
     @Test
-    public void testWithExternalParticipant() {
+    public void testWithExternalParticipant() throws OXException, IOException, JSONException {
+        List<Filter> f = getRelevantFilters(Integer.toBinaryString(1).toCharArray());
+        List<String> queries = Collections.singletonList(FindTasksTestEnvironment.getTrackingID());
+        final QueryResponse queryResponse = client.execute(new QueryRequest(0, 10, queries, Collections.singletonList(f.get(2)), "tasks"));
         
+        //assert the response
+        JSONArray results  = getResults(queryResponse);
+        int expectedResultCount = 2;
+        int actualResultCount = results.asList().size();
+        assertEquals(expectedResultCount, actualResultCount);
     }
     
     /**
      * Test filter combination 1, i.e. with mixed Participants (both internal and external)
+     * 
+     * should find 2 tasks
+     * - both in user's a private folder, 1 with a+b+ext and 1 with a+ext
+     * 
+     * @throws JSONException 
+     * @throws IOException 
+     * @throws OXException 
      */
     @Test
-    public void testWithMixedParticipants() {
+    public void testWithMixedParticipants() throws OXException, IOException, JSONException {
+        List<Filter> f = getRelevantFilters(Integer.toBinaryString(1).toCharArray());
+        List<String> queries = Collections.singletonList(FindTasksTestEnvironment.getTrackingID());
+        
+        final QueryResponse queryResponse = client.execute(new QueryRequest(0, 10, queries, f, "tasks"));
+        JSONArray results  = getResults(queryResponse);
+        int expectedResultCount = 2;
+        int actualResultCount = results.asList().size();
+        assertEquals(expectedResultCount, actualResultCount);
+    }
+    
+    /**
+     * Test filter combination 2, i.e. with status
+     */
+    @Test
+    public void testWithStatus() {
+        List<Filter> f = getRelevantFilters(Integer.toBinaryString(2).toCharArray());
+        List<String> queries = Collections.singletonList(FindTasksTestEnvironment.getTrackingID());
         
     }
     
