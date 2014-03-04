@@ -61,14 +61,25 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
+import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
+import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.calendar.CalendarDocument;
 import com.openexchange.find.calendar.CalendarFacetType;
+import com.openexchange.find.calendar.CalendarStrings;
+import com.openexchange.find.calendar.RecurringTypeDisplayItem;
+import com.openexchange.find.calendar.RelativeDateDisplayItem;
+import com.openexchange.find.calendar.StatusDisplayItem;
+import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -76,7 +87,10 @@ import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Strings;
@@ -88,7 +102,21 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class BasicCalendarDriver extends MockCalendarDriver {
+public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriver {
+
+    /**
+     * The calendar fields that are requested when searching.
+     */
+    private static final int[] FIELDS = {
+        DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
+        FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION,
+        CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
+        CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.RECURRENCE_POSITION,
+        CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.DELETE_EXCEPTIONS,
+        Appointment.CHANGE_EXCEPTIONS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.ORGANIZER,
+        Appointment.ORGANIZER_ID, Appointment.PRINCIPAL, Appointment.PRINCIPAL_ID, Appointment.UID, Appointment.SEQUENCE,
+        Appointment.CONFIRMATIONS, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, Appointment.NUMBER_OF_ATTACHMENTS
+    };
 
     /**
      * Initializes a new {@link BasicCalendarDriver}.
@@ -98,10 +126,109 @@ public class BasicCalendarDriver extends MockCalendarDriver {
     }
 
     @Override
+    public Module getModule() {
+        return Module.CALENDAR;
+    }
+
+    @Override
+    public boolean isValidFor(ServerSession session) throws OXException {
+        return session.getUserConfiguration().hasCalendar() && session.getUserConfiguration().hasContact();
+    }
+
+    @Override
+    protected String getFormatStringForGlobalFacet() {
+        return CalendarStrings.GLOBAL;
+    }
+
+    @Override
     public AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+        /*
+         * collect possible facets for current auto-complete iteration
+         */
         List<Facet> facets = new ArrayList<Facet>();
-        facets.add(new Facet(CalendarFacetType.CONTACTS, getAutocompleteContacts(autocompleteRequest, session)));
+        String prefix = autocompleteRequest.getPrefix();
+        if (false == Strings.isEmpty(prefix)) {
+            /*
+             * add prefix-aware field facets
+             */
+            facets.add(new FieldFacet(CalendarFacetType.SUBJECT, new FormattableDisplayItem(CalendarStrings.SUBJECT, prefix),
+                CalendarFacetType.SUBJECT.getId(), prefix));
+            facets.add(new FieldFacet(CalendarFacetType.DESCRIPTION, new FormattableDisplayItem(CalendarStrings.DESCRIPTION, prefix),
+                CalendarFacetType.DESCRIPTION.getId(), prefix));
+            facets.add(new FieldFacet(CalendarFacetType.LOCATION, new FormattableDisplayItem(CalendarStrings.LOCATION, prefix),
+                CalendarFacetType.LOCATION.getId(), prefix));
+            facets.add(new FieldFacet(CalendarFacetType.ATTACHMENT_NAME, new FormattableDisplayItem(CalendarStrings.ATTACHMENT_NAME, prefix),
+                CalendarFacetType.ATTACHMENT_NAME.getId(), prefix));
+        }
+        /*
+         * add participants facet dynamically
+         */
+        facets.add(new Facet(CalendarFacetType.PARTICIPANT, getAutocompleteContacts(autocompleteRequest, session)));
+        /*
+         * add other facets
+         */
+        facets.add(getStatusFacet());
+        facets.add(getFolderTypeFacet());
+        facets.add(getRelativeDateFacet());
+        facets.add(getRecurringTypeFacet());
         return new AutocompleteResult(facets);
+    }
+
+    private static Facet getStatusFacet() {
+        List<FacetValue> statusValues = new ArrayList<FacetValue>();
+        List<String> fields = Collections.singletonList(CalendarFacetType.STATUS.getId());
+        statusValues.add(new FacetValue(StatusDisplayItem.Status.ACCEPTED.getIdentifier(),
+            new StatusDisplayItem(CalendarStrings.STATUS_ACCEPTED, StatusDisplayItem.Status.ACCEPTED),
+            FacetValue.UNKNOWN_COUNT, new Filter(fields, StatusDisplayItem.Status.ACCEPTED.getIdentifier())));
+        statusValues.add(new FacetValue(StatusDisplayItem.Status.DECLINED.getIdentifier(),
+            new StatusDisplayItem(CalendarStrings.STATUS_DECLINED, StatusDisplayItem.Status.DECLINED),
+            FacetValue.UNKNOWN_COUNT, new Filter(fields, StatusDisplayItem.Status.DECLINED.getIdentifier())));
+        statusValues.add(new FacetValue(StatusDisplayItem.Status.TENTATIVE.getIdentifier(),
+            new StatusDisplayItem(CalendarStrings.STATUS_TENTATIVE, StatusDisplayItem.Status.TENTATIVE),
+            FacetValue.UNKNOWN_COUNT, new Filter(fields, StatusDisplayItem.Status.TENTATIVE.getIdentifier())));
+        statusValues.add(new FacetValue(StatusDisplayItem.Status.NONE.getIdentifier(),
+            new StatusDisplayItem(CalendarStrings.STATUS_NONE, StatusDisplayItem.Status.NONE),
+            FacetValue.UNKNOWN_COUNT, new Filter(fields, StatusDisplayItem.Status.NONE.getIdentifier())));
+        return new Facet(CalendarFacetType.STATUS, statusValues);
+    }
+
+    private static Facet getFolderTypeFacet() {
+        List<FacetValue> folderValues = new ArrayList<FacetValue>();
+        List<String> fields = Collections.singletonList(CommonFacetType.FOLDER_TYPE.getId());
+        folderValues.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
+            CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT,
+            new Filter(fields, FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
+        folderValues.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
+            CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT,
+            new Filter(fields, FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
+        folderValues.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
+            CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT,
+            new Filter(fields, FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
+        return new Facet(CommonFacetType.FOLDER_TYPE, folderValues);
+    }
+
+    private static Facet getRelativeDateFacet() {
+        List<FacetValue> dateValues = new ArrayList<FacetValue>();
+        List<String> fields = Collections.singletonList(CalendarFacetType.RELATIVE_DATE.getId());
+        dateValues.add(new FacetValue(RelativeDateDisplayItem.RelativeDate.COMING.getIdentifier(),
+            new RelativeDateDisplayItem(CalendarStrings.RELATIVE_DATE_COMING, RelativeDateDisplayItem.RelativeDate.COMING),
+            FacetValue.UNKNOWN_COUNT, new Filter(fields, RelativeDateDisplayItem.RelativeDate.COMING.getIdentifier())));
+        dateValues.add(new FacetValue(RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier(),
+            new RelativeDateDisplayItem(CalendarStrings.RELATIVE_DATE_PAST, RelativeDateDisplayItem.RelativeDate.PAST),
+            FacetValue.UNKNOWN_COUNT, new Filter(fields, RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier())));
+        return new Facet(CalendarFacetType.RELATIVE_DATE, dateValues);
+    }
+
+    private static Facet getRecurringTypeFacet() {
+        List<FacetValue> recurringTypeValues = new ArrayList<FacetValue>();
+        List<String> fields = Collections.singletonList(CalendarFacetType.RECURRING_TYPE.getId());
+        recurringTypeValues.add(new FacetValue(RecurringTypeDisplayItem.RecurringType.SINGLE.getIdentifier(),
+            new RecurringTypeDisplayItem(CalendarStrings.RECURRING_TYPE_SINGLE, RecurringTypeDisplayItem.RecurringType.SINGLE),
+            FacetValue.UNKNOWN_COUNT, new Filter(fields, RecurringTypeDisplayItem.RecurringType.SINGLE.getIdentifier())));
+        recurringTypeValues.add(new FacetValue(RecurringTypeDisplayItem.RecurringType.SERIES.getIdentifier(),
+            new RecurringTypeDisplayItem(CalendarStrings.RECURRING_TYPE_SERIES, RecurringTypeDisplayItem.RecurringType.SERIES),
+            FacetValue.UNKNOWN_COUNT, new Filter(fields, RecurringTypeDisplayItem.RecurringType.SERIES.getIdentifier())));
+        return new Facet(CalendarFacetType.RECURRING_TYPE, recurringTypeValues);
     }
 
     @Override

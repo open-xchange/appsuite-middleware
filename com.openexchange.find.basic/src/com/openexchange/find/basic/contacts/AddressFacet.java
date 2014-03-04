@@ -49,11 +49,9 @@
 
 package com.openexchange.find.basic.contacts;
 
-import java.util.Collections;
-import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
-import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.Filter;
+import com.openexchange.find.contacts.ContactsStrings;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
@@ -61,7 +59,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AddressFacet extends CommonContactSearchFacet {
+public class AddressFacet extends ContactSearchFieldFacet {
 
     private static final long serialVersionUID = -9031103652462933031L;
 
@@ -73,15 +71,13 @@ public class AddressFacet extends CommonContactSearchFacet {
         ContactField.COUNTRY_BUSINESS, ContactField.COUNTRY_HOME, ContactField.COUNTRY_OTHER,
     };
 
-    private static final String ID = "address";
-
-    public AddressFacet() {
-        super(ContactsFacetType.ADDRESS, Collections.singletonList(
-            new FacetValue(ID, new SimpleDisplayItem(ID), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(ID), "override"))));
-    }
-    @Override
-    public String getID() {
-        return ID;
+    /**
+     * Initializes a new {@link AddressFacet}.
+     *
+     * @param query The query to insert into the filter
+     */
+    public AddressFacet(String query) {
+        super(ContactsFacetType.ADDRESS, new FormattableDisplayItem(ContactsStrings.FACET_ADDRESS, query), query);
     }
 
     @Override

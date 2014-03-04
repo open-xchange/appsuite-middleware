@@ -49,11 +49,9 @@
 
 package com.openexchange.find.basic.contacts;
 
-import java.util.Collections;
-import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
-import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.Filter;
+import com.openexchange.find.contacts.ContactsStrings;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
@@ -61,7 +59,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PhoneFacet extends CommonContactSearchFacet {
+public class PhoneFacet extends ContactSearchFieldFacet {
 
     private static final long serialVersionUID = -9131205652463933031L;
 
@@ -73,15 +71,13 @@ public class PhoneFacet extends CommonContactSearchFacet {
         ContactField.TELEPHONE_TTYTDD, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2
     };
 
-    private static final String ID = "phone";
-
-    public PhoneFacet() {
-        super(ContactsFacetType.PHONE, Collections.singletonList(
-            new FacetValue(ID, new SimpleDisplayItem(ID), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(ID), "override"))));
-    }
-    @Override
-    public String getID() {
-        return ID;
+    /**
+     * Initializes a new {@link PhoneFacet}.
+     *
+     * @param query The query to insert into the filter
+     */
+    public PhoneFacet(String query) {
+        super(ContactsFacetType.PHONE, new FormattableDisplayItem(ContactsStrings.FACET_PHONE, query), query);
     }
 
     @Override

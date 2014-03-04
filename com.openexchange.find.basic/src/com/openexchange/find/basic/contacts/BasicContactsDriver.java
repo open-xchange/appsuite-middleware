@@ -52,10 +52,8 @@ package com.openexchange.find.basic.contacts;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
@@ -78,6 +76,7 @@ import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -115,27 +114,11 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         //TOD=: more fields
     );
 
-
-    private final Map<String, ContactSearchFacet> staticFacets;
-
     /**
      * Initializes a new {@link BasicContactsDriver}.
      */
     public BasicContactsDriver() {
         super();
-        staticFacets = new HashMap<String, ContactSearchFacet>();
-        AddressFacet addressFacet = new AddressFacet();
-        staticFacets.put(addressFacet.getID(), addressFacet);
-        ContactTypeFacet contactTypeFacet = new ContactTypeFacet();
-        staticFacets.put(contactTypeFacet.getID(), contactTypeFacet);
-        EmailFacet emailFacet = new EmailFacet();
-        staticFacets.put(emailFacet.getID(), emailFacet);
-        FolderTypeFacet folderTypeFacet = new FolderTypeFacet();
-        staticFacets.put(folderTypeFacet.getID(), folderTypeFacet);
-        NameFacet nameFacet = new NameFacet();
-        staticFacets.put(nameFacet.getID(), nameFacet);
-        PhoneFacet phoneFacet = new PhoneFacet();
-        staticFacets.put(phoneFacet.getID(), phoneFacet);
     }
 
     @Override
@@ -174,7 +157,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
          * combine with addressbook queries
          */
         for (String query : searchRequest.getQueries()) {
-            SearchTerm<?> term = CommonContactSearchFacet.getSearchTerm(session, ADDRESSBOOK_FIELDS, query);
+            SearchTerm<?> term = ContactSearchFieldFacet.getSearchTerm(session, ADDRESSBOOK_FIELDS, query);
             if (null != term) {
                 searchTerm.addSearchTerm(term);
             }
@@ -205,17 +188,37 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
     @Override
     protected AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         /*
-         * only offer ContactsFacetType.CONTACTS facet dynamically
+         * collect possible facets for current auto-complete iteration
+         */
+        List<Facet> facets = new ArrayList<Facet>();
+        String prefix = autocompleteRequest.getPrefix();
+        if (false == Strings.isEmpty(prefix)) {
+            /*
+             * add prefix-aware field facets
+             */
+            facets.add(new NameFacet(prefix));
+            facets.add(new EmailFacet(prefix));
+            facets.add(new PhoneFacet(prefix));
+            facets.add(new AddressFacet(prefix));
+        }
+        /*
+         * add ContactsFacetType.CONTACT facet dynamically
          */
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<FacetValue> contactValues = new ArrayList<FacetValue>(contacts.size());
         for (Contact contact : contacts) {
-            String id = "contact";
+            String id = ContactsFacetType.CONTACT.getId();
             Filter filter = new Filter(Collections.singletonList(id), String.valueOf(contact.getObjectID()));
             contactValues.add(new FacetValue(prepareFacetValueId(id, session.getContextId(),
                 Integer.toString(contact.getObjectID())), new ContactDisplayItem(contact), 1, filter));
         }
-        return new AutocompleteResult(Collections.singletonList(new Facet(ContactsFacetType.CONTACTS, contactValues)));
+        facets.add(new Facet(ContactsFacetType.CONTACT, contactValues));
+        /*
+         * add other facets
+         */
+        facets.add(FolderTypeFacet.getInstance());
+        facets.add(ContactTypeFacet.getInstance());
+        return new AutocompleteResult(facets);
     }
 
     /**
@@ -228,26 +231,31 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
      * @throws OXException
      */
     private SearchTerm<?> createSearchTerm(ServerSession session, String field, String query) throws OXException {
-        /*
-         * check static facets first
-         */
-        ContactSearchFacet contactFacet = staticFacets.get(field);
-        if (null != contactFacet) {
-            return contactFacet.getSearchTerm(session, query);
+        ContactsFacetType type = ContactsFacetType.getById(field);
+        if (null == type) {
+            throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
         }
-        /*
-         * check facets from autocomplete
-         */
-        if ("contact".equals(field)) {
+        switch (type) {
+        case ADDRESS:
+            return new AddressFacet(query).getSearchTerm(session, query);
+        case CONTACT:
             SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
             searchTerm.addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
             searchTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(query)));
             return searchTerm;
+        case CONTACT_TYPE:
+            return ContactTypeFacet.getInstance().getSearchTerm(session, query);
+        case EMAIL:
+            return new EmailFacet(query).getSearchTerm(session, query);
+        case FOLDER_TYPE:
+            return FolderTypeFacet.getInstance().getSearchTerm(session, query);
+        case NAME:
+            return new NameFacet(query).getSearchTerm(session, query);
+        case PHONE:
+            return new PhoneFacet(query).getSearchTerm(session, query);
+        default:
+            throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
         }
-        /*
-         * unknown filter field
-         */
-        throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
     }
 
     /**

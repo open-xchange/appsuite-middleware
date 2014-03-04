@@ -91,6 +91,8 @@ public abstract class ContactSearchFacet extends Facet {
      *
      * @return The ID
      */
-    public abstract String getID();
+    public String getID() {
+        return getType().getId();
+    }
 
 }

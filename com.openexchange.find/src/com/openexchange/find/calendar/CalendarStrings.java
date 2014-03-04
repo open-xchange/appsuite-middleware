@@ -60,19 +60,21 @@ public class CalendarStrings implements LocalizableStrings {
 
     public static final String GLOBAL = "%1$s <i>in appointments</i>";
 
-    public static final String CONTACTS = "Contacts";
+    public static final String SUBJECT = "%1$s <i>in subject</i>";
 
-    public static final String SUBJECT = "Subject";
+    public static final String DESCRIPTION = "%1$s <i>in description</i>";
 
-    public static final String DESCRIPTION = "Description";
+    public static final String LOCATION = "%1$s <i>in location</i>";
 
-    public static final String LOCATION = "Location";
+    public static final String ATTACHMENT_NAME = "%1$s <i>in attachment name</i>";
 
-    public static final String STATUS = "Status";
+    public static final String FACET_TYPE_STATUS = "My Status";
 
-    public static final String RELATIVE_DATE = "Date";
+    public static final String FACET_TYPE_RELATIVE_DATE = "Date";
 
-    public static final String RECURRING_TYPE = "Type";
+    public static final String FACET_TYPE_RECURRING_TYPE = "Type";
+
+    public static final String FACET_TYPE_PARTICIPANT = "Participant";
 
     // Status
     public static final String STATUS_ACCEPTED = "Accepted";
@@ -84,7 +86,7 @@ public class CalendarStrings implements LocalizableStrings {
     public static final String STATUS_NONE = "None";
 
     // Relative date
-    public static final String RELATIVE_DATE_COMMING = "Comming";
+    public static final String RELATIVE_DATE_COMING = "Coming";
 
     public static final String RELATIVE_DATE_PAST = "Past";
 
@@ -92,4 +94,5 @@ public class CalendarStrings implements LocalizableStrings {
     public static final String RECURRING_TYPE_SINGLE = "Single";
 
     public static final String RECURRING_TYPE_SERIES = "Series";
+
 }

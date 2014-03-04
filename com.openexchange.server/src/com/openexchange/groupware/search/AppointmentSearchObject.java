@@ -64,7 +64,7 @@ public class AppointmentSearchObject /*extends CalendarSearchObject*/ {
     private Set<String> titles;
     private Set<Integer> ownStatus;
     private Set<Integer> userIDs;
-    private Set<String> externalParticipants;
+    private Set<Set<String>> externalParticipants;
     private Set<String> queries;
     private Set<Integer> folderIDs;
     private Set<Integer> resourceIDs;
@@ -239,22 +239,24 @@ public class AppointmentSearchObject /*extends CalendarSearchObject*/ {
     }
 
     /**
-     * Gets a set of e-mail addresses that are matched against the external participants of an appointment during search. Multiple
-     * addresses are used with a logical <code>OR</code> conjunction.
+     * Gets a set of a set of e-mail addresses that are matched against the external participants of an appointment during search.
+     * Each set contains all possible participants that are used with a logical <code>OR</code> conjunction. Each outer set is matched
+     * using a logical <code>AND</code> conjunction.
      *
      * @return The external participants
      */
-    public Set<String> getExternalParticipants() {
+    public Set<Set<String>> getExternalParticipants() {
         return externalParticipants;
     }
 
     /**
-     * Sets the e-mail addresses that should be matched against the external participants of an appointment during search. Multiple
-     * addresses are used with a logical <code>OR</code> conjunction.
+     * Sets the set of sets of e-mail addresses that should be matched against the external participants of an appointment during search.
+     * Each set contains all possible participants that are used with a logical <code>OR</code> conjunction. Each outer set is matched
+     * using a logical <code>AND</code> conjunction.
      *
      * @param externalParticipants The external participants to set
      */
-    public void setExternalParticipants(Set<String> externalParticipants) {
+    public void setExternalParticipants(Set<Set<String>> externalParticipants) {
         this.externalParticipants = externalParticipants;
     }
 

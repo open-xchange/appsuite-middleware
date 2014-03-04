@@ -132,19 +132,19 @@ public class AppointmentSearchBuilder {
     public AppointmentSearchBuilder applyFilter(Filter filter) throws OXException {
         List<String> fields = filter.getFields();
         for (String field : fields) {
-            if ("subject".equals(field)) {
+            if (CalendarFacetType.SUBJECT.getId().equals(field)) {
                 applySubject(filter.getQueries());
-            } else if ("description".equals(field)) {
+            } else if (CalendarFacetType.DESCRIPTION.getId().equals(field)) {
                 applyDescription(filter.getQueries());
-            } else if ("location".equals(field)) {
+            } else if (CalendarFacetType.LOCATION.getId().equals(field)) {
                 applyLocation(filter.getQueries());
-            } else if ("relative_date".equals(field)) {
+            } else if (CalendarFacetType.RELATIVE_DATE.getId().equals(field)) {
                 applyRelativeDate(filter.getQueries());
-            } else if ("status".equals(field)) {
+            } else if (CalendarFacetType.STATUS.getId().equals(field)) {
                 applyStatus(filter.getQueries());
-            } else if ("recurring_type".equals(field)) {
+            } else if (CalendarFacetType.RECURRING_TYPE.getId().equals(field)) {
                 applyRecurringType(filter.getQueries());
-            } else if ("folder_type".equals(field)) {
+            } else if (CalendarFacetType.FOLDER_TYPE.getId().equals(field)) {
                 applyFolderType(filter.getQueries());
             } else if ("participants".equals(field)) {
                 applyParticipants(filter.getQueries());
@@ -199,16 +199,20 @@ public class AppointmentSearchBuilder {
     }
 
     private void applyParticipants(List<String> queries) throws OXException {
-        Set<String> externalParticipants = appointmentSearch.getExternalParticipants();
+        Set<Set<String>> externalParticipants = appointmentSearch.getExternalParticipants();
         if (null == externalParticipants) {
-            externalParticipants = new HashSet<String>();
+            externalParticipants = new HashSet<Set<String>>();
         }
+        Set<String> mailAddresses = new HashSet<String>();
         for (String query : queries) {
             if (false == isWildcardOnly(query)) {
-                externalParticipants.add(addWildcards(query, false, false));
+                mailAddresses.add(query);
             }
         }
-        appointmentSearch.setExternalParticipants(externalParticipants);
+        if (0 < mailAddresses.size()) {
+            externalParticipants.add(mailAddresses);
+            appointmentSearch.setExternalParticipants(externalParticipants);
+        }
     }
 
     private void applyUsers(List<String> queries) throws OXException {

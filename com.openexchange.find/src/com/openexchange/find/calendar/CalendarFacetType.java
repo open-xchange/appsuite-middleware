@@ -51,6 +51,7 @@ package com.openexchange.find.calendar;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.java.Strings;
 
@@ -60,32 +61,67 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public enum CalendarFacetType implements FacetType {
+    /**
+     * The "subject" field facet
+     */
+    SUBJECT("subject", null, false, true),
+    /**
+     * The "email" field facet
+     */
+    DESCRIPTION("description", null, false, true),
+    /**
+     * The "location" field facet
+     */
+    LOCATION("location", null, false, true),
+    /**
+     * The "attachment" field facet
+     */
+    ATTACHMENT_NAME("attachment", null, false, true),
+    /**
+     * The "participant" facet
+     */
+    PARTICIPANT("participant", CalendarStrings.FACET_TYPE_PARTICIPANT, false, false),
+    /**
+     * The "my status" facet
+     */
+    STATUS("status", CalendarStrings.FACET_TYPE_STATUS, true, false),
+    /**
+     * The "folder type" facet
+     */
+    FOLDER_TYPE("folder_type", CommonStrings.FACET_TYPE_FOLDER_TYPE, true, false),
+    /**
+     * The "date" facet
+     */
+    RELATIVE_DATE("date", CalendarStrings.FACET_TYPE_RELATIVE_DATE, true, false),
+    /**
+     * The "recurring type" facet
+     */
+    RECURRING_TYPE("type", CalendarStrings.FACET_TYPE_RECURRING_TYPE, true, false),
+    ;
 
-    CONTACTS(CalendarStrings.CONTACTS),
-    SUBJECT(CalendarStrings.SUBJECT),
-    DESCRIPTION(CalendarStrings.DESCRIPTION),
-    LOCATION(CalendarStrings.LOCATION),
-    STATUS(CalendarStrings.STATUS),
-    RELATIVE_DATE(CalendarStrings.RELATIVE_DATE),
-    RECURRING_TYPE(CalendarStrings.RECURRING_TYPE);
+    private final String id;
+    private final String displayName;
+    private final boolean once;
+    private final boolean fieldFacet;
 
-    private static final Map<String, CalendarFacetType> typesById = new HashMap<String, CalendarFacetType>();
-    static {
-        for (CalendarFacetType type : values()) {
-            typesById.put(type.getId(), type);
-        }
-    }
-
-
-    private String displayName;
-
-    private CalendarFacetType(String displayName) {
+    /**
+     * Initializes a new {@link CalendarFacetType}.
+     *
+     * @param id The identifier of this facet
+     * @param displayName The display name, or <code>null</code> if not relevant.
+     * @param once <code>true</code> if this filter can be applied only once, <code>false</code>, otherwise
+     * @param fieldFacet <code>true</code> if this facet denotes a field facet, <code>false</code>, otherwise
+     */
+    private CalendarFacetType(String id, String displayName, boolean once, boolean fieldFacet) {
+        this.id = id;
         this.displayName = displayName;
+        this.once = once;
+        this.fieldFacet = fieldFacet;
     }
 
     @Override
     public String getId() {
-        return toString().toLowerCase();
+        return id;
     }
 
     @Override
@@ -95,12 +131,19 @@ public enum CalendarFacetType implements FacetType {
 
     @Override
     public boolean isFieldFacet() {
-        return false;
+        return fieldFacet;
     }
 
     @Override
     public boolean appliesOnce() {
-        return false;
+        return once;
+    }
+
+    private static final Map<String, CalendarFacetType> typesById = new HashMap<String, CalendarFacetType>();
+    static {
+        for (CalendarFacetType type : values()) {
+            typesById.put(type.getId(), type);
+        }
     }
 
     /**
