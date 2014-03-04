@@ -107,26 +107,33 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
      * Initializes a new {@link ToMySqlQueryVisitor}.
      * @param cols
      */
-    public ToMySqlQueryVisitor(int[] folderIds, int contextId, String cols) {
+    public ToMySqlQueryVisitor(final int[] folderIds, final int contextId, final String cols) {
         super();
-        this.sb = new StringBuilder();
+        this.sb = new StringBuilder(8192);
         sb.append(cols).append(" ");
         sb.append(PREFIX).append(contextId).append(" AND ");
-        if (null != folderIds && folderIds.length > 0) {
-            sb.append(INFOSTORE).append("folder_id IN ");
-            appendInString(folderIds, sb);
-            sb.append(" AND ");
-        }
+        appendInString(folderIds, sb);
         this.codec = new MySQLCodec(Mode.STANDARD);
     }
 
     private void appendInString(final int[] folderIds, final StringBuilder sb) {
-        sb.append('(');
-        sb.append(folderIds[0]);
-        for (int i = 1; i < folderIds.length; i++) {
-            sb.append(',').append(folderIds[i]);
+        if (null != folderIds) {
+            final int length = folderIds.length;
+            if (length > 0) {
+                if (1 == length) {
+                    sb.append(INFOSTORE).append("folder_id = ").append(folderIds[0]);
+                } else {
+                    sb.append(INFOSTORE).append("folder_id IN ");
+                    sb.append('(');
+                    sb.append(folderIds[0]);
+                    for (int i = 1; i < length; i++) {
+                        sb.append(',').append(folderIds[i]);
+                    }
+                    sb.append(')');
+                }
+                sb.append(" AND ");
+            }
         }
-        sb.append(')');
     }
 
     public String getMySqlQuery() {
