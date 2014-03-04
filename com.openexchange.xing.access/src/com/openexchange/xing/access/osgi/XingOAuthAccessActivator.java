@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,92 +47,113 @@
  *
  */
 
-package com.openexchange.subscribe.xing.osgi;
+package com.openexchange.xing.access.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.ServiceRegistration;
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.xing.Services;
-import com.openexchange.subscribe.xing.XingSubscribeService;
+import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
+import com.openexchange.xing.access.internal.Services;
+import com.openexchange.xing.access.internal.XingEventHandler;
+import com.openexchange.xing.access.internal.XingOAuthAccessImpl;
 
 
 /**
- * {@link XingSubscribeActivator}
+ * {@link XingOAuthAccessActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class XingSubscribeActivator extends HousekeepingActivator {
+public final class XingOAuthAccessActivator extends HousekeepingActivator {
 
-    private ServiceRegistration<SubscribeService> serviceRegistration;
+    private volatile ServiceRegistration<XingOAuthAccessProvider> providerRegistration;
 
     /**
-     * Initializes a new {@link XingSubscribeActivator}.
+     * Initializes a new {@link XingOAuthAccessActivator}.
      */
-    public XingSubscribeActivator() {
+    public XingOAuthAccessActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class, XingOAuthAccessProvider.class };
+        return new Class<?>[] { SessiondService.class, OAuthService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServices(this);
+
+        // Event handler
+        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+        registerService(EventHandler.class, new XingEventHandler(), serviceProperties);
+
+        // Registerer
         track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this));
         openTrackers();
-        /*
-         * Register update task
-         */
-        final DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new com.openexchange.subscribe.xing.groupware.XingCrawlerSubscriptionsRemoverTask());
-        registerService(UpdateTaskProviderService.class.getName(), providerService);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        unregisterSubscribeService();
-        super.stopBundle();
         Services.setServices(null);
+        unregisterProvider();
+        super.stopBundle();
     }
 
     /**
-     * Registers the subscribe service.
+     * Registers the provider.
      */
-    public synchronized void registerSubscribeService() {
-        if (null == serviceRegistration) {
-            serviceRegistration = context.registerService(SubscribeService.class, new XingSubscribeService(this), null);
-            org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was started");
+    public void registerProvider() {
+        final XingOAuthAccessProvider provider = new XingOAuthAccessProvider() {
+
+            @Override
+            public XingOAuthAccess accessFor(final OAuthAccount oauthAccount, final Session session) throws OXException {
+                return XingOAuthAccessImpl.accessFor(oauthAccount, session);
+            }
+
+            @Override
+            public OAuthAccount getXingOAuthAccount(Session session) throws OXException {
+                final OAuthService oAuthService = getService(OAuthService.class);
+                return oAuthService.getDefaultAccount(API.XING, session);
+            }
+        };
+        providerRegistration = context.registerService(XingOAuthAccessProvider.class, provider, null);
+    }
+
+    /**
+     * Unregisters the provider.
+     */
+    public void unregisterProvider() {
+        final ServiceRegistration<XingOAuthAccessProvider> providerRegistration = this.providerRegistration;
+        if (null != providerRegistration) {
+            providerRegistration.unregister();
+            this.providerRegistration = null;
         }
     }
 
     /**
-     * Un-registers the subscribe service.
-     */
-    public synchronized void unregisterSubscribeService() {
-        final ServiceRegistration<SubscribeService> serviceRegistration = this.serviceRegistration;
-        if (null != serviceRegistration) {
-            serviceRegistration.unregister();
-            this.serviceRegistration = null;
-            org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was stopped");
-        }
-    }
-
-    /**
-     * Adds given service.
+     * Sets given service.
      *
-     * @param authServiceMetaData The service to add
+     * @param authServiceMetaData The service to set or <code>null</code> to remove
      */
     public void setOAuthServiceMetaData(final OAuthServiceMetaData oAuthServiceMetaData) {
-        addService(OAuthServiceMetaData.class, oAuthServiceMetaData);
+        if (null == oAuthServiceMetaData) {
+            removeService(OAuthServiceMetaData.class);
+        } else {
+            addService(OAuthServiceMetaData.class, oAuthServiceMetaData);
+        }
     }
 
 }

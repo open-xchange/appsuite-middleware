@@ -95,7 +95,8 @@ public final class DeleteAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            //final ServerSession session = req.getSession();
+            final long st = System.currentTimeMillis();
+
             /*
              * Read in parameters
              */
@@ -141,6 +142,10 @@ public final class DeleteAction extends AbstractMailAction {
                 }
             }
             jsonWriter.endArray();
+
+            final long dur = System.currentTimeMillis() - st;
+            System.out.println("DeleteAction.perform() took " + dur + "msec");
+
             return new AJAXRequestResult(jsonWriter.getObject(), "json");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

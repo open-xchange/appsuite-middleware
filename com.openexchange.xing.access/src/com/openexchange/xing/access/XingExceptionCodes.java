@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.xing;
+package com.openexchange.xing.access;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -56,11 +56,11 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link XingSubscribeExceptionCodes} - Enumeration of all errors.
+ * {@link XingExceptionCodes} - Enumeration of all errors.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum XingSubscribeExceptionCodes implements DisplayableOXExceptionCode {
+public enum XingExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
@@ -69,7 +69,7 @@ public enum XingSubscribeExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * A XING error occurred: %1$s
      */
-    XING_ERROR("A XING error occurred: %1$s", Category.CATEGORY_ERROR, 2, XingSubscribeExceptionMessages.XING_ERROR_MSG),
+    XING_ERROR("A XING error occurred: %1$s", Category.CATEGORY_ERROR, 2, XingExceptionMessages.XING_ERROR_MSG),
     /**
      * Invalid XING URL: %1$s
      */
@@ -81,15 +81,15 @@ public enum XingSubscribeExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The XING resource does not exist: %1$s
      */
-    NOT_FOUND("The XING resource does not exist: %1$s", Category.CATEGORY_ERROR, 5, XingSubscribeExceptionMessages.NOT_FOUND_MSG),
+    NOT_FOUND("The XING resource does not exist: %1$s", Category.CATEGORY_ERROR, 5, XingExceptionMessages.NOT_FOUND_MSG),
     /**
      * Update denied for XING resource: %1$s
      */
-    UPDATE_DENIED("Update denied for XING resource: %1$s", Category.CATEGORY_ERROR, 6, XingSubscribeExceptionMessages.UPDATE_DENIED_MSG),
+    UPDATE_DENIED("Update denied for XING resource: %1$s", Category.CATEGORY_ERROR, 6, XingExceptionMessages.UPDATE_DENIED_MSG),
     /**
      * Delete denied for XING resource: %1$s
      */
-    DELETE_DENIED("Delete denied for XING resource: %1$s", Category.CATEGORY_ERROR, 7, XingSubscribeExceptionMessages.DELETE_DENIED_MSG),
+    DELETE_DENIED("Delete denied for XING resource: %1$s", Category.CATEGORY_ERROR, 7, XingExceptionMessages.DELETE_DENIED_MSG),
     /**
      * XING URL does not denote a file: %1$s
      */
@@ -97,7 +97,7 @@ public enum XingSubscribeExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Missing file name.
      */
-    MISSING_FILE_NAME("Missing file name.", Category.CATEGORY_ERROR, 12, XingSubscribeExceptionMessages.MISSING_FILE_NAME_MSG),
+    MISSING_FILE_NAME("Missing file name.", Category.CATEGORY_ERROR, 12, XingExceptionMessages.MISSING_FILE_NAME_MSG),
     /**
      * Versioning not supported by XING file storage.
      */
@@ -106,12 +106,12 @@ public enum XingSubscribeExceptionCodes implements DisplayableOXExceptionCode {
      * Missing configuration for account "%1$s".
      */
     MISSING_CONFIG("Missing configuration for account \"%1$s\".", Category.CATEGORY_CONFIGURATION, 14,
-        XingSubscribeExceptionMessages.MISSING_CONFIG_MSG),
+        XingExceptionMessages.MISSING_CONFIG_MSG),
     /**
      * Bad or expired access token. Need to re-authenticate user.
      */
     UNLINKED_ERROR("Bad or expired access token. Need to re-authenticate user.", Category.CATEGORY_CONFIGURATION, 15,
-        XingSubscribeExceptionMessages.UNLINKED_ERROR_MSG),
+        XingExceptionMessages.UNLINKED_ERROR_MSG),
 
     ;
 
@@ -123,7 +123,7 @@ public enum XingSubscribeExceptionCodes implements DisplayableOXExceptionCode {
     
     private String displayMessage;
 
-    private XingSubscribeExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
+    private XingExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;

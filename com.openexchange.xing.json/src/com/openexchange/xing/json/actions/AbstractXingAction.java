@@ -55,9 +55,16 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.xing.access.XingExceptionCodes;
+import com.openexchange.xing.access.XingOAuthAccess;
+import com.openexchange.xing.access.XingOAuthAccessProvider;
+import com.openexchange.xing.exception.XingException;
+import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.json.XingRequest;
 
 /**
@@ -96,6 +103,12 @@ public abstract class AbstractXingAction implements AJAXActionService {
             return perform(new XingRequest(requestData, session));
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final XingUnlinkedException e) {
+            throw XingExceptionCodes.UNLINKED_ERROR.create();
+        } catch (final XingException e) {
+            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw XingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -114,13 +127,32 @@ public abstract class AbstractXingAction implements AJAXActionService {
     }
 
     /**
+     * Gets the XING OAuth access.
+     *
+     * @param req The associated XING request
+     * @return The XING OAuth access
+     * @throws OXException If XING OAuth access cannot be returned
+     */
+    protected XingOAuthAccess getXingOAuthAccess(final XingRequest req) throws OXException {
+        final XingOAuthAccessProvider provider = services.getService(XingOAuthAccessProvider.class);
+        if (null == provider) {
+            throw ServiceExceptionCode.absentService(XingOAuthAccessProvider.class);
+        }
+
+        final ServerSession session = req.getSession();
+        final OAuthAccount xingOAuthAccount = provider.getXingOAuthAccount(session);
+        return provider.accessFor(xingOAuthAccount, session);
+    }
+
+    /**
      * Performs specified XING request.
      *
      * @param req The XING request
      * @return The result
      * @throws OXException If an error occurs
      * @throws JSONException If a JSON error occurs
+     * @throws XingException If XING API error occurs
      */
-    protected abstract AJAXRequestResult perform(XingRequest req) throws OXException, JSONException;
+    protected abstract AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException;
 
 }

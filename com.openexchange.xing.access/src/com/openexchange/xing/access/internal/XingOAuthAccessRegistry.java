@@ -47,13 +47,12 @@
  *
  */
 
-package com.openexchange.subscribe.xing.session;
+package com.openexchange.xing.access.internal;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.subscribe.xing.Services;
 
 /**
  * {@link XingOAuthAccessRegistry}
@@ -73,83 +72,72 @@ public final class XingOAuthAccessRegistry {
         return INSTANCE;
     }
 
-    private final ConcurrentMap<SimpleKey, ConcurrentMap<Integer, XingOAuthAccess>> map;
+    // ----------------------------------------------------------------------------------------------------------------------------- //
+
+    private final ConcurrentMap<SimpleKey, ConcurrentMap<Integer, XingOAuthAccessImpl>> map;
 
     /**
      * Initializes a new {@link XingOAuthAccessRegistry}.
      */
     private XingOAuthAccessRegistry() {
         super();
-        map = new ConcurrentHashMap<SimpleKey, ConcurrentMap<Integer, XingOAuthAccess>>();
+        map = new ConcurrentHashMap<SimpleKey, ConcurrentMap<Integer, XingOAuthAccessImpl>>();
     }
 
     /**
      * Adds specified XING OAuth access.
      *
-     * @param contextId The context identifier
-     * @param userId The user identifier
+     * @param xingOAuthAccess The XING OAuth access to add
      * @param accountId The account identifier
-     * @param fbOAuthInfo The XING OAuth access to add
-     * @return The previous associated session, or <code>null</code> if there was no session.
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public XingOAuthAccess addSession(final int contextId, final int userId, final int accountId, final XingOAuthAccess fbOAuthInfo) {
+    public void addAccess(final XingOAuthAccessImpl xingOAuthAccess, final int accountId, final int userId, final int contextId) {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
-        ConcurrentMap<Integer, XingOAuthAccess> inner = map.get(key);
+        ConcurrentMap<Integer, XingOAuthAccessImpl> inner = map.get(key);
         if (null == inner) {
-            final ConcurrentMap<Integer, XingOAuthAccess> tmp = new ConcurrentHashMap<Integer, XingOAuthAccess>();
+            final ConcurrentMap<Integer, XingOAuthAccessImpl> tmp = new ConcurrentHashMap<Integer, XingOAuthAccessImpl>();
             inner = map.putIfAbsent(key, tmp);
             if (null == inner) {
                 inner = tmp;
             }
         }
-        return inner.putIfAbsent(Integer.valueOf(accountId), fbOAuthInfo);
-    }
-
-    /**
-     * Check presence of the XING OAuth access associated with given user-context-pair.
-     *
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param accountId The account identifier
-     * @return <code>true</code> if such a XING OAuth access is present; otherwise <code>false</code>
-     */
-    public boolean containsSession(final int contextId, final int userId, final int accountId) {
-        final ConcurrentMap<Integer, XingOAuthAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
-        return null != inner && inner.containsKey(Integer.valueOf(accountId));
+        final XingOAuthAccessImpl prev = inner.put(Integer.valueOf(accountId), xingOAuthAccess);
+        if (null != prev) {
+            prev.dispose();
+        }
     }
 
     /**
      * Gets the XING OAuth access associated with given user-context-pair.
      *
-     * @param contextId The context identifier
-     * @param userId The user identifier
      * @param accountId The account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The XING OAuth access or <code>null</code>
      */
-    public XingOAuthAccess getSession(final int contextId, final int userId, final int accountId) {
-        final ConcurrentMap<Integer, XingOAuthAccess> inner = map.get(SimpleKey.valueOf(contextId, userId));
+    public XingOAuthAccessImpl getAccess(final int accountId, final int userId, final int contextId) {
+        final ConcurrentMap<Integer, XingOAuthAccessImpl> inner = map.get(SimpleKey.valueOf(contextId, userId));
         return null == inner ? null : inner.get(Integer.valueOf(accountId));
     }
 
     /**
-     * Removes the OAuth access associated with given user-context-pair, if no more user-associated accesses are present.
+     * Removes the OAuth accesses associated with given user-context-pair.
      *
-     * @param contextId The context identifier
      * @param userId The user identifier
+     * @param contextId The context identifier
      * @return <code>true</code> if a XING OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
-    public boolean removeSessionIfLast(final int contextId, final int userId) {
+    public boolean removeAccessWhenNoActiveSession(final int userId, final int contextId) {
         final SessiondService sessiondService = Services.getService(SessiondService.class);
         if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
-            /*
-             * No sessions left for user
-             */
-            final ConcurrentMap<Integer, XingOAuthAccess> inner = map.remove(SimpleKey.valueOf(contextId, userId));
+            // No active session available for user
+            final ConcurrentMap<Integer, XingOAuthAccessImpl> inner = map.remove(SimpleKey.valueOf(contextId, userId));
             if (null == inner || inner.isEmpty()) {
                 return false;
             }
-            for (final XingOAuthAccess dropboxOAuthAccess : inner.values()) {
-                dropboxOAuthAccess.dispose();
+            for (final XingOAuthAccessImpl xingOAuthAccess : inner.values()) {
+                xingOAuthAccess.dispose();
             }
             return !inner.isEmpty();
         }
@@ -157,35 +145,11 @@ public final class XingOAuthAccessRegistry {
     }
 
     /**
-     * Purges specified user's XING OAuth access.
-     *
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param accountId The account identifier
-     * @return <code>true</code> if a XING OAuth access for given user-context-pair was found and purged; otherwise <code>false</code>
-     */
-    public boolean purgeUserAccess(final int contextId, final int userId, final int accountId) {
-        final SimpleKey key = SimpleKey.valueOf(contextId, userId);
-        final ConcurrentMap<Integer, XingOAuthAccess> inner = map.get(key);
-        if (null == inner) {
-            return false;
-        }
-        final XingOAuthAccess oAuthInfo = inner.remove(Integer.valueOf(accountId));
-        if (null == oAuthInfo) {
-            return false;
-        }
-        if (inner.isEmpty()) {
-            map.remove(key);
-        }
-        return true;
-    }
-
-    /**
      * Gets a {@link Iterator iterator} over the XING OAuth access instances in this registry.
      *
      * @return A {@link Iterator iterator} over the XING OAuth access instances in this registry.
      */
-    Iterator<ConcurrentMap<Integer, XingOAuthAccess>> iterator() {
+    Iterator<ConcurrentMap<Integer, XingOAuthAccessImpl>> iterator() {
         return map.values().iterator();
     }
 

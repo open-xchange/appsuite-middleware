@@ -47,16 +47,16 @@
  *
  */
 
-package com.openexchange.subscribe.xing.session;
+package com.openexchange.xing.access.internal;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.session.Session;
-import com.openexchange.subscribe.xing.XingSubscribeExceptionCodes;
-import com.openexchange.subscribe.xing.Services;
 import com.openexchange.xing.User;
 import com.openexchange.xing.XingAPI;
+import com.openexchange.xing.access.XingExceptionCodes;
+import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.session.AccessTokenPair;
@@ -64,11 +64,11 @@ import com.openexchange.xing.session.AppKeyPair;
 import com.openexchange.xing.session.WebAuthSession;
 
 /**
- * {@link XingOAuthAccess} - Initializes and provides XING OAuth access.
+ * {@link XingOAuthAccessImpl} - Initializes and provides XING OAuth access.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class XingOAuthAccess {
+public final class XingOAuthAccessImpl implements XingOAuthAccess {
 
     /**
      * Gets the XING OAuth access for given XING OAuth account.
@@ -78,29 +78,36 @@ public final class XingOAuthAccess {
      * @return The XING OAuth access; either newly created or fetched from underlying registry
      * @throws OXException If a XING session could not be created
      */
-    public static XingOAuthAccess accessFor(final OAuthAccount oauthAccount, final Session session) throws OXException {
+    public static XingOAuthAccessImpl accessFor(final OAuthAccount oauthAccount, final Session session) throws OXException {
         final XingOAuthAccessRegistry registry = XingOAuthAccessRegistry.getInstance();
         final int accountId = oauthAccount.getId();
-        XingOAuthAccess xingOAuthAccess = registry.getSession(session.getContextId(), session.getUserId(), accountId);
+        XingOAuthAccessImpl xingOAuthAccess = registry.getAccess(accountId, session.getUserId(), session.getContextId());
         if (null == xingOAuthAccess) {
-            final XingOAuthAccess newInstance = new XingOAuthAccess(oauthAccount);
-            xingOAuthAccess = registry.addSession(session.getContextId(), session.getUserId(), accountId, newInstance);
-            if (null == xingOAuthAccess) {
-                xingOAuthAccess = newInstance;
+            synchronized (XingOAuthAccessImpl.class) {
+                xingOAuthAccess = registry.getAccess(accountId, session.getUserId(), session.getContextId());
+                if (null == xingOAuthAccess) {
+                    // Create & connect
+                    final XingOAuthAccessImpl newInstance = new XingOAuthAccessImpl(oauthAccount);
+                    // Add to registry & return
+                    registry.addAccess(newInstance, accountId, session.getUserId(), session.getContextId());
+                    xingOAuthAccess = newInstance;
+                }
             }
         }
         return xingOAuthAccess;
     }
 
+    // ----------------------------------------------------------------------------------------------------------------------------- //
+
     /**
      * The XING user identifier.
      */
-    private final String xingUserId;
+    private String xingUserId;
 
     /**
      * The XING user's full name
      */
-    private final String xingUserName;
+    private String xingUserName;
 
     /**
      * The Web-authenticating session.
@@ -113,19 +120,14 @@ public final class XingOAuthAccess {
     private XingAPI<WebAuthSession> xingApi;
 
     /**
-     * Initializes a new {@link XingOAuthAccess}.
+     * Initializes a new {@link XingOAuthAccessImpl}.
      *
-     * @param oauthAccount The XING account providing credentials and settings
-     * @throws OXException If initialization fails
+     * @param oauthAccount The associated OAuth account
+     * @throws OXException If connect attempt fails
      */
-    private XingOAuthAccess(final OAuthAccount oauthAccount) throws OXException {
+    private XingOAuthAccessImpl(final OAuthAccount oauthAccount) throws OXException {
         super();
         try {
-            /*-
-             * Retrieve information about the user's XING account.
-             *
-             * See: https://www.dropbox.com/developers/reference/api#account-info
-             */
             final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
             final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(), xingOAuthServiceMetaData.getAPISecret());
             webAuthSession = new WebAuthSession(appKeys, new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret()));
@@ -135,19 +137,20 @@ public final class XingOAuthAccess {
             xingUserId = accountInfo.getId();
             xingUserName = accountInfo.getDisplayName();
         } catch (final XingUnlinkedException e) {
-            throw XingSubscribeExceptionCodes.UNLINKED_ERROR.create();
+            throw XingExceptionCodes.UNLINKED_ERROR.create();
         } catch (final XingException e) {
-            throw XingSubscribeExceptionCodes.XING_ERROR.create(e, e.getMessage());
+            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw XingSubscribeExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw XingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
-     * Gets the XING API reference
+     * Gets the XING API reference.
      *
      * @return The XING API reference
      */
+    @Override
     public XingAPI<WebAuthSession> getXingAPI() {
         return xingApi;
     }
@@ -155,8 +158,9 @@ public final class XingOAuthAccess {
     /**
      * Disposes this XING OAuth access.
      */
+    @Override
     public void dispose() {
-        // So far nothing known to me that needs to be disposed
+        // So far nothing known that needs to be disposed
     }
 
     /**
@@ -164,6 +168,7 @@ public final class XingOAuthAccess {
      *
      * @return The XING user identifier
      */
+    @Override
     public String getXingUserId() {
         return xingUserId;
     }
@@ -173,6 +178,7 @@ public final class XingOAuthAccess {
      *
      * @return The XING user's display name.
      */
+    @Override
     public String getXingUserName() {
         return xingUserName;
     }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,36 @@
  *
  */
 
-package com.openexchange.xing.json.osgi;
+package com.openexchange.xing.access;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.xing.access.XingOAuthAccessProvider;
-import com.openexchange.xing.json.XingActionFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.session.Session;
 
 /**
- * {@link XingJsonActivator}
+ * {@link XingOAuthAccessProvider} - Provides a XING OAuth access for a given XING OAuth account.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class XingJsonActivator extends AJAXModuleActivator {
+public interface XingOAuthAccessProvider {
 
     /**
-     * Initializes a new {@link XingJsonActivator}.
+     * Gets the XING OAuth access for given XING OAuth account.
+     *
+     * @param oauthAccount The XING OAuth account providing credentials and settings
+     * @param session The user session
+     * @return The XING OAuth access; either newly created or fetched from underlying registry
+     * @throws OXException If a XING session could not be created
      */
-    public XingJsonActivator() {
-        super();
-    }
+    XingOAuthAccess accessFor(final OAuthAccount oauthAccount, final Session session) throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, CapabilityService.class, XingOAuthAccessProvider.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        // Register AJAX module
-        registerModule(new XingActionFactory(this), "xing");
-    }
+    /**
+     * Gets the default XING OAuth account.
+     *
+     * @param session The associated session
+     * @return The default XING OAuth account
+     * @throws OXException If retrieval fails
+     */
+    OAuthAccount getXingOAuthAccount(final Session session) throws OXException;
 
 }

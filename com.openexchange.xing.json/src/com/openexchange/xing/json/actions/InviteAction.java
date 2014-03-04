@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,53 @@
  *
  */
 
-package com.openexchange.xing.json.osgi;
+package com.openexchange.xing.json.actions;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.xing.access.XingOAuthAccessProvider;
-import com.openexchange.xing.json.XingActionFactory;
+import java.util.Collections;
+import javax.mail.internet.AddressException;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.xing.XingAPI;
+import com.openexchange.xing.access.XingOAuthAccess;
+import com.openexchange.xing.exception.XingException;
+import com.openexchange.xing.json.XingRequest;
+import com.openexchange.xing.session.WebAuthSession;
+
 
 /**
- * {@link XingJsonActivator}
+ * {@link InviteAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class XingJsonActivator extends AJAXModuleActivator {
+public final class InviteAction extends AbstractXingAction {
 
     /**
-     * Initializes a new {@link XingJsonActivator}.
+     * Initializes a new {@link InviteAction}.
      */
-    public XingJsonActivator() {
-        super();
+    public InviteAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, CapabilityService.class, XingOAuthAccessProvider.class };
-    }
+    protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
+        // Get & validate E-Mail address
+        final String address = req.getParameter("email");
+        try {
+            new QuotedInternetAddress(address, false);
+        } catch (final AddressException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
 
-    @Override
-    protected void startBundle() throws Exception {
-        // Register AJAX module
-        registerModule(new XingActionFactory(this), "xing");
+        final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+
+        final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+        xingAPI.invite(xingOAuthAccess.getXingUserId(), Collections.<String> singletonList(address), null, null);
+
+        return new AJAXRequestResult(Boolean.TRUE, "native");
     }
 
 }

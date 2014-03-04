@@ -72,22 +72,22 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
-import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.xing.session.XingOAuthAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.xing.Address;
 import com.openexchange.xing.Contacts;
 import com.openexchange.xing.User;
 import com.openexchange.xing.UserField;
+import com.openexchange.xing.access.XingExceptionCodes;
+import com.openexchange.xing.access.XingOAuthAccess;
+import com.openexchange.xing.access.XingOAuthAccessProvider;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingUnlinkedException;
 
@@ -128,28 +128,28 @@ public class XingSubscribeService extends AbstractSubscribeService {
         this.source = source;
     }
 
-    private OAuthAccount getXingOAuthAccount(final Session session) throws OXException {
-        OAuthAccount defaultAccount = (OAuthAccount) session.getParameter("com.openexchange.subscribe.xing.defaultAccount");
-        if (null != defaultAccount) {
-            return defaultAccount;
+    /**
+     * Gets the XING OAuth access.
+     *
+     * @param session The associated session
+     * @return The XING OAuth access
+     * @throws OXException If XING OAuth access cannot be returned
+     */
+    protected XingOAuthAccess getXingOAuthAccess(final ServerSession session) throws OXException {
+        final XingOAuthAccessProvider provider = services.getService(XingOAuthAccessProvider.class);
+        if (null == provider) {
+            throw ServiceExceptionCode.absentService(XingOAuthAccessProvider.class);
         }
-        // Determine default XING access
-        final OAuthService oAuthService = services.getService(OAuthService.class);
-        defaultAccount = oAuthService.getDefaultAccount(API.XING, session);
-        if (null != defaultAccount) {
-            // Cache in session
-            session.setParameter("com.openexchange.subscribe.xing.defaultAccount", defaultAccount);
-        }
-        return defaultAccount;
+
+        final OAuthAccount xingOAuthAccount = provider.getXingOAuthAccount(session);
+        return provider.accessFor(xingOAuthAccount, session);
     }
 
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
         try {
             final ServerSession session = subscription.getSession();
-            final OAuthAccount xingOAuthAccount = getXingOAuthAccount(session);
-
-            final XingOAuthAccess xingOAuthAccess = XingOAuthAccess.accessFor(xingOAuthAccount, session);
+            final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(session);
             final Contacts xingContacts = xingOAuthAccess.getXingAPI().getContactsFrom(
                 xingOAuthAccess.getXingUserId(),
                 UserField.ID,
@@ -168,11 +168,11 @@ public class XingSubscribeService extends AbstractSubscribeService {
 
             return ret;
         } catch (final XingUnlinkedException e) {
-            throw XingSubscribeExceptionCodes.UNLINKED_ERROR.create();
+            throw XingExceptionCodes.UNLINKED_ERROR.create();
         } catch (final XingException e) {
-            throw XingSubscribeExceptionCodes.XING_ERROR.create(e, e.getMessage());
+            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw XingSubscribeExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw XingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -203,6 +203,22 @@ public class XingSubscribeService extends AbstractSubscribeService {
         } else {
             LOG.error("subscription is null");
         }
+    }
+
+    /**
+     * Gets the XING OAuth account.
+     *
+     * @param session The associated session
+     * @return The XING OAuth account
+     * @throws OXException If XING OAuth account cannot be returned
+     */
+    protected OAuthAccount getXingOAuthAccount(final ServerSession session) throws OXException {
+        final XingOAuthAccessProvider provider = services.getService(XingOAuthAccessProvider.class);
+        if (null == provider) {
+            throw ServiceExceptionCode.absentService(XingOAuthAccessProvider.class);
+        }
+
+        return provider.getXingOAuthAccount(session);
     }
 
     @Override

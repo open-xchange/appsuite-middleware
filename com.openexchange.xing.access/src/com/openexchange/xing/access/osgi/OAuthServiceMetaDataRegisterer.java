@@ -47,37 +47,64 @@
  *
  */
 
-package com.openexchange.xing.json.osgi;
+package com.openexchange.xing.access.osgi;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.xing.access.XingOAuthAccessProvider;
-import com.openexchange.xing.json.XingActionFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.oauth.OAuthServiceMetaData;
 
 /**
- * {@link XingJsonActivator}
+ * {@link OAuthServiceMetaDataRegisterer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class XingJsonActivator extends AJAXModuleActivator {
+public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
+
+    private final BundleContext context;
+    private final XingOAuthAccessActivator activator;
+    private final String xingIdentifier;
 
     /**
-     * Initializes a new {@link XingJsonActivator}.
+     * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
+     *
+     * @param context The bundle context
+     * @param activator The activator to track/start services
      */
-    public XingJsonActivator() {
+    public OAuthServiceMetaDataRegisterer(final BundleContext context, final XingOAuthAccessActivator activator) {
         super();
+        xingIdentifier = "com.openexchange.oauth.xing";
+        this.context = context;
+        this.activator = activator;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, CapabilityService.class, XingOAuthAccessProvider.class };
+    public OAuthServiceMetaData addingService(final ServiceReference<OAuthServiceMetaData> reference) {
+        final OAuthServiceMetaData oAuthServiceMetaData = context.getService(reference);
+        if (xingIdentifier.equals(oAuthServiceMetaData.getId())) {
+            activator.setOAuthServiceMetaData(oAuthServiceMetaData);
+            activator.registerProvider();
+            return oAuthServiceMetaData;
+        }
+        // Not of interest
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        // Register AJAX module
-        registerModule(new XingActionFactory(this), "xing");
+    public void modifiedService(final ServiceReference<OAuthServiceMetaData> reference, final OAuthServiceMetaData service) {
+        // nothing to do here
     }
 
+    @Override
+    public void removedService(final ServiceReference<OAuthServiceMetaData> reference, final OAuthServiceMetaData service) {
+        if (null != service) {
+            final OAuthServiceMetaData oAuthServiceMetaData = service;
+            if (xingIdentifier.equals(oAuthServiceMetaData.getId())) {
+                activator.setOAuthServiceMetaData(null);
+                activator.unregisterProvider();
+            }
+            context.ungetService(reference);
+        }
+    }
 }

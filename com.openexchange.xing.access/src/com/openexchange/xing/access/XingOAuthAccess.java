@@ -47,43 +47,43 @@
  *
  */
 
-package com.openexchange.subscribe.xing;
+package com.openexchange.xing.access;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.xing.XingAPI;
+import com.openexchange.xing.session.WebAuthSession;
+
 
 /**
- * {@link XingSubscribeExceptionMessages} - Exception messages for errors that needs to be translated.
+ * {@link XingOAuthAccess} - A XING OAuth access obtained by {@link XingOAuthAccessProvider}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class XingSubscribeExceptionMessages implements LocalizableStrings {
-
-    // A XING error occurred: %1$s
-    public static final String XING_ERROR_MSG = "A XING error occurred: %1$s";
-
-    // The XING resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The XING resource does not exist: %1$s";
-
-    // Update denied for XING resource: %1$s
-    public static final String UPDATE_DENIED_MSG = "Update denied for XING resource: %1$s";
-
-    // Delete denied for XING resource: %1$s
-    public static final String DELETE_DENIED_MSG = "Delete denied for XING resource: %1$s";
-
-    // Missing file name.
-    public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
-
-    // Missing configuration for account "%1$s".
-    public static final String MISSING_CONFIG_MSG = "Missing configuration for account \"%1$s\".";
-
-    // Bad or expired access token. Need to re-authenticate user.
-    public static final String UNLINKED_ERROR_MSG = "Bad or expired access token. Need to re-authenticate user.";
+public interface XingOAuthAccess {
 
     /**
-     * Initializes a new {@link XingSubscribeExceptionMessages}.
+     * Gets the XING API reference.
+     *
+     * @return The XING API reference
      */
-    private XingSubscribeExceptionMessages() {
-        super();
-    }
+    XingAPI<WebAuthSession> getXingAPI();
+
+    /**
+     * Disposes this XING OAuth access.
+     */
+    void dispose();
+
+    /**
+     * Gets the XING user identifier.
+     *
+     * @return The XING user identifier
+     */
+    String getXingUserId();
+
+    /**
+     * Gets the XING user's display name.
+     *
+     * @return The XING user's display name.
+     */
+    String getXingUserName();
 
 }

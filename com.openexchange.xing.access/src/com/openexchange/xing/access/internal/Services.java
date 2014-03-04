@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,73 @@
  *
  */
 
-package com.openexchange.xing.json.osgi;
+package com.openexchange.xing.access.internal;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.xing.access.XingOAuthAccessProvider;
-import com.openexchange.xing.json.XingActionFactory;
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link XingJsonActivator}
+ * {@link Services} - Provides static access to {@link ServiceLookup} reference.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class XingJsonActivator extends AJAXModuleActivator {
+public final class Services {
+
+    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
     /**
-     * Initializes a new {@link XingJsonActivator}.
+     * Initializes a new {@link Services}.
      */
-    public XingJsonActivator() {
+    private Services() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, CapabilityService.class, XingOAuthAccessProvider.class };
+    /**
+     * Sets the {@link ServiceLookup} reference.
+     *
+     * @param services The reference
+     */
+    public static void setServices(final ServiceLookup services) {
+        SERVICES.set(services);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        // Register AJAX module
-        registerModule(new XingActionFactory(this), "xing");
+    /**
+     * Gets the {@link ServiceLookup} reference.
+     *
+     * @return The reference
+     */
+    public static ServiceLookup getServices() {
+        return SERVICES.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * Gets the optional service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
     }
 
 }

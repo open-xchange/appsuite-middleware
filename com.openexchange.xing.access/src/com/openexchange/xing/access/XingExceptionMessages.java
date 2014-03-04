@@ -47,37 +47,43 @@
  *
  */
 
-package com.openexchange.xing.json.osgi;
+package com.openexchange.xing.access;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.xing.access.XingOAuthAccessProvider;
-import com.openexchange.xing.json.XingActionFactory;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link XingJsonActivator}
+ * {@link XingExceptionMessages} - Exception messages for errors that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class XingJsonActivator extends AJAXModuleActivator {
+public final class XingExceptionMessages implements LocalizableStrings {
+
+    // A XING error occurred: %1$s
+    public static final String XING_ERROR_MSG = "A XING error occurred: %1$s";
+
+    // The XING resource does not exist: %1$s
+    public static final String NOT_FOUND_MSG = "The XING resource does not exist: %1$s";
+
+    // Update denied for XING resource: %1$s
+    public static final String UPDATE_DENIED_MSG = "Update denied for XING resource: %1$s";
+
+    // Delete denied for XING resource: %1$s
+    public static final String DELETE_DENIED_MSG = "Delete denied for XING resource: %1$s";
+
+    // Missing file name.
+    public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
+
+    // Missing configuration for account "%1$s".
+    public static final String MISSING_CONFIG_MSG = "Missing configuration for account \"%1$s\".";
+
+    // Bad or expired access token. Need to re-authenticate user.
+    public static final String UNLINKED_ERROR_MSG = "Bad or expired access token. Need to re-authenticate user.";
 
     /**
-     * Initializes a new {@link XingJsonActivator}.
+     * Initializes a new {@link XingExceptionMessages}.
      */
-    public XingJsonActivator() {
+    private XingExceptionMessages() {
         super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, CapabilityService.class, XingOAuthAccessProvider.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        // Register AJAX module
-        registerModule(new XingActionFactory(this), "xing");
     }
 
 }
