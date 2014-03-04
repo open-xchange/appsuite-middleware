@@ -921,7 +921,15 @@ if [ -n "$VALUE" ]; then
 else
     ox_set_property com.openexchange.jolokia.password "" $pfile
 fi
-    
+
+# SoftwareChange_Request-1865
+PFILE=/opt/open-xchange/etc/whitelist.properties
+if [ -n "$(ox_read_property html.tag.base $PFILE)" ]; then
+    ox_comment html.tag.base= add /opt/open-xchange/etc/whitelist.properties
+fi
+if [ -n "$(ox_read_property html.tag.meta $PFILE)" ]; then
+    ox_comment html.tag.meta= add $PFILE
+fi
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
