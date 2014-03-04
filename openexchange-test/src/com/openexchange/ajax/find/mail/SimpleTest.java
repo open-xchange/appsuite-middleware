@@ -50,10 +50,11 @@
 package com.openexchange.ajax.find.mail;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import org.json.JSONException;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -66,13 +67,19 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
+import com.openexchange.ajax.user.actions.GetRequest;
+import com.openexchange.ajax.user.actions.GetResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
+import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.mail.MailFacetType;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 
 
@@ -126,7 +133,7 @@ public class SimpleTest extends AbstractFindTest {
         /*
          * Set own contact as activeFacet
          */
-        Facet activeFacet = new Facet(MailFacetType.CONTACTS, Collections.singletonList(found));
+        ActiveFacet activeFacet = new ActiveFacet(MailFacetType.CONTACTS, found.getId(), found.getFilters().get(0));
         autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier(), Collections.singletonList(activeFacet));
         autocompleteResponse = client.execute(autocompleteRequest);
         found = detectContact(autocompleteResponse.getFacets(), defaultAddress);
@@ -152,10 +159,15 @@ public class SimpleTest extends AbstractFindTest {
         addressFields.add("from");
         addressFields.add("to");
         addressFields.add("cc");
-        List<Filter> filters = new ArrayList<Filter>(3);
-        filters.add(new Filter(Collections.singletonList("folder"), testFolder.getFullName()));
-        filters.add(new Filter(addressFields, defaultAddress));
-        QueryRequest queryRequest = new QueryRequest(0, 10, Collections.singletonList("Find me"), filters, Module.MAIL.getIdentifier());
+        ActiveFacet globalFacet = new ActiveFacet(CommonFacetType.GLOBAL, CommonFacetType.GLOBAL.getId(), new Filter(Collections.singletonList("global"), "Find me"));
+        ActiveFacet contactFacet = new ActiveFacet(MailFacetType.CONTACTS, "some/id", new Filter(addressFields, defaultAddress));
+        ActiveFacet folderFacet = new ActiveFacet(CommonFacetType.FOLDER, testFolder.getFullName(), Filter.NO_FILTER);
+        List<ActiveFacet> facets = new ArrayList<ActiveFacet>(4);
+        facets.add(folderFacet);
+        facets.add(contactFacet);
+        facets.add(globalFacet);
+
+        QueryRequest queryRequest = new QueryRequest(0, 10, facets, Module.MAIL.getIdentifier());
         QueryResponse queryResponse = client.execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<Document> documents = result.getDocuments();
@@ -167,26 +179,26 @@ public class SimpleTest extends AbstractFindTest {
         /*
          * Now filter additionally for a mail address not contained in the mail headers
          */
-        filters.add(new Filter(addressFields, "unknown@example.com"));
-        queryRequest = new QueryRequest(0, 10, Collections.singletonList("Find me"), filters, Module.MAIL.getIdentifier());
+        facets.add(new ActiveFacet(MailFacetType.CONTACTS, "some/other/id", new Filter(addressFields, "unknown@example.com")));
+        queryRequest = new QueryRequest(0, 10, facets, Module.MAIL.getIdentifier());
         queryResponse = client.execute(queryRequest);
         result = queryResponse.getSearchResult();
         documents = result.getDocuments();
         assertEquals("Mail found but should not", 0, documents.size());
     }
 
-    private FacetValue detectContact(List<Facet> facets, String defaultAddress) {
+    private FacetValue detectContact(List<Facet> facets, String defaultAddress) throws OXException, IOException, JSONException {
+        GetRequest getRequest = new GetRequest(client.getValues().getUserId(), client.getValues().getTimeZone());
+        GetResponse getResponse = client.execute(getRequest);
+        Contact contact = getResponse.getContact();
         FacetValue found = null;
         outer: for (Facet facet : facets) {
             if (MailFacetType.CONTACTS == facet.getType()) {
                 List<FacetValue> values = facet.getValues();
                 for (FacetValue value : values) {
-                    Map<String, Object> displayable = (Map<String, Object>) value.getDisplayItem().getItem();
-                    for (Object obj : displayable.values()) {
-                        if (obj.equals(defaultAddress)) {
-                            found = value;
-                            break outer;
-                        }
+                    if (contact.getDisplayName().equals(value.getDisplayItem().getDefaultValue())) {
+                        found = value;
+                        break outer;
                     }
                 }
                 break;

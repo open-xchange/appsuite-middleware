@@ -49,6 +49,13 @@
 
 package com.openexchange.ajax.find.contacts;
 
+import static com.openexchange.find.common.CommonFacetType.GLOBAL;
+import static com.openexchange.find.contacts.ContactsFacetType.ADDRESS;
+import static com.openexchange.find.contacts.ContactsFacetType.EMAIL;
+import static com.openexchange.find.contacts.ContactsFacetType.FOLDERS;
+import static com.openexchange.find.contacts.ContactsFacetType.NAME;
+import static com.openexchange.find.contacts.ContactsFacetType.PHONE;
+import static com.openexchange.find.contacts.ContactsFacetType.TYPE;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -58,7 +65,10 @@ import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
+import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.FilterBuilder;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -82,36 +92,36 @@ public class QueryTest extends ContactsFindTest {
 
     public void testFilterChaining() throws Exception {
         Contact contact = randomContact();
-        List<Filter> filters = new ArrayList<Filter>();
-        filters.add(applyMatchingFilter(contact, randomUID(), "phone", PHONE_COLUMNS, true));
-        filters.add(applyMatchingFilter(contact, randomUID(), "name", NAME_COLUMNS, true));
-        filters.add(applyMatchingFilter(contact, randomUID(), "address", ADDRESS_COLUMNS, true));
-        filters.add(applyMatchingFilter(contact, randomUID() + "@example.org", "email", EMAIL_COLUMNS, true));
-        filters.add(applyMatchingFilter(contact, randomUID(), "address_book", ADDRESSBOOK_COLUMNS, true));
-        filters.add(new Filter(Collections.singletonList("contact_type"), "contact"));
-        filters.add(new Filter(Collections.singletonList("folder_type"), "private"));
+        List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
+        facets.add(applyMatchingFacet(PHONE, contact, randomUID(), "phone", PHONE_COLUMNS, true));
+        facets.add(applyMatchingFacet(NAME, contact, randomUID(), "name", NAME_COLUMNS, true));
+        facets.add(applyMatchingFacet(ADDRESS, contact, randomUID(), "address", ADDRESS_COLUMNS, true));
+        facets.add(applyMatchingFacet(EMAIL, contact, randomUID() + "@example.org", "email", EMAIL_COLUMNS, true));
+        facets.add(applyMatchingFacet(GLOBAL, contact, randomUID(), "address_book", ADDRESSBOOK_COLUMNS, true));
+        facets.add(createActiveFieldFacet(TYPE, "contact_type", "contact"));
+        facets.add(createActiveFieldFacet(FOLDERS, "folder_type", "private"));
         contact = manager.newAction(contact);
-        assertFoundDocumentInSearch(Collections.<String>emptyList(), filters, contact.getEmail1());
+        assertFoundDocumentInSearch(facets, contact.getEmail1());
     }
 
     public void testFilterPhone() throws Exception {
-        testStringFilter("phone", PHONE_COLUMNS);
+        testStringFilter(PHONE, "phone", PHONE_COLUMNS);
     }
 
     public void testFilterName() throws Exception {
-        testStringFilter("name", NAME_COLUMNS);
+        testStringFilter(NAME, "name", NAME_COLUMNS);
     }
 
     public void testFilterAddressbook() throws Exception {
-        testStringFilter("address_book", ADDRESS_COLUMNS);
+        testStringFilter(GLOBAL, "address_book", ADDRESS_COLUMNS);
     }
 
     public void testFilterAddress() throws Exception {
-        testStringFilter("address", ADDRESS_COLUMNS);
+        testStringFilter(ADDRESS, "address", ADDRESS_COLUMNS);
     }
 
     public void testFilterEmail() throws Exception {
-        testStringFilter("email", randomUID() + "@example.com", EMAIL_COLUMNS);
+        testStringFilter(EMAIL, "email", randomUID() + "@example.com", EMAIL_COLUMNS);
     }
 
     public void testFilterContactType() throws Exception {
@@ -124,14 +134,12 @@ public class QueryTest extends ContactsFindTest {
         });
         manager.newAction(contact, distributionList);
 
-        List<PropDocument> contactDocuments = query(Collections.<String>emptyList(),
-            Collections.singletonList(new Filter(Collections.singletonList("contact_type"), "contact")));
+        List<PropDocument> contactDocuments = query(Collections.singletonList(createActiveFacet(TYPE, "contact", "contact_type", "contact")));
         assertTrue("no contacts found", 0 < contactDocuments.size());
         assertNotNull("contact not found", findByProperty(contactDocuments, "email1", contact.getEmail1()));
         assertNull("distribution list found", findByProperty(contactDocuments, "display_name", distributionList.getDisplayName()));
 
-        List<PropDocument> distListDocuments = query(Collections.<String>emptyList(),
-            Collections.singletonList(new Filter(Collections.singletonList("contact_type"), "distribution list")));
+        List<PropDocument> distListDocuments = query(Collections.singletonList(createActiveFacet(TYPE, "distribution list", "contact_type", "distribution list")));
         assertTrue("no distribution lists found", 0 < distListDocuments.size());
         assertNull("contact found", findByProperty(distListDocuments, "email1", contact.getEmail1()));
         assertNotNull("distribution list not found", findByProperty(distListDocuments, "display_name", distributionList.getDisplayName()));
@@ -139,15 +147,12 @@ public class QueryTest extends ContactsFindTest {
 
     public void testFilterFolderType() throws Exception {
         Contact contact = manager.newAction(randomContact());
-        List<PropDocument> privateFolderDocuments = query(Collections.<String>emptyList(),
-            Collections.singletonList(new Filter(Collections.singletonList("folder_type"), "private")));
+        List<PropDocument> privateFolderDocuments = query(Collections.singletonList(createActiveFacet(FOLDERS, "private", "folder_type", "private")));
         assertTrue("no contacts found", 0 < privateFolderDocuments.size());
         assertNotNull("contact not found", findByProperty(privateFolderDocuments, "email1", contact.getEmail1()));
-        List<PropDocument> sharedFolderDocuments = query(Collections.<String>emptyList(),
-            Collections.singletonList(new Filter(Collections.singletonList("folder_type"), "shared")));
+        List<PropDocument> sharedFolderDocuments = query(Collections.singletonList(createActiveFacet(FOLDERS, "shared", "folder_type", "shared")));
         assertNull("contact found", findByProperty(sharedFolderDocuments, "email1", contact.getEmail1()));
-        List<PropDocument> publicFolderDocuments = query(Collections.<String>emptyList(),
-            Collections.singletonList(new Filter(Collections.singletonList("folder_type"), "public")));
+        List<PropDocument> publicFolderDocuments = query(Collections.singletonList(createActiveFacet(FOLDERS, "public", "folder_type", "public")));
         assertNull("contact found", findByProperty(publicFolderDocuments, "email1", contact.getEmail1()));
         assertNotNull("user contact not found", findByProperty(publicFolderDocuments, "email1", client.getValues().getDefaultAddress()));
     }
@@ -173,33 +178,86 @@ public class QueryTest extends ContactsFindTest {
         return new Filter(Collections.singletonList(filterField), substring);
     }
 
-    private void testStringFilter(String filterField, int[] searchedColumns) throws Exception {
-        testStringFilter(filterField, randomUID(), searchedColumns);
+    private ActiveFacet applyMatchingFacet(FacetType type, Contact contact, String value, String filterField, int[] searchedColumns, boolean unassignedOnly) {
+        if (unassignedOnly) {
+            List<Integer> unassignedColumns = new ArrayList<Integer>();
+            for (int column : searchedColumns) {
+                if (false == contact.contains(column)) {
+                    unassignedColumns.add(Integer.valueOf(column));
+                }
+            }
+            if (0 == unassignedColumns.size()) {
+                fail("no unassigned fields from " + Arrays.toString(searchedColumns) + " left.");
+            }
+            contact.set(unassignedColumns.get(random.nextInt(unassignedColumns.size())), value);
+        } else {
+            contact.set(searchedColumns[random.nextInt(searchedColumns.length)], value);
+        }
+        int start = random.nextInt(value.length() - 4);
+        int stop = start + 4 + random.nextInt(value.length() - start - 4);
+        String substring = value.substring(start, stop);
+        return createActiveFacet(type, String.valueOf(contact.getObjectID()), filterField, value);
     }
 
-    private void testStringFilter(String filterField, String value, int[] searchedColumns) throws Exception {
+    private void testStringFilter(FacetType type, String filterField, int[] searchedColumns) throws Exception {
+        testStringFilter(type, filterField, randomUID(), searchedColumns);
+    }
+
+    private void testStringFilter(FacetType type, String filterField, String value, int[] searchedColumns) throws Exception {
         Contact contact = randomContact();
-        Filter filter = applyMatchingFilter(contact, value, filterField, searchedColumns, true);
+        ActiveFacet facet = applyMatchingFacet(type, contact, value, filterField, searchedColumns, true);
         contact = manager.newAction(contact);
-        assertFoundDocumentInSearch(Collections.<String>emptyList(), Collections.singletonList(filter), contact.getEmail1());
-        assertEmptyResults(Collections.<String>emptyList(), Collections.singletonList(
-            new Filter(Collections.singletonList(filterField), randomUID())));
+        assertFoundDocumentInSearch(Collections.singletonList(facet), contact.getEmail1());
+        assertEmptyResults(Collections.singletonList(createActiveFacet(type, filterField, filterField, randomUID())));
     }
 
-    private PropDocument assertFoundDocumentInSearch(List<String> queries, List<Filter> filters, String expectedEmail1) throws Exception {
-        List<PropDocument> documents = query(queries, filters);
+    private PropDocument assertFoundDocumentInSearch(List<ActiveFacet> facets, String expectedEmail1) throws Exception {
+        List<PropDocument> documents = query(facets);
         assertTrue("No contact documents found", 0 < documents.size());
         PropDocument document = findByProperty(documents, "email1", expectedEmail1);
         assertNotNull("no document found for: " + expectedEmail1, document);
         return document;
     }
 
-    private void assertEmptyResults(List<String> queries, List<Filter> filters) throws Exception {
-        QueryRequest queryRequest = new QueryRequest(0, 10, queries, filters, Module.CONTACTS.getIdentifier());
+    private void assertEmptyResults(List<ActiveFacet> facets) throws Exception {
+        QueryRequest queryRequest = new QueryRequest(0, 10, facets, Module.CONTACTS.getIdentifier());
         QueryResponse queryResponse = client.execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<Document> documents = result.getDocuments();
         assertEquals("Documents were found", 0, documents.size());
+    }
+
+
+    private final ActiveFacet createActiveFacet(FacetType type, int valueId, Filter filter) {
+        return new ActiveFacet(type, Integer.toString(valueId), filter);
+    }
+
+    private final ActiveFacet createActiveFacet(FacetType type, String valueId, Filter filter) {
+        return new ActiveFacet(type, valueId, filter);
+    }
+
+    private final ActiveFacet createActiveFacet(FacetType type, int valueId, String field, String query) {
+        Filter filter = new FilterBuilder()
+            .addField(field)
+            .addQuery(query)
+            .build();
+        return new ActiveFacet(type, Integer.toString(valueId), filter);
+    }
+
+    private final ActiveFacet createActiveFacet(FacetType type, String valueId, String field, String query) {
+        Filter filter = new FilterBuilder()
+            .addField(field)
+            .addQuery(query)
+            .build();
+        return new ActiveFacet(type, valueId, filter);
+    }
+
+    private final ActiveFacet createActiveFieldFacet(FacetType type, String field, String query) {
+        Filter filter = new FilterBuilder()
+            .addField(field)
+            .addQuery(query)
+            .build();
+        return new ActiveFacet(type, type.getId(), filter);
     }
 
 }

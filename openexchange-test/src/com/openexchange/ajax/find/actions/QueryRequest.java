@@ -64,7 +64,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.find.Document;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.facet.ActiveFacet;
-import com.openexchange.find.facet.Filter;
 
 /**
  * {@link QueryRequest}
@@ -76,27 +75,25 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
     private final boolean failOnError;
     private final int start;
     private final int size;
-    private final List<String> queries;
-    private final List<Filter> filters;
+    private final List<ActiveFacet> activeFacets;
     private final String module;
 
     /**
      * Initializes a new {@link QueryRequest}.
      */
-    public QueryRequest(int start, int size, List<String> queries, List<Filter> filters, String module) {
-        this(true, start, size, queries, filters, module);
+    public QueryRequest(int start, int size, List<ActiveFacet> activeFacets, String module) {
+        this(true, start, size, activeFacets, module);
     }
 
     /**
      * Initializes a new {@link QueryRequest}.
      */
-    public QueryRequest(boolean failOnError, int start, int size, List<String> queries, List<Filter> filters, String module) {
+    public QueryRequest(boolean failOnError, int start, int size, List<ActiveFacet> activeFacets, String module) {
         super();
         this.failOnError = failOnError;
         this.start = start;
         this.size = size;
-        this.queries = queries;
-        this.filters = filters;
+        this.activeFacets = activeFacets;
         this.module = module;
     }
 
@@ -121,48 +118,14 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
     @Override
     public Object getBody() throws IOException, JSONException {
         final JSONObject jBody = new JSONObject(3);
+        addFacets(jBody, activeFacets);
 
-        // Add queries if present
-        {
-            final List<String> queries = this.queries;
-            if (null != queries) {
-                final JSONArray jQueries = new JSONArray(queries.size());
-                for (final String sQuery : queries) {
-                    jQueries.put(sQuery);
-                }
-                jBody.put("queries", jQueries);
-            }
-        }
         // Add size / start if present
         if (0 < start) {
             jBody.put("start", start);
         }
         if (0 < size) {
             jBody.put("size", size);
-        }
-        // Add filters if present
-        final List<Filter> filters = this.filters;
-        if (null != filters) {
-            final JSONArray jFilters = new JSONArray(filters.size());
-            for (final Filter filter : filters) {
-                final JSONObject jFilter = new JSONObject(3);
-
-                final List<String> filterQueries = filter.getQueries();
-                final JSONArray jQueries = new JSONArray(filterQueries.size());
-                for (final String sQuery : filterQueries) {
-                    jQueries.put(sQuery);
-                }
-                jFilter.put("queries", jQueries);
-
-                final List<String> fields = filter.getFields();
-                final JSONArray jFields = new JSONArray(fields.size());
-                for (final String sField : fields) {
-                    jFields.put(sField);
-                }
-                jFilter.put("fields", jFields);
-                jFilters.put(jFilter);
-            }
-            jBody.put("filters", jFilters);
         }
 
         return jBody;

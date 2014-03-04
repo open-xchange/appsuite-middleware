@@ -49,9 +49,15 @@
 
 package com.openexchange.ajax.find.actions;
 
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
+import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.Filter;
 
 /**
  * {@link AbstractFindRequest}
@@ -80,6 +86,40 @@ public abstract class AbstractFindRequest<T extends AbstractAJAXResponse> implem
     @Override
     public Header[] getHeaders() {
         return NO_HEADER;
+    }
+
+    protected void addFacets(JSONObject jBody, List<ActiveFacet> activeFacets) throws JSONException {
+        if (activeFacets != null) {
+            JSONArray jFacets = new JSONArray();
+            for (ActiveFacet facet : activeFacets) {
+                JSONObject jFacet = new JSONObject();
+                jFacet.put("facet", facet.getType().getId());
+                jFacet.put("value", facet.getValueId());
+
+                // filter
+                Filter filter = facet.getFilter();
+                if (filter != null) {
+                    final JSONObject jFilter = new JSONObject(3);
+                    final List<String> filterQueries = filter.getQueries();
+                    final JSONArray jQueries = new JSONArray(filterQueries.size());
+                    for (final String sQuery : filterQueries) {
+                        jQueries.put(sQuery);
+                    }
+                    jFilter.put("queries", jQueries);
+
+                    final List<String> fields = filter.getFields();
+                    final JSONArray jFields = new JSONArray(fields.size());
+                    for (final String sField : fields) {
+                        jFields.put(sField);
+                    }
+                    jFilter.put("fields", jFields);
+                    jFacet.put("filter", jFilter);
+                }
+
+                jFacets.put(jFacet);
+            }
+            jBody.put("facets", jFacets);
+        }
     }
 
 }

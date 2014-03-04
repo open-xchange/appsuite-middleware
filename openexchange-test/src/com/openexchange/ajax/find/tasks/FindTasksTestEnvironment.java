@@ -77,7 +77,11 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.tasks.TasksFacetType;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -92,55 +96,55 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class FindTasksTestEnvironment {
-    
+
     private static final FindTasksTestEnvironment INSTANCE = new FindTasksTestEnvironment();
-    
+
     /** UserA's private test folder */
     private FolderObject userAprivateTestFolder;
-    
-    /** UserA's public test folder */ 
+
+    /** UserA's public test folder */
     private FolderObject userApublicTestFolder;
-    
+
     /** UserB's private shared folder, Read-Only for UserA */
     private FolderObject userBsharedTestFolderRO;
-    
+
     /** UserB's private shared folder, Read-Write for UserA */
     private FolderObject userBsharedTestFolderRW;
-    
+
     /** UserB's private folder, No Access for UserA */
     private FolderObject userBprivateTestFolder;
-    
+
     /** UserB's public folder */
-    private FolderObject userBpublicTestFolder; 
-    
+    private FolderObject userBpublicTestFolder;
+
     private UserValues userA;
-    
+
     private UserValues userB;
-    
+
     private AJAXClient clientA;
-    
+
     private AJAXClient clientB;
-    
+
     /** List of Lists with filters */
-    private List<List<Filter>> lolFilters = new ArrayList<List<Filter>>();
-    
+    private List<List<ActiveFacet>> facets = new ArrayList<List<ActiveFacet>>();
+
     private enum FolderType {PRIVATE, PUBLIC, SHARED};
-    
+
     private enum Status {NOT_STARTED, IN_PROGRESS, DONE, WAITING, DEFERRED};
-    
+
     private boolean cleanup = true;
-    
+
     private Set<Integer> tasksToFind = new HashSet<Integer>();
-    
+
     private final static UUID trackingID = UUID.randomUUID();
-    
+
     /**
      * Initializes a new {@link FindTasksTestEnvironment}.
      */
     public FindTasksTestEnvironment() {
         super();
     }
-    
+
     /**
      * Get the instance of the test environment
      * @return the instance of the test environment
@@ -148,7 +152,7 @@ public class FindTasksTestEnvironment {
     public static FindTasksTestEnvironment getInstance() {
         return INSTANCE;
     }
-    
+
     /**
      * Initialize the test environment for Tasks
      * @return true if the environment was successfully initialized; false otherwise
@@ -164,18 +168,18 @@ public class FindTasksTestEnvironment {
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Initialize the users
      */
     private final void initUsers() throws Exception {
         clientA = new AJAXClient(User.User1);
         userA = clientA.getValues();
-        
+
         clientB = new AJAXClient(User.User2);
         userB = clientB.getValues();
     }
-    
+
     /**
      * Logout
      * @throws Exception
@@ -186,22 +190,22 @@ public class FindTasksTestEnvironment {
         if (clientB != null)
             clientB.logout();
     }
-    
+
     /**
      * Create the test folder structure
-     * 
-     * @throws IOException 
-     * @throws OXException 
+     *
+     * @throws IOException
+     * @throws OXException
      * @throws Exception
      */
     private final void createFolderStructure() throws OXException, IOException, Exception {
         InsertRequest insertRequestReq;
         InsertResponse insertResponseResp;
-        
+
         //Get current structure
         Map<String, FolderObject> foldersA = getFolderStructure(clientA, userA.getPrivateTaskFolder());
         Map<String, FolderObject> foldersB = getFolderStructure(clientB, userB.getPrivateTaskFolder());
-        
+
         try {
             //create private test folder
             userAprivateTestFolder = Create.createPrivateFolder("UserA - findAPIPrivateTaskFolder", FolderObject.TASK, userA.getUserId());
@@ -214,11 +218,11 @@ public class FindTasksTestEnvironment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         if (userAprivateTestFolder.getObjectID() == 0) {
             userAprivateTestFolder.setObjectID(foldersA.get("UserA - findAPIPrivateTaskFolder").getObjectID()); //maybe contains to avoid null?
         }
-        
+
         //create public test folder
         try {
             userApublicTestFolder = Create.createPublicFolder(clientA, "UserA - findAPIPublicTaskFolder", FolderObject.TASK, false);
@@ -227,11 +231,11 @@ public class FindTasksTestEnvironment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         if (userApublicTestFolder.getObjectID() == 0) {
             userApublicTestFolder.setObjectID(foldersA.get("UserA - findAPIPublicTaskFolder").getObjectID());
         }
-        
+
         try {
             //create shared folder, read-only
             userBsharedTestFolderRO = Create.createPrivateFolder("UserB - findAPIPrivateSharedTaskFolder - RO", FolderObject.TASK, userB.getUserId());
@@ -244,23 +248,23 @@ public class FindTasksTestEnvironment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         if (userBsharedTestFolderRO.getObjectID() == 0) {
             userBsharedTestFolderRO.setObjectID(foldersB.get("UserB - findAPIPrivateSharedTaskFolder - RO").getObjectID());
         }
-        
+
         try {
             //share read only folder to userA
-            FolderTools.shareFolder(clientB, EnumAPI.OX_NEW, userBsharedTestFolderRO.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, 
-                                                                                                                       OCLPermission.READ_ALL_OBJECTS, 
-                                                                                                                       OCLPermission.NO_PERMISSIONS, 
+            FolderTools.shareFolder(clientB, EnumAPI.OX_NEW, userBsharedTestFolderRO.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER,
+                                                                                                                       OCLPermission.READ_ALL_OBJECTS,
+                                                                                                                       OCLPermission.NO_PERMISSIONS,
                                                                                                                        OCLPermission.NO_PERMISSIONS);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         try {
             //create shared folder, read/write
             userBsharedTestFolderRW = Create.createPrivateFolder("UserB - findAPIPrivateSharedTaskFolder - RW", FolderObject.TASK, userB.getUserId());
@@ -273,23 +277,23 @@ public class FindTasksTestEnvironment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         if (userBsharedTestFolderRW.getObjectID() == 0) {
             userBsharedTestFolderRW.setObjectID(foldersB.get("UserB - findAPIPrivateSharedTaskFolder - RW").getObjectID());
         }
-        
+
         try {
             //share read/write folder to userA
-            FolderTools.shareFolder(clientB, EnumAPI.OX_NEW, userBsharedTestFolderRW.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, 
-                                                                                                                       OCLPermission.WRITE_ALL_OBJECTS, 
-                                                                                                                       OCLPermission.WRITE_ALL_OBJECTS, 
+            FolderTools.shareFolder(clientB, EnumAPI.OX_NEW, userBsharedTestFolderRW.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER,
+                                                                                                                       OCLPermission.WRITE_ALL_OBJECTS,
+                                                                                                                       OCLPermission.WRITE_ALL_OBJECTS,
                                                                                                                        OCLPermission.WRITE_ALL_OBJECTS);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         try {
             //create userB's private folder
             userBprivateTestFolder = Create.createPrivateFolder("UserB - findAPIPrivateTaskFolder - NA", FolderObject.TASK, userB.getUserId());
@@ -302,11 +306,11 @@ public class FindTasksTestEnvironment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         if (userBprivateTestFolder.getObjectID() == 0) {
             userBprivateTestFolder.setObjectID(foldersB.get("UserB - findAPIPrivateTaskFolder - NA").getObjectID());
         }
-        
+
         try {
             //create public test folder for user B
             userBpublicTestFolder = Create.createPublicFolder(clientB, "UserB - findAPIPublicTaskFolder", FolderObject.TASK, false);
@@ -315,20 +319,20 @@ public class FindTasksTestEnvironment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         if (userBpublicTestFolder.getObjectID() == 0) {
             userBpublicTestFolder.setObjectID(foldersB.get("UserB - findAPIPublicTaskFolder").getObjectID());
         }
     }
-    
+
     /**
-     * Get the folder structure of the specified folder 
+     * Get the folder structure of the specified folder
      * @param client
      * @param folderID
      * @return
-     * @throws JSONException 
-     * @throws IOException 
-     * @throws OXException 
+     * @throws JSONException
+     * @throws IOException
+     * @throws OXException
      */
     private final Map<String, FolderObject> getFolderStructure(AJAXClient client, int folderID) throws Exception {
         Map<String, FolderObject> folders = new HashMap<String, FolderObject>();
@@ -339,13 +343,13 @@ public class FindTasksTestEnvironment {
             FolderObject fo = it.next();
             folders.put(fo.getFolderName(), fo);
         }
-        
+
         it = response.getPublicFolders();
         while (it.hasNext()) {
             FolderObject fo = it.next();
             folders.put(fo.getFolderName(), fo);
         }
-        
+
         it = response.getSharedFolders();
         while (it.hasNext()) {
             FolderObject fo = it.next();
@@ -354,7 +358,7 @@ public class FindTasksTestEnvironment {
 
         return folders;
     }
-    
+
     /**
      * Create and insert tasks to the previously created folder structure
      * Inserting :
@@ -366,15 +370,21 @@ public class FindTasksTestEnvironment {
      * - 1 task with 2 participants (2int) in user's A private folder
      * - 1 task with 3 participants (2int,1ext) in user's B private folder
      * - 1 task with 2 participants (1int,1ext) in user's A private folder
+<<<<<<< HEAD
      * Total: 35 tasks
-     * @throws Exception 
+     * @throws Exception
+=======
+     *    (1 shared task will indirectly be inserted in user's A root task folder)
+     * Total: 31 tasks
+     * @throws Exception
+>>>>>>> Adopted find tests to API changes
      */
     private final void createAndInsertTasks() throws Exception {
         // Prepare assets
         UserParticipant usrPartA = new UserParticipant(userA.getUserId());
         UserParticipant usrPartB = new UserParticipant(userB.getUserId());
         ExternalUserParticipant extPart = new ExternalUserParticipant("foo@bar.org");
-        
+
         //insert some tasks
         for (Status s : Status.values()) {
             for (FolderType ft : FolderType.values()) {
@@ -383,12 +393,12 @@ public class FindTasksTestEnvironment {
                     insertTask(clientA, ft, s, userApublicTestFolder.getObjectID(), Collections.<Participant>emptyList(), false);
                     insertTask(clientB, ft, s, userBpublicTestFolder.getObjectID(), Collections.<Participant>emptyList(), false);
                     break;
-                    
+
                 case PRIVATE:
                     insertTask(clientA, ft, s, userAprivateTestFolder.getObjectID(), Collections.<Participant>emptyList(), false);
                     insertTask(clientB, ft, s, userBprivateTestFolder.getObjectID(), Collections.<Participant>emptyList(), false);
                     break;
-                
+
                 case SHARED:
                     insertTask(clientB, ft, s, userBsharedTestFolderRO.getObjectID(), Collections.<Participant>emptyList(), false);
                     insertTask(clientB, ft, s, userBsharedTestFolderRW.getObjectID(), Collections.<Participant>emptyList(), false);
@@ -396,19 +406,19 @@ public class FindTasksTestEnvironment {
                 }
             }
         }
-        
+
         //insert a task with attachment in private with status not started for user a
         insertTask(clientA, FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID(), Collections.<Participant>emptyList(), true);
-        
+
         //insert a task with no attachment in private with status deferred and 1 internal participants (b) for user B
         List<Participant> list  = new ArrayList<Participant>();
         list.add(usrPartB);
         insertTask(clientB, FolderType.PRIVATE, Status.DEFERRED, userBprivateTestFolder.getObjectID(), list, false);
-        
+
         //insert a task with no attachment in private with status in progress and 2 internal participants (a+b) for user A
         list.add(usrPartA);
         insertTask(clientA, FolderType.PRIVATE, Status.IN_PROGRESS, userAprivateTestFolder.getObjectID(), list, false);
-        
+
         //insert a task with attachment in private with status waiting and 2 internal (a+b) and 1 external participant for user b
         list.add(extPart);
         insertTask(clientB, FolderType.PRIVATE, Status.WAITING, userBprivateTestFolder.getObjectID(), list, true);
@@ -419,13 +429,13 @@ public class FindTasksTestEnvironment {
         list.add(extPart);
         insertTask(clientA, FolderType.PRIVATE, Status.DONE, userAprivateTestFolder.getObjectID(), list, true);
     }
-    
+
     /**
      * Read a file into a string
-     * 
+     *
      * @param fileName
      * @return
-     * @throws IOException 
+     * @throws IOException
      */
     private final String readFile(String fileName) throws IOException{
         BufferedReader br = new BufferedReader(new FileReader(MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR) + fileName));
@@ -441,12 +451,12 @@ public class FindTasksTestEnvironment {
             br.close();
         return sb.toString();
     }
-    
+
     /**
      * Helper method to insert tasks
-     * 
+     *
      * @param client the AJAXClient
-     * @param ft FolderType 
+     * @param ft FolderType
      * @param status Task's status
      * @param folder parent folder
      * @return inserted task
@@ -459,7 +469,7 @@ public class FindTasksTestEnvironment {
                               .append(", trackingID: ").append(trackingID.toString()).toString();
         builder.setLength(0);
         String body = builder.append("User ").append(client.getValues().getDefaultAddress()).append("'s task in his ").append(ft).append(" folder and have status: ").append(status).toString();
-        
+
         Task t = com.openexchange.groupware.tasks.Create.createWithDefaults(title, body, status.ordinal() + 1, folder);
         if (participants.size() > 0) {
             t.setParticipants(participants);
@@ -467,25 +477,25 @@ public class FindTasksTestEnvironment {
             builder.append(t.getNote()).append(" and have ").append(participants.size()).append(" participants");
             t.setNote(builder.toString());
         }
-        
+
         if (attachment) {
             builder.setLength(0);
             builder.append(t.getNote()).append(" and have ATTACHMENT");
             t.setNote(builder.toString());
         }
-        
-        
-        
+
+
+
         client.execute(new com.openexchange.ajax.task.actions.InsertRequest(t, client.getValues().getTimeZone())).fillTask(t);
-        
+
         if (attachment)
             client.execute(new AttachRequest(t, "my cool attachment", new ByteArrayInputStream(readFile("attachment.base64").getBytes()), "image/jpeg")).getId();
-        
+
         tasksToFind.add(t.getObjectID());
-        
+
         return t;
     }
-    
+
     /**
      * Create the filters
      * @throws Exception
@@ -493,35 +503,47 @@ public class FindTasksTestEnvironment {
     private final void createFilters() throws Exception {
         //create single filters
         //participants
-        List<Filter> l = new ArrayList<Filter>(2);
-        l.add(createFilter("participant", Integer.toString(userA.getUserId()))); 
-        l.add(createFilter("participant", Integer.toString(userB.getUserId()))); //internal
-        l.add(createFilter("participant", "foo@bar.org"));                       //external
-        lolFilters.add(l);
-        
+        List<ActiveFacet> l = new ArrayList<ActiveFacet>(2);
+        FacetType type = TasksFacetType.TASK_PARTICIPANTS;
+        l.add(createActiveFacet(type, userA.getUserId(), createFilter("participant", Integer.toString(userA.getUserId()))));
+        l.add(createActiveFacet(type, userB.getUserId(), createFilter("participant", Integer.toString(userB.getUserId()))));
+        l.add(createActiveFacet(type, "foo@bar.org", createFilter("participant", "foo@bar.org"))); //external
+        facets.add(l);
+
         //status
-        l = new ArrayList<Filter>(5);
-        l.add(createFilter("status", Integer.toString(Task.NOT_STARTED)));
-        l.add(createFilter("status", Integer.toString(Task.IN_PROGRESS)));
-        l.add(createFilter("status", Integer.toString(Task.DONE)));
-        l.add(createFilter("status", Integer.toString(Task.WAITING)));
-        l.add(createFilter("status", Integer.toString(Task.DEFERRED)));
-        lolFilters.add(l);
-        
+        l = new ArrayList<ActiveFacet>(5);
+        type = TasksFacetType.TASK_STATUS;
+        l.add(createActiveFacet(type, Task.NOT_STARTED, createFilter("status", Integer.toString(Task.NOT_STARTED))));
+        l.add(createActiveFacet(type, Task.IN_PROGRESS, createFilter("status", Integer.toString(Task.IN_PROGRESS))));
+        l.add(createActiveFacet(type, Task.DONE, createFilter("status", Integer.toString(Task.DONE))));
+        l.add(createActiveFacet(type, Task.WAITING, createFilter("status", Integer.toString(Task.WAITING))));
+        l.add(createActiveFacet(type, Task.DEFERRED, createFilter("status", Integer.toString(Task.DEFERRED))));
+        facets.add(l);
+
         //folder type
-        l = new ArrayList<Filter>(3);
-        l.add(createFilter("folder_type", Integer.toString(FolderObject.PRIVATE)));
-        l.add(createFilter("folder_type", Integer.toString(FolderObject.PUBLIC)));
-        l.add(createFilter("folder_type", Integer.toString(FolderObject.SHARED)));
-        lolFilters.add(l);
-        
+        l = new ArrayList<ActiveFacet>(3);
+        type = CommonFacetType.FOLDER_TYPE;
+        l.add(createActiveFacet(type, FolderObject.PRIVATE, createFilter("folder_type", Integer.toString(FolderObject.PRIVATE))));
+        l.add(createActiveFacet(type, FolderObject.PUBLIC, createFilter("folder_type", Integer.toString(FolderObject.PUBLIC))));
+        l.add(createActiveFacet(type, FolderObject.SHARED, createFilter("folder_type", Integer.toString(FolderObject.SHARED))));
+        facets.add(l);
+
         //type
-        l = new ArrayList<Filter>(2);
-        l.add(createFilter("type", Integer.toString(0))); //single
-        l.add(createFilter("type", Integer.toString(1))); //series
-        lolFilters.add(l);
+        l = new ArrayList<ActiveFacet>(2);
+        type = TasksFacetType.TASK_TYPE;
+        l.add(createActiveFacet(type, 0, createFilter("type", Integer.toString(0)))); //single
+        l.add(createActiveFacet(type, 0, createFilter("type", Integer.toString(1)))); //series
+        facets.add(l);
     }
-    
+
+    private final ActiveFacet createActiveFacet(FacetType type, int valueId, Filter filter) {
+        return new ActiveFacet(type, Integer.toString(valueId), filter);
+    }
+
+    private final ActiveFacet createActiveFacet(FacetType type, String valueId, Filter filter) {
+        return new ActiveFacet(type, valueId, filter);
+    }
+
     /**
      * Create a single filter
      * @param name
@@ -532,10 +554,10 @@ public class FindTasksTestEnvironment {
         return new Filter(Collections.singletonList(name), value);
     }
 
-    
+
     /**
      * Cleanup
-     * @throws Exception 
+     * @throws Exception
      */
     public void cleanup() throws Exception {
         if (cleanup) {
@@ -543,32 +565,46 @@ public class FindTasksTestEnvironment {
                 initUsers();
             clientA.execute(new DeleteRequest(EnumAPI.OX_NEW, userAprivateTestFolder, userApublicTestFolder));
             clientB.execute(new DeleteRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, userBsharedTestFolderRW, userBprivateTestFolder, userBpublicTestFolder));
-            
+
             logout();
         }
     }
-    
+
     /**
-     * Get the List of Lists Filters
-     * @return the List of Lists Filters
+     * Get the List of Lists of active facets
+     * @return the List of Lists of active facets
      */
-    public List<List<Filter>> getLolFilters() {
-        return lolFilters;
+    public List<List<ActiveFacet>> getLoActiveFacets() {
+        return facets;
     }
-    
+
     /**
-     * Set of task ids to find 
+     * Set of task ids to find
      * @return
      */
     public final Set<Integer> getTasksToFind() {
         return tasksToFind;
     }
-    
+
     /**
      * Get the tracking id for this test run
      * @return
      */
     public static final String getTrackingID() {
         return trackingID.toString();
+    }
+
+    /**
+     * Get the global active facet with tracking id as query.
+     */
+    public static final ActiveFacet createGlobalFacet() {
+        return createGlobalFacet(trackingID.toString());
+    }
+
+    /**
+     * Get the global active facet for an arbitrary query.
+     */
+    public static final ActiveFacet createGlobalFacet(String query) {
+        return new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(Collections.singletonList("global"), query));
     }
 }

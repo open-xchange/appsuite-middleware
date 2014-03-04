@@ -49,10 +49,8 @@
 
 package com.openexchange.ajax.find.drive;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
@@ -65,7 +63,8 @@ import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
-import com.openexchange.find.basic.drive.Constants;
+import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -120,12 +119,8 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testSearch() throws Exception {
-        List<String> fields = new ArrayList<String>(2);
-        fields.add(Constants.FIELD_FILE_NAME);
-        fields.add(Constants.FIELD_FILE_DESC);
-        List<Filter> filters = new ArrayList<Filter>(1);
-        filters.add(new Filter(fields, "drive"));
-        QueryRequest request = new QueryRequest(0, 10, Collections.singletonList("drive"), filters, Module.DRIVE.getIdentifier());
+        ActiveFacet fileNameFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(Collections.singletonList("global"), FILENAME));
+        QueryRequest request = new QueryRequest(0, 10, Collections.singletonList(fileNameFacet), Module.DRIVE.getIdentifier());
         QueryResponse response = client.execute(request);
         SearchResult result = response.getSearchResult();
         assertTrue("Nothing found in BasicDriveTest", result.getNumFound() > 0);

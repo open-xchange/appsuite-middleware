@@ -53,14 +53,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
-import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
@@ -70,7 +70,7 @@ import com.openexchange.test.CalendarTestManager;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CalendarFindTest extends AbstractAJAXSession {
+public class CalendarFindTest extends AbstractFindTest {
 
     protected CalendarTestManager manager;
     protected Random random;
@@ -125,15 +125,14 @@ public class CalendarFindTest extends AbstractAJAXSession {
     }
 
     /**
-     * Performs a query request using the supplied queries and filters.
+     * Performs a query request using the supplied active facets.
      *
-     * @param queries The queries
-     * @param filters The filters
+     * @param facets The active facets
      * @return The found documents
      * @throws Exception
      */
-    protected List<PropDocument> query(List<String> queries, List<Filter> filters) throws Exception {
-        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, queries, filters, Module.CALENDAR.getIdentifier());
+    protected List<PropDocument> query(List<ActiveFacet> facets) throws Exception {
+        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, Module.CALENDAR.getIdentifier());
         QueryResponse queryResponse = client.execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();

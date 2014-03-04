@@ -60,7 +60,7 @@ import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
-import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.arrays.Arrays;
 
@@ -148,15 +148,14 @@ public abstract class ContactsFindTest extends AbstractManagedContactTest {
     }
 
     /**
-     * Performs a query request using the supplied queries and filters.
+     * Performs a query request using the supplied active facets.
      *
-     * @param queries The queries
-     * @param filters The filters
+     * @param facets The active facets
      * @return The found documents
      * @throws Exception
      */
-    protected List<PropDocument> query(List<String> queries, List<Filter> filters) throws Exception {
-        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, queries, filters, Module.CONTACTS.getIdentifier());
+    protected List<PropDocument> query(List<ActiveFacet> facets) throws Exception {
+        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, Module.CONTACTS.getIdentifier());
         QueryResponse queryResponse = client.execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
