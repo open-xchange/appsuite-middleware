@@ -63,9 +63,13 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
+import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
@@ -182,6 +186,24 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         facets.add(new Facet(TasksFacetType.TASK_STATUS, statusFacets));
         
         //ignore folder facets?
+        List<String> fields = Collections.singletonList(ContactsFacetType.FOLDER_TYPE.getId());
+        List<FacetValue> facetValues = new ArrayList<FacetValue>(3);
+        facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
+            CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(
+            fields, FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
+        facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
+            CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(
+            fields, FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
+        facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
+            CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(
+            fields, FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
+        
+        //add folder type facets
+        List<FacetValue> folderFacets = new ArrayList<FacetValue>(3);
+        addFolderFacet(folderFacets, FolderTypeDisplayItem.Type.PRIVATE, CommonStrings.FOLDER_TYPE_PRIVATE);
+        addFolderFacet(folderFacets, FolderTypeDisplayItem.Type.PUBLIC, CommonStrings.FOLDER_TYPE_PUBLIC);
+        addFolderFacet(folderFacets, FolderTypeDisplayItem.Type.SHARED, CommonStrings.FOLDER_TYPE_SHARED);
+        facets.add(new Facet(CommonFacetType.FOLDER_TYPE, folderFacets));
         
         //add type facets
         final List<FacetValue> typeFacets = new ArrayList<FacetValue>(5);
@@ -215,6 +237,16 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         statusFacets.add(new FacetValue(type.getIdentifier(), 
                             new TaskStatusDisplayItem(status,type), FacetValue.UNKNOWN_COUNT, 
                             new Filter(Collections.singletonList(FIELD_STATUS),type.getIdentifier())));
+    }
+    
+    /**
+     * Add a folder facet
+     * @param folderFacets
+     * @param type
+     * @param folderType
+     */
+    private static final void addFolderFacet(List<FacetValue> folderFacets, FolderTypeDisplayItem.Type type, String folderType) {
+        folderFacets.add(new FacetValue(type.getIdentifier(), new FolderTypeDisplayItem(folderType, type), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList("folder_type"), type.getIdentifier())));
     }
     
     /**
