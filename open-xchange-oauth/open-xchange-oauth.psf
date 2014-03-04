@@ -13,6 +13,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.yahoo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.xing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xing"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xing.access“/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xing.access"/>
 </provider>
 </psf>
