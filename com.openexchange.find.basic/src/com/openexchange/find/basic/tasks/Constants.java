@@ -67,6 +67,8 @@ public class Constants {
     public final static String FIELD_DESCRIPTION = "description";
 
     public final static String FIELD_FOLDER = "folder";
+    
+    public final static String FIELD_FOLDER_TYPE = "folder_type";
 
     public final static String FIELD_STATUS = "status";
 

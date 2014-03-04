@@ -69,7 +69,6 @@ import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
@@ -99,7 +98,9 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
     
     //private final static int TASKS_FIELDS[] = {DataObject.OBJECT_ID, DataObject.CREATED_BY, Task.TITLE, Task.STATUS, Task.NOTE};
     
-    private final static int TASKS_FIELDS[] = new int[] { 20, 1, 5, 2, 4, 209, 301, 101, 200, 309, 201, 202, 102 };
+    private final static int TASKS_FIELDS[] = new int[] { Task.FOLDER_ID, Task.OBJECT_ID, Task.LAST_MODIFIED, Task.CREATED_BY, Task.CREATION_DATE, 
+                                                        Task.RECURRENCE_TYPE, Task.PERCENT_COMPLETED, Task.PRIVATE_FLAG, Task.TITLE, Task.PRIORITY, 
+                                                        Task.START_DATE, Task.END_DATE, Task.COLOR_LABEL, Task.STATUS, Task.NOTE };
 
     /**
      * Initializes a new {@link BasicTasksDriver}.
@@ -211,7 +212,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
     private static final FacetValue buildParticipantFacet(String valueId, DisplayItem item, List<String> queries) {
         return new FacetValue(valueId, item, FacetValue.UNKNOWN_COUNT,
                                         Collections.singletonList(
-                                            new Filter("participant", TasksStrings.FACET_TASK_PARTICIPANTS, Constants.PARTICIPANTS, queries)));
+                                            new Filter(Constants.FIELD_PARTICIPANT, TasksStrings.FACET_TASK_PARTICIPANTS, Constants.PARTICIPANTS, queries)));
     }
     
     /**
@@ -233,7 +234,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
      * @param folderType
      */
     private static final void addFolderFacet(List<FacetValue> folderFacets, FolderTypeDisplayItem.Type type, String folderType) {
-        folderFacets.add(new FacetValue(type.getIdentifier(), new FolderTypeDisplayItem(folderType, type), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList("folder_type"), type.getIdentifier())));
+        folderFacets.add(new FacetValue(type.getIdentifier(), new FolderTypeDisplayItem(folderType, type), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(Constants.FIELD_FOLDER_TYPE), type.getIdentifier())));
     }
     
     /**

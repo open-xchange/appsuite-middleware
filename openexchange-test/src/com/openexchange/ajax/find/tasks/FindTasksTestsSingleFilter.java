@@ -131,7 +131,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
     
     /**
      * Test with simple query with no filters
-     * Should find 28 tasks.
+     * Should find 29 tasks.
      * 
      * @throws JSONException 
      * @throws IOException 

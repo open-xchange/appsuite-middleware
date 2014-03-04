@@ -360,14 +360,13 @@ public class FindTasksTestEnvironment {
      * Inserting :
      * - 5 tasks in both users' private folder
      * - 5 tasks in both users' public folder
-     * - 5 tasks in user's B both shared folder (ro, rw for user A)
+     * - 5 tasks in user's B both shared folder (RO, RW for user A)
      * - 1 task with attachment in user's A private folder
      * - 1 task with 1 participants (1int) in user's B private folder
      * - 1 task with 2 participants (2int) in user's A private folder
      * - 1 task with 3 participants (2int,1ext) in user's B private folder
      * - 1 task with 2 participants (1int,1ext) in user's A private folder
-     *    (1 shared task will indirectly be inserted in user's A root task folder)
-     * Total: 31 tasks
+     * Total: 35 tasks
      * @throws Exception 
      */
     private final void createAndInsertTasks() throws Exception {
@@ -410,9 +409,9 @@ public class FindTasksTestEnvironment {
         list.add(usrPartA);
         insertTask(clientA, FolderType.PRIVATE, Status.IN_PROGRESS, userAprivateTestFolder.getObjectID(), list, false);
         
-        //insert a task with attachment in private with status deferred and 2 internal (a+b) and 1 external participant for user b
+        //insert a task with attachment in private with status waiting and 2 internal (a+b) and 1 external participant for user b
         list.add(extPart);
-        insertTask(clientB, FolderType.PRIVATE, Status.IN_PROGRESS, userBprivateTestFolder.getObjectID(), list, true);
+        insertTask(clientB, FolderType.PRIVATE, Status.WAITING, userBprivateTestFolder.getObjectID(), list, true);
 
         //insert a task with attachment in private with status done and 1 internal (a) and 1 external participant for user a
         list.clear();
