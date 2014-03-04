@@ -49,7 +49,6 @@
 
 package com.openexchange.find.basic.tasks;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -63,13 +62,7 @@ import java.util.Set;
  */
 public class Constants {
 
-    public final static String FIELD_FROM = "from";
-
-    public final static String FIELD_TO = "to";
-
-    public final static String FIELD_CC = "cc";
-
-    public final static String FIELD_SUBJECT = "subject";
+    public final static String FIELD_TITLE = "title";
 
     public final static String FIELD_DESCRIPTION = "description";
 
@@ -82,12 +75,14 @@ public class Constants {
     public final static String FIELD_ATTACHMENT_NAME = "attachment_name";
 
     public final static String FIELD_TYPE = "type";
-
-    public static final List<String> PERSONS_FILTER_FIELDS = Arrays.asList(new String[] { FIELD_FROM, FIELD_TO, FIELD_CC });
+    
+    public final static String FIELD_PARTICIPANT = "participant";
+    
+    public final static List<String> PARTICIPANTS = Collections.singletonList(FIELD_PARTICIPANT);
 
     public static final Set<String> FOLDERS_FILTER_FIELDS = createStringSet(FIELD_FOLDER);
 
-    public static final Set<String> QUERY_FIELDS = createStringSet(FIELD_SUBJECT, FIELD_DESCRIPTION, FIELD_FROM, FIELD_TO, FIELD_CC);
+    public static final Set<String> QUERY_FIELDS = createStringSet(FIELD_TITLE, FIELD_DESCRIPTION, FIELD_ATTACHMENT_NAME);
 
     private static Set<String> createStringSet(String... args) {
         Set<String> set = new HashSet<String>(args.length);

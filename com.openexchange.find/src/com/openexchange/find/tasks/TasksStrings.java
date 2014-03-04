@@ -64,7 +64,7 @@ public class TasksStrings implements LocalizableStrings {
     public static final String FACET_GLOBAL = "%1$s <i>in tasks</i>";
 
     // Search in task name.
-    public static final String FACET_TASK_SUBJECT = "Task subject";
+    public static final String FACET_TASK_TITLE = "%1$s <i>in title</i>";
 
     // Search in folders.
     public static final String FACET_TASK_FOLDERS = "Task folders";
@@ -79,28 +79,28 @@ public class TasksStrings implements LocalizableStrings {
     public static final String FACET_TASK_STATUS = "Task status";
 
     // Search in task description
-    public static final String FACET_TASK_DESCRIPTION = "Task description";
+    public static final String FACET_TASK_DESCRIPTION = "%1$s <i>in description</i>";
 
     // Search in task location
     public static final String FACET_TASK_LOCATION = "Task location";
 
     // Search in task attachment name
-    public static final String FACET_TASK_ATTACHMENT_NAME = "Task attachment name";
+    public static final String FACET_TASK_ATTACHMENT_NAME = "%1$s <i>in attachment name</i>";
 
     // ------------------------- i18n strings for folder types ------------------------------------- //
 
-    public static final String TASK_TYPE_NOT_STARTED = "Not Started";
+    public static final String TASK_STATUS_NOT_STARTED = "Not Started";
 
-    public static final String TASK_TYPE_IN_PROGRESS = "in Progress";
+    public static final String TASK_STATUS_IN_PROGRESS = "In Progress";
 
-    public static final String TASK_TYPE_DONE = "Done";
+    public static final String TASK_STATUS_DONE = "Done";
 
-    public static final String TASK_TYPE_WAITING = "Waiting";
+    public static final String TASK_STATUS_WAITING = "Waiting";
 
-    public static final String TASK_TYPE_DEFERRED = "Deferred";
+    public static final String TASK_STATUS_DEFERRED = "Deferred";
 
-    public static final String TASK_STATUS_SINGLE_TASK = "Single Task";
+    public static final String TASK_TYPE_SINGLE_TASK = "Single Task";
 
-    public static final String TASK_STATUS_SERIES = "Series";
+    public static final String TASK_TYPE_SERIES = "Series";
 
 }
