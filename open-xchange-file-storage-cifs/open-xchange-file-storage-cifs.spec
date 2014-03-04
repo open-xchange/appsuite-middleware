@@ -56,6 +56,8 @@ Build for patch 2014-02-26
 Build for patch 2014-02-28
 * Fri Feb 21 2014 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2014-02-26
+* Tue Feb 18 2014 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2014-02-20
 * Wed Feb 12 2014 Thorben Betten <thorben.betten@open-xchange.com>
 prepare for 7.6.0
 * Fri Feb 07 2014 Thorben Betten <thorben.betten@open-xchange.com>
