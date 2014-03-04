@@ -84,7 +84,7 @@
 * 2014-02-24 - marcus.klein@open-xchange.com
 
  - Fix for bug 31238: Use the same properties map for the general login method of the LoginPerformer and the AuthenticationService.
- 
+
 * 2014-02-24 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 30708: Incorrect credentials for "clearpreviewcache" don't return an error-code 
