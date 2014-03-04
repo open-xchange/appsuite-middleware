@@ -49,7 +49,17 @@
 package com.openexchange.find;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.Filter;
 
 /**
@@ -66,17 +76,31 @@ public class SearchRequest implements Serializable {
 
     private final int size;
 
-    private final List<String> queries;
+    private final List<ActiveFacet> activeFacets;
 
-    private final List<Filter> filters;
+    private final Map<FacetType, List<ActiveFacet>> facetMap;
+
+    private List<Filter> filters;
+
+    private List<String> queries;
 
 
-    public SearchRequest(int start, int size, List<String> queries, List<Filter> filters) {
+    public SearchRequest(int start, int size, List<ActiveFacet> activeFacets) {
         super();
         this.start = start;
         this.size = size;
-        this.queries = queries;
-        this.filters = filters;
+        this.activeFacets = new ArrayList<ActiveFacet>(activeFacets);
+        facetMap = new HashMap<FacetType, List<ActiveFacet>>(activeFacets.size());
+        for (ActiveFacet facet : activeFacets) {
+            FacetType type = facet.getType();
+            List<ActiveFacet> facetList = facetMap.get(type);
+            if (facetList == null) {
+                facetList = new LinkedList<ActiveFacet>();
+                facetMap.put(type, facetList);
+            }
+
+            facetList.add(facet);
+        }
     }
 
     /**
@@ -103,57 +127,84 @@ public class SearchRequest implements Serializable {
      * May be empty to denote no query at all.
      */
     public List<String> getQueries() {
+        if (queries == null) {
+            List<ActiveFacet> globals = facetMap.get(CommonFacetType.GLOBAL);
+            if (globals == null) {
+                queries = Collections.emptyList();
+            } else {
+                queries = new LinkedList<String>();
+                for (ActiveFacet facet : globals) {
+                    queries.addAll(facet.getFilter().getQueries());
+                }
+            }
+        }
+
         return queries;
     }
 
     /**
      * A list of filters to be applied on the search results.
+     * If {@link CommonFacetType#GLOBAL} is present, it is nevertheless
+     * not part of the result list.
+     *
      * @return May be empty but never <code>null</code>.
      */
     public List<Filter> getFilters() {
+        return getFilters(Collections.<FacetType>emptySet());
+    }
+
+    /**
+     * A list of filters to be applied on the search results.
+     * If {@link CommonFacetType#GLOBAL} is present, it is nevertheless
+     * not part of the result list.
+     *
+     * @param exclude A set of facet types whose filters should be excluded
+     * from the result list.
+     * @return May be empty but never <code>null</code>.
+     */
+    public List<Filter> getFilters(Set<FacetType> exclude) {
+        if (filters == null) {
+            filters = new LinkedList<Filter>();
+            for (Entry<FacetType, List<ActiveFacet>> entry : facetMap.entrySet()) {
+                FacetType type = entry.getKey();
+                if (type != CommonFacetType.GLOBAL && !exclude.contains(type)) {
+                    for (ActiveFacet facet : entry.getValue()) {
+                        filters.add(facet.getFilter());
+                    }
+                }
+            }
+        }
+
         return filters;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((filters == null) ? 0 : filters.hashCode());
-        result = prime * result + ((queries == null) ? 0 : queries.hashCode());
-        result = prime * result + size;
-        result = prime * result + start;
-        return result;
+    /**
+     * Gets the active facet for the given type if and only if
+     * {@link FacetType#appliesOnce()} is <code>true</code>.
+     * @return The facet or <code>null</code> if not present.
+     */
+    public ActiveFacet getActiveFacet(FacetType type) {
+        if (type.appliesOnce()) {
+            List<ActiveFacet> list = facetMap.get(type);
+            if (list != null) {
+                return list.get(0);
+            }
+        }
+
+        return null;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SearchRequest other = (SearchRequest) obj;
-        if (filters == null) {
-            if (other.filters != null)
-                return false;
-        } else if (!filters.equals(other.filters))
-            return false;
-        if (queries == null) {
-            if (other.queries != null)
-                return false;
-        } else if (!queries.equals(other.queries))
-            return false;
-        if (size != other.size)
-            return false;
-        if (start != other.start)
-            return false;
-        return true;
+    /**
+     * Gets the original list of active facets.
+     * @return A possibly empty list, never <code>null</code>.
+     */
+    public List<ActiveFacet> getActiveFacets() {
+        return activeFacets;
     }
 
     @Override
     public String toString() {
-        return "SearchRequest [start=" + start + ", size=" + size + ", queries=" + queries + ", filters=" + filters + "]";
+        return "SearchRequest [start=" + start + ", size=" + size + ", queries=" + getQueries() + ", filters=" + getFilters() + "]";
     }
 
 }

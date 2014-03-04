@@ -61,7 +61,6 @@ import com.openexchange.find.basic.contacts.BasicContactsDriver;
 import com.openexchange.find.basic.drive.BasicDriveDriver;
 import com.openexchange.find.basic.mail.BasicMailDriver;
 import com.openexchange.find.basic.tasks.BasicTasksDriver;
-import com.openexchange.find.basic.tasks.MockTasksDriver;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -70,6 +69,7 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -85,7 +85,7 @@ public class FindBasicActivator extends HousekeepingActivator {
         return new Class<?>[] { ContactService.class, FolderService.class, MailService.class,
             MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
             AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class,
-            IDBasedFolderAccessFactory.class};
+            IDBasedFolderAccessFactory.class, ResourceService.class };
     }
 
     @Override

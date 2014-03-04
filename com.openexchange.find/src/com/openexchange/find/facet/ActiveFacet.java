@@ -47,55 +47,83 @@
  *
  */
 
-package com.openexchange.find.basic.contacts;
+package com.openexchange.find.facet;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.contacts.ContactsFacetType;
-import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.Filter;
-import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link AddressbookFacet}
+ * An {@link ActiveFacet} is a facet that is currently selected to
+ * filter search results.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public class AddressbookFacet extends CommonContactSearchFacet {
+public class ActiveFacet {
 
-    private static final long serialVersionUID = -9131205652463933031L;
+    private final FacetType type;
 
-    static final ContactField[] ADDRESSBOOK_FIELDS = merge(
-        AddressFacet.ADDRESS_FIELDS, EmailFacet.EMAIL_FIELDS, NameFacet.NAME_FIELDS, PhoneFacet.PHONE_FIELDS,
-        new ContactField[] { ContactField.CATEGORIES, ContactField.COMPANY, ContactField.COMMERCIAL_REGISTER }
-        //TOD=: more fields
-    );
+    private final String valueId;
 
-    private static final String ID = "address_book";
+    private final Filter filter;
 
-    public AddressbookFacet() {
-        super(ContactsFacetType.ADDRESSBOOK, Collections.singletonList(
-            new FacetValue(ID, new SimpleDisplayItem(ID), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(ID), "override"))));
+    /**
+     * Initializes a new {@link ActiveFacet}.
+     * @param type The facets type.
+     * @param valueId The id of the selected value.
+     * @param filter The filter according to the value.
+     */
+    public ActiveFacet(FacetType type, String valueId, Filter filter) {
+        super();
+        this.type = type;
+        this.valueId = valueId;
+        this.filter = filter;
     }
+
+    public FacetType getType() {
+        return type;
+    }
+
+    public String getValueId() {
+        return valueId;
+    }
+
+    public Filter getFilter() {
+        return filter;
+    }
+
     @Override
-    public String getID() {
-        return ID;
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((valueId == null) ? 0 : valueId.hashCode());
+        return result;
     }
 
     @Override
-    protected ContactField[] getFields() {
-        return ADDRESSBOOK_FIELDS;
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ActiveFacet other = (ActiveFacet) obj;
+        if (type == null) {
+            if (other.type != null)
+                return false;
+        } else if (!type.equals(other.type))
+            return false;
+        if (valueId == null) {
+            if (other.valueId != null)
+                return false;
+        } else if (!valueId.equals(other.valueId))
+            return false;
+        return true;
     }
 
-    private static ContactField[] merge(ContactField[]...fields) {
-        Set<ContactField> mergedFields = new HashSet<ContactField>();
-        for (ContactField[] contactFields : fields) {
-            mergedFields.addAll(Arrays.asList(contactFields));
-        }
-        return mergedFields.toArray(new ContactField[mergedFields.size()]);
+    @Override
+    public String toString() {
+        return "ActiveFacet [type=" + type + ", valueId=" + valueId + ", filter=" + filter + "]";
     }
 
 }

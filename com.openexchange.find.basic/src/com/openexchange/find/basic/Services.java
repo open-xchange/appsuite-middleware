@@ -56,6 +56,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -76,6 +77,10 @@ public class Services {
 
     public static ContactService getContactService() throws OXException {
         return requireService(ContactService.class);
+    }
+
+    public static ResourceService getResourceService() throws OXException {
+        return requireService(ResourceService.class);
     }
 
     public static FolderService getFolderService() throws OXException {

@@ -86,7 +86,7 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData 
     }
 
     @Override
-    public String modifyCallbackURL(String callbackUrl, Session session) {
+    public String modifyCallbackURL(String callbackUrl, String currentHost, Session session) {
         if (deferrer == null) {
             return callbackUrl;
         }

@@ -49,7 +49,10 @@
 
 package com.openexchange.find.common;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.find.facet.FacetType;
+import com.openexchange.java.Strings;
 
 /**
  * {@link CommonFacetType}
@@ -66,16 +69,27 @@ public enum CommonFacetType implements FacetType {
      */
     GLOBAL,
     /**
+     * The facet type for folders.
+     */
+    FOLDER(CommonStrings.FACET_TYPE_FOLDER, false, true),
+    /**
      * The facet type for folder type.
      */
     FOLDER_TYPE(CommonStrings.FACET_TYPE_FOLDER_TYPE),
     ;
 
-    // ------------------------------------------------------------ //
+    private static final Map<String, CommonFacetType> typesById = new HashMap<String, CommonFacetType>();
+    static {
+        for (CommonFacetType type : values()) {
+            typesById.put(type.getId(), type);
+        }
+    }
 
     private final String displayName;
 
     private final boolean isFieldFacet;
+
+    private final boolean appliesOnce;
 
     private CommonFacetType() {
         this(null, true);
@@ -86,8 +100,13 @@ public enum CommonFacetType implements FacetType {
     }
 
     private CommonFacetType(final String displayName, final boolean isFieldFacet) {
+        this(displayName, isFieldFacet, false);
+    }
+
+    private CommonFacetType(final String displayName, final boolean isFieldFacet, final boolean appliesOnce) {
         this.displayName = displayName;
         this.isFieldFacet = isFieldFacet;
+        this.appliesOnce = appliesOnce;
     }
 
     @Override
@@ -106,8 +125,20 @@ public enum CommonFacetType implements FacetType {
     }
 
     @Override
-    public boolean isMandatory() {
-        return false;
+    public boolean appliesOnce() {
+        return appliesOnce;
+    }
+
+    /**
+     * Gets a {@link CommonFacetType} by its id.
+     * @return The type or <code>null</code>, if the id is invalid.
+     */
+    public static CommonFacetType getById(String id) {
+        if (Strings.isEmpty(id)) {
+            return null;
+        }
+
+        return typesById.get(id);
     }
 
 }

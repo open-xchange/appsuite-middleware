@@ -61,7 +61,6 @@ import com.openexchange.java.Strings;
  * @since 7.6.0
  */
 public enum ContactsFacetType implements FacetType {
-    ADDRESSBOOK(ContactsStrings.FACET_ADRESSBOOK),
     NAME(ContactsStrings.FACET_NAME),
     EMAIL(ContactsStrings.FACET_EMAIL),
     PHONE(ContactsStrings.FACET_PHONE),
@@ -71,10 +70,10 @@ public enum ContactsFacetType implements FacetType {
     TYPE(ContactsStrings.FACET_TYPE)
     ;
 
-    private static final Map<String, ContactsFacetType> typesByName = new HashMap<String, ContactsFacetType>();
+    private static final Map<String, ContactsFacetType> typesById = new HashMap<String, ContactsFacetType>();
     static {
         for (ContactsFacetType type : values()) {
-            typesByName.put(type.getId(), type);
+            typesById.put(type.getId(), type);
         }
     }
 
@@ -114,20 +113,20 @@ public enum ContactsFacetType implements FacetType {
     }
 
     @Override
-    public boolean isMandatory() {
+    public boolean appliesOnce() {
         return false;
     }
 
     /**
-     * Gets a {@link ContactsFacetType} by its name.
-     * @return The type or <code>null</code>, if the name is invalid.
+     * Gets a {@link ContactsFacetType} by its id.
+     * @return The type or <code>null</code>, if the id is invalid.
      */
-    public static ContactsFacetType getByName(String name) {
-        if (Strings.isEmpty(name)) {
+    public static ContactsFacetType getById(String id) {
+        if (Strings.isEmpty(id)) {
             return null;
         }
 
-        return typesByName.get(name);
+        return typesById.get(id);
     }
 
 }

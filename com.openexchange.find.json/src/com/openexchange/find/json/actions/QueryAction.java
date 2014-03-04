@@ -49,17 +49,15 @@
 
 package com.openexchange.find.json.actions;
 
-import java.util.Collections;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.SearchService;
-import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.json.FindRequest;
 import com.openexchange.find.json.Offset;
 import com.openexchange.server.ServiceLookup;
@@ -85,20 +83,15 @@ public class QueryAction extends AbstractFindAction {
     @Override
     protected AJAXRequestResult doPerform(final FindRequest request) throws OXException, JSONException {
         final SearchService searchService = getSearchService();
-
+        final Module module = request.requireModule();
         final Offset offset = request.getOffset();
         if (offset.len <= 0) {
-            return new AJAXRequestResult(new SearchResult(-1, -1, Collections.<Document> emptyList()), SearchResult.class.getName());
+            return new AJAXRequestResult(SearchResult.EMPTY, SearchResult.class.getName());
         }
 
-        final List<String> queries = request.requireQueries();
-        final List<Filter> filters = request.optFilters();
-
-        final Module module = request.requireModule();
-
-        final SearchRequest searchRequest = new SearchRequest(offset.off, offset.len, queries, filters);
+        final List<ActiveFacet> activeFacets = request.getActiveFacets();
+        final SearchRequest searchRequest = new SearchRequest(offset.off, offset.len, activeFacets);
         final SearchResult result = searchService.search(searchRequest, module, request.getServerSession());
-
         return new AJAXRequestResult(result, SearchResult.class.getName());
     }
 

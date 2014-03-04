@@ -61,8 +61,8 @@ import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.common.FormattableDisplayItem;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
@@ -104,7 +104,7 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
      * @param results The list to append the filtered facets to.
      * @return The modified facet list.
      */
-    protected void filterFacets(List<Facet> facets, List<Facet> toRemove, List<Facet> results) {
+    protected void filterFacets(List<Facet> facets, List<ActiveFacet> toRemove, List<Facet> results) {
         if (facets.isEmpty()) {
             return;
         }
@@ -125,13 +125,16 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
             }
         }
 
-        for (Facet removable : toRemove) {
-            Map<String, FacetValue> valueMap = typeMap.get(removable.getType());
-            if (valueMap != null) {
-                for (FacetValue value : removable.getValues()) {
-                    valueMap.remove(value.getId());
-                }
+        for (ActiveFacet removable : toRemove) {
+            FacetType type = removable.getType();
+            if (type.appliesOnce()) {
+                typeMap.remove(type);
+                continue;
+            }
 
+            Map<String, FacetValue> valueMap = typeMap.get(type);
+            if (valueMap != null) {
+                valueMap.remove(removable.getValueId());
                 if (valueMap.isEmpty()) {
                     typeMap.remove(removable.getType());
                 }
@@ -152,27 +155,28 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
 
     @Override
     public final AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
-        Facet globalFacet = new FieldFacet(
-            CommonFacetType.GLOBAL,
-            getDisplayItemForGlobalFacet(autocompleteRequest),
-            getFilterForGlobalFacet(autocompleteRequest));
         AutocompleteResult autocompleteResult = doAutocomplete(autocompleteRequest, session);
         List<Facet> modifiedFacets = new LinkedList<Facet>();
-        modifiedFacets.add(globalFacet);
+        if (!autocompleteRequest.getPrefix().isEmpty()) {
+            Facet globalFacet = new FieldFacet(
+                CommonFacetType.GLOBAL,
+                new FormattableDisplayItem(getFormatStringForGlobalFacet(), autocompleteRequest.getPrefix()),
+                new Filter(Collections.singletonList(CommonFacetType.GLOBAL.getId()),
+                    Collections.singletonList(autocompleteRequest.getPrefix())));
+            modifiedFacets.add(globalFacet);
+        }
+
         filterFacets(autocompleteResult.getFacets(), autocompleteRequest.getActiveFactes(), modifiedFacets);
         autocompleteResult.setFacets(modifiedFacets);
         return autocompleteResult;
     }
 
-    // TODO: make abstract
-    protected DisplayItem getDisplayItemForGlobalFacet(AutocompleteRequest autocompleteRequest) {
-        return new SimpleDisplayItem("");
-    }
-
-    // TODO: make abstract
-    protected Filter getFilterForGlobalFacet(AutocompleteRequest autocompleteRequest) {
-        return new Filter((List<String>)null, (List<String>)null);
-    }
+    /**
+     * The format string to construct the display item for the global facet.
+     * Something like "%1$s <i>in file name</i>". Must contain exactly one
+     * string reference that will be replaced with the current prefix.
+     */
+    protected abstract String getFormatStringForGlobalFacet();
 
     /**
      * @see ModuleSearchDriver#autocomplete(ServerSession, AutocompleteRequest)

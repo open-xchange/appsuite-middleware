@@ -86,6 +86,24 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
     }
 
     @Override
+    public String deferredURLUsing(final String url, final String domain) {
+        if (url == null) {
+            return null;
+        }
+        String deferrerURL = domain;
+        if (Strings.isEmpty(deferrerURL)) {
+            return url;
+        }
+        deferrerURL = deferrerURL.trim();
+        if (seemsAlreadyDeferred(url, deferrerURL)) {
+            // Already deferred
+            return url;
+        }
+        // Return deferred URL
+        return new StringAllocator(deferrerURL).append(PREFIX.get().getPrefix()).append("defer?redirect=").append(encodeUrl(url, false, false)).toString();
+    }
+
+    @Override
     public boolean seemsDeferred(String url) {
         if (url == null) {
             return false;
@@ -115,6 +133,10 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
      */
     protected abstract String getDeferrerURL();
 
+    @Override
+    public boolean isDeferrerURLAvailable() {
+        return !Strings.isEmpty(getDeferrerURL());
+    }
 
     @Override
     public String getBasicDeferrerURL() {

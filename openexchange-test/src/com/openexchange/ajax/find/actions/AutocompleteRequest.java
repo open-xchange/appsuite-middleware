@@ -221,19 +221,19 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
         private FacetType facetTypeFor(Module module, String name) {
             switch(module) {
                 case MAIL:
-                    return MailFacetType.getByName(name);
+                    return MailFacetType.getById(name);
 
                 case CALENDAR:
-                    return CalendarFacetType.getByName(name);
+                    return CalendarFacetType.getById(name);
 
                 case CONTACTS:
-                    return ContactsFacetType.getByName(name);
+                    return ContactsFacetType.getById(name);
 
                 case DRIVE:
-                    return DriveFacetType.getByName(name);
+                    return DriveFacetType.getById(name);
 
                 case TASKS:
-                    return TasksFacetType.getByName(name);
+                    return TasksFacetType.getById(name);
 
                 default:
                     return null;

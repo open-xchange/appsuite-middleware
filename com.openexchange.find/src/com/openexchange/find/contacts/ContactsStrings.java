@@ -53,14 +53,14 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * Contact-specific strings are potentially displayed in client applications and should therefore be localized.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.0
  */
 public class ContactsStrings implements LocalizableStrings {
 
     // Search in address book
-    public static final String FACET_ADRESSBOOK = "address book";
+    public static final String FACET_GLOBAL = "%1$s <i>in address book</i>";
 
     // Search in names
     public static final String FACET_NAME = "name";

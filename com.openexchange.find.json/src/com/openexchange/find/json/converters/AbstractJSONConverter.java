@@ -95,13 +95,9 @@ public abstract class AbstractJSONConverter implements ResultConverter {
             FacetType type = facet.getType();
             facetJSON.put("id", type.getId());
             if (type.isFieldFacet()) {
-                facetJSON.put("isFieldFacet", true);
+                facetJSON.put("is_field_facet", true);
             } else {
-                facetJSON.put("displayName", translator.translate(locale, type.getDisplayName()));
-            }
-
-            if (type.isMandatory()) {
-                facetJSON.put("isMandatory", true);
+                facetJSON.put("display_name", translator.translate(locale, type.getDisplayName()));
             }
 
             // Facet values
@@ -124,7 +120,7 @@ public abstract class AbstractJSONConverter implements ResultConverter {
         JSONObject valueJSON = new JSONObject(4);
         valueJSON.put("id", value.getId());
         String displayName = convertDisplayItem(locale, value.getDisplayItem());
-        valueJSON.put("displayName", displayName);
+        valueJSON.put("display_name", displayName);
         int count = value.getCount();
         if (count >= 0) {
             valueJSON.put("count", value.getCount());
@@ -136,11 +132,13 @@ public abstract class AbstractJSONConverter implements ResultConverter {
             for (Filter filter : filters) {
                 JSONObject filterJSON = new JSONObject();
                 filterJSON.put("id", filter.getId());
-                filterJSON.put("displayName", translator.translate(locale, filter.getDisplayName()));
+                // TODO: introduce boolean if displayName is localizable or state in javadoc
+                // that it has to be always localizable
+                filterJSON.put("display_name", translator.translate(locale, filter.getDisplayName()));
                 filterJSON.put("filter", convertFilter(filter));
                 filtersJSON.put(filterJSON);
             }
-            valueJSON.put("filters", filtersJSON);
+            valueJSON.put("options", filtersJSON);
         } else {
             valueJSON.put("filter", convertFilter(filters.get(0)));
         }

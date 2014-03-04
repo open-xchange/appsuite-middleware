@@ -246,7 +246,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final Session session) throws OXException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final String currentHost, final Session session) throws OXException {
         try {
             /*
              * Get associated OAuth meta data implementation
@@ -270,7 +270,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Apply possible modifications to call-back URL
              */
             {
-                final String modifiedUrl = metaData.modifyCallbackURL(cbUrl, session);
+                final String modifiedUrl = metaData.modifyCallbackURL(cbUrl, currentHost, session);
                 if (modifiedUrl != null) {
                     cbUrl = modifiedUrl;
                 }
@@ -311,7 +311,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             if (metaData.registerTokenBasedDeferrer() && null != scribeToken) {
                 // Is only applicable if call-back URL is deferred; e.g. /ajax/defer?redirect=http:%2F%2Fmy.host.com%2Fpath...
-                if (null != ds) {
+                if (null != ds && ds.isDeferrerURLAvailable()) {
                     if (ds.seemsDeferred(cbUrl)) {
                         callbackRegistry.add(scribeToken.getToken(), cbUrl);
                     } else {

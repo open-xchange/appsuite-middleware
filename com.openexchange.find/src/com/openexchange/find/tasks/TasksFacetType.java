@@ -70,10 +70,10 @@ public enum TasksFacetType implements FacetType {
     TASK_TYPE(TasksStrings.FACET_TASK_TYPE),
     TASK_STATUS(TasksStrings.FACET_TASK_STATUS), ;
 
-    private static final Map<String, TasksFacetType> typesByName = new HashMap<String, TasksFacetType>();
+    private static final Map<String, TasksFacetType> typesById = new HashMap<String, TasksFacetType>();
     static {
         for (TasksFacetType type : values()) {
-            typesByName.put(type.getId(), type);
+            typesById.put(type.getId(), type);
         }
     }
 
@@ -99,20 +99,20 @@ public enum TasksFacetType implements FacetType {
     }
 
     @Override
-    public boolean isMandatory() {
+    public boolean appliesOnce() {
         return false;
     }
 
     /**
-     * Gets a {@link TasksFacetType} by its name.
-     * @return The type or <code>null</code>, if the name is invalid.
+     * Gets a {@link TasksFacetType} by its id.
+     * @return The type or <code>null</code>, if the id is invalid.
      */
-    public static TasksFacetType getByName(String name) {
-        if (Strings.isEmpty(name)) {
+    public static TasksFacetType getById(String id) {
+        if (Strings.isEmpty(id)) {
             return null;
         }
 
-        return typesByName.get(name);
+        return typesById.get(id);
     }
 
 }

@@ -56,7 +56,7 @@ import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
-import com.openexchange.oauth.json.service.ServiceRegistry;
+import com.openexchange.oauth.json.Services;
 
 /**
  * Parses the JSON representation of an OAuth account.
@@ -86,7 +86,7 @@ public class AccountParser {
         }
         if (accountJSON.hasAndNotNull(AccountField.SERVICE_ID.getName())) {
             final String serviceId = accountJSON.getString(AccountField.SERVICE_ID.getName());
-            final OAuthServiceMetaDataRegistry registry = ServiceRegistry.getInstance().getService(OAuthService.class, true).getMetaDataRegistry();
+            final OAuthServiceMetaDataRegistry registry = Services.getService(OAuthService.class).getMetaDataRegistry();
             account.setMetaData(registry.getService(serviceId, user, contextId));
         }
 

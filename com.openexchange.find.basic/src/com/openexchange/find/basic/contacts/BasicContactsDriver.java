@@ -50,10 +50,13 @@
 package com.openexchange.find.basic.contacts;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -69,6 +72,7 @@ import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.contacts.ContactsStrings;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
@@ -105,19 +109,21 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.USE_COUNT
     };
 
+    static final ContactField[] ADDRESSBOOK_FIELDS = merge(
+        AddressFacet.ADDRESS_FIELDS, EmailFacet.EMAIL_FIELDS, NameFacet.NAME_FIELDS, PhoneFacet.PHONE_FIELDS,
+        new ContactField[] { ContactField.CATEGORIES, ContactField.COMPANY, ContactField.COMMERCIAL_REGISTER }
+        //TOD=: more fields
+    );
+
 
     private final Map<String, ContactSearchFacet> staticFacets;
-    private final AddressbookFacet addressbookFacet;
 
     /**
      * Initializes a new {@link BasicContactsDriver}.
      */
     public BasicContactsDriver() {
         super();
-        addressbookFacet = new AddressbookFacet();
         staticFacets = new HashMap<String, ContactSearchFacet>();
-        AddressbookFacet addressbookFacet = new AddressbookFacet();
-        staticFacets.put(addressbookFacet.getID(), addressbookFacet);
         AddressFacet addressFacet = new AddressFacet();
         staticFacets.put(addressFacet.getID(), addressFacet);
         ContactTypeFacet contactTypeFacet = new ContactTypeFacet();
@@ -143,6 +149,11 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     @Override
+    protected String getFormatStringForGlobalFacet() {
+        return ContactsStrings.FACET_GLOBAL;
+    }
+
+    @Override
     public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
         /*
@@ -163,7 +174,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
          * combine with addressbook queries
          */
         for (String query : searchRequest.getQueries()) {
-            SearchTerm<?> term = addressbookFacet.getSearchTerm(session, query);
+            SearchTerm<?> term = CommonContactSearchFacet.getSearchTerm(session, ADDRESSBOOK_FIELDS, query);
             if (null != term) {
                 searchTerm.addSearchTerm(term);
             }
@@ -188,7 +199,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         } finally {
             SearchIterators.close(searchIterator);
         }
-        return new SearchResult(-1, searchRequest.getStart(), contactDocuments);
+        return new SearchResult(-1, searchRequest.getStart(), contactDocuments, searchRequest.getActiveFacets());
     }
 
     @Override
@@ -263,6 +274,14 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             }
         }
         return 0 == compositeTerm.getOperands().length ? null : compositeTerm;
+    }
+
+    private static ContactField[] merge(ContactField[]...fields) {
+        Set<ContactField> mergedFields = new HashSet<ContactField>();
+        for (ContactField[] contactFields : fields) {
+            mergedFields.addAll(Arrays.asList(contactFields));
+        }
+        return mergedFields.toArray(new ContactField[mergedFields.size()]);
     }
 
 }

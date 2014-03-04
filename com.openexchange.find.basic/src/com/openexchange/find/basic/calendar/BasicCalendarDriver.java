@@ -140,7 +140,7 @@ public class BasicCalendarDriver extends MockCalendarDriver {
          * construct search result
          */
         return new SearchResult(appointments.size(), searchRequest.getStart(),
-            getDocuments(appointments, searchRequest.getStart(), searchRequest.getSize()));
+            getDocuments(appointments, searchRequest.getStart(), searchRequest.getSize()), searchRequest.getActiveFacets());
     }
 
     private static List<Document> getDocuments(List<Appointment> appointments, int start, int size) {

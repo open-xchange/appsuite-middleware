@@ -51,7 +51,6 @@ package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -441,21 +440,6 @@ public class OXContextMySQLStorageCommon {
             });
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
-        }
-    }
-
-    public final void handleCreateContextRollback(final Connection configCon, final Connection oxCon, final int contextId) {
-        // Creating the whole context is now done in a transaction. Rolling back this transaction should be sufficient to remove the context
-        // if creation fails.
-        rollback(oxCon);
-        // remove all entries from configuration database because everything to configuration database has been commited.
-        try {
-            if (configCon != null) {
-                deleteContextFromConfigDB(configCon, contextId);
-                configCon.commit();
-            }
-        } catch (final SQLException e) {
-            log.error("SQL Error removing/rollback entries from configdb for context {}", contextId, e);
         }
     }
 

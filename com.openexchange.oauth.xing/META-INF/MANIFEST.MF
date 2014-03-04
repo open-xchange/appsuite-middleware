@@ -5,8 +5,10 @@ Bundle-SymbolicName: com.openexchange.oauth.xing
 Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.capabilities,
+Import-Package: com.openexchange.ajax,
+ com.openexchange.capabilities,
  com.openexchange.config,
+ com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.groupware.container,
  com.openexchange.http.deferrer,
@@ -17,6 +19,8 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.session,
+ javax.servlet,
+ javax.servlet.http,
  org.apache.commons.httpclient,
  org.apache.commons.httpclient.auth,
  org.apache.commons.httpclient.cookie,

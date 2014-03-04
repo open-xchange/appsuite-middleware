@@ -51,6 +51,7 @@ package com.openexchange.ajax.find.actions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
@@ -62,6 +63,7 @@ import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.find.Document;
 import com.openexchange.find.SearchResult;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Filter;
 
 /**
@@ -189,7 +191,7 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
                 documents.add(new PropDocument(jDocuments.getJSONObject(i).asMap()));
             }
 
-            return new QueryResponse(response, new SearchResult(numFound, from, documents));
+            return new QueryResponse(response, new SearchResult(numFound, from, documents, Collections.<ActiveFacet>emptyList()));
         }
     }
 

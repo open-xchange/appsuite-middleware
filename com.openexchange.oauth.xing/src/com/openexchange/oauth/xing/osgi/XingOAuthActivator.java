@@ -55,6 +55,7 @@ import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -78,7 +79,7 @@ public final class XingOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class };
+        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class };
     }
 
     @Override

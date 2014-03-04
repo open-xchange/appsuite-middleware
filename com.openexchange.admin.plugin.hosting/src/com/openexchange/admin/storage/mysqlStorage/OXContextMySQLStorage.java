@@ -65,7 +65,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -139,7 +138,7 @@ import com.openexchange.tools.sql.DBUtils;
  * This class provides the implementation for the storage into a MySQL database
  *
  * @author d7
- * @auhtor cutmasta
+ * @author cutmasta
  */
 public class OXContextMySQLStorage extends OXContextSQLStorage {
 
@@ -1045,8 +1044,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 findOrCreateSchema(configCon, db);
                 contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
                 contextCommon.fillLogin2ContextTable(ctx, configCon);
+                final Context retval = writeContext(ctx, adminUser, access);
                 configCon.commit();
-                final Context retval = writeContext(configCon, ctx, adminUser, access);
                 LOG.info("Context {} created!", retval.getId());
                 return retval;
             } catch (SQLException e) {
@@ -1063,11 +1062,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private Context writeContext(final Connection configCon, final Context ctx, final User adminUser, final UserModuleAccess access) throws StorageException {
+    private Context writeContext(final Context ctx, final User adminUser, final UserModuleAccess access) throws StorageException {
         final int contextId = ctx.getId().intValue();
-        Connection oxCon = null;
+        Connection oxCon;
         try {
             oxCon = cache.getConnectionForContext(contextId);
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        try {
             oxCon.setAutoCommit(false);
 
             contextCommon.initSequenceTables(contextId, oxCon);
@@ -1119,50 +1123,42 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             oxa.addContextSystemFolders(contextId, display, adminUser.getLanguage(), oxCon);
 
             oxCon.commit();
-            // TODO: cutmasta call setters and fill all required fields
             ctx.setEnabled(Boolean.TRUE);
-            adminUser.setId(Integer.valueOf(adminId));
+            adminUser.setId(I(adminId));
             return ctx;
         } catch (final DataTruncation e) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, e);
-            contextCommon.handleCreateContextRollback(configCon, oxCon, contextId);
+            rollback(oxCon);
             throw AdminCache.parseDataTruncation(e);
         } catch (final OXException e) {
             LOG.error("Error", e);
-            contextCommon.handleCreateContextRollback(configCon, oxCon, contextId);
+            rollback(oxCon);
             throw new StorageException(e.toString());
         } catch (final StorageException e) {
             LOG.error("Storage Error", e);
-            contextCommon.handleCreateContextRollback(configCon, oxCon, contextId);
+            rollback(oxCon);
             throw e;
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
-            contextCommon.handleCreateContextRollback(configCon, oxCon, contextId);
-            throw new StorageException(e);
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            contextCommon.handleCreateContextRollback(configCon, oxCon, contextId);
+            rollback(oxCon);
             throw new StorageException(e);
         } catch (final InvalidDataException e) {
             LOG.error("InvalidData Error", e);
-            contextCommon.handleCreateContextRollback(configCon, oxCon, contextId);
+            rollback(oxCon);
             throw new StorageException(e);
         } catch (final Exception e) {
             LOG.error("Internal Error", e);
-            contextCommon.handleCreateContextRollback(configCon, oxCon, contextId);
+            rollback(oxCon);
             throw new StorageException("Internal server error occured");
         } finally {
             autocommit(oxCon);
             try {
-                if (oxCon != null) {
-                    cache.pushConnectionForContext(contextId, oxCon);
-                }
+                cache.pushConnectionForContext(contextId, oxCon);
             } catch (final PoolException ecp) {
                 LOG.error("Error pushing ox write connection to pool!", ecp);
             }
         }
     }
-
 
     private void updateDynamicAttributes(final Connection oxCon, final Context ctx) throws SQLException {
         PreparedStatement stmtupdateattribute = null;

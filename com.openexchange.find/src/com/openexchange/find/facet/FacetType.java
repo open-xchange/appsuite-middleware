@@ -83,10 +83,13 @@ public interface FacetType {
     boolean isFieldFacet();
 
     /**
-     * @return if this facet is mandatory, meaning
-     * that this facet must be set when performing a
-     * search.
+     * Returns if only one value of this facet can be active at a time
+     * (e.g. it makes sense to filter for items from last week OR last month,
+     * but not both at the same time).
+     *
+     * @return <code>false</code> if this facet may be set multiple times
+     * with different values and filters.
      */
-    boolean isMandatory();
+    boolean appliesOnce();
 
 }

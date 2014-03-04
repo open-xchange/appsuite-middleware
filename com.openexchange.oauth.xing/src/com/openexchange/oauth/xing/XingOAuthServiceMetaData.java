@@ -49,13 +49,16 @@
 
 package com.openexchange.oauth.xing;
 
+import static com.openexchange.ajax.AJAXServlet.encodeUrl;
 import java.util.HashMap;
 import java.util.Map;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
@@ -106,16 +109,6 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     }
 
     @Override
-    public String modifyCallbackURL(final String callbackUrl, final Session session) {
-        if (null == callbackUrl) {
-            return super.modifyCallbackURL(callbackUrl, session);
-        }
-
-        final DeferringURLService deferrer = services.getService(DeferringURLService.class);
-        return null == deferrer ? callbackUrl : deferrer.getDeferredURL(callbackUrl);
-    }
-
-    @Override
     public API getAPI() {
         return API.XING;
     }
@@ -150,6 +143,48 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     @Override
     public boolean registerTokenBasedDeferrer() {
         return true;
+    }
+
+    @Override
+    public String modifyCallbackURL(final String callbackUrl, final String currentHost, final Session session) {
+        if (null == callbackUrl) {
+            return super.modifyCallbackURL(callbackUrl, currentHost, session);
+        }
+
+        final DeferringURLService deferrer = services.getService(DeferringURLService.class);
+        if (null != deferrer && deferrer.isDeferrerURLAvailable()) {
+            return deferrer.getDeferredURL(callbackUrl);
+        }
+
+        return deferredURLUsing(callbackUrl, "https://" + currentHost);
+    }
+
+    private String deferredURLUsing(final String url, final String domain) {
+        if (url == null) {
+            return null;
+        }
+        String deferrerURL = domain;
+        if (Strings.isEmpty(deferrerURL)) {
+            return url;
+        }
+        deferrerURL = deferrerURL.trim();
+        if (seemsAlreadyDeferred(url, deferrerURL)) {
+            // Already deferred
+            return url;
+        }
+        // Return deferred URL
+        final DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
+        return new StringAllocator(deferrerURL).append(prefixService.getPrefix()).append("defer?redirect=").append(encodeUrl(url, false, false)).toString();
+    }
+
+    private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL) {
+        final String str = "://";
+        final int pos1 = url.indexOf(str);
+        final int pos2 = deferrerURL.indexOf(str);
+        if (pos1 > 0 && pos2 > 0) {
+            return url.substring(pos1).startsWith(deferrerURL.substring(pos2));
+        }
+        return url.startsWith(deferrerURL);
     }
 
 }

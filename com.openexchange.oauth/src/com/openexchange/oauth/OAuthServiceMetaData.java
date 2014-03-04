@@ -180,11 +180,13 @@ public interface OAuthServiceMetaData {
 
     /**
      * Gives the strategy the opportunity to modify a callback URL.
-     * @param callbackUrl
-     * @param session
+     *
+     * @param callbackUrl The call-back URL
+     * @param currentHost The name of the current host
+     * @param session The associated session
      * @return the modified callback URL
      */
-    String modifyCallbackURL(String callbackUrl, Session session);
+    String modifyCallbackURL(String callbackUrl, String currentHost, Session session);
 
     /**
      * Gets the style of API (e.g. Facebook, Twitter...).

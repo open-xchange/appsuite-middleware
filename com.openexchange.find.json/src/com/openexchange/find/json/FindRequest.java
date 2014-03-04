@@ -57,8 +57,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
+import com.openexchange.find.calendar.CalendarFacetType;
+import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.drive.DriveFacetType;
+import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.mail.MailFacetType;
+import com.openexchange.find.tasks.TasksFacetType;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -75,9 +84,7 @@ public class FindRequest {
     private static final String PARAM_PREFIX = "prefix";
     private static final String PARAM_START = "start";
     private static final String PARAM_SIZE = "size";
-    private static final String PARAM_ACTIVE_FACETS = "activeFacets";
-    private static final String PARAM_QUERIES = "queries";
-    private static final String PARAM_FILTERS = "filters";
+    private static final String PARAM_FACETS = "facets";
     private static final int DEFAULT_SIZE = 20;
 
     // -------------------------------------------------------------------------------------------- //
@@ -149,13 +156,6 @@ public class FindRequest {
     }
 
     /**
-     * Gets the folder parameter or <code>null</code> if not set.
-     */
-    public String getFolder() {
-        return request.getParameter("folder");
-    }
-
-    /**
      * Gets the module associated with this request.
      *
      * @return The module
@@ -184,10 +184,11 @@ public class FindRequest {
     public String requirePrefix() throws OXException {
         final JSONObject json = (JSONObject) request.requireData();
         try {
-            String prefix = json.getString(PARAM_PREFIX);
-            if (prefix == null || Strings.isEmpty((prefix = prefix.trim()))) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAM_PREFIX);
+            String prefix = json.getString(PARAM_PREFIX).trim();
+            if (Strings.isEmpty((prefix = prefix.trim()))) {
+                return "";
             }
+
             final char lastChar = prefix.charAt(prefix.length() - 1);
             if ('*' == lastChar || '?' == lastChar) {
                 throw AjaxExceptionCodes.IMVALID_PARAMETER.create(PARAM_PREFIX);
@@ -195,87 +196,79 @@ public class FindRequest {
 
             return prefix;
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAM_PREFIX);
         }
     }
 
-    /**
-     * Gets the checked queries for search.
-     *
-     * @return The queries
-     * @throws OXException If queries are missing or invalid
-     */
-    public List<String> requireQueries() throws OXException {
-        final JSONObject json = (JSONObject) request.requireData();
-        try {
-            final JSONArray jQueries = json.optJSONArray(PARAM_QUERIES);
-            if (null == jQueries) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAM_QUERIES);
-            }
+//    /**
+//     * Gets the checked filters for search.
+//     *
+//     * @return The filters
+//     * @throws OXException If filters are invalid
+//     */
+//    public List<Filter> optFilters() throws OXException {
+//        final JSONObject json = (JSONObject) request.requireData();
+//        try {
+//            final JSONArray jFilters = json.optJSONArray(PARAM_FILTERS);
+//            if (null == jFilters) {
+//                return Collections.emptyList();
+//            }
+//
+//            final int length = jFilters.length();
+//            final List<Filter> filters = new ArrayList<Filter>(length);
+//            for (int i = 0; i < length; i++) {
+//                final JSONObject jFilter = jFilters.getJSONObject(i);
+//
+//                final JSONArray jQueries = jFilter.getJSONArray("queries");
+//                int len = jQueries.length();
+//                final List<String> queries = new ArrayList<String>(len);
+//                for (int j = 0; j < len; j++) {
+//                    queries.add(jQueries.getString(j));
+//                }
+//
+//                final JSONArray jFields = jFilter.getJSONArray("fields");
+//                len = jFields.length();
+//                final List<String> fields = new ArrayList<String>(len);
+//                for (int j = 0; j < len; j++) {
+//                    fields.add(jFields.getString(j));
+//                }
+//
+//                filters.add(parseFilter(jValue));
+//            }
+//
+//            return filters;
+//        } catch (final JSONException e) {
+//            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+//        }
+//    }
 
-            final int length = jQueries.length();
-            final List<String> queries = new ArrayList<String>(length);
-            for (int i = 0; i < length; i++) {
-                queries.add(jQueries.getString(i));
-            }
-
-            return queries;
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+    public Filter parseFilter(JSONObject jFilter) throws JSONException {
+        JSONArray jQueries = jFilter.getJSONArray("queries");
+        int len = jQueries.length();
+        List<String> queries = new ArrayList<String>(len);
+        for (int j = 0; j < len; j++) {
+            queries.add(jQueries.getString(j));
         }
+
+        JSONArray jFields = jFilter.getJSONArray("fields");
+        len = jFields.length();
+        List<String> fields = new ArrayList<String>(len);
+        for (int j = 0; j < len; j++) {
+            fields.add(jFields.getString(j));
+        }
+
+        return new Filter(fields, queries);
     }
 
     /**
-     * Gets the checked filters for search.
-     *
-     * @return The filters
-     * @throws OXException If filters are invalid
-     */
-    public List<Filter> optFilters() throws OXException {
-        final JSONObject json = (JSONObject) request.requireData();
-        try {
-            final JSONArray jFilters = json.optJSONArray(PARAM_FILTERS);
-            if (null == jFilters) {
-                return Collections.emptyList();
-            }
-
-            final int length = jFilters.length();
-            final List<Filter> filters = new ArrayList<Filter>(length);
-            for (int i = 0; i < length; i++) {
-                final JSONObject jFilter = jFilters.getJSONObject(i);
-
-                final JSONArray jQueries = jFilter.getJSONArray("queries");
-                int len = jQueries.length();
-                final List<String> queries = new ArrayList<String>(len);
-                for (int j = 0; j < len; j++) {
-                    queries.add(jQueries.getString(j));
-                }
-
-                final JSONArray jFields = jFilter.getJSONArray("fields");
-                len = jFields.length();
-                final List<String> fields = new ArrayList<String>(len);
-                for (int j = 0; j < len; j++) {
-                    fields.add(jFields.getString(j));
-                }
-
-                filters.add(new Filter(fields, queries));
-            }
-
-            return filters;
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        }
-    }
-
-    /**
-     * Gets the active facets.
+     * Gets the facets.
      *
      * @return The facets.
      * @throws OXException If facets are invalid
      */
-    public JSONArray optActiveFacets() throws OXException {
+    public JSONArray optFacets() throws OXException {
         JSONObject json = (JSONObject) request.requireData();
-        Object facetsObj = json.opt(PARAM_ACTIVE_FACETS);
+        Object facetsObj = json.opt(PARAM_FACETS);
         if (facetsObj != null && facetsObj instanceof JSONArray) {
             return (JSONArray) facetsObj;
         }
@@ -325,6 +318,78 @@ public class FindRequest {
      */
     public <T> T getParameter(final String name, final Class<T> coerceTo) throws OXException {
         return request.getParameter(name, coerceTo);
+    }
+
+    /**
+     * Gets the active facets.
+     * @return A list of {@link ActiveFacet}s. May be empty but not <code>null</code>.
+     */
+    public List<ActiveFacet> getActiveFacets() throws OXException {
+        JSONArray jFacets = optFacets();
+        if (jFacets == null || jFacets.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        try {
+            Module module = getModule();
+            List<ActiveFacet> facets = new ArrayList<ActiveFacet>(jFacets.length());
+            for (int i = 0; i < jFacets.length(); i++) {
+                JSONObject jFacet = jFacets.getJSONObject(i);
+                String jType = jFacet.getString("facet");
+                FacetType type = facetTypeFor(module, jType);
+                if (type == null) {
+                    throw FindExceptionCode.UNSUPPORTED_FACET.create(jType, module.getIdentifier());
+                }
+
+                String valueId = jFacet.getString("value");
+                JSONObject jFilter = jFacet.optJSONObject("filter");
+                Filter filter;
+                if (jFilter == null) {
+                    filter = Filter.NO_FILTER;
+                } else {
+                    filter = parseFilter(jFilter);
+                }
+                facets.add(new ActiveFacet(type, valueId, filter));
+            }
+
+            return facets;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+    }
+
+    private static FacetType facetTypeFor(Module module, String id) {
+        FacetType type = null;
+        switch(module) {
+            case MAIL:
+                type = MailFacetType.getById(id);
+                break;
+
+            case CALENDAR:
+                type = CalendarFacetType.getById(id);
+                break;
+
+            case CONTACTS:
+                type = ContactsFacetType.getById(id);
+                break;
+
+            case DRIVE:
+                type = DriveFacetType.getById(id);
+                break;
+
+            case TASKS:
+                type = TasksFacetType.getById(id);
+                break;
+
+            default:
+                return null;
+        }
+
+        if (type == null) {
+            type = CommonFacetType.getById(id);
+        }
+
+        return type;
     }
 
 }

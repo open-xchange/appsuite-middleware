@@ -82,6 +82,7 @@ import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.drive.FileTypeDisplayItem;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FieldFacet;
@@ -117,6 +118,11 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
+    protected String getFormatStringForGlobalFacet() {
+        return DriveStrings.FACET_GLOBAL;
+    }
+
+    @Override
     public SearchResult search(final SearchRequest searchRequest, final ServerSession session) throws OXException {
         final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
         if (null == fileAccessFactory) {
@@ -139,7 +145,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                 final File file = it.next();
                 results.add(new FileDocument(file));
             }
-            return new SearchResult(-1, start, results);
+            return new SearchResult(-1, start, results, searchRequest.getActiveFacets());
         } finally {
             SearchIterators.close(it);
         }
@@ -187,12 +193,12 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
         // Add static file type facet
         boolean hasFileTypeFacet = false;
-        final List<Facet> activeFactes = autocompleteRequest.getActiveFactes();
+        final List<ActiveFacet> activeFactes = autocompleteRequest.getActiveFactes();
         if (null != activeFactes && !activeFactes.isEmpty()) {
-            final String idToLookFor = DriveFacetType.FILE_TYPE.getId();
-            for (final Iterator<Facet> it = activeFactes.iterator(); !hasFileTypeFacet && it.hasNext();) {
-                if (idToLookFor.equals(it.next().getType().getId())) {
+            for (final Iterator<ActiveFacet> it = activeFactes.iterator(); !hasFileTypeFacet && it.hasNext();) {
+                if (DriveFacetType.FILE_TYPE == it.next().getType()) {
                     hasFileTypeFacet = true;
+                    break;
                 }
             }
         }

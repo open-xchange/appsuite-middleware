@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,33 @@
  *
  */
 
-package com.openexchange.find.drive;
+package com.openexchange.context.mbean;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.find.facet.FacetType;
-import com.openexchange.java.Strings;
+import javax.management.MBeanException;
 
 
 /**
- * {@link DriveFacetType} - Facet types for the drive module.
+ * {@link ContextMBean} - The context MBean.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum DriveFacetType implements FacetType {
+public interface ContextMBean {
 
-    CONTACTS(DriveStrings.FACET_CONTACTS),
-    FOLDERS(DriveStrings.FACET_FOLDERS),
-    FILE_NAME(DriveStrings.FACET_FILE_NAME),
-    FILE_TYPE(DriveStrings.FACET_FILE_TYPE),
-    FILE_DESCRIPTION(DriveStrings.FACET_FILE_DESCRIPTION),
-    FILE_CONTENT(DriveStrings.FACET_FILE_CONTENT),
-    ;
-
-    private static final Map<String, DriveFacetType> typesById = new HashMap<String, DriveFacetType>();
-    static {
-        for (DriveFacetType type : values()) {
-            typesById.put(type.getId(), type);
-        }
-    }
-
-
-    private final String displayName;
-
-    private DriveFacetType(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    @Override
-    public String getId() {
-        return toString().toLowerCase();
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    @Override
-    public boolean isFieldFacet() {
-        return false;
-    }
-
-    @Override
-    public boolean appliesOnce() {
-        return false;
-    }
+    /** The MBean's domain */
+    public static final String DOMAIN = "com.openexchange.context";
 
     /**
-     * Gets a {@link DriveFacetType} by its id.
-     * @return The type or <code>null</code>, if the id is invalid.
+     * Checks all entries in login2context table for existence of context identifier.
+     *
+     * @throws MBeanException If check fails for any reason
      */
-    public static DriveFacetType getById(String id) {
-        if (Strings.isEmpty(id)) {
-            return null;
-        }
+    void checkLogin2ContextMapping() throws MBeanException;
 
-        return typesById.get(id);
-    }
-
+    /**
+     * Checks the entry in login2context table that belongs to specified context for existence of context identifier.
+     *
+     * @param contextId
+     * @throws MBeanException If check fails for any reason
+     */
+    void checkLogin2ContextMapping(int contextId) throws MBeanException;
 }

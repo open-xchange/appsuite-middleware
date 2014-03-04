@@ -80,4 +80,7 @@ public class FindExceptionMessages implements LocalizableStrings {
     // In order to accomplish the search, %1$d or more characters are required.
     public static final String QUERY_TOO_SHORT = "In order to accomplish the search, %1$d or more characters are required.";
 
+    // The facet \"%1$s\" is mandatory and has to be set.
+    public static final String MISSING_MANDATORY_FACET = "The facet \"%1$s\" is mandatory and has to be set.";
+
 }

@@ -53,12 +53,15 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link TasksStrings}
- * 
+ *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
 public class TasksStrings implements LocalizableStrings {
 
     // ------------------------- i18n strings for facet types -------------------------------------- //
+
+    // Search in tasks
+    public static final String FACET_GLOBAL = "%1$s <i>in tasks</i>";
 
     // Search in task name.
     public static final String FACET_TASK_SUBJECT = "Task subject";

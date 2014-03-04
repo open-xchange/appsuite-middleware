@@ -74,6 +74,15 @@ public interface DeferringURLService {
     String getDeferredURL(String url);
 
     /**
+     * Generates a deferred URL for specified URL using given <code>domain</code>.
+     *
+     * @param url The URL to defer
+     * @param domain The singular domain to use
+     * @return The deferred URL
+     */
+    String deferredURLUsing(String url, String domain);
+
+    /**
      * Gets the basic defer URL.
      * <p>
      * If a single domain is configured through <code>com.openexchange.http.deferrer.url</code> property (<i>deferrer.properties</i>), the
@@ -94,5 +103,12 @@ public interface DeferringURLService {
      * @return <code>true</code> if deferred; otherwise <code>false</code>
      */
     boolean seemsDeferred(String url);
+
+    /**
+     * Signals if a deferred URL is available.
+     *
+     * @return <code>true</code> if a deferred URL is available; otherwise <code>false</code>
+     */
+    boolean isDeferrerURLAvailable();
 
 }
