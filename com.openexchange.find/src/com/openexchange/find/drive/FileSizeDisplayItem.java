@@ -62,9 +62,9 @@ import com.openexchange.find.facet.DisplayItemVisitor;
 public class FileSizeDisplayItem implements DisplayItem {
 
     public static enum Size {
-        MB1(" > 1MB"),
-        MB10(" > 10MB"),
-        MB100(" > 100MB"),
+        MB1("> 1MB"),
+        MB10("> 10MB"),
+        MB100("> 100MB"),
         GB1("> 1GB");
 
         private String size;
