@@ -52,6 +52,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +80,8 @@ public class SearchRequest implements Serializable {
     private final List<ActiveFacet> activeFacets;
 
     private final Map<FacetType, List<ActiveFacet>> facetMap;
+
+    private String folderId;
 
     private List<Filter> filters;
 
@@ -145,31 +148,23 @@ public class SearchRequest implements Serializable {
     }
 
     /**
-     * A list of filters to be applied on the search results.
-     * If {@link CommonFacetType#GLOBAL} is present, it is nevertheless
-     * not part of the result list.
+     * A list of filters to be applied on the search results based
+     * on the currently active facets. {@link CommonFacetType#GLOBAL}
+     * and {@link CommonFacetType#FOLDER} are always ignored when
+     * constructing the filters.
      *
      * @return May be empty but never <code>null</code>.
      */
     public List<Filter> getFilters() {
-        return getFilters(Collections.<FacetType>emptySet());
-    }
-
-    /**
-     * A list of filters to be applied on the search results.
-     * If {@link CommonFacetType#GLOBAL} is present, it is nevertheless
-     * not part of the result list.
-     *
-     * @param exclude A set of facet types whose filters should be excluded
-     * from the result list.
-     * @return May be empty but never <code>null</code>.
-     */
-    public List<Filter> getFilters(Set<FacetType> exclude) {
         if (filters == null) {
             filters = new LinkedList<Filter>();
+
+            Set<FacetType> exclude = new HashSet<FacetType>(2);
+            exclude.add(CommonFacetType.GLOBAL);
+            exclude.add(CommonFacetType.FOLDER);
             for (Entry<FacetType, List<ActiveFacet>> entry : facetMap.entrySet()) {
                 FacetType type = entry.getKey();
-                if (type != CommonFacetType.GLOBAL && !exclude.contains(type)) {
+                if (!exclude.contains(type)) {
                     for (ActiveFacet facet : entry.getValue()) {
                         Filter filter = facet.getFilter();
                         if (filter != Filter.NO_FILTER) {
@@ -181,6 +176,19 @@ public class SearchRequest implements Serializable {
         }
 
         return filters;
+    }
+
+    /**
+     * Gets the folder id set via a present facet of type {@link CommonFacetType#FOLDER}.
+     * @return The folder id or <code>null</code> if folder facet is not present.
+     */
+    public String getFolderId() {
+        List<ActiveFacet> facets = facetMap.get(CommonFacetType.FOLDER);
+        if (facets == null || facets.isEmpty()) {
+            return null;
+        }
+
+        return facets.get(0).getValueId();
     }
 
     /**

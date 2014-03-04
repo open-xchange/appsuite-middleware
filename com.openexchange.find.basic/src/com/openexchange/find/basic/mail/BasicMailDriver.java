@@ -83,10 +83,8 @@ import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
@@ -166,14 +164,9 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     @Override
     public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
-        ActiveFacet folderFacet = searchRequest.getActiveFacet(CommonFacetType.FOLDER);
-        if (folderFacet == null) {
-            throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
-        }
-
-        String folderName = folderFacet.getValueId();
+        String folderName = searchRequest.getFolderId();
         if (folderName == null) {
-            throw FindExceptionCode.MISSING_SEARCH_FILTER.create("folder", Module.MAIL.getIdentifier());
+            throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
         }
 
         FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folderName);
@@ -186,7 +179,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             MailFolder folder = folderStorage.getFolder(fullnameArgument.getFullname());
 
-            List<Filter> filters = searchRequest.getFilters(Collections.<FacetType>singleton(CommonFacetType.FOLDER));
+            List<Filter> filters = searchRequest.getFilters();
             SearchTerm<?> searchTerm = prepareSearchTerm(folder, searchRequest.getQueries(), filters);
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             List<MailMessage> messages = searchMessages(
