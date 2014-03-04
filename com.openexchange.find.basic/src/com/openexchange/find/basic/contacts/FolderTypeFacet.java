@@ -86,31 +86,36 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class FolderTypeFacet extends ContactSearchFacet {
 
-    private static final long serialVersionUID = -9031103652463933032L;
+    private static final long serialVersionUID = -9031103622463933032L;
 
-    private static final String ID = "folder_type";
+    private static final FolderTypeFacet INSTANCE = new FolderTypeFacet();
 
-    public FolderTypeFacet() {
-        super(ContactsFacetType.FOLDERS, getFacetValues());
+    /**
+     * Gets the folder type facet instance.
+     *
+     * @return The instance
+     */
+    public static FolderTypeFacet getInstance() {
+        return INSTANCE;
+    }
+
+    private FolderTypeFacet() {
+        super(ContactsFacetType.FOLDER_TYPE, getFacetValues());
     }
 
     private static List<FacetValue> getFacetValues() {
+        List<String> fields = Collections.singletonList(ContactsFacetType.FOLDER_TYPE.getId());
         List<FacetValue> facetValues = new ArrayList<FacetValue>(3);
         facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
             CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(ID), FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
+            fields, FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
         facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
             CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singletonList(ID), FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
+            fields, FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
         facetValues.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
             CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singletonList(ID), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
+            fields, FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
         return facetValues;
-    }
-
-    @Override
-    public String getID() {
-        return ID;
     }
 
     @Override

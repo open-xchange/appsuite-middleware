@@ -898,7 +898,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public SearchIterator<File> search(final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+    public SearchIterator<File> search(final List<String> folderIds, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         final List<File> results;
         {
             final FieldCollectorVisitor fieldCollector = new FieldCollectorVisitor(Field.ID, Field.FOLDER_ID);
@@ -907,7 +907,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             final List<Field> fieldz = new ArrayList<Field>(fields);
             fieldz.addAll(fieldCollector.getFields());
 
-            final CMISSearchVisitor visitor = new CMISSearchVisitor(fieldz, this);
+            final CMISSearchVisitor visitor = null != folderIds && !folderIds.isEmpty() ? new CMISSearchVisitor(folderIds, fields, this) : new CMISSearchVisitor(fieldz, this);
             searchTerm.visit(visitor);
             results = visitor.getResults();
         }

@@ -59,29 +59,18 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class ContactsStrings implements LocalizableStrings {
 
-    // Search in address book
-    public static final String FACET_GLOBAL = "%1$s <i>in address book</i>";
+    public static final String FACET_TYPE_CONTACT_TYPE = "Type";
 
-    // Search in names
-    public static final String FACET_NAME = "name";
+    public static final String FACET_TYPE_CONTACT = "Contact";
 
-    // Search in email addresses
-    public static final String FACET_EMAIL = "email";
+    public static final String FACET_GLOBAL = "%1$s <i>in contacts</i>";
 
-    // Search in phone numbers
-    public static final String FACET_PHONE = "phone";
+    public static final String FACET_NAME = "%1$s <i>in names</i>";
 
-    // Search in addresses
-    public static final String FACET_ADDRESS = "address";
+    public static final String FACET_EMAIL = "%1$s <i>in e-mail addresses</i>";
 
-    // Search in specific types
-    public static final String FACET_TYPE = "Type";
+    public static final String FACET_PHONE = "%1$s <i>in phone numbers</i>";
 
-    // Search in folders.
-    public static final String FACET_FOLDERS = "Folder";
-
-    // Search in Persons.
-    public static final String FACET_CONTACTS = "Contact";
-
+    public static final String FACET_ADDRESS = "%1$s <i>in addresses</i>";
 
 }

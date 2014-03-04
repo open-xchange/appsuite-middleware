@@ -50,6 +50,8 @@
 package com.openexchange.file.storage.infostore;
 
 import static com.openexchange.file.storage.FileStorageUtility.checkUrl;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -481,20 +483,31 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     }
 
     @Override
-    public SearchIterator<File> search(SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
+    public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
+        final TIntList fids = new TIntArrayList(null == folderIds ? 0 : folderIds.size());
+        if (null != folderIds) {
+            for (final String folderId : folderIds) {
+                try {
+                    fids.add(Integer.parseInt(folderId));
+                } catch (final NumberFormatException e) {
+                    throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(folderId);
+                }
+            }
+        }
+
         final ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
 //        searchTerm.addField(fields);
         searchTerm.visit(visitor);
         final SearchIterator<DocumentMetadata> iterator =
             search.search(
+                fids.toArray(),
                 visitor.getInfstoreTerm(),
                 FieldMapping.getMatching(fields),
                 FieldMapping.getMatching(sort),
                 FieldMapping.getSortDirection(order),
                 start,
                 end,
-                ctx,
-                user, userPermissions);
+                ctx, user, userPermissions);
         return new InfostoreSearchIterator(iterator);
     }
 

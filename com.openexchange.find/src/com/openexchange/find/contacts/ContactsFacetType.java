@@ -51,6 +51,7 @@ package com.openexchange.find.contacts;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.java.Strings;
 
@@ -61,47 +62,62 @@ import com.openexchange.java.Strings;
  * @since 7.6.0
  */
 public enum ContactsFacetType implements FacetType {
-    NAME(ContactsStrings.FACET_NAME),
-    EMAIL(ContactsStrings.FACET_EMAIL),
-    PHONE(ContactsStrings.FACET_PHONE),
-    ADDRESS(ContactsStrings.FACET_ADDRESS),
-    CONTACTS(ContactsStrings.FACET_CONTACTS),
-    FOLDERS(ContactsStrings.FACET_FOLDERS),
-    TYPE(ContactsStrings.FACET_TYPE)
-    ;
-
-    private static final Map<String, ContactsFacetType> typesById = new HashMap<String, ContactsFacetType>();
-    static {
-        for (ContactsFacetType type : values()) {
-            typesById.put(type.getId(), type);
-        }
-    }
 
     /**
-     *
+     * The "name" field facet
      */
+    NAME("name", null, false, true),
+    /**
+     * The "email" field facet
+     */
+    EMAIL("email", null, false, true),
+    /**
+     * The "phone" field facet
+     */
+    PHONE("phone", null, false, true),
+    /**
+     * The "address" field facet
+     */
+    ADDRESS("address", null, false, true),
+    /**
+     * The "folder type" facet
+     */
+    FOLDER_TYPE("folder_type", CommonStrings.FACET_TYPE_FOLDER_TYPE, true, false),
+    /**
+     * The "contact type" facet
+     */
+    CONTACT_TYPE("contact_type", ContactsStrings.FACET_TYPE_CONTACT_TYPE, true, false),
+    /**
+     * The "contact" facet
+     */
+    CONTACT("contact", ContactsStrings.FACET_TYPE_CONTACT, true, false),
+    ;
+
+    private final String id;
     private final String displayName;
+    private final boolean once;
+    private final boolean fieldFacet;
 
     /**
      * Initializes a new {@link ContactsFacetType}.
      *
-     * @param displayName
+     * @param id The identifier of this facet
+     * @param displayName The display name, or <code>null</code> if not relevant.
+     * @param once <code>true</code> if this filter can be applied only once, <code>false</code>, otherwise
+     * @param fieldFacet <code>true</code> if this facet denotes a field facet, <code>false</code>, otherwise
      */
-    private ContactsFacetType(final String displayName) {
+    private ContactsFacetType(String id, String displayName, boolean once, boolean fieldFacet) {
+        this.id = id;
         this.displayName = displayName;
+        this.once = once;
+        this.fieldFacet = fieldFacet;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getId() {
-        return toString().toLowerCase();
+        return id;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getDisplayName() {
         return displayName;
@@ -109,12 +125,12 @@ public enum ContactsFacetType implements FacetType {
 
     @Override
     public boolean isFieldFacet() {
-        return false;
+        return fieldFacet;
     }
 
     @Override
     public boolean appliesOnce() {
-        return false;
+        return once;
     }
 
     /**
@@ -127,6 +143,13 @@ public enum ContactsFacetType implements FacetType {
         }
 
         return typesById.get(id);
+    }
+
+    private static final Map<String, ContactsFacetType> typesById = new HashMap<String, ContactsFacetType>();
+    static {
+        for (ContactsFacetType type : values()) {
+            typesById.put(type.getId(), type);
+        }
     }
 
 }

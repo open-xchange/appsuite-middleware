@@ -34,6 +34,8 @@ Import-Package: com.openexchange.api2,
  com.openexchange.tools.iterator,
  com.openexchange.tools.session,
  com.openexchange.tx,
+ gnu.trove.list,
+ gnu.trove.list.array,
  org.osgi.framework
 Bundle-Activator: com.openexchange.file.storage.infostore.osgi.InfostoreFileStorageActivator
 Export-Package: com.openexchange.file.storage.infostore

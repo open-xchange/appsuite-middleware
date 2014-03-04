@@ -205,14 +205,6 @@ public interface SearchTermVisitor {
     void visit(ModifiedByTerm term) throws OXException;
 
     /**
-     * The visitation for folder id term.
-     *
-     * @param term The visited folder id term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(FolderIdTerm term) throws OXException;
-
-    /**
      * The visitation for title term.
      *
      * @param term The visited title term
@@ -235,14 +227,6 @@ public interface SearchTermVisitor {
      * @throws OXException If visit attempt fails
      */
     void visit(ContentTerm term) throws OXException;
-
-    /**
-     * The visitation for Id term.
-     *
-     * @param term The visited id term
-     * @throws OXException If visit attempt fails
-     */
-    void visit(IdTerm term) throws OXException;
 
     /**
      * The visitation for file size term.

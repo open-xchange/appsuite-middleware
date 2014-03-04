@@ -198,11 +198,6 @@ public class FieldCollectorVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final FolderIdTerm term) throws OXException {
-        handleTerm(term);
-    }
-
-    @Override
     public void visit(final TitleTerm term) throws OXException {
         handleTerm(term);
     }
@@ -214,11 +209,6 @@ public class FieldCollectorVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(final ContentTerm term) throws OXException {
-        handleTerm(term);
-    }
-
-    @Override
-    public void visit(final IdTerm term) throws OXException {
         handleTerm(term);
     }
 

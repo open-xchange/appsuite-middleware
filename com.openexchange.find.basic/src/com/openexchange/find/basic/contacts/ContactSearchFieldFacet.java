@@ -49,18 +49,17 @@
 
 package com.openexchange.find.basic.contacts;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
-import com.openexchange.find.common.CommonStrings;
-import com.openexchange.find.common.ContactTypeDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.java.SearchStrings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -70,64 +69,74 @@ import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ContactTypeFacet}
+ * {@link ContactSearchFieldFacet}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContactTypeFacet extends ContactSearchFacet {
+public abstract class ContactSearchFieldFacet extends ContactSearchFacet {
 
-    private static final long serialVersionUID = -9031103652463933032L;
-
-    private static final ContactTypeFacet INSTANCE = new ContactTypeFacet();
+    private static final long serialVersionUID = 2919108856076038573L;
 
     /**
-     * Gets the contact type facet instance.
+     * Initializes a new {@link ContactSearchFieldFacet}.
      *
-     * @return The instance
+     * @param type The facet type
+     * @param displayItem The display item representing the facet
+     * @param query The query to insert into the filter
      */
-    public static ContactTypeFacet getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Initializes a new {@link ContactTypeFacet}.
-     */
-    private ContactTypeFacet() {
-        super(ContactsFacetType.CONTACT_TYPE, getFacetValues());
-    }
-
-    private static List<FacetValue> getFacetValues() {
-        String id = ContactsFacetType.CONTACT_TYPE.getId();
-        List<FacetValue> facetValues = new ArrayList<FacetValue>(2);
-        facetValues.add(new FacetValue(ContactTypeDisplayItem.Type.CONTACT.getIdentifier(),
-            new ContactTypeDisplayItem(CommonStrings.CONTACT_TYPE_CONTACT, ContactTypeDisplayItem.Type.CONTACT),
-            FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(id), ContactTypeDisplayItem.Type.CONTACT.getIdentifier())));
-        facetValues.add(new FacetValue(ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier(),
-            new ContactTypeDisplayItem(CommonStrings.CONTACT_TYPE_DISTRIBUTION_LIST, ContactTypeDisplayItem.Type.DISTRIBUTION_LIST),
-            FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(id), ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier())));
-        return facetValues;
+    protected ContactSearchFieldFacet(ContactsFacetType type, DisplayItem displayItem, String query) {
+        super(type, Collections.singletonList(new FacetValue(type.getId(), displayItem, FacetValue.UNKNOWN_COUNT,
+            new Filter(Collections.singletonList(type.getId()), query))));
     }
 
     @Override
     public SearchTerm<?> getSearchTerm(ServerSession session, String query) throws OXException {
-        if (ContactTypeDisplayItem.Type.CONTACT.getIdentifier().equals(query)) {
-            CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            SingleSearchTerm term1 = new SingleSearchTerm(SingleOperation.ISNULL);
-            term1.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
-            searchTerm.addSearchTerm(term1);
-            SingleSearchTerm term2 = new SingleSearchTerm(SingleOperation.EQUALS);
-            term2.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
-            term2.addOperand(new ConstantOperand<Boolean>(Boolean.FALSE));
-            searchTerm.addSearchTerm(term2);
-            return searchTerm;
-        }
-        if (ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier().equals(query)) {
-            SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-            searchTerm.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
-            searchTerm.addOperand(new ConstantOperand<Boolean>(Boolean.TRUE));
-            return searchTerm;
-        }
-        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, getID());
+        return getSearchTerm(session, getFields(), query);
     }
 
+    /**
+     * Gets the contact fields used for comparisons in the search term.
+     *
+     * @return The contact fields used by the facet
+     */
+    protected abstract ContactField[] getFields();
+
+    static SearchTerm<?> getSearchTerm(ServerSession session, ContactField[] fields, String query) throws OXException {
+        checkPatternLength(query);
+        String pattern = addWildcards(query, true, true);
+        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        for (ContactField field : fields) {
+            orTerm.addSearchTerm(getFieldEqualsPatternTerm(field, pattern));
+        }
+        return orTerm;
+    }
+
+    private static SingleSearchTerm getFieldEqualsPatternTerm(ContactField field, String pattern) {
+        SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+        searchTerm.addOperand(new ContactFieldOperand(field));
+        searchTerm.addOperand(new ConstantOperand<String>(pattern));
+        return searchTerm;
+    }
+
+    private static String addWildcards(String pattern, boolean prepend, boolean append) {
+        if ((null == pattern || 0 == pattern.length()) && (append || prepend)) {
+            return "*";
+        }
+        if (null != pattern) {
+            if (prepend && '*' != pattern.charAt(0)) {
+                pattern = "*" + pattern;
+            }
+            if (append && '*' != pattern.charAt(pattern.length() - 1)) {
+                pattern = pattern + "*";
+            }
+        }
+        return pattern;
+    }
+
+    private static void checkPatternLength(String pattern) throws OXException {
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (null != pattern && 0 < minimumSearchCharacters && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
+            throw FindExceptionCode.QUERY_TOO_SHORT.create(Integer.valueOf(minimumSearchCharacters));
+        }
+    }
 }

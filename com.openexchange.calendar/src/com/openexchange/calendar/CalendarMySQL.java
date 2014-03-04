@@ -156,7 +156,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CalendarMySQL} - The MySQL implementation of {@link CalendarSqlImp}.
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class CalendarMySQL implements CalendarSqlImp {
@@ -1592,22 +1592,32 @@ public class CalendarMySQL implements CalendarSqlImp {
             } else {
                 sb.append(" AND (pdr.type = ? AND pdr.id = IN (").append(getPlaceholders(resourceIDs.size()));
                 searchParameters.add(Participant.RESOURCE);
-                for (Integer resourceID : resourceIDs) {
-                    searchParameters.add(resourceID);
-                }
+                searchParameters.addAll(resourceIDs);
                 sb.append("))");
             }
         }
         /*
          * external participants
          */
-        Set<String> externalParticipants = searchObj.getExternalParticipants();
+        Set<Set<String>> externalParticipants = searchObj.getExternalParticipants();
         if (null != externalParticipants && 0 < externalParticipants.size()) {
-            for (String externalParticipant : externalParticipants) {
-                sb.append(" AND EXISTS (SELECT 1 FROM dateExternal WHERE dateExternal.cid = ? AND " +
-                    "dateExternal.objectId = pd.intfield01 AND dateExternal.mailAddress = ?)");
-                searchParameters.add(contextID);
-                searchParameters.add(StringCollection.prepareForSearch(externalParticipant, false, true));
+            for (Set<String> externalParticipant : externalParticipants) {
+                if (null != externalParticipant && 0 < externalParticipant.size()) {
+                    sb.append(" AND EXISTS (SELECT 1 FROM dateExternal WHERE dateExternal.cid = ? AND " +
+                        "dateExternal.objectId = pd.intfield01 AND dateExternal.mailAddress");
+                    searchParameters.add(contextID);
+                    if (1 == externalParticipants.size()) {
+                        sb.append(" = ?");
+                        searchParameters.add(externalParticipant.iterator().next());
+                    } else {
+                        sb.append(" IN (").append(getPlaceholders(externalParticipant.size()));
+                        for (String mailAddress : externalParticipant) {
+                            searchParameters.add(StringCollection.prepareForSearch(mailAddress, false, true));
+                        }
+                        sb.append(')');
+                    }
+                    sb.append(')');
+                }
             }
         }
         /*
@@ -3108,7 +3118,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * Checks, if the start or end date of the whole sequence has been changed.
-     * 
+     *
      * @param newObject new CalendarDataObject
      * @param currencObject old CalendarDataObject
      * @return
@@ -3150,7 +3160,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * Updates the participants.
-     * 
+     *
      * @param cdao
      * @param edao
      * @param uid
@@ -3954,7 +3964,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * Searches for the given user id in the users of the given CalendarDataObject
-     * 
+     *
      * @param id
      * @param calendarDataObject
      * @return the UserParticipant if found, null otherwise.
@@ -3971,7 +3981,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     /**
      * Gathers all identifiers of external participants contained in specified array of {@link Participant} objects whose identifier is
      * different from zero.
-     * 
+     *
      * @param participants The array of {@link Participant} objects.
      * @return All identifiers of external participants as a {@link Set}.
      */
@@ -4056,7 +4066,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * Trigger event after changes are committed
-     * 
+     *
      * @param oid - id of the object an event should be triggered for
      * @param uid - user id
      * @param confirm - Confirm status
@@ -4084,7 +4094,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @throws SQLException
      */
     @Override
@@ -4194,7 +4204,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * Returns the object id of the appointment exception if the given occurrence id has an entry.
-     * 
+     *
      * @param objectId - id of the confirmed object
      * @param optOccurrenceId - id of the occurrence of a series to set the confirmation for
      * @param ctx - used context
@@ -4240,7 +4250,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * Checks if an confirmation status is already set for the given occurrence
-     * 
+     *
      * @param objectId unique identifier of the appointment.
      * @param folderId folder of the appointment
      * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code>
@@ -4619,7 +4629,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * Checks if an entry can be found in backup table for specified identifier
-     * 
+     *
      * @param oid The master's object ID
      * @param cid The master's context ID
      * @param context The context
@@ -4655,7 +4665,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * Checks if specified participant is contained in participants' backup table.
-     * 
+     *
      * @param uid The participant's identifier
      * @param cid The context ID
      * @param oid The corresponding appointment's ID
@@ -4883,7 +4893,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * Deletes the reminder entry for specified appointment and user/participant
-     * 
+     *
      * @param oid The apointment's object ID
      * @param uid The user's/participant's ID
      * @param c The context
@@ -4970,7 +4980,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     /**
      * Checks if specified current calendar data object contains recurrence time and/or type changes compared to storage's calendar data
      * object
-     * 
+     *
      * @param cdao The current calendar data object
      * @param edao The storage's calendar data object
      * @return <code>true</code> if specified current calendar data object contains recurrence time and/or type changes compared to
@@ -5187,7 +5197,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * Deletes an appointment from the database.
-     * 
+     *
      * @param cid The context ID
      * @param oid The object ID of the appointment to delete
      * @param uid The user that is doing the operation
@@ -5586,7 +5596,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     /**
      * Backups appointment data identified through specified <code>oid</code> and <code>cid</code> arguments and removes from working
      * tables.
-     * 
+     *
      * @param writecon A connection with write capability
      * @param cid The context ID
      * @param oid The object ID
@@ -5601,7 +5611,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     /**
      * Optionally backups appointment data identified through specified <code>oid</code> and <code>cid</code> arguments and removes from
      * working tables.
-     * 
+     *
      * @param writecon A connection with write capability
      * @param cid The context ID
      * @param oid The object ID
@@ -5723,7 +5733,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * Backups appointment data identified through specified <code>oid</code> and <code>cid</code> arguments.
-     * 
+     *
      * @param writecon A connection with write capability
      * @param cid The context ID
      * @param oid The object ID
@@ -5828,7 +5838,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     /**
      * Gets the IDs of those change exceptions which ought to be deleted
-     * 
+     *
      * @param readcon A connection with read capability
      * @param c The context
      * @param rec_id The recurrence ID to which the change exceptions are linked
@@ -5879,7 +5889,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     /**
      * Deletes those change exceptions from working tables (prg_date_rights, prg_dates_members, and prg_dates) whose IDs appear in specified
      * <code>oids</code>.
-     * 
+     *
      * @param oids The {@link Integer} array containing the IDs of the change exceptions
      * @param so The session providing needed user data
      * @param writecon A connection with write capability
@@ -5892,7 +5902,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     /**
      * Deletes those change exceptions from working tables (prg_date_rights, prg_dates_members, and prg_dates) whose IDs appear in specified
      * <code>oids</code>.
-     * 
+     *
      * @param oids The {@link Integer} array containing the IDs of the change exceptions
      * @param so The session providing needed user data
      * @param writecon A connection with write capability
@@ -5918,7 +5928,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     /**
      * Gets the object ID of an appointment whose value in a specific column matches another value. The comparison is case-sensitive, and
      * exceptions from recurring appointments are not taken into account. If there are more than one matches, the first one is returned.
-     * 
+     *
      * @param session The current session
      * @param columnName The column name
      * @param value The value to match
