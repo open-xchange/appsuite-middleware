@@ -61,11 +61,6 @@ import com.openexchange.i18n.I18nService;
 public interface DisplayItem {
 
     /**
-     * Use as null object in cases where a display makes no sense.
-     */
-    public static final DisplayItem NO_DISPLAY_ITEM = new NoDisplayItem();
-
-    /**
      * A display item must contain a default value.
      * <p>
      * Clients may use it for displaying the item if they have no implementation to handle the concrete item type.

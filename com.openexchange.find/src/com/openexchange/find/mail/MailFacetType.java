@@ -63,8 +63,8 @@ import com.openexchange.java.Strings;
  */
 public enum MailFacetType implements FacetType {
 
-    SUBJECT,
-    MAIL_TEXT,
+    SUBJECT(null, true, false),
+    MAIL_TEXT(null, true, false),
     CONTACTS(MailStrings.FACET_SENDER_AND_RECIPIENT),
     TIME(MailStrings.FACET_TIME, false, true);
 

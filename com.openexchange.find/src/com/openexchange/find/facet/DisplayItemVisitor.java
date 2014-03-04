@@ -93,8 +93,6 @@ public interface DisplayItemVisitor {
 
     void visit(TaskTypeDisplayItem item);
 
-    void visit(NoDisplayItem item);
-
     void visit(ContactTypeDisplayItem contactTypeDisplayItem);
 
     void visit(FilenameDisplayItem filenameDisplayItem);

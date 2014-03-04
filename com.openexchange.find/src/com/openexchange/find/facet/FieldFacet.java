@@ -72,10 +72,6 @@ public class FieldFacet extends Facet {
 
     private static final long serialVersionUID = -5699454846328204928L;
 
-    public FieldFacet(final FacetType type, final String filterField) {
-        this(type, null, Collections.singletonList(filterField), null);
-    }
-
     public FieldFacet(final FacetType type, final DisplayItem displayItem, final Filter filter) {
         super(type, buildValues(type, displayItem, filter));
     }

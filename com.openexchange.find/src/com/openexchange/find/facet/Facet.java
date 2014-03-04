@@ -48,6 +48,8 @@
  */
 package com.openexchange.find.facet;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.Serializable;
 import java.util.List;
 
@@ -73,6 +75,9 @@ public class Facet implements Serializable {
 
     public Facet(FacetType type, List<FacetValue> values) {
         super();
+        checkNotNull(type);
+        checkNotNull(values);
+        checkArgument(values.size() > 0);
         this.type = type;
         this.values = values;
     }

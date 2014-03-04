@@ -46,12 +46,14 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.find.json;
+package com.openexchange.find.json.converters;
 
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -78,6 +80,8 @@ import com.openexchange.tools.session.ServerSession;
  * @since 7.6.0
  */
 public class JSONResponseVisitor implements DocumentVisitor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JSONResponseVisitor.class);
 
     private static final MailFieldWriter[] MAIL_WRITERS;
     static {
@@ -124,6 +128,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
             }
             json.put(jsonMessage);
         } catch (final OXException e) {
+            LOG.warn("Could not write document to response. It will be ignored.", e);
             errors.add(e);
         }
     }
@@ -139,6 +144,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
                 json.put(requestResult.getResultObject());
             }
         } catch (final OXException e) {
+            LOG.warn("Could not write document to response. It will be ignored.", e);
             errors.add(e);
         }
     }
@@ -154,6 +160,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
                 json.put(requestResult.getResultObject());
             }
         } catch (final OXException e) {
+            LOG.warn("Could not write document to response. It will be ignored.", e);
             errors.add(e);
         }
     }
@@ -172,10 +179,12 @@ public class JSONResponseVisitor implements DocumentVisitor {
                 json.put(requestResult.getResultObject());
             }
         } catch (final OXException e) {
+            LOG.warn("Could not write document to response. It will be ignored.", e);
             errors.add(e);
         }
     }
 
+    @Override
     public void visit(CalendarDocument calendarDocument) {
         try {
             ResultConverter calendarConverter = converterRegistry.getConverter("appointment");
@@ -185,6 +194,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
                 json.put(requestResult.getResultObject());
             }
         } catch (OXException e) {
+            LOG.warn("Could not write document to response. It will be ignored.", e);
             errors.add(e);
         }
     }
@@ -206,7 +216,5 @@ public class JSONResponseVisitor implements DocumentVisitor {
     public List<OXException> getErrors() {
         return errors;
     }
-
-
 
 }

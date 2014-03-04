@@ -104,7 +104,8 @@ public class SearchRequest implements Serializable {
     }
 
     /**
-     * Used for pagination.
+     * The start index for pagination.
+     *
      * @return The start index within the set of total results.
      * Never negative.
      */
@@ -113,7 +114,8 @@ public class SearchRequest implements Serializable {
     }
 
     /**
-     * Used for pagination.
+     * The maximum size of the result set for pagination.
+     *
      * @return The max. number of documents to return.
      * Never negative.
      */
@@ -123,8 +125,8 @@ public class SearchRequest implements Serializable {
 
     /**
      * A list of queries to search for.
-     * @return Never <code>null</code>.
-     * May be empty to denote no query at all.
+     *
+     * @return Never <code>null</code>. May be empty to denote no query at all.
      */
     public List<String> getQueries() {
         if (queries == null) {
@@ -169,7 +171,10 @@ public class SearchRequest implements Serializable {
                 FacetType type = entry.getKey();
                 if (type != CommonFacetType.GLOBAL && !exclude.contains(type)) {
                     for (ActiveFacet facet : entry.getValue()) {
-                        filters.add(facet.getFilter());
+                        Filter filter = facet.getFilter();
+                        if (filter != Filter.NO_FILTER) {
+                            filters.add(filter);
+                        }
                     }
                 }
             }

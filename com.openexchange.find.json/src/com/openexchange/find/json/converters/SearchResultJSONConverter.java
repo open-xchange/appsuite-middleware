@@ -48,8 +48,6 @@
  */
 package com.openexchange.find.json.converters;
 
-import java.util.List;
-import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,8 +57,6 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Document;
 import com.openexchange.find.SearchResult;
-import com.openexchange.find.facet.ActiveFacet;
-import com.openexchange.find.json.JSONResponseVisitor;
 import com.openexchange.find.json.osgi.ResultConverterRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -100,10 +96,13 @@ public class SearchResultJSONConverter extends AbstractJSONConverter {
                 for (Document document : searchResult.getDocuments()) {
                     document.accept(visitor);
                 }
+
                 JSONArray jsonDocuments = visitor.getJSONArray();
-                // TODO: handle possible exceptions from visitor.getErrors()
                 json.put("results", jsonDocuments);
-                json.put("facets", convertActiveFacets(session.getUser().getLocale(), searchResult.getActiveFacets()));
+                result.addWarnings(visitor.getErrors());
+
+                // TODO: remove if not needed by UI
+                // json.put("facets", convertActiveFacets(session.getUser().getLocale(), searchResult.getActiveFacets()));
                 result.setResultObject(json, "json");
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
@@ -111,6 +110,7 @@ public class SearchResultJSONConverter extends AbstractJSONConverter {
         }
     }
 
+    /* TODO: remove if not needed by UI
     private JSONArray convertActiveFacets(Locale locale, List<ActiveFacet> activeFacets) throws JSONException {
         JSONArray jFacets = new JSONArray(activeFacets.size());
         for (ActiveFacet facet : activeFacets) {
@@ -123,5 +123,6 @@ public class SearchResultJSONConverter extends AbstractJSONConverter {
 
         return jFacets;
     }
+    */
 
 }

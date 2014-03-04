@@ -70,6 +70,7 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FieldFacet;
@@ -121,27 +122,43 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     public void getConfiguration(ServerSession session) throws OXException {
+        // TODO: merge into autocomplete and use correct values (prefix) for field facets
         List<Facet> staticFacets = new ArrayList<Facet>(7);
 
         // subject or task name
         {
-            final Facet facet = new FieldFacet(TasksFacetType.TASK_SUBJECT, FIELD_SUBJECT);
+            final Facet facet = new FieldFacet(
+                TasksFacetType.TASK_SUBJECT,
+                new FormattableDisplayItem(TasksStrings.FACET_TASK_SUBJECT),
+                FIELD_SUBJECT,
+                "");
             staticFacets.add(facet);
         }
         // description
         {
-            final Facet facet = new FieldFacet(TasksFacetType.TASK_DESCRIPTION, FIELD_DESCRIPTION);
+            final Facet facet = new FieldFacet(
+                TasksFacetType.TASK_DESCRIPTION,
+                new FormattableDisplayItem(TasksStrings.FACET_TASK_DESCRIPTION),
+                FIELD_DESCRIPTION,
+                "");
             staticFacets.add(facet);
         }
         // location
         {
-            final Facet facet = new FieldFacet(TasksFacetType.TASK_LOCATION, FIELD_LOCATION);
+            final Facet facet = new FieldFacet(
+                TasksFacetType.TASK_LOCATION,
+                new FormattableDisplayItem(TasksStrings.FACET_TASK_LOCATION),
+                FIELD_LOCATION,
+                "");
             staticFacets.add(facet);
         }
         // attachment name
         {
-
-            final Facet facet = new FieldFacet(TasksFacetType.TASK_ATTACHMENT_NAME, FIELD_ATTACHMENT_NAME);
+            final Facet facet = new FieldFacet(
+                TasksFacetType.TASK_ATTACHMENT_NAME,
+                new FormattableDisplayItem(TasksStrings.FACET_TASK_ATTACHMENT_NAME),
+                FIELD_ATTACHMENT_NAME,
+                "");
             staticFacets.add(facet);
         }
         // Status

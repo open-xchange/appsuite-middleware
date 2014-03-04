@@ -60,7 +60,6 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.json.JSONDisplayItemVisitor;
 
 
 /**
@@ -95,7 +94,7 @@ public abstract class AbstractJSONConverter implements ResultConverter {
             FacetType type = facet.getType();
             facetJSON.put("id", type.getId());
             if (type.isFieldFacet()) {
-                facetJSON.put("is_field_facet", true);
+                facetJSON.put("field_facet", true);
             } else {
                 facetJSON.put("display_name", translator.translate(locale, type.getDisplayName()));
             }

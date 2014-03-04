@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.find.json;
+package com.openexchange.find.json.converters;
 
 import java.util.Locale;
 import com.openexchange.find.calendar.RecurringTypeDisplayItem;
@@ -62,8 +62,6 @@ import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.drive.FilenameDisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
-import com.openexchange.find.facet.NoDisplayItem;
-import com.openexchange.find.json.converters.StringTranslator;
 import com.openexchange.find.tasks.TaskStatusDisplayItem;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
 import com.openexchange.mail.dataobjects.MailFolderInfo;
@@ -103,7 +101,11 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     @Override
     public void visit(SimpleDisplayItem item) {
-        result = item.getDefaultValue();
+        if (item.isLocalizable()) {
+            result = translator.translate(locale, item.getDefaultValue());
+        } else {
+            result = item.getDefaultValue();
+        }
     }
 
     @Override
@@ -134,11 +136,6 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
     @Override
     public void visit(RelativeDateDisplayItem item) {
         result = translator.translate(locale, item.getDefaultValue());
-    }
-
-    @Override
-    public void visit(NoDisplayItem item) {
-        result = item.getDefaultValue();
     }
 
     @Override

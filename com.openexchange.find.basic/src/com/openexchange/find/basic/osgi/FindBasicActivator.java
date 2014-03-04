@@ -52,6 +52,7 @@ package com.openexchange.find.basic.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
@@ -85,7 +86,7 @@ public class FindBasicActivator extends HousekeepingActivator {
         return new Class<?>[] { ContactService.class, FolderService.class, MailService.class,
             MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
             AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class,
-            IDBasedFolderAccessFactory.class, ResourceService.class };
+            IDBasedFolderAccessFactory.class, ResourceService.class, ConfigurationService.class };
     }
 
     @Override

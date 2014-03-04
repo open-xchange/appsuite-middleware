@@ -53,7 +53,6 @@ import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
@@ -82,7 +81,6 @@ import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.drive.FileTypeDisplayItem;
-import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FieldFacet;
@@ -149,22 +147,6 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         } finally {
             SearchIterators.close(it);
         }
-
-//        final List<Document> result = new LinkedList<Document>();
-//        for (final Filter filter : searchRequest.getFilters()) {
-//            final SearchTerm<?> searchTerm = Utils.termFor(filter);
-//            SearchIterator<File> it = null;
-//            try {
-//                it = fileAccess.search(searchTerm, Arrays.asList(fields), File.Field.TITLE, SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
-//                while (it.hasNext()) {
-//                    final File file = it.next();
-//                    result.add(new FileDocument(file));
-//                }
-//            } finally {
-//                SearchIterators.close(it);
-//            }
-//        }
-//        return new SearchResult(result.size(), 0, result);
     }
 
     @Override
@@ -192,39 +174,17 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         }
 
         // Add static file type facet
-        boolean hasFileTypeFacet = false;
-        final List<ActiveFacet> activeFactes = autocompleteRequest.getActiveFactes();
-        if (null != activeFactes && !activeFactes.isEmpty()) {
-            for (final Iterator<ActiveFacet> it = activeFactes.iterator(); !hasFileTypeFacet && it.hasNext();) {
-                if (DriveFacetType.FILE_TYPE == it.next().getType()) {
-                    hasFileTypeFacet = true;
-                    break;
-                }
-            }
-        }
-
-        if (!hasFileTypeFacet) {
-            final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
-            final String fieldFileType = Constants.FIELD_FILE_TYPE;
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.AUDIO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_AUDIO, FileTypeDisplayItem.Type.AUDIO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS, FileTypeDisplayItem.Type.DOCUMENTS), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.IMAGES.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_IMAGES, FileTypeDisplayItem.Type.IMAGES), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.IMAGES.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.OTHER.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_OTHER, FileTypeDisplayItem.Type.OTHER), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.OTHER.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.VIDEO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_VIDEO, FileTypeDisplayItem.Type.VIDEO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
-            final Facet folderTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
-            facets.add(folderTypeFacet);
-        }
+        final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
+        final String fieldFileType = Constants.FIELD_FILE_TYPE;
+        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.AUDIO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_AUDIO, FileTypeDisplayItem.Type.AUDIO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
+        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS, FileTypeDisplayItem.Type.DOCUMENTS), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
+        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.IMAGES.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_IMAGES, FileTypeDisplayItem.Type.IMAGES), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.IMAGES.getIdentifier())));
+        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.OTHER.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_OTHER, FileTypeDisplayItem.Type.OTHER), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.OTHER.getIdentifier())));
+        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.VIDEO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_VIDEO, FileTypeDisplayItem.Type.VIDEO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
+        final Facet folderTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
+        facets.add(folderTypeFacet);
 
         return new AutocompleteResult(facets);
-    }
-
-    public void getConfiguration(final ServerSession session) {
-        Facet folderNameFacet = new FieldFacet(DriveFacetType.FOLDERS, Constants.FIELD_FOLDER_TYPE);
-        Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_NAME, Constants.FIELD_FILE_NAME);
-        // Define facets
-        final List<Facet> facets = new LinkedList<Facet>();
-        facets.add(fileNameFacet);
-        facets.add(folderNameFacet);
     }
 
     @Override

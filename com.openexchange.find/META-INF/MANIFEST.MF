@@ -6,7 +6,8 @@ Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.find.osgi.FindActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.google.common.base,
+ com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.folderstorage,
  com.openexchange.groupware.container,

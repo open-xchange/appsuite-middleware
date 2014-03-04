@@ -127,16 +127,18 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
 
         for (ActiveFacet removable : toRemove) {
             FacetType type = removable.getType();
-            if (type.appliesOnce()) {
-                typeMap.remove(type);
-                continue;
-            }
+            if (!type.isFieldFacet()) {
+                if (type.appliesOnce()) {
+                    typeMap.remove(type);
+                    continue;
+                }
 
-            Map<String, FacetValue> valueMap = typeMap.get(type);
-            if (valueMap != null) {
-                valueMap.remove(removable.getValueId());
-                if (valueMap.isEmpty()) {
-                    typeMap.remove(removable.getType());
+                Map<String, FacetValue> valueMap = typeMap.get(type);
+                if (valueMap != null) {
+                    valueMap.remove(removable.getValueId());
+                    if (valueMap.isEmpty()) {
+                        typeMap.remove(removable.getType());
+                    }
                 }
             }
         }

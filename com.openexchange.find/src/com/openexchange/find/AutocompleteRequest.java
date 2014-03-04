@@ -72,7 +72,8 @@ public class AutocompleteRequest implements Serializable {
     /**
      * Initializes a new {@link AutocompleteRequest}.
      *
-     * @param prefix The prefix to autocomplete on; must not be <code>null</code>
+     * @param prefix The prefix to autocomplete on. Must not end with a wildcard character.
+     * Must never be <code>null</code>, but may be empty.
      */
     public AutocompleteRequest(final String prefix) {
         this(prefix, Collections.<ActiveFacet>emptyList());
@@ -81,7 +82,8 @@ public class AutocompleteRequest implements Serializable {
     /**
      * Initializes a new {@link AutocompleteRequest}.
      *
-     * @param prefix The prefix to autocomplete on; must not be <code>null</code>
+     * @param prefix The prefix to autocomplete on. Must not end with a wildcard character.
+     * Must never be <code>null</code>, but may be empty.
      * @param activeFacets The list of currently active facets; must not be <code>null</code>
      */
     public AutocompleteRequest(final String prefix, final List<ActiveFacet> activeFacets) {
@@ -91,7 +93,8 @@ public class AutocompleteRequest implements Serializable {
     /**
      * Initializes a new {@link AutocompleteRequest}.
      *
-     * @param prefix The prefix to autocomplete on; must not be <code>null</code>
+     * @param prefix The prefix to autocomplete on. Must not end with a wildcard character.
+     * Must never be <code>null</code>, but may be empty.
      * @param activeFacets The list of currently active facets; must not be <code>null</code>
      * @param limit The maximum number of results to return, or <code>0</code> if not defined
      */
@@ -103,9 +106,9 @@ public class AutocompleteRequest implements Serializable {
     }
 
     /**
-     * @return The prefix to autocomplete on. Must not end
-     * with a wildcard character. Must never be <code>null</code>,
-     * but may be empty.
+     * The prefix to autocomplete on.
+     *
+     * @return The (possibly empty) prefix string.
      */
     public String getPrefix() {
         return prefix;
@@ -113,6 +116,7 @@ public class AutocompleteRequest implements Serializable {
 
     /**
      * Gets a list of active facets that are currently set.
+     *
      * @return The list of facets. May be empty but never <code>null</code>.
      */
     public List<ActiveFacet> getActiveFactes() {

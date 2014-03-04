@@ -49,33 +49,53 @@
 
 package com.openexchange.find.common;
 
-import com.openexchange.find.facet.DefaultDisplayItem;
+import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
+import com.openexchange.i18n.I18nService;
 
 
 /**
- * {@link SimpleDisplayItem}
+ * A {@link DisplayItem} containing only a (possibly localizable) default value.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class SimpleDisplayItem extends DefaultDisplayItem {
+public class SimpleDisplayItem implements DisplayItem {
 
     private final String defaultValue;
+
+    private final boolean isLocalizable;
+
+    /**
+     * Initializes a new {@link SimpleDisplayItem} that
+     * is not localizable.
+     *
+     * @param defaultValue The default value
+     */
+    public SimpleDisplayItem(final String defaultValue) {
+        this(defaultValue, false);
+    }
 
     /**
      * Initializes a new {@link SimpleDisplayItem}.
      *
      * @param defaultValue The default value
+     * @param isLocalizable If the default value can be localized via {@link I18nService}.
      */
-    public SimpleDisplayItem(final String defaultValue) {
+    public SimpleDisplayItem(final String defaultValue, final boolean isLocalizable) {
         super();
         this.defaultValue = defaultValue;
+        this.isLocalizable = isLocalizable;
     }
 
     @Override
     public String getDefaultValue() {
         return defaultValue;
+    }
+
+    @Override
+    public boolean isLocalizable() {
+        return isLocalizable;
     }
 
     @Override
@@ -93,6 +113,7 @@ public class SimpleDisplayItem extends DefaultDisplayItem {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
+        result = prime * result + ((isLocalizable) ? 1 : 0);
         return result;
     }
 
@@ -110,11 +131,13 @@ public class SimpleDisplayItem extends DefaultDisplayItem {
                 return false;
         } else if (!defaultValue.equals(other.defaultValue))
             return false;
+        if (isLocalizable != other.isLocalizable)
+            return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "SimpleDisplayItem [defaultValue=" + defaultValue + "]";
+        return "SimpleDisplayItem [defaultValue=" + defaultValue + ", isLocalizable=" + isLocalizable + "]";
     }
 }

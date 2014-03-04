@@ -49,6 +49,8 @@
 
 package com.openexchange.find.facet;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 
 /**
  * An {@link ActiveFacet} is a facet that is currently selected to
@@ -70,22 +72,45 @@ public class ActiveFacet {
      * @param type The facets type.
      * @param valueId The id of the selected value.
      * @param filter The filter according to the value.
+     * Use {@link Filter#NO_FILTER} if constructing a real filter makes no sense.
      */
     public ActiveFacet(FacetType type, String valueId, Filter filter) {
         super();
+        checkNotNull(type);
+        checkNotNull(valueId);
+        checkNotNull(filter);
         this.type = type;
         this.valueId = valueId;
         this.filter = filter;
     }
 
+    /**
+     * The type of this facet.
+     *
+     * @return The type; never <code>null</code>.
+     */
     public FacetType getType() {
         return type;
     }
 
+    /**
+     * The id of the selected value. Generally corresponds to the id attribute
+     * of a {@link FacetValue} that was present in a previous autocomplete response.
+     * In some special cases the value can be used to realize custom filters.
+     *
+     * @return The id; never <code>null</code>.
+     */
     public String getValueId() {
         return valueId;
     }
 
+    /**
+     * The filter for the according value. This should always be the
+     * unmodified filter object that was written out for the referenced
+     * value within a previous autocomplete response.
+     *
+     * @return The filter. Can be {@link Filter#NO_FILTER} but never <code>null</code>.
+     */
     public Filter getFilter() {
         return filter;
     }

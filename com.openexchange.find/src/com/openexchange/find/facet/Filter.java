@@ -48,6 +48,7 @@
  */
 package com.openexchange.find.facet;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -63,7 +64,6 @@ import com.openexchange.find.SearchRequest;
  */
 public class Filter implements Serializable {
 
-    // TODO: remove
     public static final Filter NO_FILTER = new Filter(Collections.<String>emptyList(), "");
 
     private static final long serialVersionUID = -5712151560300214639L;
@@ -135,6 +135,8 @@ public class Filter implements Serializable {
      */
     public Filter(String id, String displayName, List<String> fields, List<String> queries) {
         super();
+        checkNotNull(fields);
+        checkNotNull(queries);
         this.id = id;
         this.displayName = displayName;
         this.fields = fields;

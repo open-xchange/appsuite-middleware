@@ -52,6 +52,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.exception.OXException;
@@ -213,15 +214,20 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * @throws OXException
      */
     private static ContactSearchObject getSearchObject(String prefix, boolean requireEmail, List<String> folderIDs) throws OXException {
+        ConfigurationService config = Services.getConfigurationService();
+        int minSearchCharacters = config.getIntProperty("com.openexchange.MinimumSearchCharacters", 0);
         ContactSearchObject searchObject = new ContactSearchObject();
         searchObject.setOrSearch(true);
         searchObject.setEmailAutoComplete(requireEmail);
-        searchObject.setDisplayName(prefix);
-        searchObject.setSurname(prefix);
-        searchObject.setGivenName(prefix);
-        searchObject.setEmail1(prefix);
-        searchObject.setEmail2(prefix);
-        searchObject.setEmail3(prefix);
+        if (prefix.length() >= minSearchCharacters) {
+            searchObject.setDisplayName(prefix);
+            searchObject.setSurname(prefix);
+            searchObject.setGivenName(prefix);
+            searchObject.setEmail1(prefix);
+            searchObject.setEmail2(prefix);
+            searchObject.setEmail3(prefix);
+        }
+
         if (null != folderIDs) {
             for (String folderID : folderIDs) {
                 try {

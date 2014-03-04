@@ -49,6 +49,7 @@
 package com.openexchange.find.basic;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -105,6 +106,10 @@ public class Services {
 
     public static IDBasedFolderAccessFactory getIdBasedFolderAccessFactory() throws OXException {
         return requireService(IDBasedFolderAccessFactory.class);
+    }
+
+    public static ConfigurationService getConfigurationService() throws OXException {
+        return requireService(ConfigurationService.class);
     }
 
     public static void setServiceLookup(ServiceLookup lookup) {
