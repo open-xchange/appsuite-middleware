@@ -64,6 +64,8 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 
 %changelog
 * Tue Feb 25 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2014-03-10
+* Tue Feb 25 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2014-02-26
 * Fri Feb 21 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2014-02-28
