@@ -77,7 +77,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthHTTPClientFactory.class, CapabilityService.class, HostnameService.class };
+        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthHTTPClientFactory.class, CapabilityService.class };
     }
 
     @Override
@@ -104,6 +104,8 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             AbstractOAuthAJAXActionService.setSecretService(secretService);
 
             getService(CapabilityService.class).declareCapability("oauth");
+
+            trackService(HostnameService.class);
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
