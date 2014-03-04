@@ -138,6 +138,8 @@ public class AppointmentSearchBuilder {
                 applyDescription(filter.getQueries());
             } else if (CalendarFacetType.LOCATION.getId().equals(field)) {
                 applyLocation(filter.getQueries());
+            } else if (CalendarFacetType.ATTACHMENT_NAME.getId().equals(field)) {
+                applyAttachmentName(filter.getQueries());
             } else if (CalendarFacetType.RELATIVE_DATE.getId().equals(field)) {
                 applyRelativeDate(filter.getQueries());
             } else if (CalendarFacetType.STATUS.getId().equals(field)) {
@@ -199,10 +201,6 @@ public class AppointmentSearchBuilder {
     }
 
     private void applyParticipants(List<String> queries) throws OXException {
-        Set<Set<String>> externalParticipants = appointmentSearch.getExternalParticipants();
-        if (null == externalParticipants) {
-            externalParticipants = new HashSet<Set<String>>();
-        }
         Set<String> mailAddresses = new HashSet<String>();
         for (String query : queries) {
             if (false == isWildcardOnly(query)) {
@@ -210,6 +208,10 @@ public class AppointmentSearchBuilder {
             }
         }
         if (0 < mailAddresses.size()) {
+            Set<Set<String>> externalParticipants = appointmentSearch.getExternalParticipants();
+            if (null == externalParticipants) {
+                externalParticipants = new HashSet<Set<String>>();
+            }
             externalParticipants.add(mailAddresses);
             appointmentSearch.setExternalParticipants(externalParticipants);
         }
@@ -332,6 +334,18 @@ public class AppointmentSearchBuilder {
             locations.add(addWildcards(query, true, true));
         }
         appointmentSearch.setLocations(locations);
+    }
+
+    private void applyAttachmentName(List<String> queries) throws OXException {
+        Set<String> attachmentNames = appointmentSearch.getAttachmentNames();
+        if (null == attachmentNames) {
+            attachmentNames = new HashSet<String>();
+        }
+        for (String query : queries) {
+            checkPatternLength(query);
+            attachmentNames.add(addWildcards(query, true, true));
+        }
+        appointmentSearch.setAttachmentNames(attachmentNames);
     }
 
     private void applyDescription(List<String> queries) throws OXException {

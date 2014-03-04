@@ -163,7 +163,10 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * add participants facet dynamically
          */
-        facets.add(new Facet(CalendarFacetType.PARTICIPANT, getAutocompleteContacts(autocompleteRequest, session)));
+        List<FacetValue> participantValues = getParticipantValues(autocompleteRequest, session);
+        if (null != participantValues && 0 < participantValues.size()) {
+            facets.add(new Facet(CalendarFacetType.PARTICIPANT, participantValues));
+        }
         /*
          * add other facets
          */
@@ -362,7 +365,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         }
     };
 
-    private List<FacetValue> getAutocompleteContacts(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+    private List<FacetValue> getParticipantValues(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         /*
          * search matching contacts (and users, implicitly)
          */

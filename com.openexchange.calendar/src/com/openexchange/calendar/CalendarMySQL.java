@@ -1378,6 +1378,11 @@ public class CalendarMySQL implements CalendarSqlImp {
             searchParameters.add(contextID);
             searchParameters.add(contextID);
         }
+        if (null != searchObj.getAttachmentNames() && 0 < searchObj.getAttachmentNames().size()) {
+            sb.append(" LEFT JOIN prg_attachment AS pa ON pd.intfield01 = pa.attached AND pd.cid = ? AND pa.cid = ?");
+            searchParameters.add(contextID);
+            searchParameters.add(contextID);
+        }
         sb.append(" WHERE ");
 
         /*
@@ -1606,7 +1611,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     sb.append(" AND EXISTS (SELECT 1 FROM dateExternal WHERE dateExternal.cid = ? AND " +
                         "dateExternal.objectId = pd.intfield01 AND dateExternal.mailAddress");
                     searchParameters.add(contextID);
-                    if (1 == externalParticipants.size()) {
+                    if (1 == externalParticipant.size()) {
                         sb.append(" = ?");
                         searchParameters.add(externalParticipant.iterator().next());
                     } else {
@@ -1628,6 +1633,17 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
         if (searchObj.isExcludeNonRecurringAppointments()) {
             sb.append(" AND pd.intfield02 IS NOT NULL");
+        }
+        /*
+         * attachments names
+         */
+        Set<String> attachmentNames = searchObj.getAttachmentNames();
+        if (null != attachmentNames) {
+            for (String attachmentName : attachmentNames) {
+                String preparedPattern = StringCollection.prepareForSearch(attachmentName, false, true);
+                sb.append(containsWildcards(preparedPattern) ? " AND pa.filename LIKE ?" : " AND pa.filename = ?");
+                searchParameters.add(preparedPattern);
+            }
         }
 
         sb.append(" ORDER BY ");
