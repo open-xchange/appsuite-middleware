@@ -62,6 +62,7 @@ import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -133,6 +134,16 @@ public final class ContextMBeanImpl extends StandardMBean implements ContextMBea
                         Databases.closeSQLStuff(stmt);
                     }
                 }
+
+                // Invalidate cache
+                final ContextStorage cs = ContextStorage.getInstance();
+                for (final int contextId : contextIds.toArray()) {
+                    try {
+                        cs.invalidateContext(contextId);
+                    } catch (final Exception e) {
+                        logger.warn("Error invalidating cached infos of context {} in context storage", contextId, e);
+                    }
+                }
             }
         } catch (final OXException e) {
             throw new MBeanException(e, e.getMessage());
@@ -164,6 +175,15 @@ public final class ContextMBeanImpl extends StandardMBean implements ContextMBea
         } finally {
             Databases.closeSQLStuff(stmt);
             databaseService.backWritable(con);
+        }
+
+        // Invalidate cache
+        final ContextStorage cs = ContextStorage.getInstance();
+        try {
+            cs.invalidateContext(contextId);
+        } catch (final Exception e) {
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(ContextMBeanImpl.class);
+            logger.warn("Error invalidating cached infos of context {} in context storage", contextId, e);
         }
     }
 
