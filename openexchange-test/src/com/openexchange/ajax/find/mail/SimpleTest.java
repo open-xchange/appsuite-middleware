@@ -53,6 +53,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.find.AbstractFindTest;
@@ -93,6 +94,8 @@ public class SimpleTest extends AbstractFindTest {
 
     private FolderObject testFolder;
 
+    private String[] mailIds;
+
     public SimpleTest(String name) {
         super(name);
     }
@@ -108,6 +111,13 @@ public class SimpleTest extends AbstractFindTest {
         InsertRequest insertRequestReq = new InsertRequest(EnumAPI.OX_NEW, testFolder);
         InsertResponse insertResponseResp = client.execute(insertRequestReq);
         insertResponseResp.fillObject(testFolder);
+
+        String defaultAddress = client.getValues().getSendAddress();
+        String mail = MAIL.replaceAll("#ADDR#", defaultAddress);
+        ByteArrayInputStream mailStream = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
+        ImportMailRequest request = new ImportMailRequest(testFolder.getFullName(), 0, new ByteArrayInputStream[] { mailStream });
+        ImportMailResponse response = client.execute(request);
+        mailIds = response.getIds()[0];
     }
 
     @Override
@@ -141,20 +151,12 @@ public class SimpleTest extends AbstractFindTest {
     }
 
     public void testSearch() throws Exception {
-        /*
-         * Import a mail to our test folder...
-         */
-        String defaultAddress = client.getValues().getSendAddress();
-        String mail = MAIL.replaceAll("#ADDR#", defaultAddress);
-        ByteArrayInputStream mailStream = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
-        ImportMailRequest request = new ImportMailRequest(testFolder.getFullName(), 0, new ByteArrayInputStream[] { mailStream });
-        ImportMailResponse response = client.execute(request);
-        String[] mailIds = response.getIds()[0];
         assertNotNull("mail was not imported", mailIds);
 
         /*
          * ...and search for it using the subject as query and the default sender address
          */
+        String defaultAddress = client.getValues().getSendAddress();
         List<String> addressFields = new ArrayList<String>(3);
         addressFields.add("from");
         addressFields.add("to");
@@ -180,6 +182,36 @@ public class SimpleTest extends AbstractFindTest {
          * Now filter additionally for a mail address not contained in the mail headers
          */
         facets.add(new ActiveFacet(MailFacetType.CONTACTS, "some/other/id", new Filter(addressFields, "unknown@example.com")));
+        queryRequest = new QueryRequest(0, 10, facets, Module.MAIL.getIdentifier());
+        queryResponse = client.execute(queryRequest);
+        result = queryResponse.getSearchResult();
+        documents = result.getDocuments();
+        assertEquals("Mail found but should not", 0, documents.size());
+    }
+
+    public void testMultipleGlobalFacets() throws Exception {
+        assertNotNull("mail was not imported", mailIds);
+
+        /*
+         * Add two global facets with terms contained in the mails subject and search for it
+         */
+        List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
+        facets.add(new ActiveFacet(CommonFacetType.GLOBAL, CommonFacetType.GLOBAL.getId(), new Filter(Collections.singletonList("global"), "Find")));
+        facets.add(new ActiveFacet(CommonFacetType.GLOBAL, CommonFacetType.GLOBAL.getId(), new Filter(Collections.singletonList("global"), "me")));
+        facets.add(new ActiveFacet(CommonFacetType.FOLDER, testFolder.getFullName(), Filter.NO_FILTER));
+        QueryRequest queryRequest = new QueryRequest(0, 10, facets, Module.MAIL.getIdentifier());
+        QueryResponse queryResponse = client.execute(queryRequest);
+        SearchResult result = queryResponse.getSearchResult();
+        List<Document> documents = result.getDocuments();
+        assertEquals("Did not find mail", 1, documents.size());
+        PropDocument document = (PropDocument) documents.get(0);
+        Object mailId = document.getProps().get("id");
+        assertEquals("Wrong mail found", mailIds[1], mailId);
+
+        /*
+         * Add another one that is not contained. Now nothing should be found
+         */
+        facets.add(new ActiveFacet(CommonFacetType.GLOBAL, CommonFacetType.GLOBAL.getId(), new Filter(Collections.singletonList("global"), "again")));
         queryRequest = new QueryRequest(0, 10, facets, Module.MAIL.getIdentifier());
         queryResponse = client.execute(queryRequest);
         result = queryResponse.getSearchResult();
