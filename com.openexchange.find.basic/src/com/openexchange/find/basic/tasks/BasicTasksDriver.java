@@ -73,7 +73,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class BasicTasksDriver extends MockTasksDriver {
     
-    private final static int TASKS_FIELDS[] = {DataObject.OBJECT_ID, DataObject.CREATED_BY, Task.TITLE, Task.STATUS, Task.NOTE};
+    //private final static int TASKS_FIELDS[] = {DataObject.OBJECT_ID, DataObject.CREATED_BY, Task.TITLE, Task.STATUS, Task.NOTE};
+    
+    private final static int TASKS_FIELDS[] = new int[] { 20, 1, 5, 2, 4, 209, 301, 101, 200, 309, 201, 202, 102 };
 
     /**
      * Initializes a new {@link BasicTasksDriver}.
