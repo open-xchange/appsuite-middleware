@@ -76,12 +76,27 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     private final boolean descendingDir;
 
-    private static interface FieldComparer {
+    private static interface IFieldComparer {
 
-        public abstract int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException;
+        int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException;
+
+        int compareFieldsDesc(final MailMessage msg1, final MailMessage msg2) throws MessagingException;
     }
 
-    private static abstract class LocalizedFieldComparer implements FieldComparer {
+    private static abstract class FieldComparer implements IFieldComparer {
+
+        protected FieldComparer() {
+            super();
+        }
+
+        @Override
+        public int compareFieldsDesc(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
+            // Negate ASC order
+            return compareFields(msg1, msg2) * (-1);
+        }
+    }
+
+    private static abstract class LocalizedFieldComparer extends FieldComparer {
 
         public final Locale locale;
 
@@ -96,7 +111,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     }
 
-    private final FieldComparer fieldComparer;
+    private final IFieldComparer fieldComparer;
 
     /**
      * Initializes a new {@link MailMessageComparator} sorting by header <code>Date</code> (a.k.a. sent date).
@@ -121,7 +136,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         if (MailSortField.COLOR_LABEL.equals(sortField) && !MailProperties.getInstance().isUserFlagsEnabled()) {
             fieldComparer = DUMMY_COMPARER;
         } else {
-            FieldComparer tmp = COMPARERS.get(sortField);
+            IFieldComparer tmp = COMPARERS.get(sortField);
             if (null == tmp) {
                 tmp = createFieldComparer(sortField, locale);
             }
@@ -177,10 +192,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         }
     }
 
-    private static final EnumMap<MailSortField, FieldComparer> COMPARERS;
+    private static final EnumMap<MailSortField, IFieldComparer> COMPARERS;
 
     static {
-        COMPARERS = new EnumMap<MailSortField, FieldComparer>(MailSortField.class);
+        COMPARERS = new EnumMap<MailSortField, IFieldComparer>(MailSortField.class);
         COMPARERS.put(MailSortField.SENT_DATE, new FieldComparer() {
 
             @Override
@@ -236,16 +251,37 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
             @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
-                return Long.valueOf(msg1.getSize()).compareTo(Long.valueOf(msg2.getSize()));
+                final long size1 = msg1.getSize();
+                final long size2 = msg2.getSize();
+                return (size1 < size2 ? -1 : (size1 == size2 ? 0 : 1));
             }
         });
-        COMPARERS.put(MailSortField.COLOR_LABEL, new FieldComparer() {
+        COMPARERS.put(MailSortField.COLOR_LABEL, new IFieldComparer() {
 
             @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
-                final Integer cl1 = Integer.valueOf(msg1.getColorLabel());
-                final Integer cl2 = Integer.valueOf(msg2.getColorLabel());
-                return cl1.compareTo(cl2);
+                final int cl1 = msg1.getColorLabel();
+                final int cl2 = msg2.getColorLabel();
+                if (cl1 <= 0) {
+                    return cl2 <= 0 ? 0 : 1;
+                }
+                if (cl2 <= 0) {
+                    return cl1 <= 0 ? 0 : -1;
+                }
+                return (cl1 < cl2 ? -1 : (cl1 == cl2 ? 0 : 1));
+            }
+
+            @Override
+            public int compareFieldsDesc(MailMessage msg1, MailMessage msg2) throws MessagingException {
+                final int cl1 = msg1.getColorLabel();
+                final int cl2 = msg2.getColorLabel();
+                if (cl1 <= 0) {
+                    return cl2 <= 0 ? 0 : 1;
+                }
+                if (cl2 <= 0) {
+                    return cl1 <= 0 ? 0 : -1;
+                }
+                return (cl1 < cl2 ? 1 : (cl1 == cl2 ? 0 : -1));
             }
         });
     }
@@ -326,11 +362,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
     @Override
     public int compare(final MailMessage msg1, final MailMessage msg2) {
         try {
-            int comparedTo = fieldComparer.compareFields(msg1, msg2);
-            if (descendingDir) {
-                comparedTo *= (-1);
-            }
-            return comparedTo;
+            return descendingDir ? fieldComparer.compareFieldsDesc(msg1, msg2) : fieldComparer.compareFields(msg1, msg2);
         } catch (final MessagingException e) {
             LOG.error("", e);
             return 0;
