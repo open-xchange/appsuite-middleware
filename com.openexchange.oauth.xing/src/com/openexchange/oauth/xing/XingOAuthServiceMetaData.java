@@ -156,35 +156,37 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             return deferrer.getDeferredURL(callbackUrl);
         }
 
-        return deferredURLUsing(callbackUrl, "https://" + currentHost);
+        return deferredURLUsing(callbackUrl, new StringAllocator("https://").append(currentHost).toString());
     }
 
     private String deferredURLUsing(final String url, final String domain) {
         if (url == null) {
             return null;
         }
-        String deferrerURL = domain;
-        if (Strings.isEmpty(deferrerURL)) {
+        if (Strings.isEmpty(domain)) {
             return url;
         }
-        deferrerURL = deferrerURL.trim();
-        if (seemsAlreadyDeferred(url, deferrerURL)) {
+        String deferrerURL = domain.trim();
+        final DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
+        final String path = new StringAllocator(prefixService.getPrefix()).append("defer").toString();
+        if (seemsAlreadyDeferred(url, deferrerURL, path)) {
             // Already deferred
             return url;
         }
         // Return deferred URL
-        final DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-        return new StringAllocator(deferrerURL).append(prefixService.getPrefix()).append("defer?redirect=").append(encodeUrl(url, false, false)).toString();
+        return new StringAllocator(deferrerURL).append(path).append("?redirect=").append(encodeUrl(url, false, false)).toString();
     }
 
-    private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL) {
+    private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL, final String path) {
         final String str = "://";
         final int pos1 = url.indexOf(str);
         final int pos2 = deferrerURL.indexOf(str);
         if (pos1 > 0 && pos2 > 0) {
-            return url.substring(pos1).startsWith(deferrerURL.substring(pos2));
+            final String deferrerPrefix = new StringAllocator(deferrerURL.substring(pos2)).append(path).toString();
+            return url.substring(pos1).startsWith(deferrerPrefix);
         }
-        return url.startsWith(deferrerURL);
+        final String deferrerPrefix = new StringAllocator(deferrerURL).append(path).toString();
+        return url.startsWith(deferrerPrefix);
     }
 
 }

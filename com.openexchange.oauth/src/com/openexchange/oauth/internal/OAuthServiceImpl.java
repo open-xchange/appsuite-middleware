@@ -280,7 +280,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             final DeferringURLService ds = Services.getService(DeferringURLService.class);
             {
-                if (null != ds) {
+                if (null != ds && ds.isDeferrerURLAvailable()) {
                     final String deferredURL = ds.getDeferredURL(cbUrl);
                     if (deferredURL != null) {
                         cbUrl = deferredURL;
@@ -388,6 +388,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Execute INSERT command
              */
             executeUpdate(contextId, insert, values);
+            LOG.info("Created new {} account with ID {} for user {} in context {}", serviceMetaData, account.getId(), user, contextId);
             /*
              * Return newly created account
              */
@@ -446,6 +447,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Execute INSERT command
              */
             executeUpdate(contextId, insert, values);
+            LOG.info("Created new {} account with ID {} for user {} in context {}", serviceMetaData, account.getId(), user, contextId);
             /*
              * Return newly created account
              */
