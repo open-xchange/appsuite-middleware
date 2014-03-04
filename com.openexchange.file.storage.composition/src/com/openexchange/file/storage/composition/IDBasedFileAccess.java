@@ -324,15 +324,17 @@ public interface IDBasedFileAccess extends TransactionAware {
     /**
      * Search for a given file.
      *
+     * @param folderIds The optional folder identifiers
      * @param searchTerm The search term
      * @param fields The fields to load
      * @param sort Which field to sort by. May be <code>null</code>.
      * @param order The order in which to sort
      * @param start A start index (inclusive) for the search results. Useful for paging.
      * @param end An end index (exclusive) for the search results. Useful for paging.
+     *
      * @return
      * @throws OXException If operation fails
      */
-    SearchIterator<File> search(SearchTerm<?> searchTerm, List<Field> fields, File.Field sort, SortDirection order, int start, int end) throws OXException;
+    SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, File.Field sort, SortDirection order, int start, int end) throws OXException;
 
 }

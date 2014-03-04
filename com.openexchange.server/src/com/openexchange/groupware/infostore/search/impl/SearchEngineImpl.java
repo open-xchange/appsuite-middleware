@@ -123,8 +123,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
     }
 
     @Override
-    public SearchIterator<DocumentMetadata> search(final SearchTerm<?> searchTerm, final Metadata[] cols, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
-        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(ctx.getContextId(), getResultFieldsSelect(cols));
+    public SearchIterator<DocumentMetadata> search(final int[] folderIds, final SearchTerm<?> searchTerm, final Metadata[] cols, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
+        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(folderIds, ctx.getContextId(), getResultFieldsSelect(cols));
         searchTerm.visit(visitor);
         String sqlQuery = visitor.getMySqlQuery();
 

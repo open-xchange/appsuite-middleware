@@ -51,9 +51,11 @@ package com.openexchange.file.storage.webdav;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -69,8 +71,6 @@ import com.openexchange.file.storage.search.FileMd5SumTerm;
 import com.openexchange.file.storage.search.FileMimeTypeTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.FileSizeTerm;
-import com.openexchange.file.storage.search.FolderIdTerm;
-import com.openexchange.file.storage.search.IdTerm;
 import com.openexchange.file.storage.search.LastModifiedTerm;
 import com.openexchange.file.storage.search.LastModifiedUtcTerm;
 import com.openexchange.file.storage.search.LockedUntilTerm;
@@ -145,7 +145,7 @@ public final class WebDAVSearchVisitor implements SearchTermVisitor {
 
     // ------------------------------------------------------------------------------------------------------ //
 
-    private final List<String> folderIds;
+    private final Set<String> folderIds;
     private final WebDAVFileStorageFileAccess fileAccess;
     private final List<Field> fields;
     private Map<Key, File> results;
@@ -163,9 +163,9 @@ public final class WebDAVSearchVisitor implements SearchTermVisitor {
     /**
      * Initializes a new {@link WebDAVSearchVisitor}.
      */
-    private WebDAVSearchVisitor(final List<String> folderIds, final List<Field> fields, final WebDAVFileStorageFileAccess fileAccess) {
+    public WebDAVSearchVisitor(final List<String> folderIds, final List<Field> fields, final WebDAVFileStorageFileAccess fileAccess) {
         super();
-        this.folderIds = folderIds;
+        this.folderIds = folderIds == null ? Collections.<String> emptySet() : new LinkedHashSet<String>(folderIds);
         this.fileAccess = fileAccess;
         this.fields = fields;
     }
@@ -177,69 +177,6 @@ public final class WebDAVSearchVisitor implements SearchTermVisitor {
      */
     public List<File> getResults() {
         return new LinkedList<File>(results.values());
-    }
-
-    @Override
-    public void visit(final AndTerm term) throws OXException {
-        // Handle folder IDs as a filter
-
-        final List<String> folderIds = new LinkedList<String>();
-        final List<SearchTerm<?>> otherTerms = new LinkedList<SearchTerm<?>>();
-        {
-            final List<SearchTerm<?>> terms = term.getPattern();
-            for (final SearchTerm<?> linkedTerm : terms) {
-                if (linkedTerm instanceof FolderIdTerm) {
-                    folderIds.add(((FolderIdTerm) linkedTerm).getPattern());
-                } else {
-                    otherTerms.add(linkedTerm);
-                }
-            }
-        }
-
-        if (otherTerms.isEmpty()) {
-            searchByTerm(term);
-        } else {
-            final WebDAVSearchVisitor newVisitor = new WebDAVSearchVisitor(folderIds, fields, fileAccess);
-            new AndTerm(otherTerms).visit(newVisitor);
-            results = newVisitor.results;
-        }
-    }
-
-    @Override
-    public void visit(final OrTerm term) throws OXException {
-        // Handle folder IDs as a second source
-
-        final List<String> folderIds = new LinkedList<String>();
-        final List<SearchTerm<?>> otherTerms = new LinkedList<SearchTerm<?>>();
-        {
-            final List<SearchTerm<?>> terms = term.getPattern();
-            for (final SearchTerm<?> linkedTerm : terms) {
-                if (linkedTerm instanceof FolderIdTerm) {
-                    folderIds.add(((FolderIdTerm) linkedTerm).getPattern());
-                } else {
-                    otherTerms.add(linkedTerm);
-                }
-            }
-        }
-
-        if (otherTerms.isEmpty()) {
-            searchByTerm(term);
-        } else {
-            final WebDAVSearchVisitor newVisitor = new WebDAVSearchVisitor(folderIds, fields, fileAccess);
-            new OrTerm(otherTerms).visit(newVisitor);
-            results = newVisitor.results;
-            // Add those from folders
-            for (final String folderId : folderIds) {
-                for (final File file : fileAccess.getFileList(folderId, fields)) {
-                    results.put(new Key(file.getId(), file.getFolderId()), file);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void visit(final NotTerm term) throws OXException {
-        searchByTerm(term);
     }
 
     private void searchByTerm(final SearchTerm<?> term) throws OXException {
@@ -267,6 +204,21 @@ public final class WebDAVSearchVisitor implements SearchTermVisitor {
             }
             this.results = map;
         }
+    }
+
+    @Override
+    public void visit(final AndTerm term) throws OXException {
+        searchByTerm(term);
+    }
+
+    @Override
+    public void visit(final OrTerm term) throws OXException {
+        searchByTerm(term);
+    }
+
+    @Override
+    public void visit(final NotTerm term) throws OXException {
+        searchByTerm(term);
     }
 
     @Override
@@ -345,11 +297,6 @@ public final class WebDAVSearchVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final FolderIdTerm term) throws OXException {
-        searchByTerm(term);
-    }
-
-    @Override
     public void visit(final TitleTerm term) throws OXException {
         searchByTerm(term);
     }
@@ -361,11 +308,6 @@ public final class WebDAVSearchVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(final ContentTerm term) throws OXException {
-        searchByTerm(term);
-    }
-
-    @Override
-    public void visit(final IdTerm term) throws OXException {
         searchByTerm(term);
     }
 

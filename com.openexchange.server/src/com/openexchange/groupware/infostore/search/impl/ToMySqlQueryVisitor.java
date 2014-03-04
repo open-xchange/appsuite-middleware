@@ -67,8 +67,6 @@ import com.openexchange.groupware.infostore.search.FileMd5SumTerm;
 import com.openexchange.groupware.infostore.search.FileMimeTypeTerm;
 import com.openexchange.groupware.infostore.search.FileNameTerm;
 import com.openexchange.groupware.infostore.search.FileSizeTerm;
-import com.openexchange.groupware.infostore.search.FolderIdTerm;
-import com.openexchange.groupware.infostore.search.IdTerm;
 import com.openexchange.groupware.infostore.search.LastModifiedTerm;
 import com.openexchange.groupware.infostore.search.LastModifiedUtcTerm;
 import com.openexchange.groupware.infostore.search.LockedUntilTerm;
@@ -109,12 +107,26 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
      * Initializes a new {@link ToMySqlQueryVisitor}.
      * @param cols
      */
-    public ToMySqlQueryVisitor(int contextId, String cols) {
+    public ToMySqlQueryVisitor(int[] folderIds, int contextId, String cols) {
         super();
         this.sb = new StringBuilder();
         sb.append(cols).append(" ");
         sb.append(PREFIX).append(contextId).append(" AND ");
+        if (null != folderIds && folderIds.length > 0) {
+            sb.append(INFOSTORE).append("folder_id IN ");
+            appendInString(folderIds, sb);
+            sb.append(" AND ");
+        }
         this.codec = new MySQLCodec(Mode.STANDARD);
+    }
+
+    private void appendInString(final int[] folderIds, final StringBuilder sb) {
+        sb.append('(');
+        sb.append(folderIds[0]);
+        for (int i = 1; i < folderIds.length; i++) {
+            sb.append(',').append(folderIds[i]);
+        }
+        sb.append(')');
     }
 
     public String getMySqlQuery() {
@@ -246,12 +258,6 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(FolderIdTerm folderIdTerm) {
-        String pattern = codec.encode(IMMUNE, folderIdTerm.getPattern());
-        sb.append(INFOSTORE).append("folder_id = ").append(pattern).append(" ");
-    }
-
-    @Override
     public void visit(TitleTerm titleTerm) {
         String field = "title";
         parseStringSearchTerm(titleTerm, field);
@@ -265,12 +271,6 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(ContentTerm contentTerm) {
         // not supported
-    }
-
-    @Override
-    public void visit(IdTerm idTerm) {
-        String pattern = codec.encode(IMMUNE, idTerm.getPattern());
-        sb.append(INFOSTORE).append("id = ").append(pattern).append(" ");
     }
 
     @Override

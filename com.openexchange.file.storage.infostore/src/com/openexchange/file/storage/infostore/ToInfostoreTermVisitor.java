@@ -65,8 +65,6 @@ import com.openexchange.file.storage.search.FileMd5SumTerm;
 import com.openexchange.file.storage.search.FileMimeTypeTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.FileSizeTerm;
-import com.openexchange.file.storage.search.FolderIdTerm;
-import com.openexchange.file.storage.search.IdTerm;
 import com.openexchange.file.storage.search.LastModifiedTerm;
 import com.openexchange.file.storage.search.LastModifiedUtcTerm;
 import com.openexchange.file.storage.search.LockedUntilTerm;
@@ -220,11 +218,6 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     }
 
     @Override
-    public void visit(final FolderIdTerm term) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.FolderIdTerm(term.getPattern());
-    }
-
-    @Override
     public void visit(final TitleTerm term) throws OXException {
         infstoreTerm = new com.openexchange.groupware.infostore.search.TitleTerm(term.getPattern(), term.isIgnoreCase(), term.isSubstringSearch());
     }
@@ -237,12 +230,6 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     @Override
     public void visit(final ContentTerm term) throws OXException {
         infstoreTerm = new com.openexchange.groupware.infostore.search.ContentTerm(term.getPattern(), term.isIgnoreCase(), term.isSubstringSearch());
-
-    }
-
-    @Override
-    public void visit(final IdTerm term) throws OXException {
-        infstoreTerm = new com.openexchange.groupware.infostore.search.IdTerm(term.getPattern(), term.isIgnoreCase(), term.isSubstringSearch());
     }
 
     @Override

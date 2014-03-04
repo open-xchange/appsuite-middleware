@@ -1074,7 +1074,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     }
 
     @Override
-    public SearchIterator<File> search(final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+    public SearchIterator<File> search(final List<String> folderIds, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        // TODO:
+
+
         final List<FileStorageFileAccess> all = getAllFileStorageAccesses();
         final int numOfStorages = all.size();
         if (0 >= numOfStorages) {
@@ -1082,7 +1085,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         }
         if (1 == numOfStorages) {
             final FileStorageFileAccess files = all.get(0);
-            final SearchIterator<File> result = files.search(searchTerm, fields, sort, order, start, end);
+            final SearchIterator<File> result = files.search(folderIds, searchTerm, fields, sort, order, start, end);
             if (result == null) {
                 return SearchIteratorAdapter.emptyIterator();
             }
@@ -1108,7 +1111,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                         @Override
                         public Void call() throws Exception {
                             try {
-                                final SearchIterator<File> result = files.search(searchTerm, fields, sort, order, start, end);
+                                final SearchIterator<File> result = files.search(folderIds, searchTerm, fields, sort, order, start, end);
                                 if (result != null) {
                                     final FileStorageAccountAccess accountAccess = files.getAccountAccess();
                                     resultMap.put(index, fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));
@@ -1130,7 +1133,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                         @Override
                         public Void call() throws OXException {
                             try {
-                                final SearchIterator<File> result = files.search(searchTerm, fields, sort, order, start, end);
+                                final SearchIterator<File> result = files.search(folderIds, searchTerm, fields, sort, order, start, end);
                                 if (result != null) {
                                     final FileStorageAccountAccess accountAccess = files.getAccountAccess();
                                     resultMap.put(index, fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId()));

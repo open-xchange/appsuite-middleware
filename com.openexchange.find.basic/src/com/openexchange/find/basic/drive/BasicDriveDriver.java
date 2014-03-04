@@ -133,11 +133,14 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // Yield search term from search request
         final SearchTerm<?> term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
 
+        // Folder identifiers
+        final List<String> folderIds = new LinkedList<String>();
+
         // Search...
         SearchIterator<File> it = null;
         try {
             final int start = searchRequest.getStart();
-            it = fileAccess.search(term, Arrays.asList(fields), File.Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
+            it = fileAccess.search(folderIds, term, Arrays.asList(fields), File.Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
             final List<Document> results = new LinkedList<Document>();
             while (it.hasNext()) {
                 final File file = it.next();
@@ -246,7 +249,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // Fire search
         SearchIterator<File> it = null;
         try {
-            it = access.search(orTerm, Arrays.asList(fields), Field.TITLE, SortDirection.ASC, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+            it = access.search(Collections.<String> emptyList(), orTerm, Arrays.asList(fields), Field.TITLE, SortDirection.ASC, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
             List<FacetValue> facets = new LinkedList<FacetValue>();
             while (it.hasNext()) {
                 File file = it.next();
