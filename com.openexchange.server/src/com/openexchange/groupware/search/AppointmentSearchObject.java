@@ -68,6 +68,7 @@ public class AppointmentSearchObject /*extends CalendarSearchObject*/ {
     private Set<String> queries;
     private Set<Integer> folderIDs;
     private Set<Integer> resourceIDs;
+    private Set<String> attachmentNames;
 
 	/**
 	 * Initializes a new {@link AppointmentSearchObject}.
@@ -334,6 +335,26 @@ public class AppointmentSearchObject /*extends CalendarSearchObject*/ {
      */
     public void setResourceIDs(Set<Integer> resourceIDs) {
         this.resourceIDs = resourceIDs;
+    }
+
+    /**
+     * Gets a set of attachment names that are matched against the appointment's attachments during search. Multiple pattern values are
+     * used with a logical <code>AND</code> conjunction.
+     *
+     * @return The attachment names
+     */
+    public Set<String> getAttachmentNames() {
+        return attachmentNames;
+    }
+
+    /**
+     * Sets the patterns that are matched against the appointment's attachments during search. Multiple pattern values are used
+     * with a logical <code>AND</code> conjunction.
+     *
+     * @param attachmentNames The attachment names to set
+     */
+    public void setAttachmentNames(Set<String> attachmentNames) {
+        this.attachmentNames = attachmentNames;
     }
 
 }
