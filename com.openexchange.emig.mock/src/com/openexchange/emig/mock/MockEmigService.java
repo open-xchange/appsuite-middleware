@@ -119,7 +119,7 @@ public final class MockEmigService implements EmigService {
 
     @Override
     public boolean isEMIG_Session(final String userIdentifier) throws OXException {
-        return checkMailAddress(userIdentifier, true);
+        return checkMailAddress(userIdentifier, false);
     }
 
     @Override
