@@ -79,6 +79,9 @@ public final class Constants {
     /** The field for file MIME type */
     public static final String FIELD_FILE_TYPE = "file_type";
 
+    /** The field for file size */
+    public static final String FIELD_FILE_SIZE = "file_size";
+
     /** The field for folder type */
     public static final String FIELD_FOLDER_TYPE = "folder_type";
 

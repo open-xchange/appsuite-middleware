@@ -59,6 +59,7 @@ import com.openexchange.find.common.FolderDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.drive.FilenameDisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
@@ -162,5 +163,10 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     public String getResult() {
         return result;
+    }
+
+    @Override
+    public void visit(FileSizeDisplayItem item) {
+        result = item.getDefaultValue();
     }
 }

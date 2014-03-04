@@ -49,64 +49,65 @@
 
 package com.openexchange.find.drive;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.facet.DisplayItemVisitor;
 
 
 /**
- * {@link DriveStrings}
+ * {@link FileSizeDisplayItem}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since 7.6.0
  */
-public class DriveStrings implements LocalizableStrings {
+public class FileSizeDisplayItem implements DisplayItem {
 
-    // Search in drive
-    public static final String FACET_GLOBAL = "%1$s <i>in drive</i>";
+    public static enum Size {
+        MB1(" > 1MB"),
+        MB10(" > 10MB"),
+        MB100(" > 100MB"),
+        GB1("> 1GB");
 
-    // Search in file name.
-    public static final String FACET_FILE_NAME = "File name";
+        private String size;
 
-    // Search in file content.
-    public static final String FACET_FILE_CONTENT = "File content";
+        private Size(String size) {
+            this.size = size;
+        }
 
-    // Search in folders.
-    public static final String FACET_FOLDERS = "Folders";
+        public String getSize() {
+            return size;
+        }
+    }
 
-    // Search in Persons.
-    public static final String FACET_CONTACTS = "Contacts";
+    private String displayName;
+    private Size size;
 
-    // Search in folder type (private, public, shared, external)
-    public static final String FACET_FOLDER_TYPE = "Folder type";
+    /**
+     * Initializes a new {@link FileSizeDisplayItem}.
+     */
+    public FileSizeDisplayItem(String displayName, Size size) {
+        super();
+        this.displayName = displayName;
+        this.size = size;
+    }
 
-    // Search in file description.
-    public static final String FACET_FILE_DESCRIPTION = "File description";
+    @Override
+    public String getDefaultValue() {
+        return displayName;
+    }
 
-    // Search in file type.
-    public static final String FACET_FILE_TYPE = "File type";
+    @Override
+    public boolean isLocalizable() {
+        return false;
+    }
 
-    // Search in file size
-    public static final String FACET_FILE_SIZE = "File size";
+    @Override
+    public Object getItem() {
+        return size;
+    }
 
-    // -------------------------- i18n strings for file types ---------------------------- //
-
-    public static final String FILE_TYPE_IMAGES = "Images";
-
-    public static final String FILE_TYPE_AUDIO = "Audio";
-
-    public static final String FILE_TYPE_VIDEO = "Video";
-
-    public static final String FILE_TYPE_DOCUMENTS = "Documents";
-
-    public static final String FILE_TYPE_OTHER = "Other";
-
-    // ---------------------------------------------------------------------------------- //
-
-    // Search in file field file name.
-    public static final String SEARCH_IN_FILE_NAME = "%1$s <i>in file name</i>";
-
-    // Search in file field file description.
-    public static final String SEARCH_IN_FILE_DESC = "%1$s <i>in file description</i>";
-
-    // Search in file field file content.
-    public static final String SEARCH_IN_FILE_CONTENT = "%1$s <i>in file content</i>";
+    @Override
+    public void accept(DisplayItemVisitor visitor) {
+        visitor.visit(this);
+    }
 
 }
