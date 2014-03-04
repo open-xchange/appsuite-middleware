@@ -134,7 +134,13 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         final SearchTerm<?> term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
 
         // Folder identifiers
-        final List<String> folderIds = new LinkedList<String>();
+        final String folderId = searchRequest.getFolderId();
+        List<String> folderIds;
+        if (folderId == null) {
+            folderIds = Collections.emptyList();
+        } else {
+            folderIds = Collections.singletonList(folderId);
+        }
 
         // Search...
         SearchIterator<File> it = null;
