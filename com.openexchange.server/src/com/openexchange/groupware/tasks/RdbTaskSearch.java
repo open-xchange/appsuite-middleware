@@ -216,8 +216,8 @@ public class RdbTaskSearch extends TaskSearch {
     public SearchIterator<Task> find(final Context context, final int userID, TaskSearchObject searchObject, int[] columns, int orderBy, Order order, final List<Integer> all, final List<Integer> own, final List<Integer> shared) throws OXException {
         final List<Object> searchParameters = new ArrayList<Object>();
         StringBuilder builder = new StringBuilder();
-        String fields = SQL.getFields(columns, false, "t");
-        builder.append("SELECT ").append(fields);
+        String fields = SQL.getFields(columns, true, "t");
+        builder.append("SELECT DISTINCT ").append(fields);
         builder.append(" FROM task AS t ");
         builder.append(" LEFT JOIN task_folder AS tf ON (tf.id = t.id AND tf.cid = t.cid)");
         builder.append(" LEFT JOIN prg_attachment AS a ON (t.cid = a.cid AND t.id = a.attached)");
@@ -298,16 +298,20 @@ public class RdbTaskSearch extends TaskSearch {
             builder.append(" AND ( ");
             int i = 0;
             for(Integer id : searchObject.getInternalParticipants()) {
-                if (i++ > 1)
-                    builder.append(" AND ");
+                if (i++ > 0)
+                    builder.append(" OR ");
+                else
+                    builder.append(" ( ");
                 builder.append(" tp.user = ? ");
                 searchParameters.add(id);
             }
+            if (searchObject.hasInternalParticipants())
+                builder.append(" ) ");
             i = 0;
             for(String mail : searchObject.getExternalParticipants()) {
                 if (searchObject.hasInternalParticipants() || i++ > 1)
                     builder.append(" AND ");
-                String preparedPattern = StringCollection.prepareForSearch(mail, true, true);
+                String preparedPattern = StringCollection.prepareForSearch(mail, false, true);
                 builder.append(" etp.mail = ? ");
                 searchParameters.add(preparedPattern);
             }
