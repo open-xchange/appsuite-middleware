@@ -7366,6 +7366,31 @@ msgstr ""
 msgid "Delete denied for XING resource: %1$s"
 msgstr ""
 
+#. E-Mail address is invalid
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:83
+msgid "E-Mail address is invalid"
+msgstr ""
+
+#. The E-Mail address already belongs to a XING user
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:86
+msgid "The E-Mail address already belongs to a XING user"
+msgstr ""
+
+#. Invitation attempt failed for any reason
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:89
+msgid "Invitation attempt failed for any reason"
+msgstr ""
+
+#. The E-Mail address does not belongs to a XING user
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:92
+msgid "The E-Mail address does not belongs to a XING user"
+msgstr ""
+
+#. XING user is already directly connected.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:95
+msgid "XING user is already directly connected."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
 msgstr ""
