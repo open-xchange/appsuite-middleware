@@ -55,6 +55,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -137,6 +138,8 @@ public class FindTasksTestEnvironment {
     private Set<Integer> tasksToFind = new HashSet<Integer>();
 
     private final static UUID trackingID = UUID.randomUUID();
+    
+    private Map<String, List<Integer>> rootTasks = new HashMap<String, List<Integer>>();
 
     /**
      * Initializes a new {@link FindTasksTestEnvironment}.
@@ -370,14 +373,8 @@ public class FindTasksTestEnvironment {
      * - 1 task with 2 participants (2int) in user's A private folder
      * - 1 task with 3 participants (2int,1ext) in user's B private folder
      * - 1 task with 2 participants (1int,1ext) in user's A private folder
-<<<<<<< HEAD
      * Total: 35 tasks
      * @throws Exception
-=======
-     *    (1 shared task will indirectly be inserted in user's A root task folder)
-     * Total: 31 tasks
-     * @throws Exception
->>>>>>> Adopted find tests to API changes
      */
     private final void createAndInsertTasks() throws Exception {
         // Prepare assets
@@ -417,17 +414,17 @@ public class FindTasksTestEnvironment {
 
         //insert a task with no attachment in private with status in progress and 2 internal participants (a+b) for user A
         list.add(usrPartA);
-        insertTask(clientA, FolderType.PRIVATE, Status.IN_PROGRESS, userAprivateTestFolder.getObjectID(), list, false);
+        addToMap(userB, insertTask(clientA, FolderType.PRIVATE, Status.DONE, userAprivateTestFolder.getObjectID(), list, false));
 
         //insert a task with attachment in private with status waiting and 2 internal (a+b) and 1 external participant for user b
         list.add(extPart);
-        insertTask(clientB, FolderType.PRIVATE, Status.WAITING, userBprivateTestFolder.getObjectID(), list, true);
+        addToMap(userA, insertTask(clientB, FolderType.PRIVATE, Status.IN_PROGRESS, userBprivateTestFolder.getObjectID(), list, true));
 
         //insert a task with attachment in private with status done and 1 internal (a) and 1 external participant for user a
         list.clear();
         list.add(usrPartA);
         list.add(extPart);
-        insertTask(clientA, FolderType.PRIVATE, Status.DONE, userAprivateTestFolder.getObjectID(), list, true);
+        insertTask(clientA, FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID(), list, true);
     }
 
     /**
@@ -450,6 +447,14 @@ public class FindTasksTestEnvironment {
         if (br != null)
             br.close();
         return sb.toString();
+    }
+    
+    private final void addToMap(UserValues u, Task t) throws OXException, IOException, JSONException {
+        List<Integer> list = rootTasks.get(u.getDefaultAddress());
+        if (list == null)
+            list = new ArrayList<Integer>();
+        list.add(t.getObjectID());
+        rootTasks.put(u.getDefaultAddress(), list);
     }
 
     /**
@@ -484,15 +489,13 @@ public class FindTasksTestEnvironment {
             t.setNote(builder.toString());
         }
 
-
-
         client.execute(new com.openexchange.ajax.task.actions.InsertRequest(t, client.getValues().getTimeZone())).fillTask(t);
 
         if (attachment)
-            client.execute(new AttachRequest(t, "my cool attachment", new ByteArrayInputStream(readFile("attachment.base64").getBytes()), "image/jpeg")).getId();
-
-        tasksToFind.add(t.getObjectID());
-
+            client.execute(new AttachRequest(t, "my cool attachment", new ByteArrayInputStream(readFile("attachment.base64").getBytes()), "image/jpeg"));
+        
+        t = client.execute(new com.openexchange.ajax.task.actions.GetRequest(folder, t.getObjectID())).getTask(client.getValues().getTimeZone());
+        
         return t;
     }
 
@@ -503,7 +506,7 @@ public class FindTasksTestEnvironment {
     private final void createFilters() throws Exception {
         //create single filters
         //participants
-        List<ActiveFacet> l = new ArrayList<ActiveFacet>(2);
+        List<ActiveFacet> l = new ArrayList<ActiveFacet>(3);
         FacetType type = TasksFacetType.TASK_PARTICIPANTS;
         l.add(createActiveFacet(type, userA.getUserId(), createFilter("participant", Integer.toString(userA.getUserId()))));
         l.add(createActiveFacet(type, userB.getUserId(), createFilter("participant", Integer.toString(userB.getUserId()))));
@@ -565,8 +568,25 @@ public class FindTasksTestEnvironment {
                 initUsers();
             clientA.execute(new DeleteRequest(EnumAPI.OX_NEW, userAprivateTestFolder, userApublicTestFolder));
             clientB.execute(new DeleteRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, userBsharedTestFolderRW, userBprivateTestFolder, userBpublicTestFolder));
-
+            
+            cleanRootTasks(clientA, rootTasks.get(userA.getDefaultAddress()));
+            cleanRootTasks(clientB, rootTasks.get(userB.getDefaultAddress()));
+            
             logout();
+        }
+    }
+    
+    /**
+     * Clean up the root tasks
+     * @param client
+     * @param map
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    private static final void cleanRootTasks(AJAXClient client, List<Integer> list) throws OXException, IOException, JSONException {
+        for(Integer i : list) {
+            client.execute(new com.openexchange.ajax.task.actions.DeleteRequest(client.getValues().getPrivateTaskFolder(), i, new Date((System.currentTimeMillis() + 7300)))); //cheat and set a future last modified
         }
     }
 
