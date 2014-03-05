@@ -62,73 +62,27 @@ import com.openexchange.mail.dataobjects.MailMessage;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
+public final class ANDTerm extends CatenatingTerm {
 
     private static final long serialVersionUID = 2696976140249947009L;
-
-    private final SearchTerm<?>[] terms;
 
     /**
      * Initializes a new {@link ANDTerm}
      */
     protected ANDTerm() {
         super();
-        terms = new SearchTerm<?>[2];
     }
 
     /**
      * Initializes a new {@link ANDTerm}
      */
     public ANDTerm(final SearchTerm<?> firstTerm, final SearchTerm<?> secondTerm) {
-        super();
-        terms = new SearchTerm<?>[] { firstTerm, secondTerm };
+        super(firstTerm, secondTerm);
     }
 
     @Override
     public void accept(SearchTermVisitor visitor) {
         visitor.visit(this);
-    }
-
-    /**
-     * Gets the search terms that should be linked with an AND as an array of {@link SearchTerm} with length <code>2</code>.
-     *
-     * @return The terms that should be linked with an AND
-     */
-    @Override
-    public SearchTerm<?>[] getPattern() {
-        return terms;
-    }
-
-    /**
-     * Sets the first search term
-     *
-     * @param firstTerm The first search term
-     */
-    public void setFirstTerm(final SearchTerm<?> firstTerm) {
-        terms[0] = firstTerm;
-    }
-
-    /**
-     * Sets the second search term
-     *
-     * @param secondTerm The second search term
-     */
-    public void setSecondTerm(final SearchTerm<?> secondTerm) {
-        terms[1] = secondTerm;
-    }
-
-    /**
-     * Gets the first search term
-     */
-    public SearchTerm<?> getFirstTerm() {
-        return terms[0];
-    }
-
-    /**
-     * Gets the second search term
-     */
-    public SearchTerm<?> getSecondTerm() {
-        return terms[1];
     }
 
     @Override
