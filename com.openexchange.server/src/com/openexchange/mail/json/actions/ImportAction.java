@@ -49,10 +49,13 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
+import static com.openexchange.mail.utils.DateUtils.getDateRFC822;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -176,7 +179,34 @@ public final class ImportAction extends AbstractMailAction {
                         final InputStream is = item.openStream();
                         final MimeMessage message;
                         try {
-                            message = new MimeMessage(defaultSession, is);
+                            message = new MimeMessage(defaultSession, is) {
+                                private boolean notParsed = true;
+                                private Date receivedDate = null;
+                                @Override
+                                public Date getReceivedDate() throws MessagingException {
+                                    if (notParsed) {
+                                        notParsed = false;
+                                        final String[] receivedHdrs = getHeader(MessageHeaders.HDR_RECEIVED);
+                                        if (null != receivedHdrs) {
+                                            long lastReceived = Long.MIN_VALUE;
+                                            for (int i = 0; i < receivedHdrs.length; i++) {
+                                                final String hdr = unfold(receivedHdrs[i]);
+                                                int pos;
+                                                if (hdr != null && (pos = hdr.lastIndexOf(';')) != -1) {
+                                                    try {
+                                                        lastReceived = Math.max(lastReceived, getDateRFC822(hdr.substring(pos + 1).trim()).getTime());
+                                                    } catch (final IllegalArgumentException e) {
+                                                        continue;
+                                                    }
+                                                }
+                                            }
+                                            receivedDate = new Date(lastReceived);
+                                        }
+                                    }
+
+                                    return receivedDate;
+                                }
+                            };
                             message.removeHeader("x-original-headers");
                         } finally {
                             Streams.close(is);
