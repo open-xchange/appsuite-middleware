@@ -72,7 +72,9 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -141,7 +143,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
             throw ServiceExceptionCode.absentService(XingOAuthAccessProvider.class);
         }
 
-        final OAuthAccount xingOAuthAccount = provider.getXingOAuthAccount(session);
+        final int xingOAuthAccount = provider.getXingOAuthAccount(session);
         return provider.accessFor(xingOAuthAccount, session);
     }
 
@@ -213,12 +215,11 @@ public class XingSubscribeService extends AbstractSubscribeService {
      * @throws OXException If XING OAuth account cannot be returned
      */
     protected OAuthAccount getXingOAuthAccount(final ServerSession session) throws OXException {
-        final XingOAuthAccessProvider provider = services.getService(XingOAuthAccessProvider.class);
-        if (null == provider) {
-            throw ServiceExceptionCode.absentService(XingOAuthAccessProvider.class);
+        final OAuthService oAuthService = services.getService(OAuthService.class);
+        if (null == oAuthService) {
+            throw ServiceExceptionCode.absentService(OAuthService.class);
         }
-
-        return provider.getXingOAuthAccount(session);
+        return oAuthService.getDefaultAccount(API.XING, session);
     }
 
     @Override

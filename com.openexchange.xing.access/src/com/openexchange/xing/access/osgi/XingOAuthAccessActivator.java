@@ -119,14 +119,16 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
         final XingOAuthAccessProvider provider = new XingOAuthAccessProvider() {
 
             @Override
-            public XingOAuthAccess accessFor(final OAuthAccount oauthAccount, final Session session) throws OXException {
-                return XingOAuthAccessImpl.accessFor(oauthAccount, session);
+            public XingOAuthAccess accessFor(final int oauthAccountId, final Session session) throws OXException {
+                final OAuthService oAuthService = getService(OAuthService.class);
+                final OAuthAccount oAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                return XingOAuthAccessImpl.accessFor(oAuthAccount, session);
             }
 
             @Override
-            public OAuthAccount getXingOAuthAccount(Session session) throws OXException {
+            public int getXingOAuthAccount(Session session) throws OXException {
                 final OAuthService oAuthService = getService(OAuthService.class);
-                return oAuthService.getDefaultAccount(API.XING, session);
+                return oAuthService.getDefaultAccount(API.XING, session).getId();
             }
         };
         providerRegistration = context.registerService(XingOAuthAccessProvider.class, provider, null);

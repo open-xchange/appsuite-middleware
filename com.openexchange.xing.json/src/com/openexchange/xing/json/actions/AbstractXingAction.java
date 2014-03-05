@@ -55,7 +55,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -140,7 +139,7 @@ public abstract class AbstractXingAction implements AJAXActionService {
         }
 
         final ServerSession session = req.getSession();
-        final OAuthAccount xingOAuthAccount = provider.getXingOAuthAccount(session);
+        final int xingOAuthAccount = provider.getXingOAuthAccount(session);
         return provider.accessFor(xingOAuthAccount, session);
     }
 

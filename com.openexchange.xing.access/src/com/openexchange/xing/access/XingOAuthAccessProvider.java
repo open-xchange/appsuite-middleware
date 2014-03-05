@@ -50,7 +50,6 @@
 package com.openexchange.xing.access;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.session.Session;
 
 /**
@@ -63,20 +62,20 @@ public interface XingOAuthAccessProvider {
     /**
      * Gets the XING OAuth access for given XING OAuth account.
      *
-     * @param oauthAccount The XING OAuth account providing credentials and settings
+     * @param oauthAccountId The identifier of the XING OAuth account providing credentials and settings
      * @param session The user session
      * @return The XING OAuth access; either newly created or fetched from underlying registry
      * @throws OXException If a XING session could not be created
      */
-    XingOAuthAccess accessFor(final OAuthAccount oauthAccount, final Session session) throws OXException;
+    XingOAuthAccess accessFor(final int oauthAccountId, final Session session) throws OXException;
 
     /**
-     * Gets the default XING OAuth account.
+     * Gets the identifier of the default XING OAuth account.
      *
      * @param session The associated session
-     * @return The default XING OAuth account
+     * @return The identifier of the default XING OAuth account
      * @throws OXException If retrieval fails
      */
-    OAuthAccount getXingOAuthAccount(final Session session) throws OXException;
+    int getXingOAuthAccount(final Session session) throws OXException;
 
 }
