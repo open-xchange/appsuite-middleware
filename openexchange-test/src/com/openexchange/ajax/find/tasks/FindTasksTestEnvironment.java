@@ -414,11 +414,11 @@ public class FindTasksTestEnvironment {
 
         //insert a task with no attachment in private with status in progress and 2 internal participants (a+b) for user A
         list.add(usrPartA);
-        addToMap(userB, insertTask(clientA, FolderType.PRIVATE, Status.DONE, userAprivateTestFolder.getObjectID(), list, false));
+        rememberTask(userB, insertTask(clientA, FolderType.PRIVATE, Status.DONE, userAprivateTestFolder.getObjectID(), list, false));
 
         //insert a task with attachment in private with status waiting and 2 internal (a+b) and 1 external participant for user b
         list.add(extPart);
-        addToMap(userA, insertTask(clientB, FolderType.PRIVATE, Status.IN_PROGRESS, userBprivateTestFolder.getObjectID(), list, true));
+        rememberTask(userA, insertTask(clientB, FolderType.PRIVATE, Status.IN_PROGRESS, userBprivateTestFolder.getObjectID(), list, true));
 
         //insert a task with attachment in private with status done and 1 internal (a) and 1 external participant for user a
         list.clear();
@@ -449,7 +449,15 @@ public class FindTasksTestEnvironment {
         return sb.toString();
     }
     
-    private final void addToMap(UserValues u, Task t) throws OXException, IOException, JSONException {
+    /**
+     * Remember tasks
+     * @param u
+     * @param t
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    private final void rememberTask(UserValues u, Task t) throws OXException, IOException, JSONException {
         List<Integer> list = rootTasks.get(u.getDefaultAddress());
         if (list == null)
             list = new ArrayList<Integer>();
