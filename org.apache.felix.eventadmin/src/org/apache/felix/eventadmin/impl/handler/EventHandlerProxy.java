@@ -41,6 +41,8 @@ import org.osgi.service.event.EventHandler;
  */
 public class EventHandlerProxy {
 
+    private static final int PROCESSING_TIME_WARNING_THRESHOLD = 200;
+
     /** The service reference for the event handler. */
     private final ServiceReference<EventHandler> reference;
 
@@ -402,6 +404,7 @@ public class EventHandlerProxy {
      */
     public void sendEvent(final Event event)
     {
+        long start = System.currentTimeMillis();
         final EventHandler handlerService = this.obtain();
         if (handlerService == null)
         {
@@ -421,6 +424,13 @@ public class EventHandlerProxy {
                             "Exception during event dispatch [" + event + " | "
                                             + this.reference + " | Bundle("
                                             + this.reference.getBundle() + ")]", e);
+        }
+        long elapsed = System.currentTimeMillis() - start;
+        int level = elapsed > PROCESSING_TIME_WARNING_THRESHOLD ? LogWrapper.LOG_WARNING : LogWrapper.LOG_DEBUG;
+        if (null != event && level <= LogWrapper.getLogger().getLogLevel()) {
+            String msg = "Event handling for \"" + event.getTopic() + "\" took " + elapsed + "ms at handler " +
+                handlerService.getClass().getName();
+            LogWrapper.getLogger().log(this.reference, level, msg);
         }
     }
 
