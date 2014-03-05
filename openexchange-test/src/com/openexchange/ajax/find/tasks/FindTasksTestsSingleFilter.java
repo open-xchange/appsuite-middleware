@@ -266,6 +266,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
     
     /**
      * Test filter combination 3, i.e. with status and participants
+     * 
      * @throws JSONException 
      * @throws IOException 
      * @throws OXException 
@@ -398,6 +399,61 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
         assertResults(10, Collections.singletonList(f.get(0))); //private
         assertResults(10, Collections.singletonList(f.get(1))); //public
         assertResults(11, Collections.singletonList(f.get(2))); //shared
+    }
+    
+    /**
+     * Test filter combination 5, i.e. with folder type and participant
+     * 
+     * @throws JSONException 
+     * @throws IOException 
+     * @throws OXException 
+     */
+    @Test
+    public void testWithFolderTypeAndParticipant() throws OXException, IOException, JSONException {
+        List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(5).toCharArray());
+        List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(3)); //private
+        assertResults(4, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(4)); //public
+        assertResults(0, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(5)); //shared
+        assertResults(1, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(3)); //private
+        assertResults(3, facets);
+        
+        facets.remove(2);
+        facets.add(f.get(4)); //public
+        assertResults(0, facets);
+
+        facets.remove(2);
+        facets.add(f.get(5)); //shared
+        assertResults(1, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(2)); //ext participant
+        facets.add(f.get(3)); //private
+        assertResults(1, facets);
+        
+        facets.remove(3);
+        facets.add(f.get(4)); //public
+        assertResults(0, facets);
+
+        facets.remove(3);
+        facets.add(f.get(5)); //shared
+        assertResults(0, facets);
     }
     
     /**

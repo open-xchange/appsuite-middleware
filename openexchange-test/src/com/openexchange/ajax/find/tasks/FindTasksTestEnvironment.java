@@ -418,7 +418,7 @@ public class FindTasksTestEnvironment {
         list.add(usrPartA);
         rememberTask(userB, insertTask(clientA, FolderType.PRIVATE, Status.DONE, userAprivateTestFolder.getObjectID(), list, false, false));
         
-        //insert a recurring task with attachment in shared folder with status not started for user b
+        //insert a recurring task with attachment in shared folder with status not started and 2 internal participants for user b
         rememberTask(userB, insertTask(clientB, FolderType.SHARED, Status.NOT_STARTED, userBsharedTestFolderRO.getObjectID(), list, true, true));
 
         //insert a task with attachment in private with status in progress and 2 internal (a+b) and 1 external participant for user b
