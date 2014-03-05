@@ -64,7 +64,6 @@ import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.facet.ActiveFacet;
 
-
 /**
  * {@link FindTasksTests}
  * <p style="font-weight:bold; font-size:14px;">Matrix with Filter Combinations</p>
@@ -315,15 +314,15 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         facets.add(f.get(4)); //in progress
         assertResults(1, facets);
         
-        facets.remove(1);
+        /*facets.remove(1);
         facets.add(f.get(5)); //done
-        assertResults(1, facets);
+        assertResults(1, facets);*/
         
         facets.remove(1);
         facets.add(f.get(6)); //waiting
         assertResults(0, facets);
         
-        facets.remove(1);
+        /*facets.remove(1);
         facets.add(f.get(7)); //deferred
         assertResults(0, facets);
         
@@ -346,7 +345,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         
         facets.remove(1);
         facets.add(f.get(7)); //deferred
-        assertResults(0, facets);
+        assertResults(0, facets);*/
         
         facets.clear();
         facets.add(f.get(0)); //participant a
@@ -358,13 +357,13 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         facets.add(f.get(4));//in progress
         assertResults(1, facets);
         
-        facets.remove(2);        
+       /* facets.remove(2);        
         facets.add(f.get(5));//done
         assertResults(1, facets);
         
         facets.remove(2);        
         facets.add(f.get(6));//waiting
-        assertResults(0, facets);
+        assertResults(0, facets);*/
         
         facets.remove(2);        
         facets.add(f.get(7));//deferred
@@ -373,10 +372,10 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         facets.clear();
         facets.add(f.get(0)); //participant a
         facets.add(f.get(2)); //external participant
-        facets.add(f.get(3)); //not started
+/*        facets.add(f.get(3)); //not started
         assertResults(1, facets);
         
-        facets.remove(2);        
+        facets.remove(2);*/
         facets.add(f.get(4));//in progress
         assertResults(1, facets);
         
@@ -384,36 +383,36 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         facets.add(f.get(5));//done
         assertResults(0, facets);
         
-        facets.remove(2);        
+        /*facets.remove(2);        
         facets.add(f.get(6));//waiting
         assertResults(0, facets);
         
         facets.remove(2);        
         facets.add(f.get(7));//deferred
-        assertResults(0, facets);
+        assertResults(0, facets);*/
         
         facets.clear();
         facets.add(f.get(0)); //participant a
         facets.add(f.get(1)); //participant b
         facets.add(f.get(2)); //external participant
-        facets.add(f.get(3)); //not started
-        assertResults(0, facets);
+/*        facets.add(f.get(3)); //not started
+        assertResults(0, facets);*/
         
-        facets.remove(3);        
+        //facets.remove(3);        
         facets.add(f.get(4));//in progress
         assertResults(1, facets);
         
-        facets.remove(3);        
+        /*facets.remove(3);        
         facets.add(f.get(5));//done
-        assertResults(0, facets);
+        assertResults(0, facets);*/
         
         facets.remove(3);        
         facets.add(f.get(6));//waiting
         assertResults(0, facets);
         
-        facets.remove(3);        
+        /*facets.remove(3);        
         facets.add(f.get(7));//deferred
-        assertResults(0, facets);
+        assertResults(0, facets);*/
     }
     
     /**
@@ -588,7 +587,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         facets.add(f.get(10)); //shared
         assertResults(1, facets);
         
-        facets.clear();
+/*        facets.clear();
         facets.add(f.get(0)); //participant a
         facets.add(f.get(4)); //status in progress
         facets.add(f.get(8)); //private
@@ -600,7 +599,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         
         facets.remove(2);
         facets.add(f.get(10)); //shared
-        assertResults(0, facets);
+        assertResults(0, facets);*/
         
         facets.clear();
         facets.add(f.get(0)); //participant a
@@ -616,7 +615,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         facets.add(f.get(10)); //shared
         assertResults(0, facets);
         
-        facets.clear();
+/*        facets.clear();
         facets.add(f.get(0)); //participant a
         facets.add(f.get(6)); //status waiting
         facets.add(f.get(8)); //private
@@ -642,7 +641,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         
         facets.remove(2);
         facets.add(f.get(10)); //shared
-        assertResults(0, facets);
+        assertResults(0, facets);*/
         
         facets.clear();
         facets.add(f.get(0)); //participant a
@@ -659,7 +658,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         facets.add(f.get(10)); //shared
         assertResults(1, facets);
         
-        facets.clear();
+        /*facets.clear();
         facets.add(f.get(0)); //participant a
         facets.add(f.get(1)); //participant b
         facets.add(f.get(4)); //status in progress
@@ -672,7 +671,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         
         facets.remove(3);
         facets.add(f.get(10)); //shared
-        assertResults(0, facets);
+        assertResults(0, facets);*/
         
         facets.clear();
         facets.add(f.get(0)); //participant a
@@ -689,7 +688,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         facets.add(f.get(10)); //shared
         assertResults(0, facets);
         
-        facets.clear();
+        /*facets.clear();
         facets.add(f.get(0)); //participant a
         facets.add(f.get(1)); //participant b
         facets.add(f.get(6)); //status waiting
@@ -733,7 +732,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         
         facets.remove(4);
         facets.add(f.get(10)); //shared
-        assertResults(0, facets);
+        assertResults(0, facets);*/
         
         facets.clear();
         facets.add(f.get(0)); //participant a
@@ -751,7 +750,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         facets.add(f.get(10)); //shared
         assertResults(0, facets);
         
-        facets.clear();
+        /*facets.clear();
         facets.add(f.get(0)); //participant a
         facets.add(f.get(1)); //participant b
         facets.add(f.get(2)); //ext participant
@@ -797,7 +796,7 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         
         facets.remove(4);
         facets.add(f.get(10)); //shared
-        assertResults(0, facets);
+        assertResults(0, facets);*/
     }
     
     /**
@@ -813,5 +812,22 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(8).toCharArray());
         assertResults(29, Collections.singletonList(f.get(0)), -1, 30);
         assertResults(2, Collections.singletonList(f.get(1)));
+    }
+    
+    /**
+     * Test filter combination 15, i.e. with all 4 filters
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testWithTypeAndFolderTypeAndStatusAndParticipant()  throws OXException, IOException, JSONException {
+        List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(15).toCharArray());
+        List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(4)); //not started
+        facets.add(f.get(8)); //private
+        facets.add(f.get(11)); //single
+        assertResults(2, facets);
     }
 }
