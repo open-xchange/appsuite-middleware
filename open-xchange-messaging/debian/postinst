@@ -28,7 +28,6 @@ dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/twittermessa
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/twitter.properties /opt/open-xchange/etc/twitter.properties 6.20.99 \
     open-xchange-twitter -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-twitter)
 
-
 . /opt/open-xchange/lib/oxfunctions.sh
 
 postFix() {
@@ -37,6 +36,12 @@ postFix() {
 
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1903
+    PFILE=/opt/open-xchange/etc/twitter.properties
+    if ox_exists_property com.openexchange.twitter.http.useSSL $PFILE; then
+        ox_remove_property com.openexchange.twitter.http.useSSL $PFILE
+    fi
 }
 
 setConfigFilePermissions() {

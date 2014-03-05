@@ -71,6 +71,12 @@ if [ ${1:-0} -eq 2 ]; then
         ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
     done
     ox_update_permissions "/opt/open-xchange/etc/twitter.properties" root:open-xchange 640
+
+    # SoftwareChange_Request-1903
+    PFILE=/opt/open-xchange/etc/twitter.properties
+    if ox_exists_property com.openexchange.twitter.http.useSSL $PFILE; then
+        ox_remove_property com.openexchange.twitter.http.useSSL $PFILE
+    fi
 fi
 
 %clean
