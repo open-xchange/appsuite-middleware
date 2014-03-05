@@ -206,7 +206,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
         facets.clear();
         facets.add(f.get(0));
         facets.add(f.get(1));
-        assertResults(5, facets);
+        assertResults(4, facets);
     }
 
     /**
@@ -230,8 +230,8 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
     /**
      * Test filter combination 1, i.e. with mixed Participants (both internal and external)
      *
-     * should find 2 tasks
-     * - both in user's a private folder, 1 with a+b+ext and 1 with a+ext
+     * should find 1 task
+     * - both in user's a private folder, 1 with a+b+ext
      *
      * @throws JSONException
      * @throws IOException
@@ -240,7 +240,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
     @Test
     public void testWithMixedParticipants() throws OXException, IOException, JSONException {
         List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(1).toCharArray());
-        assertResults(2, f);
+        assertResults(1, f);
     }
 
     /**
@@ -262,6 +262,80 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
         assertResults(6, Collections.singletonList(f.get(2)));
         assertResults(5, Collections.singletonList(f.get(3)));
         assertResults(5, Collections.singletonList(f.get(4)));
+    }
+    
+    /**
+     * Test filter combination 3, i.e. with status and participants
+     * @throws JSONException 
+     * @throws IOException 
+     * @throws OXException 
+     */
+    @Test
+    public void testWithStatusAndParticipants() throws OXException, IOException, JSONException {
+        List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(3).toCharArray());
+        List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
+        facets.add(f.get(0));//participant a
+        facets.add(f.get(3));//not started
+        assertResults(3, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(4)); //in progress
+        assertResults(1, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(5)); //done
+        assertResults(1, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(6)); //waiting
+        assertResults(0, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(7)); //deferred
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(3));//not started
+        assertResults(2, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(4));//in progress
+        assertResults(1, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(5));//done
+        assertResults(1, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(6));//waiting
+        assertResults(0, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(7)); //deferred
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(3));//not started
+        assertResults(2, facets);
+        
+        facets.remove(2);        
+        facets.add(f.get(4));//in progress
+        assertResults(1, facets);
+        
+        facets.remove(2);        
+        facets.add(f.get(5));//done
+        assertResults(1, facets);
+        
+        facets.remove(2);        
+        facets.add(f.get(6));//waiting
+        assertResults(0, facets);
+        
+        facets.remove(2);        
+        facets.add(f.get(7));//deferred
+        assertResults(0, facets);
     }
     
     /**
