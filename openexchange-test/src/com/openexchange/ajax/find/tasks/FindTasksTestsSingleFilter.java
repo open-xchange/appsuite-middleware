@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.collections.iterators.EmptyListIterator;
+import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -105,6 +107,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
      */
     private static final List<ActiveFacet> getRelevantActiveFacets(char[] combination) {
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
+        ArrayUtils.reverse(combination);
         for (int i = 0; i < combination.length; i++) {
             if (combination[i] == '1')
                 facets.addAll(FindTasksTestEnvironment.getInstance().getLoActiveFacets().get(i));
@@ -123,6 +126,26 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
             ret = ((JSONObject) qr.getData()).optJSONArray("results");
         return ret;
     }
+    
+    /**
+     * Helper method to assert the query response
+     * 
+     * @param expectedResultCount
+     * @param f
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    private final void assertResults(int expectedResultCount, List<ActiveFacet> f) throws OXException, IOException, JSONException {
+        List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
+        facets.add(FindTasksTestEnvironment.createGlobalFacet());
+        facets.addAll(f);
+        final QueryResponse queryResponse = client.execute(new QueryRequest(0, 10, facets, "tasks"));
+        assertNotNull(queryResponse);
+        JSONArray results  = getResults(queryResponse);
+        int actualResultCount = results.asList().size();
+        assertEquals(expectedResultCount, actualResultCount);
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////// TEST CASES BEGIN //////////////////////////////////////////////////////////////////
@@ -140,15 +163,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
      */
     @Test
     public void testWithSimpleQuery() throws OXException, IOException, JSONException {
-        ActiveFacet globalFacet = FindTasksTestEnvironment.createGlobalFacet();
-        final QueryResponse queryResponse = client.execute(new QueryRequest(0, 10, Collections.singletonList(globalFacet), "tasks"));
-        assertNotNull(queryResponse);
-
-        //assert the response
-        JSONArray results  = getResults(queryResponse);
-        int expectedResultCount = 29;
-        int actualResultCount = results.asList().size();
-        assertEquals(expectedResultCount, actualResultCount);
+        assertResults(29, Collections.<ActiveFacet>emptyList());
     }
 
     /**
@@ -168,39 +183,22 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
         List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(1).toCharArray());
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>(3);
         facets.add(f.get(0));
-        facets.add(FindTasksTestEnvironment.createGlobalFacet());
-        QueryResponse queryResponse = client.execute(new QueryRequest(0, 10, facets, "tasks"));
-
-        //assert the response
-        JSONArray results  = getResults(queryResponse);
-        int expectedResultCount = 3;
-        int actualResultCount = results.asList().size();
-        assertEquals(expectedResultCount, actualResultCount);
+        assertResults(3, facets);
+        
         facets.clear();
         facets.add(f.get(1));
-        facets.add(FindTasksTestEnvironment.createGlobalFacet());
-        queryResponse = client.execute(new QueryRequest(0, 10, facets, "tasks"));
-
-        results  = getResults(queryResponse);
-        expectedResultCount = 2;
-        actualResultCount = results.asList().size();
-        assertEquals(expectedResultCount, actualResultCount);
+        assertResults(2, facets);
 
         facets.clear();
         facets.add(f.get(0));
         facets.add(f.get(1));
-        facets.add(FindTasksTestEnvironment.createGlobalFacet());
-        queryResponse = client.execute(new QueryRequest(0, 10, facets, "tasks"));
-        results  = getResults(queryResponse);
-        expectedResultCount = 3;
-        actualResultCount = results.asList().size();
-        assertEquals(expectedResultCount, actualResultCount);
+        assertResults(3, facets);
     }
 
     /**
      * Test filter combination 1, i.e. with Participant (external)
      *
-     * Should find 1 task
+     * Should find 2 tasks
      *
      * @throws JSONException
      * @throws IOException
@@ -212,13 +210,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>(3);
         facets.add(f.get(2));
         facets.add(FindTasksTestEnvironment.createGlobalFacet());
-        final QueryResponse queryResponse = client.execute(new QueryRequest(0, 10, facets, "tasks"));
-
-        //assert the response
-        JSONArray results  = getResults(queryResponse);
-        int expectedResultCount = 2;
-        int actualResultCount = results.asList().size();
-        assertEquals(expectedResultCount, actualResultCount);
+        assertResults(2, facets);
     }
 
     /**
@@ -234,25 +226,28 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
     @Test
     public void testWithMixedParticipants() throws OXException, IOException, JSONException {
         List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(1).toCharArray());
-        List<ActiveFacet> facets = new ArrayList<ActiveFacet>(3);
-        facets.addAll(f);
-        facets.add(FindTasksTestEnvironment.createGlobalFacet());
-        final QueryResponse queryResponse = client.execute(new QueryRequest(0, 10, facets, "tasks"));
-        JSONArray results  = getResults(queryResponse);
-        int expectedResultCount = 2;
-        int actualResultCount = results.asList().size();
-        assertEquals(expectedResultCount, actualResultCount);
+        assertResults(2, f);
     }
 
     /**
      * Test filter combination 2, i.e. with status
+     * - NOT STARTED: 7
+     * - IN PROGRESS: 6
+     * - DONE:        6
+     * - WAITING:     5
+     * - DEFERRED:    5
+     * @throws JSONException 
+     * @throws IOException 
+     * @throws OXException 
      */
     @Test
-    public void testWithStatus() {
+    public void testWithStatus() throws OXException, IOException, JSONException {
         List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(2).toCharArray());
-        List<ActiveFacet> facets = new ArrayList<ActiveFacet>(3);
-        facets.add(FindTasksTestEnvironment.createGlobalFacet());
-
+        assertResults(7, Collections.singletonList(f.get(0)));
+        assertResults(6, Collections.singletonList(f.get(1)));
+        assertResults(6, Collections.singletonList(f.get(2)));
+        assertResults(5, Collections.singletonList(f.get(3)));
+        assertResults(5, Collections.singletonList(f.get(4)));
     }
 
 
