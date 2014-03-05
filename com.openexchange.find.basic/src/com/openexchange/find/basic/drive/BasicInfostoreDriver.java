@@ -51,6 +51,7 @@ package com.openexchange.find.basic.drive;
 
 import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -84,6 +85,7 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
@@ -91,6 +93,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -146,7 +149,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         try {
             final int start = searchRequest.getStart();
             it = searchEngine.search(
-                I2i(folderIds.toArray(new Integer[folderIds.size()])),
+                I2i(folderIds),
                 visitor.getInfstoreTerm(),
                 fields,
                 Metadata.TITLE_LITERAL,
@@ -210,6 +213,41 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         facets.add(new Facet(DriveFacetType.FILE_DESCRIPTION, fileDescriptionFacet));
         facets.add(new Facet(DriveFacetType.FILE_CONTENT, fileContentFacet));
 
+
+        // Add folder type facets
+        String fieldFolderType = Constants.FIELD_FOLDER_TYPE;
+        List<DocumentMetadata> pubFolders = getAutocompleteFolders(session, autocompleteRequest, FolderObject.PUBLIC);
+        List<DocumentMetadata> privFolders = getAutocompleteFolders(session, autocompleteRequest, FolderObject.PRIVATE);
+        List<DocumentMetadata> sharedFolders = getAutocompleteFolders(session, autocompleteRequest, FolderObject.SHARED);
+        List<FacetValue> publicFoldersFacet = new ArrayList<FacetValue>(pubFolders.size());
+        List<FacetValue> privateFoldersFacet = new ArrayList<FacetValue>(privFolders.size());
+        List<FacetValue> sharedFoldersFacet = new ArrayList<FacetValue>(sharedFolders.size());
+
+        for (DocumentMetadata doc : pubFolders) {
+            Filter filter = new Filter(Collections.singletonList(fieldFolderType), String.valueOf(doc.getId()));
+            publicFoldersFacet.add(new FacetValue(
+                prepareFacetValueId(DriveFacetType.FOLDER_TYPE.getDisplayName(), session.getContextId(), String.valueOf(doc.getId())),
+                new FolderTypeDisplayItem(DriveStrings.FACET_FOLDER_TYPE, Type.PUBLIC), 1, filter));
+        }
+
+        for (DocumentMetadata doc : privFolders) {
+            Filter filter = new Filter(Collections.singletonList(fieldFolderType), String.valueOf(doc.getId()));
+            privateFoldersFacet.add(new FacetValue(
+                prepareFacetValueId(DriveFacetType.FOLDER_TYPE.getDisplayName(), session.getContextId(), String.valueOf(doc.getId())),
+                new FolderTypeDisplayItem(DriveStrings.FACET_FOLDER_TYPE, Type.PRIVATE), 1, filter));
+        }
+
+        for (DocumentMetadata doc : sharedFolders) {
+            Filter filter = new Filter(Collections.singletonList(fieldFolderType), String.valueOf(doc.getId()));
+            sharedFoldersFacet.add(new FacetValue(
+                prepareFacetValueId(DriveFacetType.FOLDER_TYPE.getDisplayName(), session.getContextId(), String.valueOf(doc.getId())),
+                new FolderTypeDisplayItem(DriveStrings.FACET_FOLDER_TYPE, Type.SHARED), 1, filter));
+        }
+        facets.add(new Facet(DriveFacetType.FOLDER_TYPE, publicFoldersFacet));
+        facets.add(new Facet(DriveFacetType.FOLDER_TYPE, privateFoldersFacet));
+        facets.add(new Facet(DriveFacetType.FOLDER_TYPE, sharedFoldersFacet));
+
+
         // Add static file type facet
         final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
         final String fieldFileType = Constants.FIELD_FILE_TYPE;
@@ -241,6 +279,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         final Facet folderTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
         facets.add(folderTypeFacet);
 
+
         // Add static file size facet
         List<FacetValue> fileSize = new ArrayList<FacetValue>(5);
         String fieldFileSize = Constants.FIELD_FILE_SIZE;
@@ -266,32 +305,6 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
             new Filter(Collections.singletonList(fieldFileSize), FileSizeDisplayItem.Size.GB1.getSize())));
         Facet fileSizeFacet = new Facet(DriveFacetType.FILE_SIZE, fileSize);
         facets.add(fileSizeFacet);
-
-        // Add static folder type facet
-        List<FacetValue> folderType = new ArrayList<FacetValue>(5);
-        String fieldFolderType = Constants.FIELD_FOLDER_TYPE;
-        folderType.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
-            DriveStrings.FACET_FOLDER_TYPE,
-            Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFolderType),
-            FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
-        folderType.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
-            DriveStrings.FACET_FOLDER_TYPE,
-            Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFolderType),
-            FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
-        folderType.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
-            DriveStrings.FACET_FOLDER_TYPE,
-            Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFolderType),
-            FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
-        folderType.add(new FacetValue(FolderTypeDisplayItem.Type.EXTERNAL.getIdentifier(), new FolderTypeDisplayItem(
-            DriveStrings.FACET_FOLDER_TYPE,
-            Type.EXTERNAL), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFolderType),
-            FolderTypeDisplayItem.Type.EXTERNAL.getIdentifier())));
-        Facet FolderTypeFacet = new Facet(DriveFacetType.FOLDER_TYPE, folderType);
-        facets.add(FolderTypeFacet);
 
         return new AutocompleteResult(facets);
     }
@@ -333,7 +346,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
     private List<DocumentMetadata> getAutocompleteFiles(ServerSession session, AutocompleteRequest request) throws OXException {
         InfostoreSearchEngine searchEngine = Services.getInfostoreSearchEngine();
         if (null == searchEngine) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreFacade.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreSearchEngine.class.getName());
         }
 
         // Compose term
@@ -352,6 +365,60 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         try {
             it = searchEngine.search(
                 new int[0],
+                visitor.getInfstoreTerm(),
+                fields,
+                Metadata.TITLE_LITERAL,
+                0,
+                0,
+                limit,
+                session.getContext(),
+                session.getUser(),
+                session.getUserPermissionBits());
+            List<DocumentMetadata> docs = new LinkedList<DocumentMetadata>();
+            while (it.hasNext()) {
+                DocumentMetadata doc = it.next();
+                docs.add(doc);
+            }
+            return docs;
+        } finally {
+            SearchIterators.close(it);
+        }
+    }
+
+    private List<DocumentMetadata> getAutocompleteFolders(ServerSession session, AutocompleteRequest request, int folderType) throws OXException {
+        String prefix = request.getPrefix();
+        int limit = request.getLimit();
+        int userId = session.getUserId();
+
+        InfostoreSearchEngine searchEngine = Services.getInfostoreSearchEngine();
+        if (null == searchEngine) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreSearchEngine.class.getName());
+        }
+        OXFolderAccess access = new OXFolderAccess(session.getContext());
+        FolderObject defaultFolder = access.getDefaultFolder(userId, FolderObject.INFOSTORE);
+
+        List<Integer> subfolders = defaultFolder.getSubfolderIds();
+        List<Integer> folders = new ArrayList<Integer>(subfolders.size());
+        for (Integer i : subfolders) {
+            if (folderType == access.getFolderType(i(i), userId)) {
+                folders.add(i);
+            }
+        }
+
+     // Compose term
+        List<SearchTerm<?>> terms = new LinkedList<SearchTerm<?>>();
+        terms.add(new TitleTerm(prefix, true, true));
+        terms.add(new FileNameTerm(prefix, true, true));
+        terms.add(new DescriptionTerm(prefix, true, true));
+        SearchTerm<List<SearchTerm<?>>> orTerm = new OrTerm(terms);
+        ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
+        orTerm.visit(visitor);
+
+     // Fire search
+        SearchIterator<DocumentMetadata> it = null;
+        try {
+            it = searchEngine.search(
+                I2i(folders),
                 visitor.getInfstoreTerm(),
                 fields,
                 Metadata.TITLE_LITERAL,
