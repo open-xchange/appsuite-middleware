@@ -79,7 +79,7 @@ public class Activator implements BundleActivator
     private void setConfigProperties() {
         System.setProperty("org.apache.felix.eventadmin.CacheSize", "30");
         System.setProperty(Configuration.PROP_THREAD_POOL_SIZE, "10");
-        System.setProperty(Configuration.PROP_TIMEOUT, "5000");
+        System.setProperty(Configuration.PROP_TIMEOUT, "0");
         System.setProperty(Configuration.PROP_REQUIRE_TOPIC, "true");
         System.setProperty(Configuration.PROP_IGNORE_TIMEOUT, "");
     }
