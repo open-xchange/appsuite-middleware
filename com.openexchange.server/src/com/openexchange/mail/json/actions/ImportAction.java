@@ -200,7 +200,10 @@ public final class ImportAction extends AbstractMailAction {
                                                     }
                                                 }
                                             }
-                                            receivedDate = new Date(lastReceived);
+
+                                            if (lastReceived > 0L) {
+                                                receivedDate = new Date(lastReceived);
+                                            }
                                         }
                                     }
 
