@@ -52,10 +52,15 @@ package com.openexchange.ajax.find.mail;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import org.json.JSONException;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
@@ -75,6 +80,8 @@ import com.openexchange.find.facet.Filter;
 import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.util.TimeZones;
+import com.openexchange.mail.utils.DateUtils;
 
 
 /**
@@ -87,6 +94,8 @@ public class BasicMailTest extends AbstractFindTest {
 
     private FolderObject testFolder;
 
+    private String defaultAddress;
+
     public BasicMailTest(String name) {
         super(name);
     }
@@ -94,6 +103,7 @@ public class BasicMailTest extends AbstractFindTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        defaultAddress = client.getValues().getSendAddress();
         String inboxFolder = client.getValues().getInboxFolder();
         String folderName = "findApiMailTestFolder_" + System.currentTimeMillis();
         testFolder = new FolderObject();
@@ -112,7 +122,6 @@ public class BasicMailTest extends AbstractFindTest {
         /*
          * Expect the clients contact in autocomplete response
          */
-        String defaultAddress = client.getValues().getDefaultAddress();
         String prefix = defaultAddress.substring(0, 3);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.MAIL.getIdentifier());
         AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
@@ -133,8 +142,7 @@ public class BasicMailTest extends AbstractFindTest {
         /*
          * Import test mail
          */
-        String defaultAddress = client.getValues().getSendAddress();
-        String[][] mailIds = importMail(defaultAddress, defaultAddress, "Find me", "");
+        String[][] mailIds = importMail(defaultAddress, "Find me", "");
         assertNotNull("mail was not imported", mailIds);
 
         /*
@@ -167,8 +175,7 @@ public class BasicMailTest extends AbstractFindTest {
         /*
          * Import test mail
          */
-        String defaultAddress = client.getValues().getSendAddress();
-        String[][] mailIds = importMail(defaultAddress, defaultAddress, "Find me", "");
+        String[][] mailIds = importMail(defaultAddress, "Find me", "");
         assertNotNull("mail was not imported", mailIds);
 
         /*
@@ -195,7 +202,6 @@ public class BasicMailTest extends AbstractFindTest {
         /*
          * Import test mails
          */
-        String defaultAddress = client.getValues().getSendAddress();
         String[][] mailIds = importMails(3, defaultAddress, defaultAddress);
         assertNotNull("mail was not imported", mailIds);
 
@@ -205,13 +211,102 @@ public class BasicMailTest extends AbstractFindTest {
         List<ActiveFacet> facets = prepareFacets();
         facets.add(createActiveFacet(MailFacetType.CONTACTS, "", "from", defaultAddress));
         List<PropDocument> documents = query(facets, 0, 5);
-        assertEquals("Should only find 3 mail", 3, documents.size());
+        assertEquals("Should only find 3 mails", 3, documents.size());
         documents = query(facets, 1, 5);
-        assertEquals("Should only find 2 mail", 2, documents.size());
+        assertEquals("Should only find 2 mails", 2, documents.size());
         documents = query(facets, 2, 5);
-        assertEquals("Should only find 1 mail", 1, documents.size());
+        assertEquals("Should only find 1 mails", 1, documents.size());
         documents = query(facets, 3, 5);
-        assertEquals("Should only find 0 mail", 0, documents.size());
+        assertEquals("Should only find 0 mails", 0, documents.size());
+    }
+
+    public void testTimeFilter() throws Exception {
+        Calendar cal = new GregorianCalendar(TimeZones.UTC);
+        cal.add(Calendar.WEEK_OF_YEAR, -1);
+        cal.add(Calendar.DAY_OF_YEAR, 1);
+        String idWithinLastWeek = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), cal.getTime())[0][1];
+        cal = new GregorianCalendar(TimeZones.UTC);
+        cal.add(Calendar.MONTH, -1);
+        cal.add(Calendar.DAY_OF_YEAR, 1);
+        String idWithinLastMonth = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), cal.getTime())[0][1];
+        cal = new GregorianCalendar(TimeZones.UTC);
+        cal.add(Calendar.YEAR, -1);
+        cal.add(Calendar.DAY_OF_YEAR, 1);
+        String idWithinLastYear = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), cal.getTime())[0][1];
+        cal = new GregorianCalendar(TimeZones.UTC);
+        cal.add(Calendar.YEAR, -1);
+        cal.add(Calendar.DAY_OF_YEAR, -1);
+        String idBeforeLastYear = importMail(defaultAddress, defaultAddress, randomUID(), randomUID(), cal.getTime())[0][1];
+
+        List<ActiveFacet> facets = prepareFacets();
+        facets.add(createActiveFacet(MailFacetType.TIME, "last_week", "time", "last_week"));
+        List<PropDocument> documents = query(facets);
+        assertEquals("Should only find 1 mails", 1, documents.size());
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
+        assertNull("Wrong mail found", findByProperty(documents, "id", idBeforeLastYear));
+
+        facets = prepareFacets();
+        facets.add(createActiveFacet(MailFacetType.TIME, "last_month", "time", "last_month"));
+        documents = query(facets);
+        assertEquals("Should only find 2 mails", 2, documents.size());
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastMonth));
+        assertNull("Wrong mail found", findByProperty(documents, "id", idBeforeLastYear));
+
+        facets = prepareFacets();
+        facets.add(createActiveFacet(MailFacetType.TIME, "last_year", "time", "last_year"));
+        documents = query(facets);
+        assertEquals("Should only find 3 mails", 3, documents.size());
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastWeek));
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastMonth));
+        assertNotNull("Mail not found", findByProperty(documents, "id", idWithinLastYear));
+        assertNull("Wrong mail found", findByProperty(documents, "id", idBeforeLastYear));
+    }
+
+    public void testFilterChaining() throws Exception {
+        /*
+         * We're chaining some filters in subsequent query requests
+         * to finally find the first row of the below table.
+         * +-------------------------+
+         * | Sender | Subject | Body |
+         * +-------------------------+
+         * |   A    |    B    |   D  |
+         * |   A    |    B    |   E  |
+         * |   A    |    C    |   F  |
+         * |   G    |    H    |   I  |
+         * +-------------------------+
+         */
+
+        String A = "some.body@find.me";
+        String B = randomUID();
+        String C = randomUID();
+        String D = randomUID();
+        String E = randomUID();
+        String F = randomUID();
+        String G = "another.dude@example.org";
+        String H = randomUID();
+        String I = randomUID();
+
+        importMail(A, B, D);
+        importMail(A, B, E);
+        importMail(A, C, F);
+        importMail(G, H, I);
+
+        List<ActiveFacet> facets = prepareFacets();
+        List<PropDocument> documents = query(facets);
+        assertEquals("Wrong number of mails", 4, documents.size());
+
+        facets.add(createActiveFacet(MailFacetType.CONTACTS, A, "from", A));
+        documents = query(facets);
+        assertEquals("Wrong number of mails", 3, documents.size());
+
+        facets.add(createActiveFacet(MailFacetType.SUBJECT, MailFacetType.SUBJECT.getId(), "subject", B));
+        documents = query(facets);
+        assertEquals("Wrong number of mails", 2, documents.size());
+
+        facets.add(createActiveFacet(MailFacetType.MAIL_TEXT, MailFacetType.MAIL_TEXT.getId(), "body", D));
+        documents = query(facets);
+        assertEquals("Wrong number of mails", 1, documents.size());
     }
 
     private List<ActiveFacet> prepareFacets() {
@@ -234,6 +329,7 @@ public class BasicMailTest extends AbstractFindTest {
             String mail = MAIL1
                 .replaceAll("#FROM#", fromHeader)
                 .replaceAll("#TO#", toHeader)
+                .replaceAll("#DATE#", DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.US).format(new Date()))
                 .replaceAll("#SUBJECT#", randomUID())
                 .replaceAll("#BODY#", randomUID());
             streams[i] = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
@@ -244,10 +340,15 @@ public class BasicMailTest extends AbstractFindTest {
         return response.getIds();
     }
 
-    private String[][] importMail(String fromHeader, String toHeader, String subject, String body) throws OXException, IOException, JSONException {
+    private String[][] importMail(String fromHeader, String subject, String body) throws OXException, IOException, JSONException {
+        return importMail(defaultAddress, fromHeader, subject, body, new Date());
+    }
+
+    private String[][] importMail(String toHeader, String fromHeader, String subject, String body, Date received) throws OXException, IOException, JSONException {
         String mail = MAIL1
             .replaceAll("#FROM#", fromHeader)
             .replaceAll("#TO#", toHeader)
+            .replaceAll("#DATE#", DateUtils.toStringRFC822(received, TimeZones.UTC))
             .replaceAll("#SUBJECT#", subject)
             .replaceAll("#BODY#", body);
         ByteArrayInputStream mailStream = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
@@ -267,6 +368,7 @@ public class BasicMailTest extends AbstractFindTest {
     private static final String MAIL1 =
         "From: #FROM#\n" +
         "To: #TO#\n" +
+        "Received: from ox.open-xchange.com;#DATE#\n" +
         "Subject: #SUBJECT#\n" +
         "Mime-Version: 1.0\n" +
         "Content-Type: text/plain; charset=\"UTF-8\"\n" +
