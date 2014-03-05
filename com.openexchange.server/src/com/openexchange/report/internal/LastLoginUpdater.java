@@ -57,8 +57,12 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.user.UserService;
 
 /**
@@ -69,7 +73,8 @@ import com.openexchange.user.UserService;
  */
 public final class LastLoginUpdater implements EventHandler {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LastLoginUpdater.class);
+    /** The logger */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LastLoginUpdater.class);
 
     /** The constant providing the amount of milliseconds for one day */
     private static final long MILLIS_DAY = 86400000L;
@@ -93,16 +98,35 @@ public final class LastLoginUpdater implements EventHandler {
     public void handleEvent(Event event) {
         if (SessiondEventConstants.TOPIC_TOUCH_SESSION.equals(event.getTopic())) {
             final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-            try {
-                handleSessionTouched(session);
-            } catch (final Exception e) {
-                final String message = "Couldn't check/update last-accessed time stamp for client \"" + session.getClient() + "\" of user " + session.getUserId() + " in context " + session.getContextId();
-                LOG.warn(message, e);
+            // Handle session-touched event asynchronously if possible
+            final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+            if (null == threadPool) {
+                try {
+                    handleSessionTouched(session);
+                } catch (final Exception e) {
+                    final String message = "Couldn't check/update last-accessed time stamp for client \"" + session.getClient() + "\" of user " + session.getUserId() + " in context " + session.getContextId();
+                    LOG.warn(message, e);
+                }
+            } else {
+                final AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        try {
+                            handleSessionTouched(session);
+                        } catch (final Exception e) {
+                            final String message = "Couldn't check/update last-accessed time stamp for client \"" + session.getClient() + "\" of user " + session.getUserId() + " in context " + session.getContextId();
+                            LOG.warn(message, e);
+                        }
+                        return null;
+                    }
+                };
+                threadPool.submit(task, CallerRunsBehavior.<Void> getInstance());
             }
         }
     }
 
-    private void handleSessionTouched(final Session session) throws OXException {
+    protected void handleSessionTouched(final Session session) throws OXException {
         // Determine client
         String client = session.getClient();
         if (!isEmpty(client) && acceptedClients.contains(client)) {
