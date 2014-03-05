@@ -58,6 +58,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.java.StringAllocator;
@@ -159,6 +160,97 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 session);
             return new User(responseInformation.getJSONArray("users").getJSONObject(0));
+        } catch (final JSONException e) {
+            throw new XingException(e);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Looks up a user by specified E-Mail address.
+     *
+     * @param emailAddress The E-Mail address to look-up
+     * @return The associated user identifier or <code>null</code> if there is no such user
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public String findByEmails(final String emailAddress) throws XingException {
+        if (Strings.isEmpty(emailAddress)) {
+            return null;
+        }
+        assertAuthenticated();
+        try {
+            // Add parameters limit & offset
+            final List<String> params = new ArrayList<String>(Arrays.asList(
+                "emails", emailAddress));
+            // Fire request
+            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/find_by_emails",
+                VERSION,
+                params.toArray(new String[0]),
+                session);
+            final JSONArray jItems = responseInformation.getJSONObject("results").optJSONArray("items");
+            if (null == jItems) {
+                return null;
+            }
+            final int length = jItems.length();
+            if (length <= 0) {
+                return null;
+            }
+            return jItems.getJSONObject(0).getJSONObject("user").getString("id");
+        } catch (final JSONException e) {
+            throw new XingException(e);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Gets the shortest contact path between a user and any other XING user.
+     *
+     * @param userId The XING user
+     * @param otherUserId The other XING user
+     * @return The contact path
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public List<User> getContactPath(final String userId, final String otherUserId) throws XingException {
+        assertAuthenticated();
+        try {
+            final JSONObject responseInformation = RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/" + userId + "/network/" + otherUserId + "/paths",
+                VERSION,
+                session).toObject();
+
+            final JSONArray jPaths = responseInformation.getJSONObject("contact_paths").optJSONArray("paths");
+            if (null == jPaths) {
+                return Collections.emptyList();
+            }
+            final int length = jPaths.length();
+            if (length <= 0) {
+                return Collections.emptyList();
+            }
+            final JSONObject jPath = jPaths.getJSONObject(0);
+            final JSONArray jUsers = jPath.getJSONArray("users");
+            final int l = jUsers.length();
+            final List<User> retval = new ArrayList<User>(l);
+            for (int i = 0; i < l; i++) {
+                retval.add(new User(jUsers.getJSONObject(i)));
+            }
+            return retval;
         } catch (final JSONException e) {
             throw new XingException(e);
         } catch (final RuntimeException e) {

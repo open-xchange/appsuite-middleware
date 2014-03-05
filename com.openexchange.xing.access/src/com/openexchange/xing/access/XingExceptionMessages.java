@@ -79,6 +79,21 @@ public final class XingExceptionMessages implements LocalizableStrings {
     // Bad or expired access token. Need to re-authenticate user.
     public static final String UNLINKED_ERROR_MSG = "Bad or expired access token. Need to re-authenticate user.";
 
+    // E-Mail address is invalid
+    public static final String INVALID_EMAIL_ADDRESS_MSG = "E-Mail address is invalid";
+
+    // The E-Mail address already belongs to a XING user
+    public static final String ALREADY_MEMBER_MSG = "The E-Mail address already belongs to a XING user";
+
+    // Invitation attempt failed for any reason
+    public static final String INVITATION_FAILED_MSG = "Invitation attempt failed for any reason";
+
+    // The E-Mail address does not belongs to a XING user
+    public static final String NOT_A_MEMBER_MSG = "The E-Mail address does not belongs to a XING user";
+
+    // XING user is already directly connected.
+    public static final String ALREADY_CONNECTED_MSG = "XING user is already directly connected.";
+
     /**
      * Initializes a new {@link XingExceptionMessages}.
      */

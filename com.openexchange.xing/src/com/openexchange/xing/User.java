@@ -116,7 +116,13 @@ public class User {
             this.pageName = accountInfo.optString("page_name", null);
             this.permalink = accountInfo.optString("permalink", null);
             this.gender = accountInfo.optString("gender", null);
-            this.activeMail = accountInfo.optString("active_email", null);
+            {
+                String email = accountInfo.optString("active_email", null);
+                if (null == email) {
+                    email = accountInfo.optString("email", null);
+                }
+                this.activeMail = email;
+            }
             if (accountInfo.hasAndNotNull("time_zone")) {
                 final JSONObject tz = accountInfo.optJSONObject("time_zone");
                 this.timeZone = TimeZone.getTimeZone(tz.getString("name"));

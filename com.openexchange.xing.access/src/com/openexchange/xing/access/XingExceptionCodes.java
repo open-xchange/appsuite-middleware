@@ -112,7 +112,26 @@ public enum XingExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNLINKED_ERROR("Bad or expired access token. Need to re-authenticate user.", Category.CATEGORY_CONFIGURATION, 15,
         XingExceptionMessages.UNLINKED_ERROR_MSG),
-
+    /**
+     * Invalid E-Mail address: %1$s
+     */
+    INVALID_EMAIL_ADDRESS("Invalid E-Mail address: %1$s", Category.CATEGORY_USER_INPUT, 16, XingExceptionMessages.INVALID_EMAIL_ADDRESS_MSG),
+    /**
+     * The E-Mail address already belongs to a XING user: %1$s
+     */
+    ALREADY_MEMBER("The E-Mail address already belongs to a XING user: %1$s", Category.CATEGORY_USER_INPUT, 17, XingExceptionMessages.ALREADY_MEMBER_MSG),
+    /**
+     * Invitation attempt failed for any reason
+     */
+    INVITATION_FAILED("Invitation attempt failed for any reason", Category.CATEGORY_USER_INPUT, 18, XingExceptionMessages.INVITATION_FAILED_MSG),
+    /**
+     * The E-Mail address does not belongs to a XING user: %1$s
+     */
+    NOT_A_MEMBER("The E-Mail address does not belongs to a XING user: %1$s", Category.CATEGORY_USER_INPUT, 19, XingExceptionMessages.NOT_A_MEMBER_MSG),
+    /**
+     * XING user "%1$s" is already directly connected.
+     */
+    ALREADY_CONNECTED("XING user \"%1$s\" is already directly connected.", Category.CATEGORY_USER_INPUT, 20, XingExceptionMessages.ALREADY_CONNECTED_MSG),
     ;
 
     private final Category category;
@@ -120,7 +139,7 @@ public enum XingExceptionCodes implements DisplayableOXExceptionCode {
     private final int detailNumber;
 
     private final String message;
-    
+
     private String displayMessage;
 
     private XingExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
@@ -144,7 +163,7 @@ public enum XingExceptionCodes implements DisplayableOXExceptionCode {
     public int getNumber() {
         return detailNumber;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;
