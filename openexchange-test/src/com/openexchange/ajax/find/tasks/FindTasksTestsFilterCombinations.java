@@ -90,12 +90,12 @@ import com.openexchange.find.facet.ActiveFacet;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class FindTasksTestsSingleFilter extends AbstractFindTest {
+public class FindTasksTestsFilterCombinations extends AbstractFindTest {
 
     /**
      * Initializes a new {@link FindTasksTests}.
      */
-    public FindTasksTestsSingleFilter(String name) {
+    public FindTasksTestsFilterCombinations(String name) {
         super(name);
     }
 
@@ -454,6 +454,82 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
         facets.remove(3);
         facets.add(f.get(5)); //shared
         assertResults(0, facets);
+    }
+    
+    /**
+     * Test filter combination 6, i.e. with folder type and status
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testWithFolderTypeAndStatus()  throws OXException, IOException, JSONException {
+        List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(6).toCharArray());
+        List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
+        facets.add(f.get(0)); //not started
+        facets.add(f.get(5)); //private
+        assertResults(4, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(6)); //public
+        assertResults(2, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(7)); //shared
+        assertResults(3, facets);
+        
+        facets.clear();
+        facets.add(f.get(1)); //in progress
+        facets.add(f.get(5)); //private
+        assertResults(2, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(6)); //public
+        assertResults(2, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(7)); //shared
+        assertResults(2, facets);
+        
+        facets.clear();
+        facets.add(f.get(2)); //done
+        facets.add(f.get(5)); //private
+        assertResults(2, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(6)); //public
+        assertResults(2, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(7)); //shared
+        assertResults(2, facets);
+        
+        facets.clear();
+        facets.add(f.get(3)); //waiting
+        facets.add(f.get(5)); //private
+        assertResults(1, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(6)); //public
+        assertResults(2, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(7)); //shared
+        assertResults(2, facets);
+        
+        facets.clear();
+        facets.add(f.get(4)); //deferred
+        facets.add(f.get(5)); //private
+        assertResults(1, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(6)); //public
+        assertResults(2, facets);
+        
+        facets.remove(1);
+        facets.add(f.get(7)); //shared
+        assertResults(2, facets);
     }
     
     /**
