@@ -299,14 +299,12 @@ public class RdbTaskSearch extends TaskSearch {
             int i = 0;
             for(Integer id : searchObject.getInternalParticipants()) {
                 if (i++ > 0)
-                    builder.append(" OR ");
-                else
-                    builder.append(" ( ");
-                builder.append(" tp.user = ? ");
+                    builder.append(" AND ");
+                builder.append(" t.id IN ( SELECT tp.task FROM task_participant AS tp WHERE t.id = tp.task AND t.cid = tp.cid AND tp.user = ? )");
                 searchParameters.add(id);
             }
-            if (searchObject.hasInternalParticipants())
-                builder.append(" ) ");
+            //if (searchObject.hasInternalParticipants())
+                //builder.append(" ) ");
             i = 0;
             for(String mail : searchObject.getExternalParticipants()) {
                 if (searchObject.hasInternalParticipants() || i++ > 1)
