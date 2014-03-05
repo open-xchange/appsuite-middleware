@@ -95,21 +95,20 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
     }
 
     /**
-     * Removes a list of facets from another one. Indeed only the facet values
-     * of the second list are removed from the first one. If the facet is empty
-     * afterwards, it's completely removed from the list. The original list stays unmodified.
+     * Removes the currently active facets (respectively their values) from the ones returned from an autocomplete request.
+     * Empty facets will be removed completely from the result. The original list stays unmodified.
      * All remaining facets are added to the result list.
      * @param facets The list to remove facets from.
-     * @param toRemove The facets (values) to remove.
+     * @param active The facets (values) to remove.
      * @param results The list to append the filtered facets to.
      * @return The modified facet list.
      */
-    protected void filterFacets(List<Facet> facets, List<ActiveFacet> toRemove, List<Facet> results) {
+    protected void filterFacets(List<Facet> facets, List<ActiveFacet> active, List<Facet> results) {
         if (facets.isEmpty()) {
             return;
         }
 
-        if (toRemove.isEmpty()) {
+        if (active.isEmpty()) {
             for (Facet facet : facets) {
                 results.add(facet);
             }
@@ -125,9 +124,17 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
             }
         }
 
-        for (ActiveFacet removable : toRemove) {
-            FacetType type = removable.getType();
-            if (!type.isFieldFacet()) {
+        for (ActiveFacet toRemove : active) {
+            FacetType type = toRemove.getType();
+            if (type == CommonFacetType.FOLDER) {
+                typeMap.remove(CommonFacetType.FOLDER);
+                typeMap.remove(CommonFacetType.FOLDER_TYPE);
+                continue;
+            } else if (type == CommonFacetType.FOLDER_TYPE) {
+                typeMap.remove(CommonFacetType.FOLDER);
+                typeMap.remove(CommonFacetType.FOLDER_TYPE);
+                continue;
+            } else if (!type.isFieldFacet()) {
                 if (type.appliesOnce()) {
                     typeMap.remove(type);
                     continue;
@@ -135,9 +142,9 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
 
                 Map<String, FacetValue> valueMap = typeMap.get(type);
                 if (valueMap != null) {
-                    valueMap.remove(removable.getValueId());
+                    valueMap.remove(toRemove.getValueId());
                     if (valueMap.isEmpty()) {
-                        typeMap.remove(removable.getType());
+                        typeMap.remove(toRemove.getType());
                     }
                 }
             }

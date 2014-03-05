@@ -69,11 +69,13 @@ public enum CommonFacetType implements FacetType {
      */
     GLOBAL,
     /**
-     * The facet type for folders.
+     * The facet type for folders. The presence of this facet is mutually exclusive
+     * with {@link CommonFacetType#FOLDER_TYPE}.
      */
     FOLDER(CommonStrings.FACET_TYPE_FOLDER, false, true),
     /**
-     * The facet type for folder type.
+     * The facet type for folder type. The presence of this facet is mutually exclusive
+     * with {@link CommonFacetType#FOLDER}.
      */
     FOLDER_TYPE(CommonStrings.FACET_TYPE_FOLDER_TYPE),
     ;
