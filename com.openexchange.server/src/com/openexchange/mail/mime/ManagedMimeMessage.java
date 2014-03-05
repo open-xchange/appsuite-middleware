@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Map;
 import java.util.Queue;
 import javax.mail.Flags;
@@ -160,7 +161,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
             return original;
         }
         try {
-            final ManagedMimeMessage mimeMessage = new ManagedMimeMessage(original);
+            final ManagedMimeMessage mimeMessage = new ManagedMimeMessage(original, original.getReceivedDateDirect());
             // Apply flags to MIME message
             {
                 MimeMessageConverter.parseMimeFlags(original.getFlags(), mimeMessage);
@@ -213,6 +214,8 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
 
     private static final int DEFAULT_BUFFER_SIZE = 131072; // 128KB
 
+    private final Date receivedDate;
+
     private final Queue<Closeable> closeables;
 
     private volatile ManagedFile managedFile;
@@ -224,11 +227,12 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
      *
      * @param session The session
      * @param file The RFC822 source file
+     * @param receivedDate The optional received date
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    private ManagedMimeMessage(final MailMessage original) throws MessagingException, OXException, IOException {
+    private ManagedMimeMessage(final MailMessage original, final Date receivedDate) throws MessagingException, OXException, IOException {
         super(MimeDefaultSession.getDefaultSession());
         final File[] files = new File[1];
         final InputStream in = getInputStreamFor(original, files);
@@ -237,6 +241,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
         closeables.add(in);
         this.managedFile = null;
         this.file = files[0];
+        this.receivedDate = receivedDate;
     }
 
     /**
@@ -248,15 +253,29 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
      * @throws IOException If an I/O error occurs
      */
     public ManagedMimeMessage(final Session session, final File file) throws MessagingException, IOException {
-        this(session, file, new SharedFileInputStream(file, DEFAULT_BUFFER_SIZE));
+        this(session, file, new SharedFileInputStream(file, DEFAULT_BUFFER_SIZE), null);
     }
 
-    private ManagedMimeMessage(final Session session, final File file, final InputStream in) throws MessagingException {
+    /**
+     * Initializes a new {@link ManagedMimeMessage}.
+     *
+     * @param session The session
+     * @param file The RFC822 source file
+     * @param receivedDate The optional received date
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public ManagedMimeMessage(final Session session, final File file, final Date receivedDate) throws MessagingException, IOException {
+        this(session, file, new SharedFileInputStream(file, DEFAULT_BUFFER_SIZE), receivedDate);
+    }
+
+    private ManagedMimeMessage(final Session session, final File file, final InputStream in, final Date receivedDate) throws MessagingException {
         super(session, in);
         closeables = new Java7ConcurrentLinkedQueue<Closeable>();
         closeables.add(in);
         this.managedFile = null;
         this.file = file;
+        this.receivedDate = receivedDate;
     }
 
     /**
@@ -267,6 +286,15 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
     public File getFile() {
         final File file = this.file;
         return null == file ? managedFile.getFile() : file;
+    }
+
+    @Override
+    public Date getReceivedDate() throws MessagingException {
+        if (receivedDate == null) {
+            return super.getReceivedDate();
+        }
+
+        return receivedDate;
     }
 
     @Override

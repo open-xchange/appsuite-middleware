@@ -374,6 +374,7 @@ public final class MimeMessageConverter {
             return convertComposedMailMessage((ComposedMailMessage) mail);
         }
         try {
+            final Date receivedDate = mail.getReceivedDateDirect();
             final int size = (int) mail.getSize();
             final boolean clone = ((behavior & BEHAVIOR_CLONE) > 0);
             final boolean stream2file = ((behavior & BEHAVIOR_STREAM2FILE) > 0);
@@ -385,8 +386,17 @@ public final class MimeMessageConverter {
                 if (!stream2file || (null == (fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class)))) {
                     final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
                     mail.writeTo(out);
-                    mimeMessage =
-                        new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                    if (receivedDate == null) {
+                        mimeMessage =
+                            new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                    } else {
+                        mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray())) {
+                            @Override
+                            public Date getReceivedDate() throws MessagingException {
+                                return receivedDate;
+                            }
+                        };
+                    }
                     mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
                 } else {
                     File file = checkForFile(mail);
@@ -410,7 +420,7 @@ public final class MimeMessageConverter {
                         }
                     }
                     try {
-                        mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file);
+                        mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file, receivedDate);
                         mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
                     } catch (final IOException e) {
                         if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
