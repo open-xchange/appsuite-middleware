@@ -95,6 +95,10 @@ public class TaskSearchObject extends CalendarSearchObject {
     
     private Set<String> attachmentFilters;
     
+    private int start;
+    
+    private int size;
+    
     /**
      * This array contains 2 values between them the task ends. If the task has
      * no end date it won't appear if the range is defined.
@@ -332,5 +336,41 @@ public class TaskSearchObject extends CalendarSearchObject {
      */
     public void setAttachmentFilters(Set<String> attachmentFilters) {
         this.attachmentFilters = attachmentFilters;
+    }
+
+    /**
+     * Gets the start
+     *
+     * @return The start
+     */
+    public int getStart() {
+        return start;
+    }
+
+    /**
+     * Sets the start
+     *
+     * @param start The start to set
+     */
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    /**
+     * Gets the size
+     *
+     * @return The size
+     */
+    public int getSize() {
+        return size;
+    }
+
+    /**
+     * Sets the size
+     *
+     * @param size The size to set
+     */
+    public void setSize(int size) {
+        this.size = size;
     }
 }

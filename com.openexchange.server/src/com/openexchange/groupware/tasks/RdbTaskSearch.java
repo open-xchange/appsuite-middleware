@@ -324,7 +324,7 @@ public class RdbTaskSearch extends TaskSearch {
         else if (searchObject.isSeriesFilter())
             builder.append(" AND t.recurrence_type > 0 ");
         
-        builder.append(SQL.getOrder(orderBy, order));
+        builder.append(SQL.getOrder(orderBy, order)).append(SQL.getLimit(searchObject.getStart(), searchObject.getSize()));
         
         //set parameters
         StatementSetter ss = new StatementSetter() {

@@ -133,7 +133,9 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
     public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
         TaskSearchObjectBuilder builder = new TaskSearchObjectBuilder(session);
         TaskSearchObject searchObject = builder.addFilters(searchRequest.getFilters()).addQueries(searchRequest.getQueries()).build();
-
+        searchObject.setStart(searchRequest.getStart());
+        searchObject.setSize(searchRequest.getSize());
+        
         final TasksSQLInterface tasksSQL = new TasksSQLImpl(session);
         SearchIterator<Task> si = tasksSQL.findTask(searchObject, Task.TITLE, Order.ASCENDING, TASKS_FIELDS);
         List<Document> documents = new ArrayList<Document>();
