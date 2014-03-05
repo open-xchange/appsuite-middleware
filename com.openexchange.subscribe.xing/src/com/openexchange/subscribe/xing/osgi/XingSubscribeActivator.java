@@ -52,6 +52,7 @@ package com.openexchange.subscribe.xing.osgi;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.oauth.OAuthService;
@@ -59,8 +60,10 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.xing.Services;
 import com.openexchange.subscribe.xing.XingSubscribeService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
 
 
@@ -82,13 +85,15 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class, XingOAuthAccessProvider.class };
+        return new Class[] { OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class, XingOAuthAccessProvider.class, ThreadPoolService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServices(this);
         track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this));
+        trackService(SubscriptionExecutionService.class);
+        trackService(FolderUpdaterRegistry.class);
         openTrackers();
         /*
          * Register update task

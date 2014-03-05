@@ -61,6 +61,6 @@ public interface FolderUpdaterRegistry {
     /**
      * @param subscription
      */
-    FolderUpdaterService getFolderUpdater(TargetFolderDefinition target) throws OXException;
+    <T> FolderUpdaterService<T> getFolderUpdater(TargetFolderDefinition target) throws OXException;
 
 }
