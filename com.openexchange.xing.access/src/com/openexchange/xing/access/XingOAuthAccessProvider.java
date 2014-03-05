@@ -67,7 +67,7 @@ public interface XingOAuthAccessProvider {
      * @return The XING OAuth access; either newly created or fetched from underlying registry
      * @throws OXException If a XING session could not be created
      */
-    XingOAuthAccess accessFor(final int oauthAccountId, final Session session) throws OXException;
+    XingOAuthAccess accessFor(int oauthAccountId, Session session) throws OXException;
 
     /**
      * Gets the identifier of the default XING OAuth account.
@@ -76,6 +76,6 @@ public interface XingOAuthAccessProvider {
      * @return The identifier of the default XING OAuth account
      * @throws OXException If retrieval fails
      */
-    int getXingOAuthAccount(final Session session) throws OXException;
+    int getXingOAuthAccount(Session session) throws OXException;
 
 }
