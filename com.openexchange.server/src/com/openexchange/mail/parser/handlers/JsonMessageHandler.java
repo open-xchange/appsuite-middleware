@@ -705,7 +705,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                         }
                     }
-                    return handleAttachment(part, false, baseContentType, fileName, id);
+                    return handleAttachment0(part, isInline, isInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
