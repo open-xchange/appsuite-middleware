@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.collections.iterators.EmptyListIterator;
 import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -168,7 +167,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
 
     /**
      * Test with simple query with no filters
-     * Should find 29 tasks.
+     * Should find 30 tasks.
      *
      * @throws JSONException
      * @throws IOException
@@ -178,16 +177,16 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
      */
     @Test
     public void testWithSimpleQuery() throws OXException, IOException, JSONException {
-        assertResults(29, Collections.<ActiveFacet>emptyList(), -1, 30);
+        assertResults(30, Collections.<ActiveFacet>emptyList(), -1, 30);
     }
 
     /**
      * Test filter combination 1, i.e. with Participant (internal)
      *
      * 3 requests:
-     *  - find all tasks with userA as participant (should find 3 tasks)
+     *  - find all tasks with userA as participant (should find 5 tasks)
      *  - find all tasks with userB as participant (should find 2 tasks)
-     *  - find all tasks with userA and userB as participant (should find 3 tasks)
+     *  - find all tasks with userA and userB as participant (should find 5 tasks)
      *
      * @throws OXException
      * @throws IOException
@@ -198,16 +197,16 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
         List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(1).toCharArray());
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>(3);
         facets.add(f.get(0));
-        assertResults(3, facets);
+        assertResults(5, facets);
         
         facets.clear();
         facets.add(f.get(1));
-        assertResults(2, facets);
+        assertResults(4, facets);
 
         facets.clear();
         facets.add(f.get(0));
         facets.add(f.get(1));
-        assertResults(3, facets);
+        assertResults(5, facets);
     }
 
     /**
@@ -246,7 +245,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
 
     /**
      * Test filter combination 2, i.e. with status
-     * - NOT STARTED: 7
+     * - NOT STARTED: 9
      * - IN PROGRESS: 6
      * - DONE:        6
      * - WAITING:     5
@@ -258,39 +257,42 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
     @Test
     public void testWithStatus() throws OXException, IOException, JSONException {
         List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(2).toCharArray());
-        assertResults(7, Collections.singletonList(f.get(0)));
+        assertResults(9, Collections.singletonList(f.get(0)));
         assertResults(6, Collections.singletonList(f.get(1)));
         assertResults(6, Collections.singletonList(f.get(2)));
         assertResults(5, Collections.singletonList(f.get(3)));
         assertResults(5, Collections.singletonList(f.get(4)));
     }
-
-
-    /*@Test
-    public void testSimpleFilter() {
-        try {
-
-            List<String> queries = Collections.singletonList("mail");
-            List<Filter> filters = new ArrayList<Filter>();
-            //filters.add(new Filter(Collections.singletonList("folder_type"), "shared"));
-            //filters.add(new Filter(Collections.singletonList("folder_type"), "private"));
-            //filters.add(new Filter(Collections.singletonList("type"), "single_task"));
-            //filters.add(new Filter(Collections.singletonList("participant"), "5"));
-            //filters.add(new Filter(Collections.singletonList("participant"), "foo@bar.org"));
-            //filters.add(new Filter(Collections.singletonList("participant"), "bar@foo.org"));
-            //filters.add(new Filter(Collections.singletonList("status"), "1"));
-            //filters.add(new Filter(Collections.singletonList("status"), "2"));
-            //filters.add(new Filter(Collections.singletonList("attachment"), "mail.png"));
-            final QueryResponse queryResponse = getClient().execute(new QueryRequest(0, 10, queries, filters, "tasks"));
-
-            assertNotNull(queryResponse);
-
-            JSONObject j = (JSONObject) queryResponse.getData();
-            System.err.println("RESULTS: " + j.getJSONArray("results").length());
-
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-    }*/
+    
+    /**
+     * Test filter combination 4, i.e. with folder type
+     * - in PRIVATE: 10
+     * - in PUBLIC: 10
+     * - in SHARED: 11
+     * @throws JSONException 
+     * @throws IOException 
+     * @throws OXException 
+     */
+    @Test
+    public void testWithFolderType() throws OXException, IOException, JSONException {
+        List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(4).toCharArray());
+        assertResults(10, Collections.singletonList(f.get(0))); //private
+        assertResults(10, Collections.singletonList(f.get(1))); //public
+        assertResults(11, Collections.singletonList(f.get(2))); //shared
+    }
+    
+    /**
+     * Test filter combination 8, i.e. with task type
+     * - SINGLE: 29
+     * - SERIES:  2
+     * @throws JSONException 
+     * @throws IOException 
+     * @throws OXException 
+     */
+    @Test
+    public void testWithType() throws OXException, IOException, JSONException {
+        List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(8).toCharArray());
+        assertResults(29, Collections.singletonList(f.get(0)), -1, 30);
+        assertResults(2, Collections.singletonList(f.get(1)));
+    }
 }

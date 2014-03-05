@@ -64,6 +64,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.json.JSONException;
+import com.openexchange.ajax.Tasks;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
@@ -82,6 +83,7 @@ import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.tasks.TaskTypeDisplayItem;
 import com.openexchange.find.tasks.TasksFacetType;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
@@ -373,7 +375,8 @@ public class FindTasksTestEnvironment {
      * - 1 task with 2 participants (2int) in user's A private folder
      * - 1 task with 3 participants (2int,1ext) in user's B private folder
      * - 1 task with 2 participants (1int,1ext) in user's A private folder
-     * Total: 35 tasks
+     * - 1 task with 2 participants (2int) in user's B shared folder (series)
+     * Total: 36 tasks
      * @throws Exception
      */
     private final void createAndInsertTasks() throws Exception {
@@ -387,44 +390,47 @@ public class FindTasksTestEnvironment {
             for (FolderType ft : FolderType.values()) {
                 switch(ft) {
                 case PUBLIC:
-                    insertTask(clientA, ft, s, userApublicTestFolder.getObjectID(), Collections.<Participant>emptyList(), false);
-                    insertTask(clientB, ft, s, userBpublicTestFolder.getObjectID(), Collections.<Participant>emptyList(), false);
+                    insertTask(clientA, ft, s, userApublicTestFolder.getObjectID(), Collections.<Participant>emptyList(), false, false);
+                    insertTask(clientB, ft, s, userBpublicTestFolder.getObjectID(), Collections.<Participant>emptyList(), false, false);
                     break;
 
                 case PRIVATE:
-                    insertTask(clientA, ft, s, userAprivateTestFolder.getObjectID(), Collections.<Participant>emptyList(), false);
-                    insertTask(clientB, ft, s, userBprivateTestFolder.getObjectID(), Collections.<Participant>emptyList(), false);
+                    insertTask(clientA, ft, s, userAprivateTestFolder.getObjectID(), Collections.<Participant>emptyList(), false, false);
+                    insertTask(clientB, ft, s, userBprivateTestFolder.getObjectID(), Collections.<Participant>emptyList(), false, false);
                     break;
 
                 case SHARED:
-                    insertTask(clientB, ft, s, userBsharedTestFolderRO.getObjectID(), Collections.<Participant>emptyList(), false);
-                    insertTask(clientB, ft, s, userBsharedTestFolderRW.getObjectID(), Collections.<Participant>emptyList(), false);
+                    insertTask(clientB, ft, s, userBsharedTestFolderRO.getObjectID(), Collections.<Participant>emptyList(), false, false);
+                    insertTask(clientB, ft, s, userBsharedTestFolderRW.getObjectID(), Collections.<Participant>emptyList(), false, false);
                     break;
                 }
             }
         }
 
         //insert a task with attachment in private with status not started for user a
-        insertTask(clientA, FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID(), Collections.<Participant>emptyList(), true);
+        insertTask(clientA, FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID(), Collections.<Participant>emptyList(), true, false);
 
         //insert a task with no attachment in private with status deferred and 1 internal participants (b) for user B
         List<Participant> list  = new ArrayList<Participant>();
         list.add(usrPartB);
-        insertTask(clientB, FolderType.PRIVATE, Status.DEFERRED, userBprivateTestFolder.getObjectID(), list, false);
+        insertTask(clientB, FolderType.PRIVATE, Status.DEFERRED, userBprivateTestFolder.getObjectID(), list, false, false);
 
-        //insert a task with no attachment in private with status in progress and 2 internal participants (a+b) for user A
+        //insert a task with no attachment in private with status done and 2 internal participants (a+b) for user A
         list.add(usrPartA);
-        rememberTask(userB, insertTask(clientA, FolderType.PRIVATE, Status.DONE, userAprivateTestFolder.getObjectID(), list, false));
+        rememberTask(userB, insertTask(clientA, FolderType.PRIVATE, Status.DONE, userAprivateTestFolder.getObjectID(), list, false, false));
+        
+        //insert a recurring task with attachment in shared folder with status not started for user b
+        rememberTask(userB, insertTask(clientB, FolderType.SHARED, Status.NOT_STARTED, userBsharedTestFolderRO.getObjectID(), list, true, true));
 
-        //insert a task with attachment in private with status waiting and 2 internal (a+b) and 1 external participant for user b
+        //insert a task with attachment in private with status in progress and 2 internal (a+b) and 1 external participant for user b
         list.add(extPart);
-        rememberTask(userA, insertTask(clientB, FolderType.PRIVATE, Status.IN_PROGRESS, userBprivateTestFolder.getObjectID(), list, true));
+        rememberTask(userA, insertTask(clientB, FolderType.PRIVATE, Status.IN_PROGRESS, userBprivateTestFolder.getObjectID(), list, true, false));
 
-        //insert a task with attachment in private with status done and 1 internal (a) and 1 external participant for user a
+        //insert a task with attachment in private with status not_started and 1 internal (a) and 1 external participant for user a
         list.clear();
         list.add(usrPartA);
         list.add(extPart);
-        insertTask(clientA, FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID(), list, true);
+        insertTask(clientA, FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID(), list, true, false);
     }
 
     /**
@@ -472,10 +478,11 @@ public class FindTasksTestEnvironment {
      * @param ft FolderType
      * @param status Task's status
      * @param folder parent folder
+     * @param recurrence TODO
      * @return inserted task
      * @throws Exception
      */
-    private final Task insertTask(AJAXClient client, FolderType ft, Status status, int folder, List<Participant> participants, boolean attachment) throws Exception {
+    private final Task insertTask(AJAXClient client, FolderType ft, Status status, int folder, List<Participant> participants, boolean attachment, boolean recurrence) throws Exception {
         StringBuilder builder = new StringBuilder();
         String title = builder.append("Find me, I am in a ").append(ft)
                               .append(" Folder - Hint User ").append(client.getValues().getDefaultAddress())
@@ -489,6 +496,14 @@ public class FindTasksTestEnvironment {
             builder.setLength(0);
             builder.append(t.getNote()).append(" and have ").append(participants.size()).append(" participants");
             t.setNote(builder.toString());
+        }
+        
+        if (recurrence) {
+            t.setStartDate(new Date(System.currentTimeMillis()));
+            t.setInterval(1);
+            t.setRecurrenceCount(10);
+            t.setEndDate(new Date(System.currentTimeMillis() + 3600));
+            t.setRecurrenceType(1);
         }
 
         if (attachment) {
@@ -534,16 +549,16 @@ public class FindTasksTestEnvironment {
         //folder type
         l = new ArrayList<ActiveFacet>(3);
         type = CommonFacetType.FOLDER_TYPE;
-        l.add(createActiveFacet(type, FolderObject.PRIVATE, createFilter("folder_type", Integer.toString(FolderObject.PRIVATE))));
-        l.add(createActiveFacet(type, FolderObject.PUBLIC, createFilter("folder_type", Integer.toString(FolderObject.PUBLIC))));
-        l.add(createActiveFacet(type, FolderObject.SHARED, createFilter("folder_type", Integer.toString(FolderObject.SHARED))));
+        l.add(createActiveFacet(type, FolderObject.PRIVATE, createFilter("folder_type", FolderObject.SYSTEM_PRIVATE_FOLDER_NAME)));
+        l.add(createActiveFacet(type, FolderObject.PUBLIC, createFilter("folder_type", FolderObject.SYSTEM_PUBLIC_FOLDER_NAME)));
+        l.add(createActiveFacet(type, FolderObject.SHARED, createFilter("folder_type", FolderObject.SYSTEM_SHARED_FOLDER_NAME)));
         facets.add(l);
 
         //type
         l = new ArrayList<ActiveFacet>(2);
         type = TasksFacetType.TASK_TYPE;
-        l.add(createActiveFacet(type, 0, createFilter("type", Integer.toString(0)))); //single
-        l.add(createActiveFacet(type, 0, createFilter("type", Integer.toString(1)))); //series
+        l.add(createActiveFacet(type, 0, createFilter("type", TaskTypeDisplayItem.Type.SINGLE_TASK.toString().toLowerCase()))); //single
+        l.add(createActiveFacet(type, 1, createFilter("type", TaskTypeDisplayItem.Type.SERIES.toString().toLowerCase()))); //series
         facets.add(l);
     }
 
