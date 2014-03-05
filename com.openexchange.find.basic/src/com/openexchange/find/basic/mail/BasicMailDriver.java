@@ -108,6 +108,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.BodyTerm;
+import com.openexchange.mail.search.CatenatingTerm;
 import com.openexchange.mail.search.CcTerm;
 import com.openexchange.mail.search.ComparablePattern;
 import com.openexchange.mail.search.ComparisonType;
@@ -287,14 +288,9 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             searchTerm,
             MailField.FIELDS_LOW_COST);
 
-        if (start > messages.length) {
-            return Collections.emptyList();
-        }
-
         List<MailMessage> resultMessages = new ArrayList<MailMessage>(messages.length);
         Collections.addAll(resultMessages, messages);
-        int toIndex = (start + size) <= resultMessages.size() ? (start + size) : resultMessages.size();
-        return resultMessages.subList(start, toIndex);
+        return resultMessages;
     }
 
     private static List<String> extractMailAddessesFrom(final Contact contact) {
@@ -315,6 +311,22 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         }
 
         return addrs;
+    }
+
+    private static enum OP {
+        OR, AND;
+    }
+
+    private static CatenatingTerm catenationFor(OP op, SearchTerm<?> t1, SearchTerm<?> t2) {
+        switch(op) {
+            case OR:
+                return new ORTerm(t1, t2);
+
+            case AND:
+                return new ANDTerm(t1, t2);
+        }
+
+        return null;
     }
 
     private static SearchTerm<?> prepareSearchTerm(MailFolder folder, List<String> queries, List<Filter> filters) throws OXException {
@@ -339,7 +351,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             return null;
         }
 
-        return termFor(QUERY_FIELDS, queries, folder.isSent());
+        return termFor(QUERY_FIELDS, queries, OP.AND, folder.isSent());
     }
 
     private static SearchTerm<?> prepareFilterTerm(MailFolder folder, List<Filter> filters) throws OXException {
@@ -347,23 +359,24 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             return null;
         }
 
+        OP queryOperator = OP.OR;
         if (filters.size() == 1) {
-            return termFor(filters.get(0), folder.isSent());
+            return termFor(filters.get(0), queryOperator, folder.isSent());
         }
 
         Iterator<Filter> it = filters.iterator();
         Filter f1 = it.next();
         Filter f2 = it.next();
-        ANDTerm finalTerm = new ANDTerm(termFor(f1, folder.isSent()), termFor(f2, folder.isSent()));
+        ANDTerm finalTerm = new ANDTerm(termFor(f1, queryOperator, folder.isSent()), termFor(f2, queryOperator, folder.isSent()));
         while (it.hasNext()) {
-            ANDTerm newTerm = new ANDTerm(finalTerm.getSecondTerm(), termFor(it.next(), folder.isSent()));
+            ANDTerm newTerm = new ANDTerm(finalTerm.getSecondTerm(), termFor(it.next(), queryOperator, folder.isSent()));
             finalTerm.setSecondTerm(newTerm);
         }
 
         return finalTerm;
     }
 
-    private static SearchTerm<?> termFor(Filter filter, boolean isOutgoingFolder) throws OXException {
+    private static SearchTerm<?> termFor(Filter filter, OP queryOperator, boolean isOutgoingFolder) throws OXException {
         List<String> fields = filter.getFields();
         if (fields == null || fields.isEmpty()) {
             throw FindExceptionCode.INVALID_FILTER_NO_FIELDS.create(filter);
@@ -374,36 +387,36 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             throw FindExceptionCode.INVALID_FILTER_NO_QUERIES.create(filter);
         }
 
-        return termFor(fields, queries, isOutgoingFolder);
+        return termFor(fields, queries, queryOperator, isOutgoingFolder);
     }
 
-    private static SearchTerm<?> termFor(List<String> fields, List<String> queries, boolean isOutgoingFolder) throws OXException {
+    private static SearchTerm<?> termFor(List<String> fields, List<String> queries, OP queryOperator, boolean isOutgoingFolder) throws OXException {
         if (fields.size() > 1) {
             Iterator<String> it = fields.iterator();
             String f1 = it.next();
             String f2 = it.next();
-            ORTerm finalTerm = new ORTerm(termForField(f1, queries, isOutgoingFolder), termForField(f2, queries, isOutgoingFolder));
+            CatenatingTerm finalTerm = catenationFor(OP.OR, termForField(f1, queries, queryOperator, isOutgoingFolder), termForField(f2, queries, queryOperator, isOutgoingFolder));
             while (it.hasNext()) {
                 String f = it.next();
-                ORTerm newTerm = new ORTerm(finalTerm.getSecondTerm(), termForField(f, queries, isOutgoingFolder));
+                CatenatingTerm newTerm = catenationFor(OP.OR, finalTerm.getSecondTerm(), termForField(f, queries, queryOperator, isOutgoingFolder));
                 finalTerm.setSecondTerm(newTerm);
             }
 
             return finalTerm;
         }
 
-        return termForField(fields.iterator().next(), queries, isOutgoingFolder);
+        return termForField(fields.iterator().next(), queries, queryOperator, isOutgoingFolder);
     }
 
-    private static SearchTerm<?> termForField(String field, List<String> queries, boolean isOutgoingFolder) throws OXException {
+    private static SearchTerm<?> termForField(String field, List<String> queries, OP queryOperator, boolean isOutgoingFolder) throws OXException {
         if (queries.size() > 1) {
             Iterator<String> it = queries.iterator();
             String q1 = it.next();
             String q2 = it.next();
-            ORTerm finalTerm = new ORTerm(termForQuery(field, q1, isOutgoingFolder), termForQuery(field, q2, isOutgoingFolder));
+            CatenatingTerm finalTerm = catenationFor(queryOperator, termForQuery(field, q1, isOutgoingFolder), termForQuery(field, q2, isOutgoingFolder));
             while (it.hasNext()) {
                 String q = it.next();
-                ORTerm newTerm = new ORTerm(finalTerm.getSecondTerm(), termForQuery(field, q, isOutgoingFolder));
+                CatenatingTerm newTerm = catenationFor(queryOperator, finalTerm.getSecondTerm(), termForQuery(field, q, isOutgoingFolder));
                 finalTerm.setSecondTerm(newTerm);
             }
 
