@@ -49,12 +49,9 @@
 
 package com.openexchange.ajax.find.contacts;
 
-import java.util.List;
-import java.util.Map;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.find.Module;
-import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.groupware.container.Contact;
 
@@ -91,24 +88,9 @@ public class AutocompleteTest extends ContactsFindTest {
     private FacetValue assertFoundFacetInAutocomplete(String prefix, String expectedEmail1) throws Exception {
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier());
         AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
-        FacetValue foundFacetValue = findByValue(autocompleteResponse.getFacets(), expectedEmail1);
+        FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), expectedEmail1);
         assertNotNull("no facet value found for: " + expectedEmail1, foundFacetValue);
         return foundFacetValue;
-    }
-
-    private FacetValue findByValue(List<Facet> facets, String displayValue) {
-        for (Facet facet : facets) {
-            List<FacetValue> values = facet.getValues();
-            for (FacetValue value : values) {
-                Map<String, Object> displayable = (Map<String, Object>) value.getDisplayItem().getItem();
-                for (Object obj : displayable.values()) {
-                    if (obj.equals(displayValue)) {
-                        return value;
-                    }
-                }
-            }
-        }
-        return null;
     }
 
 }

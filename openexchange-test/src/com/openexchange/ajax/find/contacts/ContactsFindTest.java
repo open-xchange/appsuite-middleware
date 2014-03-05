@@ -49,19 +49,16 @@
 
 package com.openexchange.ajax.find.contacts;
 
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Random;
-import java.util.UUID;
-import com.openexchange.ajax.contact.AbstractManagedContactTest;
+import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
-import com.openexchange.ajax.find.actions.QueryRequest;
-import com.openexchange.ajax.find.actions.QueryResponse;
-import com.openexchange.find.Document;
+import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.find.Module;
-import com.openexchange.find.SearchResult;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.ContactTestManager;
 import com.openexchange.tools.arrays.Arrays;
 
 
@@ -70,7 +67,7 @@ import com.openexchange.tools.arrays.Arrays;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class ContactsFindTest extends AbstractManagedContactTest {
+public abstract class ContactsFindTest extends AbstractFindTest {
 
     static final int[] PHONE_COLUMNS = new int[] {
         Contact.TELEPHONE_ASSISTANT,
@@ -129,7 +126,9 @@ public abstract class ContactsFindTest extends AbstractManagedContactTest {
     static final int[] ADDRESSBOOK_COLUMNS =
         Arrays.addUniquely(NAME_COLUMNS, Arrays.addUniquely(ADDRESS_COLUMNS, Arrays.addUniquely(PHONE_COLUMNS, EMAIL_COLUMNS)));
 
-    protected Random random;
+    protected ContactTestManager manager;
+
+    protected int folderID;
 
     /**
      * Initializes a new {@link ContactsFindTest}.
@@ -143,8 +142,21 @@ public abstract class ContactsFindTest extends AbstractManagedContactTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        manager.setFailOnError(true);
-        random = new Random();
+        manager = new ContactTestManager(getClient());
+        UserValues values = getClient().getValues();
+        FolderObject folder = folderManager.generatePublicFolder(
+                "ManagedContactTest_"+(new Date().getTime()),
+                com.openexchange.groupware.modules.Module.CONTACTS.getFolderConstant(),
+                values.getPrivateContactFolder(),
+                values.getUserId());
+        folder = folderManager.insertFolderOnServer(folder);
+        folderID = folder.getObjectID();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        manager.cleanUp();
+        super.tearDown();
     }
 
     /**
@@ -155,32 +167,7 @@ public abstract class ContactsFindTest extends AbstractManagedContactTest {
      * @throws Exception
      */
     protected List<PropDocument> query(List<ActiveFacet> facets) throws Exception {
-        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, Module.CONTACTS.getIdentifier());
-        QueryResponse queryResponse = client.execute(queryRequest);
-        SearchResult result = queryResponse.getSearchResult();
-        List<PropDocument> propDocuments = new ArrayList<PropDocument>();
-        List<Document> documents = result.getDocuments();
-        for (Document document : documents) {
-            propDocuments.add((PropDocument) document);
-        }
-        return propDocuments;
-    }
-
-    /**
-     * Searches the supplied list of property documents matching the supplied value in one of its properties.
-     *
-     * @param documents The documents to check
-     * @param property The property name to check
-     * @param value The value to check
-     * @return The found document, or <code>null</code> if not found
-     */
-    protected static PropDocument findByProperty(List<PropDocument> documents, String property, String value) {
-        for (PropDocument propDocument : documents) {
-            if (value.equals(propDocument.getProps().get(property))) {
-                return propDocument;
-            }
-        }
-        return null;
+        return query(Module.CONTACTS, facets);
     }
 
     /**
@@ -198,15 +185,6 @@ public abstract class ContactsFindTest extends AbstractManagedContactTest {
         contact.setEmail1(randomUID() + "@example.com");
         contact.setUid(randomUID());
         return contact;
-    }
-
-    /**
-     * Creates a new, random UUID string.
-     *
-     * @return The UUID string
-     */
-    protected static String randomUID() {
-        return UUID.randomUUID().toString();
     }
 
 }

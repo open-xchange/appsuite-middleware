@@ -49,7 +49,24 @@
 
 package com.openexchange.ajax.find;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+import com.openexchange.ajax.find.actions.QueryRequest;
+import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.find.Document;
+import com.openexchange.find.Module;
+import com.openexchange.find.SearchResult;
+import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetType;
+import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.FilterBuilder;
+import com.openexchange.test.FolderTestManager;
 
 /**
  * {@link AbstractFindTest}
@@ -57,6 +74,10 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractFindTest extends AbstractAJAXSession {
+
+    protected FolderTestManager folderManager;
+
+    protected Random random;
 
     /**
      * Default constructor.
@@ -70,5 +91,160 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        random = new Random();
+        folderManager = new FolderTestManager(getClient());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        folderManager.cleanUp();
+        super.tearDown();
+    }
+
+    /**
+     * Performs a query request using the supplied active facets.
+     *
+     * @param module The module
+     * @param facets The active facets
+     * @return The found documents
+     * @throws Exception
+     */
+    protected List<PropDocument> query(Module module, List<ActiveFacet> facets) throws Exception {
+        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, module.getIdentifier());
+        QueryResponse queryResponse = client.execute(queryRequest);
+        SearchResult result = queryResponse.getSearchResult();
+        List<PropDocument> propDocuments = new ArrayList<PropDocument>();
+        List<Document> documents = result.getDocuments();
+        for (Document document : documents) {
+            propDocuments.add((PropDocument) document);
+        }
+        return propDocuments;
+    }
+
+    /**
+     * Performs a query request using the supplied active facets.
+     *
+     * @param module The module
+     * @param facets The active facets
+     * @param start The start index for pagination
+     * @param size The page size
+     * @return The found documents
+     * @throws Exception
+     */
+    protected List<PropDocument> query(Module module, List<ActiveFacet> facets, int start, int size) throws Exception {
+        QueryRequest queryRequest = new QueryRequest(start, size, facets, module.getIdentifier());
+        QueryResponse queryResponse = client.execute(queryRequest);
+        SearchResult result = queryResponse.getSearchResult();
+        List<PropDocument> propDocuments = new ArrayList<PropDocument>();
+        List<Document> documents = result.getDocuments();
+        for (Document document : documents) {
+            propDocuments.add((PropDocument) document);
+        }
+        return propDocuments;
+    }
+
+    /**
+     * Gets a random substring of the supplied value, using a minimum length of 4.
+     *
+     * @param value The value to get the substring from
+     * @return The substring
+     */
+    protected String randomSubstring(String value) {
+        return randomSubstring(value, 4);
+    }
+
+    /**
+     * Gets a random substring of the supplied value.
+     *
+     * @param value The value to get the substring from
+     * @return The substring
+     */
+    protected String randomSubstring(String value, int minLength) {
+        if (minLength >= value.length()) {
+            fail(value + " is too short to get a substring from");
+        }
+        int start = random.nextInt(value.length() - minLength);
+        int stop = start + minLength + random.nextInt(value.length() - start - minLength);
+        return value.substring(start, stop);
+    }
+
+    /**
+     * Creates a new, random UUID string.
+     *
+     * @return The UUID string
+     */
+    protected static String randomUID() {
+        return UUID.randomUUID().toString();
+    }
+
+    /**
+     * Searches the supplied list of property documents matching the supplied value in one of its properties.
+     *
+     * @param documents The documents to check
+     * @param property The property name to check
+     * @param value The value to check
+     * @return The found document, or <code>null</code> if not found
+     */
+    protected static PropDocument findByProperty(List<PropDocument> documents, String property, String value) {
+        for (PropDocument propDocument : documents) {
+            if (value.equals(propDocument.getProps().get(property))) {
+                return propDocument;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Searches a FacetValue by its display name in a list of facets.
+     *
+     * @param facets The facets to check
+     * @param displayName The display name to check
+     */
+    protected static FacetValue findByDisplayName(List<Facet> facets, String displayName) {
+        for (Facet facet : facets) {
+            List<FacetValue> values = facet.getValues();
+            for (FacetValue value : values) {
+                if (displayName.equals(value.getDisplayItem().getDefaultValue())) {
+                    return value;
+                }
+            }
+        }
+        return null;
+    }
+
+    protected static ActiveFacet createQuery(String query) {
+        return createActiveFacet(CommonFacetType.GLOBAL, CommonFacetType.GLOBAL.getId(), CommonFacetType.GLOBAL.getId(), query);
+    }
+
+    protected static ActiveFacet createActiveFacet(FacetType type, int valueId, Filter filter) {
+        return new ActiveFacet(type, Integer.toString(valueId), filter);
+    }
+
+    protected static ActiveFacet createActiveFacet(FacetType type, String valueId, Filter filter) {
+        return new ActiveFacet(type, valueId, filter);
+    }
+
+    protected static ActiveFacet createActiveFacet(FacetType type, int valueId, String field, String query) {
+        Filter filter = new FilterBuilder()
+            .addField(field)
+            .addQuery(query)
+            .build();
+        return new ActiveFacet(type, Integer.toString(valueId), filter);
+    }
+
+    protected static ActiveFacet createActiveFacet(FacetType type, String valueId, String field, String query) {
+        Filter filter = new FilterBuilder()
+            .addField(field)
+            .addQuery(query)
+            .build();
+        return new ActiveFacet(type, valueId, filter);
+    }
+
+    protected static ActiveFacet createActiveFieldFacet(FacetType type, String field, String query) {
+        Filter filter = new FilterBuilder()
+            .addField(field)
+            .addQuery(query)
+            .build();
+        return new ActiveFacet(type, type.getId(), filter);
     }
 }

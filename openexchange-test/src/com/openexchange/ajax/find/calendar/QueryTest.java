@@ -63,9 +63,6 @@ import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.find.facet.ActiveFacet;
-import com.openexchange.find.facet.FacetType;
-import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.FilterBuilder;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -242,38 +239,6 @@ public class QueryTest extends CalendarFindTest {
         List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(PARTICIPANT, String.valueOf(userParticipant.getIdentifier()), "users", String.valueOf(userParticipant.getIdentifier()))));
         assertTrue("no appointments found", 0 < documents.size());
         assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
-    }
-
-    private final ActiveFacet createActiveFacet(FacetType type, int valueId, Filter filter) {
-        return new ActiveFacet(type, Integer.toString(valueId), filter);
-    }
-
-    private final ActiveFacet createActiveFacet(FacetType type, String valueId, Filter filter) {
-        return new ActiveFacet(type, valueId, filter);
-    }
-
-    private final ActiveFacet createActiveFacet(FacetType type, int valueId, String field, String query) {
-        Filter filter = new FilterBuilder()
-            .addField(field)
-            .addQuery(query)
-            .build();
-        return new ActiveFacet(type, Integer.toString(valueId), filter);
-    }
-
-    private final ActiveFacet createActiveFacet(FacetType type, String valueId, String field, String query) {
-        Filter filter = new FilterBuilder()
-            .addField(field)
-            .addQuery(query)
-            .build();
-        return new ActiveFacet(type, valueId, filter);
-    }
-
-    private final ActiveFacet createActiveFieldFacet(FacetType type, String field, String query) {
-        Filter filter = new FilterBuilder()
-            .addField(field)
-            .addQuery(query)
-            .build();
-        return new ActiveFacet(type, type.getId(), filter);
     }
 
 }

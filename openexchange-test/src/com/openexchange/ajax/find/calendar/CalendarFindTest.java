@@ -49,17 +49,11 @@
 
 package com.openexchange.ajax.find.calendar;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
-import com.openexchange.ajax.find.actions.QueryRequest;
-import com.openexchange.ajax.find.actions.QueryResponse;
-import com.openexchange.find.Document;
 import com.openexchange.find.Module;
-import com.openexchange.find.SearchResult;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
@@ -98,15 +92,6 @@ public class CalendarFindTest extends AbstractFindTest {
     }
 
     /**
-     * Creates a new, random UUID string.
-     *
-     * @return The UUID string
-     */
-    protected static String randomUID() {
-        return UUID.randomUUID().toString();
-    }
-
-    /**
      * Creates a new, random appointment instance containing some basic random data, with the folder ID being set to the private folder ID.
      * The appointment is not created at the server automatically.
      *
@@ -132,57 +117,6 @@ public class CalendarFindTest extends AbstractFindTest {
      * @throws Exception
      */
     protected List<PropDocument> query(List<ActiveFacet> facets) throws Exception {
-        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, Module.CALENDAR.getIdentifier());
-        QueryResponse queryResponse = client.execute(queryRequest);
-        SearchResult result = queryResponse.getSearchResult();
-        List<PropDocument> propDocuments = new ArrayList<PropDocument>();
-        List<Document> documents = result.getDocuments();
-        for (Document document : documents) {
-            propDocuments.add((PropDocument) document);
-        }
-        return propDocuments;
+        return query(Module.CALENDAR, facets);
     }
-
-    /**
-     * Searches the supplied list of property documents matching the supplied value in one of its properties.
-     *
-     * @param documents The documents to check
-     * @param property The property name to check
-     * @param value The value to check
-     * @return The found document, or <code>null</code> if not found
-     */
-    protected static PropDocument findByProperty(List<PropDocument> documents, String property, String value) {
-        for (PropDocument propDocument : documents) {
-            if (value.equals(propDocument.getProps().get(property))) {
-                return propDocument;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Gets a random substring of the supplied value, using a minimum length of 4.
-     *
-     * @param value The value to get the substring from
-     * @return The substring
-     */
-    protected String randomSubstring(String value) {
-        return randomSubstring(value, 4);
-    }
-
-    /**
-     * Gets a random substring of the supplied value.
-     *
-     * @param value The value to get the substring from
-     * @return The substring
-     */
-    protected String randomSubstring(String value, int minLength) {
-        if (minLength >= value.length()) {
-            fail(value + " is too short to get a substring from");
-        }
-        int start = random.nextInt(value.length() - minLength);
-        int stop = start + minLength + random.nextInt(value.length() - start - minLength);
-        return value.substring(start, stop);
-    }
-
 }

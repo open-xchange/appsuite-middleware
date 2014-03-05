@@ -67,8 +67,6 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetType;
-import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.FilterBuilder;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -157,27 +155,6 @@ public class QueryTest extends ContactsFindTest {
         assertNotNull("user contact not found", findByProperty(publicFolderDocuments, "email1", client.getValues().getDefaultAddress()));
     }
 
-    private Filter applyMatchingFilter(Contact contact, String value, String filterField, int[] searchedColumns, boolean unassignedOnly) {
-        if (unassignedOnly) {
-            List<Integer> unassignedColumns = new ArrayList<Integer>();
-            for (int column : searchedColumns) {
-                if (false == contact.contains(column)) {
-                    unassignedColumns.add(Integer.valueOf(column));
-                }
-            }
-            if (0 == unassignedColumns.size()) {
-                fail("no unassigned fields from " + Arrays.toString(searchedColumns) + " left.");
-            }
-            contact.set(unassignedColumns.get(random.nextInt(unassignedColumns.size())), value);
-        } else {
-            contact.set(searchedColumns[random.nextInt(searchedColumns.length)], value);
-        }
-        int start = random.nextInt(value.length() - 4);
-        int stop = start + 4 + random.nextInt(value.length() - start - 4);
-        String substring = value.substring(start, stop);
-        return new Filter(Collections.singletonList(filterField), substring);
-    }
-
     private ActiveFacet applyMatchingFacet(FacetType type, Contact contact, String value, String filterField, int[] searchedColumns, boolean unassignedOnly) {
         if (unassignedOnly) {
             List<Integer> unassignedColumns = new ArrayList<Integer>();
@@ -225,39 +202,6 @@ public class QueryTest extends ContactsFindTest {
         SearchResult result = queryResponse.getSearchResult();
         List<Document> documents = result.getDocuments();
         assertEquals("Documents were found", 0, documents.size());
-    }
-
-
-    private final ActiveFacet createActiveFacet(FacetType type, int valueId, Filter filter) {
-        return new ActiveFacet(type, Integer.toString(valueId), filter);
-    }
-
-    private final ActiveFacet createActiveFacet(FacetType type, String valueId, Filter filter) {
-        return new ActiveFacet(type, valueId, filter);
-    }
-
-    private final ActiveFacet createActiveFacet(FacetType type, int valueId, String field, String query) {
-        Filter filter = new FilterBuilder()
-            .addField(field)
-            .addQuery(query)
-            .build();
-        return new ActiveFacet(type, Integer.toString(valueId), filter);
-    }
-
-    private final ActiveFacet createActiveFacet(FacetType type, String valueId, String field, String query) {
-        Filter filter = new FilterBuilder()
-            .addField(field)
-            .addQuery(query)
-            .build();
-        return new ActiveFacet(type, valueId, filter);
-    }
-
-    private final ActiveFacet createActiveFieldFacet(FacetType type, String field, String query) {
-        Filter filter = new FilterBuilder()
-            .addField(field)
-            .addQuery(query)
-            .build();
-        return new ActiveFacet(type, type.getId(), filter);
     }
 
 }
