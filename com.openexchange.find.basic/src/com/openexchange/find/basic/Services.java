@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.resource.ResourceService;
@@ -110,6 +111,10 @@ public class Services {
 
     public static ConfigurationService getConfigurationService() throws OXException {
         return requireService(ConfigurationService.class);
+    }
+
+    public static InfostoreSearchEngine getInfostoreSearchEngine() throws OXException {
+        return requireService(InfostoreSearchEngine.class);
     }
 
     public static void setServiceLookup(ServiceLookup lookup) {

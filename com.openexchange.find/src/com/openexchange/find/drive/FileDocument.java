@@ -62,14 +62,14 @@ public class FileDocument implements Document {
 
     private static final long serialVersionUID = -5944087974121811926L;
 
-    private final File file;
+    private final Object file;
 
     /**
      * Initializes a new {@link FileDocument}.
      *
      * @param file
      */
-    public FileDocument(final File file) {
+    public FileDocument(final Object file) {
         super();
         this.file = file;
     }
@@ -79,7 +79,7 @@ public class FileDocument implements Document {
      *
      * @return The file
      */
-    public File getFile() {
+    public Object getFile() {
         return file;
     }
 
