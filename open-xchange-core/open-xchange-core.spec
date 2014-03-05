@@ -696,12 +696,6 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
    ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
 fi
 
-# SoftwareChange_Request-1529
-pfile=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.server.fullPrimaryKeySupport $pfile; then
-    ox_set_property com.openexchange.server.fullPrimaryKeySupport false $pfile
-fi
-
 # SoftwareChange_Request-1540
 pfile=/opt/open-xchange/etc/permissions.properties
 if ! grep "com.openexchange.capability.boring" >/dev/null $pfile; then
@@ -929,6 +923,12 @@ if [ -n "$(ox_read_property html.tag.base $PFILE)" ]; then
 fi
 if [ -n "$(ox_read_property html.tag.meta $PFILE)" ]; then
     ox_comment html.tag.meta= add $PFILE
+fi
+
+# SoftwareChange_Request-1886
+PFILE=/opt/open-xchange/etc/server.properties
+if ox_exists_property com.openexchange.server.fullPrimaryKeySupport $PFILE; then
+    ox_remove_property com.openexchange.server.fullPrimaryKeySupport $PFILE
 fi
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
