@@ -64,7 +64,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.json.JSONException;
-import com.openexchange.ajax.Tasks;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
@@ -478,7 +477,7 @@ public class FindTasksTestEnvironment {
      * @param ft FolderType
      * @param status Task's status
      * @param folder parent folder
-     * @param recurrence TODO
+     * @param recurrence of the task
      * @return inserted task
      * @throws Exception
      */

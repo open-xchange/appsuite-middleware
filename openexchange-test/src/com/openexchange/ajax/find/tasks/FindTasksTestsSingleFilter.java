@@ -318,7 +318,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
         facets.clear();
         facets.add(f.get(0)); //participant a
         facets.add(f.get(1)); //participant b
-        facets.add(f.get(3));//not started
+        facets.add(f.get(3)); //not started
         assertResults(2, facets);
         
         facets.remove(2);        
@@ -334,6 +334,51 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
         assertResults(0, facets);
         
         facets.remove(2);        
+        facets.add(f.get(7));//deferred
+        assertResults(0, facets);
+
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(2)); //external participant
+        facets.add(f.get(3)); //not started
+        assertResults(1, facets);
+        
+        facets.remove(2);        
+        facets.add(f.get(4));//in progress
+        assertResults(1, facets);
+        
+        facets.remove(2);        
+        facets.add(f.get(5));//done
+        assertResults(0, facets);
+        
+        facets.remove(2);        
+        facets.add(f.get(6));//waiting
+        assertResults(0, facets);
+        
+        facets.remove(2);        
+        facets.add(f.get(7));//deferred
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(2)); //external participant
+        facets.add(f.get(3)); //not started
+        assertResults(0, facets);
+        
+        facets.remove(3);        
+        facets.add(f.get(4));//in progress
+        assertResults(1, facets);
+        
+        facets.remove(3);        
+        facets.add(f.get(5));//done
+        assertResults(0, facets);
+        
+        facets.remove(3);        
+        facets.add(f.get(6));//waiting
+        assertResults(0, facets);
+        
+        facets.remove(3);        
         facets.add(f.get(7));//deferred
         assertResults(0, facets);
     }
