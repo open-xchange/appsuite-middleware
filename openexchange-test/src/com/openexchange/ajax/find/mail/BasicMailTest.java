@@ -366,7 +366,7 @@ public class BasicMailTest extends AbstractFindTest {
             streams[i] = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
         }
 
-        ImportMailRequest request = new ImportMailRequest(testFolder.getFullName(), 0, streams);
+        ImportMailRequest request = new ImportMailRequest(testFolder.getFullName(), 0, true, streams);
         ImportMailResponse response = client.execute(request);
         return response.getIds();
     }
@@ -383,7 +383,7 @@ public class BasicMailTest extends AbstractFindTest {
             .replaceAll("#SUBJECT#", subject)
             .replaceAll("#BODY#", body);
         ByteArrayInputStream mailStream = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
-        ImportMailRequest request = new ImportMailRequest(testFolder.getFullName(), 0, new ByteArrayInputStream[] { mailStream });
+        ImportMailRequest request = new ImportMailRequest(testFolder.getFullName(), 0, true, new ByteArrayInputStream[] { mailStream });
         ImportMailResponse response = client.execute(request);
         return response.getIds();
     }
