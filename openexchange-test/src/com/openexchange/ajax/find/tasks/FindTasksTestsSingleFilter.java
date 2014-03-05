@@ -128,7 +128,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
     }
     
     /**
-     * Helper method to assert the query response
+     * Helper method to assert the query response (no paging)
      * 
      * @param expectedResultCount
      * @param f
@@ -137,10 +137,25 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
      * @throws JSONException
      */
     private final void assertResults(int expectedResultCount, List<ActiveFacet> f) throws OXException, IOException, JSONException {
+        assertResults(expectedResultCount, f, -1, -1);
+    }
+    
+    /**
+     * Helper method to assert the query response (with paging)
+     * 
+     * @param expectedResultCount
+     * @param f
+     * @param start
+     * @param size
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    private final void assertResults(int expectedResultCount, List<ActiveFacet> f, int start, int size) throws OXException, IOException, JSONException {
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
         facets.add(FindTasksTestEnvironment.createGlobalFacet());
         facets.addAll(f);
-        final QueryResponse queryResponse = client.execute(new QueryRequest(0, 10, facets, "tasks"));
+        final QueryResponse queryResponse = client.execute(new QueryRequest(start, size, facets, "tasks"));
         assertNotNull(queryResponse);
         JSONArray results  = getResults(queryResponse);
         int actualResultCount = results.asList().size();
@@ -163,7 +178,7 @@ public class FindTasksTestsSingleFilter extends AbstractFindTest {
      */
     @Test
     public void testWithSimpleQuery() throws OXException, IOException, JSONException {
-        assertResults(29, Collections.<ActiveFacet>emptyList());
+        assertResults(29, Collections.<ActiveFacet>emptyList(), -1, 30);
     }
 
     /**
