@@ -227,7 +227,7 @@ public class Filter implements Serializable {
             sb.append("displayName=").append(displayName).append(", ");
         }
 
-        sb.append("fields=").append(fields);
+        sb.append("fields=").append(fields).append(", ");
         sb.append("queries=").append(queries);
         sb.append("]");
         return sb.toString();

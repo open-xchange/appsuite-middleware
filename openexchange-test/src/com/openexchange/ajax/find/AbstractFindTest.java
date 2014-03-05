@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import com.openexchange.ajax.find.actions.AutocompleteRequest;
+import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -144,6 +146,35 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     }
 
     /**
+     * Performs an autocomplete request and returns the facets.
+     *
+     * @param module The module
+     * @param prefix The prefix
+     * @return The facets
+     * @throws Exception
+     */
+    protected List<Facet> autocomplete(Module module, String prefix) throws Exception {
+        AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, module.getIdentifier());
+        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        return autocompleteResponse.getFacets();
+    }
+
+    /**
+     * Performs an autocomplete request and returns the facets.
+     *
+     * @param module The module
+     * @param prefix The prefix
+     * @param facets The active facets
+     * @return The facets
+     * @throws Exception
+     */
+    protected List<Facet> autocomplete(Module module, String prefix, List<ActiveFacet> facets) throws Exception {
+        AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, module.getIdentifier(), facets);
+        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        return autocompleteResponse.getFacets();
+    }
+
+    /**
      * Gets a random substring of the supplied value, using a minimum length of 4.
      *
      * @param value The value to get the substring from
@@ -175,6 +206,23 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected static String randomUID() {
         return UUID.randomUUID().toString();
+    }
+
+    /**
+     * Searches the given facet type within the list of facets.
+     *
+     * @param type The facet type to search for
+     * @param facets The facets to search in
+     * @return The found facet or <code>null</code>
+     */
+    protected static Facet findByType(FacetType type, List<Facet> facets) {
+        for (Facet facet : facets) {
+            if (facet.getType() == type) {
+                return facet;
+            }
+        }
+
+        return null;
     }
 
     /**
