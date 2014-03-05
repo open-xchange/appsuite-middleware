@@ -93,9 +93,9 @@ public class QueryTest extends CalendarFindTest {
         facets.add(createActiveFieldFacet(SUBJECT, "subject", randomSubstring(appointment.getTitle())));
         facets.add(createActiveFieldFacet(LOCATION, "location", randomSubstring(appointment.getLocation())));
         facets.add(createActiveFieldFacet(DESCRIPTION, "description", randomSubstring(appointment.getNote())));
-        facets.add(createActiveFacet(RELATIVE_DATE, "coming", "relative_date", "coming"));
+        facets.add(createActiveFacet(RELATIVE_DATE, "coming", "date", "coming"));
         facets.add(createActiveFacet(STATUS, "accepted", "status", "accepted"));
-        facets.add(createActiveFacet(RECURRING_TYPE, "single", "recurring_type", "single"));
+        facets.add(createActiveFacet(RECURRING_TYPE, "single", "type", "single"));
         facets.add(createActiveFacet(PARTICIPANT, String.valueOf(client.getValues().getUserId()), "users", String.valueOf(client.getValues().getUserId())));
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(facets);
@@ -149,12 +149,12 @@ public class QueryTest extends CalendarFindTest {
         pastAppointment.setEndDate(TimeTools.D("yesterday at noon"));
         pastAppointment = manager.insert(pastAppointment);
 
-        List<PropDocument> comingDocuments = query(Collections.singletonList(createActiveFacet(RELATIVE_DATE, "coming", "relative_date", "coming")));
+        List<PropDocument> comingDocuments = query(Collections.singletonList(createActiveFacet(RELATIVE_DATE, "coming", "date", "coming")));
         assertTrue("no appointments found", 0 < comingDocuments.size());
         assertNotNull("coming appointment not found", findByProperty(comingDocuments, "title", comingAppointment.getTitle()));
         assertNull("past appointment found", findByProperty(comingDocuments, "title", pastAppointment.getTitle()));
 
-        List<PropDocument> pastDocuments = query(Collections.singletonList(createActiveFacet(RELATIVE_DATE, "past", "relative_date", "past")));
+        List<PropDocument> pastDocuments = query(Collections.singletonList(createActiveFacet(RELATIVE_DATE, "past", "date", "past")));
         assertTrue("no appointments found", 0 < pastDocuments.size());
         assertNotNull("past appointment not found", findByProperty(pastDocuments, "title", pastAppointment.getTitle()));
         assertNull("coming appointment found", findByProperty(pastDocuments, "title", comingAppointment.getTitle()));
@@ -210,12 +210,12 @@ public class QueryTest extends CalendarFindTest {
         recurringAppointment.setInterval(1);
         recurringAppointment = manager.insert(recurringAppointment);
 
-        List<PropDocument> singleDocuments = query(Collections.singletonList(createActiveFacet(RECURRING_TYPE, "single", "recurring_type", "single")));
+        List<PropDocument> singleDocuments = query(Collections.singletonList(createActiveFacet(RECURRING_TYPE, "single", "type", "single")));
         assertTrue("no appointments found", 0 < singleDocuments.size());
         assertNotNull("single appointment not found", findByProperty(singleDocuments, "title", appointment.getTitle()));
         assertNull("recurring appointment found", findByProperty(singleDocuments, "title", recurringAppointment.getTitle()));
 
-        List<PropDocument> recurringDocuments = query(Collections.singletonList(createActiveFacet(RECURRING_TYPE, "series", "recurring_type", "series")));
+        List<PropDocument> recurringDocuments = query(Collections.singletonList(createActiveFacet(RECURRING_TYPE, "series", "type", "series")));
         assertTrue("no appointments found", 0 < recurringDocuments.size());
         assertNull("single appointment found", findByProperty(recurringDocuments, "title", appointment.getTitle()));
         assertNotNull("recurring appointment not found", findByProperty(recurringDocuments, "title", recurringAppointment.getTitle()));
