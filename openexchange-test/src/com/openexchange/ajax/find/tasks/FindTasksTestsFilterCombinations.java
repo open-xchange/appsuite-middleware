@@ -275,6 +275,38 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
     public void testWithStatusAndParticipants() throws OXException, IOException, JSONException {
         List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(3).toCharArray());
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
+        
+        // Playing around with some multi-purpose code (maybe difficult to debug the test case :-/ )
+        /*int[][] expectedResultsMatrix = { {3, 1, 1, 0, 0}, //participant a
+                                          {2, 1, 1, 0, 0}, //participant b
+                                          {2, 1, 1, 0, 0}, //participant a AND b
+                                          {1, 1, 0, 0, 0}, //participant a and external
+                                          {0, 1, 0, 0, 0}  //all participants (2int + 1ext)
+                                        };
+        
+        int[][] participantCombinationMatrix = { {0},
+                                                 {1},
+                                                 {0, 1},
+                                                 {0, 2},
+                                                 {0, 1, 2}
+                                                }; 
+        
+        for (int i = 0; i < expectedResultsMatrix.length; i++) {
+            int k = 0;
+            facets.clear();
+            int r = participantCombinationMatrix[i].length;
+            for (int py = 0; py < r; py++) {
+                facets.add(f.get(participantCombinationMatrix[i][py]));
+            }
+            for(int j = 3; j < f.size(); j++) {
+                if (j > 3) 
+                    facets.remove(r);
+                facets.add(f.get(j));
+                assertResults(expectedResultsMatrix[i][k++], facets);
+            }
+            r++;
+        }*/
+        
         facets.add(f.get(0));//participant a
         facets.add(f.get(3));//not started
         assertResults(3, facets);
@@ -530,6 +562,242 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         facets.remove(1);
         facets.add(f.get(7)); //shared
         assertResults(2, facets);
+    }
+    
+    /**
+     * Test filter combination 7, i.e. with folder type and status and participant
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testWithFolderTypeAndStatusAndParticipant() throws OXException, IOException, JSONException {
+        List<ActiveFacet> f = getRelevantActiveFacets(Integer.toBinaryString(7).toCharArray());
+        List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(3)); //status not started
+        facets.add(f.get(8)); //private
+        assertResults(2, facets);
+        
+        facets.remove(2);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(2);
+        facets.add(f.get(10)); //shared
+        assertResults(1, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(4)); //status in progress
+        facets.add(f.get(8)); //private
+        assertResults(1, facets);
+        
+        facets.remove(2);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(2);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(5)); //status done
+        facets.add(f.get(8)); //private
+        assertResults(1, facets);
+        
+        facets.remove(2);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(2);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(6)); //status waiting
+        facets.add(f.get(8)); //private
+        assertResults(0, facets);
+        
+        facets.remove(2);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(2);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(7)); //status deferred
+        facets.add(f.get(8)); //private
+        assertResults(0, facets);
+        
+        facets.remove(2);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(2);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(3)); //status not started
+        facets.add(f.get(8)); //private
+        assertResults(1, facets);
+        
+        facets.remove(3);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(3);
+        facets.add(f.get(10)); //shared
+        assertResults(1, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(4)); //status in progress
+        facets.add(f.get(8)); //private
+        assertResults(1, facets);
+        
+        facets.remove(3);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(3);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(5)); //status done
+        facets.add(f.get(8)); //private
+        assertResults(1, facets);
+        
+        facets.remove(3);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(3);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(6)); //status waiting
+        facets.add(f.get(8)); //private
+        assertResults(0, facets);
+        
+        facets.remove(3);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(3);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(7)); //status deferred
+        facets.add(f.get(8)); //private
+        assertResults(0, facets);
+        
+        facets.remove(3);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(3);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(2)); //ext participant
+        facets.add(f.get(3)); //status not started
+        facets.add(f.get(8)); //private
+        assertResults(0, facets);
+        
+        facets.remove(4);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(4);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(2)); //ext participant
+        facets.add(f.get(4)); //status in progress
+        facets.add(f.get(8)); //private
+        assertResults(1, facets);
+        
+        facets.remove(4);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(4);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(2)); //ext participant
+        facets.add(f.get(5)); //status done
+        facets.add(f.get(8)); //private
+        assertResults(0, facets);
+        
+        facets.remove(4);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(4);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(2)); //ext participant
+        facets.add(f.get(6)); //status waiting
+        facets.add(f.get(8)); //private
+        assertResults(0, facets);
+        
+        facets.remove(4);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(4);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
+        
+        facets.clear();
+        facets.add(f.get(0)); //participant a
+        facets.add(f.get(1)); //participant b
+        facets.add(f.get(2)); //ext participant
+        facets.add(f.get(6)); //status deferred
+        facets.add(f.get(8)); //private
+        assertResults(0, facets);
+        
+        facets.remove(4);
+        facets.add(f.get(9)); //public
+        assertResults(0, facets);
+        
+        facets.remove(4);
+        facets.add(f.get(10)); //shared
+        assertResults(0, facets);
     }
     
     /**
