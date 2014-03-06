@@ -53,22 +53,17 @@ import java.util.Date;
 import java.util.Set;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
-public class AppointmentSearchObject /*extends CalendarSearchObject*/ {
+public class AppointmentSearchObject extends CalendarSearchObject {
 
     private boolean excludeRecurringAppointments;
     private boolean excludeNonRecurringAppointments;
     private Date minimumEndDate;
     private Date maximumStartDate;
     private Set<String> locations;
-    private Set<String> notes;
-    private Set<String> titles;
     private Set<Integer> ownStatus;
-    private Set<Integer> userIDs;
     private Set<Set<String>> externalParticipants;
-    private Set<String> queries;
     private Set<Integer> folderIDs;
     private Set<Integer> resourceIDs;
-    private Set<String> attachmentNames;
 
 	/**
 	 * Initializes a new {@link AppointmentSearchObject}.
@@ -76,46 +71,6 @@ public class AppointmentSearchObject /*extends CalendarSearchObject*/ {
 	public AppointmentSearchObject() {
 		super();
 	}
-
-    /**
-     * Gets a set of general query patterns that are matched against all searchable properties of an appointment during search.
-     * Multiple pattern values are used with a logical <code>AND</code> conjunction.<p/>
-     *
-     * @return The queries
-     */
-    public Set<String> getQueries() {
-        return queries;
-    }
-
-    /**
-     * Sets the general query patterns that are matched against all searchable properties of an appointment during search. Multiple
-     * pattern values are used with a logical <code>AND</code> conjunction.
-     *
-     * @param queries The queries to set
-     */
-    public void setQueries(Set<String> queries) {
-        this.queries = queries;
-    }
-
-    /**
-     * Gets a set of patterns that are matched against the "title" property of an appointment during search. Multiple pattern values are
-     * used with a logical <code>AND</code> conjunction.
-     *
-     * @return The titles
-     */
-    public Set<String> getTitles() {
-        return titles;
-    }
-
-    /**
-     * Sets the patterns that are matched against the "title" property of an appointment during search. Multiple pattern values are used
-     * with a logical <code>AND</code> conjunction.
-     *
-     * @param titles The titles to set
-     */
-    public void setTitles(Set<String> titles) {
-        this.titles = titles;
-    }
 
     /**
      * Gets a set of patterns that are matched against the "location" property of an appointment during search. Multiple pattern values are
@@ -135,26 +90,6 @@ public class AppointmentSearchObject /*extends CalendarSearchObject*/ {
      */
     public void setLocations(Set<String> locations) {
         this.locations = locations;
-    }
-
-    /**
-     * Gets a set of patterns that are matched against the "note" property of an appointment during search. Multiple pattern values are
-     * used with a logical <code>AND</code> conjunction.
-     *
-     * @return The notes
-     */
-    public Set<String> getNotes() {
-        return notes;
-    }
-
-    /**
-     * Sets the patterns that are matched against the "note" property of an appointment during search. Multiple pattern values are used
-     * with a logical <code>AND</code> conjunction.
-     *
-     * @param notes The notes to set
-     */
-    public void setNotes(Set<String> notes) {
-        this.notes = notes;
     }
 
     /**
@@ -217,26 +152,6 @@ public class AppointmentSearchObject /*extends CalendarSearchObject*/ {
      */
     public void setOwnStatus(Set<Integer> ownStatus) {
         this.ownStatus = ownStatus;
-    }
-
-    /**
-     * Gets a set of IDs of internal users that are matched against the internal participants of an appointment during search. Multiple
-     * identifiers are used with a logical <code>OR</code> conjunction.
-     *
-     * @return The user IDs
-     */
-    public Set<Integer> getUserIDs() {
-        return userIDs;
-    }
-
-    /**
-     * Sets the IDs of internal users that should be matched against the internal participants of an appointment during search. Multiple
-     * identifiers are used with a logical <code>OR</code> conjunction.
-     *
-     * @param userIDs The user IDs to set
-     */
-    public void setUserIDs(Set<Integer> userIDs) {
-        this.userIDs = userIDs;
     }
 
     /**
@@ -336,25 +251,4 @@ public class AppointmentSearchObject /*extends CalendarSearchObject*/ {
     public void setResourceIDs(Set<Integer> resourceIDs) {
         this.resourceIDs = resourceIDs;
     }
-
-    /**
-     * Gets a set of attachment names that are matched against the appointment's attachments during search. Multiple pattern values are
-     * used with a logical <code>AND</code> conjunction.
-     *
-     * @return The attachment names
-     */
-    public Set<String> getAttachmentNames() {
-        return attachmentNames;
-    }
-
-    /**
-     * Sets the patterns that are matched against the appointment's attachments during search. Multiple pattern values are used
-     * with a logical <code>AND</code> conjunction.
-     *
-     * @param attachmentNames The attachment names to set
-     */
-    public void setAttachmentNames(Set<String> attachmentNames) {
-        this.attachmentNames = attachmentNames;
-    }
-
 }
