@@ -1,3 +1,7 @@
+* 2014-03-06 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 30732: Ignore removal of resources by externals.
+
 * 2014-03-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 31392: Made module-specific error messages
