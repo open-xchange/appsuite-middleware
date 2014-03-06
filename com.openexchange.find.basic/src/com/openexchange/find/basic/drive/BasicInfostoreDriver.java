@@ -398,6 +398,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         FolderObject defaultFolder = access.getDefaultFolder(userId, FolderObject.INFOSTORE);
 
         List<Integer> subfolders = defaultFolder.getSubfolderIds();
+        subfolders.add(defaultFolder.getObjectID());
         List<Integer> folders = new ArrayList<Integer>(subfolders.size());
         for (Integer i : subfolders) {
             if (folderType == access.getFolderType(i(i), userId)) {
