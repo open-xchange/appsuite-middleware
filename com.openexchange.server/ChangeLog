@@ -1,6 +1,7 @@
 * 2014-03-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 31392: Made module-specific error messages
+ - Fix for bug 31394: Added possibility to delete a quota value once it is set through specifying a value less than zero
 
 * 2014-03-06 - tobias.friedrich@open-xchange.com
 

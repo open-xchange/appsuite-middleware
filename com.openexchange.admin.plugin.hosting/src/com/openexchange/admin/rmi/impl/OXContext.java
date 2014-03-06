@@ -162,7 +162,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
 
         final long quota;
-        if (quotaValue <= 0) {
+        if (quotaValue < 0) {
             quota = -1L;
         } else {
             // MySQL int(10) unsigned: the allowable range is from 0 to 4294967295
