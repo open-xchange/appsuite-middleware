@@ -1,6 +1,7 @@
 * 2014-03-30 - martin.schneider@open-xchange.com
 
  - Fix for bug 31648: Detect Content-Type by file name if specified one is of generic nature; e.g "application/binary"
+ - Fix for bug 31443: Do not autorename folders equal to default folder names while creation. Throw exception instead.
 
 * 2014-03-26 - thorben.betten@open-xchange.com
 

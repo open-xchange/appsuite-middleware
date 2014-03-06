@@ -202,7 +202,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                     CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
                     if (null != result) {
                         final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
-                        if (!autoRename) {
+                        if (!autoRename || result.error.similarTo(FolderExceptionErrorMessage.RESERVED_NAME)) {
                             if (null != result.optFolderId && "USM-JSON".equals(session.getClient())) {
                                 return result.optFolderId;
                             }
@@ -408,8 +408,8 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                             user,
                             treeId,
                             null == folderContentType ? capStorage.getDefaultContentType() : folderContentType,
-                            virtualStorage.getTypeByParent(user, treeId, parentId, storageParameters),
-                            storageParameters);
+                                virtualStorage.getTypeByParent(user, treeId, parentId, storageParameters),
+                                storageParameters);
                     if (null == realParentId) {
                         /*
                          * No default folder found

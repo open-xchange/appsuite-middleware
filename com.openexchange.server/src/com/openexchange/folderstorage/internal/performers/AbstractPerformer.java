@@ -57,6 +57,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.lang.Validate;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -500,6 +501,8 @@ public abstract class AbstractPerformer {
 
         protected CheckForDuplicateResult(final String optFolderId, final OXException error) {
             super();
+            Validate.notNull(error, "OXException must not be null!");
+
             this.optFolderId = optFolderId;
             this.error = error;
         }
