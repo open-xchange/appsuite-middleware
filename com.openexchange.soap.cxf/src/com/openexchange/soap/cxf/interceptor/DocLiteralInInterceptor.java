@@ -151,6 +151,9 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                                                 info[0]);
                                         }
                                         throw new Fault(m, LOG, fault);
+                                    } else {
+                                        // fault.get
+
                                     }
                                 }
                             }
