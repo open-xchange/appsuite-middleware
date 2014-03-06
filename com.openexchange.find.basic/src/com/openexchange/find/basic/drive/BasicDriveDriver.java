@@ -112,7 +112,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
     @Override
     public boolean isValidFor(ServerSession session) {
-        return session.getUserConfiguration().hasInfostore() && session.getUserConfiguration().hasContact();
+        return session.getUserConfiguration().hasInfostore();
     }
 
     @Override
