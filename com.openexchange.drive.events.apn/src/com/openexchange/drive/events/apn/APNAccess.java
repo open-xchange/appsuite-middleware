@@ -47,48 +47,67 @@
  *
  */
 
-package com.openexchange.drive.events.apn.internal;
-
-import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.drive.events.apn.APNAccess;
-import com.openexchange.drive.events.apn.MacOSAPNCertificateProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
+package com.openexchange.drive.events.apn;
 
 
 /**
- * {@link MacOSDriveEventPublisher}
+ * {@link APNAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class MacOSDriveEventPublisher extends APNDriveEventPublisher {
+public class APNAccess {
 
-    private static final String SERIVCE_ID = "apn.macos";
+    private final String password;
+    private final Object keystore;
+    private final boolean production;
 
     /**
-     * Initializes a new {@link MacOSDriveEventPublisher}.
+     * Initializes a new {@link APNAccess}.
+     *
+     * @param keystore A keystore containing the private key and the certificate signed by Apple. <p/>
+     *                 The following formats can be used:
+     *                 <ul>
+     *                 <li><code>java.io.File</code></li>
+     *                 <li><code>java.io.InputStream</code></li>
+     *                 <li><code>byte[]</code></li>
+     *                 <li><code>java.security.KeyStore</code></li>
+     *                 <li><code>java.lang.String</code> for a file path</li>
+     *                 </ul>
+     * @param password The keystore's password.
+     * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
      */
-    public MacOSDriveEventPublisher() {
+    public APNAccess(Object keystore, String password, boolean production) {
         super();
+        this.keystore = keystore;
+        this.password = password;
+        this.production = production;
     }
 
-    @Override
-    protected String getServiceID() {
-        return SERIVCE_ID;
+    /**
+     * Gets the password
+     *
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
     }
 
-    @Override
-    protected APNAccess getAccess() throws OXException {
-        MacOSAPNCertificateProvider certificateProvider = Services.getOptionalService(MacOSAPNCertificateProvider.class);
-        if (null == certificateProvider) {
-            throw ServiceExceptionCode.absentService(MacOSAPNCertificateProvider.class);
-        }
-        APNAccess access = certificateProvider.getAccess();
-        if (null == access) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No APN access for service " + SERIVCE_ID + " available.");
-        }
-        return access;
+    /**
+     * Gets the keystore
+     *
+     * @return The keystore
+     */
+    public Object getKeystore() {
+        return keystore;
     }
 
+    /**
+     * Gets the production
+     *
+     * @return The production
+     */
+    public boolean isProduction() {
+        return production;
+    }
 
 }

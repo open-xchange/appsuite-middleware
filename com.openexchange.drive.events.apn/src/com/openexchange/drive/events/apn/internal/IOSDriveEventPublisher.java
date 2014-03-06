@@ -49,7 +49,11 @@
 
 package com.openexchange.drive.events.apn.internal;
 
-
+import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.drive.events.apn.APNAccess;
+import com.openexchange.drive.events.apn.IOSAPNCertificateProvider;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link IOSDriveEventPublisher}
@@ -62,16 +66,27 @@ public class IOSDriveEventPublisher extends APNDriveEventPublisher {
 
     /**
      * Initializes a new {@link IOSDriveEventPublisher}.
-     *
-     * @param access The apn access to use
      */
-    public IOSDriveEventPublisher(APNAccess access) {
-        super(access);
+    public IOSDriveEventPublisher() {
+        super();
     }
 
     @Override
     protected String getServiceID() {
         return SERIVCE_ID;
+    }
+
+    @Override
+    protected APNAccess getAccess() throws OXException {
+        IOSAPNCertificateProvider certificateProvider = Services.getOptionalService(IOSAPNCertificateProvider.class);
+        if (null == certificateProvider) {
+            throw ServiceExceptionCode.absentService(IOSAPNCertificateProvider.class);
+        }
+        APNAccess access = certificateProvider.getAccess();
+        if (null == access) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No APN access for service " + SERIVCE_ID + " available.");
+        }
+        return access;
     }
 
 }
