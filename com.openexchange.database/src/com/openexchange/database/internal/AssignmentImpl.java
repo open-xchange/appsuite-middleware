@@ -138,7 +138,6 @@ public class AssignmentImpl implements Serializable, Assignment {
         transactionInitialized = true;
     }
 
-
     @Override
     public int hashCode() {
         final int prime = 31;

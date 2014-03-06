@@ -110,13 +110,6 @@ public class AdminCacheExtended extends AdminCache {
     /**
      * ONLY USE IF YOU EXACTLY KNOW FOR WHAT THIS METHOD IS!!!
      */
-    public void resetPoolMappingForContext(final int context_id) throws PoolException {
-        pool.resetPoolMappingForContext(context_id);
-    }
-
-    /**
-     * ONLY USE IF YOU EXACTLY KNOW FOR WHAT THIS METHOD IS!!!
-     */
     public String getSchemeForContextId(final int context_id) throws PoolException{
         return pool.getSchemeForContextId(context_id);
     }

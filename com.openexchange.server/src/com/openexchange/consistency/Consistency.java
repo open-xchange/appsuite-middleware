@@ -258,7 +258,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private void deleteContextFromConfigDB(final Connection configCon, final int contextId) throws SQLException {
         PreparedStatement stmt = null;
         try {
-                LOG.debug("Deleting context_server2dbpool mapping for context {}", contextId);
+            LOG.debug("Deleting context_server2dbpool mapping for context {}", contextId);
             // delete context from context_server2db_pool
             stmt = configCon.prepareStatement("DELETE FROM context_server2db_pool WHERE cid=?");
             stmt.setInt(1, contextId);

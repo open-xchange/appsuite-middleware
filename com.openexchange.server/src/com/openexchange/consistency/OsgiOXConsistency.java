@@ -74,6 +74,10 @@ public class OsgiOXConsistency extends Consistency {
 
     private DatabaseImpl database;
 
+    public OsgiOXConsistency() {
+        super();
+    }
+
     @Override
     protected Context getContext(final int contextId) throws OXException {
         final ContextStorage ctxstor = ContextStorage.getInstance();
