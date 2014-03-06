@@ -16,6 +16,16 @@ public class IDComponentsParserTest {
         assertNull(idComponents.context);
         assertNull(idComponents.resource);
     }
+    
+    @Test
+    public void testUserId() {
+        IDComponents idComponents = IDComponentsParser.parse("303");
+        assertNull(idComponents.protocol);
+        assertNull(idComponents.component);
+        assertEquals("303", idComponents.user);
+        assertNull(idComponents.context);
+        assertNull(idComponents.resource);
+    }
 
     @Test
     public void testUserAndContext() {
@@ -24,6 +34,16 @@ public class IDComponentsParserTest {
         assertNull(idComponents.component);
         assertEquals("marc.arens", idComponents.user);
         assertEquals("premium", idComponents.context);
+        assertNull(idComponents.resource);
+    }
+    
+    @Test
+    public void testUserIDAndContextID() {
+        IDComponents idComponents = IDComponentsParser.parse("303@424242669");
+        assertNull(idComponents.protocol);
+        assertNull(idComponents.component);
+        assertEquals("303", idComponents.user);
+        assertEquals("424242669", idComponents.context);
         assertNull(idComponents.resource);
     }
 
@@ -38,12 +58,32 @@ public class IDComponentsParserTest {
     }
 
     @Test
+    public void testUserIdContextIdAndResource() {
+        IDComponents idComponents = IDComponentsParser.parse("303@424242669/20d39asd9da93249f009d");
+        assertNull(idComponents.protocol);
+        assertNull(idComponents.component);
+        assertEquals("303", idComponents.user);
+        assertEquals("424242669", idComponents.context);
+        assertEquals("20d39asd9da93249f009d", idComponents.resource);
+    }
+
+    @Test
     public void testProtocolUserContextAndResource() {
         IDComponents idComponents = IDComponentsParser.parse("ox://marc.arens@premium/20d39asd9da9/3249f009d");
         assertEquals("ox", idComponents.protocol);
         assertNull(idComponents.component);
         assertEquals("marc.arens", idComponents.user);
         assertEquals("premium", idComponents.context);
+        assertEquals("20d39asd9da9/3249f009d", idComponents.resource);
+    }
+
+    @Test
+    public void testProtocolUserIdContextIdAndResource() {
+        IDComponents idComponents = IDComponentsParser.parse("ox://303@424242669/20d39asd9da9/3249f009d");
+        assertEquals("ox", idComponents.protocol);
+        assertNull(idComponents.component);
+        assertEquals("303", idComponents.user);
+        assertEquals("424242669", idComponents.context);
         assertEquals("20d39asd9da9/3249f009d", idComponents.resource);
     }
 
@@ -56,12 +96,21 @@ public class IDComponentsParserTest {
         assertEquals("premium", idComponents.context);
         assertEquals("20d39asd9da93249f009d", idComponents.resource);
     }
-    
+
+    @Test
+    public void testProtocolComponentUserIdContextIdAndResource() {
+        IDComponents idComponents = IDComponentsParser.parse("ox.some.component://303@424242669/20d39asd9da93249f009d");
+        assertEquals("ox", idComponents.protocol);
+        assertEquals("some.component", idComponents.component);
+        assertEquals("303", idComponents.user);
+        assertEquals("424242669", idComponents.context);
+        assertEquals("20d39asd9da93249f009d", idComponents.resource);
+    }
+
     @Test
     public void testComponentContextAndResource(){
         IDComponents idComponents = IDComponentsParser.parse("synthetic.office://operations/folderId.fileId~fileVersion_fileName");
         assertEquals("folderId.fileId~fileVersion_fileName", idComponents.resource);
-        
         assertEquals("folderId.fileId~fileVersion_fileName", new ID("synthetic.office://operations/folderId.fileId~fileVersion_fileName", "1").getResource());
         
     }

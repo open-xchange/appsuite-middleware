@@ -1,8 +1,17 @@
+* 2014-02-25 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31191: Fixed erroneous permission check.
+
 * 2014-02-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 31252: Put error arguments into "error_params" field for compatibility reasons
  - Fix for bug 31287: Do not apply black-list on provisioning calls
  - Fix for bug 30969: Fully leverage from folder cache within folder layer, do not use a custom one in IMAP bundle
+
+* 2014-02-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31264: Added cache invalidator to capabilities caches
+ - Fix for bug 31152: Do not throw EmiG-specific error codes, but just mark as non-EmiG capable
 
 * 2014-02-24 - marcus.klein@open-xchange.com
 

@@ -489,13 +489,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     cdao.setOrganizer(org);
                 }
                 cdao.setUid(setString(i++, load_resultset));
-
-                //Context of check is critical. TODO: Make independent!
-                checkGeneralPermissions(oid, inFolder, readcon, so, ctx, action_folder, check_permissions, cdao, check_special_action, organizer, uniqueId);
-
                 cdao.setFilename(setString(i++, load_resultset));
                 cdao.setSequence(setInt(i++, load_resultset));
                 cdao.setOrganizerId(setInt(i++, load_resultset));
+
+                //Context of check is critical. TODO: Make independent!
+                checkGeneralPermissions(oid, inFolder, readcon, so, ctx, action_folder, check_permissions, cdao, check_special_action, organizer, uniqueId);
                 cdao.setPrincipal(setString(i++, load_resultset));
                 cdao.setPrincipalId(setInt(i++, load_resultset));
                 cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserId()).getUsers());
@@ -566,7 +565,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      * @param cdao
      * @return
      */
-   private boolean isExternalOrganizerAndKnown(String organizer, String uniqueId, CalendarDataObject cdao) {
+    private boolean isExternalOrganizerAndKnown(String organizer, String uniqueId, CalendarDataObject cdao) {
+        if (cdao.getOrganizerId() > 0) {
+            return false;
+        }
         if (cdao.getOrganizer() == null || cdao.getUid() == null) {
             return false;
         }
@@ -579,7 +581,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         return true;
     }
 
- private void checkShared(final int oid, final int inFolder, final Session so, final int action, final int action_folder, final boolean check_permissions, final CalendarDataObject cdao, int check_special_action) throws OXException {
+    private void checkShared(final int oid, final int inFolder, final Session so, final int action, final int action_folder, final boolean check_permissions, final CalendarDataObject cdao, int check_special_action) throws OXException {
         if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
             if (cdao.getFolderType() != FolderObject.SHARED && check_special_action == action) {
                 LOG.debug(

@@ -394,15 +394,19 @@ public class ID implements Serializable {
         return null == protocol && null == resource;
     }
 
+    /**
+     * Create a ServerSession from a dummy SessionObject based on the user infos contained in this {@link ID}. This will fail for synthetic
+     * {@link ID}s that don't have real userId and userContextId values.
+     * 
+     * @return a ServerSession from a dummy SessionObject based on the user infos contained in this {@link ID}.
+     * @throws OXException if no ServerSession can be ceated based upon thi {@link ID}.
+     */
     public ServerSession toSession() throws OXException {
         UserAndContext userAndContextIDs = IdLookup.getUserAndContextIDs(this);
-        if (userAndContextIDs != null) {
-            return ServerSessionAdapter.valueOf(SessionObjectWrapper.createSessionObject(
-                userAndContextIDs.getUserId(),
-                userAndContextIDs.getContextId(),
-                (resource != null) ? resource : "rt"));
-        }
-        SessionObject sessionObject = new SessionObject("anonymous");
+        SessionObject sessionObject = SessionObjectWrapper.createSessionObject(
+            userAndContextIDs.getUserId(),
+            userAndContextIDs.getContextId(),
+            (resource != null) ? resource : "rt");
         return ServerSessionAdapter.valueOf(sessionObject);
     }
 

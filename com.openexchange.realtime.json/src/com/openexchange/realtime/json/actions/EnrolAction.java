@@ -105,7 +105,6 @@ public class EnrolAction extends RTAction {
             stanzas.add(tracingDemandJSON);
         }
 
-        stateManager.retrieveState(constructedId);
         NextSequence nextSequence = new NextSequence(constructedId, constructedId, 0);
         JSONObject nextSequenceJSON = stanzaToJSON(nextSequence);
         stanzas.add(nextSequenceJSON);
@@ -124,6 +123,12 @@ public class EnrolAction extends RTAction {
             GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
             globalRealtimeCleanup.cleanForId(constructedId);
         }
+
+        /*
+         * Create the new state after the potential cleanup
+         */
+        stateManager.retrieveState(constructedId);
+        LOG.debug("Retrieved state for id {}", constructedId);
 
         try {
             resourceDirectory.set(constructedId, new DefaultResource());

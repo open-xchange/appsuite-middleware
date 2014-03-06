@@ -55,7 +55,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
-import com.openexchange.emig.EmigExceptionCodes;
 import com.openexchange.emig.EmigService;
 import com.openexchange.emig.Status;
 import com.openexchange.exception.OXException;
@@ -120,7 +119,7 @@ public final class MockEmigService implements EmigService {
 
     @Override
     public boolean isEMIG_Session(final String userIdentifier) throws OXException {
-        return checkMailAddress(userIdentifier, true);
+        return checkMailAddress(userIdentifier, false);
     }
 
     @Override
@@ -172,7 +171,9 @@ public final class MockEmigService implements EmigService {
             final String[] splitted = split(address);
             final int ctxId = contextService.getContextId(splitted[0]);
             if (ContextStorage.NOT_FOUND == ctxId) {
-                throw EmigExceptionCodes.INVALID_USER_IDENTIFER.create(address);
+                LOGGER.warn("No context found for {}. Assuming address as non-EmiG capable: {}", splitted[0], address);
+                return false;
+                // throw EmigExceptionCodes.INVALID_USER_IDENTIFER.create(address);
             }
             final Context ctx = contextService.getContext(ctxId);
             final int userId;
@@ -180,7 +181,9 @@ public final class MockEmigService implements EmigService {
                 userId = userService.getUserId(splitted[1], ctx);
             } catch (final OXException e) {
                 if (UserExceptionCode.PROPERTY_MISSING.getPrefix().equals(e.getPrefix()) && LdapExceptionCode.USER_NOT_FOUND.getNumber() == e.getCode()) {
-                    throw EmigExceptionCodes.INVALID_USER_IDENTIFER.create(address);
+                    LOGGER.warn("No user found for {}. Assuming address as non-EmiG capable: {}", splitted[1], address);
+                    return false;
+                    // throw EmigExceptionCodes.INVALID_USER_IDENTIFER.create(address);
                 }
                 throw e;
             }
