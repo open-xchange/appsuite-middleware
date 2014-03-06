@@ -53,7 +53,9 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.find.drive.BasicDriveTest;
+import com.openexchange.ajax.find.mail.BasicMailTest;
 import com.openexchange.ajax.find.tasks.FindTasksTestEnvironment;
+import com.openexchange.ajax.find.tasks.FindTasksTestsFilterCombinations;
 
 
 /**
@@ -73,10 +75,14 @@ public final class FindTestSuite {
 
     public static Test suite() {
         final TestSuite tests = new TestSuite("com.openexchange.ajax.find.FindTestSuite");
-        /*tests.addTestSuite(SimpleFindTest.class);
+        tests.addTestSuite(com.openexchange.ajax.find.calendar.QueryTest.class);
+        tests.addTestSuite(com.openexchange.ajax.find.calendar.AutocompleteTest.class);
+        tests.addTestSuite(com.openexchange.ajax.find.contacts.QueryTest.class);
+        tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
+        tests.addTestSuite(BasicMailTest.class);
         tests.addTestSuite(BasicDriveTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.mail.SimpleTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.tasks.FindTasksTestsSingleFilter.class);*/
+        tests.addTestSuite(FindTasksTestsFilterCombinations.class);
+        
         
         TestSetup setup = new TestSetup(tests) {
             protected void setUp() {
