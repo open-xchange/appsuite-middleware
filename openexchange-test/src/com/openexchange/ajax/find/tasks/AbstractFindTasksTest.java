@@ -52,6 +52,7 @@ package com.openexchange.ajax.find.tasks;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +61,7 @@ import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.groupware.tasks.Task;
 
 
 /**
@@ -122,6 +124,12 @@ public abstract class AbstractFindTasksTest extends AbstractFindTest {
         JSONArray results  = getResults(queryResponse);
         int actualResultCount = results.asList().size();
         assertEquals(expectedResultCount, actualResultCount);
+        
+        for(Object o : results.asList()) {
+            Map<String, Object> m = (Map<String, Object>) o;
+            Task t = FindTasksTestEnvironment.getInstance().getTask((Integer) m.get("id"));
+            assertNotNull("Expected object not found", t);
+            assertEquals("Not the same", t.getTitle(), m.get("title"));
+        }
     }
-
 }

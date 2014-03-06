@@ -47,56 +47,42 @@
  *
  */
 
-package com.openexchange.ajax.find;
+package com.openexchange.ajax.find.tasks;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.find.drive.BasicDriveTest;
-import com.openexchange.ajax.find.mail.BasicMailTest;
-import com.openexchange.ajax.find.tasks.FindTasksAutocompleteTests;
-import com.openexchange.ajax.find.tasks.FindTasksQueryTests;
-import com.openexchange.ajax.find.tasks.FindTasksTestEnvironment;
-import com.openexchange.ajax.find.tasks.FindTasksTestsFilterCombinations;
+import org.junit.Test;
+import com.openexchange.ajax.find.actions.AutocompleteRequest;
+import com.openexchange.ajax.find.actions.AutocompleteResponse;
+import com.openexchange.find.Module;
+import com.openexchange.find.tasks.TasksStrings;
 
 
 /**
- * {@link FindTestSuite}
+ * {@link FindTasksAutocompleteTests}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class FindTestSuite {
+public class FindTasksAutocompleteTests extends AbstractFindTasksTest {
 
     /**
-     * Initializes a new {@link FindTestSuite}.
+     * Initializes a new {@link FindTasksAutocompleteTests}.
      */
-    private FindTestSuite() {
-        super();
+    public FindTasksAutocompleteTests(String n) {
+        super(n);
     }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.find.FindTestSuite");
-        tests.addTestSuite(com.openexchange.ajax.find.calendar.QueryTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.calendar.AutocompleteTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.contacts.QueryTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
-        tests.addTestSuite(BasicMailTest.class);
-        tests.addTestSuite(BasicDriveTest.class);
-        tests.addTestSuite(FindTasksTestsFilterCombinations.class);
-        tests.addTestSuite(FindTasksQueryTests.class);
-        tests.addTestSuite(FindTasksAutocompleteTests.class);
+    
+    /**
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testAutocompleteFieldFacets() throws Exception {
+        String prefix = client.getValues().getDefaultAddress().substring(0, 3);
+        AutocompleteRequest request = new AutocompleteRequest(prefix, Module.TASKS.getIdentifier());
+        AutocompleteResponse response = client.execute(request);
         
-        
-        TestSetup setup = new TestSetup(tests) {
-            protected void setUp() {
-                FindTasksTestEnvironment.getInstance().init();
-            }
-            protected void tearDown() throws Exception {
-                FindTasksTestEnvironment.getInstance().cleanup();
-            }
-        };
-        
-        return setup;
+        assertNotNull(findByDisplayName(response.getFacets(), prefix + TasksStrings.FACET_GLOBAL.substring(4)));
+        assertNotNull(findByDisplayName(response.getFacets(), prefix + TasksStrings.FACET_TASK_TITLE.substring(4)));
+        assertNotNull(findByDisplayName(response.getFacets(), prefix + TasksStrings.FACET_TASK_DESCRIPTION.substring(4)));
+        assertNotNull(findByDisplayName(response.getFacets(), prefix + TasksStrings.FACET_TASK_ATTACHMENT_NAME.substring(4)));
     }
 }
