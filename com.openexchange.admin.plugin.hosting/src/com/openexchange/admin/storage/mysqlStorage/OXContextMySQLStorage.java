@@ -1404,31 +1404,24 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (null == poolId) {
             throw new StorageException("pool_id in getNextUnfilledSchemaFromDB must be != null");
         }
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        String found = null;
-        int count = -1;
+        final String[] unfilledSchemas;
         try {
-            stmt = con.prepareStatement("SELECT db_schema,COUNT(db_schema) AS count FROM context_server2db_pool WHERE write_db_pool_id=? GROUP BY db_schema HAVING count<? ORDER BY count");
-            stmt.setInt(1, poolId.intValue());
-            stmt.setInt(2, this.CONTEXTS_PER_SCHEMA);
-            result = stmt.executeQuery();
-            final OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
-            while (result.next() && null == found) {
-                final String schema = result.getString(1);
-                count = result.getInt(2);
-                if (oxt.schemaBeingLockedOrNeedsUpdate(poolId.intValue(), schema)) {
-                    LOG.debug("schema {}is locked or updated, trying next one", schema);
-                } else {
-                    found = schema;
-                }
-            }
-        } catch (final SQLException e) {
-            throw new StorageException(e.getMessage(), e);
-        } finally {
-            closeSQLStuff(result, stmt);
+            unfilledSchemas = ClientAdminThread.cache.getPool().getUnfilledSchemas(con, i(poolId), this.CONTEXTS_PER_SCHEMA, true);
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
         }
-        LOG.debug("count ={} of schema {}, using it for next context", count, found);
+        final OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
+        String found = null;
+        for (String schema : unfilledSchemas) {
+            if (oxt.schemaBeingLockedOrNeedsUpdate(i(poolId), schema)) {
+                LOG.debug("schema {} is locked or updated, trying next one", schema);
+            } else {
+                found = schema;
+                break;
+            }
+        }
+        LOG.debug("using schema {} it for next context", found);
         return found;
     }
 

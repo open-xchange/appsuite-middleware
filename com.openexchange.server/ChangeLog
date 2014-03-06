@@ -1,3 +1,8 @@
+* 2014-03-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 29980: Use row locks on table configdb.context_server2db_pool to prevent a delete context call to remove the schema a create
+   context call is currently writing to.
+
 * 2014-03-06 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 31447: [L3] Logging for missing user and context mapping should be improved for IMAP auth bundle

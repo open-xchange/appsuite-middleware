@@ -451,11 +451,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                 }
             }
-            pool.resetPoolMappingForContext(contextID);
         } catch (final OXException e) {
             log.error("Error invalidating context {} in ox context storage", ctx.getId(), e);
-        } catch (PoolException e) {
-            log.info("Could not reset PoolMapping for context {} while deleting it. Should not have been mapped then.", ctx.getId());
         }
 
         final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);

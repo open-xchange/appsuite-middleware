@@ -51,7 +51,6 @@ package com.openexchange.admin.storage.sqlStorage;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.slf4j.Logger;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
@@ -198,6 +197,56 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             getService().writeAssignment(con, assign);
         } catch (OXException e) {
             log.error("Error writing a context to database assigment.", e);
+            throw new PoolException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteAssignment(Connection con, int contextId) throws PoolException {
+        try {
+            getService().deleteAssignment(con, contextId);
+        } catch (OXException e) {
+            log.error("Error deleting a context to database assigment.", e);
+            throw new PoolException(e.getMessage());
+        }
+    }
+
+    @Override
+    public int[] getContextInSameSchema(Connection con, int contextId, boolean lock) throws PoolException {
+        try {
+            return getService().getContextsInSameSchema(con, contextId, lock);
+        } catch (OXException e) {
+            log.error("Error getting all contexts from the same schema.", e);
+            throw new PoolException(e.getMessage());
+        }
+    }
+
+    @Override
+    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts, boolean lock) throws PoolException {
+        try {
+            return getService().getUnfilledSchemas(con, poolId, maxContexts, lock);
+        } catch (OXException e) {
+            log.error("Error getting unfilled schemas", e);
+            throw new PoolException(e.getMessage());
+        }
+    }
+
+    @Override
+    public int getWritePool(int contextId) throws PoolException {
+        try {
+            return getService().getWritablePool(contextId);
+        } catch (OXException e) {
+            log.error("Error getting the write pool identifier for context " + contextId + ".", e);
+            throw new PoolException(e.getMessage());
+        }
+    }
+
+    @Override
+    public String getSchemaName(int contextId) throws PoolException {
+        try {
+            return getService().getSchemaName(contextId);
+        } catch (OXException e) {
+            log.error("Error getting the schema name for context " + contextId + ".", e);
             throw new PoolException(e.getMessage());
         }
     }

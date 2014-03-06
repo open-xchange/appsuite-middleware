@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
@@ -69,6 +70,7 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
@@ -304,81 +306,39 @@ public class OXContextMySQLStorageCommon {
         group_stmt.close();
     }
 
-    public final void deleteContextFromConfigDB(final Connection configCon, final int contextId) throws SQLException {
-        // find out what db_schema context belongs to
-        PreparedStatement stmt3 = null;
-        PreparedStatement stmt2 = null;
+    public final void deleteContextFromConfigDB(final Connection configCon, final int contextId) throws StorageException {
         PreparedStatement stmt = null;
         try {
-            boolean cs2dbBroken = false;
-            stmt2 = configCon.prepareStatement("SELECT db_schema,write_db_pool_id FROM context_server2db_pool WHERE cid=?");
-            stmt2.setInt(1, contextId);
-            ResultSet rs = stmt2.executeQuery();
-            String dbSchema = null;
-            int poolId = -1;
-            if (!rs.next()) {
-                // throw new OXContextException("Unable to determine db_schema of context " + context_id);
-                cs2dbBroken = true;
-                log.error("Unable to determine db_schema of context {}", contextId);
-            } else {
-                dbSchema = rs.getString(1);
-                poolId = rs.getInt(2);
+            // This creates a lock on context_server2db_pool on the rows with contexts in the same schema. Concurrent create and delete of
+            // context can cause removed schemas while creating a context in it. This can not happen anymore with the introduced lock.
+            final int[] otherContexts = ClientAdminThread.cache.getPool().getContextInSameSchema(configCon, contextId, true);
+            final int poolId = ClientAdminThread.cache.getPool().getWritePool(contextId);
+            final String dbSchema = ClientAdminThread.cache.getPool().getSchemaName(contextId);
+            ClientAdminThread.cache.getPool().deleteAssignment(configCon, contextId);
+            // otherContexts contains obviously the current context to delete.
+            if (otherContexts.length < 2) {
+                Database db = OXToolStorageInterface.getInstance().loadDatabaseById(poolId);
+                db.setScheme(dbSchema);
+                OXUtilMySQLStorageCommon.deleteDatabase(db);
             }
-            stmt2.close();
-            log.debug("Deleting context_server2dbpool mapping for context {}", contextId);
-            // delete context from context_server2db_pool
-            stmt2 = configCon.prepareStatement("DELETE FROM context_server2db_pool WHERE cid=?");
-            stmt2.setInt(1, contextId);
-            stmt2.executeUpdate();
-            stmt2.close();
-            // tell pool, that database has been removed
-            try {
-                com.openexchange.databaseold.Database.reset(contextId);
-            } catch (final OXException e) {
-                log.error("", e);
-            }
-
-            if (!cs2dbBroken) {
-                try {
-                    // check if any other context uses the same db_schema
-                    // if not, delete it
-                    stmt2 = configCon.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE db_schema=?");
-                    stmt2.setString(1, dbSchema);
-                    rs = stmt2.executeQuery();
-
-                    if (!rs.next()) {
-                        // get auth data from db_pool to delete schema
-                        stmt3 = configCon.prepareStatement("SELECT url,driver,login,password FROM db_pool WHERE db_pool_id=?");
-                        stmt3.setInt(1, poolId);
-                        final ResultSet rs3 = stmt3.executeQuery();
-
-                        if (!rs3.next()) {
-                            throw new StorageException("Unable to determine authentication data of pool_id " + poolId);
-                        }
-                        final Database db = new Database(rs3.getString("login"), rs3.getString("password"), rs3.getString("driver"), rs3.getString("url"), dbSchema);
-                        log.debug("Deleting database {}", dbSchema);
-                        oxutilcommon.deleteDatabase(db);
-                        stmt3.close();
-                    }
-                    stmt2.close();
-                } catch (final Exception e) {
-                    log.error("Problem deleting database while doing rollback, cid={}: ", contextId, e);
-                }
-            }
-            log.debug("Deleting login2context entries for context {}", contextId);
+            log.debug("Deleting login2context entries for context {}", I(contextId));
             stmt = configCon.prepareStatement("DELETE FROM login2context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
-            log.debug("Deleting context entry for context {}", contextId);
+            log.debug("Deleting context entry for context {}", I(contextId));
             stmt = configCon.prepareStatement("DELETE FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage(), e);
+        } catch (final SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage(), e);
         } finally {
             closePreparedStatement(stmt);
-            closePreparedStatement(stmt2);
-            closePreparedStatement(stmt3);
         }
     }
 

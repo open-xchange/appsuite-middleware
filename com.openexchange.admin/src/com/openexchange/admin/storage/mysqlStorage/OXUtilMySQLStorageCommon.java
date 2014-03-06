@@ -263,7 +263,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    public void deleteDatabase(final Database db) throws StorageException {
+    public static void deleteDatabase(final Database db) throws StorageException {
         final Connection con;
         try {
             con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), db.getPassword(), db.getDriver());
@@ -281,7 +281,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void deleteDatabase(final Connection con, final Database db) throws StorageException {
+    private static void deleteDatabase(final Connection con, final Database db) throws StorageException {
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
@@ -295,5 +295,4 @@ public class OXUtilMySQLStorageCommon {
             closeSQLStuff(stmt);
         }
     }
-
 }

@@ -76,6 +76,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     private static final String SELECT = "SELECT read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool WHERE server_id=? AND cid=?";
     private static final String INSERT = "INSERT INTO context_server2db_pool (server_id,cid,read_db_pool_id,write_db_pool_id,db_schema) VALUES (?,?,?,?,?)";
+    private static final String DELETE = "DELETE FROM context_server2db_pool WHERE cid=? AND server_id=?";
 
     private final ConfigDatabaseService configDatabaseService;
 
@@ -174,10 +175,9 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     @Override
     public void writeAssignment(Connection con, Assignment assign) throws OXException {
-        CacheService myCacheService = this.cacheService;
         Cache myCache = this.cache;
-        if (null != myCache && null != myCacheService) {
-            final CacheKey key = myCacheService.newCacheKey(assign.getContextId(), assign.getServerId());
+        if (null != myCache) {
+            final CacheKey key = myCache.newCacheKey(assign.getContextId(), assign.getServerId());
             cacheLock.lock();
             try {
                 try {
@@ -192,16 +192,36 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         writeAssignmentDB(con, assign);
     }
 
+    private static void deleteAssignmentDB(Connection con, int contextId) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(DELETE);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, Server.getServerId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     @Override
-    public void removeAssignments(final int contextId) {
+    public void invalidateAssignment(int contextId) {
         Cache myCache = this.cache;
         if (null != myCache) {
             try {
                 myCache.remove(myCache.newCacheKey(contextId, Server.getServerId()));
             } catch (final OXException e) {
-                LOG.error("", e);
+                LOG.error("Error while removing database assignment from cache.", e);
             }
         }
+    }
+
+    @Override
+    public void deleteAssignment(Connection con, int contextId) throws OXException {
+        deleteAssignmentDB(con, contextId);
+        invalidateAssignment(contextId);
     }
 
     void setCacheService(final CacheService service) {

@@ -130,7 +130,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public void invalidate(final int contextId) throws OXException {
-        assignmentService.removeAssignments(contextId);
+        assignmentService.invalidateAssignment(contextId);
     }
 
     // Delegate config database service methods.
@@ -326,7 +326,23 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
+    public int[] getContextsInSameSchema(Connection con, int contextId, boolean lock) throws OXException {
+        final Assignment assign = assignmentService.getAssignment(contextId);
+        return ConfigDBStorage.getContextsFromSchema(con, assign.getWritePoolId(), assign.getSchema(), lock);
+    }
+
+    @Override
+    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts, boolean lock) throws OXException {
+        return ConfigDBStorage.getUnfilledSchemas(con, poolId, maxContexts, lock);
+    }
+
+    @Override
     public void writeAssignment(Connection con, Assignment assignment) throws OXException {
         assignmentService.writeAssignment(con, assignment);
+    }
+
+    @Override
+    public void deleteAssignment(Connection con, int contextId) throws OXException {
+        assignmentService.deleteAssignment(con, contextId);
     }
 }

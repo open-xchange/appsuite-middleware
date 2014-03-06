@@ -216,15 +216,28 @@ public class MockDBService implements DatabaseService {
     }
 
     @Override
+    public int[] getContextsInSameSchema(Connection con, int contextId, boolean lock) {
+        return null;
+    }
+
+    @Override
+    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts, boolean lock) {
+        return null;
+    }
+
+    @Override
     public void invalidate(final int contextId) throws OXException {
         // Nothing to do
-
     }
 
     @Override
     public void writeAssignment(Connection con, Assignment assignment) {
         // Nothing to do
+    }
 
+    @Override
+    public void deleteAssignment(Connection con, int contextId) {
+        // Nothing to do
     }
 
     @Override

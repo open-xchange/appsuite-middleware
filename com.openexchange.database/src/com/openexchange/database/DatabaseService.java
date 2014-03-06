@@ -212,6 +212,18 @@ public interface DatabaseService extends ConfigDatabaseService {
     int[] getContextsInSameSchema(int contextId) throws OXException;
 
     /**
+     * Finds all contexts their data is stored in the same schema and on the same database like the given one.
+     * @param con connection to the config database. it must be a writable connection in a transaction if lock is given as <code>true</code>.
+     * @param contextId identifier of a context.
+     * @param lock <code>true</code> to execute the reading statement with creating a lock.
+     * @return all contexts having their data in the same schema and on the same database.
+     * @throws OXException if some problem occurs.
+     */
+    int[] getContextsInSameSchema(Connection con, int contextId, boolean lock) throws OXException;
+
+    String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts, boolean lock) throws OXException;
+
+    /**
      * Invalidates all cached database pooling information for a context. This are especially the assignments to database servers.
      * @param contextId unique identifier of the context.
      * @throws OXException if resolving the server identifier fails.
@@ -224,4 +236,10 @@ public interface DatabaseService extends ConfigDatabaseService {
      */
     void writeAssignment(Connection con, Assignment assignment) throws OXException;
 
+    /**
+     * Deletes a database assignment for a certain context;
+     * @param con writable connection in a transaction to the config database.
+     * @param contextId for this context the database assignment is deleted.
+     */
+    void deleteAssignment(Connection con, int contextId) throws OXException;
 }
