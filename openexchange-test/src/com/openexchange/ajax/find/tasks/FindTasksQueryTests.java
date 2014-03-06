@@ -47,54 +47,72 @@
  *
  */
 
-package com.openexchange.ajax.find;
+package com.openexchange.ajax.find.tasks;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.find.drive.BasicDriveTest;
-import com.openexchange.ajax.find.mail.BasicMailTest;
-import com.openexchange.ajax.find.tasks.FindTasksQueryTests;
-import com.openexchange.ajax.find.tasks.FindTasksTestEnvironment;
-import com.openexchange.ajax.find.tasks.FindTasksTestsFilterCombinations;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.json.JSONException;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
+import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.Filter;
+import com.openexchange.find.tasks.TasksFacetType;
 
 
 /**
- * {@link FindTestSuite}
+ * {@link FindTasksQueryTests}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class FindTestSuite {
+public class FindTasksQueryTests extends AbstractFindTasksTest {
 
     /**
-     * Initializes a new {@link FindTestSuite}.
+     * Initializes a new {@link FindTasksQueryTests}.
      */
-    private FindTestSuite() {
-        super();
+    public FindTasksQueryTests(String name) {
+        super(name);
     }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.find.FindTestSuite");
-        tests.addTestSuite(com.openexchange.ajax.find.calendar.QueryTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.calendar.AutocompleteTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.contacts.QueryTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
-        tests.addTestSuite(BasicMailTest.class);
-        tests.addTestSuite(BasicDriveTest.class);
-        tests.addTestSuite(FindTasksTestsFilterCombinations.class);
-        tests.addTestSuite(FindTasksQueryTests.class);
-        
-        
-        TestSetup setup = new TestSetup(tests) {
-            protected void setUp() {
-                FindTasksTestEnvironment.getInstance().init();
-            }
-            protected void tearDown() throws Exception {
-                FindTasksTestEnvironment.getInstance().cleanup();
-            }
-        };
-        
-        return setup;
+    
+    /**
+     * Test with simple query with no filters
+     * Should find 30 tasks.
+     *
+     * @throws JSONException
+     * @throws IOException
+     * @throws OXException
+     *
+     * @see {@link FindTasksTestEnvironment.createAndInsertTasks}
+     */
+    @Test
+    public void testWithSimpleQuery() throws OXException, IOException, JSONException {
+        assertResults(30, Collections.<ActiveFacet>emptyList(), -1, 30);
+    }
+    
+    /**
+     * Test pagination 
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testPagination() throws OXException, IOException, JSONException {
+        assertResults(5, Collections.<ActiveFacet>emptyList(), 5, 10);
+    }
+    
+    /**
+     * Test query attachment name
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testQueryAttachmentName() throws OXException, IOException, JSONException {
+        List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
+        facets.add(new ActiveFacet(TasksFacetType.TASK_ATTACHMENT_NAME, "attachment", new Filter(Collections.singletonList("attachment"), "cool")));
+        assertResults(5, facets);
     }
 }

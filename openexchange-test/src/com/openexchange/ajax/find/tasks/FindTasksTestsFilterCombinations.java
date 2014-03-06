@@ -54,13 +54,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.ArrayUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
-import com.openexchange.ajax.find.AbstractFindTest;
-import com.openexchange.ajax.find.actions.QueryRequest;
-import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.facet.ActiveFacet;
 
@@ -89,10 +84,11 @@ import com.openexchange.find.facet.ActiveFacet;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class FindTasksTestsFilterCombinations extends AbstractFindTest {
+public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
 
     /**
-     * Initializes a new {@link FindTasksTests}.
+     * Initializes a new {@link FindTasksTestsFilterCombinations}.
+     * @param name
      */
     public FindTasksTestsFilterCombinations(String name) {
         super(name);
@@ -113,71 +109,9 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTest {
         return facets;
     }
 
-    /**
-     * Fetch the results from the QueryResponse
-     * @param qr the QueryResponse
-     * @return the results as a JSONArray, or null if the respond does not contain a results payload
-     */
-    private static final JSONArray getResults(QueryResponse qr) {
-        JSONArray ret = null;
-        if (qr.getData() != null && qr.getData() instanceof JSONObject)
-            ret = ((JSONObject) qr.getData()).optJSONArray("results");
-        return ret;
-    }
-    
-    /**
-     * Helper method to assert the query response (no paging)
-     * 
-     * @param expectedResultCount
-     * @param f
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
-     */
-    private final void assertResults(int expectedResultCount, List<ActiveFacet> f) throws OXException, IOException, JSONException {
-        assertResults(expectedResultCount, f, -1, -1);
-    }
-    
-    /**
-     * Helper method to assert the query response (with paging)
-     * 
-     * @param expectedResultCount
-     * @param f
-     * @param start
-     * @param size
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
-     */
-    private final void assertResults(int expectedResultCount, List<ActiveFacet> f, int start, int size) throws OXException, IOException, JSONException {
-        List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
-        facets.add(FindTasksTestEnvironment.createGlobalFacet());
-        facets.addAll(f);
-        final QueryResponse queryResponse = client.execute(new QueryRequest(start, size, facets, "tasks"));
-        assertNotNull(queryResponse);
-        JSONArray results  = getResults(queryResponse);
-        int actualResultCount = results.asList().size();
-        assertEquals(expectedResultCount, actualResultCount);
-    }
-
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////// TEST CASES BEGIN //////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Test with simple query with no filters
-     * Should find 30 tasks.
-     *
-     * @throws JSONException
-     * @throws IOException
-     * @throws OXException
-     *
-     * @see {@link FindTasksTestEnvironment.createAndInsertTasks}
-     */
-    @Test
-    public void testWithSimpleQuery() throws OXException, IOException, JSONException {
-        assertResults(30, Collections.<ActiveFacet>emptyList(), -1, 30);
-    }
 
     /**
      * Test filter combination 1, i.e. with Participants 
