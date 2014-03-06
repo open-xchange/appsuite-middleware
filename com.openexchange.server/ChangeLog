@@ -3,6 +3,10 @@
  - Fix for bug 31447: [L3] Logging for missing user and context mapping should be improved for IMAP auth bundle
  - Fix for bug 31415: NullPointerException: A null service reference is not allowed
  
+* 2014-03-06 - martin.schneider@open-xchange.com
+
+ - Fix for bug 31443: Do not autorename folders equal to default folder names while creation. Throw exception instead.
+
 * 2014-03-06 - martin.herfurth@open-xchange.com
 
  - Fix for bug 30732: Ignore removal of resources by externals.
