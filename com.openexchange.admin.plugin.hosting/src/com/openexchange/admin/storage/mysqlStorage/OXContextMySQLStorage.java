@@ -471,29 +471,25 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      */
     @Override
     public void moveDatabaseContext(final Context ctx, final Database target_database_id, final MaintenanceReason reason) throws StorageException {
-        long start = 0;
-        long end = 0;
-        if (LOG.isDebugEnabled()) {
-            start = System.currentTimeMillis();
-        }
+        long start = System.currentTimeMillis();
         LOG.debug("Move of data for context {} is now starting to target database {}!", ctx.getId(), target_database_id);
-
+        final int source_database_id;
+        final String scheme;
+        try {
+            source_database_id = cache.getDBPoolIdForContextId(ctx.getId().intValue());
+            scheme = cache.getSchemeForContextId(ctx.getId().intValue());
+        } catch (PoolException e) {
+            LOG.error("Pool exception caught!", e);
+            throw new StorageException(e);
+        }
         Connection ox_db_write_con = null;
         Connection configdb_write_con = null;
-
         PreparedStatement stm = null;
-
         Connection target_ox_db_con = null;
-
         TableObject contextserver2dbpool_backup = null;
-        int source_database_id = -1;
 
         try {
             configdb_write_con = cache.getConnectionForConfigDB();
-            // ox_db_write_con = cache.getWRITEConnectionForContext(context_id);
-            source_database_id = cache.getDBPoolIdForContextId(ctx.getId().intValue());
-            final String scheme = cache.getSchemeForContextId(ctx.getId().intValue());
-
             ox_db_write_con = cache.getWRITENoTimeoutConnectionForPoolId(source_database_id, scheme);
 
             /*
@@ -524,11 +520,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // ####### ##### geht hier was kaputt -> enableContext(); ########
             LOG.debug("Database handle information found!");
 
-            // backup old mapping in contextserver2dbpool for recovery if
-            // something breaks
+            // backup old mapping in contextserver2dbpool for recovery if something breaks
             LOG.debug("Backing up current configdb entries for context {}", ctx.getId());
             contextserver2dbpool_backup = backupContextServer2DBPoolEntry(ctx.getId().intValue(), configdb_write_con);
-            // ####### ##### geht hier was kaputt -> enableContext(); ########
             LOG.debug("Backup complete!");
 
             // create database or use existing database AND update the mapping
@@ -724,12 +718,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             }
         }
-
         if (LOG.isDebugEnabled()) {
-            end = System.currentTimeMillis();
-            double time_ = end - start;
-            time_ = time_ / 1000;
-            LOG.debug("Data moving for context {} to target database system {} completed in {} seconds!", ctx.getId(), target_database_id, time_);
+            double time = (System.currentTimeMillis() - start) / 1000;
+            LOG.debug("Data moving for context {} to target database system {} completed in {} seconds!", ctx.getId(), target_database_id, time);
         }
     }
 
