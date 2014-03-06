@@ -75,7 +75,6 @@ public final class Initialization {
     private CacheService cacheService;
     private ReplicationMonitor monitor;
     private Pools pools;
-    private ContextDatabaseAssignmentImpl contextAssignment;
     private ConfigDatabaseServiceImpl configDatabaseService;
     private DatabaseServiceImpl databaseService;
 
@@ -110,9 +109,8 @@ public final class Initialization {
         // Configuration database connection pool service.
         configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor);
         // Context database assignments.
-        contextAssignment = new ContextDatabaseAssignmentImpl(configDatabaseService);
         if (null != cacheService) {
-            contextAssignment.setCacheService(cacheService);
+            configDatabaseService.setCacheService(cacheService);
         }
         // Context pool life cycle.
         final ContextDatabaseLifeCycle contextDBLifeCycle = new ContextDatabaseLifeCycle(
@@ -128,14 +126,13 @@ public final class Initialization {
         } catch (OXException e) {
             LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
         }
-        databaseService = new DatabaseServiceImpl(pools, configDatabaseService, contextAssignment, monitor);
+        databaseService = new DatabaseServiceImpl(pools, configDatabaseService, monitor);
         return databaseService;
     }
 
     public void stop() {
         databaseService = null;
-        contextAssignment.removeCacheService();
-        contextAssignment = null;
+        configDatabaseService.removeCacheService();
         configDatabaseService = null;
         pools.stop(timer);
         pools = null;
@@ -144,15 +141,15 @@ public final class Initialization {
 
     public void setCacheService(final CacheService service) {
         this.cacheService = service;
-        if (null != contextAssignment) {
-            contextAssignment.setCacheService(service);
+        if (null != configDatabaseService) {
+            configDatabaseService.setCacheService(service);
         }
     }
 
     public void removeCacheService() {
         this.cacheService = null;
-        if (null != contextAssignment) {
-            contextAssignment.removeCacheService();
+        if (null != configDatabaseService) {
+            configDatabaseService.removeCacheService();
         }
     }
 

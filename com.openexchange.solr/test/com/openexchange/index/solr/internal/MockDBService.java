@@ -226,7 +226,7 @@ public class MockDBService implements DatabaseService {
     }
 
     @Override
-    public void invalidate(final int contextId) throws OXException {
+    public void invalidate(final int contextId) {
         // Nothing to do
     }
 

@@ -108,11 +108,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
 
     @Override
     public void resetPoolMappingForContext(int contextId) throws PoolException {
-        try {
-            getService().invalidate(contextId);
-        } catch (OXException e) {
-            throw new PoolException("" + e.getMessage(), e);
-        }
+        getService().invalidate(contextId);
     }
 
     @Override
