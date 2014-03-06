@@ -201,8 +201,11 @@ public class RdbContactStorage extends DefaultContactStorage {
                 Quota quota = quotaService.getQuotaFor(Resource.CONTACT, ResourceDescription.getEmptyResourceDescription(), session);
                 if (null != quota) {
                     long quotaValue = quota.getQuota(QuotaType.AMOUNT);
-                    if (0 < quotaValue && quotaValue <= executor.count(connection, Table.CONTACTS, contextID)) {
-                        throw QuotaExceptionCodes.QUOTA_EXCEEDED.create();
+                    if (0 < quotaValue) {
+                        final long used = executor.count(connection, Table.CONTACTS, contextID);
+                        if (quotaValue <= used) {
+                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_CONTACTS.create(used, quotaValue);
+                        }
                     }
                 }
             }

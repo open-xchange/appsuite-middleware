@@ -1669,7 +1669,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             if (quotaValue > 0) {
                 long used = countAppointments(session);
                 if (used > 0 && used >= quotaValue) {
-                    throw QuotaExceptionCodes.QUOTA_EXCEEDED.create();
+                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_CALENDAR.create(used, quotaValue);
                 }
             }
         }
