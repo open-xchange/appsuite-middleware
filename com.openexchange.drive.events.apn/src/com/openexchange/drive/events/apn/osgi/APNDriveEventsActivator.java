@@ -49,10 +49,15 @@
 
 package com.openexchange.drive.events.apn.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.Constants;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.DriveEventService;
-import com.openexchange.drive.events.apn.internal.APNAccess;
+import com.openexchange.drive.events.apn.APNAccess;
+import com.openexchange.drive.events.apn.IOSAPNCertificateProvider;
+import com.openexchange.drive.events.apn.MacOSAPNCertificateProvider;
 import com.openexchange.drive.events.apn.internal.APNDriveEventPublisher;
 import com.openexchange.drive.events.apn.internal.IOSDriveEventPublisher;
 import com.openexchange.drive.events.apn.internal.MacOSDriveEventPublisher;
@@ -95,8 +100,28 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
          * iOS
          */
         if (configService.getBoolProperty("com.openexchange.drive.events.apn.ios.enabled", false)) {
-            IOSDriveEventPublisher publisher = new IOSDriveEventPublisher(
-                getAccess(configService, "com.openexchange.drive.events.apn.ios."));
+            /*
+             * register APN certificate provider for iOS if specified via config file (with a low ranking)
+             */
+            final APNAccess access = getAccess(configService, "com.openexchange.drive.events.apn.ios.");
+            if (null != access) {
+                Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
+                dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
+                registerService(IOSAPNCertificateProvider.class, new IOSAPNCertificateProvider() {
+
+                    @Override
+                    public APNAccess getAccess() {
+                        return access;
+                    }
+                }, dictionary);
+                LOG.info("Successfully registered APN certificate provider for iOS.");
+            } else {
+                LOG.info("No APN access confgiured for iOS, skipping certificate provider registration.");
+            }
+            /*
+             * register publisher
+             */
+            APNDriveEventPublisher publisher = new IOSDriveEventPublisher();
             eventService.registerPublisher(publisher);
             String feedbackQueryInterval = configService.getProperty(
                 "com.openexchange.drive.events.apn.ios.feedbackQueryInterval", (String)null);
@@ -108,8 +133,28 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
          * Mac OS
          */
         if (configService.getBoolProperty("com.openexchange.drive.events.apn.macos.enabled", false)) {
-            MacOSDriveEventPublisher publisher = new MacOSDriveEventPublisher(
-                getAccess(configService, "com.openexchange.drive.events.apn.macos."));
+            /*
+             * register APN certificate provider for Mac OS if specified via config file (with a low ranking)
+             */
+            final APNAccess access = getAccess(configService, "com.openexchange.drive.events.apn.macos.");
+            if (null != access) {
+                Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
+                dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
+                registerService(MacOSAPNCertificateProvider.class, new MacOSAPNCertificateProvider() {
+
+                    @Override
+                    public APNAccess getAccess() {
+                        return access;
+                    }
+                }, dictionary);
+                LOG.info("Successfully registered APN certificate provider for Mac OS.");
+            } else {
+                LOG.info("No APN access confgiured for Mac OS, skipping certificate provider registration.");
+            }
+            /*
+             * register publisher
+             */
+            APNDriveEventPublisher publisher = new MacOSDriveEventPublisher();
             eventService.registerPublisher(publisher);
             String feedbackQueryInterval = configService.getProperty(
                 "com.openexchange.drive.events.apn.macos.feedbackQueryInterval", (String)null);
@@ -136,10 +181,18 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
         }
     }
 
+    /**
+     * Gets an APN access from the configuration service, using the supplied configuration property prefix.
+     *
+     * @param configService The config service
+     * @param prefix The prefix up to the last dot, for example <code>com.openexchange.drive.events.apn.macos.</code>
+     * @return The APN access, or <code>null</code> if not configured.
+     * @throws OXException
+     */
     private static APNAccess getAccess(ConfigurationService configService, String prefix) throws OXException {
         String keystore = configService.getProperty(prefix + "keystore");
         if (Strings.isEmpty(keystore)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "keystore");
+            return null;
         }
         String password = configService.getProperty(prefix + "password");
         if (Strings.isEmpty(password)) {
