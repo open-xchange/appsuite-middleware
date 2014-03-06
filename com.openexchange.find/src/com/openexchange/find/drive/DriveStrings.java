@@ -100,6 +100,15 @@ public class DriveStrings implements LocalizableStrings {
 
     // ---------------------------------------------------------------------------------- //
 
+    // Public folders
+    public static final String FOLDER_TYPE_PUBLIC = "Public folders";
+
+    // Private folders
+    public static final String FOLDER_TYPE_PRIVATE = "Private folders";
+
+    // Shared folders
+    public static final String FOLDER_TYPE_SHARED = "Shared folders";
+
     // Search in file field file name.
     public static final String SEARCH_IN_FILE_NAME = "%1$s <i>in file name</i>";
 
