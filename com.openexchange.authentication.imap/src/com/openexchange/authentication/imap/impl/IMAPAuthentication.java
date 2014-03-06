@@ -49,14 +49,14 @@
 
 package com.openexchange.authentication.imap.impl;
 
-import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING;
 import static com.openexchange.authentication.LoginExceptionCodes.UNKNOWN;
 import static com.openexchange.authentication.imap.osgi.ImapAuthServiceRegistry.getServiceRegistry;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.text.MessageFormat;
 import java.util.Properties;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
@@ -227,7 +227,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
 	            final int ctxId = contextService.getContextId(splitted[0]);
 	            if (ContextStorage.NOT_FOUND == ctxId) {
-	                throw INVALID_CREDENTIALS.create();
+	                throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(splitted[0]);
 	            }
 	            final Context ctx = contextService.getContext(ctxId);
 
@@ -236,7 +236,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	            try {
 	                userId = userService.getUserId(uid, ctx);
 	            } catch (final OXException e) {
-	                throw INVALID_CREDENTIALS.create();
+	                throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(loginInfo.getUsername());
 	            }
 	            // final User user2 = userService.getUser(userId, ctx);
 
