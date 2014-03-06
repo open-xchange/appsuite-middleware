@@ -559,21 +559,7 @@ public class FindTasksTestEnvironment {
         l.add(createActiveFacet(type, 0, createFilter("type", TaskTypeDisplayItem.Type.SINGLE_TASK.toString().toLowerCase()))); //single
         l.add(createActiveFacet(type, 1, createFilter("type", TaskTypeDisplayItem.Type.SERIES.toString().toLowerCase()))); //series
         facets.add(l);
-/*        
-        //description
-        l = new ArrayList<ActiveFacet>();
-        type = TasksFacetType.TASK_DESCRIPTION;
-        l.add(createActiveFacet(type, "description", createFilter("description", "have status")));
-        facets.add(l);
-        
-        //title
-        l = new ArrayList<ActiveFacet>();
-        type = TasksFacetType.TASK_TITLE;
-        l.add(createActiveFacet(type, "title", createFilter("title", "Find me")));
-        facets.add(l);
-        
-        //attachment
-*/    }
+    }
 
     private final ActiveFacet createActiveFacet(FacetType type, int valueId, Filter filter) {
         return new ActiveFacet(type, Integer.toString(valueId), filter);
