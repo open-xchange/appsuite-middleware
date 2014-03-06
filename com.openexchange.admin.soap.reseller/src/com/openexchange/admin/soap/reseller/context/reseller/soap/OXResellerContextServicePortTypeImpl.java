@@ -8,11 +8,15 @@ package com.openexchange.admin.soap.reseller.context.reseller.soap;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.xml.datatype.XMLGregorianCalendar;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
@@ -567,7 +571,16 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
 
         final XMLGregorianCalendar anniversary = soapUser.getAnniversary();
         if (null != anniversary) {
-            user.setAnniversary(anniversary.toGregorianCalendar().getTime());
+            final GregorianCalendar gregorianCalendar = anniversary.toGregorianCalendar();
+
+            final GregorianCalendar newCal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+            newCal.clear();
+            newCal.set(Calendar.YEAR, gregorianCalendar.get(Calendar.YEAR));
+            newCal.set(Calendar.MONTH, gregorianCalendar.get(Calendar.MONTH));
+            newCal.set(Calendar.DAY_OF_MONTH, gregorianCalendar.get(Calendar.DAY_OF_MONTH));
+
+            final Date date = newCal.getTime();
+            user.setAnniversary(date);
         }
 
         final String assistantName = soapUser.getAssistantName();
@@ -577,7 +590,16 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
 
         final XMLGregorianCalendar birthday = soapUser.getBirthday();
         if (null != birthday) {
-            user.setBirthday(birthday.toGregorianCalendar().getTime());
+            final GregorianCalendar gregorianCalendar = birthday.toGregorianCalendar();
+
+            final GregorianCalendar newCal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+            newCal.clear();
+            newCal.set(Calendar.YEAR, gregorianCalendar.get(Calendar.YEAR));
+            newCal.set(Calendar.MONTH, gregorianCalendar.get(Calendar.MONTH));
+            newCal.set(Calendar.DAY_OF_MONTH, gregorianCalendar.get(Calendar.DAY_OF_MONTH));
+
+            final Date date = newCal.getTime();
+            user.setBirthday(date);
         }
 
         String tmp = soapUser.getBranches();
