@@ -115,9 +115,9 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
             context.ungetService(reference);
             return null;
         }
-        
+
         capabilityServiceTracker = new ServiceTracker<CapabilityService, CapabilityService>(context, CapabilityService.class, null) {
-            
+
             @Override
             public CapabilityService addingService(ServiceReference<CapabilityService> ref) {
                 final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
@@ -139,14 +139,14 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                         return true;
                     }
                 }, properties);
-                
-                CapabilityService capabilityService = (CapabilityService) context.getService(ref);
+
+                CapabilityService capabilityService = context.getService(ref);
                 capabilityService.declareCapability(sCapability);
                 return capabilityService;
             }
         };
         capabilityServiceTracker.open();
-        
+
         return transportProvider;
     }
 
@@ -175,11 +175,14 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                 if (capabilityChecker != null) {
                     capabilityChecker.unregister();
                     this.capabilityChecker = null;
+
+                    final ServiceTracker<CapabilityService, CapabilityService> capabilityServiceTracker = this.capabilityServiceTracker;
+                    if (capabilityServiceTracker != null) {
+                        capabilityServiceTracker.close();
+                        this.capabilityServiceTracker = null;
+                    }
                 }
             }
-            
-            if (capabilityServiceTracker != null)
-                capabilityServiceTracker.close();
         }
     }
 
