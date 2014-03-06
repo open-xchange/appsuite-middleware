@@ -3,6 +3,7 @@
  - Fix for bug 31392: Made module-specific error messages
  - Fix for bug 31217: No translation of standard folders for external accounts + prefer localized standard folder names than taking the ones
                       from primary account (as they might get translated)
+ - Fix for bug 31394: Added possibility to delete a quota value once it is set through specifying a value less than zero
 
 * 2014-04-02 - ioannis.chouklis@open-xchange.com
 
