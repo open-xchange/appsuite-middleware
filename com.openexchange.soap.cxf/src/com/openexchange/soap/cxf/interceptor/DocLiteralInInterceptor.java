@@ -50,6 +50,7 @@ import org.apache.cxf.service.model.ServiceModelUtil;
 import org.apache.cxf.staxutils.DepthXMLStreamReader;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.ws.commons.schema.XmlSchemaElement;
+import org.xml.sax.SAXParseException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.Slf4jLogger;
 
@@ -151,9 +152,10 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                                                 info[0]);
                                         }
                                         throw new Fault(m, LOG, fault);
-                                    } else {
-                                        // fault.get
-
+                                    } else if (linkedException instanceof SAXParseException) {
+                                        final SAXParseException sax = (SAXParseException) linkedException;
+                                        final String m = MessageFormat.format("Invalid value in line {0} in row {1}. Please correct SOAP request.", sax.getLineNumber(), sax.getColumnNumber());
+                                        throw new Fault(m, LOG, fault);
                                     }
                                 }
                             }
