@@ -75,21 +75,21 @@ public enum QuotaExceptionCodes implements DisplayableOXExceptionCode {
      */
     QUOTA_EXCEEDED("Quota exceeded", QuotaExceptionMessages.QUOTA_EXCEEDED_MSG, CATEGORY_USER_INPUT, 3),
     /**
-     * Quota exceeded for calendar. Used %1$s of %2$s.
+     * Quota exceeded for calendar. Quota used: %1$s. Quota limit: %2$s.
      */
-    QUOTA_EXCEEDED_CALENDAR("Quota exceeded for calendar. Used %1$s of %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_CALENDAR_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
+    QUOTA_EXCEEDED_CALENDAR("Quota exceeded for calendar. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_CALENDAR_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
     /**
-     * Quota exceeded for contacts. Used %1$s of %2$s
+     * Quota exceeded for contacts. Quota used: %1$s. Quota limit: %2$s.
      */
-    QUOTA_EXCEEDED_CONTACTS("Quota exceeded for contacts. Used %1$s of %2$s", QuotaExceptionMessages.QUOTA_EXCEEDED_CONTACTS_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
+    QUOTA_EXCEEDED_CONTACTS("Quota exceeded for contacts. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_CONTACTS_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
     /**
-     * Quota exceeded for tasks. Used %1$s of %2$s
+     * Quota exceeded for tasks. Quota used: %1$s. Quota limit: %2$s.
      */
-    QUOTA_EXCEEDED_TASKS("Quota exceeded for tasks. Used %1$s of %2$s", QuotaExceptionMessages.QUOTA_EXCEEDED_TASKS_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
+    QUOTA_EXCEEDED_TASKS("Quota exceeded for tasks. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_TASKS_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
     /**
-     * Quota exceeded for files. Used %1$s of %2$s
+     * Quota exceeded for files. Quota used: %1$s. Quota limit: %2$s.
      */
-    QUOTA_EXCEEDED_FILES("Quota exceeded for files. Used %1$s of %2$s", QuotaExceptionMessages.QUOTA_EXCEEDED_FILES_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
+    QUOTA_EXCEEDED_FILES("Quota exceeded for files. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_FILES_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
 
     ;
 

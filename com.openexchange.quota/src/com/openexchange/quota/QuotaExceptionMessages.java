@@ -61,13 +61,13 @@ public final class QuotaExceptionMessages implements LocalizableStrings {
 
     public static final String QUOTA_EXCEEDED_MSG = "Quota exceeded. Please delete some items in order to create new ones.";
 
-    public static final String QUOTA_EXCEEDED_CALENDAR_MSG = "Quota exceeded for calendar. Used %1$s of %2$s. Please delete some appointments in order to create new ones.";
+    public static final String QUOTA_EXCEEDED_CALENDAR_MSG = "Quota exceeded for calendar. Quota limit: %2$s. Quota used: %1$s. Please delete some appointments in order to create new ones.";
 
-    public static final String QUOTA_EXCEEDED_CONTACTS_MSG = "Quota exceeded for contacts. Used %1$s of %2$s. Please delete some contacts in order to create new ones.";
+    public static final String QUOTA_EXCEEDED_CONTACTS_MSG = "Quota exceeded for contacts. Quota limit: %2$s. Quota used: %1$s. Please delete some contacts in order to create new ones.";
 
-    public static final String QUOTA_EXCEEDED_TASKS_MSG = "Quota exceeded for tasks. Used %1$s of %2$s. Please delete some tasks in order to create new ones.";
+    public static final String QUOTA_EXCEEDED_TASKS_MSG = "Quota exceeded for tasks. Quota limit: %2$s. Quota used: %1$s. Please delete some tasks in order to create new ones.";
 
-    public static final String QUOTA_EXCEEDED_FILES_MSG = "Quota exceeded for files. Used %1$s of %2$s. Please delete some files in order to create new ones.";
+    public static final String QUOTA_EXCEEDED_FILES_MSG = "Quota exceeded for files. Quota limit: %2$s. Quota used: %1$s.. Please delete some files in order to create new ones.";
 
     /**
      * Initializes a new {@link QuotaExceptionMessages}.
