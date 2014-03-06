@@ -1,3 +1,8 @@
+* 2014-03-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30369: Replaced equinox event admin with multithreaded implementation from apache felix project, introduced background
+                      event processing for time-consuming handlers
+
 * 2014-02-25 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31191: Fixed erroneous permission check.
