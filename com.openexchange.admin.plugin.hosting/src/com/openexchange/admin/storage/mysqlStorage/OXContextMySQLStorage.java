@@ -110,6 +110,7 @@ import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.Assignment;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -516,7 +517,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             // fetch data for db handle to create database
             LOG.debug("Get database handle information for target database system!");
-            final Database db_handle = getDatabaseHandleById(target_database_id, configdb_write_con);
+            final Database db_handle = OXToolStorageInterface.getInstance().loadDatabaseById(i(target_database_id.getId()));
             // ####### ##### geht hier was kaputt -> enableContext(); ########
             LOG.debug("Database handle information found!");
 
@@ -529,31 +530,28 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // in contextserver2dbpool
             try {
                 LOG.debug("Creating new scheme or using existing scheme on target database system!");
+                startTransaction(configdb_write_con);
                 createDatabaseAndMappingForContext(db_handle, configdb_write_con, ctx.getId().intValue());
-                cache.resetPoolMappingForContext(ctx.getId().intValue());
+                configdb_write_con.commit();
                 LOG.debug("Scheme found and mapping in configdb changed to new target database system!");
             } catch (final SQLException sqle) {
+                rollback(configdb_write_con);
                 LOG.error("SQL Error", sqle);
                 throw new DatabaseContextMappingException("" + sqle.getMessage());
-            } catch (final PoolException poolex) {
-                LOG.error("Pool Error", poolex);
-                throw new DatabaseContextMappingException("" + poolex.getMessage());
             }
 
             // now insert all data to target db
             LOG.debug("Now filling target database system {} with data of context {}!", target_database_id, ctx.getId());
+            target_ox_db_con = cache.getConnectionForContextNoTimeout(ctx.getId().intValue());
             try {
-                target_ox_db_con = cache.getConnectionForContextNoTimeout(ctx.getId().intValue());
                 target_ox_db_con.setAutoCommit(false);
                 fillTargetDatabase(sorted_tables, target_ox_db_con, ox_db_write_con, ctx.getId());
                 // commit ALL tables with all data of every row
                 target_ox_db_con.commit();
             } catch (final SQLException sql) {
+                rollback(target_ox_db_con);
                 LOG.error("SQL Error", sql);
                 throw new TargetDatabaseException("" + sql.getMessage());
-            } catch (final PoolException pexp) {
-                LOG.error("Pool Error", pexp);
-                throw new TargetDatabaseException("" + pexp.getMessage());
             }
 
             LOG.debug("Filling completed for target database system {} with data of context {}!", target_database_id, ctx.getId());
@@ -575,6 +573,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // check if scheme is empty after deleting context data on source db
             // if yes, drop whole database
             deleteSchemeFromDatabaseIfEmpty(ox_db_write_con, configdb_write_con, source_database_id, scheme);
+            configdb_write_con.commit();
             ox_db_write_con.commit();
 
             // all this was ok , then enable context back again
@@ -601,15 +600,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (final TargetDatabaseException tde) {
             LOG.error("Exception caught while moving data for context {} to target database {}", ctx.getId(), target_database_id, tde);
             LOG.error("Target database rollback starts for context {}", ctx.getId());
-            // rollback insert on target db
-            if (target_ox_db_con != null) {
-                try {
-                    target_ox_db_con.rollback();
-                    LOG.error("Target database rollback finished for context {}", ctx.getId());
-                } catch (final SQLException ecp) {
-                    LOG.error("Error rollback on target database", ecp);
-                }
-            }
 
             // revoke contextserver2dbpool()
             try {
@@ -1368,27 +1358,41 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             }
         }
-        updateContextServer2DbPool(db, configCon, context_id);
+        try {
+            updateContextServer2DbPool(db, configCon, context_id);
+        } catch (PoolException e) {
+            throw new StorageException(e.getMessage(), e);
+        }
     }
 
-    private void updateContextServer2DbPool(final Database db, final Connection configdb_write_con, final int context_id) throws SQLException {
-        PreparedStatement pstm = null;
-        try {
-            pstm = configdb_write_con.prepareStatement("UPDATE " + "context_server2db_pool " + "SET " + "read_db_pool_id = ?," + "write_db_pool_id = ?," + "db_schema = ? " + "WHERE " + "cid = ?");
-            pstm.setInt(1, db.getId().intValue());
-            pstm.setInt(2, db.getId().intValue());
-            pstm.setString(3, db.getScheme());
-            pstm.setInt(4, context_id);
-            pstm.executeUpdate();
-        } finally {
-            try {
-                if (pstm != null) {
-                    pstm.close();
-                }
-            } catch (final Exception e) {
-                LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
+    private static void updateContextServer2DbPool(final Database db, Connection con, final int contextId) throws PoolException {
+        final int serverId = ClientAdminThread.cache.getServerId();
+        ClientAdminThread.cache.getPool().writeAssignment(con, new Assignment() {
+            @Override
+            public boolean isToConfigDB() {
+                return false;
             }
-        }
+            @Override
+            public int getWritePoolId() {
+                return i(db.getId());
+            }
+            @Override
+            public int getServerId() {
+                return serverId;
+            }
+            @Override
+            public String getSchema() {
+                return db.getScheme();
+            }
+            @Override
+            public int getReadPoolId() {
+                return i(db.getRead_id());
+            }
+            @Override
+            public int getContextId() {
+                return contextId;
+            }
+        });
     }
 
     private String getNextUnfilledSchemaFromDB(final Integer poolId, final Connection con) throws StorageException {
@@ -1503,6 +1507,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             // end of test table
         }
+        configdb_write_con.commit();
     }
 
     private void enableContextBackAfterError(final Context ctx) throws StorageException {
@@ -1511,7 +1516,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         LOG.error("Context {} enabled back again!", ctx.getId());
     }
 
-    private void fillTargetDatabase(final ArrayList<TableObject> sorted_tables, final Connection target_ox_db_con, final Connection ox_db_connection, final Object criteriaMatch) throws PoolException, SQLException {
+    private void fillTargetDatabase(final ArrayList<TableObject> sorted_tables, final Connection target_ox_db_con, final Connection ox_db_connection, final Object criteriaMatch) throws SQLException {
         // do the inserts for all tables!
         for (int a = 0; a < sorted_tables.size(); a++) {
             TableObject to = sorted_tables.get(a);

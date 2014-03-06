@@ -75,7 +75,8 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextDatabaseAssignmentImpl.class);
 
     private static final String SELECT = "SELECT read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool WHERE server_id=? AND cid=?";
-    private static final String INSERT = "INSERT INTO context_server2db_pool (server_id,cid,read_db_pool_id,write_db_pool_id,db_schema) VALUES (?,?,?,?,?)";
+    private static final String INSERT = "INSERT INTO context_server2db_pool (read_db_pool_id,write_db_pool_id,db_schema,server_id,cid) VALUES (?,?,?,?,?)";
+    private static final String UPDATE = "UPDATE context_server2db_pool SET read_db_pool_id=?,write_db_pool_id=?,db_schema=? WHERE server_id=? AND cid=?";
     private static final String DELETE = "DELETE FROM context_server2db_pool WHERE cid=? AND server_id=?";
 
     private final ConfigDatabaseService configDatabaseService;
@@ -126,9 +127,8 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         return retval;
     }
 
-    private AssignmentImpl loadAssignment(final int contextId) throws OXException {
-        AssignmentImpl retval = null;
-        final Connection con = configDatabaseService.getReadOnly();
+    private static AssignmentImpl loadAssignment(Connection con, int contextId) throws OXException {
+        final AssignmentImpl retval;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -141,27 +141,40 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
                 retval = new AssignmentImpl(contextId, Server.getServerId(), result.getInt(pos++), result.getInt(pos++),
                         result.getString(pos++));
             } else {
-                throw DBPoolingExceptionCodes.RESOLVE_FAILED.create(I(contextId), I(Server.getServerId()));
+                retval = null;
             }
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            configDatabaseService.backReadOnly(con);
         }
         return retval;
     }
 
-    private static void writeAssignmentDB(Connection con, Assignment assign) throws OXException {
+    private AssignmentImpl loadAssignment(final int contextId) throws OXException {
+        final AssignmentImpl retval;
+        final Connection con = configDatabaseService.getReadOnly();
+        try {
+            retval = loadAssignment(con, contextId);
+        } finally {
+            configDatabaseService.backReadOnly(con);
+        }
+        if (null == retval) {
+            throw DBPoolingExceptionCodes.RESOLVE_FAILED.create(I(contextId), I(Server.getServerId()));
+        }
+        return retval;
+    }
+
+    private static void writeAssignmentDB(Connection con, Assignment assign, boolean update) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(INSERT);
+            stmt = con.prepareStatement(update ? UPDATE : INSERT);
             int pos = 1;
-            stmt.setInt(pos++, assign.getServerId());
-            stmt.setInt(pos++, assign.getContextId());
             stmt.setInt(pos++, assign.getReadPoolId());
             stmt.setInt(pos++, assign.getWritePoolId());
             stmt.setString(pos++, assign.getSchema());
+            stmt.setInt(pos++, assign.getServerId());
+            stmt.setInt(pos++, assign.getContextId());
             int count = stmt.executeUpdate();
             if (1 != count) {
                 throw DBPoolingExceptionCodes.INSERT_FAILED.create(I(assign.getContextId()), I(assign.getServerId()));
@@ -175,11 +188,15 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     @Override
     public void writeAssignment(Connection con, Assignment assign) throws OXException {
+        final boolean update = null != loadAssignment(con, assign.getContextId());
         Cache myCache = this.cache;
         if (null != myCache) {
             final CacheKey key = myCache.newCacheKey(assign.getContextId(), assign.getServerId());
             cacheLock.lock();
             try {
+                if (update) {
+                    myCache.remove(key);
+                }
                 try {
                     myCache.putSafe(key, new AssignmentImpl(assign));
                 } catch (OXException e) {
@@ -189,7 +206,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
                 cacheLock.unlock();
             }
         }
-        writeAssignmentDB(con, assign);
+        writeAssignmentDB(con, assign, update);
     }
 
     private static void deleteAssignmentDB(Connection con, int contextId) throws OXException {
