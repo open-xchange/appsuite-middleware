@@ -122,6 +122,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
         
         capabilityServiceTracker = new ServiceTracker<CapabilityService, CapabilityService>(context, CapabilityService.class, null) {
             
+            @Override
             public CapabilityService addingService(ServiceReference<CapabilityService> ref) {
                 final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
                 final String sCapability = "auto_publish_attachments";
@@ -148,8 +149,8 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                 return capabilityService;
             }
         };
-        
         capabilityServiceTracker.open();
+        
         return transportProvider;
     }
 
