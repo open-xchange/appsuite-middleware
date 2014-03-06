@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -119,9 +120,38 @@ public class ZipDocumentsAction extends AbstractFileAction {
         }
         // Get file access
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        // Initialize ZIP'ing
+        // Initialize ZIP'ing -- Either streamed or in-memory/tmp file
+        {
+            final AJAXRequestData ajaxRequestData = request.getRequestData();
+            if (null != ajaxRequestData) {
+                if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
+                    try {
+                        ajaxRequestData.setResponseHeader("Content-Disposition", "attachment; filename*=UTF-8''documents.zip; filename=\"documents.zip\"");
+                        createZipArchive(idVersionPairs, fileAccess, ajaxRequestData.optOutputStream());
+                        // Streamed
+                        return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+                    } catch (final IOException e) {
+                        throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    }
+                }
+            }
+        }
+        // In-memory/tmp file
         final ThresholdFileHolder thresholdFileHolder = new ThresholdFileHolder();
-        final ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(thresholdFileHolder.asOutputStream());
+        createZipArchive(idVersionPairs, fileAccess, thresholdFileHolder.asOutputStream());
+        // Set meta information
+        final AJAXRequestData requestData = request.getRequestData();
+        if (null != requestData) {
+            requestData.setFormat("file");
+        }
+        thresholdFileHolder.setContentType("application/zip");
+        thresholdFileHolder.setName("documents.zip");
+        // Return AJAX result
+        return new AJAXRequestResult(thresholdFileHolder, "file");
+    }
+
+    private void createZipArchive(final List<IdVersionPair> idVersionPairs, final IDBasedFileAccess fileAccess, OutputStream out) throws OXException {
+        final ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
         zipOutput.setEncoding("UTF-8");
         zipOutput.setUseLanguageEncodingFlag(true);
         try {
@@ -191,15 +221,6 @@ public class ZipDocumentsAction extends AbstractFileAction {
             // Complete the ZIP file
             Streams.close(zipOutput);
         }
-        // Set meta information
-        final AJAXRequestData requestData = request.getRequestData();
-        if (null != requestData) {
-            requestData.setFormat("file");
-        }
-        thresholdFileHolder.setContentType("application/zip");
-        thresholdFileHolder.setName("documents.zip");
-        // Return AJAX result
-        return new AJAXRequestResult(thresholdFileHolder, "file");
     }
 
     /** Check for an empty string */

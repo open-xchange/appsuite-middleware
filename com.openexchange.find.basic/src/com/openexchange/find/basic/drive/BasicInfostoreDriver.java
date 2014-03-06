@@ -52,13 +52,17 @@ package com.openexchange.find.basic.drive;
 import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.infostore.ToInfostoreTermVisitor;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.AndTerm;
 import com.openexchange.file.storage.search.DescriptionTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
@@ -73,7 +77,6 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.FolderTypeDisplayItem.Type;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
@@ -122,8 +125,26 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    public boolean isValidFor(ServerSession session) {
-        return (session.getUserConfiguration().hasInfostore() && session.getUserConfiguration().hasContact()/* && !session.getUserConfiguration().hasWebDAV()*/);
+    public boolean isValidFor(ServerSession session) throws OXException {
+        if (!session.getUserConfiguration().hasInfostore()) {
+            return false;
+        }
+        FileStorageServiceRegistry registry = Services.getFileStorageServiceRegistry();
+        if (null == registry) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(FileStorageServiceRegistry.class.getName());
+        }
+        List<FileStorageService> services = registry.getAllServices();
+        for (FileStorageService service : services) {
+            List<FileStorageAccount> accounts = service.getAccountManager().getAccounts(session);
+            if (accounts.size() == 0 || accounts.size() > 1) {
+                return false;
+            }
+            if (!"com.openexchange.infostore".equals(service.getId())) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -162,7 +183,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
             final List<Document> results = new LinkedList<Document>();
             while (it.hasNext()) {
                 final DocumentMetadata doc = it.next();
-                results.add(new FileDocument(doc));
+                results.add(new FileDocument(Utils.documentMetadata2File(doc)));
             }
             return new SearchResult(-1, start, results, searchRequest.getActiveFacets());
         } finally {
@@ -213,41 +234,6 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         facets.add(new Facet(DriveFacetType.FILE_DESCRIPTION, fileDescriptionFacet));
         facets.add(new Facet(DriveFacetType.FILE_CONTENT, fileContentFacet));
 
-
-        // Add folder type facets
-        String fieldFolderType = Constants.FIELD_FOLDER_TYPE;
-        List<DocumentMetadata> pubFolders = getAutocompleteFolders(session, autocompleteRequest, FolderObject.PUBLIC);
-        List<DocumentMetadata> privFolders = getAutocompleteFolders(session, autocompleteRequest, FolderObject.PRIVATE);
-        List<DocumentMetadata> sharedFolders = getAutocompleteFolders(session, autocompleteRequest, FolderObject.SHARED);
-        List<FacetValue> publicFoldersFacet = new ArrayList<FacetValue>(pubFolders.size());
-        List<FacetValue> privateFoldersFacet = new ArrayList<FacetValue>(privFolders.size());
-        List<FacetValue> sharedFoldersFacet = new ArrayList<FacetValue>(sharedFolders.size());
-
-        for (DocumentMetadata doc : pubFolders) {
-            Filter filter = new Filter(Collections.singletonList(fieldFolderType), String.valueOf(doc.getId()));
-            publicFoldersFacet.add(new FacetValue(
-                prepareFacetValueId(DriveFacetType.FOLDER_TYPE.getDisplayName(), session.getContextId(), String.valueOf(doc.getId())),
-                new FolderTypeDisplayItem(DriveStrings.FACET_FOLDER_TYPE, Type.PUBLIC), 1, filter));
-        }
-
-        for (DocumentMetadata doc : privFolders) {
-            Filter filter = new Filter(Collections.singletonList(fieldFolderType), String.valueOf(doc.getId()));
-            privateFoldersFacet.add(new FacetValue(
-                prepareFacetValueId(DriveFacetType.FOLDER_TYPE.getDisplayName(), session.getContextId(), String.valueOf(doc.getId())),
-                new FolderTypeDisplayItem(DriveStrings.FACET_FOLDER_TYPE, Type.PRIVATE), 1, filter));
-        }
-
-        for (DocumentMetadata doc : sharedFolders) {
-            Filter filter = new Filter(Collections.singletonList(fieldFolderType), String.valueOf(doc.getId()));
-            sharedFoldersFacet.add(new FacetValue(
-                prepareFacetValueId(DriveFacetType.FOLDER_TYPE.getDisplayName(), session.getContextId(), String.valueOf(doc.getId())),
-                new FolderTypeDisplayItem(DriveStrings.FACET_FOLDER_TYPE, Type.SHARED), 1, filter));
-        }
-        facets.add(new Facet(DriveFacetType.FOLDER_TYPE, publicFoldersFacet));
-        facets.add(new Facet(DriveFacetType.FOLDER_TYPE, privateFoldersFacet));
-        facets.add(new Facet(DriveFacetType.FOLDER_TYPE, sharedFoldersFacet));
-
-
         // Add static file type facet
         final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
         final String fieldFileType = Constants.FIELD_FILE_TYPE;
@@ -276,9 +262,29 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
             FileTypeDisplayItem.Type.VIDEO), FacetValue.UNKNOWN_COUNT, new Filter(
             Collections.singletonList(fieldFileType),
             FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
-        final Facet folderTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
-        facets.add(folderTypeFacet);
+        final Facet fileTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
+        facets.add(fileTypeFacet);
 
+        // Add static folder type facets
+        String fieldFolderType = Constants.FIELD_FOLDER_TYPE;
+        final List<FacetValue> folderTypes = new ArrayList<FacetValue>(4);
+        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
+            DriveStrings.FOLDER_TYPE_PUBLIC,
+            FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(
+            Collections.singletonList(fieldFolderType),
+            FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
+        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
+            DriveStrings.FOLDER_TYPE_PRIVATE,
+            FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(
+            Collections.singletonList(fieldFolderType),
+            FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
+        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
+            DriveStrings.FOLDER_TYPE_SHARED,
+            FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(
+            Collections.singletonList(fieldFolderType),
+            FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
+        final Facet folderTypeFacet = new Facet(DriveFacetType.FOLDER_TYPE, folderTypes);
+        facets.add(folderTypeFacet);
 
         // Add static file size facet
         List<FacetValue> fileSize = new ArrayList<FacetValue>(5);
@@ -385,9 +391,8 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         }
     }
 
-    private List<DocumentMetadata> getAutocompleteFolders(ServerSession session, AutocompleteRequest request, int folderType) throws OXException {
+    private List<FolderObject> getAutocompleteFolders(ServerSession session, AutocompleteRequest request, int folderType) throws OXException {
         String prefix = request.getPrefix();
-        int limit = request.getLimit();
         int userId = session.getUserId();
 
         InfostoreSearchEngine searchEngine = Services.getInfostoreSearchEngine();
@@ -397,47 +402,24 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         OXFolderAccess access = new OXFolderAccess(session.getContext());
         FolderObject defaultFolder = access.getDefaultFolder(userId, FolderObject.INFOSTORE);
 
-        List<Integer> subfolders = defaultFolder.getSubfolderIds();
-        subfolders.add(defaultFolder.getObjectID());
-        List<Integer> folders = new ArrayList<Integer>(subfolders.size());
+        List<Integer> subfolders = new LinkedList<Integer>();
+        if (defaultFolder.hasSubfolders()) {
+            try {
+                subfolders.addAll(defaultFolder.getSubfolderIds(true, session.getContext()));
+            } catch (SQLException e) {
+                // should not happen?
+            }
+        }
+        subfolders.add(0, defaultFolder.getObjectID());
+        List<FolderObject> folders = new ArrayList<FolderObject>(subfolders.size());
         for (Integer i : subfolders) {
             if (folderType == access.getFolderType(i(i), userId)) {
-                folders.add(i);
+                if (access.getFolderName(i(i)).startsWith(prefix)) {
+                    folders.add(access.getFolderObject(i(i)));
+                }
             }
         }
-
-     // Compose term
-        List<SearchTerm<?>> terms = new LinkedList<SearchTerm<?>>();
-        terms.add(new TitleTerm(prefix, true, true));
-        terms.add(new FileNameTerm(prefix, true, true));
-        terms.add(new DescriptionTerm(prefix, true, true));
-        SearchTerm<List<SearchTerm<?>>> orTerm = new OrTerm(terms);
-        ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
-        orTerm.visit(visitor);
-
-     // Fire search
-        SearchIterator<DocumentMetadata> it = null;
-        try {
-            it = searchEngine.search(
-                I2i(folders),
-                visitor.getInfstoreTerm(),
-                fields,
-                Metadata.TITLE_LITERAL,
-                0,
-                0,
-                limit,
-                session.getContext(),
-                session.getUser(),
-                session.getUserPermissionBits());
-            List<DocumentMetadata> docs = new LinkedList<DocumentMetadata>();
-            while (it.hasNext()) {
-                DocumentMetadata doc = it.next();
-                docs.add(doc);
-            }
-            return docs;
-        } finally {
-            SearchIterators.close(it);
-        }
+        return folders;
     }
 
 }

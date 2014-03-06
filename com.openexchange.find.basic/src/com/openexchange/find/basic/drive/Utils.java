@@ -51,8 +51,13 @@ package com.openexchange.find.basic.drive;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.search.ContentTerm;
 import com.openexchange.file.storage.search.DescriptionTerm;
 import com.openexchange.file.storage.search.FileMimeTypeTerm;
@@ -63,6 +68,7 @@ import com.openexchange.file.storage.search.TitleTerm;
 import com.openexchange.file.storage.search.VersionCommentTerm;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 
 
 /**
@@ -195,6 +201,287 @@ public final class Utils {
         }
 
         return termFor(fields, queries);
+    }
+
+    public static File documentMetadata2File(final DocumentMetadata doc) {
+        File file = new File() {
+
+            @Override
+            public String getProperty(String key) {
+                return doc.getProperty(key);
+            }
+
+            @Override
+            public Set<String> getPropertyNames() {
+                return doc.getPropertyNames();
+            }
+
+            @Override
+            public Date getLastModified() {
+                return doc.getLastModified();
+            }
+
+            @Override
+            public void setLastModified(Date now) {
+                doc.setLastModified(now);
+            }
+
+            @Override
+            public Date getCreated() {
+                return doc.getCreationDate();
+            }
+
+            @Override
+            public void setCreated(Date creationDate) {
+                doc.setCreationDate(creationDate);
+            }
+
+            @Override
+            public int getModifiedBy() {
+                return doc.getModifiedBy();
+            }
+
+            @Override
+            public void setModifiedBy(int lastEditor) {
+                doc.setModifiedBy(lastEditor);
+            }
+
+            @Override
+            public String getFolderId() {
+                return String.valueOf(doc.getFolderId());
+            }
+
+            @Override
+            public void setFolderId(String folderId) {
+                doc.setFolderId(Long.parseLong(folderId));
+            }
+
+            @Override
+            public String getTitle() {
+                return doc.getTitle();
+            }
+
+            @Override
+            public void setTitle(String title) {
+                doc.setTitle(title);
+            }
+
+            @Override
+            public String getVersion() {
+                return String.valueOf(doc.getVersion());
+            }
+
+            @Override
+            public void setVersion(String version) {
+                doc.setVersion(Integer.parseInt(version));
+            }
+
+            @Override
+            public String getContent() {
+                return doc.getCategories();
+            }
+
+            @Override
+            public long getFileSize() {
+                return doc.getFileSize();
+            }
+
+            @Override
+            public void setFileSize(long length) {
+                doc.setFileSize(length);
+            }
+
+            @Override
+            public String getFileMIMEType() {
+                return doc.getFileMIMEType();
+            }
+
+            @Override
+            public void setFileMIMEType(String type) {
+                doc.setFileMIMEType(type);
+            }
+
+            @Override
+            public String getFileName() {
+                return doc.getFileName();
+            }
+
+            @Override
+            public void setFileName(String fileName) {
+                doc.setFileName(fileName);
+            }
+
+            @Override
+            public String getId() {
+                return String.valueOf(doc.getId());
+            }
+
+            @Override
+            public void setId(String id) {
+                doc.setId(Integer.parseInt(id));
+            }
+
+            @Override
+            public int getCreatedBy() {
+                return doc.getCreatedBy();
+            }
+
+            @Override
+            public void setCreatedBy(int cretor) {
+                doc.setCreatedBy(cretor);
+            }
+
+            @Override
+            public String getDescription() {
+                return doc.getDescription();
+            }
+
+            @Override
+            public void setDescription(String description) {
+                doc.setDescription(description);
+            }
+
+            @Override
+            public String getURL() {
+                return doc.getURL();
+            }
+
+            @Override
+            public void setURL(String url) {
+                doc.setURL(url);
+            }
+
+            @Override
+            public long getSequenceNumber() {
+                return doc.getSequenceNumber();
+            }
+
+            @Override
+            public String getCategories() {
+                return doc.getCategories();
+            }
+
+            @Override
+            public void setCategories(String categories) {
+                doc.setCategories(categories);
+            }
+
+            @Override
+            public Date getLockedUntil() {
+                return doc.getLockedUntil();
+            }
+
+            @Override
+            public void setLockedUntil(Date lockedUntil) {
+                doc.setLockedUntil(lockedUntil);
+            }
+
+            @Override
+            public String getFileMD5Sum() {
+                return doc.getFileMD5Sum();
+            }
+
+            @Override
+            public void setFileMD5Sum(String sum) {
+                doc.setFileMD5Sum(sum);
+            }
+
+            @Override
+            public int getColorLabel() {
+                return doc.getColorLabel();
+            }
+
+            @Override
+            public void setColorLabel(int color) {
+                doc.setColorLabel(color);
+            }
+
+            @Override
+            public boolean isCurrentVersion() {
+                return doc.isCurrentVersion();
+            }
+
+            @Override
+            public void setIsCurrentVersion(boolean bool) {
+                doc.setIsCurrentVersion(bool);
+            }
+
+            @Override
+            public String getVersionComment() {
+                return doc.getVersionComment();
+            }
+
+            @Override
+            public void setVersionComment(String string) {
+                doc.setVersionComment(string);
+            }
+
+            @Override
+            public void setNumberOfVersions(int numberOfVersions) {
+                doc.setNumberOfVersions(numberOfVersions);
+            }
+
+            @Override
+            public int getNumberOfVersions() {
+                return doc.getNumberOfVersions();
+            }
+
+            @Override
+            public Map<String, Object> getMeta() {
+                return Collections.emptyMap();
+            }
+
+            @Override
+            public void setMeta(Map<String, Object> properties) {
+                // nothing to do
+            }
+
+            @Override
+            public File dup() {
+                // not needed here
+                return null;
+            }
+
+            @Override
+            public void copyInto(File other) {
+                // not needed here
+            }
+
+            @Override
+            public void copyFrom(File other) {
+                // not needed here
+            }
+
+            @Override
+            public void copyInto(File other, Field... fields) {
+                // not needed here
+            }
+
+            @Override
+            public void copyFrom(File other, Field... fields) {
+                // not needed here
+            }
+
+            @Override
+            public Set<Field> differences(File other) {
+                // not needed here
+                return null;
+            }
+
+            @Override
+            public boolean equals(File other, Field criterium, Field... criteria) {
+                // not needed here
+                return false;
+            }
+
+            @Override
+            public boolean matches(String pattern, Field... fields) {
+                // not needed here
+                return false;
+            }
+
+        };
+        return file;
     }
 
 }

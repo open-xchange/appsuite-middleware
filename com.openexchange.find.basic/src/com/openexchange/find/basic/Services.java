@@ -54,6 +54,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.mail.service.MailService;
@@ -115,6 +116,10 @@ public class Services {
 
     public static InfostoreSearchEngine getInfostoreSearchEngine() throws OXException {
         return requireService(InfostoreSearchEngine.class);
+    }
+
+    public static FileStorageServiceRegistry getFileStorageServiceRegistry() throws OXException {
+        return requireService(FileStorageServiceRegistry.class);
     }
 
     public static void setServiceLookup(ServiceLookup lookup) {

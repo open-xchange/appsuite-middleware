@@ -102,16 +102,16 @@ public class FolderTypeDisplayItem implements DisplayItem {
     // ----------------------------------------------------------------------------- //
 
     private final Type type;
-    private final String displayName;
+    private final String defaultValue;
 
     /**
      * Initializes a new {@link FolderTypeDisplayItem}.
      *
      * @param type The folder type associated with this display item
      */
-    public FolderTypeDisplayItem(final String displayName, final Type type) {
+    public FolderTypeDisplayItem(final String defaultValue, final Type type) {
         super();
-        this.displayName = displayName;
+        this.defaultValue = defaultValue;
         this.type = type;
     }
 
@@ -127,12 +127,45 @@ public class FolderTypeDisplayItem implements DisplayItem {
 
     @Override
     public String getDefaultValue() {
-        return displayName;
+        return defaultValue;
     }
 
     @Override
     public boolean isLocalizable() {
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
+        result = prime * result + type.ordinal();
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        FolderTypeDisplayItem other = (FolderTypeDisplayItem) obj;
+        if (defaultValue == null) {
+            if (other.defaultValue != null)
+                return false;
+        } else if (!defaultValue.equals(other.defaultValue))
+            return false;
+        if (type.ordinal() != other.type.ordinal())
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleDisplayItem [defaultValue=" + defaultValue + ", type=" + type.getIdentifier() + "]";
     }
 
 }
