@@ -1,3 +1,7 @@
+* 2014-03-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31391: Use dynamically registered key and certificate providers for cloud-based push notifications
+
 * 2014-02-25 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31191: Fixed erroneous permission check.

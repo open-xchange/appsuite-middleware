@@ -22,3 +22,4 @@ Import-Package: com.openexchange.ajax,
  org.apache.commons.logging,
  org.osgi.framework,
  org.slf4j
+Export-Package: com.openexchange.drive.events.gcm

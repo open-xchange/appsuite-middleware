@@ -63,6 +63,7 @@ import javapns.notification.PushedNotification;
 import javapns.notification.PushedNotifications;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
+import com.openexchange.drive.events.apn.APNAccess;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.exception.OXException;
@@ -80,14 +81,16 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(APNDriveEventPublisher.class);
 
-    private final APNAccess access;
-
-    public APNDriveEventPublisher(APNAccess access) {
+    /**
+     * Initializes a new {@link APNDriveEventPublisher}.
+     */
+    public APNDriveEventPublisher() {
         super();
-        this.access = access;
     }
 
     protected abstract String getServiceID();
+
+    protected abstract APNAccess getAccess() throws OXException;
 
     @Override
     public void publish(DriveEvent event) {
@@ -102,10 +105,13 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
             List<PayloadPerDevice> payloads = getPayloads(event, subscriptions);
             PushedNotifications notifications = null;
             try {
+                APNAccess access = getAccess();
                 notifications = Push.payloads(access.getKeystore(), access.getPassword(), access.isProduction(), payloads);
             } catch (CommunicationException e) {
                 LOG.warn("error submitting push notifications", e);
             } catch (KeystoreException e) {
+                LOG.warn("error submitting push notifications", e);
+            } catch (OXException e) {
                 LOG.warn("error submitting push notifications", e);
             }
             processNotificationResults(notifications);
@@ -140,10 +146,13 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
         long start = System.currentTimeMillis();
         List<Device> devices = null;
         try {
-             devices = Push.feedback(access.getKeystore(), access.getPassword(), access.isProduction());
+            APNAccess access = getAccess();
+            devices = Push.feedback(access.getKeystore(), access.getPassword(), access.isProduction());
         } catch (CommunicationException e) {
             LOG.warn("error querying feedback service", e);
         } catch (KeystoreException e) {
+            LOG.warn("error querying feedback service", e);
+        } catch (OXException e) {
             LOG.warn("error querying feedback service", e);
         }
         if (null != devices && 0 < devices.size()) {
