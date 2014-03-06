@@ -3625,6 +3625,30 @@ msgstr ""
 msgid "Quota exceeded. Please delete some items in order to create new ones."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:64
+msgid ""
+"Quota exceeded for calendar. Used %1$s of %2$s. Please delete some "
+"appointments in order to create new ones."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
+msgid ""
+"Quota exceeded for contacts. Used %1$s of %2$s. Please delete some contacts "
+"in order to create new ones."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:68
+msgid ""
+"Quota exceeded for tasks. Used %1$s of %2$s. Please delete some tasks in "
+"order to create new ones."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:70
+msgid ""
+"Quota exceeded for files. Used %1$s of %2$s. Please delete some files in "
+"order to create new ones."
+msgstr ""
+
 #. Could not find a handler for the specified stanza
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
 msgid "Could not find a handler for the given stanza: . \"%1$s\""
