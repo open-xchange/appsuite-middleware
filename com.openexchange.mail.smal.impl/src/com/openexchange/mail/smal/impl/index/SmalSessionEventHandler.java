@@ -114,13 +114,12 @@ public class SmalSessionEventHandler implements EventHandler {
     @Override
     public void handleEvent(final Event event) {
         try {
-            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-            if (session.isTransient()) {
-                return;
-            }
-
             final String topic = event.getTopic();
             if (handleAdded.contains(topic)) {
+                final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                if (null == session || session.isTransient()) {
+                    return;
+                }
 
                 final ThreadPoolService threadPool = SmalServiceLookup.getInstance().getService(ThreadPoolService.class);
                 if (null == threadPool) {
