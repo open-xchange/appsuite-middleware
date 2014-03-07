@@ -118,6 +118,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
 
     @Override
     public String getScope() {
+        // TODO: "xmpp_login" for RTC chat access
         return "offline_access,publish_stream,read_stream,status_update,user_about_me,friends_about_me," +
         		"user_activities,friends_activities,user_birthday,friends_birthday,user_education_history," +
         		"friends_education_history,user_events,friends_events,user_hometown,friends_hometown," +
