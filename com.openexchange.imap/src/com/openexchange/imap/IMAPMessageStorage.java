@@ -3341,8 +3341,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Remove all old color label flag(s) and set new color label flag
                  */
                 imapFolderStorage.removeFromCache(fullName);
-                IMAPCommandsCollection.clearAllColorLabels(imapFolder, msgUIDs);
-                IMAPCommandsCollection.setColorLabel(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
+                IMAPCommandsCollection.clearAndSetColorLabelSafely(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
+
                 /*
                  * Force JavaMail's cache update through folder closure
                  */
@@ -3408,8 +3408,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Remove all old color label flag(s) and set new color label flag
                  */
                 imapFolderStorage.removeFromCache(fullName);
-                IMAPCommandsCollection.clearAllColorLabels(imapFolder, null);
-                IMAPCommandsCollection.setColorLabel(imapFolder, null, MailMessage.getColorLabelStringValue(colorLabel));
+
+                IMAPCommandsCollection.clearAndSetColorLabelSafely(imapFolder, null, MailMessage.getColorLabelStringValue(colorLabel));
                 /*
                  * Force JavaMail's cache update through folder closure
                  */
