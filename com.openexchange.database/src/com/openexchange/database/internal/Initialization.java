@@ -108,7 +108,6 @@ public final class Initialization {
         pools.addLifeCycle(configDBLifeCycle);
         // Configuration database connection pool service.
         configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor);
-        // Context database assignments.
         if (null != cacheService) {
             configDatabaseService.setCacheService(cacheService);
         }

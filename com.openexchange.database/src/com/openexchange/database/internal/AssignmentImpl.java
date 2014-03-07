@@ -117,7 +117,6 @@ public class AssignmentImpl implements Serializable, Assignment {
         return schema;
     }
 
-    @Override
     public boolean isToConfigDB() {
         return Constants.CONFIGDB_WRITE_ID == writePoolId;
     }

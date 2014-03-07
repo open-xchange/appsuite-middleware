@@ -1369,10 +1369,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         final int serverId = ClientAdminThread.cache.getServerId();
         ClientAdminThread.cache.getPool().writeAssignment(con, new Assignment() {
             @Override
-            public boolean isToConfigDB() {
-                return false;
-            }
-            @Override
             public int getWritePoolId() {
                 return i(db.getId());
             }
