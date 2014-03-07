@@ -58,9 +58,13 @@
 
  - Fix for bug 31555: Also check standard folders' subscribed status in case SPECIAL-USE capability is supported by IMAP server
  
- * 2014-03-07 - jan.bauerdick@open-xchange.com
+* 2014-03-07 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 31335: Fixed/Added missing dependencies on update tasks
+ 
+* 2024-03-07 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 31448: [L3] Backend mistakes IMAP with SMTP password entries by updating external mail account credentials 
 
 * 2014-03-07 - marcus.klein@open-xchange.com
 
