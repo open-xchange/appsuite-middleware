@@ -78,7 +78,21 @@ interface ContextDatabaseAssignmentService {
      */
     void invalidateAssignment(int contextId) throws OXException;
 
+    /**
+     * Writes a database assignment for a context into the database. Normally this is done within a transaction on the config database.
+     * Therefore a connection to the config database must be given. This connections needs to be to the write host and in a transaction.
+     * This method can overwrite existing assignments.
+     * @param con writable database connection to the config database.
+     * @param assignment database assignment for a context that should be written.
+     * @throws OXException if writing to the persistent storage fails.
+     */
     void writeAssignment(Connection con, Assignment assignment) throws OXException;
 
+    /**
+     * Deletes a database assignment for the given context. This should be done within a transaction on the config database.
+     * @param con writable database connection to the config database. This connection should be in a transaction.
+     * @param contextId identifier of the context that database assignment should be deleted.
+     * @throws OXException if deleting in the persistent storage fails.
+     */
     void deleteAssignment(Connection con, int contextId) throws OXException;
 }
