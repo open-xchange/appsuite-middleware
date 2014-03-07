@@ -1,5 +1,7 @@
 * 2014-03-07 - marcus.klein@open-xchange.com
 
+ - Fix for bug 31154: Necessary Ant tasks for our build system have not be available by default on Debian Squeeze but on Wheezy. Adding an
+   additional JAR to the build call on Debian Squeeze systems when using CDBS for building.
  - Fix for bug 31405: Implementation of move context now uses existing functionality to update context to database mapping that takes care
    about MySQL master/slave setups.
 
