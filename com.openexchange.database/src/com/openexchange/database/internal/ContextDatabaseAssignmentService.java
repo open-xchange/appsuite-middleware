@@ -95,4 +95,19 @@ interface ContextDatabaseAssignmentService {
      * @throws OXException if deleting in the persistent storage fails.
      */
     void deleteAssignment(Connection con, int contextId) throws OXException;
+
+    /**
+     * Determines all context IDs which reside in given schema.
+     * @param con a connection to the config database. It must be to the write host and in a transaction if the parameter lock is <code>true</code>.
+     * @param schema the database schema
+     * @param writePoolId corresponding write pool ID (master database)
+     * @param lock <code>true</code> and a connection to the write host and in a transaction will create row locks on the read lines.
+     * @return an array of <code>int</code> representing all retrieved context identifier
+     * @throws OXException if there is no connection to the config database slave is available or reading from the database fails.
+     */
+    int[] getContextsFromSchema(Connection con, int writePoolId, String schema, boolean lock) throws OXException;
+
+    int[] getContextsInDatabase(int poolId) throws OXException;
+
+    String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts, boolean lock) throws OXException;
 }
