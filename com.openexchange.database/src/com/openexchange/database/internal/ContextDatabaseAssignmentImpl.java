@@ -51,10 +51,14 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
@@ -80,6 +84,10 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final String INSERT = "INSERT INTO context_server2db_pool (read_db_pool_id,write_db_pool_id,db_schema,server_id,cid) VALUES (?,?,?,?,?)";
     private static final String UPDATE = "UPDATE context_server2db_pool SET read_db_pool_id=?,write_db_pool_id=?,db_schema=? WHERE server_id=? AND cid=?";
     private static final String DELETE = "DELETE FROM context_server2db_pool WHERE cid=? AND server_id=?";
+    private static final String CONTEXTS_IN_SCHEMA = "SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?";
+    private static final String CONTEXTS_IN_DATABASE = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
+    private static final String NOTFILLED = "SELECT db_schema,COUNT(db_schema) AS count FROM context_server2db_pool WHERE write_db_pool_id=? GROUP BY db_schema HAVING count<? ORDER BY count ASC";
+    private static final String FOR_UPDATE = " FOR UPDATE";
 
     private final ConfigDatabaseService configDatabaseService;
 
@@ -241,6 +249,92 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     public void deleteAssignment(Connection con, int contextId) throws OXException {
         deleteAssignmentDB(con, contextId);
         invalidateAssignment(contextId);
+    }
+
+    @Override
+    public int[] getContextsFromSchema(Connection con, int writePoolId, String schema, boolean lock) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (lock && con.getAutoCommit()) {
+                throw new SQLException("The row lock can only be obtained if the connection is in a transaction.");
+            }
+            stmt = con.prepareStatement(CONTEXTS_IN_SCHEMA + (lock ? FOR_UPDATE : ""));
+            stmt.setInt(1, Server.getServerId());
+            stmt.setInt(2, writePoolId);
+            stmt.setString(3, schema);
+            rs = stmt.executeQuery();
+            final TIntList tmp = new TIntLinkedList();
+            while (rs.next()) {
+                tmp.add(rs.getInt(1));
+            }
+            return tmp.toArray();
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private static int[] listContexts(Connection con, int poolId) throws OXException {
+        final List<Integer> tmp = new LinkedList<Integer>();
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(CONTEXTS_IN_DATABASE);
+            stmt.setInt(1, poolId);
+            stmt.setInt(2, poolId);
+            result = stmt.executeQuery();
+            while (result.next()) {
+                tmp.add(I(result.getInt(1)));
+            }
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        final int[] retval = new int[tmp.size()];
+        for (int i = 0; i < tmp.size(); i++) {
+            retval[i] = tmp.get(i).intValue();
+        }
+        return retval;
+    }
+
+    @Override
+    public int[] getContextsInDatabase(int poolId) throws OXException {
+        final Connection con = configDatabaseService.getReadOnly();
+        try {
+            return listContexts(con, poolId);
+        } finally {
+            configDatabaseService.backReadOnly(con);
+        }
+    }
+
+    @Override
+    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts, boolean lock) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        List<String> retval = new LinkedList<String>();
+        try {
+            if (lock && con.getAutoCommit()) {
+                throw new SQLException("The row lock can only be obtained if the connection is in a transaction.");
+            }
+            stmt = con.prepareStatement(NOTFILLED + (lock ? FOR_UPDATE : ""));
+            stmt.setInt(1, poolId);
+            stmt.setInt(2, maxContexts);
+            result = stmt.executeQuery();
+            while (result.next()) {
+                String schema = result.getString(1);
+                int count = result.getInt(2);
+                LOG.debug("schema {} is filled with {} contexts.", schema, I(count));
+                retval.add(schema);
+            }
+        } catch (final SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        return retval.toArray(new String[retval.size()]);
     }
 
     void setCacheService(final CacheService service) {
