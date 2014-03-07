@@ -3666,8 +3666,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:70
 msgid ""
-"Quota exceeded for files. Quota limit: %2$s. Quota used: %1$s.. Please "
-"delete some files in order to create new ones."
+"Quota exceeded for files. Quota limit: %2$s. Quota used: %1$s. Please delete "
+"some files in order to create new ones."
 msgstr ""
 
 #. Could not find a handler for the specified stanza
