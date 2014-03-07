@@ -1,3 +1,7 @@
+* 2024-03-07 - ioannis.chouklis@open-xchange.com
+
+- Fix for bug 31448: [L3] Backend mistakes IMAP with SMTP password entries by updating external mail account credentials 
+
 * 2014-03-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 31154: Necessary Ant tasks for our build system have not be available by default on Debian Squeeze but on Wheezy. Adding an
