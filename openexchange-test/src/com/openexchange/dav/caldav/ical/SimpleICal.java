@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.lang.StringEscapeUtils;
+import com.openexchange.dav.caldav.ICalResource;
 
 
 /**
@@ -101,6 +102,11 @@ public class SimpleICal {
             this.name = name;
             this.properties = new ArrayList<SimpleICal.Property>();
             this.components = new ArrayList<SimpleICal.Component>();
+        }
+
+        public Component getVAlarm() {
+            List<Component> components = getComponents(ICalResource.VALARM);
+            return 0 < components.size() ? components.get(0) : null;
         }
 
     	public String getUID() {
