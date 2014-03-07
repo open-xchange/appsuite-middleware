@@ -105,6 +105,8 @@ public class ID implements Serializable {
     
     private static final ConcurrentHashMap<ID, Boolean> DISPOSING = new ConcurrentHashMap<ID, Boolean>();
     
+    public static final String INTERNAL_CONTEXT = "internal";
+    
     
     private String protocol;
     private String component;
@@ -554,6 +556,14 @@ public class ID implements Serializable {
         } finally {
             DISPOSING.remove(this);
         }
+    }
+
+    /**
+     * Check whether this {@link ID} represents an internal client.
+     * @return false if this {@link ID} doesn't represent an internal client, true otherwise.
+     */
+    public boolean isInternal() {
+        return INTERNAL_CONTEXT.equals(context);
     }
 
     /**

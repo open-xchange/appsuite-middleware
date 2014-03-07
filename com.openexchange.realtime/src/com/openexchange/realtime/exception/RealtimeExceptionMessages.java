@@ -112,6 +112,7 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     /** The server has no state associated with this client. Please enrol first. */
     public static final String STATE_MISSING_MSG = "The server has no state associated with this client. Please enrol first.";
     
-    
+    /** You are no member of the GroupDispatcher: %1$s. Please join first. */
+    public static final String NOT_A_MEMBER_MSG = "You are no member of the GroupDispatcher: %1$s. Please join first.";
 
 }

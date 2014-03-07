@@ -140,7 +140,7 @@ public class ResponseChannel implements Channel{
      * @return an channel specific internal ID
      */
     private ID getId(String uuid) {
-        ID id = new ID(getProtocol(), uuid, "internal", "");
+        ID id = new ID(getProtocol(), uuid, ID.INTERNAL_CONTEXT, "");
         return id;
     }
 

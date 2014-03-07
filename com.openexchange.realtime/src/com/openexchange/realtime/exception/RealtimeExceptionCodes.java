@@ -134,7 +134,9 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
     /** Invalid sequence detected.*/
     SEQUENCE_INVALID(RealtimeExceptionMessages.SEQUENCE_INVALID_MSG, CATEGORY_ERROR, 1006, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST),
     /** The server has no state associated with this client. Please enrol first. */
-    STATE_MISSING(RealtimeExceptionMessages.STATE_MISSING_MSG, CATEGORY_ERROR, 1007, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST)
+    STATE_MISSING(RealtimeExceptionMessages.STATE_MISSING_MSG, CATEGORY_ERROR, 1007, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST),
+    /** You are no member of the GroupDispatcher: %1$s. Please join first. */
+    NOT_A_MEMBER(RealtimeExceptionMessages.NOT_A_MEMBER_MSG, CATEGORY_ERROR, 1008, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST)
     ;
 
     private int number;

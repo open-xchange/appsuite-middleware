@@ -181,9 +181,30 @@ public class GroupDispatcher implements ComponentHandle {
      * @throws OXException
      */
     protected void processStanza(Stanza stanza) throws OXException {
-        if (handler == null || !handler.callMethod(this, stanza)) {
-            defaultAction(stanza);
+        ID sender = stanza.getFrom();
+        if (isWhitelisted(sender) || isMember(sender)) {
+            if (handler == null || !handler.callMethod(this, stanza)) {
+                defaultAction(stanza);
+            }
+        } else {
+            LOG.error("Refusing to send to GroupDispatcher {} as sender is no member of the GrupDispatcher {}", stanza.getFrom(), groupId);
+            send(new NotMember(groupId, sender));
         }
+    }
+
+    /**
+     * Check if the sender is whitelisted iow. always allowed to send {@link Stanza}s to {@ GroupDispatcher}s although he isn't a member.
+     * @param sender The sender of the {@link Stanza}
+     * @return true if the user is always allowed to send e.g. is a synthetic component from an internal context
+     */
+    private boolean isWhitelisted(ID sender) {
+        if(
+            sender != null 
+            && sender.isInternal()
+          ) {
+            return true;
+        }
+        return false;
     }
 
     private boolean handleGroupCommand(Stanza stanza) throws OXException {
