@@ -67,7 +67,7 @@ public final class QuotaExceptionMessages implements LocalizableStrings {
 
     public static final String QUOTA_EXCEEDED_TASKS_MSG = "Quota exceeded for tasks. Quota limit: %2$s. Quota used: %1$s. Please delete some tasks in order to create new ones.";
 
-    public static final String QUOTA_EXCEEDED_FILES_MSG = "Quota exceeded for files. Quota limit: %2$s. Quota used: %1$s.. Please delete some files in order to create new ones.";
+    public static final String QUOTA_EXCEEDED_FILES_MSG = "Quota exceeded for files. Quota limit: %2$s. Quota used: %1$s. Please delete some files in order to create new ones.";
 
     /**
      * Initializes a new {@link QuotaExceptionMessages}.
