@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,21 @@
  *
  */
 
-package com.openexchange.subscribe.crawler.osgi;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.data.conversion.ical.ICalParser;
+package com.openexchange.subscribe.crawler;
 
 
 /**
- * {@link IcalParserRegisterer}
+ * {@link CrawlerBlacklister} - Adds a specific crawler to crawler black-list.
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ICalParserRegisterer implements ServiceTrackerCustomizer<ICalParser,ICalParser> {
+public interface CrawlerBlacklister {
 
-    private final BundleContext context;
-    private final CrawlersActivator activator;
-
-    public ICalParserRegisterer(final BundleContext context, final CrawlersActivator activator) {
-        super();
-        this.context = context;
-        this.activator = activator;
-    }
-
-    @Override
-    public ICalParser addingService(final ServiceReference<ICalParser> reference) {
-        final ICalParser iCalParser = context.getService(reference);
-        activator.setICalParser(iCalParser);
-        return iCalParser;
-    }
-
-    @Override
-    public void modifiedService(final ServiceReference<ICalParser> reference, final ICalParser service) {
-        //nothing to do here
-    }
-
-    @Override
-    public void removedService(final ServiceReference<ICalParser> reference, final ICalParser service) {
-        activator.setICalParser(null);
-        context.ungetService(reference);
-    }
+    /**
+     * Gets the identifier of the crawler to black-list.
+     *
+     * @return The crawler identifier
+     */
+    String getCrawlerId();
 
 }

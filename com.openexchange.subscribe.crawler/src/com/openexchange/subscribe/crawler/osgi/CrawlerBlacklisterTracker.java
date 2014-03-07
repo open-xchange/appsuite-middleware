@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,40 +52,47 @@ package com.openexchange.subscribe.crawler.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.subscribe.crawler.CrawlerBlacklister;
 
 
 /**
- * {@link IcalParserRegisterer}
+ * {@link CrawlerBlacklisterTracker}
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ICalParserRegisterer implements ServiceTrackerCustomizer<ICalParser,ICalParser> {
+public final class CrawlerBlacklisterTracker implements ServiceTrackerCustomizer<CrawlerBlacklister, CrawlerBlacklister> {
 
     private final BundleContext context;
-    private final CrawlersActivator activator;
+    private final CrawlersActivator crawlersActivator;
 
-    public ICalParserRegisterer(final BundleContext context, final CrawlersActivator activator) {
+    /**
+     * Initializes a new {@link CrawlerBlacklisterTracker}.
+     */
+    public CrawlerBlacklisterTracker(final BundleContext context, final CrawlersActivator crawlersActivator) {
         super();
         this.context = context;
-        this.activator = activator;
+        this.crawlersActivator = crawlersActivator;
     }
 
     @Override
-    public ICalParser addingService(final ServiceReference<ICalParser> reference) {
-        final ICalParser iCalParser = context.getService(reference);
-        activator.setICalParser(iCalParser);
-        return iCalParser;
+    public CrawlerBlacklister addingService(final ServiceReference<CrawlerBlacklister> reference) {
+        final CrawlerBlacklister blacklister = context.getService(reference);
+        if (crawlersActivator.blacklistSingleCrawler(blacklister.getCrawlerId())) {
+            return blacklister;
+        }
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<ICalParser> reference, final ICalParser service) {
-        //nothing to do here
+    public void modifiedService(final ServiceReference<CrawlerBlacklister> reference, final CrawlerBlacklister blacklister) {
+        // TODO Auto-generated method stub
+
     }
 
     @Override
-    public void removedService(final ServiceReference<ICalParser> reference, final ICalParser service) {
-        activator.setICalParser(null);
+    public void removedService(final ServiceReference<CrawlerBlacklister> reference, final CrawlerBlacklister blacklister) {
+        crawlersActivator.unblacklistSingleCrawler(blacklister.getCrawlerId());
         context.ungetService(reference);
     }
 

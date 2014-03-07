@@ -61,6 +61,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
+import com.openexchange.subscribe.crawler.CrawlerBlacklister;
 import com.openexchange.subscribe.xing.Services;
 import com.openexchange.subscribe.xing.XingSubscribeService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -75,6 +76,7 @@ import com.openexchange.xing.access.XingOAuthAccessProvider;
 public final class XingSubscribeActivator extends HousekeepingActivator {
 
     private ServiceRegistration<SubscribeService> serviceRegistration;
+    private ServiceRegistration<CrawlerBlacklister> blacklisterRegistration;
 
     /**
      * Initializes a new {@link XingSubscribeActivator}.
@@ -114,6 +116,14 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
      */
     public synchronized void registerSubscribeService() {
         if (null == serviceRegistration) {
+            final CrawlerBlacklister blacklister = new CrawlerBlacklister() {
+
+                @Override
+                public String getCrawlerId() {
+                    return "com.openexchange.subscribe.xing";
+                }
+            };
+            blacklisterRegistration = context.registerService(CrawlerBlacklister.class, blacklister, null);
             serviceRegistration = context.registerService(SubscribeService.class, new XingSubscribeService(this), null);
             org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was started");
         }
@@ -127,8 +137,13 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
             this.serviceRegistration = null;
-            org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was stopped");
         }
+        final ServiceRegistration<CrawlerBlacklister> blacklisterRegistration = this.blacklisterRegistration;
+        if (null != blacklisterRegistration) {
+            blacklisterRegistration.unregister();
+            this.blacklisterRegistration = null;
+        }
+        org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was stopped");
     }
 
     /**
