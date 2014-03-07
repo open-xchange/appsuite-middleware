@@ -74,7 +74,7 @@ public class InfostoreDocumentCreateForeignKeyUpdateTask extends UpdateTaskAdapt
 
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { InfostorePrimaryKeyUpdateTask.class.getName() };
     }
 
 }

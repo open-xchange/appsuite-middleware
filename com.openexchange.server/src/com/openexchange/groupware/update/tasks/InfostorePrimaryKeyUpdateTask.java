@@ -110,7 +110,7 @@ public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { InfostoreDocumentDropForeignKeyUpdateTask.class.getName() };
     }
 
 }
