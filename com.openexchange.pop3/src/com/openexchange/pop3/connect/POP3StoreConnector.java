@@ -69,6 +69,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.pop3.POP3ExceptionCode;
@@ -219,7 +220,7 @@ public final class POP3StoreConnector {
         super();
     }
 
-    public static POP3StoreResult getUnconnectedPOP3Store(final POP3Config pop3Config, final Properties pop3Properties, final Session session) throws OXException {
+    public static POP3StoreResult getUnconnectedPOP3Store(final POP3Config pop3Config, final Properties pop3Properties, final Session session, final boolean forceSecure) throws OXException {
         try {
             final boolean tmpDownEnabled = (POP3Properties.getInstance().getPOP3TemporaryDown() > 0);
             if (tmpDownEnabled) {
@@ -307,6 +308,9 @@ public final class POP3StoreConnector {
                 /*
                  * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
                  */
+                if (forceSecure && staticCapabilities.indexOf("STLS") < 0) {
+                    throw MailExceptionCode.NON_SECURE_DENIED.create(pop3Config.getServer());
+                }
                 pop3Props.put("mail.pop3.starttls.enable", "true");
                 /*
                  * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create POP3 SSL sockets if TLS handshake says
@@ -362,7 +366,7 @@ public final class POP3StoreConnector {
      * @return A connected instance of {@link POP3Store}
      * @throws OXException If establishing a connected instance of {@link POP3Store} fails
      */
-    public static POP3StoreResult getPOP3Store(final POP3Config pop3Config, final Properties pop3Properties, final boolean monitorFailedAuthentication, final Session session, final boolean errorOnMissingUIDL) throws OXException {
+    public static POP3StoreResult getPOP3Store(final POP3Config pop3Config, final Properties pop3Properties, final boolean monitorFailedAuthentication, final Session session, final boolean errorOnMissingUIDL, final boolean forceSecure) throws OXException {
         try {
             final boolean tmpDownEnabled = (POP3Properties.getInstance().getPOP3TemporaryDown() > 0);
             if (tmpDownEnabled) {
@@ -450,6 +454,9 @@ public final class POP3StoreConnector {
                 /*
                  * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
                  */
+                if (forceSecure && staticCapabilities.indexOf("STLS") < 0) {
+                    throw MailExceptionCode.NON_SECURE_DENIED.create(pop3Config.getServer());
+                }
                 pop3Props.put("mail.pop3.starttls.enable", "true");
                 /*
                  * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create POP3 SSL sockets if TLS handshake says

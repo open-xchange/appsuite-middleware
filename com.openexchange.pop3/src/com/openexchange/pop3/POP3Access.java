@@ -388,17 +388,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         checkFieldsBeforeConnect(config);
         POP3Store pop3Store = null;
         try {
-            pop3Store = POP3StoreConnector.getUnconnectedPOP3Store(config, getMailProperties(), session).getPop3Store();
-            // Check for secure connection
-            if (MailProperties.getInstance().isEnforceSecureConnection()) {
-                try {
-                    if (!config.isSecure() && !pop3Store.capabilities().containsKey("STLS")) {
-                        throw MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
-                    }
-                } catch (final MessagingException e) {
-                    throw MimeMailException.handleMessagingException(e, config, session);
-                }
-            }
             /*-
              * Some POP3 accounts specify a connect frequency limitation,
              * therefore skip ping check if:
@@ -416,7 +405,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             /*
              * Try to authenticate
              */
-            pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session, false).getPop3Store();
+            pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session, false, MailProperties.getInstance().isEnforceSecureConnection()).getPop3Store();
             /*
              * Add warning if non-secure
              */

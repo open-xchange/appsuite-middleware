@@ -666,7 +666,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             {
                 final Class<? extends IMAPStore> clazz = useIMAPStoreCache() ? IMAPStoreCache.getInstance().getStoreClass() : JavaIMAPStore.class;
-                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz);
+                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, accountId > 0 && MailProperties.getInstance().isEnforceSecureConnection());
             }
             /*
              * Check if debug should be enabled
@@ -1192,10 +1192,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     protected IMailProperties createNewMailProperties() throws OXException {
         final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
         return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
-    }
-
-    private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps, final Class<? extends IMAPStore> storeClass) throws OXException {
-        return setConnectProperties(config, timeout, connectionTimeout, imapProps, storeClass, false);
     }
 
     private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps, final Class<? extends IMAPStore> storeClass, final boolean forceSecure) throws OXException {

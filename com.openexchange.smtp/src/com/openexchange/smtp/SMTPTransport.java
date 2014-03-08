@@ -333,7 +333,7 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private javax.mail.Session getSMTPSession() throws OXException {
-        return getSMTPSession(false);
+        return getSMTPSession(accountId > 0 && MailProperties.getInstance().isEnforceSecureConnection());
     }
 
     private javax.mail.Session getSMTPSession(final boolean forceSecure) throws OXException {
