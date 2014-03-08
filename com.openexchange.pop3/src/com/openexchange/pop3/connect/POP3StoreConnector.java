@@ -219,6 +219,138 @@ public final class POP3StoreConnector {
         super();
     }
 
+    public static POP3StoreResult getUnconnectedPOP3Store(final POP3Config pop3Config, final Properties pop3Properties, final Session session) throws OXException {
+        try {
+            final boolean tmpDownEnabled = (POP3Properties.getInstance().getPOP3TemporaryDown() > 0);
+            if (tmpDownEnabled) {
+                /*
+                 * Check if POP3 server is marked as being (temporary) down since connecting to it failed before
+                 */
+                checkTemporaryDown(pop3Config);
+            }
+            /*
+             * Check capabilities
+             */
+            final IPOP3Properties pop3ConfProps = (IPOP3Properties) pop3Config.getMailProperties();
+            final String server = pop3Config.getServer();
+            final int port = pop3Config.getPort();
+            String staticCapabilities;
+            try {
+                staticCapabilities =
+                    POP3CapabilityCache.getCapability(
+                        InetAddress.getByName(IDNA.toASCII(server)),
+                        port,
+                        pop3Config.isSecure(),
+                        pop3ConfProps,
+                        pop3Config.getLogin());
+            } catch (final Exception e) {
+                LOG.warn("Couldn't detect capabilities from POP3 server \"{}\" with login \"{}\" (user={}, context={})", server, pop3Config.getLogin(), session.getUserId(), session.getContextId(), e);
+                staticCapabilities = POP3CapabilityCache.getDeaultCapabilities();
+            }
+            /*
+             * JavaMail POP3 implementation requires capabilities "UIDL" and "TOP"
+             */
+            final POP3StoreResult result = new POP3StoreResult(staticCapabilities);
+            final String login = pop3Config.getLogin();
+            boolean responseCodeAware = staticCapabilities.indexOf("RESP-CODES") >= 0;
+            String tmpPass = pop3Config.getPassword();
+            if (tmpPass != null) {
+                try {
+                    tmpPass = new String(tmpPass.getBytes(POP3Properties.getInstance().getPOP3AuthEnc()), com.openexchange.java.Charsets.ISO_8859_1);
+                } catch (final UnsupportedEncodingException e) {
+                    LOG.error("", e);
+                }
+            }
+            /*
+             * Check for already failed authentication
+             */
+            checkFailedAuths(login, tmpPass);
+            /*
+             * Get properties
+             */
+            final Properties pop3Props = POP3SessionProperties.getDefaultSessionProperties();
+            if ((null != pop3Properties) && !pop3Properties.isEmpty()) {
+                pop3Props.putAll(pop3Properties);
+            }
+            /*
+             * Set timeouts
+             */
+            final int timeout = pop3ConfProps.getPOP3Timeout();
+            if (timeout > 0) {
+                pop3Props.put("mail.pop3.timeout", String.valueOf(timeout));
+            }
+            final int connectionTimeout = pop3ConfProps.getPOP3ConnectionTimeout();
+            if (connectionTimeout > 0) {
+                pop3Props.put("mail.pop3.connectiontimeout", String.valueOf(connectionTimeout));
+            }
+            /*
+             * Check if a secure POP3 connection should be established.
+             *
+             * With JavaMail v1.4.3 the JavaMail POP3 provider supports to start in plain text mode and
+             * then switching the connection into TLS mode using the STLS command.
+             */
+            final String sPort = String.valueOf(port);
+            final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+            if (pop3Config.isSecure()) {
+                pop3Props.put("mail.pop3.socketFactory.class", socketFactoryClass);
+                pop3Props.put("mail.pop3.socketFactory.port", sPort);
+                pop3Props.put("mail.pop3.socketFactory.fallback", "false");
+                /*
+                 * Needed for JavaMail >= 1.4
+                 */
+                // Security.setProperty("ssl.SocketFactory.provider", TrustAllSSLSocketFactory.class.getName());
+                /*
+                 * Specify SSL protocols
+                 */
+                pop3Props.put("mail.pop3.ssl.protocols", "SSLv3");
+            } else {
+                /*
+                 * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
+                 */
+                pop3Props.put("mail.pop3.starttls.enable", "true");
+                /*
+                 * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create POP3 SSL sockets if TLS handshake says
+                 * so.
+                 */
+                pop3Props.put("mail.pop3.socketFactory.port", sPort);
+                pop3Props.put("mail.pop3.ssl.socketFactory.class", socketFactoryClass);
+                pop3Props.put("mail.pop3.ssl.socketFactory.port", sPort);
+                pop3Props.put("mail.pop3.socketFactory.fallback", "false");
+                /*
+                 * Specify SSL protocols
+                 */
+                pop3Props.put("mail.pop3.ssl.protocols", "SSLv3 TLSv1");
+                // pop3Props.put("mail.pop3.ssl.enable", "true");
+                /*
+                 * Needed for JavaMail >= 1.4
+                 */
+                // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+            }
+            /*
+             * Apply properties to POP3 session
+             */
+            final javax.mail.Session pop3Session = javax.mail.Session.getInstance(pop3Props, null);
+            /*
+             * Check if debug should be enabled
+             */
+            if (Boolean.parseBoolean(pop3Session.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
+                pop3Session.setDebug(true);
+                pop3Session.setDebugOut(System.out);
+            } else {
+                pop3Session.setDebug(false);
+                pop3Session.setDebugOut(EMPTY_PRINTER);
+            }
+            /*
+             * Get store
+             */
+            final POP3Store pop3Store = (POP3Store) pop3Session.getStore(POP3Provider.PROTOCOL_POP3.getName());
+            result.setPop3Store(pop3Store);
+            return result;
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e, pop3Config, session);
+        }
+    }
+
     /**
      * Gets a connected instance of {@link POP3Store}.
      *

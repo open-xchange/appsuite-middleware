@@ -68,6 +68,7 @@ import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -383,34 +384,39 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     @Override
     public boolean ping() throws OXException {
-        /*-
-         * Some POP3 accounts specify a connect frequency limitation,
-         * therefore skip ping check if:
-         *
-         * com.openexchange.pop3.allowPing=false
-         */
-        final ConfigurationService service = POP3ServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-        if (null == service || !service.getBoolProperty("com.openexchange.pop3.allowPing", false)) {
-            if (null == service || service.getBoolProperty("com.openexchange.pop3.logDeniedPing", true)) {
-                warnings.add(POP3ExceptionCode.VALIDATE_DENIED.create());
-            }
-            return true;
-        }
-        /*
-         * Ping allowed by configuration service
-         */
         final POP3Config config = getPOP3Config();
         checkFieldsBeforeConnect(config);
+        POP3Store pop3Store = null;
         try {
-            final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session, false).getPop3Store();
-            /*
-             * Close quietly
-             */
-            try {
-                pop3Store.close();
-            } catch (final MessagingException e) {
-                LOG.warn("", e);
+            pop3Store = POP3StoreConnector.getUnconnectedPOP3Store(config, getMailProperties(), session).getPop3Store();
+            // Check for secure connection
+            if (MailProperties.getInstance().isEnforceSecureConnection()) {
+                try {
+                    if (!config.isSecure() && !pop3Store.capabilities().containsKey("STLS")) {
+                        throw MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
+                    }
+                } catch (final MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e, config, session);
+                }
             }
+            /*-
+             * Some POP3 accounts specify a connect frequency limitation,
+             * therefore skip ping check if:
+             *
+             * com.openexchange.pop3.allowPing=false
+             */
+            final ConfigurationService service = POP3ServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+            if (null == service || !service.getBoolProperty("com.openexchange.pop3.allowPing", false)) {
+                if (null == service || service.getBoolProperty("com.openexchange.pop3.logDeniedPing", true)) {
+                    warnings.add(POP3ExceptionCode.VALIDATE_DENIED.create());
+                }
+                return true;
+            }
+            closeQuietly(pop3Store);
+            /*
+             * Try to authenticate
+             */
+            pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session, false).getPop3Store();
             /*
              * Add warning if non-secure
              */
@@ -427,6 +433,11 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             }
         } catch (final OXException e) {
             throw e;
+        } finally {
+            /*
+             * Close quietly
+             */
+            closeQuietly(pop3Store);
         }
         return true;
     }
@@ -573,6 +584,16 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             return new MailAccountPOP3Properties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final OXException e) {
             throw e;
+        }
+    }
+
+    private static void closeQuietly(POP3Store pop3Store) {
+        if (null != pop3Store) {
+            try {
+                pop3Store.close();
+            } catch (final MessagingException e) {
+                LOG.warn("", e);
+            }
         }
     }
 

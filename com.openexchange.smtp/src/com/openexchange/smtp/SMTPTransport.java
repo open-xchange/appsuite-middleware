@@ -333,6 +333,10 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private javax.mail.Session getSMTPSession() throws OXException {
+        return getSMTPSession(false);
+    }
+
+    private javax.mail.Session getSMTPSession(final boolean forceSecure) throws OXException {
         if (null == smtpSession) {
             synchronized (this) {
                 if (null == smtpSession) {
@@ -421,6 +425,9 @@ public final class SMTPTransport extends MailTransport {
                             final Map<String, String> capabilities = SMTPCapabilityCache.getCapabilities(address, smtpConfig.isSecure(), smtpProperties, hostName);
                             if (capabilities.containsKey("STARTTLS")) {
                                 smtpProps.put("mail.smtp.starttls.enable", "true");
+                            } else if (forceSecure) {
+                                // No SSL demanded and SMTP server seems not to support TLS
+                                throw MailExceptionCode.NON_SECURE_DENIED.create(smtpConfig.getServer());
                             }
                         } catch (final IOException e) {
                             smtpProps.put("mail.smtp.starttls.enable", "true");
@@ -1090,7 +1097,7 @@ public final class SMTPTransport extends MailTransport {
         // Connect to SMTP server
         final Transport transport;
         try {
-            transport = getSMTPSession().getTransport(SMTP);
+            transport = getSMTPSession(MailProperties.getInstance().isEnforceSecureConnection()).getTransport(SMTP);
         } catch (final NoSuchProviderException e) {
             throw MimeMailException.handleMessagingException(e);
         }

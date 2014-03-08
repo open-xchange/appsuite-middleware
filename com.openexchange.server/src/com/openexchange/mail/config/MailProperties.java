@@ -190,6 +190,8 @@ public final class MailProperties implements IMailProperties {
     /** The ranges for account black-list */
     private List<IPRange> accountBlacklistRanges;
 
+    private boolean enforceSecureConnection;
+
     /**
      * Initializes a new {@link MailProperties}
      */
@@ -281,6 +283,7 @@ public final class MailProperties implements IMailProperties {
         authProxyDelimiter = null;
         supportMsisdnAddresses = false;
         accountBlacklistRanges = null;
+        enforceSecureConnection = false;
     }
 
     private void loadProperties0() throws OXException {
@@ -482,6 +485,12 @@ public final class MailProperties implements IMailProperties {
             final String tmp = configuration.getProperty("com.openexchange.mail.addClientIPAddress", "false").trim();
             addClientIPAddress = Boolean.parseBoolean(tmp);
             logBuilder.append("\tAdd Client IP Address: ").append(addClientIPAddress).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.enforceSecureConnection", "false").trim();
+            enforceSecureConnection = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tEnforced secure connections to external accounts: ").append(enforceSecureConnection).append('\n');
         }
 
         {
@@ -718,6 +727,15 @@ public final class MailProperties implements IMailProperties {
     @Override
     public int getAttachDisplaySize() {
         return attachDisplaySize;
+    }
+
+    /**
+     * Signals whether secure connections to external accounts are mandatory.
+     *
+     * @return <code>true</code> if secure connections are enforced; otherwise <code>false</code>
+     */
+    public boolean isEnforceSecureConnection() {
+        return enforceSecureConnection;
     }
 
     /**

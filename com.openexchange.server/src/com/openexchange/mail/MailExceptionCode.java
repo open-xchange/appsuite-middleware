@@ -507,6 +507,11 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      */
     PING_FAILED_AUTH("Ping to server %1$s failed with login %2$s due to invalid credentials.", MailExceptionStrings.PING_FAILED_AUTH_MSG,
         CATEGORY_WARNING, 91),
+    /**
+     * Server %1$s does not support being accessed using a secure connection.
+     */
+    NON_SECURE_DENIED("Server %1$s does not support being accessed using a secure connection.",
+        MailExceptionStrings.NON_SECURE_DENIED_MSG, CATEGORY_WARNING, 92),
     ;
 
     private static String PREFIX = "MSG";
