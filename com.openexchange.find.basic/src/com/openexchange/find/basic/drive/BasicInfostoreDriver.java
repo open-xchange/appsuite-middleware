@@ -213,27 +213,41 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
             Filter fileNameFilter = new Filter(Collections.singletonList(fileNameId), String.valueOf(doc.getId()));
             Filter fileDescriptionFilter = new Filter(Collections.singletonList(fileDescriptionId), String.valueOf(doc.getId()));
             Filter fileContentFilter = new Filter(Collections.singletonList(fileContentId), String.valueOf(doc.getId()));
-            fileNameFacet.add(new FacetValue(
-                prepareFacetValueId(fileNameId, session.getContextId(), String.valueOf(doc.getId())),
-                new SimpleDisplayItem(doc.getFileName(), false),
-                1,
-                fileNameFilter));
-            fileDescriptionFacet.add(new FacetValue(prepareFacetValueId(
-                fileDescriptionId,
-                session.getContextId(),
-                String.valueOf(doc.getId())), new SimpleDisplayItem(doc.getDescription(), false), 1, fileDescriptionFilter));
-            fileContentFacet.add(new FacetValue(
-                prepareFacetValueId(fileContentId, session.getContextId(), String.valueOf(doc.getId())),
-                new SimpleDisplayItem(doc.getContent(), false),
-                1,
-                fileContentFilter));
+            String fileName = doc.getFileName();
+            if (null != fileName) {
+                fileNameFacet.add(new FacetValue(
+                    prepareFacetValueId(fileNameId, session.getContextId(), String.valueOf(doc.getId())),
+                    new SimpleDisplayItem(fileName, false),
+                    1,
+                    fileNameFilter));
+            }
+            String description = doc.getDescription();
+            if (null != description) {
+                fileDescriptionFacet.add(new FacetValue(prepareFacetValueId(
+                    fileDescriptionId,
+                    session.getContextId(),
+                    String.valueOf(doc.getId())), new SimpleDisplayItem(description, false), 1, fileDescriptionFilter));
+            }
+            String content = doc.getContent();
+            if (null != content) {
+                fileContentFacet.add(new FacetValue(
+                    prepareFacetValueId(fileContentId, session.getContextId(), String.valueOf(doc.getId())),
+                    new SimpleDisplayItem(content, false),
+                    1,
+                    fileContentFilter));
+            }
         }
 
         // Add field factes
-        facets.add(new Facet(DriveFacetType.FILE_NAME, fileNameFacet));
-        facets.add(new Facet(DriveFacetType.FILE_DESCRIPTION, fileDescriptionFacet));
-        facets.add(new Facet(DriveFacetType.FILE_CONTENT, fileContentFacet));
-
+        if (fileNameFacet.size() > 0) {
+            facets.add(new Facet(DriveFacetType.FILE_NAME, fileNameFacet));
+        }
+        if (fileDescriptionFacet.size() > 0) {
+            facets.add(new Facet(DriveFacetType.FILE_DESCRIPTION, fileDescriptionFacet));
+        }
+        if (fileContentFacet.size() > 0) {
+            facets.add(new Facet(DriveFacetType.FILE_CONTENT, fileContentFacet));
+        }
         // Add static file type facet
         final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
         final String fieldFileType = Constants.FIELD_FILE_TYPE;
