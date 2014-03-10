@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import org.apache.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -714,6 +715,64 @@ public class XingAPI<S extends Session> {
 
             return responseInformation.asMap();
 
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Performs a sign-up request for a lead.
+     *
+     * @param leadDescription The lead description
+     * @return A map representation of created lead
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public Map<String, Object> signUpLead(final LeadDescription leadDescription) throws XingException {
+        final String url = RESTUtility.buildURL(session.getWebServer(), -1, "/signup-api/v1/leads", null);
+
+        try {
+            final JSONObject jLeadDesc = new JSONObject(10);
+            {
+                final String tmp = leadDescription.getEmail();
+                if (!Strings.isEmpty(tmp)) {
+                    jLeadDesc.put("email", tmp);
+                }
+            }
+            {
+                final String tmp = leadDescription.getFirstName();
+                if (!Strings.isEmpty(tmp)) {
+                    jLeadDesc.put("first_name", tmp);
+                }
+            }
+            {
+                final String tmp = leadDescription.getLastName();
+                if (!Strings.isEmpty(tmp)) {
+                    jLeadDesc.put("last_name", tmp);
+                }
+            }
+            {
+                final Language tmp = leadDescription.getLanguage();
+                if (null != tmp) {
+                    jLeadDesc.put("language", tmp.getLangId());
+                }
+            }
+            {
+                jLeadDesc.put("tandc_check", leadDescription.isTandcCheck());
+            }
+
+            jLeadDesc.put("reg_consumer_key", session.getAccessTokenPair().key);
+            jLeadDesc.put("reg_consumer_secret", session.getAccessTokenPair().secret);
+
+            final HttpResponse resp = RESTUtility.basicRequest(Method.POST, url, jLeadDesc, session).response;
+            final JSONObject jResponse = RESTUtility.parseAsJSON(resp).toObject();
+            return jResponse.asMap();
+        } catch (final JSONException e) {
+            throw new XingException(e);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }

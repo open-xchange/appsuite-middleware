@@ -248,6 +248,56 @@ public class RESTUtility {
     }
 
     /**
+     * Creates and sends a request to the XING API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
+     * {@link HttpResponse}.
+     *
+     * @param method GET or POST.
+     * @param url the URL to use.
+     * @param requestInformation The request's JSON object
+     * @param session the {@link Session} to use for this request.
+     * @return a parsed JSON object, typically a Map or a JSONArray.
+     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException if any network-related error occurs.
+     * @throws XingUnlinkedException if the user has revoked access.
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public static RequestAndResponse basicRequest(final Method method, final String url, final JSONObject requestInformation, final Session session) throws XingException {
+        final HttpRequestBase req;
+        switch (method) {
+        case PUT:
+            {
+                final HttpPut put = new HttpPut(url);
+                if (null != requestInformation) {
+                    put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
+                }
+                req = put;
+            }
+            break;
+        case POST:
+            {
+                final HttpPost post = new HttpPost(url);
+                if (null != requestInformation) {
+                    post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
+                }
+                req = post;
+            }
+            break;
+        case GET:
+            req = new HttpGet(url);
+            break;
+        case DELETE:
+            req = new HttpDelete(url);
+            break;
+        default:
+            throw new XingException("Unsupported HTTP method: " + method);
+        }
+        final HttpResponse resp = execute(session, req);
+        return new RequestAndResponse(req, resp);
+    }
+
+    /**
      * Reads in content from an {@link HttpResponse} and parses it as JSON.
      *
      * @param response the {@link HttpResponse}.
@@ -474,7 +524,11 @@ public class RESTUtility {
         try {
             // We have to encode the whole line, then remove + and / encoding
             // to get a good OAuth URL.
-            trgt = URLEncoder.encode(new StringAllocator(16).append("/v").append(apiVersion).append(trgt).toString(), "UTF-8");
+            if (apiVersion > 0) {
+                trgt = URLEncoder.encode(new StringAllocator(16).append("/v").append(apiVersion).append(trgt).toString(), "UTF-8");
+            } else {
+                trgt = URLEncoder.encode(new StringAllocator(16).append(trgt).toString(), "UTF-8");
+            }
             trgt = trgt.replace("%2F", "/");
 
             if (params != null && params.length > 0) {
