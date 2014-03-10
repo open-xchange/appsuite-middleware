@@ -407,7 +407,7 @@ public final class POP3StoreConnector {
                 final Exception nested = e.getNextException();
                 if (nested != null) {
                     if (nested instanceof IOException) {
-                        throw MimeMailExceptionCode.CONNECT_ERROR.create(pop3Config.getServer(), pop3Config.getLogin());
+                        throw MimeMailExceptionCode.CONNECT_ERROR.create(e, pop3Config.getServer(), pop3Config.getLogin());
                     } else if (tmpDownEnabled && SocketTimeoutException.class.isInstance(e.getNextException())) {
                         /*
                          * TODO: Re-think if exception's message should be part of condition or just checking if nested exception is an instance of
