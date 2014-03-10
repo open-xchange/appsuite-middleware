@@ -49,15 +49,20 @@
 
 package com.openexchange.xing;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -397,7 +402,12 @@ public class XingAPI<S extends Session> {
      * @param withLatestMessages The number of latest messages to be returned. Must be zero or a positive number. Default: <code>0</code>,
      *            Maximum: <code>100</code>. If its value is equal to zero, default limit is passed to request
      * @return The user's conversations
-     * @throws XingException
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
      */
     public Conversations getConversationsFrom(final String userId, final int limit, final int offset, final Collection<UserField> userFields, final int withLatestMessages) throws XingException {
         if (limit < 0 || limit > MAX_LIMIT) {
@@ -509,7 +519,12 @@ public class XingAPI<S extends Session> {
      * @param withLatestMessages The number of latest messages to be returned. Must be zero or a positive number. Default: <code>0</code>,
      *            Maximum: <code>100</code>. If its value is equal to zero, default limit is passed to request
      * @return The conversation
-     * @throws XingException
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
      */
     public Conversation getConversationFrom(final String id, final String userId, final Collection<UserField> userFields, final int withLatestMessages) throws XingException {
         if (withLatestMessages < 0 || withLatestMessages > MAX_WITH_LATEST_MESSAGES) {
@@ -594,7 +609,7 @@ public class XingAPI<S extends Session> {
      * @return A invitation response
      * @throws XingException If invitation attempt fails
      */
-    public InvitationStats invite(final String userId, final List<String> addresses, final String optMessage, Collection<UserField> optUserFields) throws XingException {
+    public InvitationStats invite(final String userId, final List<String> addresses, final String optMessage, final Collection<UserField> optUserFields) throws XingException {
         if (null == addresses || addresses.isEmpty()) {
             throw new XingException("Invalid addresses");
         }
@@ -611,7 +626,7 @@ public class XingAPI<S extends Session> {
                 params.add(optMessage);
             }
 
-            if (null != optMessage && !optUserFields.isEmpty()) {
+            if (null != optUserFields && !optUserFields.isEmpty()) {
                 params.add("user_fields");
                 params.add(collectionToCsv(optUserFields, new Stringer<UserField>() {
 
@@ -632,6 +647,73 @@ public class XingAPI<S extends Session> {
             return new InvitationStats(responseInformation.getJSONObject("invitation_stats"));
         } catch (final JSONException e) {
             throw new XingException(e);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Gets the user's network feed; a stream of activities recently performed by the user's network.
+     *
+     * @param userId The ID of the user whose contacts' activities are to be returned
+     * @param optAggregate If set to <code>true</code> (default) similar activities may be combined into one. Set this to <code>false</code> if you don't want any aggregation at all.
+     * @param optSince Only returns activities that are newer than the specified time stamp. <b>Can't be combined with until!</b>
+     * @param optUntil Only returns activities that are older than the specified time stamp. <b>Can't be combined with since!</b>
+     * @param optUserFields The list of user attributes to be returned in nested user objects. If this parameter is not used, only the ID will be returned.
+     * @return A generic map representing return network feed data
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public Map<String, Object> getNetworkFeed(final String userId, final Boolean optAggregate, final Date optSince, final Date optUntil, final Collection<UserField> optUserFields) throws XingException {
+        assertAuthenticated();
+        try {
+            // Add parameters
+            final List<String> params = new ArrayList<String>(6);
+
+            if (null != optAggregate) {
+                params.add("aggregate");
+                params.add(optAggregate.toString());
+            }
+
+            if (null != optSince) {
+                params.add("since");
+                synchronized (ISO6801) {
+                    params.add(ISO6801.format(optSince));
+                }
+            }
+
+            if (null != optUntil) {
+                params.add("until");
+                synchronized (ISO6801) {
+                    params.add(ISO6801.format(optUntil));
+                }
+            }
+
+            if (null != optUserFields && !optUserFields.isEmpty()) {
+                params.add("user_fields");
+                params.add(collectionToCsv(optUserFields, new Stringer<UserField>() {
+
+                    @Override
+                    public String getString(final UserField element) {
+                        return element.getFieldName();
+                    }
+                }));
+            }
+
+            final JSONObject responseInformation = RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/" + userId + "/network_feed",
+                VERSION,
+                params.toArray(new String[0]),
+                session).toObject();
+
+            return responseInformation.asMap();
+
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -675,6 +757,14 @@ public class XingAPI<S extends Session> {
             sb.append(',').append(str.getString(iter.next()));
         }
         return sb.toString();
+    }
+
+    private static final DateFormat ISO6801;
+
+    static {
+        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        ISO6801 = df;
     }
 
 }
