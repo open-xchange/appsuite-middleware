@@ -1,6 +1,7 @@
 * 2014-03-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 30652: Signal value of property "com.openexchange.forceHTTPS" to App Suite UI
+ - Fix for bug 31304: Suppress warning if "pop3.refreshrate" property is missing. Silently use fall-back value
 
 * 2014-03-10 - tobias.friedrich@open-xchange.com
 
