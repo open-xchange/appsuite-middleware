@@ -68,6 +68,7 @@ import com.openexchange.groupware.container.FolderObject;
 public class Bug31453Test extends CalDAVTest {
 
     private FolderObject publicFolder = null;
+    private String folderID = null;
 
     public Bug31453Test(String name) {
         super(name);
@@ -77,6 +78,7 @@ public class Bug31453Test extends CalDAVTest {
     protected void setUp() throws Exception {
         super.setUp();
         publicFolder = createPublicFolder();
+        folderID = String.valueOf(publicFolder.getObjectID());
     }
 
     @Override
@@ -135,11 +137,11 @@ public class Bug31453Test extends CalDAVTest {
                 "END:VEVENT" + "\r\n" +
                 "END:VCALENDAR"
         ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(String.valueOf(publicFolder.getObjectID()), uid, iCal));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(folderID, uid, iCal));
         /*
          * verify appointment on server
          */
-        Appointment appointment = super.getAppointment(String.valueOf(publicFolder.getObjectID()), uid);
+        Appointment appointment = super.getAppointment(folderID, uid);
         assertNotNull("appointment not found on server", appointment);
         super.rememberForCleanUp(appointment);
         assertTrue("no reminder found", appointment.containsAlarm());
@@ -147,7 +149,7 @@ public class Bug31453Test extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        ICalResource iCalResource = super.get(String.valueOf(publicFolder.getObjectID()), uid, null);
+        ICalResource iCalResource = super.get(folderID, uid, null);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
@@ -205,11 +207,11 @@ public class Bug31453Test extends CalDAVTest {
                 "END:VEVENT" + "\r\n" +
                 "END:VCALENDAR"
         ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(String.valueOf(publicFolder.getObjectID()), uid, iCal));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(folderID, uid, iCal));
         /*
          * verify appointment on server
          */
-        Appointment appointment = super.getAppointment(String.valueOf(publicFolder.getObjectID()), uid);
+        Appointment appointment = super.getAppointment(folderID, uid);
         assertNotNull("appointment not found on server", appointment);
         super.rememberForCleanUp(appointment);
         assertTrue("no reminder found", appointment.containsAlarm());
@@ -217,7 +219,7 @@ public class Bug31453Test extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        ICalResource iCalResource = super.get(String.valueOf(publicFolder.getObjectID()), uid, null);
+        ICalResource iCalResource = super.get(folderID, uid, null);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
@@ -231,14 +233,14 @@ public class Bug31453Test extends CalDAVTest {
         /*
          * verify appointment on server
          */
-        appointment = super.getAppointment(String.valueOf(publicFolder.getObjectID()), uid);
+        appointment = super.getAppointment(folderID, uid);
         assertNotNull("appointment not found on server", appointment);
         assertFalse("reminder found", appointment.containsAlarm());
         assertEquals("reminder minutes wrong", 0, appointment.getAlarm());
         /*
          * verify appointment on client
          */
-        iCalResource = super.get(String.valueOf(publicFolder.getObjectID()), uid, iCalResource.getETag());
+        iCalResource = super.get(folderID, uid, iCalResource.getETag());
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNull("ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
@@ -295,11 +297,11 @@ public class Bug31453Test extends CalDAVTest {
                 "END:VEVENT" + "\r\n" +
                 "END:VCALENDAR"
         ;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(String.valueOf(publicFolder.getObjectID()), uid, iCal));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(folderID, uid, iCal));
         /*
          * verify appointment on server
          */
-        Appointment appointment = super.getAppointment(String.valueOf(publicFolder.getObjectID()), uid);
+        Appointment appointment = super.getAppointment(folderID, uid);
         assertNotNull("appointment not found on server", appointment);
         super.rememberForCleanUp(appointment);
         assertTrue("no reminder found", appointment.containsAlarm());
@@ -307,29 +309,113 @@ public class Bug31453Test extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        ICalResource iCalResource = super.get(String.valueOf(publicFolder.getObjectID()), uid, null);
+        ICalResource iCalResource = super.get(folderID, uid, null);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
         /*
-         * remove reminder on client
+         * edit reminder on client
          */
         iCalResource.getVEvent().getVAlarm().setProperty("TRIGGER", "-PT20M");
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
         /*
          * verify appointment on server
          */
-        appointment = super.getAppointment(String.valueOf(publicFolder.getObjectID()), uid);
+        appointment = super.getAppointment(folderID, uid);
         assertNotNull("appointment not found on server", appointment);
         assertTrue("no reminder found", appointment.containsAlarm());
         assertEquals("reminder minutes wrong", 20, appointment.getAlarm());
         /*
          * verify appointment on client
          */
-        iCalResource = super.get(String.valueOf(publicFolder.getObjectID()), uid, iCalResource.getETag());
+        iCalResource = super.get(folderID, uid, iCalResource.getETag());
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
+        assertEquals("ALARM wrong", "-PT20M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
+    }
+
+    public void testCreateReminderAtServer() throws Exception {
+        /*
+         * create appointment
+         */
+        String uid = randomUID();
+        Date start = TimeTools.D("next friday at 08:50");
+        Date end = TimeTools.D("next friday at 09:20");
+        Appointment appointment = generateAppointment(start, end, uid, "test", "test");
+        appointment.setAlarm(30);
+        appointment = create(folderID, appointment);
+        /*
+         * verify appointment on client
+         */
+        ICalResource iCalResource = super.get(String.valueOf(publicFolder.getObjectID()), uid, null);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
+        assertEquals("ALARM wrong", "-PT30M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
+    }
+
+    public void testRemoveReminderAtServer() throws Exception {
+        /*
+         * create appointment
+         */
+        String uid = randomUID();
+        Date start = TimeTools.D("next friday at 08:50");
+        Date end = TimeTools.D("next friday at 09:20");
+        Appointment appointment = generateAppointment(start, end, uid, "test", "test");
+        appointment.setAlarm(30);
+        appointment = create(folderID, appointment);
+        /*
+         * verify appointment on client
+         */
+        ICalResource iCalResource = super.get(String.valueOf(publicFolder.getObjectID()), uid, null);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
+        assertEquals("ALARM wrong", "-PT30M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
+        /*
+         * remove reminder at server
+         */
+        appointment.setAlarm(-1);
+        super.update(appointment);
+        /*
+         * verify appointment on client
+         */
+        iCalResource = super.get(folderID, uid, iCalResource.getETag());
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertNull("ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
+    }
+
+    public void testEditReminderAtServer() throws Exception {
+        /*
+         * create appointment
+         */
+        String uid = randomUID();
+        Date start = TimeTools.D("next friday at 08:50");
+        Date end = TimeTools.D("next friday at 09:20");
+        Appointment appointment = generateAppointment(start, end, uid, "test", "test");
+        appointment.setAlarm(30);
+        appointment = create(folderID, appointment);
+        /*
+         * verify appointment on client
+         */
+        ICalResource iCalResource = super.get(String.valueOf(publicFolder.getObjectID()), uid, null);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
+        assertEquals("ALARM wrong", "-PT30M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
+        /*
+         * edit reminder at server
+         */
+        appointment.setAlarm(20);
+        super.update(appointment);
+        /*
+         * verify appointment on client
+         */
+        iCalResource = super.get(folderID, uid, iCalResource.getETag());
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT20M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
     }

@@ -426,15 +426,21 @@ public abstract class CalDAVTest extends WebDAVTest {
     	return match;
     }
 
-	protected Appointment create(Appointment appointment) {
-		return create(getDefaultFolderID(), appointment);
-	}
+    protected Appointment create(Appointment appointment) {
+        return create(getDefaultFolderID(), appointment);
+    }
 
     protected Appointment create(String folderID, Appointment appointment) {
-		appointment.setParentFolderID(parse(folderID));
-		appointment.setIgnoreConflicts(true);
-		return getManager().insert(appointment);
-	}
+        appointment.setParentFolderID(parse(folderID));
+        appointment.setIgnoreConflicts(true);
+        return getManager().insert(appointment);
+    }
+
+    protected Appointment update(Appointment appointment) {
+        appointment.setIgnoreConflicts(true);
+        getManager().update(appointment);
+        return appointment;
+    }
 
     protected FolderObject createPublicFolder() throws OXException, IOException, JSONException  {
         return createPublicFolder(randomUID());
