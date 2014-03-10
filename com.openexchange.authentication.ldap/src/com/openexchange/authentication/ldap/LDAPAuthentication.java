@@ -226,7 +226,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
                 } else {
                     final String errortext = "No user found with " + uidAttribute + "=" + uid;
                     LOG.error(errortext);
-                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                    throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uid);
                 }
                 context.close();
             } else {
@@ -278,7 +278,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
                         }
                     } else {
                         LOG.error("No user with displayname {} found.", uid);
-                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uid);
                     }
                 } else {
                     userDnAttributes = context.getAttributes(dn);

@@ -210,7 +210,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
                 userId = userservice.getUserId(oxuser_, ctx);
             } catch (final OXException e) {
                 LOG.error("UserID for {} could not be resolved via OX API from database. Not provisioned yet?", oxuser_,e);
-                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(oxuser_);
             }
             final User user = userservice.getUser(userId, ctx);
             if (!userservice.authenticate(user, gui_password)) {

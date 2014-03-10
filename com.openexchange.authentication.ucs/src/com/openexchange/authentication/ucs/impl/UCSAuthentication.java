@@ -174,7 +174,7 @@ public class UCSAuthentication implements AuthenticationService {
                 if(count!=1){
                     // found more than 1 user or no user , this is not good :)
                     LOG.debug("User {} not found in LDAP", uid);
-                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                    throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uid);
                 }
                 if (null != ctx) {
                     try {
@@ -241,7 +241,7 @@ public class UCSAuthentication implements AuthenticationService {
                 }else{
                     final String[] data  = ((String)emailattrib.get()).split("@");
                     if(data.length!=2){
-                        LOG.error("FATAL! Email address {} could be splitted correctly!!", emailattrib.get());
+                        LOG.error("FATAL! Email address {} could not be splitted correctly!!", emailattrib.get());
                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                     }else{
                         splitted[0] = data[1];

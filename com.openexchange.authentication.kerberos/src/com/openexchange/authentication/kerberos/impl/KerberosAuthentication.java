@@ -49,7 +49,8 @@
 
 package com.openexchange.authentication.kerberos.impl;
 
-import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING;
 import static com.openexchange.authentication.kerberos.impl.ConfigurationProperty.PROXY_DELIMITER;
 import static com.openexchange.authentication.kerberos.impl.ConfigurationProperty.PROXY_USER;
 import java.util.List;
@@ -135,7 +136,7 @@ public class KerberosAuthentication implements AuthenticationService {
         final String[] splitted = split(principal.getName());
         final int ctxId = contextService.getContextId(splitted[0]);
         if (ContextStorage.NOT_FOUND == ctxId) {
-            throw INVALID_CREDENTIALS.create();
+            throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(splitted[0]);
         }
         final Context ctx = contextService.getContext(ctxId);
         final int userId;
@@ -147,7 +148,7 @@ public class KerberosAuthentication implements AuthenticationService {
             }
         } catch (OXException e) {
             if (LdapExceptionCode.USER_NOT_FOUND.equals(e)) {
-                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(splitted[1]);
             }
             throw e;
         }
