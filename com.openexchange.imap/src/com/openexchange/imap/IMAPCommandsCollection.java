@@ -1527,9 +1527,6 @@ public final class IMAPCommandsCollection {
 
     private final static String TEMPL_STORE_FLAGS = "STORE %s %sFLAGS (%s)";
 
-    private static final String ALL_COLOR_LABELS =
-        "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
-
     /**
      * Clears an sets only known colors in user defined IMAP flag
      * <p>
@@ -1545,7 +1542,7 @@ public final class IMAPCommandsCollection {
      */
     public static void clearAndSetColorLabelSafely(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException, OXException {
         // Only set colors allowed in ALL_COLOR_LABELS
-        if (!ALL_COLOR_LABELS.contains(colorLabelFlag)) {
+        if (!MailMessage.isValidColorLabel(colorLabelFlag)) {
             throw IMAPException.create(IMAPException.Code.FLAG_FAILED, colorLabelFlag, "Unknown color label.");
         }
         clearAllColorLabels(imapFolder, msgUIDs);
@@ -1589,7 +1586,7 @@ public final class IMAPCommandsCollection {
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
 
-                    final String command = String.format(format, args[i], "-", ALL_COLOR_LABELS);
+                    final String command = String.format(format, args[i], "-", MailMessage.ALL_COLOR_LABELS);
                     r = performCommand(p, command);
                     response = r[r.length - 1];
                     if (response.isOK()) {
