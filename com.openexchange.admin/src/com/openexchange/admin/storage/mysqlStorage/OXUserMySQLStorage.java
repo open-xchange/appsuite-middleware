@@ -501,8 +501,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 for (final String elem : alias) {
                     if (elem != null && elem.trim().length() > 0) {
                         stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,?)");
-                        UUID uuid = UUID.randomUUID();
-                        byte[] uuidBinary = UUIDs.toByteArray(uuid);
+                        byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
                         stmt.setInt(1, contextId);
                         stmt.setInt(2, userId);
                         stmt.setString(3, "alias");
@@ -528,8 +527,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmtupdateattribute.setInt(3, userId);
 
                 stmtinsertattribute = con.prepareStatement("INSERT INTO user_attribute (value, cid, id, name, uuid) VALUES (?, ?, ?, ?, ?)");
-                UUID uuid = UUID.randomUUID();
-                byte[] uuidBinary = UUIDs.toByteArray(uuid);
+                byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
                 stmtinsertattribute.setInt(2, contextId);
                 stmtinsertattribute.setInt(3, userId);
                 stmtinsertattribute.setBytes(5, uuidBinary);
