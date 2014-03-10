@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -72,6 +73,7 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.TimeZoneUtils;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link MailMessage} - Abstract super class for all {@link MailMessage} subclasses.
@@ -246,7 +248,7 @@ public abstract class MailMessage extends MailPart {
     /**
      * The <code>string</code> with all valid color flags whitespace seperated
      */
-    public static final String ALL_COLOR_LABELS = "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
+    private static final Set<String> ALL_COLOR_LABELS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("$cl_0", "$cl_1", "$cl_2", "$cl_3", "$cl_4", "$cl_5", "$cl_6", "$cl_7", "$cl_8", "$cl_9", "$cl_10", "cl_0", "cl_1", "cl_2", "cl_3", "cl_4", "cl_5", "cl_6", "cl_7", "cl_8", "cl_9", "cl_10")));
 
     /**
      * Determines the corresponding <code>int</code> value of a given color label's string representation.
