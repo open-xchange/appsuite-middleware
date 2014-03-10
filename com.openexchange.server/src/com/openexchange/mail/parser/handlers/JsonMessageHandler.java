@@ -489,7 +489,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Content-Type
              */
-            jsonObject.put(CONTENT_TYPE, part.getContentType().toString());
+            ContentType clone = new ContentType();
+            clone.setContentType(part.getContentType());
+            clone.removeNameParameter();
+            jsonObject.put(CONTENT_TYPE, clone.toString());
             /*
              * Content
              */
