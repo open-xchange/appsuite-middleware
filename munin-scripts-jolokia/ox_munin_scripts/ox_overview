@@ -65,7 +65,7 @@ $request = new JMX::Jmx4Perl::Request(READ,
 	"NumberOfOpenAJPSockets");
 $response = $jmx->request($request);
 if ($response->is_ok()){
-	print "nbofdbc.value ",$response->value(),"\n";
+	print "nbofajp.value ",$response->value(),"\n";
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
@@ -73,7 +73,7 @@ $request = new JMX::Jmx4Perl::Request(READ,
 	"NumberOfIMAPConnections");
 $response = $jmx->request($request);
 if ($response->is_ok()){
-	print "nbofdbc.value ",$response->value(),"\n";
+	print "nbofimap.value ",$response->value(),"\n";
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
@@ -81,6 +81,6 @@ $request = new JMX::Jmx4Perl::Request(READ,
 	"OpenFileDescriptorCount");
 $response = $jmx->request($request);
 if ($response->is_ok()){
-	print "nbofdbc.value ",$response->value(),"\n";
+	print "nboffile.value ",$response->value(),"\n";
 }
 
