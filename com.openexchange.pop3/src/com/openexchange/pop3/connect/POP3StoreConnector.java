@@ -71,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.POP3Provider;
@@ -403,16 +404,22 @@ public final class POP3StoreConnector {
                 }
                 throw e;
             } catch (final MessagingException e) {
-                /*
-                 * TODO: Re-think if exception's message should be part of condition or just checking if nested exception is an instance of
-                 * SocketTimeoutException
-                 */
-                if (tmpDownEnabled && SocketTimeoutException.class.isInstance(e.getNextException())) {
-                    /*
-                     * Remember a timed-out POP3 server on connect attempt
-                     */
-                    timedOutServers.put(new HostAndPort(server, port), Long.valueOf(System.currentTimeMillis()));
+                final Exception nested = e.getNextException();
+                if (nested != null) {
+                    if (nested instanceof IOException) {
+                        throw MimeMailExceptionCode.CONNECT_ERROR.create(pop3Config.getServer(), pop3Config.getLogin());
+                    } else if (tmpDownEnabled && SocketTimeoutException.class.isInstance(e.getNextException())) {
+                        /*
+                         * TODO: Re-think if exception's message should be part of condition or just checking if nested exception is an instance of
+                         * SocketTimeoutException
+                         */
+                        /*
+                         * Remember a timed-out POP3 server on connect attempt
+                         */
+                        timedOutServers.put(new HostAndPort(server, port), Long.valueOf(System.currentTimeMillis()));
+                    }
                 }
+
                 throw e;
             }
             /*
