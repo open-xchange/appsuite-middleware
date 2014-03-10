@@ -123,7 +123,7 @@ public class BasicDriveTest extends AbstractFindTest {
         QueryRequest request = new QueryRequest(0, 10, Collections.singletonList(fileNameFacet), Module.DRIVE.getIdentifier());
         QueryResponse response = client.execute(request);
         SearchResult result = response.getSearchResult();
-        assertTrue("Nothing found in BasicDriveTest", result.getNumFound() > 0);
+        assertTrue("Nothing found in BasicDriveTest", result.getSize() > 0);
     }
 
     public void testAutocompletion() throws Exception {
