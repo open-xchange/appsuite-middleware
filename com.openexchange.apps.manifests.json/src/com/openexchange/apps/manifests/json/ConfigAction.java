@@ -67,6 +67,7 @@ import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.apps.manifests.ServerConfigMatcherService;
 import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
 import com.openexchange.apps.manifests.json.values.Capabilities;
+import com.openexchange.apps.manifests.json.values.ForcedHttpsValue;
 import com.openexchange.apps.manifests.json.values.Hosts;
 import com.openexchange.apps.manifests.json.values.Languages;
 import com.openexchange.apps.manifests.json.values.Manifests;
@@ -104,6 +105,7 @@ public class ConfigAction implements AJAXActionService {
             new Hosts(),
             new ServerVersion(),
             new Languages(services),
+            new ForcedHttpsValue(services),
             new UIVersion()
         };
     }
