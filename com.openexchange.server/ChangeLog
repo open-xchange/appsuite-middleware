@@ -1,3 +1,7 @@
+* 2014-03-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31453: Prefer user's personal reminder for CalDAV in public folders
+
 * 2014-03-07 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 31335: Fixed/Added missing dependencies on update tasks
