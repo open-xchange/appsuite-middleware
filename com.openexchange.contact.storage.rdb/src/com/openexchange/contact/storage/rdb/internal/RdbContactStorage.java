@@ -242,7 +242,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             connectionHelper.commit();
         } catch (DataTruncation e) {
             DBUtils.rollback(connection);
-            throw Tools.getTruncationException(connection, e, contact, Table.CONTACTS);
+            throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
         } catch (SQLException e) {
             DBUtils.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -494,7 +494,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             connectionHelper.commit();
         } catch (DataTruncation e) {
             DBUtils.rollback(connection);
-            throw Tools.getTruncationException(connection, e, contact, Table.CONTACTS);
+            throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -562,7 +562,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             connectionHelper.commit();
         } catch (DataTruncation e) {
             DBUtils.rollback(connectionHelper.getWritable());
-            throw Tools.getTruncationException(connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
+            throw Tools.getTruncationException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {

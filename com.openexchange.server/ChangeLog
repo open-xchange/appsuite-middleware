@@ -6,6 +6,8 @@
 * 2014-03-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31453: Prefer user's personal reminder for CalDAV in public folders
+ - Fix for bug 31073: Use "Display name" for a contact, use "Name" for a distribution list in truncation error messages 
+ - Fix for bug 31072: Use "First name" instead of "Given name" in truncation error messages 
 
 * 2014-03-07 - jan.bauerdick@open-xchange.com
 
