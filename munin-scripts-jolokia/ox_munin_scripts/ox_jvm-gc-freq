@@ -18,46 +18,53 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "graph_args --base 1000 -l 0\n";
 	print "graph_category Open Xchange\n";
 	print "graph_vlabel number per hour\n";
-	print "graph_period hour\n";
 	
 	print "a.label Copy\n";
 	print "a.draw LINE1\n";
 	print "a.type DERIVE\n";
+	print "a.cdef a,3600,*";
 	print "a.min 0\n";
 
 	print "b.label MarkSweepCompact\n";
 	print "b.draw LINE1\n";
 	print "b.type DERIVE\n";
+	print "b.cdef b,3600,*";
 	print "b.min 0\n";
 
 	print "c.label PS MarkSweep\n";
 	print "c.draw LINE1\n";
 	print "c.type DERIVE\n";
+	print "c.cdef c,3600,*";
 	print "c.min 0\n";
 
 	print "d.label PS Scavenge\n";
 	print "d.draw LINE1\n";
 	print "d.type DERIVE\n";
+	print "d.cdef d,3600,*";
 	print "d.min 0\n";
 
 	print "e.label ConcurrentMarkSweep\n";
 	print "e.draw LINE1\n";
 	print "e.type DERIVE\n";
+	print "e.cdef e,3600,*";
 	print "e.min 0\n";
 
 	print "f.label ParNew\n";
 	print "f.draw LINE1\n";
 	print "f.type DERIVE\n";
+	print "f.cdef f,3600,*";
 	print "f.min 0\n";
 
 	print "g.label G1 Old Generation\n";
 	print "g.draw LINE1\n";
 	print "g.type DERIVE\n";
+	print "g.cdef g,3600,*";
 	print "g.min 0\n";
 
 	print "h.label G1 Young Generation\n";
 	print "h.draw LINE1\n";
 	print "h.type DERIVE\n";
+	print "h.cdef h,3600,*";
 	print "h.min 0\n";
 	exit 0
 }
