@@ -1,3 +1,7 @@
+* 2014-03-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31508: Deal with concurrent insertion into resource cache
+
 * 2014-03-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 30652: Signal value of property "com.openexchange.forceHTTPS" to App Suite UI
