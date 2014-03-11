@@ -77,8 +77,6 @@ public class UserParticipant implements Participant, Comparable<Participant> {
 
     private String confirmMessage;
     
-    private int occurrence;
-
     private String displayName;
 
     private String emailaddress;
@@ -177,14 +175,6 @@ public class UserParticipant implements Participant, Comparable<Participant> {
 
     public String getConfirmMessage() {
         return confirmMessage;
-    }
-
-    public int getOccurrence() {
-        return occurrence;
-    }
-
-    public void setOccurrence(int occurrence) {
-        this.occurrence = occurrence;
     }
 
     /**
