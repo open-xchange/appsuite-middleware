@@ -1,3 +1,7 @@
+* 2014-03-11 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30843: Added properties to explicitly choose SSL protocols
+
 * 2014-03-11 - marcus.klein@open-xchange.com
 
  - Fix for bug 29980: Use row locks on complete table configdb.context_server2db_pool to prevent a delete context call to remove the schema
