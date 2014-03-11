@@ -2296,6 +2296,11 @@ msgstr ""
 msgid "The facet \"%1$s\" is mandatory and has to be set."
 msgstr ""
 
+#. Could not parse \"%1$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:87
+msgid "Could not parse \"%1$s\"."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:61
 msgid "%1$s <i>in appointments</i>"
 msgstr ""
