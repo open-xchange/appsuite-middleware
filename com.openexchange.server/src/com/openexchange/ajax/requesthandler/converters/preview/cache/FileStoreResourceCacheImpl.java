@@ -178,17 +178,7 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
             metadata.setCreatedAt(System.currentTimeMillis());
             metadata.setRefId(refId);
             if (existingMetadata == null) {
-                try {
-                    metadataStore.store(con, metadata);
-                } catch (final SQLException e) {
-                    if (!e.getClass().getName().endsWith("MySQLIntegrityConstraintViolationException")) {
-                        throw e;
-                    }
-                    // Seems to be inserted in the meantime
-                    rollbackAndReleaseCon(con, contextId, dbService);
-                    rollbackFile(refId, fileStorage);
-                    return save(id, bytes, optName, optType, userId, contextId);
-                }
+                metadataStore.store(con, metadata);
             } else {
                 metadataStore.update(con, metadata);
             }
@@ -213,33 +203,24 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
                     }
                 }
             } else {
-                rollbackAndReleaseCon(con, contextId, dbService);
-                rollbackFile(refId, fileStorage);
-            }
-        }
-    }
-
-    private void rollbackFile(final String refId, final FileStorage fileStorage) {
-        if (null != refId) {
-            try {
-                if (!fileStorage.deleteFile(refId)) {
-                    LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId);
+                if (con != null) {
+                    try {
+                        con.rollback();
+                    } catch (SQLException e) {
+                        LOG.warn("Could not rollback database transaction after failing to cache a resource. Consider using 'checkconsistency' to clean up the database.");
+                    }
+                    Databases.autocommit(con);
+                    dbService.backWritableAfterReading(contextId, con);
                 }
-            } catch (Exception e) {
-                LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId, e);
-            }
-        }
-    }
 
-    private void rollbackAndReleaseCon(final Connection con, final int contextId, final DatabaseService dbService) {
-        if (con != null) {
-            try {
-                con.rollback();
-            } catch (Exception e) {
-                LOG.warn("Could not rollback database transaction after failing to cache a resource. Consider using 'checkconsistency' to clean up the database.");
+                try {
+                    if (refId != null && !fileStorage.deleteFile(refId)) {
+                        LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId);
+                    }
+                } catch (OXException e) {
+                    LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId, e);
+                }
             }
-            Databases.autocommit(con);
-            dbService.backWritableAfterReading(contextId, con);
         }
     }
 
