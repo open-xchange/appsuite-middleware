@@ -49,6 +49,14 @@
 
 package com.openexchange.xing;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,10 +71,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import javax.activation.FileTypeMap;
 import org.apache.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.java.ImageTypeDetector;
+import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.xing.RESTUtility.Method;
@@ -779,6 +792,21 @@ public class XingAPI<S extends Session> {
     }
 
     /**
+     * Gets the photo denoted by given URL.
+     *
+     * @param url The photo URL
+     * @return The loaded photo or <code>null</code>
+     * @throws XingException If loading photo fails
+     */
+    public IFileHolder getPhoto(final String url) throws XingException {
+        if (null == url) {
+            return null;
+        }
+
+        return loadImageFromURL(url);
+    }
+
+    /**
      * Gets the associated session.
      */
     public S getSession() {
@@ -786,6 +814,94 @@ public class XingAPI<S extends Session> {
     }
 
     // -------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
+     * its MIME type is then read from opened connection.
+     *
+     * @param url The URI parameter's value
+     * @return The appropriate file holder
+     * @throws XingException If converting image's data fails
+     */
+    private static IFileHolder loadImageFromURL(final String url) throws XingException {
+        try {
+            return loadImageFromURL(new URL(url));
+        } catch (final MalformedURLException e) {
+            throw new XingException("Problem loading photo from URL: " + url, e);
+        }
+    }
+
+    /**
+     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
+     * its MIME type is then read from opened connection.
+     *
+     * @param url The image URL
+     * @return The appropriate file holder
+     * @throws XingException If converting image's data fails
+     */
+    private static IFileHolder loadImageFromURL(final URL url) throws XingException {
+        String mimeType = null;
+        byte[] bytes = null;
+        try {
+            final URLConnection urlCon = url.openConnection();
+            urlCon.setConnectTimeout(2500);
+            urlCon.setReadTimeout(2500);
+            urlCon.connect();
+            mimeType = urlCon.getContentType();
+            final InputStream in = urlCon.getInputStream();
+            try {
+                final ByteArrayOutputStream buffer = Streams.newByteArrayOutputStream(in.available());
+                transfer(in, buffer);
+                bytes = buffer.toByteArray();
+            } finally {
+                Streams.close(in);
+            }
+        } catch (final SocketTimeoutException e) {
+            throw new XingException("Timeout while loading photo from URL: " + url, e);
+        } catch (final IOException e) {
+            throw new XingException("I/O problem loading photo from URL: " + url, e);
+        }
+        if (null != bytes) {
+            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+            if (mimeType == null) {
+                mimeType = ImageTypeDetector.getMimeType(bytes);
+                if ("application/octet-stream".equals(mimeType)) {
+                    mimeType = getMimeType(url.toString());
+                }
+            }
+            if (isValidImage(bytes)) {
+                // Mime type should be of image type. Otherwise web server send some error page instead of 404 error code.
+                fileHolder.setContentType(mimeType);
+            }
+            return fileHolder;
+        }
+        return null;
+    }
+
+    private static void transfer(final InputStream in, final OutputStream out) throws IOException {
+        final byte[] buffer = new byte[4096];
+        int length;
+        while ((length = in.read(buffer)) > 0) {
+            out.write(buffer, 0, length);
+        }
+        out.flush();
+    }
+
+    private static final FileTypeMap DEFAULT_FILE_TYPE_MAP = FileTypeMap.getDefaultFileTypeMap();
+
+    private static String getMimeType(final String filename) {
+        return DEFAULT_FILE_TYPE_MAP.getContentType(filename);
+    }
+
+    private static boolean isValidImage(final byte[] data) {
+        java.awt.image.BufferedImage bimg = null;
+        try {
+            bimg = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(data));
+        } catch (final Exception e) {
+            return false;
+        }
+        return (bimg != null);
+    }
 
     private static interface Stringer<E> {
 
