@@ -688,40 +688,26 @@ public final class Tools {
         }
     }
 
-    public static void checkAndAddColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
-        final List<Column> notExisting = new ArrayList<Column>();
-        for (final Column col : cols) {
-            if (!columnExists(con, tableName, col.getName())) {
-                notExisting.add(col);
-            }
-        }
-        if (!notExisting.isEmpty()) {
-            addColumns(con, tableName, notExisting.toArray(new Column[notExisting.size()]));
-        }
-    }
-
-    public static void modifyColumns(final Connection con, final String tableName, final Collection<Column> columns) throws SQLException {
-        modifyColumns(con, tableName, columns.toArray(new Column[columns.size()]));
-    }
-
-    public static void modifyColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
-        if (null == cols || cols.length == 0) {
+    /**
+     * Drops specified columns from given table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @param cols The columns to drop
+     * @throws SQLException If dropping columns fails
+     */
+    public static void dropColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        if (null == cols || 0 == cols.length) {
             return;
         }
-        final StringBuilder sql = new StringBuilder("ALTER TABLE ");
+
+        final StringBuffer sql = new StringBuffer("ALTER TABLE ");
         sql.append(tableName);
-        for (final Column column : cols) {
-            sql.append(" MODIFY COLUMN ");
-            sql.append(column.getName());
-            sql.append(' ');
-            sql.append(column.getDefinition());
-            sql.append(',');
-        }
-        if (sql.charAt(sql.length() - 1) == ',') {
-            sql.setLength(sql.length() - 1);
-        }
-        if (sql.length() == 12 + tableName.length()) {
-            return;
+        sql.append(" DROP ");
+        sql.append(cols[0].getName());
+        for (int i = 1; i < cols.length; i++) {
+            sql.append(", DROP ");
+            sql.append(cols[i].getName());
         }
         Statement stmt = null;
         try {
@@ -732,6 +718,91 @@ public final class Tools {
         }
     }
 
+    /**
+     * Checks absence of specified columns and adds them to table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @param cols The columns to add
+     * @throws SQLException If operation fails
+     */
+    public static void checkAndAddColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        final List<Column> notExisting = new LinkedList<Column>();
+        for (final Column col : cols) {
+            if (!columnExists(con, tableName, col.getName())) {
+                notExisting.add(col);
+            }
+        }
+        if (!notExisting.isEmpty()) {
+            addColumns(con, tableName, notExisting.toArray(new Column[notExisting.size()]));
+        }
+    }
+
+    /**
+     * Checks existence of specified columns and drops them from table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @param cols The columns to drop
+     * @throws SQLException If operation fails
+     */
+    public static void checkAndDropColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        final List<Column> existing = new LinkedList<Column>();
+        for (final Column col : cols) {
+            if (columnExists(con, tableName, col.getName())) {
+                existing.add(col);
+            }
+        }
+        if (!existing.isEmpty()) {
+            dropColumns(con, tableName, existing.toArray(new Column[existing.size()]));
+        }
+    }
+
+    public static void modifyColumns(final Connection con, final String tableName, final Collection<Column> columns) throws SQLException {
+        modifyColumns(con, tableName, columns.toArray(new Column[columns.size()]));
+    }
+
+    /**
+     * Modifies specified columns in given table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @param cols The new column definitions to change to
+     * @throws SQLException If operation fails
+     */
+    public static void modifyColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+        if (null == cols || cols.length == 0) {
+            return;
+        }
+        final StringBuilder sql = new StringBuilder("ALTER TABLE ");
+        sql.append(tableName);
+        sql.append(" MODIFY COLUMN ");
+        sql.append(cols[0].getName());
+        sql.append(' ');
+        sql.append(cols[0].getDefinition());
+        for (int i = 1; i < cols.length; i++) {
+            sql.append(", MODIFY COLUMN ");
+            sql.append(cols[i].getName());
+            sql.append(' ');
+            sql.append(cols[i].getDefinition());
+        }
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sql.toString());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * Checks existence of specified columns and modifies them in table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @param cols The columns to modify
+     * @throws SQLException If operation fails
+     */
     public static void checkAndModifyColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
         final List<Column> toDo = new ArrayList<Column>();
         for (final Column col : cols) {

@@ -720,14 +720,20 @@ public final class InternalList {
 
         // +++++++++++++++++++++++++++++++++ Version 7.6.0 starts here. +++++++++++++++++++++++++++++++++
 
-        // Extends those calendar tables that carry confirmation information by "occurrence" column
+        // TODO: DELETE -- Extends those calendar tables that carry confirmation information by "occurrence" column
         list.add(new com.openexchange.groupware.update.tasks.CalendarAddConfirmPerOccurrenceTask());
 
-        // Adapts the keys for those calendar tables that carry confirmation information to new "occurrence" column
+        // TODO: DELETE -- Adapts the keys for those calendar tables that carry confirmation information to new "occurrence" column
         list.add(new com.openexchange.groupware.update.tasks.CalendarAddNewPrimaryKeyForConfirmPerOccurrence());
 
         // Adds (cid,changing_date) index to calendar tables if missing
         list.add(new com.openexchange.groupware.update.tasks.CalendarAddChangingDateIndexTask());
+
+        // TODO: DELETE -- Extends those calendar tables that carry confirmation information by "occurrence" column
+        list.add(new com.openexchange.groupware.update.tasks.CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence());
+
+        // TODO: DELETE -- Adapts the keys for those calendar tables that carry confirmation information to new "occurrence" column
+        list.add(new com.openexchange.groupware.update.tasks.CalendarRevokeAddConfirmPerOccurrenceTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
