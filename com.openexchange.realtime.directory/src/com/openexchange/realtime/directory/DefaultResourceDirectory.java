@@ -127,19 +127,12 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
     }
 
     protected void notifyAdded(ID id, Resource addedResource) {
-        id.trigger(Events.ADD, this);
         for (ChangeListener listener : listeners) {
             listener.added(id, addedResource);
         }
     }
 
     private void notifyUpdated(ID id, Resource updatedResource, Resource previousResource) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("updated", updatedResource);
-        event.put("previous", previousResource);
-        
-        id.trigger(Events.UPDATE, this, event);
-
         for (ChangeListener listener : listeners) {
             listener.updated(id, updatedResource, previousResource);
         }

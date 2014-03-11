@@ -149,26 +149,5 @@ public interface ResourceDirectory {
      * @throws OXException when the Presence lookup fails
      */
     Presence getPresence(ID id) throws OXException;
-    
-    /**
-     * 
-     * {@link Events} is a collection of event constants to be used with {@link ID#trigger(String, Object)} and {@link ID#on(String, IDEventHandler)} 
-     *
-     * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
-     */
-    public static interface Events {
-        /**
-         * Called when an entry in the resource directory is updated
-         */
-        public static final String UPDATE = "update";
-        
-        /**
-         * Called when an entry in the resource directory is added
-         */
-        public static final String ADD = "add";
-        
-        /**
-         * A good event to find out when a resource is removed is ID.Events.DISPOSE
-         */
-    }
+
 }
