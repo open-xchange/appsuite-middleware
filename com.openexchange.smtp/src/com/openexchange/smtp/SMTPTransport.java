@@ -397,7 +397,7 @@ public final class SMTPTransport extends MailTransport {
                         /*
                          * Specify SSL protocols
                          */
-                        smtpProps.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
+                        smtpProps.put("mail.smtp.ssl.protocols", smtpConfig.getSMTPProperties().getSSLProtocols());
                         // smtpProps.put("mail.smtp.ssl", "true");
                         /*
                          * Needed for JavaMail >= 1.4
@@ -443,7 +443,7 @@ public final class SMTPTransport extends MailTransport {
                         /*
                          * Specify SSL protocols
                          */
-                        smtpProps.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
+                        smtpProps.put("mail.smtp.ssl.protocols", smtpConfig.getSMTPProperties().getSSLProtocols());
                         // smtpProps.put("mail.smtp.ssl", "true");
                         /*
                          * Needed for JavaMail >= 1.4

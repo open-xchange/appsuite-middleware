@@ -98,6 +98,8 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
 
     private String spamHandlerName;
 
+    private String sslProtocols;
+
     /**
      * Initializes a new {@link POP3Properties}
      */
@@ -193,6 +195,9 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
         spamHandlerName = configuration.getProperty("com.openexchange.pop3.spamHandler", SpamHandler.SPAM_HANDLER_FALLBACK).trim();
         logBuilder.append("\tSpam Handler: ").append(spamHandlerName).append('\n');
 
+        sslProtocols = configuration.getProperty("com.openexchange.pop3.ssl.protocols", "SSLv3 TLSv1").trim();
+        logBuilder.append("\tSupported SSL protocols: ").append(sslProtocols).append("\n");
+
         logBuilder.append("Global POP3 properties successfully loaded!");
         LOG.info(logBuilder.toString());
     }
@@ -206,6 +211,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
         pop3AuthEnc = null;
         spamHandlerName = null;
         pop3BlockSize = 100;
+        sslProtocols = null;
     }
 
     @Override
@@ -310,6 +316,11 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
     @Override
     public boolean isWatcherShallClose() {
         return mailProperties.isWatcherShallClose();
+    }
+
+    @Override
+    public String getSSLProtocols() {
+        return sslProtocols;
     }
 
 }

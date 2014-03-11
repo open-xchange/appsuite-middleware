@@ -136,6 +136,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private String sContainerType;
 
+    private String sslProtocols;
+
     /**
      * Initializes a new {@link IMAPProperties}
      */
@@ -381,6 +383,9 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         spamHandlerName = configuration.getProperty("com.openexchange.imap.spamHandler", SpamHandler.SPAM_HANDLER_FALLBACK).trim();
         logBuilder.append("\tSpam Handler: ").append(spamHandlerName).append('\n');
 
+        sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
+        logBuilder.append("\tSupported SSL protocols: ").append(sslProtocols).append("\n");
+
         logBuilder.append("Global IMAP properties successfully loaded!");
 
         LOG.info(logBuilder.toString());
@@ -407,6 +412,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         notifyRecent = false;
         notifyFrequencySeconds = 300;
         notifyFullNames = "INBOX";
+        sslProtocols = null;
     }
 
     @Override
@@ -589,5 +595,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
      */
     public String getsContainerType() {
         return sContainerType;
+    }
+
+    @Override
+    public String getSSLProtocols() {
+        return sslProtocols;
     }
 }

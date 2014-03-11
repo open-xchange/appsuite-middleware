@@ -49,8 +49,8 @@
 
 package com.openexchange.authentication.imap.impl;
 
-import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
 import static com.openexchange.authentication.LoginExceptionCodes.UNKNOWN;
 import static com.openexchange.authentication.imap.osgi.ImapAuthServiceRegistry.getServiceRegistry;
 import java.io.File;
@@ -74,6 +74,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
@@ -313,7 +314,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 /*
                  * Specify SSL protocols
                  */
-                imapprops.put("mail.imap.ssl.protocols", "SSLv3 TLSv1");
+                imapprops.put("mail.imap.ssl.protocols", IMAPProperties.getInstance().getSSLProtocols());
                 // imapProps.put("mail.imap.ssl.enable", "true");
                 /*
                  * Needed for JavaMail >= 1.4

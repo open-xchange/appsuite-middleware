@@ -47,65 +47,60 @@
  *
  */
 
-package com.openexchange.smtp.config;
+package com.openexchange.imap;
 
-import com.openexchange.mail.transport.config.ITransportProperties;
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.imap.config.IMAPProperties;
+import com.openexchange.imap.services.Services;
 
-public interface ISMTPProperties extends ITransportProperties {
 
-    /**
-     * Gets the smtpLocalhost
-     *
-     * @return the smtpLocalhost
-     */
-    public String getSmtpLocalhost();
+/**
+ * {@link Bug30843Test}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since 7.6.0
+ */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Services.class, ConfigurationService.class })
+public class Bug30843Test {
 
-    /**
-     * Gets the smtpAuth
-     *
-     * @return the smtpAuth
-     */
-    public boolean isSmtpAuth();
-
-    /**
-     * Gets the smtpEnvelopeFrom
-     *
-     * @return the smtpEnvelopeFrom
-     */
-    public boolean isSmtpEnvelopeFrom();
-
-    /**
-     * Gets the logTransport flag
-     *
-     * @return the logTransport flag
-     */
-    public boolean isLogTransport();
+    private ConfigurationService configService;
 
     /**
-     * Gets the smtpAuthEnc
-     *
-     * @return the smtpAuthEnc
+     * Initializes a new {@link Bug30843Test}.
      */
-    public String getSmtpAuthEnc();
+    public Bug30843Test() {
+        super();
+    }
 
-    /**
-     * Gets the smtpTimeout
-     *
-     * @return the smtpTimeout
-     */
-    public int getSmtpTimeout();
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        this.configService = PowerMockito.mock(ConfigurationService.class);
+        PowerMockito.when(configService.getProperty(Matchers.anyString())).thenReturn("");
+        PowerMockito.when(configService.getProperty(Matchers.anyString(), Matchers.anyString())).thenReturn("");
+        PowerMockito.when(configService.getIntProperty(Matchers.anyString(), Matchers.anyInt())).thenReturn(0);
+        PowerMockito.when(configService.getProperty("com.openexchange.imap.imapAuthEnc", "UTF-8")).thenReturn("UTF-8");
+        PowerMockito.when(configService.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1")).thenReturn("SSLv3 TLSv1");
+        PowerMockito.mockStatic(Services.class);
+        PowerMockito.when(Services.getService(ConfigurationService.class)).thenReturn(configService);
+    }
 
-    /**
-     * Gets the smtpConnectionTimeout
-     *
-     * @return the smtpConnectionTimeout
-     */
-    public int getSmtpConnectionTimeout();
-
-    /**
-     * Gets supported SSL protocols
-     * @return Supported SSL protocols
-     */
-    public String getSSLProtocols();
+    @Test
+    public void testIMAPProperties_getSSLProtocols() throws Exception {
+        IMAPProperties props = IMAPProperties.getInstance();
+        props.loadProperties();
+        String sslProtocols = props.getSSLProtocols();
+        assertEquals("Wrong value loaded from ConfigurationService", "SSLv3 TLSv1", sslProtocols);
+    }
 
 }
