@@ -587,7 +587,7 @@ public class XingAPI<S extends Session> {
             }
 
             RESTUtility.streamRequest(
-                Method.GET,
+                Method.POST,
                 session.getAPIServer(),
                 "/users/" + userId + "/contact_requests",
                 VERSION,
