@@ -212,9 +212,9 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
-    public int[] getContextInSameSchema(Connection con, int contextId, boolean lock) throws PoolException {
+    public int[] getContextInSameSchema(Connection con, int contextId) throws PoolException {
         try {
-            return getService().getContextsInSameSchema(con, contextId, lock);
+            return getService().getContextsInSameSchema(con, contextId);
         } catch (OXException e) {
             log.error("Error getting all contexts from the same schema.", e);
             throw new PoolException(e.getMessage());
@@ -222,9 +222,19 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
-    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts, boolean lock) throws PoolException {
+    public int[] getContextInSchema(Connection con, int poolId, String schema) throws PoolException {
         try {
-            return getService().getUnfilledSchemas(con, poolId, maxContexts, lock);
+            return getService().getContextsInSchema(con, poolId, schema);
+        } catch (OXException e) {
+            log.error("Error getting all contexts from the same schema.", e);
+            throw new PoolException(e.getMessage());
+        }
+    }
+
+    @Override
+    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws PoolException {
+        try {
+            return getService().getUnfilledSchemas(con, poolId, maxContexts);
         } catch (OXException e) {
             log.error("Error getting unfilled schemas", e);
             throw new PoolException(e.getMessage());
@@ -247,6 +257,16 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().getSchemaName(contextId);
         } catch (OXException e) {
             log.error("Error getting the schema name for context " + contextId + ".", e);
+            throw new PoolException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void lock(Connection con) throws PoolException {
+        try {
+            getService().lock(con);
+        } catch (OXException e) {
+            log.error("Error locking context_server2db_pool table", e);
             throw new PoolException(e.getMessage());
         }
     }

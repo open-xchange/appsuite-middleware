@@ -170,21 +170,26 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         final Assignment assign = contextAssignment.getAssignment(contextId);
         final Connection con = getReadOnly();
         try {
-            return contextAssignment.getContextsFromSchema(con, assign.getWritePoolId(), assign.getSchema(), false);
+            return contextAssignment.getContextsFromSchema(con, assign.getWritePoolId(), assign.getSchema());
         } finally {
             backReadOnly(con);
         }
     }
 
     @Override
-    public int[] getContextsInSameSchema(Connection con, int contextId, boolean lock) throws OXException {
+    public int[] getContextsInSameSchema(Connection con, int contextId) throws OXException {
         final Assignment assign = contextAssignment.getAssignment(contextId);
-        return contextAssignment.getContextsFromSchema(con, assign.getWritePoolId(), assign.getSchema(), lock);
+        return contextAssignment.getContextsFromSchema(con, assign.getWritePoolId(), assign.getSchema());
     }
 
     @Override
-    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts, boolean lock) throws OXException {
-        return contextAssignment.getUnfilledSchemas(con, poolId, maxContexts, lock);
+    public int[] getContextsInSchema(Connection con, int poolId, String schema) throws OXException {
+        return contextAssignment.getContextsFromSchema(con, poolId, schema);
+    }
+
+    @Override
+    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException {
+        return contextAssignment.getUnfilledSchemas(con, poolId, maxContexts);
     }
 
     @Override
@@ -200,5 +205,10 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     @Override
     public void deleteAssignment(Connection con, int contextId) throws OXException {
         contextAssignment.deleteAssignment(con, contextId);
+    }
+
+    @Override
+    public void lock(Connection con) throws OXException {
+        contextAssignment.lock(con);
     }
 }

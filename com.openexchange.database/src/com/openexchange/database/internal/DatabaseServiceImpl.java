@@ -178,13 +178,18 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public int[] getContextsInSameSchema(Connection con, int contextId, boolean lock) throws OXException {
-        return configDatabaseService.getContextsInSameSchema(con, contextId, lock);
+    public int[] getContextsInSameSchema(Connection con, int contextId) throws OXException {
+        return configDatabaseService.getContextsInSameSchema(con, contextId);
     }
 
     @Override
-    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts, boolean lock) throws OXException {
-        return configDatabaseService.getUnfilledSchemas(con, poolId, maxContexts, lock);
+    public int[] getContextsInSchema(Connection con, int poolId, String schema) throws OXException {
+        return configDatabaseService.getContextsInSchema(con, poolId, schema);
+    }
+
+    @Override
+    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException {
+        return configDatabaseService.getUnfilledSchemas(con, poolId, maxContexts);
     }
 
     @Override
@@ -200,6 +205,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public void deleteAssignment(Connection con, int contextId) throws OXException {
         configDatabaseService.deleteAssignment(con, contextId);
+    }
+
+    @Override
+    public void lock(Connection con) throws OXException {
+        configDatabaseService.lock(con);
     }
 
     // Implemented database service methods.

@@ -71,6 +71,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
@@ -306,35 +307,50 @@ public class OXContextMySQLStorageCommon {
         group_stmt.close();
     }
 
-    public final void deleteContextFromConfigDB(final Connection configCon, final int contextId) throws StorageException {
+    /**
+     * If this method is used the surrounding code needs to take care, that according locks on the database tables are created. If they are
+     * no such locks this method may delete schemas where another request currently writes to.
+     */
+    public static void deleteEmptySchema(Connection con, int poolId, String dbSchema) throws StorageException {
+        final int[] otherContexts;
+        try {
+            otherContexts = ClientAdminThread.cache.getPool().getContextInSchema(con, poolId, dbSchema);
+        } catch (PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage(), e);
+        }
+        if (otherContexts.length == 0) {
+            Database db = OXToolStorageInterface.getInstance().loadDatabaseById(poolId);
+            db.setScheme(dbSchema);
+            OXUtilMySQLStorageCommon.deleteDatabase(db);
+        }
+    }
+
+    public final void deleteContextFromConfigDB(Connection con, int contextId) throws StorageException {
+        OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
         PreparedStatement stmt = null;
         try {
             // This creates a lock on context_server2db_pool on the rows with contexts in the same schema. Concurrent create and delete of
             // context can cause removed schemas while creating a context in it. This can not happen anymore with the introduced lock.
-            final int[] otherContexts = ClientAdminThread.cache.getPool().getContextInSameSchema(configCon, contextId, true);
-            final int poolId = ClientAdminThread.cache.getPool().getWritePool(contextId);
-            final String dbSchema = ClientAdminThread.cache.getPool().getSchemaName(contextId);
-            ClientAdminThread.cache.getPool().deleteAssignment(configCon, contextId);
-            // otherContexts contains obviously the current context to delete.
-            if (otherContexts.length < 2) {
-                Database db = OXToolStorageInterface.getInstance().loadDatabaseById(poolId);
-                db.setScheme(dbSchema);
-                OXUtilMySQLStorageCommon.deleteDatabase(db);
-            }
+            pool.lock(con);
+            final int poolId = pool.getWritePool(contextId);
+            final String dbSchema = pool.getSchemaName(contextId);
+            pool.deleteAssignment(con, contextId);
+            deleteEmptySchema(con, poolId, dbSchema);
             log.debug("Deleting login2context entries for context {}", I(contextId));
-            stmt = configCon.prepareStatement("DELETE FROM login2context WHERE cid=?");
+            stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
             log.debug("Deleting context entry for context {}", I(contextId));
-            stmt = configCon.prepareStatement("DELETE FROM context WHERE cid=?");
+            stmt = con.prepareStatement("DELETE FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
         } catch (PoolException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage(), e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage(), e);
         } finally {
@@ -565,5 +581,4 @@ public class OXContextMySQLStorageCommon {
             }
         }
     }
-
 }

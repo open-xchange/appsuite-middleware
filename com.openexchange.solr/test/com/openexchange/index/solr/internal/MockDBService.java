@@ -216,13 +216,23 @@ public class MockDBService implements DatabaseService {
     }
 
     @Override
-    public int[] getContextsInSameSchema(Connection con, int contextId, boolean lock) {
+    public int[] getContextsInSameSchema(Connection con, int contextId) {
         return null;
     }
 
     @Override
-    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts, boolean lock) {
+    public int[] getContextsInSchema(Connection con, int poolId, String schema) {
         return null;
+    }
+
+    @Override
+    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) {
+        return null;
+    }
+
+    @Override
+    public void lock(Connection con) {
+        // Nothing to do
     }
 
     @Override

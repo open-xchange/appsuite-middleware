@@ -105,27 +105,25 @@ public interface ConfigDatabaseService {
 
     /**
      * Finds all contexts their data is stored in the same schema and on the same database like the given one.
-     * @param con connection to the config database. it must be a writable connection in a transaction if lock is given as <code>true</code>.
+     * @param con connection to the config database
      * @param contextId identifier of a context.
-     * @param lock <code>true</code> to execute the reading statement with creating a lock.
      * @return all contexts having their data in the same schema and on the same database.
      * @throws OXException if some problem occurs.
      */
-    int[] getContextsInSameSchema(Connection con, int contextId, boolean lock) throws OXException;
+    int[] getContextsInSameSchema(Connection con, int contextId) throws OXException;
+
+    int[] getContextsInSchema(Connection con, int poolId, String schema) throws OXException;
 
     /**
      * Searches for schemas that store less that <code>maxContexts</code> contexts and that are stored on given database identified by
-     * <code>poolId</code>. Can additionally lock the touched tables so that some context delete is not able to drop a selected schema.
-     * @param con connection to the config database. this connection must be to the write host and in a transaction if lock is given as
-     * <code>true</code>.
+     * <code>poolId</code>.
+     * @param con connection to the config database
      * @param poolId only schema stored on the given database should be considered.
      * @param maxContexts configured maximum allowed contexts for a database schema.
-     * @param lock <code>true</code> to lock the touched lines. con must then be a connection to the write host and it must be in a
-     * transaction. This locks out any context delete calls maybe removing one of this returned schemas.
      * @return a list of schemas that are not filled up to the given maximum number of contexts.
      * @throws OXException if reading from the database fails.
      */
-    String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts, boolean lock) throws OXException;
+    String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException;
 
     /**
      * Invalidates all cached database pooling information for a context. This are especially the assignments to database servers.
@@ -145,4 +143,6 @@ public interface ConfigDatabaseService {
      * @param contextId for this context the database assignment is deleted.
      */
     void deleteAssignment(Connection con, int contextId) throws OXException;
+
+    void lock(Connection con) throws OXException;
 }

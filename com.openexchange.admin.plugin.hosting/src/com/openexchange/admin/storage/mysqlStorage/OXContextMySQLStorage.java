@@ -102,6 +102,7 @@ import com.openexchange.admin.services.I18nServices;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
@@ -1016,7 +1017,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             } catch (SQLException e) {
                 throw new StorageException(e.getMessage(), e);
             } catch (OXContextException e) {
-                LOG.error("", e);
+                LOG.error(e.getMessage(), e);
                 throw new StorageException(e.getMessage());
             }
             // Two separate try-catch blocks are necessary because rollback only works after starting a transaction.
@@ -1031,9 +1032,21 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 return retval;
             } catch (SQLException e) {
                 rollback(configCon);
+                try {
+                    cache.getPool().lock(configCon);
+                } catch (PoolException e1) {
+                    LOG.error(e1.getMessage(), e1);
+                }
+                OXContextMySQLStorageCommon.deleteEmptySchema(configCon, i(db.getId()), db.getScheme());
                 throw new StorageException(e.getMessage(), e);
             } catch (StorageException e) {
                 rollback(configCon);
+                try {
+                    cache.getPool().lock(configCon);
+                } catch (PoolException e1) {
+                    LOG.error(e1.getMessage(), e1);
+                }
+                OXContextMySQLStorageCommon.deleteEmptySchema(configCon, i(db.getId()), db.getScheme());
                 throw e;
             } finally {
                 autocommit(configCon);
@@ -1395,9 +1408,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (null == poolId) {
             throw new StorageException("pool_id in getNextUnfilledSchemaFromDB must be != null");
         }
+        OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
         final String[] unfilledSchemas;
         try {
-            unfilledSchemas = ClientAdminThread.cache.getPool().getUnfilledSchemas(con, i(poolId), this.CONTEXTS_PER_SCHEMA, true);
+            pool.lock(con);
+            unfilledSchemas = pool.getUnfilledSchemas(con, i(poolId), this.CONTEXTS_PER_SCHEMA);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);

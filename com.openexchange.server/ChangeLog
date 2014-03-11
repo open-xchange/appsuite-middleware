@@ -1,3 +1,8 @@
+* 2014-03-11 - marcus.klein@open-xchange.com
+
+ - Fix for bug 29980: Use row locks on complete table configdb.context_server2db_pool to prevent a delete context call to remove the schema
+   a create context call is currently writing to. The complete table must be locked to prevent deadlocks on concurrent create context calls.
+
 * 2014-03-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 30652: Signal value of property "com.openexchange.forceHTTPS" to App Suite UI
@@ -23,11 +28,6 @@
    additional JAR to the build call on Debian Squeeze systems when using CDBS for building.
  - Fix for bug 31405: Implementation of move context now uses existing functionality to update context to database mapping that takes care
    about MySQL master/slave setups.
-
-* 2014-03-06 - marcus.klein@open-xchange.com
-
- - Fix for bug 29980: Use row locks on table configdb.context_server2db_pool to prevent a delete context call to remove the schema a create
-   context call is currently writing to.
 
 * 2014-03-06 - ioannis.chouklis@open-xchange.com
 
