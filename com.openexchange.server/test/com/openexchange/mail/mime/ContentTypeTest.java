@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,38 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.mail.mime;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import junit.framework.TestCase;
+
 
 /**
- * {@link UnitTests}
+ * {@link ContentTypeTest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    com.openexchange.ajax.ProcessUploadStaticTest.class,
-    com.openexchange.ajax.parser.TaskLastModifiedTest.class,
-    com.openexchange.ajax.LoginAddFragmentTest.class,
-    com.openexchange.groupware.ldap.UserAttributeDiffTest.class,
-    com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest.class,
-    com.openexchange.login.internal.LoginPerformerTest.class,
-    com.openexchange.tools.collections.OXCollectionsTest.class,
-    com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class,
-    com.openexchange.tools.net.URIParserTest.class,
-    com.openexchange.mail.utils.MsisdnUtilityTest.class,
-    com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class,
-    com.openexchange.ajax.MailAttachmentTest.class,
-    com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
-    com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
-    com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
-    com.openexchange.mail.mime.ContentDispositionTest.class,
-    com.openexchange.mail.mime.ContentTypeTest.class,
-    com.openexchange.mail.mime.MimeStructureFixerTest.class,
-    com.openexchange.mail.mime.MimeSmilFixerTest.class,
-    com.openexchange.groupware.notify.ParticipantNotifyTest.class,
-    com.openexchange.mail.json.actions.GetAttachmentActionTest.class,
-    com.openexchange.ajax.requesthandler.converters.preview.cache.FileStoreResourceCacheImplTest.class,
-    com.openexchange.server.services.SharedInfostoreJSlobTest.class,
-    com.openexchange.groupware.upload.quotachecker.MailUploadQuotaCheckerTest.class
-})
-public class UnitTests {
+public class ContentTypeTest extends TestCase {
 
     /**
-     * Initializes a new {@link UnitTests}.
+     * Initializes a new {@link ContentTypeTest}.
      */
-    public UnitTests() {
+    public ContentTypeTest() {
         super();
+    }
+
+    public void testTrucatedNameParameter() {
+        try {
+            String hdr = "application/pdf; name=The New York Times - Breaking News, World News & Multimedia.loc.pdf";
+            com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
+            String name = contentType.getNameParameter();
+
+            assertEquals("Unexpected \"name\" parameter.", "The New York Times - Breaking News, World News & Multimedia.loc.pdf", name);
+
+            assertEquals("Unexpected toString() result.", "application/pdf; name=\"The New York Times - Breaking News, World News & Multimedia.loc.pdf\"", contentType.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
 }
