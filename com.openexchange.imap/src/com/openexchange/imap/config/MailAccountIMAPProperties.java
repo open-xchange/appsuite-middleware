@@ -291,7 +291,12 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
 
     @Override
     public String getSSLProtocols() {
-        return IMAPProperties.getInstance().getSSLProtocols();
+        final String tmp = properties.get("com.openexchange.imap.ssl.protocols");
+        if (null == tmp) {
+            return IMAPProperties.getInstance().getSSLProtocols();
+        }
+
+        return tmp.trim();
     }
 
 }
