@@ -50,18 +50,24 @@
 package com.openexchange.find.basic.drive;
 
 import static com.openexchange.java.Strings.isEmpty;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.search.ComparablePattern;
+import com.openexchange.file.storage.search.ComparisonType;
 import com.openexchange.file.storage.search.ContentTerm;
 import com.openexchange.file.storage.search.DescriptionTerm;
 import com.openexchange.file.storage.search.FileMimeTypeTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
+import com.openexchange.file.storage.search.FileSizeTerm;
 import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.search.TitleTerm;
@@ -115,8 +121,24 @@ public final class Utils {
         } else if (Constants.FIELD_FOLDER_TYPE.equals(field)) {
             // TODO
             return null;
-        }
+        } else if (Constants.FIELD_FILE_SIZE.equals(field)) {
+            final long bytes = parseFilesizeQuery(query);
+            final ComparisonType comparison = parseComparisonType(query);
+            ComparablePattern<Number> term = new ComparablePattern<Number>() {
 
+                @Override
+                public ComparisonType getComparisonType() {
+                    return comparison;
+                }
+
+                @Override
+                public Number getPattern() {
+                    return bytes;
+                }
+
+            };
+            return new FileSizeTerm(term);
+        }
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
     }
 
@@ -482,6 +504,44 @@ public final class Utils {
 
         };
         return file;
+    }
+
+    private final static Pattern pattern = Pattern.compile("([<>=]) ([\\d.]+)([GMK]B)", Pattern.CASE_INSENSITIVE);
+
+    private static long parseFilesizeQuery(String query) throws OXException {
+        Matcher matcher = pattern.matcher(query);
+        if (matcher.find()) {
+            String number = matcher.group(2);
+            String suffix = matcher.group(3);
+            int power = 0;
+            if ("TB".equals(suffix.toUpperCase())) {
+                power = 4;
+            } else if ("GB".equals(suffix.toUpperCase())) {
+                power = 3;
+            } else if ("MB".equals(suffix.toUpperCase())) {
+                power = 2;
+            } else if ("KB".equals(suffix.toUpperCase())) {
+                power = 1;
+            }
+            BigDecimal decimal = new BigDecimal(number);
+            return decimal.multiply(BigDecimal.valueOf(1024).pow(power)).longValue();
+        }
+        throw FindExceptionCode.PARSING_ERROR.create(query);
+    }
+
+    private static ComparisonType parseComparisonType(String query) throws OXException {
+        Matcher matcher = pattern.matcher(query);
+        if (matcher.find()) {
+            String comparison = matcher.group(1);
+            if (">".equals(comparison)) {
+                return ComparisonType.GREATER_THAN;
+            } else if ("<".equals(comparison)) {
+                return ComparisonType.LESS_THAN;
+            } else if ("=".equals(comparison)){
+                return ComparisonType.EQUALS;
+            }
+        }
+        throw FindExceptionCode.PARSING_ERROR.create(query);
     }
 
 }
