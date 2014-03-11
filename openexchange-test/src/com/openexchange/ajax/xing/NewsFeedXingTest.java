@@ -47,51 +47,41 @@
  *
  */
 
-package com.openexchange.xing.json;
+package com.openexchange.ajax.xing;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
+import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.xing.actions.NewsFeedRequest;
+import com.openexchange.ajax.xing.actions.NewsFeedResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.json.actions.AbstractXingAction;
-import com.openexchange.xing.json.actions.ContacRequestAction;
-import com.openexchange.xing.json.actions.InviteAction;
-import com.openexchange.xing.json.actions.NewsFeedRequestAction;
-
 
 /**
- * {@link XingActionFactory} - The XING action factory.
+ * {@link NewsFeedXingTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@Module(name = "xing", description = "Provides access to XING module.")
-public class XingActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AbstractXingAction> actions;
+public class NewsFeedXingTest extends AbstractAJAXSession {
 
     /**
-     * Initializes a new {@link XingActionFactory}.
+     * Initializes a new {@link NewsFeedXingTest}.
      */
-    public XingActionFactory(final ServiceLookup serviceLookup) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractXingAction>(4);
-        actions.put("invite", new InviteAction(serviceLookup));
-        actions.put("contact_request", new ContacRequestAction(serviceLookup));
-        actions.put("newsfeed", new NewsFeedRequestAction(serviceLookup));
+    public NewsFeedXingTest(String name) {
+        super(name);
     }
-
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    
+    /**
+     * Simple test to verify that the action fetches the network_activities
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    public void testNewsFeedSimple() throws OXException, IOException, JSONException {
+        NewsFeedRequest request = new NewsFeedRequest(false, -1, -1, new int[0]);
+        NewsFeedResponse response = client.execute(request);
+        assertNotNull(response);
+        JSONObject json = (JSONObject) response.getData();
+        assertNotNull(json.getJSONArray("network_activities"));
     }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
 }

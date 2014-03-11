@@ -47,51 +47,32 @@
  *
  */
 
-package com.openexchange.xing.json;
+package com.openexchange.ajax.xing.actions;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.json.actions.AbstractXingAction;
-import com.openexchange.xing.json.actions.ContacRequestAction;
-import com.openexchange.xing.json.actions.InviteAction;
-import com.openexchange.xing.json.actions.NewsFeedRequestAction;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link XingActionFactory} - The XING action factory.
+ * {@link NewsFeedParser}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@Module(name = "xing", description = "Provides access to XING module.")
-public class XingActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AbstractXingAction> actions;
+public class NewsFeedParser extends AbstractAJAXParser<NewsFeedResponse>{
 
     /**
-     * Initializes a new {@link XingActionFactory}.
+     * Initializes a new {@link NewsFeedParser}.
      */
-    public XingActionFactory(final ServiceLookup serviceLookup) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractXingAction>(4);
-        actions.put("invite", new InviteAction(serviceLookup));
-        actions.put("contact_request", new ContacRequestAction(serviceLookup));
-        actions.put("newsfeed", new NewsFeedRequestAction(serviceLookup));
+    public NewsFeedParser(boolean fail) {
+        super (fail);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected NewsFeedResponse createResponse(Response response) throws JSONException {
+        return new NewsFeedResponse(response);
     }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
 }

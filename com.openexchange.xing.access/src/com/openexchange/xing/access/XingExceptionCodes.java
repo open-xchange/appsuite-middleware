@@ -132,6 +132,10 @@ public enum XingExceptionCodes implements DisplayableOXExceptionCode {
      * XING user "%1$s" is already directly connected.
      */
     ALREADY_CONNECTED("XING user \"%1$s\" is already directly connected.", Category.CATEGORY_USER_INPUT, 20, XingExceptionMessages.ALREADY_CONNECTED_MSG),
+    /**
+     * The URL parameters 'since' and 'until' are mutually exclusive.
+     */
+    MUTUALLY_EXCLUSIVE("The URL parameters 'since' and 'until' are mutually exclusive", Category.CATEGORY_ERROR, 21, null),
     ;
 
     private final Category category;
