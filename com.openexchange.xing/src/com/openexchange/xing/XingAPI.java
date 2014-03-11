@@ -639,9 +639,9 @@ public class XingAPI<S extends Session> {
             }
 
             final JSONObject responseInformation = RESTUtility.request(
-                Method.GET,
+                Method.POST,
                 session.getAPIServer(),
-                "/users/" + userId + "/invite",
+                "/users/invite",
                 VERSION,
                 params.toArray(new String[0]),
                 session).toObject();
