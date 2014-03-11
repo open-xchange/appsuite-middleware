@@ -51,7 +51,6 @@ package com.openexchange.authentication.imap.impl;
 
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import static com.openexchange.authentication.LoginExceptionCodes.UNKNOWN;
-import static com.openexchange.authentication.imap.osgi.ImapAuthServiceRegistry.getServiceRegistry;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -68,17 +67,18 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
 public class IMAPAuthentication implements AuthenticationService {
@@ -130,11 +130,14 @@ public class IMAPAuthentication implements AuthenticationService {
      */
     private static final String CHARENC_ISO8859 = "ISO-8859-1";
 
+    private final ServiceLookup services;
+
     /**
      * Default constructor.
      */
-    public IMAPAuthentication() {
+    public IMAPAuthentication(final ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     // /**
@@ -223,7 +226,7 @@ public class IMAPAuthentication implements AuthenticationService {
             // Added by cutmasta
             boolean USE_IMAPS = false;
             if ("true".equalsIgnoreCase(props.getProperty(PropertyNames.USE_MULTIPLE.name))) {
-	            final ContextService contextService = getServiceRegistry().getService(ContextService.class, true);
+	            final ContextService contextService = services.getService(ContextService.class);
 
 	            final int ctxId = contextService.getContextId(splitted[0]);
 	            if (ContextStorage.NOT_FOUND == ctxId) {
@@ -231,7 +234,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	            }
 	            final Context ctx = contextService.getContext(ctxId);
 
-	            final UserService userService = getServiceRegistry().getService(UserService.class, true);
+	            final UserService userService = services.getService(UserService.class);
 	            final int userId;
 	            try {
 	                userId = userService.getUserId(uid, ctx);
@@ -243,8 +246,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	            /*
 	             * Load primary account and check its protocol to be IMAP
 	             */
-	            final MailAccount defaultMailAccount =
-	                getServiceRegistry().getService(MailAccountStorageService.class, true).getDefaultMailAccount(userId, ctxId);
+	            final MailAccount defaultMailAccount = services.getService(MailAccountStorageService.class).getDefaultMailAccount(userId, ctxId);
 	            final String mailProtocol = defaultMailAccount.getMailProtocol();
 	            if (!mailProtocol.toLowerCase().startsWith("imap")) {
 	                throw UNKNOWN.create(new StringBuilder(128).append(
@@ -313,7 +315,11 @@ public class IMAPAuthentication implements AuthenticationService {
                 /*
                  * Specify SSL protocols
                  */
-                imapprops.put("mail.imap.ssl.protocols", IMAPProperties.getInstance().getSSLProtocols());
+                {
+                    final ConfigurationService configuration = services.getService(ConfigurationService.class);
+                    final String sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
+                    imapprops.put("mail.imap.ssl.protocols", sslProtocols);
+                }
                 // imapProps.put("mail.imap.ssl.enable", "true");
                 /*
                  * Needed for JavaMail >= 1.4
