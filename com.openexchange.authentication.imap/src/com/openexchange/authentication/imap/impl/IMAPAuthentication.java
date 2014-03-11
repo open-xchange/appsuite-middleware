@@ -56,7 +56,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.text.MessageFormat;
 import java.util.Properties;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
@@ -74,6 +73,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
@@ -313,7 +313,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 /*
                  * Specify SSL protocols
                  */
-                imapprops.put("mail.imap.ssl.protocols", "SSLv3 TLSv1");
+                imapprops.put("mail.imap.ssl.protocols", IMAPProperties.getInstance().getSSLProtocols());
                 // imapProps.put("mail.imap.ssl.enable", "true");
                 /*
                  * Needed for JavaMail >= 1.4

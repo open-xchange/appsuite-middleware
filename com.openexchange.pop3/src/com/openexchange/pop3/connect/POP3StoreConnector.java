@@ -324,7 +324,7 @@ public final class POP3StoreConnector {
                 /*
                  * Specify SSL protocols
                  */
-                pop3Props.put("mail.pop3.ssl.protocols", "SSLv3 TLSv1");
+                pop3Props.put("mail.pop3.ssl.protocols", pop3Config.getPOP3Properties().getSSLProtocols());
                 // pop3Props.put("mail.pop3.ssl.enable", "true");
                 /*
                  * Needed for JavaMail >= 1.4

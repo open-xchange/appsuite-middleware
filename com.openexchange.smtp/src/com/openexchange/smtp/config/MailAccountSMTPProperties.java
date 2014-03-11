@@ -171,4 +171,9 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         return retval;
     }
 
+    @Override
+    public String getSSLProtocols() {
+        return SMTPProperties.getInstance().getSSLProtocols();
+    }
+
 }

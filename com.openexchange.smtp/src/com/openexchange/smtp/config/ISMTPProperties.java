@@ -102,4 +102,10 @@ public interface ISMTPProperties extends ITransportProperties {
      */
     public int getSmtpConnectionTimeout();
 
+    /**
+     * Gets supported SSL protocols
+     * @return Supported SSL protocols
+     */
+    public String getSSLProtocols();
+
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,60 @@
  *
  */
 
-package com.openexchange.pop3.config;
+package com.openexchange.imap;
 
-import com.openexchange.mail.api.IMailProperties;
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.imap.config.IMAPProperties;
+import com.openexchange.imap.services.Services;
+
 
 /**
- * {@link IPOP3Properties} - Properties for POP3.
+ * {@link Bug30843Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since 7.6.0
  */
-public interface IPOP3Properties extends IMailProperties {
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Services.class, ConfigurationService.class })
+public class Bug30843Test {
+
+    private ConfigurationService configService;
 
     /**
-     * Gets the POP3 authentication encoding.
-     *
-     * @return The POP3 authentication encoding
+     * Initializes a new {@link Bug30843Test}.
      */
-    public String getPOP3AuthEnc();
+    public Bug30843Test() {
+        super();
+    }
 
-    /**
-     * Gets the POP3 connection idle time in milliseconds.
-     *
-     * @return The POP3 connection idle time in milliseconds
-     */
-    public int getPOP3ConnectionIdleTime();
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        this.configService = PowerMockito.mock(ConfigurationService.class);
+        PowerMockito.when(configService.getProperty(Matchers.anyString())).thenReturn("");
+        PowerMockito.when(configService.getProperty(Matchers.anyString(), Matchers.anyString())).thenReturn("");
+        PowerMockito.when(configService.getIntProperty(Matchers.anyString(), Matchers.anyInt())).thenReturn(0);
+        PowerMockito.when(configService.getProperty("com.openexchange.imap.imapAuthEnc", "UTF-8")).thenReturn("UTF-8");
+        PowerMockito.when(configService.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1")).thenReturn("SSLv3 TLSv1");
+        PowerMockito.mockStatic(Services.class);
+        PowerMockito.when(Services.getService(ConfigurationService.class)).thenReturn(configService);
+    }
 
-    /**
-     * Gets the POP3 connection timeout in milliseconds.
-     *
-     * @return The POP3 connection timeout in milliseconds
-     */
-    public int getPOP3ConnectionTimeout();
-
-    /**
-     * Gets the POP3 temporary down in milliseconds.
-     *
-     * @return The POP3 temporary down in milliseconds
-     */
-    public int getPOP3TemporaryDown();
-
-    /**
-     * Gets the POP3 timeout in milliseconds.
-     *
-     * @return The POP3 timeout in milliseconds
-     */
-    public int getPOP3Timeout();
-
-    /**
-     * Gets the number of messages which are allowed to be fetched at once.
-     *
-     * @return The block size
-     */
-    public int getPOP3BlockSize();
-
-    /**
-     * Gets supported SSL protocols
-     * @return Supported SSL protocols
-     */
-    public String getSSLProtocols();
+    @Test
+    public void testIMAPProperties_getSSLProtocols() throws Exception {
+        IMAPProperties props = IMAPProperties.getInstance();
+        props.loadProperties();
+        String sslProtocols = props.getSSLProtocols();
+        assertEquals("Wrong value loaded from ConfigurationService", "SSLv3 TLSv1", sslProtocols);
+    }
 
 }
