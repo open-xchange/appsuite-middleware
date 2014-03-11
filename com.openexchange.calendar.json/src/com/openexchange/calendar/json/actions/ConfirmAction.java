@@ -122,9 +122,13 @@ public final class ConfirmAction extends AppointmentAction {
 
         if (isOccurrenceChange) {
             if (isUser) {
-                timestamp = appointmentSql.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirmStatus, confirmMessage);
+                // TODO handle occurrence as exception for user
+                // timestamp = appointmentSql.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirmStatus,
+                // confirmMessage);
             } else if (isExternal) {
-                timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, optOccurrenceId, participant.getEmailAddress(), confirmStatus, confirmMessage);
+                // TODO handle occurrence as exception for external user
+                // timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, optOccurrenceId, participant.getEmailAddress(),
+                // confirmStatus, confirmMessage);
             } else {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
             }

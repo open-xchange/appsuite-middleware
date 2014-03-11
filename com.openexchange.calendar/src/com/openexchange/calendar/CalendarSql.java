@@ -86,7 +86,6 @@ import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.Strings;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
@@ -884,27 +883,6 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
-    public Date setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
-        if (optOccurrenceId <= 0) {
-            return setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
-        }
-
-        if (session == null) {
-            throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
-        }
-        final Context ctx = Tools.getContext(session);
-        if (confirmMessage != null) {
-            String error = null;
-            error = Check.containsInvalidChars(confirmMessage);
-            if (error != null) {
-                throw OXCalendarExceptionCodes.INVALID_CHARACTER.create("Confirm Message", error);
-            }
-        }
-
-        return cimp.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage, session, ctx);
-    }
-
-    @Override
     public Date setExternalConfirmation(final int objectId, final int folderId, final String mail, final int confirm, final String message) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -918,29 +896,6 @@ public class CalendarSql implements AppointmentSQLInterface {
             }
         }
         return cimp.setExternalConfirmation(objectId, folderId, mail, confirm, message, session, ctx);
-    }
-
-    @Override
-    public Date setExternalConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final String mail, final int confirm, final String message) throws OXException {
-        if (optOccurrenceId <= 0) {
-            return setExternalConfirmation(objectId, folderId, mail, confirm, message);
-        }
-        if (session == null) {
-            throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
-        }
-        if ((mail == null) || Strings.isEmpty(mail)) {
-            throw OXCalendarExceptionCodes.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD.create();
-        }
-        final Context ctx = Tools.getContext(session);
-        if (message != null) {
-            String error = null;
-            error = Check.containsInvalidChars(message);
-            if (error != null) {
-                throw OXCalendarExceptionCodes.INVALID_CHARACTER.create("Confirm Message", error);
-            }
-        }
-        return cimp.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message, session, ctx);
-
     }
 
     @Override

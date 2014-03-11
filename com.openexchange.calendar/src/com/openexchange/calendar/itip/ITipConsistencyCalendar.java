@@ -506,22 +506,12 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 				confirm, confirmMessage);
 	}
 
-	@Override
-    public Date setUserConfirmation(int objectId, int folderId, int optOccurrenceId, int userId, int confirm, String confirmMessage) throws OXException {
-        return delegate.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage);
-    }
-
     @Override
     public Date setExternalConfirmation(final int objectId, final int folderId, final String mail,
 			final int confirm, final String message) throws OXException {
 		return delegate.setExternalConfirmation(objectId, folderId, mail, confirm,
 				message);
 	}
-
-    @Override
-    public Date setExternalConfirmation(int objectId, int folderId, int optOccurrenceId, String mail, int confirm, String message) throws OXException {
-        return delegate.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message);
-    }
 
 	@Override
     public long attachmentAction(final int folderId, final int objectId, final int userId,
