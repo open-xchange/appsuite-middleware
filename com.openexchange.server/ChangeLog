@@ -1,3 +1,17 @@
+* 2014-03-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31154: Necessary Ant tasks for our build system have not be available by default on Debian Squeeze but on Wheezy. Adding an
+   additional JAR to the build call on Debian Squeeze systems when using CDBS for building.
+
+* 2014-03-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30369: Replaced equinox event admin with multithreaded implementation from apache felix project, introduced background
+                      event processing for time-consuming handlers
+
+* 2014-03-03 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 31329: Multi-line calculation has now also been added for PGP_ENCRYPT commands
+
 * 2014-02-25 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31191: Fixed erroneous permission check.
