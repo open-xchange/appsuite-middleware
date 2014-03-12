@@ -75,12 +75,13 @@ public class NewsFeedXingTest extends AbstractAJAXSession {
     
     /**
      * Simple test to verify that the action fetches the network_activities
+     * 
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
-    public void testNewsFeedSimple() throws OXException, IOException, JSONException {
-        NewsFeedRequest request = new NewsFeedRequest(false, -1, -1, new int[0]);
+    public void r() throws OXException, IOException, JSONException {
+        NewsFeedRequest request = new NewsFeedRequest(false, -1, -1, new int[0], true);
         NewsFeedResponse response = client.execute(request);
         assertNotNull(response);
         JSONObject json = (JSONObject) response.getData();
@@ -89,13 +90,14 @@ public class NewsFeedXingTest extends AbstractAJAXSession {
     
     /**
      * Test to verify userfields
+     * 
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
     public void testNewsFeedWithUserFields() throws OXException, IOException, JSONException {
         int[] uf = {UserField.FIRST_NAME.ordinal(), UserField.LAST_NAME.ordinal()};
-        NewsFeedRequest request = new NewsFeedRequest(false, -1, -1, uf);
+        NewsFeedRequest request = new NewsFeedRequest(false, -1, -1, uf, true);
         NewsFeedResponse response = client.execute(request);
         assertNotNull(response);
         
@@ -118,5 +120,19 @@ public class NewsFeedXingTest extends AbstractAJAXSession {
         assertTrue(creator.hasAndNotNull("first_name"));
         assertFalse(creator.hasAndNotNull("active_email"));
         assertFalse(creator.hasAndNotNull("wants"));
+    }
+    
+    /**
+     * Test error code for mutually exclusive URL parameters 'since' and 'until'
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    public void testNewsFeedWithSinceAndUntil() throws OXException, IOException, JSONException {
+        NewsFeedRequest request = new NewsFeedRequest(true, 123, 123, new int[0], false);
+        NewsFeedResponse response = client.execute(request);
+        assertNotNull(response);
+        assertEquals("XING-0021", response.getException().getErrorCode());
     }
 }

@@ -74,16 +74,19 @@ public class NewsFeedRequest implements AJAXRequest<NewsFeedResponse>{
     private final int[] fields;
     
     public static final String XING_URL = "/ajax/xing";
+    
+    private final boolean failOnError;
 
     /**
      * Initializes a new {@link NewsFeedRequest}.
      */
-    public NewsFeedRequest(boolean aggregate, long since, long until, int[] fields) {
+    public NewsFeedRequest(boolean aggregate, long since, long until, int[] fields, boolean foe) {
         super();
         this.aggregate = aggregate;
         this.since = since;
         this.until = until;
         this.fields = fields;
+        failOnError = foe;
     }
 
     /* (non-Javadoc)
@@ -124,7 +127,7 @@ public class NewsFeedRequest implements AJAXRequest<NewsFeedResponse>{
      */
     @Override
     public AbstractAJAXParser<? extends NewsFeedResponse> getParser() {
-        return new NewsFeedParser(true);
+        return new NewsFeedParser(failOnError);
     }
     
     /* (non-Javadoc)
