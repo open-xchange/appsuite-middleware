@@ -49,9 +49,10 @@
 
 package com.openexchange.ajax.find.drive;
 
+import java.io.File;
 import java.util.Collections;
-import java.util.Date;
 import com.openexchange.ajax.find.AbstractFindTest;
+import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
@@ -61,14 +62,16 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
+import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
+import com.openexchange.find.basic.drive.Constants;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-
 
 /**
  * {@link BasicDriveTest}
@@ -79,10 +82,12 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 public class BasicDriveTest extends AbstractFindTest {
 
     private DocumentMetadata metadata;
-    private static final String FILENAME = "BasicDriveTest";
+
+    private static final String SEARCH = "BasicDriveTest";
 
     /**
      * Initializes a new {@link BasicDriveTest}.
+     *
      * @param name
      */
     public BasicDriveTest(String name) {
@@ -93,17 +98,16 @@ public class BasicDriveTest extends AbstractFindTest {
     public void setUp() throws Exception {
         super.setUp();
         client = new AJAXClient(User.User1);
+        File file = new File("testData/BasicDriveTest.tmp");
         metadata = new DocumentMetadataImpl();
-        metadata.setCreationDate(new Date());
-        metadata.setFolderId(client.getValues().getPrivateInfostoreFolder());
-        metadata.setFileName(FILENAME);
-        metadata.setTitle(FILENAME);
-        metadata.setLastModified(new Date());
+        metadata.setFileName(file.getName());
         metadata.setDescription("Test file for testing new find api");
-        NewInfostoreRequest request = new NewInfostoreRequest(metadata);
+        metadata.setFolderId(client.getValues().getPrivateInfostoreFolder());
+        NewInfostoreRequest request = new NewInfostoreRequest(metadata, file);
         NewInfostoreResponse response = client.execute(request);
         assertFalse("Could not create test file for BasicDriveTest", response.hasError());
         metadata.setId(response.getID());
+        metadata.setLastModified(response.getTimestamp());
     }
 
     @Override
@@ -119,7 +123,9 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testSearch() throws Exception {
-        ActiveFacet fileNameFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(Collections.singletonList("global"), FILENAME));
+        ActiveFacet fileNameFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(
+            Collections.singletonList(Constants.FIELD_FILE_NAME),
+            SEARCH));
         QueryRequest request = new QueryRequest(0, 10, Collections.singletonList(fileNameFacet), Module.DRIVE.getIdentifier());
         QueryResponse response = client.execute(request);
         SearchResult result = response.getSearchResult();
@@ -127,9 +133,24 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testAutocompletion() throws Exception {
-        AutocompleteRequest request = new AutocompleteRequest(FILENAME.substring(0, 3), Module.DRIVE.getIdentifier());
+        AutocompleteRequest request = new AutocompleteRequest(SEARCH.substring(0, 3), Module.DRIVE.getIdentifier());
         AutocompleteResponse response = client.execute(request);
         assertNotNull("Autocompletion failed in BasicDriveTest", response.getFacets());
+    }
+
+    public void testSizeFacet() throws Exception {
+        ActiveFacet fileSizeFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(
+            Collections.singletonList(Constants.FIELD_FILE_SIZE),
+            FileSizeDisplayItem.Size.MB1.getSize()));
+        QueryRequest request = new QueryRequest(0, 10, Collections.singletonList(fileSizeFacet), Module.DRIVE.getIdentifier());
+        QueryResponse response = client.execute(request);
+        SearchResult result = response.getSearchResult();
+        assertNotNull("No search result", result);
+        assertTrue("Nothing found in file size test", result.getSize() > 0);
+        for (Document d : result.getDocuments()) {
+            PropDocument file = (PropDocument) d;
+            assertTrue("File is too small", (Integer)file.getProps().get("file_size")  >= 1024*1024);
+        }
     }
 
 }
