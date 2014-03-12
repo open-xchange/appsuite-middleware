@@ -272,9 +272,11 @@ public class AdminCache {
                 UserModuleAccess us = new UserModuleAccess();
                 us.disableAll();
                 us.setGlobalAddressBookDisabled(false); // by default this is enabled.
-                String[] modules = predefined_modules.split(",");
+                String[] modules = predefined_modules.split(" *, *");
                 for (String module : modules) {
-                    if (!module_method_mapping.containsKey(module)) {
+                    module = module.trim();
+                    Method meth = module_method_mapping.get(module);
+                    if (null == meth) {
                         log.error("Predefined combination \"{}\" contains invalid module \"{}\" ", predefined_combination_name, module);
                         // AS DEFINED IN THE CONTEXT WIDE ACCES SPECIFICAION ,
                         // THE SYSTEM WILL STOP IF IT FINDS AN INVALID
@@ -283,7 +285,6 @@ public class AdminCache {
                         // TODO: Lets stop the admin daemon
                         throw new OXGenericException("Invalid access combinations found in config file!");
                     }
-                    Method meth = module_method_mapping.get(module);
                     try {
                         meth.invoke(us, true);
                     } catch (IllegalArgumentException e) {
