@@ -49,9 +49,10 @@
 
 package com.openexchange.halo.xing;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -66,20 +67,24 @@ import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.xing.Path;
+import com.openexchange.xing.PhotoUrls;
 import com.openexchange.xing.XingAPI;
+import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
 import com.openexchange.xing.exception.XingException;
+import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.session.WebAuthSession;
 
 
 /**
- * {@link XingUserDataSource}
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
 public class XingUserDataSource implements HaloContactDataSource, HaloContactImageSource {
+
+    private static final Logger LOG = LoggerFactory.getLogger(XingUserDataSource.class);
 
     private final XingOAuthAccessProvider provider;
 
@@ -115,12 +120,27 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
 
     @Override
     public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
-        com.openexchange.xing.User userInfo = loadXingUser(getAPI(session), query, session);
-        if (userInfo == null) {
-            return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        XingAPI<WebAuthSession> api = getAPI(session);
+        com.openexchange.xing.User userInfo = loadXingUser(api, query, session);
+
+        Path shortestPath = null;
+        if (userInfo != null) {
+            try {
+                com.openexchange.xing.User sessionUser = api.userInfo();
+                String sessionUserId = sessionUser.getId();
+                String otherId = userInfo.getId();
+                if (!sessionUserId.equals(otherId)) {
+                    shortestPath = api.getShortestPath(sessionUserId, userInfo.getId());
+                }
+            } catch (final XingUnlinkedException e) {
+                throw XingExceptionCodes.UNLINKED_ERROR.create();
+            } catch (final XingException e) {
+                throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
+            }
         }
 
-        return new AJAXRequestResult(userInfo, com.openexchange.xing.User.class.getName());
+        XingInvestigationResult result = new XingInvestigationResult(userInfo, shortestPath);
+        return new AJAXRequestResult(result, XingInvestigationResult.class.getName());
     }
 
     @Override
@@ -131,38 +151,34 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
             return null;
         }
 
-        // TODO: make API nicer
-        Map<String, Object> photoUrls = userInfo.getPhotoUrls();
-        if (photoUrls == null || photoUrls.isEmpty()) {
+        PhotoUrls photoUrls = userInfo.getPhotoUrls();
+        if (photoUrls == null) {
             return null;
         }
 
-        Object object = photoUrls.get("maxi_thumb");
-        if (object == null) {
-            return null;
+        String url = photoUrls.getMaxiThumbUrl();
+        if (url == null) {
+            url = photoUrls.getLargestAvailableUrl();
         }
 
-        try {
-            String url = (String) object;
-            IFileHolder photo = api.getPhoto(url);
-            if (photo == null) {
-                return null;
+        if (url != null) {
+            try {
+                IFileHolder photo = api.getPhoto(url);
+                if (photo == null) {
+                    return null;
+                }
+
+                return new Picture(Base64.encode(url), photo);
+            } catch (XingException e) {
+                LOG.error("Could not load photo '{}' from XING. Returning 'null' instead.", url, e);
             }
-
-            return new Picture(Base64.encode(url), photo);
-        } catch (XingException e) {
-            // TODO mach ma richtich
-            throw new OXException(e);
         }
+
+        return null;
     }
 
     private XingAPI<WebAuthSession> getAPI(ServerSession session) throws OXException {
         XingOAuthAccessProvider provider = getAccessProvider();
-        if (provider == null) {
-            // TODO mach ma richtich
-            throw new OXException();
-        }
-
         XingOAuthAccess access = provider.accessFor(provider.getXingOAuthAccount(session), session);
         return access.getXingAPI();
     }
@@ -172,28 +188,27 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
     }
 
     private static com.openexchange.xing.User loadXingUser(XingAPI<WebAuthSession> api, HaloContactQuery query, ServerSession session) throws OXException {
-        String mailAddresses = prepareMailAddresses(query);
-        if (Strings.isEmpty(mailAddresses)) {
+        List<String> mailAddresses = prepareMailAddresses(query);
+        if (mailAddresses.isEmpty()) {
             return null;
         }
 
         try {
-            // TODO: change api call to take a list of addresses
-            // TODO: fails with exception of user not found...
-            String userId = api.findByEmails(mailAddresses);
-            if (!Strings.isEmpty(userId)) {
-                return api.userInfo(userId);
+            List<String> userIds = api.findByEmails(mailAddresses);
+            if (!userIds.isEmpty()) {
+                return api.userInfo(userIds.get(0));
             }
-        } catch (XingException e) {
-            // TODO mach ma richtich
-            throw new OXException(e);
+        } catch (final XingUnlinkedException e) {
+            throw XingExceptionCodes.UNLINKED_ERROR.create();
+        } catch (final XingException e) {
+            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
         }
 
         return null;
     }
 
-    private static String prepareMailAddresses(HaloContactQuery query) {
-        Set<String> mailAddresses = new HashSet<String>();
+    private static List<String> prepareMailAddresses(HaloContactQuery query) {
+        List<String> mailAddresses = new LinkedList<String>();
         User user = query.getUser();
         if (user != null) {
             addMailAddress(user.getMail(), mailAddresses);
@@ -206,19 +221,10 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
             addMailAddress(contact.getEmail3(), mailAddresses);
         }
 
-        if (mailAddresses.isEmpty()) {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (String address : mailAddresses) {
-            sb.append(address).append(',');
-        }
-
-        return sb.deleteCharAt(sb.length() - 1).toString();
+        return mailAddresses;
     }
 
-    private static void addMailAddress(String address, Set<String> mailAddresses) {
+    private static void addMailAddress(String address, List<String> mailAddresses) {
         if (!Strings.isEmpty(address)) {
             mailAddresses.add(address);
         }
