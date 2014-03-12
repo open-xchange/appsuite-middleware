@@ -4011,7 +4011,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return retval;
     }
 
-    private static final String SQL_CONFIRM = "UPDATE prg_dates_members SET confirm = ?, reason = ? WHERE object_id = ? AND cid = ? AND member_uid = ? AND occurrence = 0";
+    private static final String SQL_CONFIRM = "UPDATE prg_dates_members SET confirm = ?, reason = ? WHERE object_id = ? AND cid = ? AND member_uid = ?";
 
     private static final String SQL_CONFIRM2 = "UPDATE prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?";
 
@@ -4116,9 +4116,9 @@ public class CalendarMySQL implements CalendarSqlImp {
         checkConfirmPermission(folderId, -1, so, ctx);
 
         final String insert = "INSERT INTO dateExternal (confirm, reason, objectId, cid, mailAddress) VALUES (?, ?, ?, ?, ?)"; // this is a
-                                                                                                                               // party
-                                                                                                                               // crasher
-        final String update = "UPDATE dateExternal SET confirm = ?, reason = ? WHERE objectId = ? AND cid = ? AND mailAddress = ? AND occurrence = 0";
+        // party
+        // crasher
+        final String update = "UPDATE dateExternal SET confirm = ?, reason = ? WHERE objectId = ? AND cid = ? AND mailAddress = ?";
         final String updateAppointment = "UPDATE prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?";
 
         Connection writeCon = null;
