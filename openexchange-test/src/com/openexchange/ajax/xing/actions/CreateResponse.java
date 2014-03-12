@@ -49,77 +49,22 @@
 
 package com.openexchange.ajax.xing.actions;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+
 
 /**
- * {@link NewsFeedRequest}
+ * {@link CreateResponse}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class NewsFeedRequest extends AbstractXingRequest<NewsFeedResponse> {
-    
-    private final boolean aggregate;
-    
-    private final long since;
-    
-    private final long until;
-    
-    private final int[] fields;
-    
+public class CreateResponse extends AbstractAJAXResponse {
+
     /**
-     * Initializes a new {@link NewsFeedRequest}.
+     * Initializes a new {@link CreateResponse}.
      */
-    public NewsFeedRequest(boolean aggregate, long since, long until, int[] fields, boolean foe) {
-        super(foe);
-        this.aggregate = aggregate;
-        this.since = since;
-        this.until = until;
-        this.fields = fields;
+    public CreateResponse(Response response) {
+        super(response);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "newsfeed"));
-        params.add(new Parameter("aggregate", aggregate));
-        if (since > 0)
-            params.add(new Parameter("since", since));
-        if (until > 0)
-            params.add(new Parameter("until", until));
-        if (fields.length > 0)
-            params.add(new Parameter("user_fields", fields));
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public AbstractAJAXParser<? extends NewsFeedResponse> getParser() {
-        return new NewsFeedParser(failOnError);
-    }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
 }

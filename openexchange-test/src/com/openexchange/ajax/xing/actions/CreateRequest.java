@@ -50,44 +50,49 @@
 package com.openexchange.ajax.xing.actions;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link NewsFeedRequest}
+ * {@link CreateRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class NewsFeedRequest extends AbstractXingRequest<NewsFeedResponse> {
+public class CreateRequest extends AbstractXingRequest<CreateResponse> {
     
-    private final boolean aggregate;
-    
-    private final long since;
-    
-    private final long until;
-    
-    private final int[] fields;
-    
+    private final JSONObject body;
+
+    private final String firstName;
+
+    private final String lastName;
+
+    private final boolean tandc;
+
+    private final String language;
+
+    private final String email;
+
     /**
-     * Initializes a new {@link NewsFeedRequest}.
+     * Initializes a new {@link CreateRequest}.
      */
-    public NewsFeedRequest(boolean aggregate, long since, long until, int[] fields, boolean foe) {
+    public CreateRequest(String email, boolean tandc, String fname, String lname, String language, boolean foe) {
         super(foe);
-        this.aggregate = aggregate;
-        this.since = since;
-        this.until = until;
-        this.fields = fields;
+        body = new JSONObject();
+        firstName = fname;
+        lastName = lname;
+        this.tandc = tandc;
+        this.language = language;
+        this.email = email;
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
+    public Method getMethod() {
+        return Method.PUT;
     }
 
     /* (non-Javadoc)
@@ -95,31 +100,35 @@ public class NewsFeedRequest extends AbstractXingRequest<NewsFeedResponse> {
      */
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "newsfeed"));
-        params.add(new Parameter("aggregate", aggregate));
-        if (since > 0)
-            params.add(new Parameter("since", since));
-        if (until > 0)
-            params.add(new Parameter("until", until));
-        if (fields.length > 0)
-            params.add(new Parameter("user_fields", fields));
-        return params.toArray(new Parameter[params.size()]);
+        return new Parameter[]{new Parameter(AJAXServlet.PARAMETER_ACTION, "create")};
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
-    public AbstractAJAXParser<? extends NewsFeedResponse> getParser() {
-        return new NewsFeedParser(failOnError);
+    public AbstractAJAXParser<? extends CreateResponse> getParser() {
+        return new CreateParser(failOnError);
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
      */
     @Override
     public Object getBody() throws IOException, JSONException {
-        return null;
+        if (firstName != null) {
+            body.put("first_name", firstName);
+        }
+        if (lastName != null) {
+            body.put("last_name", lastName);
+        }
+        if (language != null) {
+            body.put("language", language);
+        }
+        
+        body.put("email", email);
+        body.put("tandc_check", tandc);
+        
+        return body;
     }
 }

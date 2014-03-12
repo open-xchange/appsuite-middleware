@@ -49,77 +49,44 @@
 
 package com.openexchange.ajax.xing.actions;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link NewsFeedRequest}
+ * {@link AbstractXingRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class NewsFeedRequest extends AbstractXingRequest<NewsFeedResponse> {
+public abstract class AbstractXingRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+
+    public static final String XING_URL = "/ajax/xing";
     
-    private final boolean aggregate;
-    
-    private final long since;
-    
-    private final long until;
-    
-    private final int[] fields;
-    
+    protected final boolean failOnError;
+
     /**
-     * Initializes a new {@link NewsFeedRequest}.
+     * Initializes a new {@link AbstractXingRequest}.
      */
-    public NewsFeedRequest(boolean aggregate, long since, long until, int[] fields, boolean foe) {
-        super(foe);
-        this.aggregate = aggregate;
-        this.since = since;
-        this.until = until;
-        this.fields = fields;
+    public AbstractXingRequest(boolean foe) {
+        failOnError = foe;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getServletPath()
      */
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "newsfeed"));
-        params.add(new Parameter("aggregate", aggregate));
-        if (since > 0)
-            params.add(new Parameter("since", since));
-        if (until > 0)
-            params.add(new Parameter("until", until));
-        if (fields.length > 0)
-            params.add(new Parameter("user_fields", fields));
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public AbstractAJAXParser<? extends NewsFeedResponse> getParser() {
-        return new NewsFeedParser(failOnError);
+    public String getServletPath() {
+        return XING_URL;
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getHeaders()
      */
     @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
+
 }

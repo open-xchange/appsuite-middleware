@@ -47,79 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.xing.actions;
+package com.openexchange.ajax.xing;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.xing.actions.CreateRequest;
+import com.openexchange.ajax.xing.actions.CreateResponse;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link NewsFeedRequest}
+ * {@link CreateProfileTest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class NewsFeedRequest extends AbstractXingRequest<NewsFeedResponse> {
-    
-    private final boolean aggregate;
-    
-    private final long since;
-    
-    private final long until;
-    
-    private final int[] fields;
-    
+public class CreateProfileTest extends AbstractAJAXSession {
+
     /**
-     * Initializes a new {@link NewsFeedRequest}.
+     * Initializes a new {@link CreateProfileTest}.
      */
-    public NewsFeedRequest(boolean aggregate, long since, long until, int[] fields, boolean foe) {
-        super(foe);
-        this.aggregate = aggregate;
-        this.since = since;
-        this.until = until;
-        this.fields = fields;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "newsfeed"));
-        params.add(new Parameter("aggregate", aggregate));
-        if (since > 0)
-            params.add(new Parameter("since", since));
-        if (until > 0)
-            params.add(new Parameter("until", until));
-        if (fields.length > 0)
-            params.add(new Parameter("user_fields", fields));
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public AbstractAJAXParser<? extends NewsFeedResponse> getParser() {
-        return new NewsFeedParser(failOnError);
+    public CreateProfileTest(String n) {
+        super(n);
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
+    public void testCreateCoReg() throws OXException, IOException, JSONException {
+        CreateRequest request = new CreateRequest("testing.tester@open-xchange.com", true, "testing", "tester", "en", true);
+        CreateResponse response = client.execute(request);
+        assertNotNull(response);
     }
+
 }
