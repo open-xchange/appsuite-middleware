@@ -77,11 +77,6 @@ public class GetAction extends AutoconfigAction {
         super(services);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData,
-     * com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         String mail = request.getParameter(EMAIL, String.class);

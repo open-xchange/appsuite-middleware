@@ -106,4 +106,28 @@ public class IncomingServer extends Server {
         this.type = IncomingType.getIncomingType(type);
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(1024);
+        builder.append("IncomingServer [");
+        if (getHostname() != null) {
+            builder.append("hostname=").append(getHostname()).append(", ");
+        }
+        builder.append("port=").append(getPort()).append(", ");
+        if (getSocketType() != null) {
+            builder.append("socketType=").append(getSocketType().getKeyword()).append(", ");
+        }
+        if (getUsername() != null) {
+            builder.append("username=").append(getUsername()).append(", ");
+        }
+        if (getAuthentication() != null) {
+            builder.append("authentication=").append(getAuthentication());
+        }
+        if (type != null) {
+            builder.append("type=").append(type);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }

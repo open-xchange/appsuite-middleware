@@ -235,4 +235,25 @@ public abstract class Server {
 
     public abstract void setType(String setType);
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(1024);
+        builder.append("Server [");
+        if (hostname != null) {
+            builder.append("hostname=").append(hostname).append(", ");
+        }
+        builder.append("port=").append(port).append(", ");
+        if (socketType != null) {
+            builder.append("socketType=").append(socketType.getKeyword()).append(", ");
+        }
+        if (username != null) {
+            builder.append("username=").append(username).append(", ");
+        }
+        if (authentication != null) {
+            builder.append("authentication=").append(authentication);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }
