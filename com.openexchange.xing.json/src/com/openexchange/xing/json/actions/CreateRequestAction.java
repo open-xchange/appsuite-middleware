@@ -85,23 +85,20 @@ public class CreateRequestAction extends AbstractXingAction {
         super(serviceLookup);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
-     */
     @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
         Object objData = req.getRequest().getData();
         if (objData == null) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-        
-        if (!(objData instanceof JSONObject)) { 
+
+        if (!(objData instanceof JSONObject)) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
-        
-        LeadDescription leadDescription = new LeadDescription();        
+
+        LeadDescription leadDescription = new LeadDescription();
         JSONObject jsonData = (JSONObject) objData;
-        
+
         //email
         String email = jsonData.optString("email", null);
         if (email == null) {
@@ -114,24 +111,25 @@ public class CreateRequestAction extends AbstractXingAction {
         } catch (final AddressException e) {
             throw MimeMailException.handleMessagingException(e);
         }
-        
+
         //tandc
         String tandc = jsonData.optString("tandc_check", null);
         if (tandc == null) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
         leadDescription.setTandcCheck(Boolean.parseBoolean(tandc));
-        
+
         leadDescription.setFirstName(jsonData.optString("first_name", null));
         leadDescription.setLastName(jsonData.optString("last_name", null));
         leadDescription.setLanguage(Language.valueOf(jsonData.optString("language", Language.DE.getLangId()).toUpperCase()));
-        
+
         OAuthService oauthService = getService(OAuthService.class);
         OAuthServiceMetaData m = oauthService.getMetaDataRegistry().getService("com.openexchange.oauth.xing", req.getSession().getUserId(), req.getSession().getContextId());
         WebAuthSession session = new WebAuthSession(new AppKeyPair(m.getAPIKey(), m.getAPISecret()));
-        
+
         XingAPI<WebAuthSession> xingAPI = new XingAPI<WebAuthSession>(session);
         Map<String, Object> lead = xingAPI.signUpLead(leadDescription);
         return new AJAXRequestResult(JSONCoercion.coerceToJSON(lead));
     }
+
 }

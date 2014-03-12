@@ -76,7 +76,7 @@ import com.openexchange.xing.session.WebAuthSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class NewsFeedRequestAction extends AbstractXingAction {
-    
+
     private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
 
     /**
@@ -86,36 +86,33 @@ public class NewsFeedRequestAction extends AbstractXingAction {
         super(serviceLookup);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
-     */
     @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
         boolean optAggregate = true;
         Date optSince = null;
         Date optUntil = null;
         Collection<UserField> optUserFields = null;
-        
+
         //Aggregate
         String aggregate = req.getParameter("aggregate");
         if (aggregate != null) {
             optAggregate = Boolean.parseBoolean(aggregate);
         }
-        
+
         //Since/Until
         String since = req.getParameter("since");
         String until = req.getParameter("until");
-        
+
         if (since != null && until != null) {
             throw XingExceptionCodes.MUTUALLY_EXCLUSIVE.create();
         }
-        
+
         if (since != null) {
             optSince = new Date(Long.parseLong(since));
         } else if (until != null) {
             optUntil = new Date(Long.parseLong(until));
         }
-        
+
         //User Fields
         Object user_fields = req.getParameter("user_fields");
         if (user_fields != null) {
@@ -127,12 +124,13 @@ public class NewsFeedRequestAction extends AbstractXingAction {
                 }
             }
         }
-        
+
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
         Map<String, Object> networkFeed = xingAPI.getNetworkFeed(xingOAuthAccess.getXingUserId(), optAggregate, optSince, optUntil, optUserFields);
         JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(networkFeed);
-        
+
         return new AJAXRequestResult(result);
     }
+
 }
