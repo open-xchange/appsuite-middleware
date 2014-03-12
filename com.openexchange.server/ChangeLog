@@ -6,6 +6,7 @@
 * 2014-03-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 31491: Removed duplicate CREATE TABLE statements from affected classes
+ - Fix for bug 19763: Support setter for IMAP/SMTP port through SOAP interface
 
 * 2014-03-11 - jan.bauerdick@open-xchange.com
 

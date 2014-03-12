@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.datatype.XMLGregorianCalendar;
 import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.rmi.OXContextInterface;
@@ -506,6 +508,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         return credentials;
     }
 
+    private static final Pattern URL_PATTERN = Pattern.compile("^(.*?://)?(.*?)(:(.*?))?$");
+
     private static com.openexchange.admin.rmi.dataobjects.Filestore soap2Filestore(final Filestore soapFilestore) {
         if (null == soapFilestore) {
             return null;
@@ -742,6 +746,36 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             user.setImapServer(tmp);
         }
 
+        Integer i = soapUser.getImapPort();
+        if (i != null) {
+            final String s = user.getImapServerString();
+            if (!isEmpty(s)) {
+                final Matcher matcher = URL_PATTERN.matcher(s);
+                if (matcher.matches()) {
+                    final StringBuilder sb = new StringBuilder(32);
+                    for (int j = 1; j <= 3; j++) {
+                        switch (j) {
+                        case 1:
+                            {
+                                final String schema = matcher.group(1);
+                                if (null != schema) {
+                                    sb.append(schema);
+                                }
+                            }
+                            break;
+                        case 2:
+                            sb.append(matcher.group(2));
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                    sb.append(':').append(i);
+                    user.setImapServer(sb.toString());
+                }
+            }
+        }
+
         tmp = soapUser.getInfo();
         if (tmp != null) {
             user.setInfo(tmp);
@@ -888,6 +922,36 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         tmp = soapUser.getSmtpServer();
         if (tmp != null) {
             user.setSmtpServer(tmp);
+        }
+
+        i = soapUser.getSmtpPort();
+        if (i != null) {
+            final String s = user.getSmtpServerString();
+            if (!isEmpty(s)) {
+                final Matcher matcher = URL_PATTERN.matcher(s);
+                if (matcher.matches()) {
+                    final StringBuilder sb = new StringBuilder(32);
+                    for (int j = 1; j <= 3; j++) {
+                        switch (j) {
+                        case 1:
+                        {
+                            final String schema = matcher.group(1);
+                            if (null != schema) {
+                                sb.append(schema);
+                            }
+                        }
+                        break;
+                        case 2:
+                            sb.append(matcher.group(2));
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                    sb.append(':').append(i);
+                    user.setSmtpServer(sb.toString());
+                }
+            }
         }
 
         tmp = soapUser.getSpouseName();
