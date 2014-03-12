@@ -68,16 +68,16 @@ import com.openexchange.xing.session.WebAuthSession;
 
 
 /**
- * {@link ContacRequestAction}
+ * {@link ContactRequestAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ContacRequestAction extends AbstractXingAction {
+public final class ContactRequestAction extends AbstractXingAction {
 
     /**
-     * Initializes a new {@link ContacRequestAction}.
+     * Initializes a new {@link ContactRequestAction}.
      */
-    public ContacRequestAction(final ServiceLookup services) {
+    public ContactRequestAction(final ServiceLookup services) {
         super(services);
     }
 
