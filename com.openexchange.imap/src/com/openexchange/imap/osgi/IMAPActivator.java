@@ -84,7 +84,9 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.textxtraction.TextXtractService;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
@@ -165,6 +167,32 @@ public final class IMAPActivator extends HousekeepingActivator {
 
                     @Override
                     public void handleEvent(final Event event) {
+                        final ThreadPoolService threadPool = getService(ThreadPoolService.class);
+                        if (null == threadPool) {
+                            doHandleEvent(event);
+                        } else {
+                            final AbstractTask<Void> t = new AbstractTask<Void>() {
+
+                                @Override
+                                public Void call() throws Exception {
+                                    try {
+                                        doHandleEvent(event);
+                                    } catch (final Exception e) {
+                                        LOG.warn("Handling event {} failed.", event.getTopic(), e);
+                                    }
+                                    return null;
+                                }
+                            };
+                            threadPool.submit(t, CallerRunsBehavior.<Void> getInstance());
+                        }
+                    }
+
+                    /**
+                     * Handles given event.
+                     *
+                     * @param event The event
+                     */
+                    protected void doHandleEvent(final Event event) {
                         final String topic = event.getTopic();
                         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
                             @SuppressWarnings("unchecked") final Map<String, Session> container =

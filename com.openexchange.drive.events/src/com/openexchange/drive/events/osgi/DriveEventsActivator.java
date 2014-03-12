@@ -67,6 +67,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.ms.MsService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -88,7 +89,7 @@ public class DriveEventsActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class, TimerService.class,
-            ConfigurationService.class };
+            ConfigurationService.class, ThreadPoolService.class };
     }
 
     @Override
