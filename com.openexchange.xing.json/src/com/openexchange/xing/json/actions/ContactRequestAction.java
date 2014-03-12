@@ -106,7 +106,7 @@ public final class ContactRequestAction extends AbstractXingAction {
             throw XingExceptionCodes.ALREADY_CONNECTED.create(address);
         }
 
-        xingAPI.initiateContactRequest(xingOAuthAccess.getXingUserId(), result, null);
+        xingAPI.initiateContactRequest(result, null);
 
         return new AJAXRequestResult(Boolean.TRUE, "native");
     }

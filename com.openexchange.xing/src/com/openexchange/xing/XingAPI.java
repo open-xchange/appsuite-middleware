@@ -297,7 +297,6 @@ public class XingAPI<S extends Session> {
             if (length <= 0) {
                 return null;
             }
-
             JSONObject jUser = jItems.getJSONObject(0).optJSONObject("user");
             if (jUser == null) {
                 return null;
@@ -689,14 +688,11 @@ public class XingAPI<S extends Session> {
      * @param optMessage The optional message
      * @throws XingException If contact request fails
      */
-    public void initiateContactRequest(final String userId, final String recipientUserId, final String optMessage) throws XingException {
+    public void initiateContactRequest(final String recipientUserId, final String optMessage) throws XingException {
         assertAuthenticated();
         try {
             // Add parameters limit & offset
             final List<String> params = new ArrayList<String>(4);
-
-            params.add("user_id");
-            params.add(recipientUserId);
 
             if (!Strings.isEmpty(optMessage)) {
                 params.add("message");
@@ -706,7 +702,7 @@ public class XingAPI<S extends Session> {
             RESTUtility.streamRequest(
                 Method.POST,
                 session.getAPIServer(),
-                "/users/" + userId + "/contact_requests",
+                "/users/" + recipientUserId + "/contact_requests",
                 VERSION,
                 params.toArray(new String[0]),
                 session);
