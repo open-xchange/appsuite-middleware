@@ -211,7 +211,7 @@ public class RdbUserStorage extends UserStorage {
             writeUserAttributes(con, user, context, userId);
             return userId;
         } catch (final SQLException e) {
-            throw UserExceptionCode.SQL_ERROR.create(e);
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
