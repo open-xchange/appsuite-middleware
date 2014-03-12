@@ -95,7 +95,7 @@ public final class ContactRequestAction extends AbstractXingAction {
         final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
 
-        final String result = xingAPI.findByEmails(address);
+        final String result = xingAPI.findByEmail(address);
 
         if (Strings.isEmpty(result)) {
             // Already connected

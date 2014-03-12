@@ -187,6 +187,80 @@ public class XingAPI<S extends Session> {
     }
 
     /**
+     * Looks up a list of users by their E-Mail addresses.
+     *
+     * @param emailAddresses The E-Mail addresses to look-up
+     * @return The associated user identifiers; may be empty, if no users were found.
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public List<String> findByEmails(final List<String> emailAddresses) throws XingException {
+        if (emailAddresses == null || emailAddresses.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String addressParam = prepareMailAddresses(emailAddresses);
+        if (Strings.isEmpty(addressParam)) {
+            return Collections.emptyList();
+        }
+
+        assertAuthenticated();
+        List<String> userIds = new LinkedList<String>();
+        try {
+
+            // Add parameters limit & offset
+            final List<String> params = new ArrayList<String>(Arrays.asList(
+                "emails", addressParam));
+            // Fire request
+            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/find_by_emails",
+                VERSION,
+                params.toArray(new String[0]),
+                session);
+            final JSONArray jItems = responseInformation.getJSONObject("results").optJSONArray("items");
+            if (null == jItems) {
+                return null;
+            }
+            final int length = jItems.length();
+            if (length <= 0) {
+                return null;
+            }
+
+            for (int i = 0; i < jItems.length(); i++) {
+                JSONObject jUser = jItems.getJSONObject(i).optJSONObject("user");
+                if (jUser != null) {
+                    userIds.add(jUser.getString("id"));
+                }
+            }
+        } catch (final JSONException e) {
+            throw new XingException(e);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+
+        return userIds;
+    }
+
+    private static String prepareMailAddresses(final List<String> emailAddresses) {
+        if (emailAddresses.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String address : emailAddresses) {
+            sb.append(address).append(',');
+        }
+
+        return sb.deleteCharAt(sb.length() - 1).toString();
+    }
+
+    /**
      * Looks up a user by specified E-Mail address.
      *
      * @param emailAddress The E-Mail address to look-up
@@ -198,7 +272,7 @@ public class XingAPI<S extends Session> {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public String findByEmails(final String emailAddress) throws XingException {
+    public String findByEmail(final String emailAddress) throws XingException {
         if (Strings.isEmpty(emailAddress)) {
             return null;
         }
@@ -223,7 +297,13 @@ public class XingAPI<S extends Session> {
             if (length <= 0) {
                 return null;
             }
-            return jItems.getJSONObject(0).getJSONObject("user").getString("id");
+
+            JSONObject jUser = jItems.getJSONObject(0).optJSONObject("user");
+            if (jUser == null) {
+                return null;
+            }
+
+            return jUser.getString("id");
         } catch (final JSONException e) {
             throw new XingException(e);
         } catch (final RuntimeException e) {

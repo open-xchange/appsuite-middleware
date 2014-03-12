@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.subscribe.xing
 Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.ajax.container,
+ com.openexchange.config,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.datatypes.genericonf,

@@ -49,14 +49,7 @@
 
 package com.openexchange.subscribe.xing;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,7 +57,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.activation.FileTypeMap;
+import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -73,7 +66,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
-import com.openexchange.java.ImageTypeDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
@@ -91,6 +83,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.xing.Address;
 import com.openexchange.xing.Contacts;
+import com.openexchange.xing.PhotoUrls;
 import com.openexchange.xing.User;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
@@ -115,7 +108,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
 
     private interface PhotoHandler {
 
-        void handlePhoto(User xingUser, Contact contact) throws OXException;
+        void handlePhoto(User xingUser, Contact contact, ServerSession session) throws OXException;
     }
 
     private final class CollectingPhotoHandler implements PhotoHandler {
@@ -131,16 +124,16 @@ public class XingSubscribeService extends AbstractSubscribeService {
         }
 
         @Override
-        public void handlePhoto(User xingUser, Contact contact) throws OXException {
-            final Map<String, Object> photoUrls = xingUser.getPhotoUrls();
-            if (null != photoUrls) {
-                final Object pic = photoUrls.get("maxi_thumb");
-                if (null != pic && !"null".equals(pic.toString())) {
-                    final String id = xingUser.getId();
-                    if (isNotNull(id)) {
-                        photoUrlsMap.put(id, pic.toString());
-                    }
-                }
+        public void handlePhoto(User xingUser, Contact contact, ServerSession session) throws OXException {
+            final PhotoUrls photoUrls = xingUser.getPhotoUrls();
+            String url = photoUrls.getMaxiThumbUrl();
+            if (url == null) {
+                url = photoUrls.getLargestAvailableUrl();
+            }
+
+            final String id = xingUser.getId();
+            if (url != null && isNotNull(id)) {
+                photoUrlsMap.put(id, url);
             }
         }
     }
@@ -148,15 +141,31 @@ public class XingSubscribeService extends AbstractSubscribeService {
     private final PhotoHandler loadingPhotoHandler = new PhotoHandler() {
 
         @Override
-        public void handlePhoto(final User xingUser, final Contact contact) throws OXException {
+        public void handlePhoto(final User xingUser, final Contact contact, ServerSession session) throws OXException {
             if (null == xingUser || null == contact) {
                 return;
             }
-            final Map<String, Object> photoUrls = xingUser.getPhotoUrls();
-            if (null != photoUrls) {
-                final Object pic = photoUrls.get("maxi_thumb");
-                if (null != pic && !"null".equals(pic.toString())) {
-                    loadImageFromURL(contact, pic.toString());
+
+            final PhotoUrls photoUrls = xingUser.getPhotoUrls();
+            String url = photoUrls.getMaxiThumbUrl();
+            if (url == null) {
+                url = photoUrls.getLargestAvailableUrl();
+            }
+
+            if (url != null) {
+                XingOAuthAccess xingAccess = getXingOAuthAccess(session);
+                XingAPI<WebAuthSession> api = xingAccess.getXingAPI();
+                try {
+                    IFileHolder photo = api.getPhoto(url);
+                    if (photo != null) {
+                        byte[] bytes = Streams.stream2bytes(photo.getStream());
+                        contact.setImage1(bytes);
+                        contact.setImageContentType(photo.getContentType());
+                    }
+                } catch (XingException e) {
+                    throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                } catch (IOException e) {
+                    throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
         }
@@ -209,8 +218,6 @@ public class XingSubscribeService extends AbstractSubscribeService {
         return provider.accessFor(xingOAuthAccount, session);
     }
 
-    private static final int MAX_LIMIT = 100;
-
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
         try {
@@ -226,7 +233,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
             List<User> chunk = contacts.getUsers();
             if (chunk.size() < firstChunkLimit) {
                 // Obtained less than requested; no more contacts available then
-                return convert(chunk, loadingPhotoHandler);
+                return convert(chunk, loadingPhotoHandler, session);
             }
             final int maxLimit = 25;
             final int total = contacts.getTotal();
@@ -250,7 +257,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 LOG.info("Going to converted {} XING contacts for user {} in context {}", total, session.getUserId(), session.getContextId());
                 final Map<String, String> photoUrlsMap = new HashMap<String, String>(total);
                 final PhotoHandler photoHandler = new CollectingPhotoHandler(photoUrlsMap);
-                final List<Contact> retval = convert(chunk, photoHandler);
+                final List<Contact> retval = convert(chunk, photoHandler, session);
                 LOG.info("Converted {} XING contacts for user {} in context {}", total, session.getUserId(), session.getContextId());
 
                 // TODO: Schedule a separate task to fill photos
@@ -268,7 +275,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
                         final int remain = total - off;
                         final List<User> chunk = xingAPI.getContactsFrom(userId, remain > maxLimit ? maxLimit : remain, off, null, userFields).getUsers();
                         // Store them
-                        final List<Contact> convertees = convert(chunk, loadingPhotoHandler);
+                        final List<Contact> convertees = convert(chunk, loadingPhotoHandler, session);
                         LOG.info("Converted {} XING contacts for user {} in context {}", chunk.size(), session.getUserId(), session.getContextId());
                         folderUpdater.save(convertees, subscription);
                         // Next chunk...
@@ -278,7 +285,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 }
             });
             // Return first chunk with this thread
-            return convert(chunk, loadingPhotoHandler);
+            return convert(chunk, loadingPhotoHandler, session);
         } catch (final XingUnlinkedException e) {
             throw XingExceptionCodes.UNLINKED_ERROR.create();
         } catch (final XingException e) {
@@ -295,10 +302,10 @@ public class XingSubscribeService extends AbstractSubscribeService {
      * @param optPhotoHandler The photo handler
      * @return The resulting contacts
      */
-    protected List<Contact> convert(final List<User> xingContacts, final PhotoHandler optPhotoHandler) {
+    protected List<Contact> convert(final List<User> xingContacts, final PhotoHandler optPhotoHandler, final ServerSession session) {
         final List<Contact> ret = new ArrayList<Contact>(xingContacts.size());
         for (final User xingContact : xingContacts) {
-            ret.add(convert(xingContact, optPhotoHandler));
+            ret.add(convert(xingContact, optPhotoHandler, session));
         }
         return ret;
     }
@@ -375,7 +382,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         removeWhereConfigMatches(context, query);
     }
 
-    private Contact convert(final User xingUser, final PhotoHandler optPhotoHandler) {
+    private Contact convert(final User xingUser, final PhotoHandler optPhotoHandler, final ServerSession session) {
         if (null == xingUser) {
             return null;
         }
@@ -552,7 +559,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         }
         if (null != optPhotoHandler) {
             try {
-                optPhotoHandler.handlePhoto(xingUser, oxContact);
+                optPhotoHandler.handlePhoto(xingUser, oxContact, session);
             } catch (final Exception e) {
                 LOG.warn("Could not handle photo from XING contact {} ({}).", xingUser.getDisplayName(), id);
             }
@@ -574,90 +581,6 @@ public class XingSubscribeService extends AbstractSubscribeService {
             isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
-    }
-
-    /**
-     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
-     * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
-     *
-     * @param contact The contact container to fill
-     * @param url The URI parameter's value
-     * @throws OXException If converting image's data fails
-     */
-    protected void loadImageFromURL(final Contact contact, final String url) throws OXException {
-        try {
-            loadImageFromURL(contact, new URL(url));
-        } catch (final MalformedURLException e) {
-            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
-     * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
-     *
-     * @param contact The contact container to fill
-     * @param url The image URL
-     * @throws OXException If converting image's data fails
-     */
-    private void loadImageFromURL(final Contact contact, final URL url) throws OXException {
-        String mimeType = null;
-        byte[] bytes = null;
-        try {
-            final URLConnection urlCon = url.openConnection();
-            urlCon.setConnectTimeout(2500);
-            urlCon.setReadTimeout(2500);
-            urlCon.connect();
-            mimeType = urlCon.getContentType();
-            final InputStream in = urlCon.getInputStream();
-            try {
-                final ByteArrayOutputStream buffer = Streams.newByteArrayOutputStream(in.available());
-                transfer(in, buffer);
-                bytes = buffer.toByteArray();
-            } finally {
-                Streams.close(in);
-            }
-        } catch (final SocketTimeoutException e) {
-            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-        if (mimeType == null) {
-            mimeType = ImageTypeDetector.getMimeType(bytes);
-            if ("application/octet-stream".equals(mimeType)) {
-                mimeType = getMimeType(url.toString());
-            }
-        }
-        if (bytes != null && isValidImage(bytes)) {
-            // Mime type should be of image type. Otherwise web server send some error page instead of 404 error code.
-            contact.setImage1(bytes);
-            contact.setImageContentType(mimeType);
-        }
-    }
-
-    private static final FileTypeMap DEFAULT_FILE_TYPE_MAP = FileTypeMap.getDefaultFileTypeMap();
-
-    private String getMimeType(final String filename) {
-        return DEFAULT_FILE_TYPE_MAP.getContentType(filename);
-    }
-
-    private boolean isValidImage(final byte[] data) {
-        java.awt.image.BufferedImage bimg = null;
-        try {
-            bimg = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(data));
-        } catch (final Exception e) {
-            return false;
-        }
-        return (bimg != null);
-    }
-
-    private static void transfer(final InputStream in, final OutputStream out) throws IOException {
-        final byte[] buffer = new byte[4096];
-        int length;
-        while ((length = in.read(buffer)) > 0) {
-            out.write(buffer, 0, length);
-        }
-        out.flush();
     }
 
 }

@@ -97,7 +97,7 @@ public class User {
     private final Map<String, String> instantMessagingAccounts;
     private final Map<String, Object> professionalExperience;
     private final Map<String, Object> educationalBackground;
-    private final Map<String, Object> photoUrls;
+    private final PhotoUrls photoUrls;
     private final Date birthDate;
 
     /**
@@ -238,11 +238,9 @@ public class User {
                 this.educationalBackground = Collections.emptyMap();
             }
             if (accountInfo.hasAndNotNull("photo_urls")) {
-                @SuppressWarnings("unchecked")
-                final Map<String, Object> map = (Map<String, Object>) coerceToNative(accountInfo.optJSONObject("photo_urls"));
-                this.photoUrls = map;
+                this.photoUrls = new PhotoUrls(accountInfo.getJSONObject("photo_urls"));
             } else {
-                this.photoUrls = Collections.emptyMap();
+                this.photoUrls = new PhotoUrls();
             }
         } catch (final JSONException e) {
             throw new XingException(e);
@@ -461,7 +459,7 @@ public class User {
      *
      * @return The photo URLs
      */
-    public Map<String, Object> getPhotoUrls() {
+    public PhotoUrls getPhotoUrls() {
         return photoUrls;
     }
 
