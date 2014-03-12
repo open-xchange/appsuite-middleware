@@ -1,3 +1,7 @@
+* 2014-03-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28587: Ignore unused flags/permissions on access-combination equality check
+
 * 2014-03-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 30434: Keep proper date information on SOAP to Java conversion

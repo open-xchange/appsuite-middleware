@@ -580,11 +580,14 @@ public class UserModuleAccess implements Serializable {
         result = prime * result + (GlobalAddressBookDisabled ? 1231 : 1237);
         result = prime * result + (MultipleMailAccounts ? 1231 : 1237);
         result = prime * result + (OLOX20 ? 1231 : 1237);
-        result = prime * result + (PinboardWrite ? 1231 : 1237);
+        // Currently NOT in use!
+        // result = prime * result + (PinboardWrite ? 1231 : 1237);
         result = prime * result + (PublicFolderEditable ? 1231 : 1237);
         result = prime * result + (Publication ? 1231 : 1237);
-        result = prime * result + (RssBookmarks ? 1231 : 1237);
-        result = prime * result + (RssPortal ? 1231 : 1237);
+        // Currently NOT in use!
+        //result = prime * result + (RssBookmarks ? 1231 : 1237);
+        // Currently NOT in use!
+        // result = prime * result + (RssPortal ? 1231 : 1237);
         result = prime * result + (Subscription ? 1231 : 1237);
         result = prime * result + (Syncml ? 1231 : 1237);
         result = prime * result + (Tasks ? 1231 : 1237);
@@ -598,7 +601,8 @@ public class UserModuleAccess implements Serializable {
         result = prime * result + (delegateTask ? 1231 : 1237);
         result = prime * result + (deniedPortal ? 1231 : 1237);
         result = prime * result + (editPublicFolders ? 1231 : 1237);
-        result = prime * result + (forum ? 1231 : 1237);
+        // Currently NOT in use!
+        // result = prime * result + (forum ? 1231 : 1237);
         result = prime * result + (ical ? 1231 : 1237);
         result = prime * result + (infostore ? 1231 : 1237);
         result = prime * result + (readCreateSharedFolders ? 1231 : 1237);
@@ -641,21 +645,33 @@ public class UserModuleAccess implements Serializable {
         if (OLOX20 != other.OLOX20) {
             return false;
         }
+        // Currently NOT in use!
+        /*-
+         *
         if (PinboardWrite != other.PinboardWrite) {
             return false;
         }
+        */
         if (PublicFolderEditable != other.PublicFolderEditable) {
             return false;
         }
         if (Publication != other.Publication) {
             return false;
         }
+        // Currently NOT in use!
+        /*-
+         *
         if (RssBookmarks != other.RssBookmarks) {
             return false;
         }
+        */
+        // Currently NOT in use!
+        /*-
+         *
         if (RssPortal != other.RssPortal) {
             return false;
         }
+        */
         if (Subscription != other.Subscription) {
             return false;
         }
@@ -695,9 +711,13 @@ public class UserModuleAccess implements Serializable {
         if (editPublicFolders != other.editPublicFolders) {
             return false;
         }
+        // Currently NOT in use!
+        /*-
+         *
         if (forum != other.forum) {
             return false;
         }
+        */
         if (ical != other.ical) {
             return false;
         }
