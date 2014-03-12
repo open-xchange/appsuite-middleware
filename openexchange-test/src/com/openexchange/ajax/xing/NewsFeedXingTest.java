@@ -50,12 +50,14 @@
 package com.openexchange.ajax.xing;
 
 import java.io.IOException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.xing.actions.NewsFeedRequest;
 import com.openexchange.ajax.xing.actions.NewsFeedResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.xing.UserField;
 
 /**
  * {@link NewsFeedXingTest}
@@ -83,5 +85,38 @@ public class NewsFeedXingTest extends AbstractAJAXSession {
         assertNotNull(response);
         JSONObject json = (JSONObject) response.getData();
         assertNotNull(json.getJSONArray("network_activities"));
+    }
+    
+    /**
+     * Test to verify userfields
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    public void testNewsFeedWithUserFields() throws OXException, IOException, JSONException {
+        int[] uf = {UserField.FIRST_NAME.ordinal(), UserField.LAST_NAME.ordinal()};
+        NewsFeedRequest request = new NewsFeedRequest(false, -1, -1, uf);
+        NewsFeedResponse response = client.execute(request);
+        assertNotNull(response);
+        
+        JSONObject json = (JSONObject) response.getData();
+        JSONArray network_activities = json.getJSONArray("network_activities");
+        assertNotNull(network_activities);
+        assertTrue(network_activities.length() > 0);
+        
+        JSONObject na1 = network_activities.getJSONObject(0);
+        JSONArray objects = na1.getJSONArray("objects");
+        assertTrue(objects.length() > 0);
+        
+        JSONObject obj1 = objects.getJSONObject(0);
+        assertTrue(obj1.hasAndNotNull("creator"));
+        
+        JSONObject creator = obj1.getJSONObject("creator");
+        
+        assertTrue(creator.hasAndNotNull("id"));
+        assertTrue(creator.hasAndNotNull("last_name"));
+        assertTrue(creator.hasAndNotNull("first_name"));
+        assertFalse(creator.hasAndNotNull("active_email"));
+        assertFalse(creator.hasAndNotNull("wants"));
     }
 }
