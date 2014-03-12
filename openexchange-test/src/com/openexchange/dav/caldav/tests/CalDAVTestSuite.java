@@ -65,6 +65,7 @@ public final class CalDAVTestSuite {
         suite.addTestSuite(FreeBusyTest.class);
         suite.addTestSuite(MkCalendarTest.class);
         suite.addTestSuite(CookieTest.class);
+        suite.addTestSuite(ConfirmationTest.class);
         return suite;
     }
 

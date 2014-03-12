@@ -121,6 +121,19 @@ public class SimpleICal {
             return this.getPropertyValue("DESCRIPTION");
         }
 
+        public Property getAttendee(String email) {
+            List<Property> properties = this.getProperties("ATTENDEE");
+            if (null != properties) {
+                for (Property property : properties) {
+                    String value = property.getValue();
+                    if (null != value && value.contains("mailto:" + email)) {
+                        return property;
+                    }
+                }
+            }
+            return null;
+        }
+
         public List<Date> getExDates() throws ParseException {
             List<Date> exDates = new ArrayList<Date>();
             List<Property> properties = this.getProperties("EXDATE");
