@@ -1630,8 +1630,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // Sort root elements
                 {
                     final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-                    final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
+                    final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, OrderDirection.DESC, getLocale());
                     Collections.sort(list, listComparator);
+                    if (OrderDirection.ASC.equals(order)) {
+                        Collections.reverse(list);
+                    }
                 }
                 // Check for index range
                 if (null != indexRange) {

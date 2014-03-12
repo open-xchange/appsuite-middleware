@@ -8,6 +8,7 @@
  - Fix for bug 31491: Removed duplicate CREATE TABLE statements from affected classes
  - Fix for bug 19763: Support setter for IMAP/SMTP port through SOAP interface
  - Fix for bug 31395: Enhanced localized error message according to proposal from documentation team
+ - Fix for bug 31061: Provide thread-sorted messages in "reverse" order if order direction changes
 
 * 2014-03-11 - jan.bauerdick@open-xchange.com
 
