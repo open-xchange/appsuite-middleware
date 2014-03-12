@@ -49,7 +49,6 @@
 
 package com.openexchange.xing.json.actions;
 
-import java.util.List;
 import javax.mail.internet.AddressException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -58,7 +57,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.User;
+import com.openexchange.xing.Path;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -102,10 +101,8 @@ public final class ContactRequestAction extends AbstractXingAction {
             throw XingExceptionCodes.NOT_A_MEMBER.create(address);
         }
 
-        final List<User> contactPath = xingAPI.getContactPath(xingOAuthAccess.getXingUserId(), result);
-        final int size = null == contactPath ? 0 : contactPath.size();
-        if (size == 1) {
-            // Already directly connected
+        Path shortestPath = xingAPI.getShortestPath(xingOAuthAccess.getXingUserId(), result);
+        if (shortestPath != null && shortestPath.isDirectConnection()) {
             throw XingExceptionCodes.ALREADY_CONNECTED.create(address);
         }
 

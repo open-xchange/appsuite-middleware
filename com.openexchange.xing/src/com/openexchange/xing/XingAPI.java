@@ -314,9 +314,9 @@ public class XingAPI<S extends Session> {
     /**
      * Gets the shortest contact path between a user and any other XING user.
      *
-     * @param userId The XING user
-     * @param otherUserId The other XING user
-     * @return The contact path
+     * @param fromId The XING user id
+     * @param toId The other XING user id
+     * @return The contact path or <code>null</code> if no path exists.
      * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
@@ -324,32 +324,56 @@ public class XingAPI<S extends Session> {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public List<User> getContactPath(final String userId, final String otherUserId) throws XingException {
+    public Path getShortestPath(final String fromId, final String toId) throws XingException {
         assertAuthenticated();
         try {
+            final Collection<UserField> fields = EnumSet.noneOf(UserField.class);
+            fields.add(UserField.FIRST_NAME);
+            fields.add(UserField.LAST_NAME);
+            fields.add(UserField.DISPLAY_NAME);
+            fields.add(UserField.ACTIVE_EMAIL);
+
+            final List<String> params = new ArrayList<String>(4);
+            params.add("all_paths");
+            params.add("false");
+            params.add("user_fields");
+            params.add(collectionToCsv(fields, new Stringer<UserField>() {
+                @Override
+                public String getString(final UserField element) {
+                    return element.getFieldName();
+                }
+            }));
+
             final JSONObject responseInformation = RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
-                "/users/" + userId + "/network/" + otherUserId + "/paths",
+                "/users/" + fromId + "/network/" + toId + "/paths",
                 VERSION,
+                params.toArray(new String[0]),
                 session).toObject();
 
             final JSONArray jPaths = responseInformation.getJSONObject("contact_paths").optJSONArray("paths");
-            if (null == jPaths) {
-                return Collections.emptyList();
+            if (null == jPaths || jPaths.length() <= 0) {
+                return null;
             }
-            final int length = jPaths.length();
-            if (length <= 0) {
-                return Collections.emptyList();
-            }
+
             final JSONObject jPath = jPaths.getJSONObject(0);
             final JSONArray jUsers = jPath.getJSONArray("users");
             final int l = jUsers.length();
-            final List<User> retval = new ArrayList<User>(l);
+            final List<User> inBetween = new LinkedList<User>();
+            User from = null;
+            User to = null;
             for (int i = 0; i < l; i++) {
-                retval.add(new User(jUsers.getJSONObject(i)));
+                final User user = new User(jUsers.getJSONObject(i));
+                if (i == 0) {
+                    from = user;
+                } else if (i == (l - 1)) {
+                    to = user;
+                } else {
+                    inBetween.add(user);
+                }
             }
-            return retval;
+            return new Path(from, to, inBetween);
         } catch (final JSONException e) {
             throw new XingException(e);
         } catch (final RuntimeException e) {

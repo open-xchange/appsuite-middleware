@@ -99,6 +99,7 @@ public class User {
     private final Map<String, Object> educationalBackground;
     private final PhotoUrls photoUrls;
     private final Date birthDate;
+    private final JSONObject json;
 
     /**
      * Initializes a new {@link User}.
@@ -108,6 +109,7 @@ public class User {
      */
     public User(final JSONObject accountInfo) throws XingException {
         super();
+        this.json = accountInfo;
         try {
             this.id = accountInfo.optString("id", null);
             this.firstName = accountInfo.optString("first_name", null);
@@ -461,6 +463,18 @@ public class User {
      */
     public PhotoUrls getPhotoUrls() {
         return photoUrls;
+    }
+
+    /**
+     * Returns the original JSON object of this user.
+     */
+    public JSONObject toJSON() {
+        return json;
+    }
+
+    @Override
+    public String toString() {
+        return json.toString();
     }
 
 }
