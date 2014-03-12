@@ -58,7 +58,8 @@ import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.json.actions.AbstractXingAction;
-import com.openexchange.xing.json.actions.ContacRequestAction;
+import com.openexchange.xing.json.actions.ContactRequestAction;
+import com.openexchange.xing.json.actions.CreateRequestAction;
 import com.openexchange.xing.json.actions.InviteAction;
 import com.openexchange.xing.json.actions.NewsFeedRequestAction;
 
@@ -80,8 +81,9 @@ public class XingActionFactory implements AJAXActionServiceFactory {
         super();
         actions = new ConcurrentHashMap<String, AbstractXingAction>(4);
         actions.put("invite", new InviteAction(serviceLookup));
-        actions.put("contact_request", new ContacRequestAction(serviceLookup));
+        actions.put("contact_request", new ContactRequestAction(serviceLookup));
         actions.put("newsfeed", new NewsFeedRequestAction(serviceLookup));
+        actions.put("create", new CreateRequestAction(serviceLookup));
     }
 
     @Override
