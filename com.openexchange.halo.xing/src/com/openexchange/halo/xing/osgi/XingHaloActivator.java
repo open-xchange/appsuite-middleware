@@ -50,8 +50,10 @@ package com.openexchange.halo.xing.osgi;
 
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactImageSource;
+import com.openexchange.halo.xing.XingInvestigationResultConverter;
 import com.openexchange.halo.xing.XingUserDataSource;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -74,6 +76,7 @@ public class XingHaloActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        registerService(ResultConverter.class, new XingInvestigationResultConverter());
         track(XingOAuthAccessProvider.class, new SimpleRegistryListener<XingOAuthAccessProvider>() {
             @Override
             public void added(ServiceReference<XingOAuthAccessProvider> ref, XingOAuthAccessProvider service) {

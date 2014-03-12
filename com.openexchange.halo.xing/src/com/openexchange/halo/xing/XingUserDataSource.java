@@ -67,6 +67,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.xing.Path;
 import com.openexchange.xing.PhotoUrls;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
@@ -119,12 +120,27 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
 
     @Override
     public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
-        com.openexchange.xing.User userInfo = loadXingUser(getAPI(session), query, session);
-        if (userInfo == null) {
-            return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        XingAPI<WebAuthSession> api = getAPI(session);
+        com.openexchange.xing.User userInfo = loadXingUser(api, query, session);
+
+        Path shortestPath = null;
+        if (userInfo != null) {
+            try {
+                com.openexchange.xing.User sessionUser = api.userInfo();
+                String sessionUserId = sessionUser.getId();
+                String otherId = userInfo.getId();
+                if (!sessionUserId.equals(otherId)) {
+                    shortestPath = api.getShortestPath(sessionUserId, userInfo.getId());
+                }
+            } catch (final XingUnlinkedException e) {
+                throw XingExceptionCodes.UNLINKED_ERROR.create();
+            } catch (final XingException e) {
+                throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
+            }
         }
 
-        return new AJAXRequestResult(userInfo, com.openexchange.xing.User.class.getName());
+        XingInvestigationResult result = new XingInvestigationResult(userInfo, shortestPath);
+        return new AJAXRequestResult(result, XingInvestigationResult.class.getName());
     }
 
     @Override
