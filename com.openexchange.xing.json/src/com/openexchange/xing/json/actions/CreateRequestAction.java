@@ -63,7 +63,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.Language;
 import com.openexchange.xing.LeadDescription;
 import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
@@ -122,8 +121,8 @@ public class CreateRequestAction extends AbstractXingAction {
         leadDescription.setTandcCheck(Boolean.parseBoolean(tandc));
         
         leadDescription.setFirstName(jsonData.optString("first_name", null));
-        leadDescription.setFirstName(jsonData.optString("last_name", null));
-        leadDescription.setFirstName(jsonData.optString("language", Language.DE.getLangId()));
+        leadDescription.setLastName(jsonData.optString("last_name", null));
+        leadDescription.setLanguage(Language.valueOf(jsonData.optString("language", Language.DE.getLangId())));
         
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
