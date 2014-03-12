@@ -303,6 +303,10 @@ public class JSONObject extends AbstractJSONValue {
                     } else {
                         myHashMap.put(entry.getKey(), new JSONObject(jsonValue.toObject()));
                     }
+                } else if (value instanceof Collection) {
+                    myHashMap.put(entry.getKey(), new JSONArray((Collection<Object>) value));
+                } else if (value instanceof Map) {
+                    myHashMap.put(entry.getKey(), new JSONObject((Map<String, Object>) value));
                 } else {
                     myHashMap.put(entry.getKey(), value);
                 }

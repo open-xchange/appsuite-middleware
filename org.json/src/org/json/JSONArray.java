@@ -240,6 +240,10 @@ public class JSONArray extends AbstractJSONValue {
                     } else {
                         myArrayList.add(new JSONObject(jsonValue.toObject()));
                     }
+                } else if (value instanceof Collection) {
+                    myArrayList.add(new JSONArray((Collection<Object>) value));
+                } else if (value instanceof Map) {
+                    myArrayList.add(new JSONObject((Map<String, Object>) value));
                 } else {
                     myArrayList.add(value);
                 }
