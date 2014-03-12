@@ -119,14 +119,14 @@ public class XingSubscribeService extends AbstractSubscribeService {
 
     private final class CollectingPhotoHandler implements PhotoHandler {
 
-        private final Map<String, String> optPhotoUrlsMap;
+        private final Map<String, String> photoUrlsMap;
 
         /**
          * Initializes a new {@link CollectingPhotoHandler}.
          */
-        CollectingPhotoHandler(Map<String, String> optPhotoUrlsMap) {
+        CollectingPhotoHandler(Map<String, String> photoUrlsMap) {
             super();
-            this.optPhotoUrlsMap = optPhotoUrlsMap;
+            this.photoUrlsMap = photoUrlsMap;
         }
 
         @Override
@@ -137,7 +137,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 if (null != pic && !"null".equals(pic.toString())) {
                     final String id = xingUser.getId();
                     if (isNotNull(id)) {
-                        optPhotoUrlsMap.put(id, pic.toString());
+                        photoUrlsMap.put(id, pic.toString());
                     }
                 }
             }
