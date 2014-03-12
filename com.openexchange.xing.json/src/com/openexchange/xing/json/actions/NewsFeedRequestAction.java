@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
@@ -117,7 +118,7 @@ public class NewsFeedRequestAction extends AbstractXingAction {
         Object user_fields = req.getParameter("user_fields");
         if (user_fields != null) {
             if (user_fields instanceof String) {
-                String[] split = ((String) user_fields).split(",");
+                String[] split = Strings.splitByComma((String) user_fields);
                 optUserFields = new ArrayList<UserField>();
                 for(String s : split) {
                     optUserFields.add(USER_FIELDS.get(Integer.parseInt(s)));
