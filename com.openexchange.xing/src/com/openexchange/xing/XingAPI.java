@@ -878,8 +878,8 @@ public class XingAPI<S extends Session> {
                 jLeadDesc.put("tandc_check", leadDescription.isTandcCheck());
             }
 
-            jLeadDesc.put("reg_consumer_key", session.getAccessTokenPair().key);
-            jLeadDesc.put("reg_consumer_secret", session.getAccessTokenPair().secret);
+            jLeadDesc.put("reg_consumer_key", session.getAppKeyPair().key);
+            jLeadDesc.put("reg_consumer_secret", session.getAppKeyPair().secret);
 
             final HttpResponse resp = RESTUtility.basicRequest(Method.POST, url, jLeadDesc, session).response;
             final JSONObject jResponse = RESTUtility.parseAsJSON(resp).toObject();
