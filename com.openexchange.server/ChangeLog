@@ -1,3 +1,7 @@
+* 2014-03-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31395: Enhanced localized error message according to proposal from documentation team
+
 * 2014-03-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 31392: Made module-specific error messages
