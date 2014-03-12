@@ -58,14 +58,16 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.Language;
 import com.openexchange.xing.LeadDescription;
 import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
+import com.openexchange.xing.session.AppKeyPair;
 import com.openexchange.xing.session.WebAuthSession;
 
 
@@ -122,14 +124,14 @@ public class CreateRequestAction extends AbstractXingAction {
         
         leadDescription.setFirstName(jsonData.optString("first_name", null));
         leadDescription.setLastName(jsonData.optString("last_name", null));
-        leadDescription.setLanguage(Language.valueOf(jsonData.optString("language", Language.DE.getLangId())));
+        leadDescription.setLanguage(Language.valueOf(jsonData.optString("language", Language.DE.getLangId()).toUpperCase()));
         
-        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
-        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+        OAuthService oauthService = getService(OAuthService.class);
+        OAuthServiceMetaData m = oauthService.getMetaDataRegistry().getService("com.openexchange.oauth.xing", req.getSession().getUserId(), req.getSession().getContextId());
+        WebAuthSession session = new WebAuthSession(new AppKeyPair(m.getAPIKey(), m.getAPISecret()));
         
+        XingAPI<WebAuthSession> xingAPI = new XingAPI<WebAuthSession>(session);
         Map<String, Object> lead = xingAPI.signUpLead(leadDescription);
-        
         return new AJAXRequestResult(JSONCoercion.coerceToJSON(lead));
     }
-
 }
