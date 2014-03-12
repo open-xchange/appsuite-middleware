@@ -1,6 +1,7 @@
 * 2014-03-12 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31490: More lenient parsing in case ATTENDEE is not in "mailto:" URI format
+ - Fix for bug 31489: Added optional "admin" parameter for actions "birthdays", "anniversaries", "updates", "search" and "advancedSearch"
 
 * 2014-03-12 - thorben.betten@open-xchange.com
 
