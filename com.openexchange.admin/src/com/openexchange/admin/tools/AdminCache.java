@@ -68,7 +68,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -230,18 +230,11 @@ public class AdminCache {
         return named_access_combinations.containsKey(name);
     }
 
-    public synchronized String getNameForAccessCombination(UserModuleAccess access_combination) {
-        if(named_access_combinations.containsValue(access_combination)){
-            Iterator<String> names = named_access_combinations.keySet().iterator();
-            String retval = null;
-            while(names.hasNext()){
-                String combi_name = names.next();
-                if(named_access_combinations.get(combi_name).equals(access_combination)){
-                    retval =  combi_name;
-                    break;
-                }
+    public synchronized String getNameForAccessCombination(final UserModuleAccess access_combination) {
+        for (final Entry<String, UserModuleAccess> entry : named_access_combinations.entrySet()) {
+            if (entry.getValue().equals(access_combination)) {
+                return entry.getKey();
             }
-            return retval;
         }
         return null;
     }
