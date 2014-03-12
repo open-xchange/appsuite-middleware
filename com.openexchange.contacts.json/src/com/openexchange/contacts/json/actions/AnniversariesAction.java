@@ -56,12 +56,14 @@ import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
@@ -77,7 +79,8 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "folder", optional=true, description = "Object ID of the parent folder that is searched. If not set, all visible folders are used."),
     @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response.  If not specified, the results are sorted ascending by their anniversary in the supplied timerange. If this parameter is specified, then the parameter order must be also specified. In case of use of column 609 (use count depending order for collected contacts with global address book) the parameter \"order\" is NOT necessary and will be ignored."),
     @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
-    @Parameter(name = "collation", optional=true, description = "Allows you to specify a collation to sort the contacts by. As of 6.20, only supports \"gbk\" and \"gb2312\", not needed for other languages. Parameter sort should be set for this to work.")
+    @Parameter(name = "collation", optional=true, description = "Allows you to specify a collation to sort the contacts by. As of 6.20, only supports \"gbk\" and \"gb2312\", not needed for other languages. Parameter sort should be set for this to work."),
+    @Parameter(name = "admin", optional=true, type=Type.BOOLEAN, description = "(preliminary, since 7.4.2) - whether to include the contact representing the admin in the result or not. Defaults to \"true\".")
 }, responseDescription = "Response with timestamp: An array with contact data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public class AnniversariesAction extends ContactAction {
 
@@ -91,17 +94,22 @@ public class AnniversariesAction extends ContactAction {
 
     @Override
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
+        boolean excludeAdmin = request.isExcludeAdmin();
+        int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
+        ContactField[] fields = excludeAdmin ?
+            request.getFields(ContactField.INTERNAL_USERID, ContactField.ANNIVERSARY) : request.getFields(ContactField.ANNIVERSARY);
         String folderID = request.optFolderID();
-        List<Contact> contacts = new ArrayList<Contact>();
-        Date lastModified;
+
+        SearchIterator<Contact> searchIterator;
         if (null != folderID) {
-            List<String> folderIDs = Arrays.asList(new String[] { folderID });
-            lastModified = addContacts(contacts, getContactService().searchContactsWithAnniversary(request.getSession(), folderIDs,
-                request.getStart(), request.getEnd(), request.getFields(ContactField.ANNIVERSARY), request.getSortOptions()));
+            searchIterator = getContactService().searchContactsWithAnniversary(request.getSession(),
+                Arrays.asList(new String[] { folderID }), request.getStart(), request.getEnd(), fields, request.getSortOptions());
         } else {
-            lastModified = addContacts(contacts, getContactService().searchContactsWithAnniversary(request.getSession(),
-                request.getStart(), request.getEnd(), request.getFields(ContactField.ANNIVERSARY), request.getSortOptions()));
+            searchIterator = getContactService().searchContactsWithAnniversary(request.getSession(), request.getStart(),
+                request.getEnd(), fields, request.getSortOptions());
         }
+        List<Contact> contacts = new ArrayList<Contact>();
+        Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
         request.sortInternalIfNeeded(contacts, ContactField.ANNIVERSARY, request.getStart());
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
