@@ -1379,6 +1379,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private static void updateContextServer2DbPool(final Database db, Connection con, final int contextId) throws PoolException {
+        // dbid is the id in db_pool of database engine to use for next context
+
+        // if read id -1 (not set by client ) or 0 (there is no read db for this
+        // cluster) then read id must be same as write id
+        // else the db pool cannot resolve the database
+        if (null == db.getRead_id() || 0 == db.getRead_id().intValue()) {
+            db.setRead_id(db.getId());
+        }
+
         final int serverId = ClientAdminThread.cache.getServerId();
         ClientAdminThread.cache.getPool().writeAssignment(con, new Assignment() {
             @Override
