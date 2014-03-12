@@ -97,7 +97,7 @@ public final class InviteAction extends AbstractXingAction {
         final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
 
-        final InvitationStats invitationStats = xingAPI.invite(xingOAuthAccess.getXingUserId(), Collections.<String> singletonList(address), null, null);
+        final InvitationStats invitationStats = xingAPI.invite(Collections.<String> singletonList(address), null, null);
 
         if (invitationStats.getInvitationsSent() > 0) {
             return new AJAXRequestResult(Boolean.TRUE, "native");

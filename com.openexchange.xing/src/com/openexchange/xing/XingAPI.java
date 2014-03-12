@@ -705,7 +705,8 @@ public class XingAPI<S extends Session> {
                 "/users/" + recipientUserId + "/contact_requests",
                 VERSION,
                 params.toArray(new String[0]),
-                session);
+                session,
+                Arrays.asList(XingServerException._201_CREATED));
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -723,7 +724,7 @@ public class XingAPI<S extends Session> {
      * @return A invitation response
      * @throws XingException If invitation attempt fails
      */
-    public InvitationStats invite(final String userId, final List<String> addresses, final String optMessage, final Collection<UserField> optUserFields) throws XingException {
+    public InvitationStats invite(final List<String> addresses, final String optMessage, final Collection<UserField> optUserFields) throws XingException {
         if (null == addresses || addresses.isEmpty()) {
             throw new XingException("Invalid addresses");
         }
@@ -881,7 +882,12 @@ public class XingAPI<S extends Session> {
             jLeadDesc.put("reg_consumer_key", session.getAppKeyPair().key);
             jLeadDesc.put("reg_consumer_secret", session.getAppKeyPair().secret);
 
-            final HttpResponse resp = RESTUtility.basicRequest(Method.POST, url, jLeadDesc, session).response;
+            final HttpResponse resp = RESTUtility.basicRequest(
+                Method.POST,
+                url,
+                jLeadDesc,
+                session,
+                Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT)).response;
             final JSONObject jResponse = RESTUtility.parseAsJSON(resp).toObject();
             return jResponse.asMap();
         } catch (final JSONException e) {

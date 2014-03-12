@@ -97,6 +97,9 @@ public class XingServerException extends XingException {
     /** The request was successful. This won't ever be thrown in an exception. */
     public static final int _200_OK = 200;
 
+    /** The request was successful. This won't ever be thrown in an exception. */
+    public static final int _201_CREATED = 201;
+
     /** The request was successful for a Range request. This won't ever be thrown in an exception. */
     public static final int _206_PARTIAL_CONTENT = 206;
 

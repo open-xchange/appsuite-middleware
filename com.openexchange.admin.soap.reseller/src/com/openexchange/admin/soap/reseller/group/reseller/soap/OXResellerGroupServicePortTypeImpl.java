@@ -6,6 +6,7 @@
 
 package com.openexchange.admin.soap.reseller.group.reseller.soap;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -390,6 +393,8 @@ public class OXResellerGroupServicePortTypeImpl implements OXResellerGroupServic
         }
     }
 
+    private static final Pattern URL_PATTERN = Pattern.compile("^(.*?://)?(.*?)(:(.*?))?$");
+
     @Override
     public java.util.List<com.openexchange.admin.soap.reseller.group.soap.dataobjects.Group> listGroupsForUser(com.openexchange.admin.soap.reseller.group.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.group.soap.dataobjects.User usr,com.openexchange.admin.soap.reseller.group.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         final OXGroupInterface groupInterface = getGroupInterface();
@@ -628,6 +633,36 @@ public class OXResellerGroupServicePortTypeImpl implements OXResellerGroupServic
             user.setImapServer(tmp);
         }
 
+        Integer i = soapUser.getImapPort();
+        if (i != null) {
+            final String s = user.getImapServerString();
+            if (!isEmpty(s)) {
+                final Matcher matcher = URL_PATTERN.matcher(s);
+                if (matcher.matches()) {
+                    final StringBuilder sb = new StringBuilder(32);
+                    for (int j = 1; j <= 3; j++) {
+                        switch (j) {
+                        case 1:
+                            {
+                                final String schema = matcher.group(1);
+                                if (null != schema) {
+                                    sb.append(schema);
+                                }
+                            }
+                            break;
+                        case 2:
+                            sb.append(matcher.group(2));
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                    sb.append(':').append(i);
+                    user.setImapServer(sb.toString());
+                }
+            }
+        }
+
         tmp = soapUser.getInfo();
         if (tmp != null) {
             user.setInfo(tmp);
@@ -774,6 +809,36 @@ public class OXResellerGroupServicePortTypeImpl implements OXResellerGroupServic
         tmp = soapUser.getSmtpServer();
         if (tmp != null) {
             user.setSmtpServer(tmp);
+        }
+
+        i = soapUser.getSmtpPort();
+        if (i != null) {
+            final String s = user.getSmtpServerString();
+            if (!isEmpty(s)) {
+                final Matcher matcher = URL_PATTERN.matcher(s);
+                if (matcher.matches()) {
+                    final StringBuilder sb = new StringBuilder(32);
+                    for (int j = 1; j <= 3; j++) {
+                        switch (j) {
+                        case 1:
+                        {
+                            final String schema = matcher.group(1);
+                            if (null != schema) {
+                                sb.append(schema);
+                            }
+                        }
+                        break;
+                        case 2:
+                            sb.append(matcher.group(2));
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                    sb.append(':').append(i);
+                    user.setSmtpServer(sb.toString());
+                }
+            }
         }
 
         tmp = soapUser.getSpouseName();
