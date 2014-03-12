@@ -84,6 +84,7 @@ import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.drive.FileSizeDisplayItem.Size;
 import com.openexchange.find.drive.FileTypeDisplayItem;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
@@ -153,7 +154,25 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         if (null == searchEngine) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreFacade.class.getName());
         }
-        SearchTerm<?> term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
+        SearchTerm<?> term = null;
+        List<SearchTerm<?>> terms = null;
+        List<ActiveFacet> facets = searchRequest.getActiveFacets();
+        if (facets.size() > 1) {
+             terms = new ArrayList<SearchTerm<?>>(facets.size());
+        }
+        for (ActiveFacet facet : facets) {
+            Filter filter = facet.getFilter();
+            term = Utils.termFor(filter);
+            if (null != terms) {
+                terms.add(term);
+            }
+        }
+        if (null != terms) {
+            term = new AndTerm(terms);
+        }
+        if (null == term) {
+            term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
+        }
 
         final String folderId = searchRequest.getFolderId();
         List<Integer> folderIds;
@@ -341,6 +360,9 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
     private static SearchTerm<?> prepareQueryTerm(final List<String> queries) throws OXException {
         if (queries == null || queries.isEmpty()) {
             return null;
+        }
+        for (String query : queries) {
+            query.trim();
         }
 
         return Utils.termFor(QUERY_FIELDS, queries);
