@@ -1,3 +1,7 @@
+* 2014-03-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31490: More lenient parsing in case ATTENDEE is not in "mailto:" URI format
+
 * 2014-03-11 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 30843: Added properties to explicitly choose SSL protocols
