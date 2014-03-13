@@ -1081,6 +1081,35 @@ public class XingAPI<S extends Session> {
     }
 
     /**
+     * Shares a link in network activity
+     * 
+     * @param uri
+     * @return A map reprecenting the outcome of the operation
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     */
+    public Map<String, Object> shareLink(final String uri) throws XingException {
+        assertAuthenticated();
+        try {
+            final List<String> params = new ArrayList<String>(1);
+            params.add("uri");
+            params.add(uri);
+
+            final JSONObject response = RESTUtility.request(
+                Method.POST,
+                session.getAPIServer(),
+                "/users/me/share/link",
+                VERSION,
+                params.toArray(new String[0]),
+                session,
+                Arrays.asList(XingServerException._201_CREATED)).toObject();
+            return response.asMap();
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
      * Performs a sign-up request for a lead.
      *
      * @param leadDescription The lead description
