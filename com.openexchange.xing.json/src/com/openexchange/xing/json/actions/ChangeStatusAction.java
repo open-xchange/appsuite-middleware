@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,23 +49,13 @@
 
 package com.openexchange.xing.json.actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
-import javax.mail.internet.AddressException;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -75,62 +65,26 @@ import com.openexchange.xing.session.WebAuthSession;
 
 
 /**
- * {@link FeedRequestAction}
+ * {@link ChangeStatusAction}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FeedRequestAction extends AbstractXingAction {
-
-    private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
+public final class ChangeStatusAction extends AbstractXingAction {
 
     /**
-     * Initializes a new {@link FeedRequestAction}.
+     * Initializes a new {@link ChangeStatusAction}.
      */
-    public FeedRequestAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    public ChangeStatusAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        Date optSince = null;
-        Date optUntil = null;
-        Collection<UserField> optUserFields = null;
+    protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
+        // Get & validate message
+        final String address = req.getParameter("email");
+        final String message = req.getParameter("message");
 
-        // Since/Until
-        String since = req.getParameter("since");
-        String until = req.getParameter("until");
-
-        String address = req.getParameter("email");
-        try {
-            final QuotedInternetAddress addr = new QuotedInternetAddress(address, false);
-            address = QuotedInternetAddress.toIDN(addr.getAddress());
-        } catch (final AddressException e) {
-            throw MimeMailException.handleMessagingException(e);
-        }
-
-        if (since != null && until != null) {
-            throw XingExceptionCodes.MUTUALLY_EXCLUSIVE.create();
-        }
-
-        if (since != null) {
-            optSince = new Date(Long.parseLong(since));
-        } else if (until != null) {
-            optUntil = new Date(Long.parseLong(until));
-        }
-
-        // User Fields
-        Object user_fields = req.getParameter("user_fields");
-        if (user_fields != null) {
-            if (user_fields instanceof String) {
-                String[] split = Strings.splitByComma((String) user_fields);
-                optUserFields = new ArrayList<UserField>();
-                for (String s : split) {
-                    optUserFields.add(USER_FIELDS.get(Integer.parseInt(s)));
-                }
-            }
-        }
-
-        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
         final String xingId = xingAPI.findByEmail(address);
 
@@ -138,12 +92,9 @@ public class FeedRequestAction extends AbstractXingAction {
             // Already connected
             throw XingExceptionCodes.NOT_A_MEMBER.create(address);
         }
+        final Map<String, Object> status = xingAPI.changeStatusMessage(xingId, message);
 
-        Map<String, Object> feed = xingAPI.getFeed(xingId, optSince, optUntil, optUserFields);
-
-        JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(feed);
-
-        return new AJAXRequestResult(result);
+        return new AJAXRequestResult(JSONCoercion.coerceToJSON(status));
     }
 
 }

@@ -169,9 +169,34 @@ public class RESTUtility {
     }
 
     /**
+     * Creates and sends a request to the XING API, parses the response as JSON, and returns the result.
+     * 
+     * @param method GET or POST.
+     * @param host the hostname to use. Should be either api server, content server, or web server.
+     * @param path the URL path, starting with a '/'.
+     * @param apiVersion the API version to use. This should almost always be set to {@code XingAPI.VERSION}.
+     * @param params the URL params in an array, with the even numbered elements the parameter names and odd numbered elements the values,
+     *            e.g. <code>new String[] {"path", "/Public", "locale",
+     *         "en"}</code>.
+     * @param session the {@link Session} to use for this request.
+     * @return a parsed JSON object, typically a Map or a JSONArray.
+     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException if any network-related error occurs.
+     * @throws XingUnlinkedException if the user has revoked access.
+     * @throws XingParseException if a malformed or unknown response was received from the server.
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final String[] params, final Session session, final List<Integer> expectedStatusCode) throws XingException {
+        final HttpResponse resp = streamRequest(method, host, path, apiVersion, params, session, expectedStatusCode).response;
+        return parseAsJSON(resp);
+    }
+
+    /**
      * Creates and sends a request to the XING API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
      * {@link HttpResponse}.
-     *
+     * 
      * @param method GET or POST.
      * @param host the hostname to use. Should be either api server, content server, or web server.
      * @param path the URL path, starting with a '/'.

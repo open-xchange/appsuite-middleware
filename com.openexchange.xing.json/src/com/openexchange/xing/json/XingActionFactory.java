@@ -58,6 +58,7 @@ import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.json.actions.AbstractXingAction;
+import com.openexchange.xing.json.actions.ChangeStatusAction;
 import com.openexchange.xing.json.actions.CommentActivityRequestAction;
 import com.openexchange.xing.json.actions.ContactRequestAction;
 import com.openexchange.xing.json.actions.CreateRequestAction;
@@ -90,6 +91,7 @@ public class XingActionFactory implements AJAXActionServiceFactory {
         actions.put("comment", new CommentActivityRequestAction(serviceLookup));
         actions.put("like", new LikeActivityRequestAction(serviceLookup));
         actions.put("feed", new FeedRequestAction(serviceLookup));
+        actions.put("change_status", new ChangeStatusAction(serviceLookup));
     }
 
     @Override

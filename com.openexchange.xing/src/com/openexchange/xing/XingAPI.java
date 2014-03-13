@@ -920,7 +920,37 @@ public class XingAPI<S extends Session> {
             throw new XingException(e);
         }
     }
-    
+
+    /**
+     * Change the status message of the user
+     * 
+     * @param userId The userId
+     * @param message The status message
+     * @return The hard-coded string <code>Status update has been posted<code> on success \"
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     */
+    public Map<String, Object> changeStatusMessage(final String userId, final String message) throws XingException {
+        assertAuthenticated();
+        try {
+            final List<String> params = new ArrayList<String>(1);
+            params.add("message");
+            params.add(message);
+
+            final JSONObject response = RESTUtility.request(
+                Method.POST,
+                session.getAPIServer(),
+                "/users/" + userId + "/status_message",
+                VERSION,
+                params.toArray(new String[0]),
+                session,
+                Arrays.asList(XingServerException._201_CREATED)).toObject();
+            return response.asMap();
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
     /**
      * Like a certain network activity
      * 
