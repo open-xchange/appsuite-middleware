@@ -155,7 +155,8 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
         final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         final DatabaseService dbService = getDBService();
 
-        final Connection con = dbService.getWritable(contextId);
+        // Check for sufficient space in cache
+        Connection con = dbService.getWritable(contextId);
         ResourceCacheMetadata existingMetadata = loadExistingEntry(metadataStore, con, contextId, userId, id);
         long existingSize = existingMetadata == null ? 0L : existingMetadata.getSize();
         if (!ensureUnexceededContextQuota(con, bytes.length, contextId, existingSize)) {
@@ -163,20 +164,26 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
             return false;
         }
 
-        String refId = null;
+        // Ensured to have sufficient space
+        dbService.backWritable(contextId, con);
+
+        // Save file & create appropriate ResourceCacheMetadata instance
+        final String refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
+        final ResourceCacheMetadata metadata = new ResourceCacheMetadata();
+        metadata.setContextId(contextId);
+        metadata.setUserId(userId);
+        metadata.setResourceId(id);
+        metadata.setFileName(optName);
+        metadata.setFileType(prepareFileType(optType, 32));
+        metadata.setSize(bytes.length);
+        metadata.setCreatedAt(System.currentTimeMillis());
+        metadata.setRefId(refId);
+
+        // Fetch another connection
+        con = dbService.getWritable(contextId);
         boolean committed = false;
         try {
             Databases.startTransaction(con);
-            refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
-            ResourceCacheMetadata metadata = new ResourceCacheMetadata();
-            metadata.setContextId(contextId);
-            metadata.setUserId(userId);
-            metadata.setResourceId(id);
-            metadata.setFileName(optName);
-            metadata.setFileType(prepareFileType(optType, 32));
-            metadata.setSize(bytes.length);
-            metadata.setCreatedAt(System.currentTimeMillis());
-            metadata.setRefId(refId);
             if (existingMetadata == null) {
                 metadataStore.store(con, metadata);
             } else {
