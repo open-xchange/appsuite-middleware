@@ -1,3 +1,7 @@
+* 2014-03-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31555: Also check standard folders' subscribed status in case SPECIAL-USE capability is supported by IMAP server
+
 * 2014-03-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31391: Use dynamically registered key and certificate providers for cloud-based push notifications
