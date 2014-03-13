@@ -7870,6 +7870,11 @@ msgstr ""
 msgid "The status message size exceeds the maximum allowed of 420 characters."
 msgstr ""
 
+#. The status message size exceeds the maximum allowed of 600 characters.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:104
+msgid "The text message size exceeds the maximum allowed of 140 characters."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
 msgstr ""
