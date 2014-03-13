@@ -933,7 +933,7 @@ public class XingAPI<S extends Session> {
     public Map<String, Object> changeStatusMessage(final String userId, final String message) throws XingException {
         assertAuthenticated();
         try {
-            final List<String> params = new ArrayList<String>(1);
+            final List<String> params = new ArrayList<String>(4);
             params.add("message");
             params.add(message);
 
@@ -970,6 +970,43 @@ public class XingAPI<S extends Session> {
                 Method.PUT,
                 session.getAPIServer(),
                 "/v1/activities/" + activityId + "/like",
+                VERSION,
+                params.toArray(new String[0]),
+                session).toObject();
+            return response.asMap();
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Shares a link in network activity
+     * 
+     * @param uri
+     * @return A map reprecenting the outcome of the operation
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     */
+    public Map<String, Object> showActivity(final String activitiId, Collection<UserField> optUserFields) throws XingException {
+        assertAuthenticated();
+        try {
+            final List<String> params = new ArrayList<String>(4);
+
+            if (null != optUserFields && !optUserFields.isEmpty()) {
+                params.add("user_fields");
+                params.add(collectionToCsv(optUserFields, new Stringer<UserField>() {
+
+                    @Override
+                    public String getString(final UserField element) {
+                        return element.getFieldName();
+                    }
+                }));
+            }
+
+            final JSONObject response = RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/activities/" + activitiId,
                 VERSION,
                 params.toArray(new String[0]),
                 session).toObject();

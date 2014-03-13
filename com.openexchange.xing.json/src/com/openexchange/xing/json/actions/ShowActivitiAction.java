@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,76 @@
  *
  */
 
-package com.openexchange.xing.json;
+package com.openexchange.xing.json.actions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
+import javax.mail.internet.AddressException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.json.actions.AbstractXingAction;
-import com.openexchange.xing.json.actions.ChangeStatusAction;
-import com.openexchange.xing.json.actions.CommentActivityRequestAction;
-import com.openexchange.xing.json.actions.ContactRequestAction;
-import com.openexchange.xing.json.actions.CreateRequestAction;
-import com.openexchange.xing.json.actions.FeedRequestAction;
-import com.openexchange.xing.json.actions.InviteAction;
-import com.openexchange.xing.json.actions.LikeActivityRequestAction;
-import com.openexchange.xing.json.actions.NewsFeedRequestAction;
-import com.openexchange.xing.json.actions.ShowActivitiAction;
+import com.openexchange.xing.InvitationStats;
+import com.openexchange.xing.User;
+import com.openexchange.xing.UserField;
+import com.openexchange.xing.XingAPI;
+import com.openexchange.xing.access.XingExceptionCodes;
+import com.openexchange.xing.access.XingOAuthAccess;
+import com.openexchange.xing.exception.XingException;
+import com.openexchange.xing.json.XingRequest;
+import com.openexchange.xing.session.WebAuthSession;
 
 
 /**
- * {@link XingActionFactory} - The XING action factory.
+ * {@link ShowActivitiAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "xing", description = "Provides access to XING module.")
-public class XingActionFactory implements AJAXActionServiceFactory {
+public final class ShowActivitiAction extends AbstractXingAction {
 
-    private final Map<String, AbstractXingAction> actions;
+    private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
 
     /**
-     * Initializes a new {@link XingActionFactory}.
+     * Initializes a new {@link ShowActivitiAction}.
      */
-    public XingActionFactory(final ServiceLookup serviceLookup) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractXingAction>(6);
-        actions.put("invite", new InviteAction(serviceLookup));
-        actions.put("contact_request", new ContactRequestAction(serviceLookup));
-        actions.put("newsfeed", new NewsFeedRequestAction(serviceLookup));
-        actions.put("create", new CreateRequestAction(serviceLookup));
-        actions.put("comment", new CommentActivityRequestAction(serviceLookup));
-        actions.put("like", new LikeActivityRequestAction(serviceLookup));
-        actions.put("feed", new FeedRequestAction(serviceLookup));
-        actions.put("change_status", new ChangeStatusAction(serviceLookup));
-        actions.put("show_activity", new ShowActivitiAction(serviceLookup));
+    public ShowActivitiAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
+    protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
+        // Get & validate E-Mail address
+        final String id = req.getParameter("id");
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+        // User Fields
+        Collection<UserField> optUserFields = null;
+        Object user_fields = req.getParameter("user_fields");
+        if (user_fields != null) {
+            if (user_fields instanceof String) {
+                String[] split = Strings.splitByComma((String) user_fields);
+                optUserFields = new ArrayList<UserField>();
+                for (String s : split) {
+                    optUserFields.add(USER_FIELDS.get(Integer.parseInt(s)));
+                }
+            }
+        }
+
+        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+        Map<String, Object> activity = xingAPI.showActivity(id, optUserFields);
+        JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(activity);
+
+        return new AJAXRequestResult(result);
     }
 
 }
