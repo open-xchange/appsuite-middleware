@@ -1339,9 +1339,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (this.CONTEXTS_PER_SCHEMA == 1) {
             String schema_name;
             synchronized (ClientAdminThread.create_mutex) {
-                configCon.setAutoCommit(false);
                 final int srv_id = IDGenerator.getId(configCon);
-                configCon.commit();
                 schema_name = db.getName() + "_" + srv_id;
             }
             db.setScheme(schema_name);
@@ -1354,11 +1352,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 String schema_name = getNextUnfilledSchemaFromDB(db.getId(), configCon);
                 // there's none? create one
                 if (schema_name == null) {
-                    configCon.setAutoCommit(false);
-
                     final int srv_id = IDGenerator.getId(configCon);
-                    configCon.commit();
-                    configCon.setAutoCommit(true);
                     schema_name = db.getName() + "_" + srv_id;
 
                     db.setScheme(schema_name);
