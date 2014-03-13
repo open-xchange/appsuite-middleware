@@ -100,6 +100,9 @@ public final class XingExceptionMessages implements LocalizableStrings {
     // The status message size exceeds the maximum allowed of 600 characters.
     public static final String STATUS_MESSAGE_SIZE_EXCEEDED_MSG = "The status message size exceeds the maximum allowed of 420 characters.";
 
+    // The status message size exceeds the maximum allowed of 600 characters.
+    public static final String TEXT_MESSAGE_SIZE_EXCEEDED_MSG = "The text message size exceeds the maximum allowed of 140 characters.";
+
     /**
      * Initializes a new {@link XingExceptionMessages}.
      */

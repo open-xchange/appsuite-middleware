@@ -58,6 +58,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
+import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
@@ -87,6 +88,11 @@ public final class ShareActivityRequestAction extends AbstractXingAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("activity_id");
         }
         final String text = req.getParameter("text");
+        if (text != null) {
+            if (text.length() > 140) {
+                throw XingExceptionCodes.TEXT_MESSAGE_SIZE_EXCEEDED.create();
+            }
+        }
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
         xingAPI.shareActivity(activityId, text);
