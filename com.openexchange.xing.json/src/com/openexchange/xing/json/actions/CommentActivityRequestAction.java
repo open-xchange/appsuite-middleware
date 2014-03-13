@@ -47,55 +47,57 @@
  *
  */
 
-package com.openexchange.xing.json;
+package com.openexchange.xing.json.actions;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.json.actions.AbstractXingAction;
-import com.openexchange.xing.json.actions.CommentActivityRequestAction;
-import com.openexchange.xing.json.actions.ContactRequestAction;
-import com.openexchange.xing.json.actions.CreateRequestAction;
-import com.openexchange.xing.json.actions.InviteAction;
-import com.openexchange.xing.json.actions.NewsFeedRequestAction;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.xing.XingAPI;
+import com.openexchange.xing.access.XingOAuthAccess;
+import com.openexchange.xing.exception.XingException;
+import com.openexchange.xing.json.XingRequest;
+import com.openexchange.xing.session.WebAuthSession;
 
 
 /**
- * {@link XingActionFactory} - The XING action factory.
+ * {@link CommentActivityRequestAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@Module(name = "xing", description = "Provides access to XING module.")
-public class XingActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AbstractXingAction> actions;
+public class CommentActivityRequestAction extends AbstractXingAction {
 
     /**
-     * Initializes a new {@link XingActionFactory}.
+     * Initializes a new {@link CommentActivityRequestAction}.
      */
-    public XingActionFactory(final ServiceLookup serviceLookup) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractXingAction>(5);
-        actions.put("invite", new InviteAction(serviceLookup));
-        actions.put("contact_request", new ContactRequestAction(serviceLookup));
-        actions.put("newsfeed", new NewsFeedRequestAction(serviceLookup));
-        actions.put("create", new CreateRequestAction(serviceLookup));
-        actions.put("comment", new CommentActivityRequestAction(serviceLookup));
+    public CommentActivityRequestAction(ServiceLookup serviceLookup) {
+        super(serviceLookup);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
+     */
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
+        String activityId = req.getParameter("activity_id");
+        String text = req.getParameter("text");
+        
+        if (activityId == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("activity_id");
+        }
+        
+        if (text == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("text");
+        }
+        
+        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+        Map<String, Object> response = xingAPI.commentActivity(activityId, text);
+        
+        return new AJAXRequestResult(JSONCoercion.coerceToJSON(response));
     }
 
 }
