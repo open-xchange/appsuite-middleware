@@ -49,18 +49,16 @@
 
 package com.openexchange.xing.json.actions;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import javax.mail.internet.AddressException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.InvitationStats;
-import com.openexchange.xing.User;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -70,22 +68,22 @@ import com.openexchange.xing.session.WebAuthSession;
 
 
 /**
- * {@link InviteAction}
+ * {@link ChangeStatusRequestAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class InviteAction extends AbstractXingAction {
+public final class ChangeStatusRequestAction extends AbstractXingAction {
 
     /**
-     * Initializes a new {@link InviteAction}.
+     * Initializes a new {@link ChangeStatusRequestAction}.
      */
-    public InviteAction(final ServiceLookup services) {
+    public ChangeStatusRequestAction(final ServiceLookup services) {
         super(services);
     }
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        // Get & validate E-Mail address
+        // Get & validate message
         String address = req.getParameter("email");
         try {
             final QuotedInternetAddress addr = new QuotedInternetAddress(address, false);
@@ -93,36 +91,19 @@ public final class InviteAction extends AbstractXingAction {
         } catch (final AddressException e) {
             throw MimeMailException.handleMessagingException(e);
         }
+        final String message = req.getParameter("message");
 
         final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+        final String xingId = xingAPI.findByEmail(address);
 
-        final InvitationStats invitationStats = xingAPI.invite(Collections.<String> singletonList(address), null, null);
-
-        if (invitationStats.getInvitationsSent() > 0) {
-            return new AJAXRequestResult(Boolean.TRUE, "native");
+        if (Strings.isEmpty(xingId)) {
+            // Already connected
+            throw XingExceptionCodes.NOT_A_MEMBER.create(address);
         }
+        final Map<String, Object> status = xingAPI.changeStatusMessage(xingId, message);
 
-        final List<String> alreadyInvited = invitationStats.getAlreadyInvited();
-        if (null != alreadyInvited && new HashSet<String>(alreadyInvited).contains(address)) {
-            return new AJAXRequestResult(Boolean.TRUE, "native");
-        }
-
-        final List<String> invalidAddresses = invitationStats.getInvalidAddresses();
-        if (null != invalidAddresses && new HashSet<String>(invalidAddresses).contains(address)) {
-            throw XingExceptionCodes.INVALID_EMAIL_ADDRESS.create(address);
-        }
-
-        final List<User> alreadyMember = invitationStats.getAlreadyMember();
-        if (null != alreadyMember) {
-            for (final User member : alreadyMember) {
-                if (member.getActiveMail().equals(address)) {
-                    throw XingExceptionCodes.ALREADY_MEMBER.create(address);
-                }
-            }
-        }
-
-        throw XingExceptionCodes.INVITATION_FAILED.create();
+        return new AJAXRequestResult(JSONCoercion.coerceToJSON(status));
     }
 
 }

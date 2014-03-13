@@ -58,16 +58,16 @@ import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.json.actions.AbstractXingAction;
-import com.openexchange.xing.json.actions.ChangeStatusAction;
+import com.openexchange.xing.json.actions.ChangeStatusRequestAction;
 import com.openexchange.xing.json.actions.CommentActivityRequestAction;
 import com.openexchange.xing.json.actions.ContactRequestAction;
 import com.openexchange.xing.json.actions.CreateRequestAction;
 import com.openexchange.xing.json.actions.FeedRequestAction;
-import com.openexchange.xing.json.actions.InviteAction;
+import com.openexchange.xing.json.actions.InviteRequestAction;
 import com.openexchange.xing.json.actions.LikeActivityRequestAction;
 import com.openexchange.xing.json.actions.NewsFeedRequestAction;
-import com.openexchange.xing.json.actions.ShareActivityAction;
-import com.openexchange.xing.json.actions.ShowActivityAction;
+import com.openexchange.xing.json.actions.ShareActivityRequestAction;
+import com.openexchange.xing.json.actions.ShowActivityRequestAction;
 
 
 /**
@@ -86,16 +86,16 @@ public class XingActionFactory implements AJAXActionServiceFactory {
     public XingActionFactory(final ServiceLookup serviceLookup) {
         super();
         actions = new ConcurrentHashMap<String, AbstractXingAction>(6);
-        actions.put("invite", new InviteAction(serviceLookup));
+        actions.put("invite", new InviteRequestAction(serviceLookup));
         actions.put("contact_request", new ContactRequestAction(serviceLookup));
         actions.put("newsfeed", new NewsFeedRequestAction(serviceLookup));
         actions.put("create", new CreateRequestAction(serviceLookup));
         actions.put("comment", new CommentActivityRequestAction(serviceLookup));
         actions.put("like", new LikeActivityRequestAction(serviceLookup));
         actions.put("feed", new FeedRequestAction(serviceLookup));
-        actions.put("change_status", new ChangeStatusAction(serviceLookup));
-        actions.put("show_activity", new ShowActivityAction(serviceLookup));
-        actions.put("share_activity", new ShareActivityAction(serviceLookup));
+        actions.put("change_status", new ChangeStatusRequestAction(serviceLookup));
+        actions.put("show_activity", new ShowActivityRequestAction(serviceLookup));
+        actions.put("share_activity", new ShareActivityRequestAction(serviceLookup));
     }
 
     @Override

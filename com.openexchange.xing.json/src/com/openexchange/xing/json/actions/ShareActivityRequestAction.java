@@ -49,28 +49,14 @@
 
 package com.openexchange.xing.json.actions;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import javax.mail.internet.AddressException;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.InvitationStats;
-import com.openexchange.xing.User;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
@@ -78,18 +64,18 @@ import com.openexchange.xing.session.WebAuthSession;
 
 
 /**
- * {@link ShareActivityAction}
+ * {@link ShareActivityRequestAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ShareActivityAction extends AbstractXingAction {
+public final class ShareActivityRequestAction extends AbstractXingAction {
 
     private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
 
     /**
-     * Initializes a new {@link ShareActivityAction}.
+     * Initializes a new {@link ShareActivityRequestAction}.
      */
-    public ShareActivityAction(final ServiceLookup services) {
+    public ShareActivityRequestAction(final ServiceLookup services) {
         super(services);
     }
 

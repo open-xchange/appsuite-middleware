@@ -1053,6 +1053,35 @@ public class XingAPI<S extends Session> {
     }
 
     /**
+     * Deletes an activity
+     * 
+     * @param activityId The id of the activity
+     * @param optTextMessage An optional text message - up to 140 characters
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public void deleteActivity(final String activityId) throws XingException {
+        assertAuthenticated();
+        try {
+            final List<String> params = new ArrayList<String>(4);
+
+            params.add("id");
+            params.add(activityId);
+
+            RESTUtility.request(
+                Method.DELETE,
+                session.getAPIServer(),
+                "/activities/" + activityId,
+                VERSION,
+                params.toArray(new String[0]),
+                session,
+                Arrays.asList(XingServerException._204_NO_CONTENT)).toObject();
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
      * Performs a sign-up request for a lead.
      *
      * @param leadDescription The lead description

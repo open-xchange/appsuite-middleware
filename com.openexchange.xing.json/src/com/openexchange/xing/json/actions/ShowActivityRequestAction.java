@@ -49,18 +49,20 @@
 
 package com.openexchange.xing.json.actions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import javax.mail.internet.AddressException;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
@@ -68,42 +70,45 @@ import com.openexchange.xing.session.WebAuthSession;
 
 
 /**
- * {@link ChangeStatusAction}
+ * {@link ShowActivityRequestAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ChangeStatusAction extends AbstractXingAction {
+public final class ShowActivityRequestAction extends AbstractXingAction {
+
+    private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
 
     /**
-     * Initializes a new {@link ChangeStatusAction}.
+     * Initializes a new {@link ShowActivityRequestAction}.
      */
-    public ChangeStatusAction(final ServiceLookup services) {
+    public ShowActivityRequestAction(final ServiceLookup services) {
         super(services);
     }
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        // Get & validate message
-        String address = req.getParameter("email");
-        try {
-            final QuotedInternetAddress addr = new QuotedInternetAddress(address, false);
-            address = QuotedInternetAddress.toIDN(addr.getAddress());
-        } catch (final AddressException e) {
-            throw MimeMailException.handleMessagingException(e);
+        // Get & validate E-Mail address
+        final String id = req.getParameter("id");
+
+        // User Fields
+        Collection<UserField> optUserFields = null;
+        Object user_fields = req.getParameter("user_fields");
+        if (user_fields != null) {
+            if (user_fields instanceof String) {
+                String[] split = Strings.splitByComma((String) user_fields);
+                optUserFields = new ArrayList<UserField>();
+                for (String s : split) {
+                    optUserFields.add(USER_FIELDS.get(Integer.parseInt(s)));
+                }
+            }
         }
-        final String message = req.getParameter("message");
 
-        final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
-        final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        final String xingId = xingAPI.findByEmail(address);
+        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+        Map<String, Object> activity = xingAPI.showActivity(id, optUserFields);
+        JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(activity);
 
-        if (Strings.isEmpty(xingId)) {
-            // Already connected
-            throw XingExceptionCodes.NOT_A_MEMBER.create(address);
-        }
-        final Map<String, Object> status = xingAPI.changeStatusMessage(xingId, message);
-
-        return new AJAXRequestResult(JSONCoercion.coerceToJSON(status));
+        return new AJAXRequestResult(result);
     }
 
 }
