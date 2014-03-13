@@ -109,6 +109,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
 
     @Override
     protected void sequentiallyCheckFolders(final String prefix, final char sep, final int type, final MailSessionCache cache) throws OXException {
+        final AtomicBoolean modified = new AtomicBoolean(false);
         final TIntSet indexes = new TIntHashSet(new int[] { StorageUtility.INDEX_DRAFTS, StorageUtility.INDEX_SENT, StorageUtility.INDEX_SPAM, StorageUtility.INDEX_TRASH });
         try {
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
@@ -116,21 +117,37 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
             if (null != entry) {
                 setDefaultMailFolder(StorageUtility.INDEX_DRAFTS, entry.getFullName(), cache);
                 indexes.remove(StorageUtility.INDEX_DRAFTS);
+                if (!entry.isSubscribed()) {
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
+                    modified.set(true);
+                }
             }
             entry = ListLsubCache.getJunkEntry(accountId, imapFolder, session);
             if (null != entry) {
                 setDefaultMailFolder(StorageUtility.INDEX_SPAM, entry.getFullName(), cache);
                 indexes.remove(StorageUtility.INDEX_SPAM);
+                if (!entry.isSubscribed()) {
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
+                    modified.set(true);
+                }
             }
             entry = ListLsubCache.getSentEntry(accountId, imapFolder, session);
             if (null != entry) {
                 setDefaultMailFolder(StorageUtility.INDEX_SENT, entry.getFullName(), cache);
                 indexes.remove(StorageUtility.INDEX_SENT);
+                if (!entry.isSubscribed()) {
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
+                    modified.set(true);
+                }
             }
             entry = ListLsubCache.getTrashEntry(accountId, imapFolder, session);
             if (null != entry) {
                 setDefaultMailFolder(StorageUtility.INDEX_TRASH, entry.getFullName(), cache);
                 indexes.remove(StorageUtility.INDEX_TRASH);
+                if (!entry.isSubscribed()) {
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
+                    modified.set(true);
+                }
             }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
@@ -175,7 +192,6 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
             }
         }
         // Check folders
-        final AtomicBoolean modified = new AtomicBoolean(false);
         for (int index = 0; index < names.length; index++) {
             String checkedFullName = null;
             boolean apply = true;
