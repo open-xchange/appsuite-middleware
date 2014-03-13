@@ -381,6 +381,12 @@ public final class FilterJerichoHandler implements JerichoHandler {
         System.arraycopy(tmp, 0, depthInfo, 0, tmp.length);
     }
 
+    /**
+     * Checks if max. allowed content size is exceeded.
+     *
+     * @param addLen The expected length the content will grow
+     * @return <code>true</code> if not exceeded; otherwise <code>false</code> if exceeded
+     */
     private boolean checkMaxContentSize(final int addLen) {
         if (maxContentSize <= 0) {
             return true;
