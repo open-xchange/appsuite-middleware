@@ -53,19 +53,15 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
-import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link LikeActivityRequestAction}
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class LikeActivityRequestAction extends AbstractXingAction {
+public class LikeActivityRequestAction extends AbstractNewsFeedAction {
 
     /**
      * Initializes a new {@link LikeActivityRequestAction}.
@@ -80,16 +76,8 @@ public class LikeActivityRequestAction extends AbstractXingAction {
      */
     @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String activityId = req.getParameter("activity_id");
-
-        if (activityId == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("activity_id");
-        }
-
-        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
-        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        xingAPI.likeActivity(activityId);
-
+        String activityId = getStringMandatoryParameter(req, "activity_id");
+        getXingAPI(req).likeActivity(activityId);
         return new AJAXRequestResult(Boolean.TRUE, "native");
     }
 }

@@ -66,10 +66,9 @@ import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
 import com.openexchange.xing.session.WebAuthSession;
 
-
 /**
  * {@link NewsFeedRequestAction}
- *
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class NewsFeedRequestAction extends AbstractXingAction {
@@ -88,13 +87,13 @@ public class NewsFeedRequestAction extends AbstractXingAction {
         Date optUntil = null;
         Collection<UserField> optUserFields = null;
 
-        //Aggregate
+        // Aggregate
         String aggregate = req.getParameter("aggregate");
         if (aggregate != null) {
             optAggregate = Boolean.parseBoolean(aggregate);
         }
 
-        //Since/Until
+        // Since/Until
         String since = req.getParameter("since");
         String until = req.getParameter("until");
 
@@ -108,7 +107,7 @@ public class NewsFeedRequestAction extends AbstractXingAction {
             optUntil = new Date(Long.parseLong(until));
         }
 
-        //User Fields
+        // User Fields
         optUserFields = getUserFields(req.getParameter("user_fields"));
 
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);

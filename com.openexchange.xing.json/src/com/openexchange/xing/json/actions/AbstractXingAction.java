@@ -65,12 +65,14 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.xing.UserField;
+import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.json.XingRequest;
+import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link AbstractXingAction} - The abstract XING action.
@@ -149,6 +151,17 @@ public abstract class AbstractXingAction implements AJAXActionService {
         final ServerSession session = req.getSession();
         final int xingOAuthAccount = provider.getXingOAuthAccount(session);
         return provider.accessFor(xingOAuthAccount, session);
+    }
+    
+    /**
+     * Get an instance to the XingAPI
+     * @param req the XingRequest
+     * @return an instance to XingAPI
+     * @throws OXException
+     */
+    protected XingAPI<WebAuthSession> getXingAPI(XingRequest req) throws OXException {
+        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        return xingOAuthAccess.getXingAPI();
     }
     
     /**

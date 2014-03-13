@@ -49,31 +49,24 @@
 
 package com.openexchange.xing.json.actions;
 
-import java.util.Collection;
-import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.UserField;
-import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
-import com.openexchange.xing.session.WebAuthSession;
 
 /**
- * {@link GetCommentsActivityRequestAction}
+ * {@link DeleteCommentActivityRequestAction}
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GetCommentsActivityRequestAction extends AbstractNewsFeedAction {
+public class DeleteCommentActivityRequestAction extends AbstractNewsFeedAction {
 
     /**
-     * Initializes a new {@link GetCommentsActivityRequestAction}.
+     * Initializes a new {@link DeleteCommentActivityRequestAction}.
      */
-    public GetCommentsActivityRequestAction(ServiceLookup serviceLookup) {
+    public DeleteCommentActivityRequestAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
@@ -84,15 +77,8 @@ public class GetCommentsActivityRequestAction extends AbstractNewsFeedAction {
     @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
         String activityId = getStringMandatoryParameter(req, "activity_id");
-        int optLimit = getOptIntParameter(req, "limit");
-        int optOffset = getOptIntParameter(req, "limit");
-        Collection<UserField> optUserFields = getUserFields(req.getParameter("user_fields"));
-
-        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
-        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        Map<String, Object> response = xingAPI.getComments(activityId, optLimit, optOffset, optUserFields);
-
-        return new AJAXRequestResult(JSONCoercion.coerceToJSON(response));
+        String id = getStringMandatoryParameter(req, "id");
+        getXingAPI(req).deleteComment(activityId, id);
+        return new AJAXRequestResult(Boolean.TRUE, "native");
     }
-
 }
