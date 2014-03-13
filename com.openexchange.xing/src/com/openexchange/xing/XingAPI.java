@@ -968,6 +968,29 @@ public class XingAPI<S extends Session> {
             throw new XingException(e);
         }
     }
+    
+    /**
+     * Deletes the comment specified under the provided commentId for the activity specified under the provided activityId
+     * 
+     * @param activityId
+     * @param commentId
+     * @return 
+     * @throws XingException
+     */
+    public Map<String, Object> deleteComment(final String activityId, final String commentId) throws XingException {
+        assertAuthenticated();
+        try {
+            final JSONObject response = RESTUtility.request(
+                Method.DELETE,
+                session.getAPIServer(),
+                "/v1/activities/" + activityId + "comments/" + commentId,
+                VERSION,
+                session).toObject();
+            return response.asMap();
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
 
     /**
      * Change the status message of the user
