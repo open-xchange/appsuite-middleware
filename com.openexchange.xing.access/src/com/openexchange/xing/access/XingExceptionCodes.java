@@ -140,6 +140,10 @@ public enum XingExceptionCodes implements DisplayableOXExceptionCode {
      * Comment size exceeds 600 chars.
      */
     COMMENT_SIZE_EXCEEDED("Comment size exceeds 600 chars.", Category.CATEGORY_USER_INPUT, 22, XingExceptionMessages.COMMENT_SIZE_EXCEEDED_MSG),
+    /**
+     * Comment size exceeds 600 chars.
+     */
+    STATUS_MESSAGE_SIZE_EXCEEDED("Status message size exceeds 420 chars.", Category.CATEGORY_USER_INPUT, 22, XingExceptionMessages.STATUS_MESSAGE_SIZE_EXCEEDED_MSG),
     ;
 
     private final Category category;

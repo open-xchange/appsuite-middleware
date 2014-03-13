@@ -55,6 +55,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -65,12 +66,10 @@ import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link ShareLinkRequestAction}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public final class ShareLinkRequestAction extends AbstractXingAction {
-
-    private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
 
     /**
      * Initializes a new {@link ShareLinkRequestAction}.
@@ -82,7 +81,9 @@ public final class ShareLinkRequestAction extends AbstractXingAction {
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
         final String url = req.getParameter("url");
-
+        if (url == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("url");
+        }
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
         xingAPI.shareLink(url);

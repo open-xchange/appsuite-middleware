@@ -55,6 +55,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -65,8 +66,8 @@ import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link ShareActivityRequestAction}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public final class ShareActivityRequestAction extends AbstractXingAction {
 
@@ -81,12 +82,14 @@ public final class ShareActivityRequestAction extends AbstractXingAction {
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String id = req.getParameter("id");
+        final String activityId = req.getParameter("activity_id");
+        if (activityId == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("activity_id");
+        }
         final String text = req.getParameter("text");
-
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        xingAPI.shareActivity(id, text);
+        xingAPI.shareActivity(activityId, text);
 
         return new AJAXRequestResult(Boolean.TRUE, "native");
     }
