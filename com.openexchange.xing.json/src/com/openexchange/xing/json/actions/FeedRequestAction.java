@@ -49,11 +49,8 @@
 
 package com.openexchange.xing.json.actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import javax.mail.internet.AddressException;
 import org.json.JSONException;
@@ -73,15 +70,12 @@ import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
 import com.openexchange.xing.session.WebAuthSession;
 
-
 /**
  * {@link FeedRequestAction}
- *
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class FeedRequestAction extends AbstractXingAction {
-
-    private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
 
     /**
      * Initializes a new {@link FeedRequestAction}.
@@ -119,16 +113,7 @@ public class FeedRequestAction extends AbstractXingAction {
         }
 
         // User Fields
-        Object user_fields = req.getParameter("user_fields");
-        if (user_fields != null) {
-            if (user_fields instanceof String) {
-                String[] split = Strings.splitByComma((String) user_fields);
-                optUserFields = new ArrayList<UserField>();
-                for (String s : split) {
-                    optUserFields.add(USER_FIELDS.get(Integer.parseInt(s)));
-                }
-            }
-        }
+        optUserFields = getUserFields(req.getParameter("user_fields"));
 
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();

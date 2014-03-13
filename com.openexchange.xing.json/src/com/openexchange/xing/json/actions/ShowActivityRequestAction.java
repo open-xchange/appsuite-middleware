@@ -49,17 +49,13 @@
 
 package com.openexchange.xing.json.actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
@@ -76,8 +72,6 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public final class ShowActivityRequestAction extends AbstractXingAction {
 
-    private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
-
     /**
      * Initializes a new {@link ShowActivityRequestAction}.
      */
@@ -90,17 +84,7 @@ public final class ShowActivityRequestAction extends AbstractXingAction {
         final String id = req.getParameter("id");
 
         // User Fields
-        Collection<UserField> optUserFields = null;
-        Object user_fields = req.getParameter("user_fields");
-        if (user_fields != null) {
-            if (user_fields instanceof String) {
-                String[] split = Strings.splitByComma((String) user_fields);
-                optUserFields = new ArrayList<UserField>();
-                for (String s : split) {
-                    optUserFields.add(USER_FIELDS.get(Integer.parseInt(s)));
-                }
-            }
-        }
+        Collection<UserField> optUserFields = getUserFields(req.getParameter("user_fields"));
 
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
