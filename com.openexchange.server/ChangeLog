@@ -1,3 +1,7 @@
+* 2014-03-13 - jan.bauerdick@open-xchange.com
+
+ - Change for bug 31539: Added exception code if account needs to be verified
+
 * 2014-03-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 31552: Also support IPv6 addresses when setting IMAP/SMTP server
