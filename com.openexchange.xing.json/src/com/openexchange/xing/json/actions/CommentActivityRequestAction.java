@@ -49,23 +49,21 @@
 
 package com.openexchange.xing.json.actions;
 
-import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.XingAPI;
+import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
 import com.openexchange.xing.session.WebAuthSession;
 
-
 /**
  * {@link CommentActivityRequestAction}
- *
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CommentActivityRequestAction extends AbstractXingAction {
@@ -77,27 +75,31 @@ public class CommentActivityRequestAction extends AbstractXingAction {
         super(serviceLookup);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
      */
     @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
         String activityId = req.getParameter("activity_id");
         String text = req.getParameter("text");
-        
+
         if (activityId == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("activity_id");
         }
-        
+
         if (text == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("text");
         }
-        
+
+        if (text.length() > 600) {
+            throw XingExceptionCodes.COMMENT_SIZE_EXCEEDED.create();
+        }
+
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        Map<String, Object> response = xingAPI.commentActivity(activityId, text);
-        
-        return new AJAXRequestResult(JSONCoercion.coerceToJSON(response));
-    }
+        xingAPI.commentActivity(activityId, text);
 
+        return new AJAXRequestResult(Boolean.TRUE, "native");
+    }
 }

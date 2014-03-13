@@ -136,6 +136,10 @@ public enum XingExceptionCodes implements DisplayableOXExceptionCode {
      * The URL parameters 'since' and 'until' are mutually exclusive.
      */
     MUTUALLY_EXCLUSIVE("The URL parameters 'since' and 'until' are mutually exclusive", Category.CATEGORY_ERROR, 21, null),
+    /**
+     * Comment size exceeds 600 chars.
+     */
+    COMMENT_SIZE_EXCEEDED("Comment size exceeds 600 chars.", Category.CATEGORY_USER_INPUT, 22, XingExceptionMessages.COMMENT_SIZE_EXCEEDED_MSG),
     ;
 
     private final Category category;
