@@ -926,9 +926,9 @@ public class XingAPI<S extends Session> {
      * 
      * @param userId The userId
      * @param message The status message
-     * @return The hard-coded string <code>Status update has been posted<code> on success \"
-     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
-     *             meaning of each error code.
+     * @return The hardcoded string <code>Status update has been posted<code> on success
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
      */
     public Map<String, Object> changeStatusMessage(final String userId, final String message) throws XingException {
         assertAuthenticated();
@@ -954,8 +954,8 @@ public class XingAPI<S extends Session> {
     /**
      * Like a certain network activity
      * 
-     * @param activityId
-     * @return A map reprecenting the outcome of the operation
+     * @param The id of the activity
+     * @return A map representing the outcome of the operation
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
      */
@@ -980,14 +980,16 @@ public class XingAPI<S extends Session> {
     }
 
     /**
-     * Shares a link in network activity
+     * Shows an activity
      * 
-     * @param uri
-     * @return A map reprecenting the outcome of the operation
-     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
-     *             meaning of each error code.
+     * @param activityId The id of the activity
+     * @param optUserFields The list of user attributes to be returned in nested user objects. If this parameter is not used, only the ID
+     *            will be returned.
+     * @return A map representing the outcome of the operation
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
      */
-    public Map<String, Object> showActivity(final String activitiId, Collection<UserField> optUserFields) throws XingException {
+    public Map<String, Object> showActivity(final String activityId, Collection<UserField> optUserFields) throws XingException {
         assertAuthenticated();
         try {
             final List<String> params = new ArrayList<String>(4);
@@ -1006,11 +1008,45 @@ public class XingAPI<S extends Session> {
             final JSONObject response = RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
-                "/activities/" + activitiId,
+                "/activities/" + activityId,
                 VERSION,
                 params.toArray(new String[0]),
                 session).toObject();
             return response.asMap();
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Shares an activity
+     * 
+     * @param activityId The id of the activity
+     * @param optTextMessage An optional text message - up to 140 characters
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public void shareActivity(final String activityId, final String optTextMessage) throws XingException {
+        assertAuthenticated();
+        try {
+            final List<String> params = new ArrayList<String>(4);
+
+            params.add("id");
+            params.add(activityId);
+
+            if (optTextMessage != null) {
+                params.add("text");
+                params.add(optTextMessage);
+            }
+
+            RESTUtility.request(
+                Method.POST,
+                session.getAPIServer(),
+                "/activities/" + activityId + "/share",
+                VERSION,
+                params.toArray(new String[0]),
+                session,
+                Arrays.asList(XingServerException._204_NO_CONTENT)).toObject();
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }

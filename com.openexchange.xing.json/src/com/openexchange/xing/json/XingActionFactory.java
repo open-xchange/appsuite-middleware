@@ -66,7 +66,8 @@ import com.openexchange.xing.json.actions.FeedRequestAction;
 import com.openexchange.xing.json.actions.InviteAction;
 import com.openexchange.xing.json.actions.LikeActivityRequestAction;
 import com.openexchange.xing.json.actions.NewsFeedRequestAction;
-import com.openexchange.xing.json.actions.ShowActivitiAction;
+import com.openexchange.xing.json.actions.ShareActivityAction;
+import com.openexchange.xing.json.actions.ShowActivityAction;
 
 
 /**
@@ -93,7 +94,8 @@ public class XingActionFactory implements AJAXActionServiceFactory {
         actions.put("like", new LikeActivityRequestAction(serviceLookup));
         actions.put("feed", new FeedRequestAction(serviceLookup));
         actions.put("change_status", new ChangeStatusAction(serviceLookup));
-        actions.put("show_activity", new ShowActivitiAction(serviceLookup));
+        actions.put("show_activity", new ShowActivityAction(serviceLookup));
+        actions.put("share_activity", new ShareActivityAction(serviceLookup));
     }
 
     @Override
