@@ -82,4 +82,6 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
 
     // The message displayed if the user would like to access the service but does not have an OAuth account.
     public static final String NO_OAUTH_ACCOUNT_GIVEN_DISPLAY = "You need to create an OAuth-account first to access this service.";
+
+    public static final String NEED_VERIFICATION_DISPLAY = "Your account needs to be verified: %1$s";
 }

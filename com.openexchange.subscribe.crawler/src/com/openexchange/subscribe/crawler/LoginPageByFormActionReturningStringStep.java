@@ -130,13 +130,20 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
                    pageAfterLogin = button.click();
                }
                Pattern pattern = Pattern.compile(regexForReturnedString);
-               Matcher matcher = pattern.matcher(pageAfterLogin.getWebResponse().getContentAsString());
+               String contentAsString = pageAfterLogin.getWebResponse().getContentAsString();
+               Matcher matcher = pattern.matcher(contentAsString);
                if (matcher.find()){
                    output = matcher.group(0);
                } else {
-                   LOG.debug("Page that does not have the String to imply a successful login : {}", pageAfterLogin.getWebResponse().getContentAsString());
+                   LOG.debug("Page that does not have the String to imply a successful login : {}", contentAsString);
                    if (debuggingEnabled){
                        openPageInBrowser(pageAfterLogin);
+                   }
+                   String htmlPage = pageAfterLogin.toString();
+                   Pattern p = Pattern.compile(".*\\((.*LoginVerification.*)\\).*");
+                   Matcher m = p.matcher(htmlPage);
+                   if (m.find()) {
+                       throw SubscriptionErrorMessage.NEED_VERIFICATION.create(m.group(1));
                    }
                    throw SubscriptionErrorMessage.INVALID_LOGIN.create();
                }

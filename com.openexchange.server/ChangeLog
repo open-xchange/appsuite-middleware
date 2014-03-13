@@ -3,8 +3,40 @@
  - Fix for bug 31599: Corrected RPM post installation script to not modify logback.xml anymore if log configuration migration has performed
    once.
 
-* 2014-03-16 - thorben.betten@open-xchange.com
+* 2014-03-13 - jan.bauerdick@open-xchange.com
 
+ - Change for bug 31539: Added exception code if account needs to be verified
+
+* 2014-03-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31552: Also support IPv6 addresses when setting IMAP/SMTP server
+ - Fix for bug 31531: Don not hold connection while writing resource cache file to storage
+
+* 2014-03-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31490: More lenient parsing in case ATTENDEE is not in "mailto:" URI format
+ - Fix for bug 31489: Added optional "admin" parameter for actions "birthdays", "anniversaries", "updates", "search" and "advancedSearch"
+
+* 2014-03-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31491: Removed duplicate CREATE TABLE statements from affected classes
+ - Fix for bug 19763: Support setter for IMAP/SMTP port through SOAP interface
+ - Fix for bug 31395: Enhanced localized error message according to proposal from documentation team
+ - Fix for bug 31061: Simply select oldest chunk in case ascending sort order is selected
+
+* 2014-03-11 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30843: Added properties to explicitly choose SSL protocols
+
+* 2014-03-11 - marcus.klein@open-xchange.com
+
+ - Fix for bug 29980: Use row locks on complete table configdb.context_server2db_pool to prevent a delete context call to remove the schema
+   a create context call is currently writing to. The complete table must be locked to prevent deadlocks on concurrent create context calls.
+
+* 2014-03-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30652: Signal value of property "com.openexchange.forceHTTPS" to App Suite UI
+ - Fix for bug 31304: Suppress warning if "pop3.refreshrate" property is missing. Silently use fall-back value
  - Fix for bug 30848: Properly recognize & transmit an S/MIME encrypted mail
 
 * 2014-03-13 - thorben.betten@open-xchange.com
