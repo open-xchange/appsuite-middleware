@@ -62,6 +62,7 @@ import com.openexchange.xing.json.actions.CommentActivityRequestAction;
 import com.openexchange.xing.json.actions.ContactRequestAction;
 import com.openexchange.xing.json.actions.CreateRequestAction;
 import com.openexchange.xing.json.actions.InviteAction;
+import com.openexchange.xing.json.actions.LikeActivityRequestAction;
 import com.openexchange.xing.json.actions.NewsFeedRequestAction;
 
 
@@ -80,12 +81,13 @@ public class XingActionFactory implements AJAXActionServiceFactory {
      */
     public XingActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractXingAction>(5);
+        actions = new ConcurrentHashMap<String, AbstractXingAction>(6);
         actions.put("invite", new InviteAction(serviceLookup));
         actions.put("contact_request", new ContactRequestAction(serviceLookup));
         actions.put("newsfeed", new NewsFeedRequestAction(serviceLookup));
         actions.put("create", new CreateRequestAction(serviceLookup));
         actions.put("comment", new CommentActivityRequestAction(serviceLookup));
+        actions.put("like", new LikeActivityRequestAction(serviceLookup));
     }
 
     @Override
