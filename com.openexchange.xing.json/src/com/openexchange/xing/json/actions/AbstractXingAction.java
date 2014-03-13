@@ -49,16 +49,22 @@
 
 package com.openexchange.xing.json.actions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.xing.UserField;
 import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
@@ -72,7 +78,9 @@ import com.openexchange.xing.json.XingRequest;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractXingAction implements AJAXActionService {
-
+    
+    private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
+    
     private final ServiceLookup services;
 
     /**
@@ -141,6 +149,26 @@ public abstract class AbstractXingAction implements AJAXActionService {
         final ServerSession session = req.getSession();
         final int xingOAuthAccount = provider.getXingOAuthAccount(session);
         return provider.accessFor(xingOAuthAccount, session);
+    }
+    
+    /**
+     * Get the UserFields from the specified parameter object.
+     * 
+     * @param user_fields as a comma separated String
+     * @return a {@link Collection} with {@link UserField}s, or null 
+     */
+    protected Collection<UserField> getUserFields(Object user_fields) {
+        Collection<UserField> optUserFields = null;
+        if (user_fields != null) {
+            if (user_fields instanceof String) {
+                String[] split = Strings.splitByComma((String) user_fields);
+                optUserFields = new ArrayList<UserField>();
+                for(String s : split) {
+                    optUserFields.add(USER_FIELDS.get(Integer.parseInt(s)));
+                }
+            }
+        }
+        return optUserFields;
     }
 
     /**
