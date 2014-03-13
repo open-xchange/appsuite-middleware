@@ -835,6 +835,33 @@ public class XingAPI<S extends Session> {
     }
 
     /**
+     * Creates a comment for a certain network activity.
+     * 
+     * @return A map representing the outcome of the operation
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     */
+    public Map<String, Object> commentActivity(final String activityId, final String text) throws XingException {
+        assertAuthenticated();
+        try {
+            final List<String> params = new ArrayList<String>(1);
+            params.add("text");
+            params.add(text);
+
+            final JSONObject response = RESTUtility.request(
+                Method.POST,
+                session.getAPIServer(),
+                "/v1/activities/" + activityId + "/comments",
+                VERSION,
+                params.toArray(new String[0]),
+                session).toObject();
+            return response.asMap();
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
      * Performs a sign-up request for a lead.
      *
      * @param leadDescription The lead description
