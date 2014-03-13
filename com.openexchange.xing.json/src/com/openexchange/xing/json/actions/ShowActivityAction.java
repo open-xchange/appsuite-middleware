@@ -78,18 +78,18 @@ import com.openexchange.xing.session.WebAuthSession;
 
 
 /**
- * {@link ShowActivitiAction}
+ * {@link ShowActivityAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ShowActivitiAction extends AbstractXingAction {
+public final class ShowActivityAction extends AbstractXingAction {
 
     private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
 
     /**
-     * Initializes a new {@link ShowActivitiAction}.
+     * Initializes a new {@link ShowActivityAction}.
      */
-    public ShowActivitiAction(final ServiceLookup services) {
+    public ShowActivityAction(final ServiceLookup services) {
         super(services);
     }
 
