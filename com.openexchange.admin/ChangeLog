@@ -1,6 +1,7 @@
 * 2014-03-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 29983: Perform a single UPDATE statement to change values and added retry mechanism in case of possibly detected deadlock
+ - Fix for bug 31551: Do not perform intermediate ''auto-commit=true'' while processing a transaction
 
 * 2014-03-12 - thorben.betten@open-xchange.com
 
