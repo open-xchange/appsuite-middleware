@@ -497,6 +497,16 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNKNOWN_RECURRENCE_TYPE(OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_TYPE_MSG, 109, Category.CATEGORY_USER_INPUT),
 
+    /**
+     * Not possible to set information for object with id %1$d because this a one time appointment and does not have occurrences.
+     */
+    NO_SERIES(OXCalendarExceptionCodes.NO_SERIES_MSG, OXCalendarExceptionMessage.NO_SERIES_DISPLAY, 110, Category.CATEGORY_USER_INPUT),
+
+    /**
+     * The given object with id %1$d cannot be changed because the given occurrence is an appointment exception which must be changed.
+     */
+    OCCURRENCE_IS_EXCEPTION(OXCalendarExceptionCodes.OCCURRENCE_IS_EXCEPTION_MSG, OXCalendarExceptionMessage.OCCURRENCE_IS_EXCEPTION_DISPLAY, 111, Category.CATEGORY_USER_INPUT),
+
     ;
 
     private static final String CFO_NOT_INITIALIZIED_MSG = "CalendarFolderObject not initialized.";
@@ -714,6 +724,10 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     private static final String NO_RECCURENCE_MSG = "Appointment is not a recurring appointment.";
 
     private static final String UNKNOWN_RECURRENCE_TYPE_MSG = "Unknown recurrence type: %1$d";
+
+    private static final String NO_SERIES_MSG = "Not possible to set information for object with id %1$d because this a one time appointment and does not have occurrences.";
+
+    private static final String OCCURRENCE_IS_EXCEPTION_MSG = "The occurrence for the given object with id %1$d cannot be changed because the occurrence is an appointment exception. Please change the exception.";
 
     /**
      * Message of the exception.

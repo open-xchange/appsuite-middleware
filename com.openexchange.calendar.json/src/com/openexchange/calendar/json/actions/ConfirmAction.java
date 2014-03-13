@@ -85,6 +85,7 @@ import com.openexchange.tools.session.ServerSession;
     responseDescription = "An array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. The fields of each object are described in Full identifier for an appointment.")
 public final class ConfirmAction extends AppointmentAction {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfirmAction.class);
     /**
      * Initializes a new {@link ConfirmAction}.
      * @param services
@@ -98,23 +99,23 @@ public final class ConfirmAction extends AppointmentAction {
         // Get parameters
         final int objectId = req.checkInt(DataFields.ID);
         final int folderId = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        Date timestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
         final int optOccurrenceId = req.optInt(AJAXServlet.PARAMETER_OCCURRENCE);
 
         // Get request body
         final JSONObject jData = req.getData();
 
         final ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jData);
+        final String confirmMessage = participant.getMessage();
+        final int confirmStatus = participant.getConfirm();
 
         final ServerSession session = req.getSession();
         int userId = session.getUserId();
         if (jData.has(AJAXServlet.PARAMETER_ID)) {
             userId = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
         }
-        final String confirmMessage = participant.getMessage();
-        final int confirmStatus = participant.getConfirm();
 
         final AppointmentSQLInterface appointmentSql = getService().createAppointmentSql(session);
-        Date timestamp = null;
 
         boolean isUser = (participant.getType() == Participant.USER) || (participant.getType() == 0);
         boolean isExternal = participant.getType() == Participant.EXTERNAL_USER;
@@ -122,13 +123,9 @@ public final class ConfirmAction extends AppointmentAction {
 
         if (isOccurrenceChange) {
             if (isUser) {
-                // TODO handle occurrence as exception for user
-                // timestamp = appointmentSql.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirmStatus,
-                // confirmMessage);
+                timestamp = appointmentSql.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirmStatus, confirmMessage);
             } else if (isExternal) {
-                // TODO handle occurrence as exception for external user
-                // timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, optOccurrenceId, participant.getEmailAddress(),
-                // confirmStatus, confirmMessage);
+                timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, optOccurrenceId, participant.getEmailAddress(), confirmStatus, confirmMessage);
             } else {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
             }
@@ -145,5 +142,4 @@ public final class ConfirmAction extends AppointmentAction {
 
         return new AJAXRequestResult(new JSONObject(0), timestamp, "json");
     }
-
 }

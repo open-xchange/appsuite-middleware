@@ -343,7 +343,35 @@ public interface AppointmentSQLInterface {
      */
     Date setExternalConfirmation(int objectId, int folderId, String mail, int confirm, String message) throws OXException;
 
-    // ---------------------------------------------------------------------------------------------------------------------------------- //
+    /**
+     * Sets the confirmation of an appointment for a user.
+     * 
+     * @param objectId unique identifier of the appointment.
+     * @param folderId folder of the appointment
+     * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code>
+     *            denotes a series appointment; otherwise <code>0</code> (zero)
+     * @param userId unique identifier of the user.
+     * @param confirm The confirm status
+     * @param confirmMessage The confirm message
+     * @return The last-modified time stamp of associated appointment
+     * @throws OXException If setting the confirmation fails
+     */
+    Date setUserConfirmation(int objectId, int folderId, int optOccurrenceId, int userId, int confirm, String confirmMessage) throws OXException;
+
+    /**
+     * Sets the confirmation of an appointment for an external user, identified with his mail address.
+     * 
+     * @param objectId unique identifier of the appointment.
+     * @param folderId folder of the appointment
+     * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code>
+     *            denotes a series appointment; otherwise <code>0</code> (zero)
+     * @param mail The E-Mail address of the associated external participant
+     * @param confirm The confirm status
+     * @param message The confirm message
+     * @return The last-modified time stamp of associated appointment
+     * @throws OXException If setting the confirmation fails
+     */
+    Date setExternalConfirmation(int objectId, int folderId, int optOccurrenceId, String mail, int confirm, String message) throws OXException;
 
     /**
      * Method to attach or detach attachments
