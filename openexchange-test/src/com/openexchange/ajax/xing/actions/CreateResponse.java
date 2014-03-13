@@ -63,7 +63,7 @@ public class CreateResponse extends AbstractAJAXResponse {
     /**
      * Initializes a new {@link CreateResponse}.
      */
-    public CreateResponse(Response response) {
+    public CreateResponse(final Response response) {
         super(response);
     }
 

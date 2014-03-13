@@ -74,7 +74,7 @@ public class NewsFeedRequest extends AbstractXingRequest<NewsFeedResponse> {
     /**
      * Initializes a new {@link NewsFeedRequest}.
      */
-    public NewsFeedRequest(boolean aggregate, long since, long until, int[] fields, boolean foe) {
+    public NewsFeedRequest(final boolean aggregate, final long since, final long until, final int[] fields, final boolean foe) {
         super(foe);
         this.aggregate = aggregate;
         this.since = since;
@@ -95,15 +95,18 @@ public class NewsFeedRequest extends AbstractXingRequest<NewsFeedResponse> {
      */
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        List<Parameter> params = new ArrayList<Parameter>();
+        final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "newsfeed"));
         params.add(new Parameter("aggregate", aggregate));
-        if (since > 0)
+        if (since > 0) {
             params.add(new Parameter("since", since));
-        if (until > 0)
+        }
+        if (until > 0) {
             params.add(new Parameter("until", until));
-        if (fields.length > 0)
+        }
+        if (fields.length > 0) {
             params.add(new Parameter("user_fields", fields));
+        }
         return params.toArray(new Parameter[params.size()]);
     }
 

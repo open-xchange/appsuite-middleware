@@ -63,7 +63,7 @@ public class NewsFeedResponse extends AbstractAJAXResponse{
     /**
      * Initializes a new {@link NewsFeedResponse}.
      */
-    public NewsFeedResponse(Response response) {
+    public NewsFeedResponse(final Response response) {
         super(response);
 
     }

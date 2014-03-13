@@ -64,7 +64,7 @@ public class CreateParser extends AbstractAJAXParser<CreateResponse>{
     /**
      * Initializes a new {@link CreateParser}.
      */
-    public CreateParser(boolean foe) {
+    public CreateParser(final boolean foe) {
         super(foe);
     }
 
@@ -72,7 +72,7 @@ public class CreateParser extends AbstractAJAXParser<CreateResponse>{
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
      */
     @Override
-    protected CreateResponse createResponse(Response response) throws JSONException {
+    protected CreateResponse createResponse(final Response response) throws JSONException {
         return new CreateResponse(response);
     }
 

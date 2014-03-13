@@ -61,7 +61,7 @@ import com.openexchange.xing.UserField;
 
 /**
  * {@link NewsFeedTest}
- *
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class NewsFeedTest extends AbstractAJAXSession {
@@ -69,10 +69,10 @@ public class NewsFeedTest extends AbstractAJAXSession {
     /**
      * Initializes a new {@link NewsFeedTest}.
      */
-    public NewsFeedTest(String name) {
+    public NewsFeedTest(final String name) {
         super(name);
     }
-    
+
     /**
      * Simple test to verify that the action fetches the network_activities
      * 
@@ -80,14 +80,14 @@ public class NewsFeedTest extends AbstractAJAXSession {
      * @throws IOException
      * @throws JSONException
      */
-    public void r() throws OXException, IOException, JSONException {
-        NewsFeedRequest request = new NewsFeedRequest(false, -1, -1, new int[0], true);
-        NewsFeedResponse response = client.execute(request);
+    public void testSimpleNewsFeed() throws OXException, IOException, JSONException {
+        final NewsFeedRequest request = new NewsFeedRequest(false, -1, -1, new int[0], true);
+        final NewsFeedResponse response = client.execute(request);
         assertNotNull(response);
-        JSONObject json = (JSONObject) response.getData();
+        final JSONObject json = (JSONObject) response.getData();
         assertNotNull(json.getJSONArray("network_activities"));
     }
-    
+
     /**
      * Test to verify userfields
      * 
@@ -96,32 +96,35 @@ public class NewsFeedTest extends AbstractAJAXSession {
      * @throws JSONException
      */
     public void testNewsFeedWithUserFields() throws OXException, IOException, JSONException {
-        int[] uf = {UserField.FIRST_NAME.ordinal(), UserField.LAST_NAME.ordinal()};
-        NewsFeedRequest request = new NewsFeedRequest(false, -1, -1, uf, true);
-        NewsFeedResponse response = client.execute(request);
+        final int[] uf = { UserField.FIRST_NAME.ordinal(), UserField.LAST_NAME.ordinal() };
+        final NewsFeedRequest request = new NewsFeedRequest(false, -1, -1, uf, true);
+        final NewsFeedResponse response = client.execute(request);
         assertNotNull(response);
-        
-        JSONObject json = (JSONObject) response.getData();
-        JSONArray network_activities = json.getJSONArray("network_activities");
+
+        final JSONObject json = (JSONObject) response.getData();
+        final JSONArray network_activities = json.getJSONArray("network_activities");
         assertNotNull(network_activities);
         assertTrue(network_activities.length() > 0);
-        
-        JSONObject na1 = network_activities.getJSONObject(0);
-        JSONArray objects = na1.getJSONArray("objects");
+
+        final JSONObject na1 = network_activities.getJSONObject(0);
+        final JSONArray objects = na1.getJSONArray("objects");
         assertTrue(objects.length() > 0);
-        
-        JSONObject obj1 = objects.getJSONObject(0);
-        assertTrue(obj1.hasAndNotNull("creator"));
-        
-        JSONObject creator = obj1.getJSONObject("creator");
-        
-        assertTrue(creator.hasAndNotNull("id"));
-        assertTrue(creator.hasAndNotNull("last_name"));
-        assertTrue(creator.hasAndNotNull("first_name"));
-        assertFalse(creator.hasAndNotNull("active_email"));
-        assertFalse(creator.hasAndNotNull("wants"));
+
+        final JSONObject obj1 = objects.getJSONObject(0);
+        JSONObject person;
+        if (obj1.getString("type").equals("user")) {
+            person = obj1;
+        } else {
+            person = obj1.getJSONObject("creator");
+        }
+
+        assertTrue(person.hasAndNotNull("id"));
+        assertTrue(person.hasAndNotNull("last_name"));
+        assertTrue(person.hasAndNotNull("first_name"));
+        assertFalse(person.hasAndNotNull("active_email"));
+        assertFalse(person.hasAndNotNull("wants"));
     }
-    
+
     /**
      * Test error code for mutually exclusive URL parameters 'since' and 'until'
      * 
@@ -130,8 +133,8 @@ public class NewsFeedTest extends AbstractAJAXSession {
      * @throws JSONException
      */
     public void testNewsFeedWithSinceAndUntil() throws OXException, IOException, JSONException {
-        NewsFeedRequest request = new NewsFeedRequest(true, 123, 123, new int[0], false);
-        NewsFeedResponse response = client.execute(request);
+        final NewsFeedRequest request = new NewsFeedRequest(true, 123, 123, new int[0], false);
+        final NewsFeedResponse response = client.execute(request);
         assertNotNull(response);
         assertEquals("XING-0021", response.getException().getErrorCode());
     }

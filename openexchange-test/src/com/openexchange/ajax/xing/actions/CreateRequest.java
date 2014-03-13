@@ -77,7 +77,7 @@ public class CreateRequest extends AbstractXingRequest<CreateResponse> {
     /**
      * Initializes a new {@link CreateRequest}.
      */
-    public CreateRequest(String email, boolean tandc, String fname, String lname, String language, boolean foe) {
+    public CreateRequest(final String email, final boolean tandc, final String fname, final String lname, final String language, final boolean foe) {
         super(foe);
         body = new JSONObject();
         firstName = fname;

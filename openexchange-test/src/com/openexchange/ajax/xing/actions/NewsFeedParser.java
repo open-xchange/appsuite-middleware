@@ -64,7 +64,7 @@ public class NewsFeedParser extends AbstractAJAXParser<NewsFeedResponse>{
     /**
      * Initializes a new {@link NewsFeedParser}.
      */
-    public NewsFeedParser(boolean fail) {
+    public NewsFeedParser(final boolean fail) {
         super (fail);
     }
 
@@ -72,7 +72,7 @@ public class NewsFeedParser extends AbstractAJAXParser<NewsFeedResponse>{
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
      */
     @Override
-    protected NewsFeedResponse createResponse(Response response) throws JSONException {
+    protected NewsFeedResponse createResponse(final Response response) throws JSONException {
         return new NewsFeedResponse(response);
     }
 }

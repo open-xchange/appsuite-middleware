@@ -67,13 +67,13 @@ public class CreateProfileTest extends AbstractAJAXSession {
     /**
      * Initializes a new {@link CreateProfileTest}.
      */
-    public CreateProfileTest(String n) {
+    public CreateProfileTest(final String n) {
         super(n);
     }
     
     public void testCreateCoReg() throws OXException, IOException, JSONException {
-        CreateRequest request = new CreateRequest("testing.tester@open-xchange.com", true, "testing", "tester", "en", true);
-        CreateResponse response = client.execute(request);
+        final CreateRequest request = new CreateRequest("testing.tester@open-xchange.com", true, "testing", "tester", "en", true);
+        final CreateResponse response = client.execute(request);
         assertNotNull(response);
     }
 

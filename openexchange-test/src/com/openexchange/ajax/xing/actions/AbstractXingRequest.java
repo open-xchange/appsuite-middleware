@@ -67,7 +67,7 @@ public abstract class AbstractXingRequest<T extends AbstractAJAXResponse> implem
     /**
      * Initializes a new {@link AbstractXingRequest}.
      */
-    public AbstractXingRequest(boolean foe) {
+    public AbstractXingRequest(final boolean foe) {
         failOnError = foe;
     }
 
