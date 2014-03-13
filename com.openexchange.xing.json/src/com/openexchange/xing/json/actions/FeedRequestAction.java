@@ -118,14 +118,12 @@ public class FeedRequestAction extends AbstractXingAction {
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
         final String xingId = xingAPI.findByEmail(address);
-
         if (Strings.isEmpty(xingId)) {
             // Already connected
             throw XingExceptionCodes.NOT_A_MEMBER.create(address);
         }
 
         Map<String, Object> feed = xingAPI.getFeed(xingId, optSince, optUntil, optUserFields);
-
         JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(feed);
 
         return new AJAXRequestResult(result);

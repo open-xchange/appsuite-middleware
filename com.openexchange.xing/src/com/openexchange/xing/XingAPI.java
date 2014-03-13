@@ -1110,14 +1110,14 @@ public class XingAPI<S extends Session> {
                 params.add(optTextMessage);
             }
 
-            RESTUtility.request(
+            RESTUtility.streamRequest(
                 Method.POST,
                 session.getAPIServer(),
                 "/activities/" + activityId + "/share",
                 VERSION,
                 params.toArray(new String[0]),
                 session,
-                Arrays.asList(XingServerException._204_NO_CONTENT)).toObject();
+                Arrays.asList(XingServerException._204_NO_CONTENT));
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -1138,14 +1138,14 @@ public class XingAPI<S extends Session> {
             params.add("id");
             params.add(activityId);
 
-            RESTUtility.request(
+            RESTUtility.streamRequest(
                 Method.DELETE,
                 session.getAPIServer(),
                 "/activities/" + activityId,
                 VERSION,
                 params.toArray(new String[0]),
                 session,
-                Arrays.asList(XingServerException._204_NO_CONTENT)).toObject();
+                Arrays.asList(XingServerException._204_NO_CONTENT));
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
