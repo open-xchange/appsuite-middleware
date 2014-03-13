@@ -837,6 +837,8 @@ public class XingAPI<S extends Session> {
     /**
      * Creates a comment for a certain network activity.
      * 
+     * @param activityId the activity id
+     * @param text comment
      * @return A map representing the outcome of the operation
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
@@ -852,6 +854,34 @@ public class XingAPI<S extends Session> {
                 Method.POST,
                 session.getAPIServer(),
                 "/v1/activities/" + activityId + "/comments",
+                VERSION,
+                params.toArray(new String[0]),
+                session).toObject();
+            return response.asMap();
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+    
+    /**
+     * Like a certain network activity
+     * 
+     * @param activityId
+     * @return A map reprecenting the outcome of the operation
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     */
+    public Map<String, Object> likeActivity(final String activityId) throws XingException {
+        assertAuthenticated();
+        try {
+            final List<String> params = new ArrayList<String>(1);
+            params.add("activity_id");
+            params.add(activityId);
+
+            final JSONObject response = RESTUtility.request(
+                Method.PUT,
+                session.getAPIServer(),
+                "/v1/activities/" + activityId + "/like",
                 VERSION,
                 params.toArray(new String[0]),
                 session).toObject();
