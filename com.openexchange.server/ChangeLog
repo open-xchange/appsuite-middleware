@@ -1,3 +1,7 @@
+* 2014-03-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31552: Also support IPv6 addresses when setting IMAP/SMTP server
+
 * 2014-03-12 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31490: More lenient parsing in case ATTENDEE is not in "mailto:" URI format

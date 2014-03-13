@@ -77,8 +77,22 @@ public class OXUserServicePortTypeImplTest extends TestCase {
 
         final com.openexchange.admin.rmi.dataobjects.User user = com.openexchange.admin.soap.user.soap.OXUserServicePortTypeImpl.soap2User(soapUser);
 
-        assertEquals("Unexpected IMAP server string.", "imap.invalid.com:143", user.getImapServerString());
-        assertEquals("Unexpected SMTP server string.", "smtp://smtp.invalid.com:587", user.getSmtpServerString());
+        final String imapServerString = user.getImapServerString();
+        assertEquals("Unexpected IMAP server string.", "imap://imap.invalid.com:143", imapServerString);
+
+        final String smtpServerString = user.getSmtpServerString();
+        assertEquals("Unexpected SMTP server string.", "smtp://smtp.invalid.com:587", smtpServerString);
+    }
+
+    public void testSetImapPortIPv6() {
+        User soapUser = new User();
+        soapUser.setImapServer("fd9e:21a7:a92c:2323::1");
+        soapUser.setImapPort(Integer.valueOf(143));
+
+        final com.openexchange.admin.rmi.dataobjects.User user = com.openexchange.admin.soap.user.soap.OXUserServicePortTypeImpl.soap2User(soapUser);
+
+        final String imapServerString = user.getImapServerString();
+        assertEquals("Unexpected IMAP server string.", "imap://[fd9e:21a7:a92c:2323::1]:143", imapServerString);
     }
 
 }
