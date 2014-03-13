@@ -7839,6 +7839,11 @@ msgstr ""
 msgid "XING user is already directly connected."
 msgstr ""
 
+#. The comment size exceeds the maximum allowed of 600 characters.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:98
+msgid "The comment size exceeds the maximum allowed of 600 characters."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
 msgstr ""
