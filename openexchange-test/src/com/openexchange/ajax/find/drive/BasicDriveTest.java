@@ -62,6 +62,7 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
+import com.openexchange.configuration.MailConfig;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
@@ -98,7 +99,9 @@ public class BasicDriveTest extends AbstractFindTest {
     public void setUp() throws Exception {
         super.setUp();
         client = new AJAXClient(User.User1);
-        File file = new File("testData/BasicDriveTest.tmp");
+        MailConfig.init();
+        String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+        File file = new File(testDataDir, "BasicDriveTest.tmp");
         metadata = new DocumentMetadataImpl();
         metadata.setFileName(file.getName());
         metadata.setDescription("Test file for testing new find api");
