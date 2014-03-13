@@ -2340,7 +2340,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             final String retvalPrefix = new com.openexchange.java.StringAllocator(isEmpty ? STR_INBOX : prefix).append(sep[0]).toString();
             if (!retvalPrefix.equals(prefixByInferiors)) {
-                LOG.warn("The personal namespace indicated by NAMESPACE command does not match root folder's capabilities: {} IS NOT {}", retvalPrefix, prefixByInferiors);
+                LOG.warn("The personal namespace indicated by NAMESPACE command does not match root folder's capabilities: \"{}\" IS NOT \"{}\"", retvalPrefix, prefixByInferiors);
             }
             return retvalPrefix;
         } catch (final MessagingException e) {
