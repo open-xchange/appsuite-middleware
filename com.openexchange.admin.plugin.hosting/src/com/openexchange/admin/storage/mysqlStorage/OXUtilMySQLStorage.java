@@ -319,7 +319,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 } else {
                     sqlBuilder.append(", ");
                 }
-                sqlBuilder.append("db_pool.weight = ?");
+                sqlBuilder.append("db_cluster.weight = ?");
                 params.add(db.getClusterWeight());
             }
 
@@ -329,7 +329,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 } else {
                     sqlBuilder.append(", ");
                 }
-                sqlBuilder.append("db_pool.max_units = ?");
+                sqlBuilder.append("db_cluster.max_units = ?");
                 params.add(db.getMaxUnits());
             }
 
