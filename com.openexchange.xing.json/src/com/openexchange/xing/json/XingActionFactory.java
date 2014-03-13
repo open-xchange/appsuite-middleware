@@ -62,6 +62,7 @@ import com.openexchange.xing.json.actions.ChangeStatusRequestAction;
 import com.openexchange.xing.json.actions.CommentActivityRequestAction;
 import com.openexchange.xing.json.actions.ContactRequestAction;
 import com.openexchange.xing.json.actions.CreateRequestAction;
+import com.openexchange.xing.json.actions.DeleteActivityRequestAction;
 import com.openexchange.xing.json.actions.FeedRequestAction;
 import com.openexchange.xing.json.actions.InviteRequestAction;
 import com.openexchange.xing.json.actions.LikeActivityRequestAction;
@@ -96,6 +97,7 @@ public class XingActionFactory implements AJAXActionServiceFactory {
         actions.put("change_status", new ChangeStatusRequestAction(serviceLookup));
         actions.put("show_activity", new ShowActivityRequestAction(serviceLookup));
         actions.put("share_activity", new ShareActivityRequestAction(serviceLookup));
+        actions.put("delete_activity", new DeleteActivityRequestAction(serviceLookup));
     }
 
     @Override

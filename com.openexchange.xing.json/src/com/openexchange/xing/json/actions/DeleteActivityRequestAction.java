@@ -49,19 +49,10 @@
 
 package com.openexchange.xing.json.actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
@@ -70,18 +61,16 @@ import com.openexchange.xing.session.WebAuthSession;
 
 
 /**
- * {@link ShowActivityRequestAction}
+ * {@link DeleteActivityRequestAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ShowActivityRequestAction extends AbstractXingAction {
-
-    private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
+public final class DeleteActivityRequestAction extends AbstractXingAction {
 
     /**
-     * Initializes a new {@link ShowActivityRequestAction}.
+     * Initializes a new {@link DeleteActivityRequestAction}.
      */
-    public ShowActivityRequestAction(final ServiceLookup services) {
+    public DeleteActivityRequestAction(final ServiceLookup services) {
         super(services);
     }
 
@@ -89,25 +78,10 @@ public final class ShowActivityRequestAction extends AbstractXingAction {
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
         final String id = req.getParameter("id");
 
-        // User Fields
-        Collection<UserField> optUserFields = null;
-        Object user_fields = req.getParameter("user_fields");
-        if (user_fields != null) {
-            if (user_fields instanceof String) {
-                String[] split = Strings.splitByComma((String) user_fields);
-                optUserFields = new ArrayList<UserField>();
-                for (String s : split) {
-                    optUserFields.add(USER_FIELDS.get(Integer.parseInt(s)));
-                }
-            }
-        }
-
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        Map<String, Object> activity = xingAPI.showActivity(id, optUserFields);
-        JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(activity);
-
-        return new AJAXRequestResult(result);
+        xingAPI.deleteActivity(id);
+        return new AJAXRequestResult(Boolean.TRUE, "native");
     }
 
 }

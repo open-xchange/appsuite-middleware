@@ -1056,7 +1056,6 @@ public class XingAPI<S extends Session> {
      * Deletes an activity
      * 
      * @param activityId The id of the activity
-     * @param optTextMessage An optional text message - up to 140 characters
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
