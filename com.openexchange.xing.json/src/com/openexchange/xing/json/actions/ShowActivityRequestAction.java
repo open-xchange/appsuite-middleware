@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -67,8 +68,8 @@ import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link ShowActivityRequestAction}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public final class ShowActivityRequestAction extends AbstractXingAction {
 
@@ -81,14 +82,16 @@ public final class ShowActivityRequestAction extends AbstractXingAction {
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String id = req.getParameter("id");
-
+        final String activityId = req.getParameter("activity_id");
+        if (activityId == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("activity_id");
+        }
         // User Fields
         Collection<UserField> optUserFields = getUserFields(req.getParameter("user_fields"));
 
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        Map<String, Object> activity = xingAPI.showActivity(id, optUserFields);
+        Map<String, Object> activity = xingAPI.showActivity(activityId, optUserFields);
         JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(activity);
 
         return new AJAXRequestResult(result);

@@ -65,31 +65,28 @@ import com.openexchange.xing.session.WebAuthSession;
 
 
 /**
- * {@link ShareActivityRequestAction}
+ * {@link ShareLinkRequestAction}
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public final class ShareActivityRequestAction extends AbstractXingAction {
-
-    private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
+public final class ShareLinkRequestAction extends AbstractXingAction {
 
     /**
-     * Initializes a new {@link ShareActivityRequestAction}.
+     * Initializes a new {@link ShareLinkRequestAction}.
      */
-    public ShareActivityRequestAction(final ServiceLookup services) {
+    public ShareLinkRequestAction(final ServiceLookup services) {
         super(services);
     }
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String activityId = req.getParameter("activity_id");
-        if (activityId == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("activity_id");
+        final String url = req.getParameter("url");
+        if (url == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("url");
         }
-        final String text = req.getParameter("text");
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        xingAPI.shareActivity(activityId, text);
+        xingAPI.shareLink(url);
 
         return new AJAXRequestResult(Boolean.TRUE, "native");
     }

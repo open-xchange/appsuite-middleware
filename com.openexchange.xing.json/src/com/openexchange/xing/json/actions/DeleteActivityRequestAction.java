@@ -53,6 +53,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
@@ -62,8 +63,8 @@ import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link DeleteActivityRequestAction}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public final class DeleteActivityRequestAction extends AbstractXingAction {
 
@@ -76,11 +77,13 @@ public final class DeleteActivityRequestAction extends AbstractXingAction {
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String id = req.getParameter("id");
-
+        final String activityId = req.getParameter("activity_id");
+        if (activityId == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("activity_id");
+        }
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        xingAPI.deleteActivity(id);
+        xingAPI.deleteActivity(activityId);
         return new AJAXRequestResult(Boolean.TRUE, "native");
     }
 

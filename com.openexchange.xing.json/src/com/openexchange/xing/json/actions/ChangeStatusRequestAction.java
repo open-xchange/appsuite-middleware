@@ -59,6 +59,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -69,8 +70,8 @@ import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link ChangeStatusRequestAction}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public final class ChangeStatusRequestAction extends AbstractXingAction {
 
@@ -83,7 +84,7 @@ public final class ChangeStatusRequestAction extends AbstractXingAction {
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        // Get & validate message
+        // Get & validate email
         String address = req.getParameter("email");
         try {
             final QuotedInternetAddress addr = new QuotedInternetAddress(address, false);
@@ -92,7 +93,12 @@ public final class ChangeStatusRequestAction extends AbstractXingAction {
             throw MimeMailException.handleMessagingException(e);
         }
         final String message = req.getParameter("message");
-
+        if (message == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("message");
+        }
+        if (message.length() > 420) {
+            throw XingExceptionCodes.STATUS_MESSAGE_SIZE_EXCEEDED.create();
+        }
         final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
         final String xingId = xingAPI.findByEmail(address);
