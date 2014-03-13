@@ -50,11 +50,14 @@
 package com.openexchange.xing.json.actions;
 
 import java.util.Map;
+import javax.mail.internet.AddressException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
@@ -81,7 +84,13 @@ public final class ChangeStatusAction extends AbstractXingAction {
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
         // Get & validate message
-        final String address = req.getParameter("email");
+        String address = req.getParameter("email");
+        try {
+            final QuotedInternetAddress addr = new QuotedInternetAddress(address, false);
+            address = QuotedInternetAddress.toIDN(addr.getAddress());
+        } catch (final AddressException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
         final String message = req.getParameter("message");
 
         final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
