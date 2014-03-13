@@ -835,6 +835,64 @@ public class XingAPI<S extends Session> {
     }
 
     /**
+     * Gets the user feed; a stream of activities recently performed by the user.
+     * 
+     * @param xingUserId The ID of the user whose contacts' activities are to be returned
+     * @param optSince Only returns activities that are newer than the specified time stamp. <b>Can't be combined with until!</b>
+     * @param optUntil Only returns activities that are older than the specified time stamp. <b>Can't be combined with since!</b>
+     * @param optUserFields The list of user attributes to be returned in nested user objects. If this parameter is not used, only the ID
+     *            will be returned.
+     * @return A generic map representing return network feed data only activities of the user will be shown
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public Map<String, Object> getFeed(String xingUserId, Date optSince, Date optUntil, Collection<UserField> optUserFields) throws XingException {
+        assertAuthenticated();
+        try {
+            // Add parameters
+            final List<String> params = new ArrayList<String>(6);
+
+            if (null != optSince) {
+                params.add("since");
+                synchronized (ISO6801) {
+                    params.add(ISO6801.format(optSince));
+                }
+            }
+
+            if (null != optUntil) {
+                params.add("until");
+                synchronized (ISO6801) {
+                    params.add(ISO6801.format(optUntil));
+                }
+            }
+
+            if (null != optUserFields && !optUserFields.isEmpty()) {
+                params.add("user_fields");
+                params.add(collectionToCsv(optUserFields, new Stringer<UserField>() {
+
+                    @Override
+                    public String getString(final UserField element) {
+                        return element.getFieldName();
+                    }
+                }));
+            }
+
+            final JSONObject responseInformation = RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/" + xingUserId + "/feed",
+                VERSION,
+                params.toArray(new String[0]),
+                session).toObject();
+
+            return responseInformation.asMap();
+
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
      * Creates a comment for a certain network activity.
      * 
      * @param activityId the activity id
@@ -1104,5 +1162,6 @@ public class XingAPI<S extends Session> {
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
         ISO6801 = df;
     }
+
 
 }
