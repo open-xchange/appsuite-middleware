@@ -49,11 +49,9 @@
 
 package com.openexchange.xing.json.actions;
 
-import java.util.Map;
 import javax.mail.internet.AddressException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeMailException;
@@ -84,21 +82,12 @@ public final class ChangeStatusAction extends AbstractXingAction {
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
+
+        final String message = getStringMandatoryParameter(req, "message");
         // Get & validate email
-        String address = req.getParameter("email");
-        try {
-            final QuotedInternetAddress addr = new QuotedInternetAddress(address, false);
-            address = QuotedInternetAddress.toIDN(addr.getAddress());
-        } catch (final AddressException e) {
-            throw MimeMailException.handleMessagingException(e);
-        }
-        final String message = req.getParameter("message");
-        if (message == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("message");
-        }
-        if (message.length() > 420) {
-            throw XingExceptionCodes.STATUS_MESSAGE_SIZE_EXCEEDED.create();
-        }
+        String address = getStringMandatoryParameter(req, "address");
+        address = validateMailAddress(address);
+
         final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
         final String xingId = xingAPI.findByEmail(address);
@@ -107,9 +96,9 @@ public final class ChangeStatusAction extends AbstractXingAction {
             // Already connected
             throw XingExceptionCodes.NOT_A_MEMBER.create(address);
         }
-        final Map<String, Object> status = xingAPI.changeStatusMessage(xingId, message);
+        xingAPI.changeStatusMessage(xingId, message);
 
-        return new AJAXRequestResult(JSONCoercion.coerceToJSON(status));
+        return new AJAXRequestResult(Boolean.TRUE, "native");
     }
 
 }

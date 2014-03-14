@@ -110,6 +110,34 @@ public final class OXFolderSQL {
         super();
     }
 
+    private static final String SQL_LOCK = "SELECT fuid FROM oxfolder_tree WHERE cid=? AND fuid=? FOR UPDATE";
+
+    /**
+     * Performs a lock on the folder entry in associated table.
+     *
+     * @param folderId The folder identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @throws SQLException If lock attempt fails
+     */
+    public static void lock(final int folderId, final int contextId, final Connection con) throws SQLException {
+        if (null == con) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            if (con.getAutoCommit()) {
+                throw new SQLException("Connection is not in transaction state.");
+            }
+            stmt = con.prepareStatement(SQL_LOCK);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, folderId);
+            stmt.executeQuery();
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     /*
      * A possible optimization for this query can be:
      * SELECT ot1.fuid FROM oxfolder_tree AS ot1 LEFT JOIN oxfolder_tree ot2 ON ot1.cid=ot2.cid AND ot1.parent=ot2.fuid WHERE ot1.cid=? AND ot1.parent<>0 AND ot2.fuid IS NULL;
@@ -275,10 +303,10 @@ public final class OXFolderSQL {
     private static final String SQL_UPDATE_LAST_MOD = "UPDATE oxfolder_tree SET changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?";
 
     /**
-     * Updates the last modified timestamp of the folder whose ID matches given parameter <code>folderId</code>.
+     * Updates the last modified time stamp of the folder whose ID matches given parameter <code>folderId</code>.
      *
      * @param folderId The folder ID
-     * @param lastModified The new last-modified timestamp to set
+     * @param lastModified The new last-modified time stamp to set
      * @param modifiedBy The user who shall be inserted as modified-by
      * @param writeConArg A writable connection or <code>null</code> to fetch a new one from pool
      * @param ctx The context
@@ -289,18 +317,42 @@ public final class OXFolderSQL {
         Connection writeCon = writeConArg;
         boolean closeWriteCon = false;
         PreparedStatement stmt = null;
+        boolean rollback = false;
+        boolean startedTransaction = false;
         try {
             if (writeCon == null) {
                 writeCon = DBPool.pickupWriteable(ctx);
                 closeWriteCon = true;
             }
+            startedTransaction = writeCon.getAutoCommit();
+            if (startedTransaction) {
+                writeCon.setAutoCommit(false);
+                rollback = true;
+            }
+
+            // Acquire lock
+            lock(folderId, ctx.getContextId(), writeCon);
+
+            // Do the update
             stmt = writeCon.prepareStatement(SQL_UPDATE_LAST_MOD);
             stmt.setLong(1, lastModified);
             stmt.setInt(2, modifiedBy);
             stmt.setInt(3, ctx.getContextId());
             stmt.setInt(4, folderId);
             executeUpdate(stmt);
+
+            if (startedTransaction) {
+                writeCon.commit();
+                rollback = false;
+                writeCon.setAutoCommit(true);
+            }
         } finally {
+            if (startedTransaction && rollback) {
+                if (null != writeCon) {
+                    writeCon.rollback();
+                    writeCon.setAutoCommit(true);
+                }
+            }
             closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
         }
     }
@@ -321,17 +373,41 @@ public final class OXFolderSQL {
         Connection writeCon = writeConArg;
         boolean closeWriteCon = false;
         PreparedStatement stmt = null;
+        boolean rollback = false;
+        boolean startedTransaction = false;
         try {
             if (writeCon == null) {
                 writeCon = DBPool.pickupWriteable(ctx);
                 closeWriteCon = true;
             }
+            startedTransaction = writeCon.getAutoCommit();
+            if (startedTransaction) {
+                writeCon.setAutoCommit(false);
+                rollback = true;
+            }
+
+            // Acquire lock
+            lock(folderId, ctx.getContextId(), writeCon);
+
+            // Do the update
             stmt = writeCon.prepareStatement(SQL_UPDATE_LAST_MOD2);
             stmt.setLong(1, lastModified);
             stmt.setInt(2, ctx.getContextId());
             stmt.setInt(3, folderId);
             executeUpdate(stmt);
+
+            if (startedTransaction) {
+                writeCon.commit();
+                rollback = false;
+                writeCon.setAutoCommit(true);
+            }
         } finally {
+            if (startedTransaction && rollback) {
+                if (null != writeCon) {
+                    writeCon.rollback();
+                    writeCon.setAutoCommit(true);
+                }
+            }
             closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
         }
     }
@@ -354,11 +430,23 @@ public final class OXFolderSQL {
         Connection writeCon = writeConArg;
         boolean closeWriteCon = false;
         PreparedStatement stmt = null;
+        boolean rollback = false;
+        boolean startedTransaction = false;
         try {
             if (writeCon == null) {
                 writeCon = DBPool.pickupWriteable(ctx);
                 closeWriteCon = true;
             }
+            startedTransaction = writeCon.getAutoCommit();
+            if (startedTransaction) {
+                writeCon.setAutoCommit(false);
+                rollback = true;
+            }
+
+            // Acquire lock
+            lock(folderId, ctx.getContextId(), writeCon);
+
+            // Do the update
             stmt = writeCon.prepareStatement(SQL_UPDATE_NAME);
             stmt.setString(1, newName);
             stmt.setLong(2, lastModified);
@@ -366,7 +454,19 @@ public final class OXFolderSQL {
             stmt.setInt(4, ctx.getContextId());
             stmt.setInt(5, folderId);
             executeUpdate(stmt);
+
+            if (startedTransaction) {
+                writeCon.commit();
+                rollback = false;
+                writeCon.setAutoCommit(true);
+            }
         } finally {
+            if (startedTransaction && rollback) {
+                if (null != writeCon) {
+                    writeCon.rollback();
+                    writeCon.setAutoCommit(true);
+                }
+            }
             closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
         }
     }
@@ -550,11 +650,23 @@ public final class OXFolderSQL {
         Connection wc = writeCon;
         boolean closeWriteCon = false;
         PreparedStatement stmt = null;
+        boolean rollback = false;
+        boolean startedTransaction = false;
         try {
             if (wc == null) {
                 wc = DBPool.pickupWriteable(ctx);
                 closeWriteCon = true;
             }
+            startedTransaction = writeCon.getAutoCommit();
+            if (startedTransaction) {
+                writeCon.setAutoCommit(false);
+                rollback = true;
+            }
+
+            // Acquire lock
+            lock(folderId, ctx.getContextId(), writeCon);
+
+            // Do the update
             stmt = wc.prepareStatement(SQL_UPDATE_PERMS);
             int pos = 1;
             stmt.setInt(pos++, folderPermission);
@@ -564,17 +676,36 @@ public final class OXFolderSQL {
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, folderId);
             stmt.setInt(pos++, permissionId);
-            if (executeUpdate(stmt) != 1) {
+            final boolean failed = executeUpdate(stmt) != 1;
+
+            if (failed) {
+                if (startedTransaction) {
+                    writeCon.commit();
+                    rollback = false;
+                    writeCon.setAutoCommit(true);
+                }
                 return false;
             }
             closeSQLStuff(null, stmt);
             stmt = null;
-            /*
-             * Update last-modified to propagate changes to clients
-             */
+
+            // Update last-modified to propagate changes to clients
             updateLastModified(folderId, System.currentTimeMillis(), wc, ctx);
+
+            if (startedTransaction) {
+                writeCon.commit();
+                rollback = false;
+                writeCon.setAutoCommit(true);
+            }
+
             return true;
         } finally {
+            if (startedTransaction && rollback) {
+                if (null != writeCon) {
+                    writeCon.rollback();
+                    writeCon.setAutoCommit(true);
+                }
+            }
             closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
         }
     }
@@ -603,11 +734,23 @@ public final class OXFolderSQL {
         Connection wc = writeCon;
         boolean closeWriteCon = false;
         PreparedStatement stmt = null;
+        boolean rollback = false;
+        boolean startedTransaction = false;
         try {
             if (wc == null) {
                 wc = DBPool.pickupWriteable(ctx);
                 closeWriteCon = true;
             }
+            startedTransaction = writeCon.getAutoCommit();
+            if (startedTransaction) {
+                writeCon.setAutoCommit(false);
+                rollback = true;
+            }
+
+            // Acquire lock
+            lock(folderId, ctx.getContextId(), writeCon);
+
+            // Do the update
             stmt = wc.prepareStatement(SQL_ADD_PERMS);
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
@@ -620,8 +763,22 @@ public final class OXFolderSQL {
             stmt.setInt(pos++, objectDeletePermission);
             stmt.setInt(pos++, isAdmin ? 1 : 0);
             stmt.setInt(pos++, system);
-            return (executeUpdate(stmt) == 1);
+            final boolean success = executeUpdate(stmt) == 1;
+
+            if (startedTransaction) {
+                writeCon.commit();
+                rollback = false;
+                writeCon.setAutoCommit(true);
+            }
+
+            return success;
         } finally {
+            if (startedTransaction && rollback) {
+                if (null != writeCon) {
+                    writeCon.rollback();
+                    writeCon.setAutoCommit(true);
+                }
+            }
             closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
         }
     }
@@ -729,18 +886,42 @@ public final class OXFolderSQL {
         Connection writeCon = writeConArg;
         boolean closeCon = false;
         PreparedStatement stmt = null;
+        boolean rollback = false;
+        boolean startedTransaction = false;
         try {
             if (writeCon == null) {
                 writeCon = DBPool.pickupWriteable(ctx);
                 closeCon = true;
             }
+            startedTransaction = writeCon.getAutoCommit();
+            if (startedTransaction) {
+                writeCon.setAutoCommit(false);
+                rollback = true;
+            }
+
+            // Acquire lock
+            lock(folderId, ctx.getContextId(), writeCon);
+
+            // Do the update
             stmt = writeCon.prepareStatement(SQL_UDTSUBFLDFLG);
             stmt.setInt(1, hasSubfolders ? 1 : 0);
             stmt.setLong(2, lastModified);
             stmt.setInt(3, ctx.getContextId());
             stmt.setInt(4, folderId);
             executeUpdate(stmt);
+
+            if (startedTransaction) {
+                writeCon.commit();
+                rollback = false;
+                writeCon.setAutoCommit(true);
+            }
         } finally {
+            if (startedTransaction && rollback) {
+                if (null != writeCon) {
+                    writeCon.rollback();
+                    writeCon.setAutoCommit(true);
+                }
+            }
             closeResources(null, stmt, closeCon ? writeCon : null, false, ctx);
         }
     }
@@ -819,13 +1000,17 @@ public final class OXFolderSQL {
                 writeCon = DBPool.pickupWriteable(ctx);
                 closeWriteCon = true;
             }
-            final boolean isAuto = writeCon.getAutoCommit();
-            if (isAuto) {
+            final boolean startedTransaction = writeCon.getAutoCommit();
+            if (startedTransaction) {
                 writeCon.setAutoCommit(false);
             }
             try {
                 PreparedStatement stmt = null;
                 try {
+                    // Acquire lock
+                    lock(folder.getParentFolderID(), ctx.getContextId(), writeCon);
+
+                    // Do the insert
                     stmt = writeCon.prepareStatement("INSERT INTO oxfolder_tree " +
                         "(fuid,cid,parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag," +
                         "default_flag,meta) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,? FROM DUAL " +
@@ -918,19 +1103,19 @@ public final class OXFolderSQL {
                     }
                 }
             } catch (final SQLException e) {
-                if (isAuto) {
+                if (startedTransaction) {
                     writeCon.rollback();
                     writeCon.setAutoCommit(true);
                 }
                 throw e;
             } catch (final JSONException e) {
-                if (isAuto) {
+                if (startedTransaction) {
                     writeCon.rollback();
                     writeCon.setAutoCommit(true);
                 }
                 throw OXFolderExceptionCode.JSON_ERROR.create(e, e.getMessage());
             }
-            if (isAuto) {
+            if (startedTransaction) {
                 writeCon.commit();
                 writeCon.setAutoCommit(true);
             }
@@ -970,12 +1155,16 @@ public final class OXFolderSQL {
                 writeCon = DBPool.pickupWriteable(ctx);
                 closeWriteCon = true;
             }
-            final boolean isAuto = writeCon.getAutoCommit();
-            if (isAuto) {
+            final boolean startedTransaction = writeCon.getAutoCommit();
+            if (startedTransaction) {
                 writeCon.setAutoCommit(false);
             }
             PreparedStatement stmt = null;
             try {
+                // Acquire lock
+                lock(folder.getObjectID(), ctx.getContextId(), writeCon);
+
+                // Do the update
                 int pos = 1;
                 final boolean containsMeta = folder.containsMeta();
                 if (folder.containsFolderName()) {
@@ -1070,13 +1259,13 @@ public final class OXFolderSQL {
                 stmt.close();
                 stmt = null;
             } catch (final SQLException e) {
-                if (isAuto) {
+                if (startedTransaction) {
                     writeCon.rollback();
                     writeCon.setAutoCommit(true);
                 }
                 throw e;
             } catch (final JSONException e) {
-                if (isAuto) {
+                if (startedTransaction) {
                     writeCon.rollback();
                     writeCon.setAutoCommit(true);
                 }
@@ -1087,7 +1276,7 @@ public final class OXFolderSQL {
                     stmt = null;
                 }
             }
-            if (isAuto) {
+            if (startedTransaction) {
                 writeCon.commit();
                 writeCon.setAutoCommit(true);
             }
@@ -1129,6 +1318,11 @@ public final class OXFolderSQL {
                 writeCon.setAutoCommit(false);
             }
             try {
+                // Acquire lock
+                lock(src.getObjectID(), ctx.getContextId(), writeCon);
+                lock(dest.getObjectID(), ctx.getContextId(), writeCon);
+
+                // Do the move
                 pst = writeCon.prepareStatement(SQL_MOVE_UPDATE);
                 pst.setInt(1, dest.getObjectID());
                 pst.setLong(2, lastModified);
@@ -1210,6 +1404,10 @@ public final class OXFolderSQL {
             }
             PreparedStatement pst = null;
             try {
+                // Acquire lock
+                lock(folderObj.getObjectID(), ctx.getContextId(), writeCon);
+
+                // Do the rename
                 pst = writeCon.prepareStatement(SQL_RENAME_UPDATE);
                 pst.setString(1, folderObj.getFolderName());
                 pst.setLong(2, lastModified);
@@ -1285,6 +1483,10 @@ public final class OXFolderSQL {
         final boolean backup = (createBackup && deleteWorking);
         PreparedStatement stmt = null;
         try {
+            // Acquire lock
+            lock(folderId, ctx.getContextId(), writeCon);
+
+            // Do delete
             if (backup) {
                 /*
                  * Clean backup tables
@@ -1394,9 +1596,10 @@ public final class OXFolderSQL {
         }
         PreparedStatement stmt = null;
         try {
-            /*
-             * Clean backup tables
-             */
+            // Acquire lock
+            lock(folderId, ctx.getContextId(), writeCon);
+
+            // Clean backup tables
             stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);

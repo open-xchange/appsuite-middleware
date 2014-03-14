@@ -62,6 +62,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
@@ -89,18 +90,13 @@ public class FeedAction extends AbstractXingAction {
         Date optSince = null;
         Date optUntil = null;
         Collection<UserField> optUserFields = null;
-
+        
+        String address = getStringMandatoryParameter(req, "email");
+        address = validateMailAddress(address);
+        
         // Since/Until
         String since = req.getParameter("since");
         String until = req.getParameter("until");
-
-        String address = req.getParameter("email");
-        try {
-            final QuotedInternetAddress addr = new QuotedInternetAddress(address, false);
-            address = QuotedInternetAddress.toIDN(addr.getAddress());
-        } catch (final AddressException e) {
-            throw MimeMailException.handleMessagingException(e);
-        }
 
         if (since != null && until != null) {
             throw XingExceptionCodes.MUTUALLY_EXCLUSIVE.create();

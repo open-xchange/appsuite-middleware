@@ -61,8 +61,7 @@ import com.openexchange.xing.json.XingRequest;
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DeleteCommentActivityAction extends AbstractNewsFeedAction {
-
+public class DeleteCommentActivityAction extends AbstractXingAction {
     /**
      * Initializes a new {@link DeleteCommentActivityAction}.
      */

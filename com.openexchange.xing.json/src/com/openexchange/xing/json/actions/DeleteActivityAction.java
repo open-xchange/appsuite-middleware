@@ -77,10 +77,8 @@ public final class DeleteActivityAction extends AbstractXingAction {
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String activityId = req.getParameter("activity_id");
-        if (activityId == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("activity_id");
-        }
+        final String activityId = getStringMandatoryParameter(req, "activity_id");
+
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
         xingAPI.deleteActivity(activityId);

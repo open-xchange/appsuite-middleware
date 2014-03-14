@@ -82,6 +82,7 @@ public class CommentActivityAction extends AbstractNewsFeedAction {
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
         String activityId = getMandatoryStringParameter(req, "activity_id");
         String text = getMandatoryStringParameter(req, "text");
+        
         if (text.length() > 600) {
             throw XingExceptionCodes.COMMENT_SIZE_EXCEEDED.create();
         }

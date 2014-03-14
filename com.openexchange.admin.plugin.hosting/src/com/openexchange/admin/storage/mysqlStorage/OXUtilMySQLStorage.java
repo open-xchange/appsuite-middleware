@@ -175,56 +175,48 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public void changeDatabase(final Database db) throws StorageException {
+        // Get connection
+        final Connection con;
         try {
-            final DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
-            do {
-                // Get connection & start transaction
-                final Connection con;
-                try {
-                    con = cache.getConnectionForConfigDB();
-                    con.setAutoCommit(false);
-                } catch (final PoolException e) {
-                    LOG.error("Pool Error", e);
-                    throw new StorageException(e);
-                }
+            con = cache.getConnectionForConfigDB();
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        }
 
-                // Reset condition & start processing
-                condition.resetTransactionRollbackException();
-                PreparedStatement prep = null;
-                boolean rollback = true;
-                try {
-                    changeDatabase(db, con);
-                    con.commit();
-                    rollback = false;
-                } catch (final DataTruncation dt) {
-                    DBUtils.rollback(con);
-                    rollback = false;
-                    LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-                    throw AdminCache.parseDataTruncation(dt);
-                } catch (final SQLException sql) {
-                    DBUtils.rollback(con);
-                    rollback = false;
-                    if (!condition.isFailedTransactionRollback(sql)) {
-                        LOG.error("SQL Error", sql);
-                        throw new StorageException(sql.toString(), sql);
-                    }
-                } finally {
-                    if (rollback) {
-                        DBUtils.rollback(con);
-                    }
-                    DBUtils.closeSQLStuff(prep);
-                    DBUtils.autocommit(con);
-                    try {
-                        cache.pushConnectionForConfigDB(con);
-                    } catch (final PoolException e) {
-                        LOG.error("Error pushing configdb connection to pool!", e);
-                    }
-                }
-            } while (condition.checkRetry());
+        // Process it...
+        boolean rollback = true;
+        try {
+            con.setAutoCommit(false);
+
+            // TODO: Add lock here
+            // SELECT * FROM <table> WHERE <where-clause> FOR UPDATE
+            //   or
+            // SELECT COUNT(*) FROM <table> FOR UPDATE   to lock complete table
+
+            changeDatabase(db, con);
+            con.commit();
+            rollback = false;
         } catch (final DataTruncation dt) {
+            DBUtils.rollback(con);
+            rollback = false;
+            LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final SQLException sqle) {
-            throw new StorageException(sqle);
+        } catch (final SQLException sql) {
+            DBUtils.rollback(con);
+            rollback = false;
+            LOG.error("SQL Error", sql);
+            throw new StorageException(sql.toString(), sql);
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.autocommit(con);
+            try {
+                cache.pushConnectionForConfigDB(con);
+            } catch (final PoolException e) {
+                LOG.error("Error pushing configdb connection to pool!", e);
+            }
         }
     }
 
