@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-03-11 14:24+0100\n"
+"PO-Revision-Date: 2014-03-14 14:27+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -972,6 +972,424 @@ msgstr "Die LDAP-Suche für den Benutzer enthält zu viele Treffer."
 msgid "The LDAP search for the user object \"%s\" gave no results."
 msgstr "Die LDAP-Suche für das Benutzerobjekt  \"%s\" ergab keinen Treffer."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:62
+msgid "Display name"
+msgstr "Angezeigter Name"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:63
+msgid "Name"
+msgstr "Name"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:64
+msgid "Last name"
+msgstr "Nachname"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:65
+msgid "First name"
+msgstr "Vorname"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:66
+msgid "Middle name"
+msgstr "Zweiter Vorname"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:67
+msgid "Suffix"
+msgstr "Endung"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:68
+msgid "Title"
+msgstr "Anrede"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:69
+msgid "Street (home)"
+msgstr "Straße (privat)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:70
+msgid "Postcode (home)"
+msgstr "PLZ (privat)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:71
+msgid "Town (home)"
+msgstr "Stadt (privat)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:72
+msgid "State (home)"
+msgstr "Bundesland (privat)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:73
+msgid "Country (home)"
+msgstr "Land (privat)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:74
+#, fuzzy
+msgid "Martial status"
+msgstr "Familienstand"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:75
+msgid "Number of children"
+msgstr "Anzahl Kinder"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:76
+msgid "Profession"
+msgstr "Beruf"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:77
+msgid "Nickname"
+msgstr "Spitzname"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:78
+msgid "Spouse name"
+msgstr "Ehepartner"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:79
+msgid "Comment"
+msgstr "Kommentar"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:80
+msgid "Company"
+msgstr "Firma"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:81
+msgid "Department"
+msgstr "Abteilung"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:82
+msgid "Position"
+msgstr "Position"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:83
+#, fuzzy
+msgid "Employee type"
+msgstr "Dateityp"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:84
+msgid "Room number"
+msgstr "Raumnummer"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:85
+msgid "Street (business)"
+msgstr "Straße (geschäftlich)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:86
+msgid "Postcode (business)"
+msgstr "PLZ (geschäftlich)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:87
+msgid "Town (business)"
+msgstr "Stadt (geschäftlich)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:88
+msgid "State (business)"
+msgstr "Bundesland (geschäftlich)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:89
+msgid "Country (business)"
+msgstr "Land (geschäftlich)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:90
+#, fuzzy
+msgid "Number of employee"
+msgstr "Anzahl Mitarbeiter"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:91
+msgid "Sales volume"
+msgstr "Umsatz"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:92
+msgid "Tax id"
+msgstr "Steuernummer"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:93
+msgid "Commercial register"
+msgstr "Handelsregister"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:94
+#, fuzzy
+msgid "Branches"
+msgstr "Niederlassungen"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:95
+#, fuzzy
+msgid "Business category"
+msgstr "Geschäftsbereich"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:96
+msgid "Info"
+msgstr "Info"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:97
+msgid "Manager's name"
+msgstr "Name Manager"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:98
+msgid "Assistant's name"
+msgstr "Name Assistent"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:99
+msgid "Street (other)"
+msgstr "Straße (weitere)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:100
+msgid "Postcode (other)"
+msgstr "PLZ (weitere)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:101
+msgid "Town (other)"
+msgstr "Stadt (weitere)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:102
+msgid "State (other)"
+msgstr "Bundesland (weiteres)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:103
+msgid "Country (other)"
+msgstr "Land (weiteres)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:104
+msgid "Telephone assistant"
+msgstr "Telefon (Assistent)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:105
+msgid "Phone (business)"
+msgstr "Telefon (geschäftlich)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:106
+msgid "Phone (business alt)"
+msgstr "Telefon (geschäftlich 2)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:107
+msgid "Fax"
+msgstr "Fax"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:108
+msgid "Telephone callback"
+msgstr "Telefon (Rückruf)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:109
+msgid "Telephone car"
+msgstr "Autotelefon"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:110
+msgid "Telephone company"
+msgstr "Telefon (Zentrale)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:111
+msgid "Phone (home)"
+msgstr "Telefon (privat)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:112
+msgid "Phone (home alt)"
+msgstr "Telefon (privat 2)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:113
+msgid "FAX (home)"
+msgstr "Fax (privat)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:114
+msgid "Telephone ISDN"
+msgstr "ISDN-Telefon"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:115
+msgid "Cell phone"
+msgstr "Mobiltelefon"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:116
+msgid "Cell phone (alt)"
+msgstr "Mobiltelefon (2)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:117
+msgid "Phone (other)"
+msgstr "Telefon (weiteres)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:118
+msgid "FAX other"
+msgstr "Fax (weiteres)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:119
+msgid "Telephone pager"
+msgstr "Pager"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:120
+msgid "Telephone primary"
+msgstr "Telefon (primär)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:121
+msgid "Telephone radio"
+msgstr "Funktelefon"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:122
+msgid "Telephone telex"
+msgstr "Telex"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:123
+msgid "Telephone TTY/TDD"
+msgstr "TTY/TDD-Gerät"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:124
+msgid "Instant Messenger 1"
+msgstr "Instant Messenger 1"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:125
+msgid "Instant Messenger 2"
+msgstr "Instant Messenger 2"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:126
+msgid "Telephone IP"
+msgstr "IP-Telefon"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:127
+msgid "Email 1"
+msgstr "E-Mail 1"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:128
+msgid "Email 2"
+msgstr "E-Mail 2"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:129
+msgid "Email 3"
+msgstr "E-Mail 3"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.rss/src/com/openexchange/messaging/rss/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:61
+msgid "URL"
+msgstr "URL"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:131
+msgid "Categories"
+msgstr "Kategorien"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:132
+msgid "Optional 01"
+msgstr "Optional 01"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:133
+msgid "Optional 02"
+msgstr "Optional 02"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:134
+msgid "Optional 03"
+msgstr "Optional 03"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:135
+msgid "Optional 04"
+msgstr "Optional 04"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:136
+msgid "Optional 05"
+msgstr "Optional 05"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:137
+msgid "Optional 06"
+msgstr "Optional 06"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:138
+msgid "Optional 07"
+msgstr "Optional 07"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:139
+msgid "Optional 08"
+msgstr "Optional 08"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:140
+msgid "Optional 09"
+msgstr "Optional 09"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:141
+msgid "Optional 10"
+msgstr "Optional 10"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:142
+msgid "Optional 11"
+msgstr "Optional 11"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:143
+msgid "Optional 12"
+msgstr "Optional 12"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:144
+msgid "Optional 13"
+msgstr "Optional 13"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:145
+msgid "Optional 14"
+msgstr "Optional 14"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:146
+msgid "Optional 15"
+msgstr "Optional 15"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:147
+msgid "Optional 16"
+msgstr "Optional 16"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:148
+msgid "Optional 17"
+msgstr "Optional 17"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:149
+msgid "Optional 18"
+msgstr "Optional 18"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:150
+msgid "Optional 19"
+msgstr "Optional 19"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:151
+msgid "Optional 20"
+msgstr "Optional 20"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:152
+msgid "Date of birth"
+msgstr "Geburtsdatum"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:153
+msgid "Anniversary"
+msgstr "Jahrestag"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:154
+#, fuzzy
+msgid "File as"
+msgstr "Speichern unter"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:155
+#, fuzzy
+msgid "First name (yomi)"
+msgstr "Vorname (yomi)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:156
+#, fuzzy
+msgid "Last name (yomi)"
+msgstr "Nachname (yomi)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:157
+#, fuzzy
+msgid "Company (yomi)"
+msgstr "Firma (yomi)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:158
+msgid "UID"
+msgstr "Mitarbeiter-ID"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:159
+#, fuzzy
+msgid "Filename"
+msgstr "Dateiname"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:160
+msgid "Address (home)"
+msgstr "Adresse (privat)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:161
+msgid "Address (business)"
+msgstr "Adresse (geschäftlich)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:162
+msgid "Address (other)"
+msgstr "Adresse (weitere)"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:61
 msgid "The type %1$s of the provided file is not supported."
 msgstr "Der Typ %1$s der angegebenen Datei wird nicht unterstützt."
@@ -1098,14 +1516,16 @@ msgstr "Unbekannter Pool %1$d."
 msgid "Transaction counter is missing for context %1$d."
 msgstr "Übertragungszähler für Kontext %1$d ist nicht vorhanden."
 
-#. This error message may happen when provisioning contexts. Writing the database assigment failed in database.
+#. This error message may happen when provisioning contexts. Writing the database assigment or updating it failed in database.
 #. %1$d is replaced with the context identifier.
 #. %2$d is replaced with the server identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:130
-msgid "Inserting database assignment for context %1$d and server %2$d failed!"
+msgid ""
+"Inserting or updating database assignment for context %1$d and server %2$d "
+"failed!"
 msgstr ""
-"Das Eintragen der Datenbankzuordnung für den Kontext  %1$d und den Server "
-"%2$d ist fehlgeschlagen."
+"Das Eintragen oder Aktualisieren der Datenbankzuordnung für den Kontext %1$d "
+"und den Server %2$d ist fehlgeschlagen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:63
 msgid "The path \"%1$s\" was not found. Please retry the synchronization."
@@ -2016,6 +2436,11 @@ msgstr "Ein Suchfilter enthielt ein unbekanntes Feld: '%1$s'."
 msgid "The facet \"%1$s\" is mandatory and has to be set."
 msgstr "Die Facette \"%1$s\" ist eine Pflichtangabe und muss gesetzt werden."
 
+#. Could not parse \"%1$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:87
+msgid "Could not parse \"%1$s\"."
+msgstr "\"%1$s\" konnte nicht analysiert werden."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:61
 msgid "%1$s <i>in appointments</i>"
 msgstr "%1$s <i>in Terminen</i>"
@@ -2207,18 +2632,37 @@ msgid "Other"
 msgstr "Weitere"
 
 #. ---------------------------------------------------------------------------------- //
-#. Search in file field file name.
+#. Public folders
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
+msgid "Public folders"
+msgstr "Öffentliche Ordner"
+
+#. Private folders
+#. Name of the parent folder for the private user folders.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
+msgid "Private folders"
+msgstr "Persönliche Ordner"
+
+#. Shared folders
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
+msgid "Shared folders"
+msgstr "Freigegebene Ordner"
+
+#. Search in file field file name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:113
 msgid "%1$s <i>in file name</i>"
 msgstr "%1$s <i>im Dateinamen</i>"
 
 #. Search in file field file description.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:116
 msgid "%1$s <i>in file description</i>"
 msgstr "%1$s <i>in der Dateibeschreibung</i>"
 
 #. Search in file field file content.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:119
 msgid "%1$s <i>in file content</i>"
 msgstr "%1$s <i>im Dateiinhalt</i>"
 
@@ -3182,13 +3626,6 @@ msgstr "Aktionslinks"
 msgid "Album"
 msgstr "Album"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.rss/src/com/openexchange/messaging/rss/FormStrings.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:61
-msgid "URL"
-msgstr "URL"
-
 #. Invalid Twitter messaging account. Please delete and re-create your Twitter messaging account.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/TwitterMessagingExceptionMessages.java:64
 msgid ""
@@ -3944,42 +4381,54 @@ msgstr ""
 "Verfügung."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:62
-msgid "Quota exceeded. Please delete some items in order to create new ones."
+msgid ""
+"Quota exceeded. Please delete some items in order to create new ones. Please "
+"note: The quota refers to all items of all users in this context."
 msgstr ""
 "Quota überschritten. Bitte löschen Sie einige Objekte, um Platz für neue zu "
-"schaffen."
+"schaffen. Bitte beachten: Die Quota bezieht sich auf alle Objekte aller "
+"Benutzer in diesem Kontext."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:64
 msgid ""
 "Quota exceeded for calendar. Quota limit: %2$s. Quota used: %1$s. Please "
-"delete some appointments in order to create new ones."
+"delete some appointments in order to create new ones. Please note: The quota "
+"refers to all appointments of all users in this context."
 msgstr ""
 "Quota für Kalender überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitte "
-"löschen Sie einige Termine, um Platz für neue zu schaffen."
+"löschen Sie einige Termine, um Platz für neue zu schaffen. Bitte beachten: "
+"Die Quota bezieht sich auf alle Termine aller Benutzer in diesem Kontext."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
 msgid ""
 "Quota exceeded for contacts. Quota limit: %2$s. Quota used: %1$s. Please "
-"delete some contacts in order to create new ones."
+"delete some contacts in order to create new ones. Please note: The quota "
+"refers to all contacts of all users in this context."
 msgstr ""
 "Quota für Kontakte überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitte "
-"löschen Sie einige Kontakte, um Platz für neue zu schaffen."
+"löschen Sie einige Kontakte, um Platz für neue zu schaffen. Bitte beachten: "
+"Die Quota bezieht sich auf alle Kontakte aller Benutzer in diesem Kontext."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:68
 msgid ""
 "Quota exceeded for tasks. Quota limit: %2$s. Quota used: %1$s. Please delete "
-"some tasks in order to create new ones."
+"some tasks in order to create new ones. Please note: The quota refers to all "
+"tasks of all users in this context."
 msgstr ""
 "Quota für Aufgaben überschritten. Quota-Limit: %2$s. Belegte Quota: %1$s. "
-"Bitte löschen Sie einige Aufgaben, um Platz für neue zu schaffen."
+"Bitte löschen Sie einige Aufgaben, um Platz für neue zu schaffen. Bitte "
+"beachten: Die Quota bezieht sich auf alle Aufgaben aller Benutzer in diesem "
+"Kontext."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:70
 msgid ""
-"Quota exceeded for files. Quota limit: %2$s. Quota used: %1$s.. Please "
-"delete some files in order to create new ones."
+"Quota exceeded for files. Quota limit: %2$s. Quota used: %1$s. Please delete "
+"some files in order to create new ones. Please note: The quota refers to all "
+"files of all users in this context."
 msgstr ""
 "Quota für Dateien überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitte "
-"löschen Sie einige Dateien, um Platz für neue zu schaffen."
+"löschen Sie einige Dateien, um Platz für neue zu schaffen. Bitte beachten: "
+"Die Quota bezieht sich auf alle Dateien aller Benutzer in diesem Kontext."
 
 #. Could not find a handler for the specified stanza
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
@@ -4948,19 +5397,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:64
 msgid "Could not connect to the context storage."
 msgstr "Verbindung zum Kontext-Speicher fehlgeschlagen"
-
-#. Name of the parent folder for the private user folders.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
-msgid "Private folders"
-msgstr "Persönliche Ordner"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
-msgid "Public folders"
-msgstr "Öffentliche Ordner"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
-msgid "Shared folders"
-msgstr "Freigegebene Ordner"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
 msgid "System"
@@ -7451,6 +7887,10 @@ msgid "Validation of server %1$s failed due to invalid credentials"
 msgstr ""
 "Validierung des Servers %1$s schlug aufgrund ungültiger Anmeldedaten fehl."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:178
+msgid "Server %1$s does not support being accessed using a secure connection."
+msgstr "Server %1$s unterstützt keinen Zugriff über eine sichere Verbindung."
+
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
@@ -8351,6 +8791,10 @@ msgstr ""
 "Für den Zugriff auf diesen Dienst müssen Sie zunächst einen OAuth-Account "
 "erstellen."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:86
+msgid "Your account needs to be verified: %1$s"
+msgstr "Ihr Account muss verifiziert werden: %1$s"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."
 msgstr "Dateizugriff verweigert"
@@ -8542,6 +8986,13 @@ msgstr "Die E-Mail-Adresse ist keinem XING-Benutzer zugewiesen."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:95
 msgid "XING user is already directly connected."
 msgstr "XING-Benutzer ist bereits direkt verbunden."
+
+#. The comment size exceeds the maximum allowed of 600 characters.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:98
+#, fuzzy
+msgid "The comment size exceeds the maximum allowed of 600 characters."
+msgstr ""
+"Der Kommentar überschreitet die maximal zulässige Anzahl von 600 Zeichen."
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
@@ -10630,21 +11081,6 @@ msgstr "Zulu"
 #~ msgid "Subject"
 #~ msgstr "Betreff"
 
-#~ msgid "Description"
-#~ msgstr "Beschreibung"
-
-#~ msgid "address book"
-#~ msgstr "Adressbuch"
-
-#~ msgid "name"
-#~ msgstr "Name"
-
-#~ msgid "email"
-#~ msgstr "E-Mail"
-
-#~ msgid "phone"
-#~ msgstr "Telefon"
-
 #~ msgid "address"
 #~ msgstr "Adresse"
 
@@ -11266,9 +11702,6 @@ msgstr "Zulu"
 #~ msgid "POST requires exactly one file upload per request.e."
 #~ msgstr "POST erfordert exakt einen Datei-Upload pro Anfrage."
 
-#~ msgid "Inline data exceeds the maximum allowed size."
-#~ msgstr "Eingebettete Daten übersteigen die maximal zulässige Größe."
-
 #~ msgid "We encountered an internal error. Please try again."
 #~ msgstr "Es trat ein interner Fehler auf. Bitte erneut versuchen."
 
@@ -11492,9 +11925,6 @@ msgstr "Zulu"
 
 #~ msgid "Method not supported."
 #~ msgstr "Methode ist nicht unterstützt."
-
-#~ msgid "No account found with identifier \"%1$s\"."
-#~ msgstr "Ein Account mit der ID \"%1$s\" konnte nicht gefunden werden."
 
 #~ msgid "No chat found with identifier \"%1$s\"."
 #~ msgstr "Ein Chat mit der ID \"%1$s\" konnte nicht gefunden werden."
@@ -11896,9 +12326,6 @@ msgstr "Zulu"
 
 #~ msgid "No session found."
 #~ msgstr "Keine Sitzung gefunden."
-
-#~ msgid "%s does not support an auto login authentication."
-#~ msgstr "%s unterstützt keine automatische Anmeldung."
 
 #~ msgid "Server side token for token login was not created."
 #~ msgstr ""
@@ -14839,9 +15266,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Die Apache Solr-Anfrage konnte weder an eine lokale noch an eine "
 #~ "entfernte Server-Instanz delegiert werden."
-
-#~ msgid "Could not parse URI: %1$s."
-#~ msgstr "URI konnte nicht analysiert werden: %1$s."
 
 #~ msgid "Remote error: %1$s."
 #~ msgstr "Fehler auf entferntem System: %1$s."
