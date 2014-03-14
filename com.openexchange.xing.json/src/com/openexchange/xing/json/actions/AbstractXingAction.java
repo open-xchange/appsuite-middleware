@@ -171,16 +171,21 @@ public abstract class AbstractXingAction implements AJAXActionService {
      * Get the UserFields from the specified parameter object.
      * 
      * @param user_fields as a comma separated String
-     * @return a {@link Collection} with {@link UserField}s, or null 
+     * @return a {@link Collection} with {@link UserField}s, or null
+     * @throws OXException
      */
-    protected Collection<UserField> getUserFields(Object user_fields) {
+    protected Collection<UserField> getUserFields(Object user_fields) throws OXException {
         Collection<UserField> optUserFields = null;
         if (user_fields != null) {
             if (user_fields instanceof String) {
                 String[] split = Strings.splitByComma((String) user_fields);
                 optUserFields = new ArrayList<UserField>();
                 for(String s : split) {
-                    optUserFields.add(USER_FIELDS.get(Integer.parseInt(s)));
+                    try {
+                        optUserFields.add(USER_FIELDS.get(Integer.parseInt(s)));
+                    } catch (NumberFormatException e) {
+                        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(s, "user_field");
+                    }
                 }
             }
         }
