@@ -61,6 +61,8 @@ import com.openexchange.ajax.xing.actions.DeleteCommentRequest;
 import com.openexchange.ajax.xing.actions.DeleteCommentResponse;
 import com.openexchange.ajax.xing.actions.GetCommentsRequest;
 import com.openexchange.ajax.xing.actions.GetCommentsResponse;
+import com.openexchange.ajax.xing.actions.GetLikesRequest;
+import com.openexchange.ajax.xing.actions.GetLikesResponse;
 import com.openexchange.ajax.xing.actions.LikeActivityRequest;
 import com.openexchange.ajax.xing.actions.LikeActivityResponse;
 import com.openexchange.ajax.xing.actions.NewsFeedRequest;
@@ -203,13 +205,17 @@ public class NewsFeedTest extends AbstractAJAXSession {
      * @throws IOException
      * @throws JSONException
      */
-    public void testLikeUnlikeActivity() throws OXException, IOException, JSONException {
+    public void testLikesActivity() throws OXException, IOException, JSONException {
         JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
         String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
         
         final LikeActivityRequest likeRequest = new LikeActivityRequest(activityId, true);
         final LikeActivityResponse likeResponse = client.execute(likeRequest);
         assertNotNull(likeResponse);
+        
+        final GetLikesRequest getLikesRequest = new GetLikesRequest(activityId, -1, -1, new int[0], true);
+        final GetLikesResponse getLikesResponse = client.execute(getLikesRequest);
+        assertNotNull(getLikesResponse);
         
         final UnlikeActivityRequest unlikeRequest = new UnlikeActivityRequest(activityId, true);
         final UnlikeActivityResponse unlikeResponse = client.execute(unlikeRequest);

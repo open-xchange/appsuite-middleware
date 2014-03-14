@@ -1069,6 +1069,54 @@ public class XingAPI<S extends Session> {
             throw new XingException(e);
         }
     }
+    
+    /**
+     * Retrieves a list of users who liked the specified activity.
+     * 
+     * @param activityId the id of the activity
+     * @param optLimit restricts the number of comments to be returned. (Optional, Default 10)
+     * @param optOffset the offset (Optional, Default 0)
+     * @param optUserFields a Collection with all user fields to be returned (Optional, defaults to ID only)
+     * @return a map representation of the activity's comments.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public Map<String, Object> getLikes(final String activityId, final int optLimit, final int optOffset, final Collection<UserField> optUserFields) throws XingException {
+        assertAuthenticated();
+        try {
+            final List<String> params = new ArrayList<String>(3);
+            if (optLimit > 0) {
+                params.add("limit");
+                params.add(Integer.toString(optLimit));
+            }
+            
+            if (optOffset > 0) {
+                params.add("offset");
+                params.add(Integer.toString(optOffset));
+            }
+            
+            if (optUserFields != null && !optUserFields.isEmpty()) {
+                params.add("user_fields");
+                params.add(collectionToCsv(optUserFields, new Stringer<UserField>() {
+                    @Override
+                    public String getString(final UserField element) {
+                        return element.getFieldName();
+                    }
+                }));
+            }
+            
+            final JSONObject response = RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/activities/" + activityId + "/likes",
+                VERSION,
+                params.toArray(new String[0]),
+                session).toObject();
+            return response.asMap();
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
 
     /**
      * Shows an activity
