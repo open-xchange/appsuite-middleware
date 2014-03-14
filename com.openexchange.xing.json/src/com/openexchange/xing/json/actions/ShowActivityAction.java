@@ -82,10 +82,7 @@ public final class ShowActivityAction extends AbstractXingAction {
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String activityId = req.getParameter("activity_id");
-        if (activityId == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("activity_id");
-        }
+        final String activityId = getStringMandatoryParameter(req, "activity_id");
         // User Fields
         Collection<UserField> optUserFields = getUserFields(req.getParameter("user_fields"));
 

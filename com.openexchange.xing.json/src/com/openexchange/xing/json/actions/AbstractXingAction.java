@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import javax.mail.internet.AddressException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -60,6 +61,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -182,6 +185,61 @@ public abstract class AbstractXingAction implements AJAXActionService {
             }
         }
         return optUserFields;
+    }
+
+    /**
+     * Get the value of the specified mandatory parameter from the specified {@link XingRequest}.
+     * 
+     * @param request
+     * @param param the parameter's name
+     * @return the value of the parameter
+     * @throws OXException if the parameter is missing from the request.
+     */
+    protected String getStringMandatoryParameter(XingRequest request, String param) throws OXException {
+        String pv = request.getParameter(param);
+        if (pv == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(param);
+        }
+        return pv;
+    }
+
+    /**
+     * Get the specified integer parameter from the specified request.
+     * 
+     * @param request
+     * @param param the parameter's name
+     * @return the parameter as integer, or -1 if not present.
+     * @throws OXException if the parameter value cannot be parsed to an integer
+     */
+    protected int getOptIntParameter(XingRequest request, String param) throws OXException {
+        String p = request.getParameter(param);
+        if (p != null) {
+            try {
+                return Integer.parseInt(p);
+            } catch (NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(param, p);
+            }
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * Validates the value of an email address
+     * 
+     * @param request
+     * @param email the mail address to validate
+     * @return the unicode representation of the mail address
+     * @throws OXException if the parameter is missing from the request.
+     */
+    protected String validateMailAddress(String email) throws OXException {
+        try {
+            final QuotedInternetAddress addr = new QuotedInternetAddress(email, false);
+            email = QuotedInternetAddress.toIDN(addr.getAddress());
+            return email;
+        } catch (final AddressException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
     }
 
     /**

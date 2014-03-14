@@ -65,8 +65,7 @@ import com.openexchange.xing.json.XingRequest;
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GetCommentsActivityAction extends AbstractNewsFeedAction {
-
+public class GetCommentsActivityAction extends AbstractXingAction {
     /**
      * Initializes a new {@link GetCommentsActivityAction}.
      */
@@ -84,9 +83,8 @@ public class GetCommentsActivityAction extends AbstractNewsFeedAction {
         int optLimit = getOptIntParameter(req, "limit");
         int optOffset = getOptIntParameter(req, "offset");
         Collection<UserField> optUserFields = getUserFields(req.getParameter("user_fields"));
-        
+
         Map<String, Object> response = getXingAPI(req).getComments(activityId, optLimit, optOffset, optUserFields);
         return new AJAXRequestResult(JSONCoercion.coerceToJSON(response));
     }
-
 }

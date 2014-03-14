@@ -81,16 +81,8 @@ public class CommentActivityAction extends AbstractXingAction {
      */
     @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String activityId = req.getParameter("activity_id");
-        String text = req.getParameter("text");
-
-        if (activityId == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("activity_id");
-        }
-
-        if (text == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("text");
-        }
+        String activityId = getStringMandatoryParameter(req, "activity_id");
+        String text = getStringMandatoryParameter(req, "text");
 
         if (text.length() > 600) {
             throw XingExceptionCodes.COMMENT_SIZE_EXCEEDED.create();
