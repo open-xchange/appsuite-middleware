@@ -68,16 +68,16 @@ import com.openexchange.xing.json.XingRequest;
 import com.openexchange.xing.session.WebAuthSession;
 
 /**
- * {@link FeedAction}
+ * {@link UserFeedAction}
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class FeedAction extends AbstractXingAction {
+public class UserFeedAction extends AbstractXingAction {
 
     /**
-     * Initializes a new {@link FeedAction}.
+     * Initializes a new {@link UserFeedAction}.
      */
-    public FeedAction(ServiceLookup serviceLookup) {
+    public UserFeedAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
@@ -86,10 +86,8 @@ public class FeedAction extends AbstractXingAction {
         Date optSince = null;
         Date optUntil = null;
         Collection<UserField> optUserFields = null;
-        
         String address = getMandatoryStringParameter(req, "email");
         address = validateMailAddress(address);
-        
         // Since/Until
         String since = req.getParameter("since");
         String until = req.getParameter("until");

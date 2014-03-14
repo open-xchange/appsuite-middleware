@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,88 @@
  *
  */
 
-package com.openexchange.xing.json.actions;
+package com.openexchange.ajax.xing.actions;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingExceptionCodes;
-import com.openexchange.xing.access.XingOAuthAccess;
-import com.openexchange.xing.exception.XingException;
-import com.openexchange.xing.json.XingRequest;
-import com.openexchange.xing.session.WebAuthSession;
-
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link ChangeStatusAction}
+ * {@link UserFeedRequest}
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public final class ChangeStatusAction extends AbstractXingAction {
+public class UserFeedRequest extends AbstractXingRequest<UserFeedResponse> {
 
+    private final String email;
+
+    private final long since;
+
+    private final long until;
+
+    private final int[] fields;
     /**
-     * Initializes a new {@link ChangeStatusAction}.
+     * Initializes a new {@link UserFeedRequest}.
+     * 
+     * @param foe
      */
-    public ChangeStatusAction(final ServiceLookup services) {
-        super(services);
+    public UserFeedRequest(final String email, final long since, final long until, final int[] fields, boolean foe) {
+        super(foe);
+        this.email = email;
+        this.since = since;
+        this.until = until;
+        this.fields = fields;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
     @Override
-    protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String message = getMandatoryStringParameter(req, "message");
-        // Get & validate email
-        String address = getMandatoryStringParameter(req, "email");
-        address = validateMailAddress(address);
+    public Method getMethod() {
+        return Method.GET;
+    }
 
-        final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
-        final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        final String xingId = xingAPI.findByEmail(address);
-
-        if (Strings.isEmpty(xingId)) {
-            // Already connected
-            throw XingExceptionCodes.NOT_A_MEMBER.create(address);
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "userfeed"));
+        params.add(new Parameter("email", email));
+        if (since > 0) {
+            params.add(new Parameter("since", since));
         }
-        xingAPI.changeStatusMessage(xingId, message);
+        if (until > 0) {
+            params.add(new Parameter("until", until));
+        }
+        if (fields.length > 0) {
+            params.add(new Parameter("user_fields", fields));
+        }
+        return params.toArray(new URLParameter[params.size()]);
+    }
 
-        return new AJAXRequestResult(Boolean.TRUE, "native");
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
+    public AbstractAJAXParser<? extends UserFeedResponse> getParser() {
+        return new UserFeedActionParser(failOnError);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

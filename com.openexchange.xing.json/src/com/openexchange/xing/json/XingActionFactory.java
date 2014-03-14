@@ -64,7 +64,7 @@ import com.openexchange.xing.json.actions.ContactRequestAction;
 import com.openexchange.xing.json.actions.CreateProfileAction;
 import com.openexchange.xing.json.actions.DeleteActivityAction;
 import com.openexchange.xing.json.actions.DeleteCommentActivityAction;
-import com.openexchange.xing.json.actions.FeedAction;
+import com.openexchange.xing.json.actions.UserFeedAction;
 import com.openexchange.xing.json.actions.GetActivityLikesAction;
 import com.openexchange.xing.json.actions.GetCommentsActivityAction;
 import com.openexchange.xing.json.actions.InviteRequestAction;
@@ -95,7 +95,7 @@ public class XingActionFactory implements AJAXActionServiceFactory {
         actions.put("invite", new InviteRequestAction(serviceLookup));
         actions.put("contact_request", new ContactRequestAction(serviceLookup));
         actions.put("newsfeed", new NewsFeedAction(serviceLookup));
-        actions.put("userfeed", new FeedAction(serviceLookup));
+        actions.put("userfeed", new UserFeedAction(serviceLookup));
         actions.put("create", new CreateProfileAction(serviceLookup));
         actions.put("comment", new CommentActivityAction(serviceLookup));
         actions.put("get_comments", new GetCommentsActivityAction(serviceLookup));

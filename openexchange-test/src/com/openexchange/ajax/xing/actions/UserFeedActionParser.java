@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,35 @@
  *
  */
 
-package com.openexchange.xing.json.actions;
+package com.openexchange.ajax.xing.actions;
 
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingExceptionCodes;
-import com.openexchange.xing.access.XingOAuthAccess;
-import com.openexchange.xing.exception.XingException;
-import com.openexchange.xing.json.XingRequest;
-import com.openexchange.xing.session.WebAuthSession;
-
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link ChangeStatusAction}
+ * {@link UserFeedActionParser}
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public final class ChangeStatusAction extends AbstractXingAction {
+public class UserFeedActionParser extends AbstractAJAXParser<UserFeedResponse> {
 
     /**
-     * Initializes a new {@link ChangeStatusAction}.
+     * Initializes a new {@link UserFeedActionParser}.
+     * 
+     * @param failOnError
      */
-    public ChangeStatusAction(final ServiceLookup services) {
-        super(services);
+    protected UserFeedActionParser(boolean failOnError) {
+        super(failOnError);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
     @Override
-    protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String message = getMandatoryStringParameter(req, "message");
-        // Get & validate email
-        String address = getMandatoryStringParameter(req, "email");
-        address = validateMailAddress(address);
-
-        final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
-        final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        final String xingId = xingAPI.findByEmail(address);
-
-        if (Strings.isEmpty(xingId)) {
-            // Already connected
-            throw XingExceptionCodes.NOT_A_MEMBER.create(address);
-        }
-        xingAPI.changeStatusMessage(xingId, message);
-
-        return new AJAXRequestResult(Boolean.TRUE, "native");
+    protected UserFeedResponse createResponse(Response response) throws JSONException {
+        return new UserFeedResponse(response);
     }
 
 }

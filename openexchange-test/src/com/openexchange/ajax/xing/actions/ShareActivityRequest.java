@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,78 @@
  *
  */
 
-package com.openexchange.xing.json.actions;
+package com.openexchange.ajax.xing.actions;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingExceptionCodes;
-import com.openexchange.xing.access.XingOAuthAccess;
-import com.openexchange.xing.exception.XingException;
-import com.openexchange.xing.json.XingRequest;
-import com.openexchange.xing.session.WebAuthSession;
-
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link ChangeStatusAction}
+ * {@link ShareActivityRequest}
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public final class ChangeStatusAction extends AbstractXingAction {
+public class ShareActivityRequest extends AbstractXingRequest<ShareActivityResponse> {
+    
+    private final String activityId;
+
+    private final String text;
 
     /**
-     * Initializes a new {@link ChangeStatusAction}.
+     * Initializes a new {@link ShareActivityRequest}.
+     * 
+     * @param foe
      */
-    public ChangeStatusAction(final ServiceLookup services) {
-        super(services);
+    public ShareActivityRequest(final String activityId, final String text, boolean foe) {
+        super(foe);
+        this.activityId = activityId;
+        this.text = text;
+
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
     @Override
-    protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String message = getMandatoryStringParameter(req, "message");
-        // Get & validate email
-        String address = getMandatoryStringParameter(req, "email");
-        address = validateMailAddress(address);
+    public Method getMethod() {
+        return Method.POST;
+    }
 
-        final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
-        final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        final String xingId = xingAPI.findByEmail(address);
-
-        if (Strings.isEmpty(xingId)) {
-            // Already connected
-            throw XingExceptionCodes.NOT_A_MEMBER.create(address);
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        List<URLParameter> params = new ArrayList<URLParameter>();
+        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "share_activity"));
+        params.add(new URLParameter("id", activityId));
+        if (text != null && text.length() > 0) {
+            params.add(new URLParameter("text", text));
         }
-        xingAPI.changeStatusMessage(xingId, message);
+        return params.toArray(new URLParameter[params.size()]);
+    }
 
-        return new AJAXRequestResult(Boolean.TRUE, "native");
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
+    public AbstractAJAXParser<? extends ShareActivityResponse> getParser() {
+        return new ShareActivityParser(failOnError);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }
