@@ -222,7 +222,7 @@ public class RESTUtility {
             params,
             null,
             session,
-            Arrays.asList(XingServerException._200_OK, XingServerException._201_CREATED, XingServerException._206_PARTIAL_CONTENT));
+            Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT));
     }
 
     /**
@@ -280,7 +280,7 @@ public class RESTUtility {
             params,
             requestInformation,
             session,
-            Arrays.asList(XingServerException._200_OK, XingServerException._201_CREATED, XingServerException._206_PARTIAL_CONTENT));
+            Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT));
     }
 
     /**
