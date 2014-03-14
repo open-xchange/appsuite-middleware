@@ -423,7 +423,7 @@ final class ListLsubCollection {
         /*
          * Consistency check
          */
-        checkConsistency();
+        checkConsistency(imapStore);
         /*
          * Status if enabled
          */
@@ -546,7 +546,7 @@ final class ListLsubCollection {
         }
     }
 
-    private void checkConsistency() {
+    private void checkConsistency(final IMAPStore imapStore) {
         final ListLsubEntryImpl rootEntry = listMap.get(ROOT_FULL_NAME);
         /*
          * Ensure every LSUB'ed entry occurs in LIST'ed entries
@@ -561,28 +561,34 @@ final class ListLsubCollection {
                     /*
                      * Either shared or user namespace
                      */
-                    final ListLsubEntryImpl lle = new ListLsubEntryImpl(entry.getValue(), true);
-                    listMap.put(fullName, lle);
-                    /*
-                     * Determine parent
-                     */
-                    final int pos = fullName.lastIndexOf(lle.getSeparator());
-                    if (pos >= 0) {
+                    if (existsSafe(fullName, imapStore)) {
+                        final ListLsubEntryImpl lle = new ListLsubEntryImpl(entry.getValue(), true);
+                        listMap.put(fullName, lle);
                         /*
-                         * Non-root level
+                         * Determine parent
                          */
-                        final String parentFullName = fullName.substring(0, pos);
-                        final ListLsubEntryImpl parent = listMap.get(parentFullName);
-                        {
-                            lle.setParent(parent);
-                            parent.addChild(lle);
+                        final int pos = fullName.lastIndexOf(lle.getSeparator());
+                        if (pos >= 0) {
+                            /*
+                             * Non-root level
+                             */
+                            final String parentFullName = fullName.substring(0, pos);
+                            final ListLsubEntryImpl parent = listMap.get(parentFullName);
+                            {
+                                lle.setParent(parent);
+                                parent.addChild(lle);
+                            }
+                        } else {
+                            /*
+                             * Root level
+                             */
+                            lle.setParent(rootEntry);
+                            rootEntry.addChild(lle);
                         }
                     } else {
-                        /*
-                         * Root level
-                         */
-                        lle.setParent(rootEntry);
-                        rootEntry.addChild(lle);
+                        IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
+                        final ListLsubEntryImpl lle = entry.getValue();
+                        dropEntryFrom(lle, listMap);
                     }
                 } else {
                     /*
@@ -608,6 +614,16 @@ final class ListLsubCollection {
         if (null != p) {
             p.removeChild(lle);
         }
+    }
+
+    private static boolean existsSafe(final String fullName, final IMAPStore imapStore) {
+        try {
+            return imapStore.getFolder(fullName).exists();
+        } catch (final MessagingException e) {
+            // Swallow
+            LOG.debug("Failed checking existence for {}", fullName, e);
+        }
+        return false;
     }
 
     /**
