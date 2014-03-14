@@ -81,7 +81,8 @@ public final class ChangeStatusAction extends AbstractXingAction {
 
         final String message = getMandatoryStringParameter(req, "message");
         // Get & validate email
-        String address = getMandatoryStringParameter(req, "address");
+
+        String address = getMandatoryStringParameter(req, "email");
         address = validateMailAddress(address);
 
         final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
