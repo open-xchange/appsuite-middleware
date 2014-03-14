@@ -959,7 +959,7 @@ public class XingAPI<S extends Session> {
             final JSONObject response = RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
-                "/v1/activities/" + activityId + "comments",
+                "/activities/" + activityId + "/comments",
                 VERSION,
                 params.toArray(new String[0]),
                 session).toObject();
@@ -983,7 +983,7 @@ public class XingAPI<S extends Session> {
             final JSONObject response = RESTUtility.request(
                 Method.DELETE,
                 session.getAPIServer(),
-                "/v1/activities/" + activityId + "comments/" + commentId,
+                "/activities/" + activityId + "comments/" + commentId,
                 VERSION,
                 session).toObject();
             return response.asMap();

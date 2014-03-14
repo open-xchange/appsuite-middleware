@@ -47,46 +47,70 @@
  *
  */
 
-package com.openexchange.xing.json.actions;
+package com.openexchange.ajax.xing.actions;
 
-import java.util.Collection;
-import java.util.Map;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.UserField;
-import com.openexchange.xing.exception.XingException;
-import com.openexchange.xing.json.XingRequest;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+
 
 /**
- * {@link GetCommentsActivityRequestAction}
- * 
+ * {@link CommentActivityRequest}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GetCommentsActivityRequestAction extends AbstractNewsFeedAction {
+public class CommentActivityRequest extends AbstractXingRequest<CommentActivityResponse> {
+    
+    private final String activityId;
+    
+    private final String text;
+    
 
     /**
-     * Initializes a new {@link GetCommentsActivityRequestAction}.
+     * Initializes a new {@link CommentActivityRequest}.
      */
-    public GetCommentsActivityRequestAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    public CommentActivityRequest(final String activityId, final String text, boolean foe) {
+        super(foe);
+        this.activityId = activityId;
+        this.text = text;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
     @Override
-    protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String activityId = getStringMandatoryParameter(req, "activity_id");
-        int optLimit = getOptIntParameter(req, "limit");
-        int optOffset = getOptIntParameter(req, "offset");
-        Collection<UserField> optUserFields = getUserFields(req.getParameter("user_fields"));
-        
-        Map<String, Object> response = getXingAPI(req).getComments(activityId, optLimit, optOffset, optUserFields);
-        return new AJAXRequestResult(JSONCoercion.coerceToJSON(response));
+    public Method getMethod() {
+        return Method.POST;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "comment"));
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    @Override
+    public AbstractAJAXParser<? extends CommentActivityResponse> getParser() {
+        return new CommentActivityParser(failOnError);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

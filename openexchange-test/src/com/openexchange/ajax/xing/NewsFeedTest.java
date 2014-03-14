@@ -54,6 +54,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.xing.actions.GetCommentsRequest;
+import com.openexchange.ajax.xing.actions.GetCommentsResponse;
 import com.openexchange.ajax.xing.actions.NewsFeedRequest;
 import com.openexchange.ajax.xing.actions.NewsFeedResponse;
 import com.openexchange.exception.OXException;
@@ -137,5 +139,24 @@ public class NewsFeedTest extends AbstractAJAXSession {
         final NewsFeedResponse response = client.execute(request);
         assertNotNull(response);
         assertEquals("XING-0021", response.getException().getErrorCode());
+    }
+    
+    public void testCommentActivity() {
+        
+    }
+    
+    /**
+     * Test get all comments for a specific activity
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    public void testGetComments() throws OXException, IOException, JSONException {
+        JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
+        String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
+        
+        final GetCommentsRequest request = new GetCommentsRequest(activityId, -1, -1, new int[0], true);
+        final GetCommentsResponse response = client.execute(request);
+        assertNotNull(response);
     }
 }

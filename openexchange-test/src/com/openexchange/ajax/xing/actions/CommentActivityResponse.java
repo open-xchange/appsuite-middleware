@@ -47,46 +47,25 @@
  *
  */
 
-package com.openexchange.xing.json.actions;
+package com.openexchange.ajax.xing.actions;
 
-import java.util.Collection;
-import java.util.Map;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.UserField;
-import com.openexchange.xing.exception.XingException;
-import com.openexchange.xing.json.XingRequest;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link GetCommentsActivityRequestAction}
+ * {@link CommentActivityResponse}
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GetCommentsActivityRequestAction extends AbstractNewsFeedAction {
+public class CommentActivityResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link GetCommentsActivityRequestAction}.
+     * Initializes a new {@link CommentActivityResponse}.
+     * 
+     * @param response
      */
-    public GetCommentsActivityRequestAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
-     */
-    @Override
-    protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String activityId = getStringMandatoryParameter(req, "activity_id");
-        int optLimit = getOptIntParameter(req, "limit");
-        int optOffset = getOptIntParameter(req, "offset");
-        Collection<UserField> optUserFields = getUserFields(req.getParameter("user_fields"));
-        
-        Map<String, Object> response = getXingAPI(req).getComments(activityId, optLimit, optOffset, optUserFields);
-        return new AJAXRequestResult(JSONCoercion.coerceToJSON(response));
+    protected CommentActivityResponse(Response response) {
+        super(response);
     }
 
 }
