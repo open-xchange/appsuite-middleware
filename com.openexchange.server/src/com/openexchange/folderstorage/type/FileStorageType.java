@@ -52,7 +52,7 @@ package com.openexchange.folderstorage.type;
 import com.openexchange.folderstorage.Type;
 
 /**
- * {@link FileStorageType} - The messaging type.
+ * {@link FileStorageType} - The file storage type.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
