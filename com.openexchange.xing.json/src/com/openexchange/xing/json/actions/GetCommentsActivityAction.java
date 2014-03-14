@@ -50,83 +50,43 @@
 package com.openexchange.xing.json.actions;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
-import javax.mail.internet.AddressException;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.UserField;
-import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingExceptionCodes;
-import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
-import com.openexchange.xing.session.WebAuthSession;
 
 /**
- * {@link FeedRequestAction}
+ * {@link GetCommentsActivityAction}
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class FeedRequestAction extends AbstractXingAction {
+public class GetCommentsActivityAction extends AbstractNewsFeedAction {
 
     /**
-     * Initializes a new {@link FeedRequestAction}.
+     * Initializes a new {@link GetCommentsActivityAction}.
      */
-    public FeedRequestAction(ServiceLookup serviceLookup) {
+    public GetCommentsActivityAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
+     */
     @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        Date optSince = null;
-        Date optUntil = null;
-        Collection<UserField> optUserFields = null;
-
-        // Since/Until
-        String since = req.getParameter("since");
-        String until = req.getParameter("until");
-
-        String address = req.getParameter("email");
-        try {
-            final QuotedInternetAddress addr = new QuotedInternetAddress(address, false);
-            address = QuotedInternetAddress.toIDN(addr.getAddress());
-        } catch (final AddressException e) {
-            throw MimeMailException.handleMessagingException(e);
-        }
-
-        if (since != null && until != null) {
-            throw XingExceptionCodes.MUTUALLY_EXCLUSIVE.create();
-        }
-
-        if (since != null) {
-            optSince = new Date(Long.parseLong(since));
-        } else if (until != null) {
-            optUntil = new Date(Long.parseLong(until));
-        }
-
-        // User Fields
-        optUserFields = getUserFields(req.getParameter("user_fields"));
-
-        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
-        final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        final String xingId = xingAPI.findByEmail(address);
-        if (Strings.isEmpty(xingId)) {
-            // Already connected
-            throw XingExceptionCodes.NOT_A_MEMBER.create(address);
-        }
-
-        Map<String, Object> feed = xingAPI.getFeed(xingId, optSince, optUntil, optUserFields);
-        JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(feed);
-
-        return new AJAXRequestResult(result);
+        String activityId = getStringMandatoryParameter(req, "activity_id");
+        int optLimit = getOptIntParameter(req, "limit");
+        int optOffset = getOptIntParameter(req, "offset");
+        Collection<UserField> optUserFields = getUserFields(req.getParameter("user_fields"));
+        
+        Map<String, Object> response = getXingAPI(req).getComments(activityId, optLimit, optOffset, optUserFields);
+        return new AJAXRequestResult(JSONCoercion.coerceToJSON(response));
     }
 
 }
