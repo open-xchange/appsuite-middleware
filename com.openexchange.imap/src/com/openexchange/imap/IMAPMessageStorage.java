@@ -1300,7 +1300,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             }
             usedFields.add(MailField.toField(effectiveSortField.getListField()));
-            if (MailSortField.FLAG_SEEN.equals(effectiveSortField)) {
+            {
                 // Second-level sort field
                 usedFields.add(MailField.RECEIVED_DATE);
             }
