@@ -141,11 +141,19 @@ public class RTJSONActivator extends AJAXModuleActivator {
 
         getService(CapabilityService.class).declareCapability("rt");
         managementHouseKeeper.exposeManagementObjects();
+
+        /*
+         * Register all RealtimeJanitor services contained in this bundle
+         */
+        for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
+            registerService(RealtimeJanitor.class, realtimeJanitor);
+        }
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
         ManagementHouseKeeper.getInstance().cleanup();
+        RealtimeJanitors.getInstance().cleanup();
         unregisterService(realtimeActions);
         JSONServiceRegistry.SERVICES.set(null);
         super.stop(context);

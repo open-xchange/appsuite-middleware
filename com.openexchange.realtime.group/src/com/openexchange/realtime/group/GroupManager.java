@@ -61,6 +61,7 @@ import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.group.commands.LeaveStanza;
 import com.openexchange.realtime.group.osgi.GroupServiceRegistry;
+import com.openexchange.realtime.group.osgi.RealtimeJanitors;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceExceptionCode;
@@ -84,6 +85,7 @@ public class GroupManager implements RealtimeJanitor {
     public GroupManager() {
         super();
         clientMap = Multimaps.synchronizedMultimap(HashMultimap.<ID, ID> create());
+        RealtimeJanitors.getInstance().addJanitor(this);
     }
 
     /**

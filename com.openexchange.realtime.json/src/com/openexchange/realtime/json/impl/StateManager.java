@@ -50,21 +50,20 @@
 package com.openexchange.realtime.json.impl;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
 
 /**
  * The {@link StateManager} manages the state of connected clients.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class StateManager {
+public class StateManager implements RealtimeJanitor {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StateManager.class);
 
@@ -86,16 +85,6 @@ public class StateManager {
             RTClientState meantime = states.putIfAbsent(id, state);
             created = meantime == null;
             state = (created) ? state : meantime;
-            if (created) {
-                id.on(ID.Events.DISPOSE, new IDEventHandler() {
-
-                    @Override
-                    public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                        states.remove(id);
-                        transmitters.remove(id);
-                    }
-                });
-            }
         }
         StanzaTransmitter transmitter = transmitters.get(id);
 
@@ -131,10 +120,14 @@ public class StateManager {
     public void timeOutStaleStates(long timestamp) {
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
             if (state.isTimedOut(timestamp)) {
+                /*
+                 * The client timed out: if he'd be still active and was just rerouted to another backend the cleanup would have already
+                 * happened during enrol on the other node. As we reached this code there was no cleanup yet and we still have to do
+                 * it cluster-wide.
+                 */
                 LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
                 GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
                 globalRealtimeCleanup.cleanForId(state.getId());
-                state.getId().dispose(this, null);
             } else {
                 state.getId().trigger(ID.Events.REFRESH, this);
             }
@@ -149,6 +142,13 @@ public class StateManager {
      */
     public boolean isConnected(ID id) {
         return states.containsKey(id);
+    }
+
+    @Override
+    public void cleanupForId(ID id) {
+        LOG.debug("Cleanup for ID: {}", id);
+        states.remove(id);
+        transmitters.remove(id);
     }
 
 }

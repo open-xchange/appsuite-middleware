@@ -140,7 +140,7 @@ public abstract class AbstractManagementHouseKeeper {
     }
 
     /**
-     * Expose all known {@link ManagementObject}s
+     * Conceal all known {@link ManagementObject}s
      *
      * @throws OXException
      */

@@ -83,12 +83,16 @@ public class RTGroupActivator extends HousekeepingActivator implements BundleAct
         getService(PayloadTreeConverter.class).declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
         registerService(SimplePayloadConverter.class, new GroupCommand2JSON());
         registerService(SimplePayloadConverter.class, new JSON2GroupCommand());
+        for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
+            registerService(RealtimeJanitor.class, realtimeJanitor);
+        }
 
     }
 
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
+        RealtimeJanitors.getInstance().cleanup();
         GroupServiceRegistry.SERVICES.set(null);
         GroupDispatcher.GROUPMANAGER_REF.set(null);
     }

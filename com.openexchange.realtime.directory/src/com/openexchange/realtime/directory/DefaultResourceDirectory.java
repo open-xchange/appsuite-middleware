@@ -113,17 +113,13 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
 
     @Override
     public IDMap<Resource> remove(ID id) throws OXException {
-        return notifyRemoved(doRemove(id), true);
+        return notifyRemoved(doRemove(id));
     }
     
-    
-    public IDMap<Resource> removeWithoutDisposeEvent(ID id) throws OXException {
-        return notifyRemoved(doRemove(id), false);
-    }
 
     @Override
     public IDMap<Resource> remove(Collection<ID> ids) throws OXException {
-        return notifyRemoved(doRemove(ids), true);
+        return notifyRemoved(doRemove(ids));
     }
 
     protected void notifyAdded(ID id, Resource addedResource) {
@@ -142,15 +138,11 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
      * Notify registered ChangeListeners about the removal of Resources from the ResourceDirectory.
      * 
      * @param removedResources The Resources that were removed
-     * @param triggerDispose True if the ID.Events.DISPOSE event should be triggered on the ID that is associated with the Resource
      * @return the IDMap with removed Resources
      */
-    private IDMap<Resource> notifyRemoved(IDMap<Resource> removedResources, boolean triggerDispose) {
+    private IDMap<Resource> notifyRemoved(IDMap<Resource> removedResources) {
         for (ChangeListener listener : listeners) {
             for (Entry<ID, Resource> entry : removedResources.entrySet()) {
-                if (triggerDispose) {
-                    entry.getKey().trigger(ID.Events.DISPOSE, this);
-                }
                 listener.removed(entry.getKey(), entry.getValue());
             }
         }

@@ -176,7 +176,7 @@ public class RTEventManager implements RTEventManagerService {
             List<RTEventSubscription> meantime = subscriptions.putIfAbsent(id, list);
             list = (meantime != null) ? meantime : list;
             if (meantime == null) {
-                id.on("dispose", new IDEventHandler() {
+                id.on(ID.Events.DISPOSE, new IDEventHandler() {
                     
                     @Override
                     public void handle(String event, ID id, Object source, Map<String, Object> properties) {

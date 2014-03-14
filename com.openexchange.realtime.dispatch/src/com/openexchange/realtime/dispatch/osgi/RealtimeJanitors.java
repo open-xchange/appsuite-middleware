@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,25 @@
  *
  */
 
-package com.openexchange.realtime.json.osgi;
+package com.openexchange.realtime.dispatch.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
-
+import com.openexchange.realtime.cleanup.AbstractJanitors;
 /**
- * {@link JSONServiceRegistry} - Singleton that acts as central accesspoint for classes of the bundle.
+ * {@link RealtimeJanitors}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class JSONServiceRegistry implements ServiceLookup {
-
-    private static final JSONServiceRegistry INSTANCE = new JSONServiceRegistry();
-    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Encapsulated constructor.
-     */
-    private JSONServiceRegistry() {
-    }
+public class RealtimeJanitors extends AbstractJanitors {
+    
+    private static RealtimeJanitors instance = new RealtimeJanitors();
 
     /**
-     * Get the Registry singleton.
+     * Return the instance of the RealtimeJanitors singleton
      *
-     * @return the Registry singleton
+     * @return the instance of the RealtimeJanitors singleton
      */
-    public static JSONServiceRegistry getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public <S> S getService(Class<? extends S> clazz) {
-        return SERVICES.get().getService(clazz);
-    }
-
-    @Override
-    public <S> S getOptionalService(Class<? extends S> clazz) {
-        return SERVICES.get().getOptionalService(clazz);
+    public static RealtimeJanitors getInstance() {
+        return instance;
     }
 }
+

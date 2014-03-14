@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.dispatch.osgi;
 
+import java.util.Collection;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
@@ -98,8 +99,10 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
 
         final LocalMessageDispatcher dispatcher = new LocalMessageDispatcherImpl();
         registerService(LocalMessageDispatcher.class, dispatcher);
-        RealtimeJanitor gate = dispatcher.getGate();
-        registerService(RealtimeJanitor.class, gate);
+        Collection<RealtimeJanitor> realtimeJanitors = RealtimeJanitors.getInstance().getJanitors();
+        for (RealtimeJanitor realtimeJanitor : realtimeJanitors) {
+            registerService(RealtimeJanitor.class, realtimeJanitor);
+        }
 
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 
@@ -121,6 +124,7 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
+        RealtimeJanitors.getInstance().cleanup();
         ManagementHouseKeeper.getInstance().cleanup();
         RealtimeServiceRegistry.SERVICES.set(null);
     }

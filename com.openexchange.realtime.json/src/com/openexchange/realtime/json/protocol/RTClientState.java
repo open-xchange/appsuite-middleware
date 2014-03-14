@@ -54,7 +54,8 @@ import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link RTClientState} - 
+ * {@link RTClientState} - The {@link RTClientState} encapsulates the state of a connected client by keeping track of the sequenced and
+ * unsequenced Stanzas that still have to be delivered to the client.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

@@ -153,6 +153,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         
         directory.addChannel(globalDispatcher.getChannel());
         managementHouseKeeper.exposeManagementObjects();
+        registerService(RealtimeJanitor.class, globalDispatcher);
     }
 
     @Override

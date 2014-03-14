@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
@@ -65,7 +66,12 @@ import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.Component.EvictionPolicy;
 import com.openexchange.realtime.ComponentHandle;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.RealtimeCleanup;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.osgi.RealtimeServiceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
@@ -80,12 +86,15 @@ import com.openexchange.threadpool.ThreadPoolService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class SyntheticChannel implements Channel, Runnable {
+public class SyntheticChannel implements Channel, Runnable, RealtimeJanitor {
 
     private static final int NUMBER_OF_RUNLOOPS = 16;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyntheticChannel.class);
     private static final String SENDLOCK = "syntheticChannel";
+
+    public static final AtomicReference<GlobalRealtimeCleanup> GLOBAL_CLEANUP_REF = null;
+    private LocalRealtimeCleanup localRealtimeCleanup = null;
 
     private final ConcurrentHashMap<String, Component> components = new ConcurrentHashMap<String, Component>();
     private final ConcurrentHashMap<ID, ComponentHandle> handles = new ConcurrentHashMap<ID, ComponentHandle>();
@@ -101,7 +110,8 @@ public class SyntheticChannel implements Channel, Runnable {
 
     private final AtomicBoolean shuttingDown = new AtomicBoolean(false);
 
-    public SyntheticChannel(ServiceLookup services) {
+    public SyntheticChannel(ServiceLookup services, LocalRealtimeCleanup localRealtimeCleanup) {
+        this.localRealtimeCleanup = localRealtimeCleanup;
         for (int i = 0; i < NUMBER_OF_RUNLOOPS; i++) {
             SyntheticChannelRunLoop rl = new SyntheticChannelRunLoop("message-handler-" + i);
             runLoops.add(rl);
@@ -233,7 +243,9 @@ public class SyntheticChannel implements Channel, Runnable {
             long now = System.currentTimeMillis();
 
             if (now - last >= millis) {
-                id.dispose(SyntheticChannel.this, null);
+                if(id.isDisposable()) {
+                    getRealtimeCleanup().cleanForId(id);
+                }
             }
         }
 
@@ -241,8 +253,11 @@ public class SyntheticChannel implements Channel, Runnable {
     }
 
     public void shutdown() {
+        RealtimeCleanup realtimeCleanup = getRealtimeCleanup();
         for(ID id: handles.keySet()) {
-            id.dispose(SyntheticChannel.this, null);
+            if(id.isDisposable()) {
+                realtimeCleanup.cleanForId(id);
+            }
         }
     }
 
@@ -251,11 +266,11 @@ public class SyntheticChannel implements Channel, Runnable {
         if (shuttingDown.get()) {
             return;
         }
-        for(TimeoutEviction e: new ArrayList<TimeoutEviction>(timeouts.values())) {
+        for(TimeoutEviction eviction: new ArrayList<TimeoutEviction>(timeouts.values())) {
             try {
-                e.tick();
-            } catch (OXException e1) {
-                LOG.error("", e1);
+                eviction.tick();
+            } catch (OXException e) {
+                LOG.error("", e);
             }
         }
     }
@@ -324,4 +339,24 @@ public class SyntheticChannel implements Channel, Runnable {
 
     };
 
+    /**
+     * Try to get the cluster wide GlobalRealtimeCleanup service first. If that fails get the LocalRealtimeCleanup service that is provided
+     * by this bundle and thus should always be available.
+     * 
+     * @return the first available RealtimeCleanup service
+     */
+    private RealtimeCleanup getRealtimeCleanup() {
+        RealtimeCleanup realtimeCleanup = GLOBAL_CLEANUP_REF.get();
+        if (realtimeCleanup == null) {
+            LOG.error("Unable to issue cluster wide cleanup due to missing GlobalRealtimeCleanup. Falling back to node wide cleanup");
+            realtimeCleanup = localRealtimeCleanup;
+        }
+        return realtimeCleanup;
+    }
+
+    @Override
+    public void cleanupForId(ID id) {
+        ComponentHandle componentHandle = handles.get(id);
+        componentHandle.dispose();
+    }
 }

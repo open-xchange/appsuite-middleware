@@ -51,6 +51,7 @@ package com.openexchange.realtime;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
@@ -78,6 +79,11 @@ public @NotThreadSafe interface ComponentHandle {
      * Get the id used to direct messages at this {@link ComponentHandle}
      * @return the id used to direct messages at this {@link ComponentHandle}
      */
-    ID getID();
+    ID getId();
+
+    /**
+     * Dispose this Componenthandle
+     */
+    void dispose();
 
 }

@@ -533,13 +533,13 @@ public class ID implements Serializable {
     }
 
     /**
-     * Dispose this ID.
+     * Check if this ID is disposable. This may be vetoed by components that listen on ID.Events.BEFOREDISPOSE (e.g. SyntheticChannel)
      * 
      * @param source The event source
      * @param properties The event properties
      * @return False if the ID wasn't disposed due to a veto or an ongoing dispose call
      */
-    public boolean dispose(Object source, Map<String, Object> properties) {
+    public boolean isDisposable() {
         Boolean currentValue = DISPOSING.putIfAbsent(this, Boolean.TRUE);
         if (currentValue == Boolean.TRUE) {
             return false;
@@ -549,7 +549,6 @@ public class ID implements Serializable {
             this.trigger(Events.BEFOREDISPOSE, this, vetoProperties);
             Boolean veto = (Boolean) vetoProperties.get("veto");
             if (veto == null || !veto) {
-                this.trigger(Events.DISPOSE, source, properties);
                 return true;
             }
             return false;
@@ -579,13 +578,6 @@ public class ID implements Serializable {
          * the properties
          */
         public static final String BEFOREDISPOSE = "beforedispose";
-
-        /**
-         * This event is triggered, when an ID goes offline. You can use this to free up resources this ID uses, for example state
-         * information associated with the ID. Use {@link ID#dispose(Object, Map)} to give EventHandlers a chance to veto the disposal of
-         * the ID.
-         */
-        public static final String DISPOSE = "dispose";
 
         /**
          * This event is triggered to ensure that resources for this ID aren't freed up by eviction policies or sth. similar.

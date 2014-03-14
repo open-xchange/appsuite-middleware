@@ -104,7 +104,7 @@ public class JoinCommand implements GroupCommand {
     
     private boolean shouldExecuteAsynchronously(GroupDispatcher groupDispatcher) {
         try {
-            return ActionHandler.isAsynchronous(groupDispatcher.getClass().getMethod("getWelcomeMessage", ID.class));            
+            return ActionHandler.isAsynchronous(groupDispatcher.getClass().getMethod("getWelcomeMessage", ID.class));
         } catch (SecurityException e) {
             return false;
         } catch (NoSuchMethodException e) {

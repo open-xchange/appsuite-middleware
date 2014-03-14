@@ -53,7 +53,6 @@ import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 
-
 /**
  * {@link GlobalRealtimeCleanup} - A central service that can be used for cluster-wide cleanup tasks of realtime components. The realtime
  * framework has to manage various states at different places. Under certain conditions e.g. a client leaves or a {@link GroupDispatcher}

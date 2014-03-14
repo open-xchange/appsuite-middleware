@@ -112,7 +112,7 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
 
     private boolean isDestinedForID(ID destination, MessageDispatch messageDispatch) {
         ComponentHandle handle = messageDispatch.getHandle();
-        ID currentID = handle.getID();
+        ID currentID = handle.getId();
         return currentID.equals(destination);
     }
 

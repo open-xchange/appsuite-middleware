@@ -86,11 +86,13 @@ import com.openexchange.server.ServiceExceptionCode;
  * the introspection magic.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+
 public class GroupDispatcher implements ComponentHandle {
 
     /** The logger constant. */
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupDispatcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupDispatcher.class);
 
     public static final AtomicReference<GroupManager> GROUPMANAGER_REF = new AtomicReference<GroupManager>();
 
@@ -127,35 +129,9 @@ public class GroupDispatcher implements ComponentHandle {
      */
     public GroupDispatcher(ID id, ActionHandler handler) {
         super();
-        groupId = id;
+        this.groupId = id;
         this.handler = handler;
         final AtomicReference<Set<ID>> idsRef = this.idsRef;
-        id.on(ID.Events.DISPOSE, new IDEventHandler() {
-
-            @Override
-            public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                try {
-                    if (!isDisposed) {
-                        isDisposed = true;
-                     // Find any valid member identifier
-                        ID memberId = null;
-                        if (properties != null) {
-                            memberId = (ID) properties.get("id");
-                        }
-                        if (null == memberId) {
-                            final Set<ID> ids = idsRef.get();
-                            memberId = ids.isEmpty() ? null : ids.iterator().next();
-                        }
-                        if (memberId == null) {
-                            memberId = id;
-                        }
-                        onDispose(memberId != null ? memberId : id);
-                    }
-                } catch (OXException e) {
-                    LOG.error("", e);
-                }
-            }
-        });
     }
 
     /**
@@ -327,7 +303,6 @@ public class GroupDispatcher implements ComponentHandle {
         LOG.debug("{} is joining {},", id, groupId);
 
         stamps.put(id, stamp);
-        id.on(ID.Events.DISPOSE, LEAVE);
         if (first) {
             firstJoined(id);
         }
@@ -350,8 +325,6 @@ public class GroupDispatcher implements ComponentHandle {
         beforeLeave(id);
 
         LOG.debug("{} is leaving {}", id, groupId);
-
-        id.off("dispose", LEAVE);
 
         // Perform a compare-and-set to atomically remove
         boolean removed = false;
@@ -383,7 +356,7 @@ public class GroupDispatcher implements ComponentHandle {
             properties.put("id", id);
             onDispose(id);
             isDisposed = true;
-            boolean isDisposable = groupId.dispose(this, properties);
+            boolean isDisposable = groupId.isDisposable();
             /*
              * If nobody vetoed the disposal of this GroupDispatcher we have to issue a cluster wide cleanup to remove entries from
              * StanzaSequenceGate instances
@@ -426,6 +399,7 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * Get the id of this group
      */
+    @Override
     public ID getId() {
         return groupId;
     }
@@ -525,18 +499,6 @@ public class GroupDispatcher implements ComponentHandle {
         LOG.error("Couldn't find matching handler for {}. \nUse default", stanza);
     }
 
-    private final IDEventHandler LEAVE = new IDEventHandler() {
-
-        @Override
-        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-            try {
-                leave(id);
-            } catch (OXException e) {
-                LOG.error("Error while handling LEAVE for ID:{}", id, e);
-            }
-        }
-    };
-
     @Override
     public boolean shouldBeDoneInGlobalThread(Stanza stanza) {
         PayloadElement payload = stanza.getPayload();
@@ -570,8 +532,22 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     @Override
-    public ID getID() {
-        return groupId;
+    public void dispose() {
+        try {
+          if (!isDisposed) {
+              isDisposed = true;
+           // Find any valid member identifier
+              ID memberId = null;
+              final Set<ID> ids = idsRef.get();
+              memberId = ids.isEmpty() ? null : ids.iterator().next();
+              if (memberId == null) {
+                  memberId = groupId;
+              }
+              onDispose(memberId);
+          }
+      } catch (OXException e) {
+          LOG.error("", e);
+      }
     }
 
 }

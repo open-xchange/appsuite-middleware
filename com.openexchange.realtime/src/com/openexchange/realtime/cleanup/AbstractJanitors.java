@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,66 @@
  *
  */
 
-package com.openexchange.realtime.json.osgi;
+package com.openexchange.realtime.cleanup;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.ConcurrentHashSet;
 
 /**
- * {@link JSONServiceRegistry} - Singleton that acts as central accesspoint for classes of the bundle.
+ * {@link AbstractJanitors} - Collection of RealtimeJanitors on bundle level.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class JSONServiceRegistry implements ServiceLookup {
+public abstract class AbstractJanitors {
 
-    private static final JSONServiceRegistry INSTANCE = new JSONServiceRegistry();
-    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Encapsulated constructor.
-     */
-    private JSONServiceRegistry() {
-    }
+    private final Set<RealtimeJanitor> janitors;
 
     /**
-     * Get the Registry singleton.
+     * Initializes a new {@link AbstractJanitor}.
      *
-     * @return the Registry singleton
+     * @param janitors
      */
-    public static JSONServiceRegistry getInstance() {
-        return INSTANCE;
+    protected AbstractJanitors() {
+        super();
+        janitors = new ConcurrentHashSet<RealtimeJanitor>();
     }
 
-    @Override
-    public <S> S getService(Class<? extends S> clazz) {
-        return SERVICES.get().getService(clazz);
+    /**
+     * Reset all states to uninitialized.
+     */
+    public void cleanup() throws OXException {
+        janitors.clear();
     }
 
-    @Override
-    public <S> S getOptionalService(Class<? extends S> clazz) {
-        return SERVICES.get().getOptionalService(clazz);
+    /**
+     * Add a new RealtimeJanitor
+     *
+     * @param janitor The {@link RealimteJanitor} to add
+     * @return true if the object was successfully added, false if an Object with the same name already exists.
+     */
+    public boolean addJanitor(RealtimeJanitor janitor) {
+        return janitors.add(janitor);
     }
+
+    /**
+     * Remove a RealtimeJanitor
+     *
+     * @param janitor The {@link RealimteJanitor} to remove
+     * @return true if the object was successfully removed
+     */
+    public boolean removeJanitor(RealtimeJanitor janitor) {
+        return janitors.remove(janitor);
+    }
+    
+    /**
+     * Get an unmodifiable view of the currently known {@link RealtimeJanitor}s.
+     * @return an unmodifiable {@link Collection} containing the currently known {@link RealtimeJanitor}s.
+     */
+    public Collection<RealtimeJanitor> getJanitors() {
+        return Collections.unmodifiableCollection(janitors);
+    }
+
 }
