@@ -1,3 +1,8 @@
+* 2014-03-14 - marc.arens@open-xchange.com
+
+ - Fix for bug 29802: Send LeaveStanza on behalf of timed out client 
+ - Fix for bug 31293: IDManager cleans up states for disposed IDs
+ 
 * 2014-03-13 - jan.bauerdick@open-xchange.com
 
  - Change for bug 31539: Added exception code if account needs to be verified
