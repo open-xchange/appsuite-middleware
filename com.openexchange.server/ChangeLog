@@ -6,7 +6,7 @@
 
  - Fix for bug 31552: Also support IPv6 addresses when setting IMAP/SMTP server
  - Fix for bug 31531: Do not hold connection while writing resource cache file to storage
- - Fix for bug 31555: Also check standard folders' subscribed status in case SPECIAL-USE capability is supported by IMAP server
+ - Fix for bug 31555: Also check standard folders' subscription status in case SPECIAL-USE capability is supported by IMAP server
 
 * 2014-03-12 - tobias.friedrich@open-xchange.com
 
