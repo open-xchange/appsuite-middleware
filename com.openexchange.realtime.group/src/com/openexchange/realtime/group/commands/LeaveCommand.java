@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.group.commands;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.GroupCommand;
@@ -68,6 +70,8 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class LeaveCommand implements GroupCommand {
 
+    private static final Logger LOG = LoggerFactory.getLogger(LeaveCommand.class);
+    
     @Override
     public void perform(final Stanza stanza, final GroupDispatcher groupDispatcher) throws OXException {
         if (isSynchronous(stanza) && groupDispatcher.isMember(stanza.getOnBehalfOf())) {
@@ -75,8 +79,12 @@ public class LeaveCommand implements GroupCommand {
                 GroupServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(new AbstractTask<Void>() {
 
                     @Override
-                    public Void call() throws Exception {
-                        doSignOff(stanza, groupDispatcher);
+                    public Void call() {
+                        try {
+                            doSignOff(stanza, groupDispatcher);
+                        } catch (Throwable t) {
+                            LOG.error("Error invoking LeaveCommand.", t);
+                        }
                         return null;
                     }
                 });

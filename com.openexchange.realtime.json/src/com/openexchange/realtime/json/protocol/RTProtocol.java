@@ -130,6 +130,6 @@ public interface RTProtocol {
      * @param gate The StanzaSequenceGate that has to be reset
      * @param clientState The RTClientState that has to be reset
      */
-    void nextSequence(ID id, int newSequence, StanzaSequenceGate gate, RTClientState clientState);
+    void nextSequence(ID id, int newSequence, StanzaSequenceGate gate, RTClientState clientState) throws RealtimeException;
 
 }

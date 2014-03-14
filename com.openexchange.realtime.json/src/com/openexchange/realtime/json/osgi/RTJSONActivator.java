@@ -108,7 +108,6 @@ public class RTJSONActivator extends AJAXModuleActivator {
 
         handler = new RTJSONHandler();
         registerService(Channel.class, new JSONChannel(handler));
-        registerService(RealtimeJanitor.class, handler.getGate());
 
         /*
          * Register the package specific payload converters. The SimpleConverterActivator listens for registrations of new

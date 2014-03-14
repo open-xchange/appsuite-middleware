@@ -67,7 +67,7 @@ public class StateManager implements RealtimeJanitor {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StateManager.class);
 
-    private final ConcurrentHashMap<ID, RTClientState> states = new ConcurrentHashMap<ID, RTClientState>();
+    protected final ConcurrentHashMap<ID, RTClientState> states = new ConcurrentHashMap<ID, RTClientState>();
 
     private final ConcurrentHashMap<ID, StanzaTransmitter> transmitters = new ConcurrentHashMap<ID, StanzaTransmitter>();
 
@@ -129,7 +129,11 @@ public class StateManager implements RealtimeJanitor {
                 GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
                 globalRealtimeCleanup.cleanForId(state.getId());
             } else {
-                state.getId().trigger(ID.Events.REFRESH, this);
+                try {
+                    state.getId().trigger(ID.Events.REFRESH, this);
+                } catch (Exception e) {
+                    LOG.error("Triggering refresh of ID: {} failed.", state.getId(), e);
+                }
             }
         }
     }

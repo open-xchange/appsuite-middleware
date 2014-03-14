@@ -72,10 +72,11 @@ import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.DefaultResourceDirectory;
 import com.openexchange.realtime.directory.Resource;
-import com.openexchange.realtime.hazelcast.Services;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.management.HazelcastResourceDirectoryMBean;
 import com.openexchange.realtime.hazelcast.management.HazelcastResourceDirectoryManagement;
+import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Presence;
@@ -490,7 +491,11 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             @Override
             public void run() {
                 for (ID syntheticID : syntheticIDs) {
-                    syntheticID.trigger(ID.Events.REFRESH, this);
+                    try {
+                        syntheticID.trigger(ID.Events.REFRESH, this);
+                    } catch(RealtimeException re) {
+                        LOG.error("Error while refreshing ID: {}", syntheticID, re);
+                    }
                 }
             }
 

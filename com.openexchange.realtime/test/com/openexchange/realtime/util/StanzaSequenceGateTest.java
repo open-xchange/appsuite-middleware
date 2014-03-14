@@ -10,12 +10,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IDManager;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
 
@@ -27,6 +30,16 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
 
     private long lastInternallyHandledSeqNum = -1L;
 
+    @BeforeClass
+    public static void setUp() {
+        ID.ID_MANAGER_REF.set(new IDManager());
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        ID.ID_MANAGER_REF.set(null);
+    }
+    
     @Before
     public void before() {
         clearAll();

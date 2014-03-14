@@ -50,8 +50,10 @@
 package com.openexchange.realtime.json.mock;
 
 import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.packet.ID;
 
 
@@ -62,8 +64,20 @@ import com.openexchange.realtime.packet.ID;
  */
 public class NoOpGlobalRealtimeCleanup implements GlobalRealtimeCleanup {
 
+    private ConcurrentHashMap<ID, RTClientState> states;
+
+    /**
+     * Initializes a new {@link NoOpGlobalRealtimeCleanup}.
+     * @param states
+     */
+    public NoOpGlobalRealtimeCleanup(ConcurrentHashMap<ID, RTClientState> states) {
+        super();
+        this.states = states;
+    }
+
     @Override
     public void cleanForId(ID id) {
+        states.remove(id);
     }
 
     @Override

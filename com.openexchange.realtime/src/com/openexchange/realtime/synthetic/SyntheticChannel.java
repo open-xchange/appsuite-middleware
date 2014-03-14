@@ -69,9 +69,8 @@ import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.RealtimeCleanup;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.osgi.RealtimeServiceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
@@ -86,14 +85,14 @@ import com.openexchange.threadpool.ThreadPoolService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class SyntheticChannel implements Channel, Runnable, RealtimeJanitor {
+public class SyntheticChannel implements Channel, Runnable {
 
     private static final int NUMBER_OF_RUNLOOPS = 16;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyntheticChannel.class);
     private static final String SENDLOCK = "syntheticChannel";
 
-    public static final AtomicReference<GlobalRealtimeCleanup> GLOBAL_CLEANUP_REF = null;
+    public static final AtomicReference<GlobalRealtimeCleanup> GLOBAL_CLEANUP_REF = new AtomicReference<GlobalRealtimeCleanup>();
     private LocalRealtimeCleanup localRealtimeCleanup = null;
 
     private final ConcurrentHashMap<String, Component> components = new ConcurrentHashMap<String, Component>();
@@ -144,7 +143,7 @@ public class SyntheticChannel implements Channel, Runnable, RealtimeJanitor {
     }
 
     @Override
-    public boolean conjure(ID id) {
+    public boolean conjure(ID id) throws RealtimeException {
         if (shuttingDown.get()) {
             return false;
         }
@@ -203,8 +202,9 @@ public class SyntheticChannel implements Channel, Runnable, RealtimeJanitor {
         if (runLoop == null) {
             throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
         }
-
+        
         Lock sendLock = recipient.getLock(SENDLOCK);
+        
         try {
             sendLock.lock();
             final boolean taken = runLoop.offer(new MessageDispatch(handle, stanza));
@@ -254,9 +254,13 @@ public class SyntheticChannel implements Channel, Runnable, RealtimeJanitor {
 
     public void shutdown() {
         RealtimeCleanup realtimeCleanup = getRealtimeCleanup();
-        for(ID id: handles.keySet()) {
-            if(id.isDisposable()) {
-                realtimeCleanup.cleanForId(id);
+        for (ID id : handles.keySet()) {
+            try {
+                if (id.isDisposable()) {
+                    realtimeCleanup.cleanForId(id);
+                }
+            } catch (Exception e) {
+                LOG.error("Failed to cleanup for ID {}", id, e);
             }
         }
     }
@@ -292,53 +296,65 @@ public class SyntheticChannel implements Channel, Runnable, RealtimeJanitor {
 
         @Override
         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-            SyntheticChannelRunLoop runLoopForId = runLoopsPerID.get(id);
-            Lock cleanUpLock = cleanUpLocks.get(runLoopForId);
-            Lock sendLock = id.getLock(SENDLOCK);
+            Lock cleanUpLock = null;
+            Lock sendLock = null;
             try {
-                cleanUpLock.lock();
-                sendLock.lock();
-                lastAccess.remove(id);
-                timeouts.remove(id);
-                handles.remove(id);
-                SyntheticChannelRunLoop runLoop = runLoopsPerID.remove(id);
-                if(runLoop == null) {
-                    LOG.error("RunLoop to clean was null. This should have been been prevented by mutex.");
-                    return;
-                }
-                Collection<MessageDispatch> messagesForHandle = runLoop.removeMessagesForHandle(id);
-                if(!messagesForHandle.isEmpty()) {
-                    /*
-                     * The ID.Events.BEFOREDISPOSAL which triggered this handler allows us to veto the complete disposal of this ID if we
-                     * still see need for it which is the case when messagesForHandle isn't empty.
-                     */
-                    properties.put("veto", true);
-                    LOG.debug("Vetoed disposal of id: {}", id);
-                    if(conjure(id)) {
-                        ComponentHandle newHandle = handles.get(id);
-                        SyntheticChannelRunLoop newRunLoop = runLoopsPerID.get(id);
-                        for (MessageDispatch messageDispatch : messagesForHandle) {
-                            messageDispatch.setHandle(newHandle);
-                            boolean taken = newRunLoop.offer(messageDispatch);
-                            if (!taken) {
-                                LOG.error("Queue refused offered Stanza for id: {}", id);
+                SyntheticChannelRunLoop runLoopForId = runLoopsPerID.get(id);
+                if (runLoopForId != null) {
+                    cleanUpLock = cleanUpLocks.get(runLoopForId);
+                    sendLock = id.getLock(SENDLOCK);
+                    cleanUpLock.lock();
+                    sendLock.lock();
+                    lastAccess.remove(id);
+                    timeouts.remove(id);
+                    handles.remove(id);
+                    SyntheticChannelRunLoop runLoop = runLoopsPerID.remove(id);
+                    if (runLoop == null) {
+                        LOG.error("RunLoop to clean was null. This should have been been prevented by mutex.");
+                        return;
+                    }
+                    Collection<MessageDispatch> messagesForHandle = runLoop.removeMessagesForHandle(id);
+                    if (!messagesForHandle.isEmpty()) {
+                        /*
+                         * The ID.Events.BEFOREDISPOSAL which triggered this handler allows us to veto the complete disposal of this ID if
+                         * we still see need for it which is the case when messagesForHandle isn't empty.
+                         */
+                        properties.put("veto", true);
+                        LOG.debug("Vetoed disposal of id: {}", id);
+                        if (conjure(id)) {
+                            ComponentHandle newHandle = handles.get(id);
+                            SyntheticChannelRunLoop newRunLoop = runLoopsPerID.get(id);
+                            for (MessageDispatch messageDispatch : messagesForHandle) {
+                                messageDispatch.setHandle(newHandle);
+                                boolean taken = newRunLoop.offer(messageDispatch);
+                                if (!taken) {
+                                    LOG.error("Queue refused offered Stanza for id: {}", id);
+                                }
                             }
+                            LOG.debug("Migrated MessageDispatchs to new Handle for id: {}", id);
+                        } else {
+                            LOG.error("Unable to conjure ID and migrate MessageDispatchs to new handle for id: {}", id);
                         }
-                        LOG.debug("Migrated MessageDispatchs to new Handle for id: {}", id);
                     } else {
-                        LOG.error("Unable to conjure ID and migrate MessageDispatchs to new handle for id: {}", id);
+                        LOG.debug("No MessageDispatchs to migrate for id: {}", id);
                     }
                 } else {
-                    LOG.debug("No MessageDispatchs to migrate for id: {}", id);
+                    LOG.error("RunLoopForID was null while trying to clean up.");
                 }
+            } catch (Exception e) {
+                LOG.error("Error during RunLoop cleanup for ID: {}", id, e);
             } finally {
-                sendLock.unlock();
-                cleanUpLock.unlock();
+                if (sendLock != null) {
+                    sendLock.unlock();
+                }
+                if (cleanUpLock != null) {
+                    cleanUpLock.unlock();
+                }
             }
         }
 
     };
-
+    
     /**
      * Try to get the cluster wide GlobalRealtimeCleanup service first. If that fails get the LocalRealtimeCleanup service that is provided
      * by this bundle and thus should always be available.
@@ -354,9 +370,4 @@ public class SyntheticChannel implements Channel, Runnable, RealtimeJanitor {
         return realtimeCleanup;
     }
 
-    @Override
-    public void cleanupForId(ID id) {
-        ComponentHandle componentHandle = handles.get(id);
-        componentHandle.dispose();
-    }
 }

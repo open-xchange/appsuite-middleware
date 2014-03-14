@@ -79,7 +79,6 @@ public class RTGroupActivator extends HousekeepingActivator implements BundleAct
         GroupServiceRegistry.SERVICES.set(this);
         groupManager = new GroupManager();
         GroupDispatcher.GROUPMANAGER_REF.set(groupManager);
-        registerService(RealtimeJanitor.class, groupManager);
         getService(PayloadTreeConverter.class).declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
         registerService(SimplePayloadConverter.class, new GroupCommand2JSON());
         registerService(SimplePayloadConverter.class, new JSON2GroupCommand());

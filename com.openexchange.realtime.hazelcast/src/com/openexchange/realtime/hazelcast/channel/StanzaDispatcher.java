@@ -57,8 +57,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.Utils;
+import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 

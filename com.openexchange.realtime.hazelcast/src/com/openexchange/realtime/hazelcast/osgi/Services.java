@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast;
+package com.openexchange.realtime.hazelcast.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;

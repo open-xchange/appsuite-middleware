@@ -312,9 +312,10 @@ public class RTProtocolTest {
     
     /**
      * Resetting sequence numbers
+     * @throws RealtimeException 
      */
     @Test
-    public void clientsCanResetTheirSequenceNumbering() {
+    public void clientsCanResetTheirSequenceNumbering() throws RealtimeException {
         protocol.nextSequence(new ID("test://user1@1") , 12, gate, state);
         assertEquals(12, nextSequence);
     }

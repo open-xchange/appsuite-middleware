@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,25 @@
  *
  */
 
-package com.openexchange.realtime.json.mock;
+package com.openexchange.realtime.osgi;
 
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
-import com.openexchange.realtime.json.protocol.RTClientState;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.server.ServiceLookup;
-
-
+import com.openexchange.realtime.cleanup.AbstractJanitors;
 /**
- * {@link JSONServiceRegistryMock}
+ * {@link RealtimeJanitors}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class JSONServiceRegistryMock implements ServiceLookup {
-
-    private ConcurrentHashMap<ID, RTClientState> states;
+public class RealtimeJanitors extends AbstractJanitors {
+    
+    private static RealtimeJanitors instance = new RealtimeJanitors();
 
     /**
-     * Initializes a new {@link JSONServiceRegistryMock}.
-     * @param states
+     * Return the instance of the RealtimeJanitors singleton
+     *
+     * @return the instance of the RealtimeJanitors singleton
      */
-    public JSONServiceRegistryMock(ConcurrentHashMap<ID, RTClientState> states) {
-        super();
-        this.states = states;
+    public static RealtimeJanitors getInstance() {
+        return instance;
     }
-
-    @Override
-    public <S> S getService(Class<? extends S> clazz) {
-        if(GlobalRealtimeCleanup.class.isAssignableFrom(clazz)) {
-            return (S) new NoOpGlobalRealtimeCleanup(states);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public <S> S getOptionalService(Class<? extends S> clazz) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }
+

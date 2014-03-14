@@ -63,8 +63,9 @@ import com.openexchange.session.Session;
 
 
 /**
- * The {@link MailPushEventEmitter} manages subscriptions to mail push events from the RT event system and maps the OSGi events of the Push system to RT Events of the RT event system.
- *
+ * The {@link MailPushEventEmitter} manages subscriptions to mail push events from the RT event system and maps the OSGi events of the Push
+ * system to RT Events of the RT event system.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MailPushEventEmitter implements RTEventEmitterService, EventHandler {

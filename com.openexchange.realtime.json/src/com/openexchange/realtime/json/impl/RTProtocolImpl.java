@@ -164,7 +164,7 @@ public class RTProtocolImpl implements RTProtocol {
     }
 
     @Override
-    public void nextSequence(ID constructedId, int newSequence, StanzaSequenceGate gate, RTClientState clientState) {
+    public void nextSequence(ID constructedId, int newSequence, StanzaSequenceGate gate, RTClientState clientState) throws RealtimeException {
         gate.resetThreshold(constructedId, newSequence);
         clientState.reset();
     }

@@ -54,12 +54,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.IDComponentsParser.IDComponents;
 import com.openexchange.realtime.util.IdLookup;
 import com.openexchange.realtime.util.IdLookup.UserAndContext;
@@ -96,17 +98,14 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ID implements Serializable {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(ID.class);
 
     private static final long serialVersionUID = -5237507998711320109L;
 
-    private static final ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>> LISTENERS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>>();
+    public static final AtomicReference<IDManager> ID_MANAGER_REF = new AtomicReference<IDManager>();
 
-    private static final ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>> LOCKS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>>();
-    
-    private static final ConcurrentHashMap<ID, Boolean> DISPOSING = new ConcurrentHashMap<ID, Boolean>();
-    
     public static final String INTERNAL_CONTEXT = "internal";
-    
     
     private String protocol;
     private String component;
@@ -413,148 +412,47 @@ public class ID implements Serializable {
     }
 
     /**
-     * Execute the event handler when the "event" happens
-     */
-    public void on(String event, IDEventHandler handler) {
-        handlerList(event).add(handler);
-    }
-
-    /**
-     * Execute the event handler when the event happens, but only once
-     *
-     * @param event
-     * @param handler
-     */
-    public void one(String event, IDEventHandler handler) {
-        on(event, new OneOf(handler));
-    }
-
-    /**
-     * Remove the event handler
-     */
-    public void off(String event, IDEventHandler handler) {
-        handlerList(event).remove(handler);
-    }
-
-    /**
-     * Remove all event handlers for this ID
-     */
-    public void clearListeners() {
-        LISTENERS.remove(this);
-    }
-
-    /**
-     * Trigger an event on this ID, with the give properties
-     */
-    public void trigger(String event, Object source, Map<String, Object> properties) {
-        if (properties == null) {
-            properties = new HashMap<String, Object>();
-        }
-        List<IDEventHandler> handlerList = new ArrayList<IDEventHandler>(handlerList(event));
-        for (IDEventHandler handler : handlerList) {
-            handler.handle(event, this, source, properties);
-        }
-        if (event.equals("dispose")) {
-            clearListeners();
-            clearLocks();
-        }
-    }
-
-    /**
-     * Trigger an event on this ID.
-     */
-    public void trigger(String event, Object source) {
-        trigger(event, source, new HashMap<String, Object>());
-    }
-
-
-    private List<IDEventHandler> handlerList(String event) {
-        ConcurrentHashMap<String, List<IDEventHandler>> events = LISTENERS.get(this);
-        if (events == null) {
-            events = new ConcurrentHashMap<String, List<IDEventHandler>>();
-            LISTENERS.put(this, events);
-        }
-
-        List<IDEventHandler> list = events.get(event);
-
-        if (list == null) {
-            list = new CopyOnWriteArrayList<IDEventHandler>();
-            events.put(event, list);
-        }
-
-        return list;
-
-    }
-
-    private class OneOf implements IDEventHandler {
-
-        IDEventHandler delegate;
-
-        public OneOf(IDEventHandler delegate) {
-            super();
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-            delegate.handle(event, id, source, properties);
-            id.off(event, this);
-        }
-    }
-
-    public void clearLocks() {
-        LOCKS.remove(this);
-    }
-
-    public void lock(String scope) {
-        getLock(scope).lock();
-    }
-
-    public void unlock(String scope) {
-        getLock(scope).unlock();
-    }
-
-    public Lock getLock(String scope) {
-        ConcurrentHashMap<String, Lock> locksPerId = LOCKS.get(this);
-        if (locksPerId == null) {
-            locksPerId = new ConcurrentHashMap<String, Lock>();
-            ConcurrentHashMap<String, Lock> meantime = LOCKS.putIfAbsent(this, locksPerId);
-            locksPerId = (meantime != null) ?  meantime : locksPerId;
-        }
-
-        Lock lock = locksPerId.get(scope);
-        if (lock == null) {
-            lock = new ReentrantLock();
-            Lock l = locksPerId.putIfAbsent(scope, lock);
-            lock = (l != null) ? l : lock;
-        }
-
-        return lock;
-    }
-
-    /**
-     * Check if this ID is disposable. This may be vetoed by components that listen on ID.Events.BEFOREDISPOSE (e.g. SyntheticChannel)
+     * Get the static {@link IDManager} instance that does the Housekeeping for all {@link ID}s.
      * 
-     * @param source The event source
-     * @param properties The event properties
-     * @return False if the ID wasn't disposed due to a veto or an ongoing dispose call
+     * @return The IDManager instance
+     * @throws RealtimeException if the IDManager reference is unset 
      */
-    public boolean isDisposable() {
-        Boolean currentValue = DISPOSING.putIfAbsent(this, Boolean.TRUE);
-        if (currentValue == Boolean.TRUE) {
-            return false;
+    private IDManager getManager() throws RealtimeException {
+        IDManager manager = ID_MANAGER_REF.get();
+        if (manager == null) {
+            throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("IDManager instance is missing. Bundle com.openexchange.realtime stopped?");
         }
-        try {
-            Map<String, Object> vetoProperties = new HashMap<String, Object>();
-            this.trigger(Events.BEFOREDISPOSE, this, vetoProperties);
-            Boolean veto = (Boolean) vetoProperties.get("veto");
-            if (veto == null || !veto) {
-                return true;
-            }
-            return false;
-        } finally {
-            DISPOSING.remove(this);
-        }
+        return manager;
+    }
+
+    /**
+     * Get a "scope"-wide lock for a given {@link ID}.
+     * 
+     * @param scope The scope to be used for the {@link Lock}
+     * @return The "scope"-wide lock for this {@link ID}.
+     */
+    public Lock getLock(String scope) throws RealtimeException {
+        return getManager().getLock(this, scope);
+    }
+
+    /**
+     * Get a {@link Lock} for the given scope from this {@link ID} and lock it.
+     * 
+     * @param scope The scope for the {@link Lock}
+     * @throws RealtimeException If getting the {@link Lock}/locking fails
+     */
+    public void lock(String scope) throws RealtimeException {
+        getManager().getLock(this, scope).lock();
+    }
+
+    /**
+     * Get a {@link Lock} for the given scope from this {@link ID} and unlock it.
+     * 
+     * @param scope The scope for the {@link Lock}
+     * @throws RealtimeException If getting the {@link Lock}/unlocking fails
+     */
+    public void unlock(String scope) throws RealtimeException {
+        getManager().getLock(this, scope).unlock();
     }
 
     /**
@@ -564,6 +462,15 @@ public class ID implements Serializable {
     public boolean isInternal() {
         return INTERNAL_CONTEXT.equals(context);
     }
+
+
+
+
+    /*
+     **************************************************************************************************************************************
+     * EVENT SYSTEM
+     **************************************************************************************************************************************
+     */
 
     /**
      * {@link Events} is a collection of event constants to be used with {@link ID#trigger(String, Object)} and
@@ -585,4 +492,72 @@ public class ID implements Serializable {
         public static final String REFRESH = "refresh";
 
     }
+
+    /**
+     * Execute the event handler when the "event" happens
+     * @throws RealtimeException 
+     */
+    public void on(String event, IDEventHandler handler) throws RealtimeException {
+        getManager().getEventHandlers(this, event).add(handler);
+    }
+
+    /**
+     * Remove the event handler
+     * @throws RealtimeException 
+     */
+    public void off(String event, IDEventHandler handler) throws RealtimeException {
+        getManager().getEventHandlers(this, event).remove(handler);
+    }
+
+    /**
+     * Trigger an event on this ID, with the give properties
+     * 
+     * @throws RealtimeException When triffering the event failed
+     */
+    public void trigger(String event, Object source, Map<String, Object> properties) throws RealtimeException {
+        if (properties == null) {
+            properties = new HashMap<String, Object>();
+        }
+        List<IDEventHandler> handlerList = new ArrayList<IDEventHandler>(getManager().getEventHandlers(this, event));
+        for (IDEventHandler handler : handlerList) {
+            handler.handle(event, this, source, properties);
+        }
+    }
+
+    /**
+     * Trigger an event on this ID.
+     * 
+     * @throws RealtimeException When triggering the event failed.
+     */
+    public void trigger(String event, Object source) throws RealtimeException {
+        trigger(event, source, new HashMap<String, Object>());
+    }
+
+    /**
+     * Check if this ID is disposable. This may be vetoed by components that listen on ID.Events.BEFOREDISPOSE (e.g. SyntheticChannel)
+     * 
+     * @param source The event source
+     * @param properties The event properties
+     * @return False if the ID wasn't disposed due to a veto or an ongoing dispose call
+     * @throws RealtimeException When checking if this {@link ID} is disposable fails 
+     */
+    public boolean isDisposable() throws RealtimeException {
+        boolean disposingSucceeded = getManager().setDisposing(this, true);
+        if (!disposingSucceeded) {
+            //The ID is already being disposed
+            return false;
+        }
+        try {
+            Map<String, Object> vetoProperties = new HashMap<String, Object>();
+            this.trigger(Events.BEFOREDISPOSE, this, vetoProperties);
+            Boolean veto = (Boolean) vetoProperties.get("veto");
+            if (veto == null || !veto) {
+                return true;
+            }
+            return false;
+        } finally {
+            getManager().setDisposing(this, false);
+        }
+    }
+
 }

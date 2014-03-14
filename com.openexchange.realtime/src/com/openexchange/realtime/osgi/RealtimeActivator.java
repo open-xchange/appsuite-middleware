@@ -63,7 +63,10 @@ import com.openexchange.realtime.RealtimeConfig;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanupImpl;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.management.ManagementHouseKeeper;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IDManager;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
@@ -100,6 +103,10 @@ public class RealtimeActivator extends HousekeepingActivator {
         realtimeConfig.start();
 
         managementHouseKeeper.addManagementObject(realtimeConfig.getManagementObject());
+        
+        IDManager idManager = new IDManager();
+        ID.ID_MANAGER_REF.set(idManager);
+        RealtimeJanitors.getInstance().addJanitor(idManager);
 
         //Add the node-wide cleanup service and start tracking Janitors 
         LocalRealtimeCleanupImpl localRealtimeCleanup = new LocalRealtimeCleanupImpl(context);
@@ -147,6 +154,11 @@ public class RealtimeActivator extends HousekeepingActivator {
 
         registerService(Channel.class, new DevNullChannel());
 
+        //Register all RealtimeJanitors
+        for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
+            registerService(RealtimeJanitor.class, realtimeJanitor);
+        }
+
         //Expose all ManagementObjects for this bundle
         managementHouseKeeper.exposeManagementObjects();
         openTrackers();
@@ -157,6 +169,8 @@ public class RealtimeActivator extends HousekeepingActivator {
         synth.shutdown();
         //Conceal all ManagementObjects for this bundle and remove them from the housekeeper
         ManagementHouseKeeper.getInstance().cleanup();
+        ID.ID_MANAGER_REF.set(null);
+        RealtimeJanitors.getInstance().cleanup();
         realtimeConfig.stop();
         super.cleanUp();
     }

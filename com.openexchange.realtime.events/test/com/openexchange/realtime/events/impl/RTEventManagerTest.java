@@ -252,7 +252,7 @@ public class RTEventManagerTest {
 
         assertEquals(2, events.getSubscriptions(id).size());
 
-        id.trigger(ID.Events.DISPOSE, this);
+        events.cleanupForId(id);
 
         Set<String> subscriptions = events.getSubscriptions(id);
         assertTrue(subscriptions.isEmpty());

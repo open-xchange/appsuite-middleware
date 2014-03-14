@@ -296,8 +296,9 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
      * Resets the current threshold for the given ID and empties the buffer of Stanzas with now incorrect sequence numbers
      * @param constructedId The ID for that we want to reset the threshold
      * @param newSequence the new sequence number to use
+     * @throws RealtimeException
      */
-    public void resetThreshold(ID constructedId, long newSequence) {
+    public void resetThreshold(ID constructedId, long newSequence) throws RealtimeException {
         constructedId.lock("gate");
         try {
             List<StanzaWithCustomAction> list = inboxes.get(constructedId);
