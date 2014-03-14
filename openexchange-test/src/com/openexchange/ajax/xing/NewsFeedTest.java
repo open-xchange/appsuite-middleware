@@ -61,6 +61,8 @@ import com.openexchange.ajax.xing.actions.DeleteCommentRequest;
 import com.openexchange.ajax.xing.actions.DeleteCommentResponse;
 import com.openexchange.ajax.xing.actions.GetCommentsRequest;
 import com.openexchange.ajax.xing.actions.GetCommentsResponse;
+import com.openexchange.ajax.xing.actions.LikeActivityRequest;
+import com.openexchange.ajax.xing.actions.LikeActivityResponse;
 import com.openexchange.ajax.xing.actions.NewsFeedRequest;
 import com.openexchange.ajax.xing.actions.NewsFeedResponse;
 import com.openexchange.exception.OXException;
@@ -189,6 +191,22 @@ public class NewsFeedTest extends AbstractAJAXSession {
         
         final DeleteCommentRequest request = new DeleteCommentRequest(activityId, commentId, true);
         final DeleteCommentResponse response = client.execute(request);
+        assertNotNull(response);
+    }
+    
+    /**
+     * Test like an activity
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    public void testLikeActivity() throws OXException, IOException, JSONException {
+        JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
+        String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
+        
+        final LikeActivityRequest request = new LikeActivityRequest(activityId, true);
+        final LikeActivityResponse response = client.execute(request);
         assertNotNull(response);
     }
 }

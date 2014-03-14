@@ -1031,21 +1031,18 @@ public class XingAPI<S extends Session> {
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
      */
-    public Map<String, Object> likeActivity(final String activityId) throws XingException {
+    public void likeActivity(final String activityId) throws XingException {
         assertAuthenticated();
         try {
-            final List<String> params = new ArrayList<String>(1);
-            params.add("activity_id");
-            params.add(activityId);
 
-            final JSONObject response = RESTUtility.request(
+            RESTUtility.streamRequest(
                 Method.PUT,
                 session.getAPIServer(),
                 "/activities/" + activityId + "/like",
                 VERSION,
-                params.toArray(new String[0]),
-                session).toObject();
-            return response.asMap();
+                null,
+                session,
+                Arrays.asList(XingServerException._204_NO_CONTENT));
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
