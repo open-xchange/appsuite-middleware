@@ -61,6 +61,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -81,6 +82,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
@@ -1807,14 +1809,17 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                     throw IMAPException.create(IMAPException.Code.NO_ADMIN_ACL, imapConfig, session, updateMe.getFullName());
                                 }
                             }
+                            final List<ACL> entities = new LinkedList<ACL>();
                             /*
                              * Remove deleted ACLs
                              */
                             final ACL[] removedACLs = getRemovedACLs(m, oldACLs);
                             if (removedACLs.length > 0) {
                                 for (int i = 0; i < removedACLs.length; i++) {
-                                    if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
-                                        updateMe.removeACL(removedACLs[i].getName());
+                                    final String entityName = removedACLs[i].getName();
+                                    if (isKnownEntity(entityName, entity2ACL, ctx, args)) {
+                                        updateMe.removeACL(entityName);
+                                        entities.add(removedACLs[i]);
                                         changed = true;
                                     }
                                 }
@@ -1824,7 +1829,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                              */
                             final Map<String, ACL> om = acl2map(oldACLs);
                             for (int i = 0; i < newACLs.length; i++) {
-                                updateMe.addACL(validate(newACLs[i], om));
+                                final ACL newACL = newACLs[i];
+                                updateMe.addACL(validate(newACL, om));
+                                entities.add(newACL);
                                 changed = true;
                             }
                             /*
@@ -1832,6 +1839,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                              */
                             FolderCache.removeCachedFolder(fullName, session, accountId);
                             RightsCache.removeCachedRights(updateMe, session, accountId);
+                            /*
+                             * Does affect ListLsubCache of other users, too
+                             */
+                            dropListLsubCachesFor(entities.toArray(new ACL[0]));
                         }
                     }
                 }
@@ -2584,6 +2595,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (deleteMe.isOpen()) {
             deleteMe.close(false);
         }
+        final ACL[] oldACLs = getACLSafe(deleteMe);
         /*
          * Unsubscribe prior to deletion
          */
@@ -2601,6 +2613,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         // ListLsubCache.clearCache(accountId, session);
         RightsCache.removeCachedRights(deleteMe, session, accountId);
         UserFlagsCache.removeUserFlags(deleteMe, session, accountId);
+        // Affected users, too
+        dropListLsubCachesFor(oldACLs);
     }
 
     private boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs, final ACLExtension aclExtension) throws OXException {
@@ -2723,6 +2737,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         /*
          * Perform RENAME
          */
+        final ACL[] acls = getACLSafe(toMove);
         final boolean subscribed = toMove.isSubscribed();
         if (!toMove.renameTo(newFolder)) {
             throw IMAPException.create(
@@ -2754,6 +2769,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (IMAPSessionStorageAccess.isEnabled()) {
             IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, moveFullname);
         }
+        // Affected users, too
+        dropListLsubCachesFor(acls);
+
         return newFolder;
     }
 
@@ -2837,6 +2855,23 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
         }
         return (examined == newACLs.size());
+    }
+
+    private void dropListLsubCachesFor(final ACL[] acls) {
+        final UserStorage us = UserStorage.getInstance();
+        for (final ACL acl : acls) {
+            try {
+                final User[] users = us.searchUserByMailLogin(acl.getName(), ctx);
+                for (final User user : users) {
+                    final int userId = user.getId();
+                    if (userId != session.getUserId()) {
+                        ListLsubCache.dropFor(userId, ctx.getContextId());
+                    }
+                }
+            } catch (final OXException e) {
+                LOG.debug("Could not resolve users for entity name {}", acl.getName(), e);
+            }
+        }
     }
 
     private static String stripPOSTRight(final String rights) {
