@@ -92,7 +92,9 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         @Override
         public int compareFieldsDesc(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
             // Negate ASC order
-            return compareFields(msg1, msg2) * (-1);
+            int result = compareFields(msg1, msg2);
+            result = -result;
+            return result;
         }
     }
 
@@ -177,18 +179,18 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         }
     }
 
-    static int compareByReceivedDate(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
+    static int compareByReceivedDate(final MailMessage msg1, final MailMessage msg2, final boolean asc) throws MessagingException {
         final Date d1 = msg1.getReceivedDate();
         final Date d2 = msg2.getReceivedDate();
         if (null == d1) {
             if (null == d2) {
                 return 0;
             }
-            return -1;
+            return asc ? -1 : 1;
         } else if (null == d2) {
-            return 1;
+            return asc ? 1 : -1;
         } else {
-            return d1.compareTo(d2);
+            return asc ? d1.compareTo(d2) : d2.compareTo(d1);
         }
     }
 
@@ -218,7 +220,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
             @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
-                return compareByReceivedDate(msg1, msg2);
+                return compareByReceivedDate(msg1, msg2, true);
             }
         });
         COMPARERS.put(MailSortField.FLAG_SEEN, new FieldComparer() {
@@ -228,12 +230,12 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                 final boolean isSeen1 = msg1.isSeen();
                 final boolean isSeen2 = msg2.isSeen();
                 if (isSeen1 && isSeen2) {
-                    return compareByReceivedDate(msg1, msg2);
+                    return compareByReceivedDate(msg1, msg2, false);
                 } else if (!isSeen1 && !isSeen2) {
                     final boolean isRecent1 = msg1.isRecent();
                     final boolean isRecent2 = msg2.isRecent();
                     if ((isRecent1 && isRecent2) || (!isRecent1 && !isRecent2)) {
-                        return compareByReceivedDate(msg1, msg2);
+                        return compareByReceivedDate(msg1, msg2, false);
                     } else if (isRecent1 && !isRecent2) {
                         return 1;
                     } else if (!isRecent1 && isRecent2) {
@@ -244,7 +246,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                 } else if (!isSeen1 && isSeen2) {
                     return -1;
                 }
-                return compareByReceivedDate(msg1, msg2);
+                return compareByReceivedDate(msg1, msg2, false);
             }
         });
         COMPARERS.put(MailSortField.SIZE, new FieldComparer() {
@@ -260,6 +262,11 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
             @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
+                final int result = compAsc(msg1, msg2);
+                return result == 0 ? compareByReceivedDate(msg1, msg2, false) : result;
+            }
+
+            private int compAsc(final MailMessage msg1, final MailMessage msg2) {
                 final int cl1 = msg1.getColorLabel();
                 final int cl2 = msg2.getColorLabel();
                 if (cl1 <= 0) {
@@ -272,7 +279,12 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             }
 
             @Override
-            public int compareFieldsDesc(MailMessage msg1, MailMessage msg2) throws MessagingException {
+            public int compareFieldsDesc(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
+                final int result = compDesc(msg1, msg2);
+                return result == 0 ? compareByReceivedDate(msg1, msg2, false) : result;
+            }
+
+            private int compDesc(final MailMessage msg1, final MailMessage msg2) {
                 final int cl1 = msg1.getColorLabel();
                 final int cl2 = msg2.getColorLabel();
                 if (cl1 <= 0) {
