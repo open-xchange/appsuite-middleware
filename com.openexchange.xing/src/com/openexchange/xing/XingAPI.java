@@ -974,7 +974,6 @@ public class XingAPI<S extends Session> {
      * 
      * @param activityId
      * @param commentId
-     * @return 
      * @throws XingException
      */
     public void deleteComment(final String activityId, final String commentId) throws XingException {
@@ -1027,7 +1026,6 @@ public class XingAPI<S extends Session> {
      * Like a certain network activity
      * 
      * @param The id of the activity
-     * @return A map representing the outcome of the operation
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
      */
@@ -1037,6 +1035,30 @@ public class XingAPI<S extends Session> {
 
             RESTUtility.streamRequest(
                 Method.PUT,
+                session.getAPIServer(),
+                "/activities/" + activityId + "/like",
+                VERSION,
+                null,
+                session,
+                Arrays.asList(XingServerException._204_NO_CONTENT));
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+    
+    /**
+     * Unlike a certain network activity
+     * 
+     * @param The id of the activity
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     */
+    public void unlikeActivity(final String activityId) throws XingException {
+        assertAuthenticated();
+        try {
+
+            RESTUtility.streamRequest(
+                Method.DELETE,
                 session.getAPIServer(),
                 "/activities/" + activityId + "/like",
                 VERSION,
