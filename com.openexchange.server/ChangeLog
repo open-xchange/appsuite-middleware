@@ -1,7 +1,84 @@
+* 2014-03-13 - jan.bauerdick@open-xchange.com
+
+ - Change for bug 31539: Added exception code if account needs to be verified
+
+* 2014-03-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31552: Also support IPv6 addresses when setting IMAP/SMTP server
+ - Fix for bug 31531: Do not hold connection while writing resource cache file to storage
+ - Fix for bug 31555: Also check standard folders' subscription status in case SPECIAL-USE capability is supported by IMAP server
+
+* 2014-03-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31490: More lenient parsing in case ATTENDEE is not in "mailto:" URI format
+ - Fix for bug 31489: Added optional "admin" parameter for actions "birthdays", "anniversaries", "updates", "search" and "advancedSearch"
+
+* 2014-03-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31491: Removed duplicate CREATE TABLE statements from affected classes
+ - Fix for bug 19763: Support setter for IMAP/SMTP port through SOAP interface
+ - Fix for bug 31395: Enhanced localized error message according to proposal from documentation team
+ - Fix for bug 31061: Simply select oldest chunk in case ascending sort order is selected
+
+* 2014-03-11 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30843: Added properties to explicitly choose SSL protocols
+
+* 2014-03-11 - marcus.klein@open-xchange.com
+
+ - Fix for bug 29980: Use row locks on complete table configdb.context_server2db_pool to prevent a delete context call to remove the schema
+   a create context call is currently writing to. The complete table must be locked to prevent deadlocks on concurrent create context calls.
+
+* 2014-03-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30652: Signal value of property "com.openexchange.forceHTTPS" to App Suite UI
+ - Fix for bug 31304: Suppress warning if "pop3.refreshrate" property is missing. Silently use fall-back value
+
+* 2014-03-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31453: Prefer user's personal reminder for CalDAV in public folders
+ - Fix for bug 31073: Use "Display name" for a contact, use "Name" for a distribution list in truncation error messages 
+ - Fix for bug 31072: Use "First name" instead of "Given name" in truncation error messages 
+
+* 2014-03-07 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 31335: Fixed/Added missing dependencies on update tasks
+
+* 2024-03-07 - ioannis.chouklis@open-xchange.com
+
+- Fix for bug 31448: [L3] Backend mistakes IMAP with SMTP password entries by updating external mail account credentials 
+
+* 2014-03-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31154: Necessary Ant tasks for our build system have not be available by default on Debian Squeeze but on Wheezy. Adding an
+   additional JAR to the build call on Debian Squeeze systems when using CDBS for building.
+ - Fix for bug 31405: Implementation of move context now uses existing functionality to update context to database mapping that takes care
+   about MySQL master/slave setups.
+
+* 2014-03-06 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 31447: [L3] Logging for missing user and context mapping should be improved for IMAP auth bundle
+ - Fix for bug 31415: NullPointerException: A null service reference is not allowed
+ 
+* 2014-03-06 - martin.schneider@open-xchange.com
+
+ - Fix for bug 31443: Do not autorename folders equal to default folder names while creation. Throw exception instead.
+
+* 2014-03-06 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 30732: Ignore removal of resources by externals.
+
+* 2014-03-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31392: Made module-specific error messages
+ - Fix for bug 31394: Added possibility to delete a quota value once it is set through specifying a value less than zero
+
 * 2014-03-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31391: Use dynamically registered key and certificate providers for cloud-based push notifications
- 
+ - Fix for bug 30369: Replaced equinox event admin with multithreaded implementation from apache felix project, introduced background
+                      event processing for time-consuming handlers
+
 * 2014-03-03 - dennis.sieben@open-xchange.com
 
  - Fix for bug 31329: Multi-line calculation has now also been added for PGP_ENCRYPT commands
@@ -66,7 +143,7 @@
 * 2024-02-25 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 30773: NullPointerException at com.openexchange.spamsettings.generic.osgi.Activator.stop()
- 
+
 * 2014-02-25 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31191: Fixed erroneous permission check.
@@ -82,8 +159,9 @@
 
 * 2014-02-24 - thorben.betten@open-xchange.com
 
- - Fix for bug 31264: Added cache invalidator to capabilities caches
  - Fix for bug 30969: Fully leverage from folder cache within folder layer, do not use a custom one in IMAP bundle
+ - Fix for bug 31264: Added cache invalidator to capabilities caches
+ - Fix for bug 31152: Do not throw EmiG-specific error codes, but just mark as non-EmiG capable
 
 * 2014-02-24 - marcus.klein@open-xchange.com
 

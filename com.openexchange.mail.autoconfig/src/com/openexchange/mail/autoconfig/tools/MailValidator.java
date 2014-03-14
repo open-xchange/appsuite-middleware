@@ -60,6 +60,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.Transport;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -79,8 +80,12 @@ public class MailValidator {
                 props.put("mail.imap.socketFactory.class", socketFactoryClass);
             } else {
                 props.put("mail.imap.ssl.socketFactory.class", socketFactoryClass);
-                props.put("mail.imap.ssl.protocols", "SSLv3 TLSv1");
                 props.put("mail.imap.ssl.socketFactory.port", port);
+                {
+                    final ConfigurationService configuration = Services.getService(ConfigurationService.class);
+                    final String sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
+                    props.put("mail.imap.ssl.protocols", sslProtocols);
+                }
             }
             int timeout = DEFAULT_TIMEOUT;
             props.put("mail.imap.socketFactory.fallback", "false");
@@ -108,7 +113,11 @@ public class MailValidator {
             } else {
                 props.put("mail.pop3.ssl.socketFactory.class", socketFactoryClass);
                 props.put("mail.pop3.ssl.socketFactory.port", port);
-                props.put("mail.pop3.ssl.protocols", "SSLv3 TLSv1");
+                {
+                    final ConfigurationService configuration = Services.getService(ConfigurationService.class);
+                    final String sslProtocols = configuration.getProperty("com.openexchange.pop3.ssl.protocols", "SSLv3 TLSv1").trim();
+                    props.put("mail.pop3.ssl.protocols", sslProtocols);
+                }
             }
             int timeout = DEFAULT_TIMEOUT;
             props.put("mail.pop3.socketFactory.fallback", "false");
@@ -136,7 +145,11 @@ public class MailValidator {
             } else {
                 props.put("mail.smtp.ssl.socketFactory.class", socketFactoryClass);
                 props.put("mail.smtp.ssl.socketFactory.port", port);
-                props.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
+                {
+                    final ConfigurationService configuration = Services.getService(ConfigurationService.class);
+                    final String sslProtocols = configuration.getProperty("com.openexchange.smtp.ssl.protocols", "SSLv3 TLSv1").trim();
+                    props.put("mail.smtp.ssl.protocols", sslProtocols);
+                }
             }
             props.put("mail.smtp.socketFactory.port", port);
             //props.put("mail.smtp.auth", "true");

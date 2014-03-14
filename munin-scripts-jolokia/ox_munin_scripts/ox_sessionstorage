@@ -51,8 +51,6 @@ if ($response->is_error()){
 
 ###
 
-	
-use Data::Dumper;
 
 $request = new JMX::Jmx4Perl::Request(READ,
 	"com.hazelcast:*,type=IMap,name=sessions-*",

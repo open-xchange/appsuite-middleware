@@ -91,7 +91,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
-import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -162,7 +161,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
 
         final long quota;
-        if (quotaValue <= 0) {
+        if (quotaValue < 0) {
             quota = -1L;
         } else {
             // MySQL int(10) unsigned: the allowable range is from 0 to 4294967295
@@ -451,11 +450,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                 }
             }
-            pool.resetPoolMappingForContext(contextID);
         } catch (final OXException e) {
             log.error("Error invalidating context {} in ox context storage", ctx.getId(), e);
-        } catch (PoolException e) {
-            log.info("Could not reset PoolMapping for context {} while deleting it. Should not have been mapped then.", ctx.getId());
         }
 
         final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);

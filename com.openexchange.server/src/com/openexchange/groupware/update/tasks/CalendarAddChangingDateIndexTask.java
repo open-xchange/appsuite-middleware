@@ -79,7 +79,7 @@ public final class CalendarAddChangingDateIndexTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { PrgDatesPrimaryKeyUpdateTask.class.getName() };
     }
 
     @Override

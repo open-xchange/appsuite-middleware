@@ -97,6 +97,8 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
 
     private boolean logTransport;
 
+    private String sslProtocols;
+
     /**
      * Initializes a new {@link SMTPProperties}
      */
@@ -173,6 +175,9 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             }
         }
 
+        sslProtocols = configuration.getProperty("com.openexchange.smtp.ssl.protocols", "SSLv3 TLSv1").trim();
+        logBuilder.append("\tSupported SSL protocols: ").append(sslProtocols).append("\n");
+
         logBuilder.append("Global SMTP properties successfully loaded!");
         LOG.info(logBuilder.toString());
     }
@@ -186,6 +191,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         smtpTimeout = 0;
         smtpConnectionTimeout = 0;
         logTransport = false;
+        sslProtocols = null;
     }
 
     @Override
@@ -226,6 +232,11 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
     @Override
     public int getReferencedPartLimit() {
         return transportProperties.getReferencedPartLimit();
+    }
+
+    @Override
+    public String getSSLProtocols() {
+        return sslProtocols;
     }
 
 }

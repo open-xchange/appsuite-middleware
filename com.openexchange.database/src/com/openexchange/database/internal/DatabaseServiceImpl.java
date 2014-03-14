@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.Assignment;
-import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
@@ -72,20 +71,18 @@ public final class DatabaseServiceImpl implements DatabaseService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseServiceImpl.class);
 
     private final Pools pools;
-    private final ConfigDatabaseService configDatabaseService;
-    private final ContextDatabaseAssignmentService assignmentService;
+    private final ConfigDatabaseServiceImpl configDatabaseService;
     private final ReplicationMonitor monitor;
 
-    public DatabaseServiceImpl(Pools pools, ConfigDatabaseService configDatabaseService, ContextDatabaseAssignmentService assignmentService, ReplicationMonitor monitor) {
+    public DatabaseServiceImpl(Pools pools, ConfigDatabaseServiceImpl configDatabaseService, ReplicationMonitor monitor) {
         super();
         this.pools = pools;
         this.configDatabaseService = configDatabaseService;
-        this.assignmentService = assignmentService;
         this.monitor = monitor;
     }
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
-        final AssignmentImpl assign = assignmentService.getAssignment(contextId);
+        final AssignmentImpl assign = configDatabaseService.getAssignment(contextId);
         LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, assign.getSchema());
         return monitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
@@ -128,11 +125,6 @@ public final class DatabaseServiceImpl implements DatabaseService {
         }
     }
 
-    @Override
-    public void invalidate(final int contextId) throws OXException {
-        assignmentService.removeAssignments(contextId);
-    }
-
     // Delegate config database service methods.
 
     @Override
@@ -168,6 +160,56 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public String getServerName() throws OXException {
         return configDatabaseService.getServerName();
+    }
+
+    @Override
+    public int getWritablePool(int contextId) throws OXException {
+        return configDatabaseService.getWritablePool(contextId);
+    }
+
+    @Override
+    public String getSchemaName(int contextId) throws OXException {
+        return configDatabaseService.getSchemaName(contextId);
+    }
+
+    @Override
+    public int[] getContextsInSameSchema(int contextId) throws OXException {
+        return configDatabaseService.getContextsInSameSchema(contextId);
+    }
+
+    @Override
+    public int[] getContextsInSameSchema(Connection con, int contextId) throws OXException {
+        return configDatabaseService.getContextsInSameSchema(con, contextId);
+    }
+
+    @Override
+    public int[] getContextsInSchema(Connection con, int poolId, String schema) throws OXException {
+        return configDatabaseService.getContextsInSchema(con, poolId, schema);
+    }
+
+    @Override
+    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException {
+        return configDatabaseService.getUnfilledSchemas(con, poolId, maxContexts);
+    }
+
+    @Override
+    public void invalidate(int contextId) {
+        configDatabaseService.invalidate(contextId);
+    }
+
+    @Override
+    public void writeAssignment(Connection con, Assignment assignment) throws OXException {
+        configDatabaseService.writeAssignment(con, assignment);
+    }
+
+    @Override
+    public void deleteAssignment(Connection con, int contextId) throws OXException {
+        configDatabaseService.deleteAssignment(con, contextId);
+    }
+
+    @Override
+    public void lock(Connection con) throws OXException {
+        configDatabaseService.lock(con);
     }
 
     // Implemented database service methods.
@@ -305,28 +347,5 @@ public final class DatabaseServiceImpl implements DatabaseService {
         } catch (final OXException e) {
             LOG.error("", e);
         }
-    }
-
-    @Override
-    public int getWritablePool(final int contextId) throws OXException {
-        final Assignment assign = assignmentService.getAssignment(contextId);
-        return assign.getWritePoolId();
-    }
-
-    @Override
-    public String getSchemaName(final int contextId) throws OXException {
-        return assignmentService.getAssignment(contextId).getSchema();
-    }
-
-    @Override
-    public int[] getContextsInSameSchema(final int contextId) throws OXException {
-        final Assignment assign = assignmentService.getAssignment(contextId);
-        final ConfigDBStorage configDBStorage = new ConfigDBStorage(configDatabaseService);
-        return configDBStorage.getContextsFromSchema(assign.getSchema(), assign.getWritePoolId());
-    }
-
-    @Override
-    public void writeAssignment(Connection con, Assignment assignment) throws OXException {
-        assignmentService.writeAssignment(con, assignment);
     }
 }

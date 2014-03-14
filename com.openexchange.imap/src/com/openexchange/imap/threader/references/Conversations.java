@@ -66,6 +66,7 @@ import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -223,12 +224,13 @@ public final class Conversations {
      *
      * @param imapFolder The IMAP folder
      * @param limit The limit
+     * @param order The order direction that controls which chunk (oldest vs. most recent) to select
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
      * @return The unfolded conversations
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit, final boolean byEnvelope) throws MessagingException {
-        return conversationsFor(imapFolder, limit, null, byEnvelope);
+    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit, final OrderDirection order, final boolean byEnvelope) throws MessagingException {
+        return conversationsFor(imapFolder, limit, order, null, byEnvelope);
     }
 
     /**
@@ -236,13 +238,14 @@ public final class Conversations {
      *
      * @param imapFolder The IMAP folder
      * @param limit The limit
+     * @param order The order direction that controls which chunk (oldest vs. most recent) to select
      * @param fetchProfile The fetch profile
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
      * @return The unfolded conversations
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
-        final List<MailMessage> messages = messagesFor(imapFolder, limit, fetchProfile, byEnvelope);
+    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit, final OrderDirection order, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
+        final List<MailMessage> messages = messagesFor(imapFolder, limit, order, fetchProfile, byEnvelope);
         if (null == messages || messages.isEmpty()) {
             return Collections.<Conversation> emptyList();
         }
@@ -258,13 +261,14 @@ public final class Conversations {
      *
      * @param imapFolder The IMAP folder
      * @param limit The limit
+     * @param order The order direction that controls which chunk (oldest vs. most recent) to select
      * @param fetchProfile The fetch profile
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
      * @return The messages with conversation information (References, In-Reply-To, Message-Id)
      * @throws MessagingException If a messaging error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<MailMessage> messagesFor(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
+    public static List<MailMessage> messagesFor(final IMAPFolder imapFolder, final int limit, final OrderDirection order, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -287,7 +291,11 @@ public final class Conversations {
                         if (limit < 0 || limit >= messageCount) {
                             sb.append("1:*");
                         } else {
-                            sb.append(messageCount - limit + 1).append(':').append('*');
+                            if (OrderDirection.DESC.equals(order)) {
+                                sb.append(messageCount - limit + 1).append(':').append('*');
+                            } else {
+                                sb.append(1).append(':').append(limit);
+                            }
                         }
                     }
                     final FetchProfile fp = null == fetchProfile ? (byEnvelope ? FETCH_PROFILE_CONVERSATION_BY_ENVELOPE : FETCH_PROFILE_CONVERSATION_BY_HEADERS) : checkFetchProfile(fetchProfile, byEnvelope);

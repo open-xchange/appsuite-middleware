@@ -86,7 +86,7 @@ public class ListUserAction extends ContactAction {
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = addContacts(contacts, getContactService().getUsers(
-            request.getSession(), request.getUserIds(), request.getFields()));
+            request.getSession(), request.getUserIds(), request.getFields()), -1);
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 

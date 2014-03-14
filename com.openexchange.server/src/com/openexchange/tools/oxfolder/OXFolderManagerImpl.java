@@ -557,8 +557,10 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
         }
         final boolean performMove = fo.containsParentFolderID();
+        int oldParentId = -1;
         if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
             FolderObject storageObject = getFolderFromMaster(fo.getObjectID());
+            oldParentId = storageObject.getParentFolderID();
             final int newParentFolderID = fo.getParentFolderID();
             if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                 move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
@@ -572,6 +574,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
         } else if (fo.containsFolderName()) {
             final FolderObject storageObject = getFolderFromMaster(fo.getObjectID());
+            oldParentId = storageObject.getParentFolderID();
             final int newParentFolderID = fo.getParentFolderID();
             if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                 move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
@@ -582,7 +585,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             /*
              * Perform move
              */
-            move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), null, getFolderFromMaster(fo.getObjectID()), lastModified);
+            FolderObject storageObject = getFolderFromMaster(fo.getObjectID());
+            oldParentId = storageObject.getParentFolderID();
+            move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), null, storageObject, lastModified);
         }
         /*
          * Finally update cache
@@ -606,6 +611,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                          */
                         cacheManager.removeFolderObject(parentFolderID, ctx);
                         cacheManager.loadFolderObject(parentFolderID, ctx, wc);
+                    }
+                    if (0 < oldParentId && oldParentId != parentFolderID) {
+                        /*
+                         * Update old parent, too
+                         */
+                        cacheManager.removeFolderObject(oldParentId, ctx);
+                        cacheManager.loadFolderObject(oldParentId, ctx, wc);
                     }
                 } else {
                     fo.fill(FolderObject.loadFolderObjectFromDB(fo.getObjectID(), ctx, wc));

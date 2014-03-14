@@ -489,7 +489,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Content-Type
              */
-            jsonObject.put(CONTENT_TYPE, part.getContentType().toString());
+            {
+                ContentType clone = new ContentType();
+                clone.setContentType(part.getContentType());
+                clone.removeNameParameter();
+                jsonObject.put(CONTENT_TYPE, clone.toString());
+            }
             /*
              * Content
              */
@@ -652,7 +657,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
-        if (isInline && (DisplayMode.RAW.getMode() < displayMode.getMode())) {
+        final boolean considerAsInline = isInline || part.containsHeader("Content-Id");
+        if (considerAsInline && (DisplayMode.RAW.getMode() < displayMode.getMode())) {
             final MultipartInfo mpInfo = multiparts.peek();
             if (null != mpInfo && textAppended && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
                 try {
@@ -705,13 +711,13 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                         }
                     }
-                    return handleAttachment0(part, isInline, isInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id);
+                    return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         }
-        return handleAttachment0(part, isInline, isInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id);
+        return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id);
     }
 
     @Override

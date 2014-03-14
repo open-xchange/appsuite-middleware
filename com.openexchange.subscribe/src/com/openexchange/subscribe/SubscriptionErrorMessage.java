@@ -89,23 +89,23 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
      */
     INVALID_LOGIN(CATEGORY_USER_INPUT, 7, SubscriptionErrorMessage.WRONG_PASSWORD, SubscriptionErrorStrings.WRONG_PASSWORD_DISPLAY),
     /**
-     * 
+     *
      */
     COMMUNICATION_PROBLEM(CATEGORY_SERVICE_DOWN, 8, SubscriptionErrorMessage.SERVICE_UNAVAILABLE, SubscriptionErrorStrings.SERVICE_UNAVAILABLE_DISPLAY),
     /**
-     * 
+     *
      */
     INVALID_WORKFLOW(CATEGORY_CONFIGURATION, 9, SubscriptionErrorMessage.INCONSISTENT_WORKFLOW),
     /**
-     * 
+     *
      */
     INACTIVE_SOURCE(CATEGORY_CONFIGURATION, 10, SubscriptionErrorMessage.INACTIVE_SOURCE_MSG, SubscriptionErrorStrings.INACTIVE_SOURCE_DISPLAY),
     /**
-     * 
+     *
      */
     MISSING_ARGUMENT(CATEGORY_USER_INPUT, 11, SubscriptionErrorMessage.MISSING_ARGUMENT_MSG, SubscriptionErrorStrings.MISSING_ARGUMENT_DISPLAY),
     /**
-     * 
+     *
      */
     PERMISSION_DENIED(CATEGORY_WARNING, 12, SubscriptionErrorMessage.PERMISSION_DENIED_MSG, SubscriptionErrorStrings.PERMISSION_DENIED_DISPLAY),
     /**
@@ -117,9 +117,11 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
      */
     UNEXPECTED_ERROR(CATEGORY_ERROR, 9999, SubscriptionErrorMessage.UNEXPECTED_ERROR_MSG),
     /**
-     * 
+     *
      */
-    NO_OAUTH_ACCOUNT_GIVEN(CATEGORY_USER_INPUT, 90111, SubscriptionErrorMessage.NO_OAUTH_ACCOUNT_GIVEN_MSG, SubscriptionErrorStrings.NO_OAUTH_ACCOUNT_GIVEN_DISPLAY);
+    NO_OAUTH_ACCOUNT_GIVEN(CATEGORY_USER_INPUT, 90111, SubscriptionErrorMessage.NO_OAUTH_ACCOUNT_GIVEN_MSG, SubscriptionErrorStrings.NO_OAUTH_ACCOUNT_GIVEN_DISPLAY),
+
+    NEED_VERIFICATION(CATEGORY_USER_INPUT, 90112, SubscriptionErrorStrings.NEED_VERIFICATION_DISPLAY, SubscriptionErrorStrings.NEED_VERIFICATION_DISPLAY),
     ;
 
     private static final String SQL_ERROR = "A SQL error occurred.";
@@ -159,7 +161,7 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link SubscriptionErrorMessage}.
-     * 
+     *
      * @param category
      * @param errorCode
      * @param help
@@ -175,7 +177,7 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link SubscriptionErrorMessage}.
-     * 
+     *
      * @param category
      * @param errorCode
      * @param help

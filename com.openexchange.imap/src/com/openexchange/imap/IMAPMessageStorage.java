@@ -1300,7 +1300,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             }
             usedFields.add(MailField.toField(effectiveSortField.getListField()));
-            if (MailSortField.FLAG_SEEN.equals(effectiveSortField)) {
+            {
                 // Second-level sort field
                 usedFields.add(MailField.RECEIVED_DATE);
             }
@@ -1550,7 +1550,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Parse THREAD response to a list structure and extract sequence numbers
                  */
-                final String sortRange = limit <= 0 ? "ALL" : (Integer.toString(messageCount - limit + 1) + ':' + Integer.toString(messageCount));
+                final String sortRange;
+                if (limit <= 0) {
+                    sortRange = "ALL";
+                } else {
+                    if (OrderDirection.DESC.equals(order)) {
+                        sortRange = (Integer.toString(messageCount - limit + 1) + ':' + Integer.toString(messageCount));
+                    } else {
+                        sortRange = ("1:" + Integer.toString(limit));
+                    }
+                }
                 final String threadResponse = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
                 threadList = ThreadSortUtil.parseThreadResponse(threadResponse);
                 ThreadSortNode.applyFullName(fullName, threadList);
@@ -1574,12 +1583,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
                             @Override
                             public List<MailMessage> call() throws Exception {
-                                return Conversations.messagesFor(zentFolder, limit, clonedFetchProfile, byEnvelope);
+                                return Conversations.messagesFor(zentFolder, limit, order, clonedFetchProfile, byEnvelope);
                             }
                         });
                     }
                     // Retrieve from actual folder
-                    conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile, byEnvelope);
+                    conversations = Conversations.conversationsFor(imapFolder, limit, order, fetchProfile, byEnvelope);
                     // Retrieve from sent folder
                     if (null != messagesFromSentFolder) {
                         final List<MailMessage> sentMessages = getFrom(messagesFromSentFolder);
@@ -1595,7 +1604,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                 } else {
                     // Retrieve from actual folder
-                    conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile, byEnvelope);
+                    conversations = Conversations.conversationsFor(imapFolder, limit, order, fetchProfile, byEnvelope);
                     // Retrieve from sent folder
                     if (mergeWithSent) {
                         // Switch folder
@@ -1608,7 +1617,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             }
                             throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
                         }
-                        final List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, limit, fetchProfile, byEnvelope);
+                        final List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, limit, order, fetchProfile, byEnvelope);
                         for (final Conversation conversation : conversations) {
                             for (final MailMessage sentMessage : sentMessages) {
                                 if (conversation.referencesOrIsReferencedBy(sentMessage)) {
@@ -3341,8 +3350,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Remove all old color label flag(s) and set new color label flag
                  */
                 imapFolderStorage.removeFromCache(fullName);
-                IMAPCommandsCollection.clearAllColorLabels(imapFolder, msgUIDs);
-                IMAPCommandsCollection.setColorLabel(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
+                IMAPCommandsCollection.clearAndSetColorLabelSafely(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
+
                 /*
                  * Force JavaMail's cache update through folder closure
                  */
@@ -3408,8 +3417,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Remove all old color label flag(s) and set new color label flag
                  */
                 imapFolderStorage.removeFromCache(fullName);
-                IMAPCommandsCollection.clearAllColorLabels(imapFolder, null);
-                IMAPCommandsCollection.setColorLabel(imapFolder, null, MailMessage.getColorLabelStringValue(colorLabel));
+
+                IMAPCommandsCollection.clearAndSetColorLabelSafely(imapFolder, null, MailMessage.getColorLabelStringValue(colorLabel));
                 /*
                  * Force JavaMail's cache update through folder closure
                  */

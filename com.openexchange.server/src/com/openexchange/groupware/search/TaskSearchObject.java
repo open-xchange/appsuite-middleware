@@ -73,27 +73,13 @@ public class TaskSearchObject extends CalendarSearchObject {
 
     private int priority = NO_PRIORITY;
     
-    private Set<String> titleFilters;
-    
-    private Set<String> descriptionFilters;
-    
     private Set<Integer> stateFilters;
-    
-    private Set<String> queries;
     
     private boolean seriesFilter;
     
     private boolean singleOccurrenceFilter;
     
-    private Set<Integer> internalParticipants;
-    
     private Set<String> externalParticipants;
-    
-    private boolean hasInternalParticipants;
-    
-    private boolean hasExternalParticipants;
-    
-    private Set<String> attachmentFilters;
     
     private int start;
     
@@ -131,58 +117,6 @@ public class TaskSearchObject extends CalendarSearchObject {
 
     public void setRange(final Date[] range) {
         this.range = range;
-    }
-    
-    /**
-     * Set filters for the title field
-     * @param tf title filters
-     */
-    public void setTitleFilters(Set<String> tf) {
-        titleFilters = tf;
-    }
-    
-    /**
-     * Gets the title filters
-     *
-     * @return The title filters
-     */
-    public Set<String> getTitleFilters() {
-        return titleFilters;
-    }
-    
-    /**
-     * Set the filters for the description field
-     * @param df description filters
-     */
-    public void setDescriptionFilters(Set<String> df) {
-        descriptionFilters = df;
-    }
-    
-    /**
-     * Gets the description filters
-     *
-     * @return The description filters
-     */
-    public Set<String> getDescriptionFilters() {
-        return descriptionFilters;
-    }
-
-    /**
-     * Gets the queries
-     *
-     * @return The queries
-     */
-    public Set<String> getQueries() {
-        return queries;
-    }
-
-    /**
-     * Sets the queries
-     *
-     * @param queries The queries to set
-     */
-    public void setQueries(Set<String> queries) {
-        this.queries = queries;
     }
 
     /**
@@ -240,24 +174,6 @@ public class TaskSearchObject extends CalendarSearchObject {
     }
 
     /**
-     * Gets the internalParticipants
-     *
-     * @return The internalParticipants
-     */
-    public Set<Integer> getInternalParticipants() {
-        return internalParticipants;
-    }
-
-    /**
-     * Sets the internalParticipants
-     *
-     * @param internalParticipants The internalParticipants to set
-     */
-    public void setInternalParticipants(Set<Integer> internalParticipants) {
-        this.internalParticipants = internalParticipants;
-    }
-
-    /**
      * Gets the externalParticipants
      *
      * @return The externalParticipants
@@ -273,69 +189,6 @@ public class TaskSearchObject extends CalendarSearchObject {
      */
     public void setExternalParticipants(Set<String> externalParticipants) {
         this.externalParticipants = externalParticipants;
-    }
-
-    /**
-     * Gets the hasInternalParticipants
-     *
-     * @return The hasInternalParticipants
-     */
-    public boolean hasInternalParticipants() {
-        return hasInternalParticipants;
-    }
-
-    /**
-     * Sets the hasInternalParticipants
-     *
-     * @param hasInternalParticipants The hasInternalParticipants to set
-     */
-    public void setHasInternalParticipants(boolean hasInternalParticipants) {
-        this.hasInternalParticipants = hasInternalParticipants;
-    }
-
-    /**
-     * Gets the hasExternalParticipants
-     *
-     * @return The hasExternalParticipants
-     */
-    public boolean hasExternalParticipants() {
-        return hasExternalParticipants;
-    }
-
-    /**
-     * Sets the hasExternalParticipants
-     *
-     * @param hasExternalParticipants The hasExternalParticipants to set
-     */
-    public void setHasExternalParticipants(boolean hasExternalParticipants) {
-        this.hasExternalParticipants = hasExternalParticipants;
-    }
-
-    /**
-     * Gets the hasParticipants
-     *
-     * @return The hasParticipants
-     */
-    public boolean hasParticipants() {
-        return (hasInternalParticipants || hasExternalParticipants);
-    }
-
-    /**
-     * Gets the attachmentFilters
-     *
-     * @return The attachmentFilters
-     */
-    public Set<String> getAttachmentFilters() {
-        return attachmentFilters;
-    }
-
-    /**
-     * Sets the attachmentFilters
-     *
-     * @param attachmentFilters The attachmentFilters to set
-     */
-    public void setAttachmentFilters(Set<String> attachmentFilters) {
-        this.attachmentFilters = attachmentFilters;
     }
 
     /**

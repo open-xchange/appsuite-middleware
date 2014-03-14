@@ -1432,7 +1432,7 @@ public class User {
      *
      */
     public String getImapServer() {
-        return imapServer;
+        return null == imapServer ? imapServerString : imapServer;
     }
 
     /**
@@ -2248,7 +2248,7 @@ public class User {
      *
      */
     public String getSmtpServer() {
-        return smtpServer;
+        return null == smtpServer ? smtpServerString : smtpServer;
     }
 
     /**

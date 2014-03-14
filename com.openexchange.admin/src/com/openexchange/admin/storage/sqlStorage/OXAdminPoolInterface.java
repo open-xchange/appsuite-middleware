@@ -76,6 +76,19 @@ public interface OXAdminPoolInterface {
 
     void writeAssignment(Connection con, Assignment assign) throws PoolException;
 
+    void deleteAssignment(Connection con, int contextId) throws PoolException;
+
     void removeService();
 
+    int[] getContextInSameSchema(Connection con, int contextId) throws PoolException;
+
+    int[] getContextInSchema(Connection con, int poolId, String schema) throws PoolException;
+
+    int getWritePool(int contextId) throws PoolException;
+
+    String getSchemaName(int contextId) throws PoolException;
+
+    String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws PoolException;
+
+    void lock(Connection con) throws PoolException;
 }

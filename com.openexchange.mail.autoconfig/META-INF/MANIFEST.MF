@@ -19,6 +19,7 @@ Import-Package: com.google.common.annotations,
  com.google.common.primitives,
  com.google.common.reflect,
  com.google.common.util.concurrent,
+ com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.database,
  com.openexchange.exception,
@@ -48,6 +49,5 @@ Import-Package: com.google.common.annotations,
  org.osgi.framework,
  org.slf4j,
  org.xmlpull.v1
-Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: com.openexchange.mail.autoconfig

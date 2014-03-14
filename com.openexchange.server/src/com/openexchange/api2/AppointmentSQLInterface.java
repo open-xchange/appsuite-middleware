@@ -180,7 +180,7 @@ public interface AppointmentSQLInterface {
      * @return A SearchIterator contains AppointmentObjects
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
-//    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(AppointmentSearchObject searchObject, int orderBy, Order orderDir, int cols[]) throws OXException, SQLException;
+    //    public SearchIterator<Appointment> getAppointmentsByExtendedSearch(AppointmentSearchObject searchObject, int orderBy, Order orderDir, int cols[]) throws OXException, SQLException;
 
     /**
      * Lists all appointments where the title or description matches the given pattern in the {@link AppointmentSearchObject}.
@@ -282,7 +282,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * checks if the given folder contains any foreign objects
-         * @param user_id
+     * @param user_id
      * @param folderid
      * @throws OXException, SQLException
      */
@@ -304,18 +304,18 @@ public interface AppointmentSQLInterface {
      * @param folderid
      * @throws OXException, SQLException
      */
-     public boolean isFolderEmpty(int uid, int fid) throws OXException, SQLException;
+    public boolean isFolderEmpty(int uid, int fid) throws OXException, SQLException;
 
     /**
-      * returns true if the given folder is empty using specified connection
+     * returns true if the given folder is empty using specified connection
      * @param user_id
-      * @param folderid
-      * @param readCon
-      * @throws OXException, SQLException
-      */
-     public boolean isFolderEmpty(int uid, int fid, Connection readCon) throws OXException, SQLException;
+     * @param folderid
+     * @param readCon
+     * @throws OXException, SQLException
+     */
+    public boolean isFolderEmpty(int uid, int fid, Connection readCon) throws OXException, SQLException;
 
-     // ---------------------------------------------------------------------------------------------------------------------------------- //
+    // ---------------------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Sets the confirmation of an appointment for a user.
@@ -345,10 +345,11 @@ public interface AppointmentSQLInterface {
 
     /**
      * Sets the confirmation of an appointment for a user.
-     *
+     * 
      * @param objectId unique identifier of the appointment.
      * @param folderId folder of the appointment
-     * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code> denotes a series appointment; otherwise <code>0</code> (zero)
+     * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code>
+     *            denotes a series appointment; otherwise <code>0</code> (zero)
      * @param userId unique identifier of the user.
      * @param confirm The confirm status
      * @param confirmMessage The confirm message
@@ -359,10 +360,11 @@ public interface AppointmentSQLInterface {
 
     /**
      * Sets the confirmation of an appointment for an external user, identified with his mail address.
-     *
+     * 
      * @param objectId unique identifier of the appointment.
      * @param folderId folder of the appointment
-     * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code> denotes a series appointment; otherwise <code>0</code> (zero)
+     * @param optOccurrenceId The numeric identifier of the occurrence to which the confirmation applies in case <code>objectId</code>
+     *            denotes a series appointment; otherwise <code>0</code> (zero)
      * @param mail The E-Mail address of the associated external participant
      * @param confirm The confirm status
      * @param message The confirm message
@@ -370,8 +372,6 @@ public interface AppointmentSQLInterface {
      * @throws OXException If setting the confirmation fails
      */
     Date setExternalConfirmation(int objectId, int folderId, int optOccurrenceId, String mail, int confirm, String message) throws OXException;
-
-    // ---------------------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Method to attach or detach attachments

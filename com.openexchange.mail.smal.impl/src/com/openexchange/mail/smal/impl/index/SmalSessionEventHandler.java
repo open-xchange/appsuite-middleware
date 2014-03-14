@@ -80,6 +80,9 @@ import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link SmalSessionEventHandler}
@@ -109,68 +112,94 @@ public class SmalSessionEventHandler implements EventHandler {
     }
 
     @Override
-    public void handleEvent(Event event) {
+    public void handleEvent(final Event event) {
         try {
-            IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
-            if (indexingService == null) {
-                OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexingService.class.getName());
-                LOG.warn("Could not handle session event.", e);
-                return;
-            }
-
-            String topic = event.getTopic();
+            final String topic = event.getTopic();
             if (handleAdded.contains(topic)) {
-                Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                if (session.isTransient()) {
+                final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                if (null == session || session.isTransient()) {
                     return;
                 }
 
-                int contextId = session.getContextId();
-                int userId = session.getUserId();
-                if (!isIndexingPermitted(contextId, userId)) {
-                    if (LOG.isDebugEnabled()) {
-                        OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(Types.EMAIL, userId, contextId);
-                        LOG.debug("Skipping event handling execution", e);
-                    }
-                    return;
-                }
+                final ThreadPoolService threadPool = SmalServiceLookup.getInstance().getService(ThreadPoolService.class);
+                if (null == threadPool) {
+                    handleSession(session, topic);
+                } else {
+                    final AbstractTask<Void> task = new AbstractTask<Void>() {
 
-                MailAccountStorageService storageService = SmalServiceLookup.getServiceStatic(MailAccountStorageService.class);
-                if (storageService == null) {
-                    OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailAccountStorageService.class.getName());
-                    LOG.warn("Could not handle session event.", e);
-                    return;
+                        @Override
+                        public Void call() throws Exception {
+                            try {
+                                handleSession(session, topic);
+                            } catch (final Exception e) {
+                                LOG.warn("Error while triggering mail indexing jobs.", e);
+                            }
+                            return null;
+                        }
+                    };
+                    threadPool.submit(task, CallerRunsBehavior.<Void> getInstance());
                 }
-
-                Map<Integer, Set<MailFolder>> allFolders = IndexableFoldersCalculator.calculatePrivateMailFolders(
-                    session,
-                    storageService);
-                scheduleFolderJobs(session, allFolders, indexingService, SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic));
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.warn("Error while triggering mail indexing jobs.", e);
         }
     }
 
-    private boolean isIndexingPermitted(int contextId, int userId) throws OXException {
-        ConfigViewFactory config = SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
-        ConfigView view = config.getView(userId, contextId);
-        String moduleStr = view.get(IndexProperties.ALLOWED_MODULES, String.class);
-        ModuleSet modules = new ModuleSet(moduleStr);
+    /**
+     * Handles specified session and topic.
+     *
+     * @param session The session
+     * @param topic The topic
+     * @throws OXException If handling session fails
+     */
+    protected void handleSession(final Session session, final String topic) throws OXException {
+        final IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
+        if (indexingService == null) {
+            final OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IndexingService.class.getName());
+            LOG.warn("Could not handle session event.", e);
+            return;
+        }
+
+        final int contextId = session.getContextId();
+        final int userId = session.getUserId();
+        if (!isIndexingPermitted(contextId, userId)) {
+            if (LOG.isDebugEnabled()) {
+                final OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(Types.EMAIL, userId, contextId);
+                LOG.debug("Skipping event handling execution", e);
+            }
+            return;
+        }
+
+        final MailAccountStorageService storageService = SmalServiceLookup.getServiceStatic(MailAccountStorageService.class);
+        if (storageService == null) {
+            final OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailAccountStorageService.class.getName());
+            LOG.warn("Could not handle session event.", e);
+            return;
+        }
+
+        final Map<Integer, Set<MailFolder>> allFolders = IndexableFoldersCalculator.calculatePrivateMailFolders(session, storageService);
+        scheduleFolderJobs(session, allFolders, indexingService, SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic));
+    }
+
+    private boolean isIndexingPermitted(final int contextId, final int userId) throws OXException {
+        final ConfigViewFactory config = SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
+        final ConfigView view = config.getView(userId, contextId);
+        final String moduleStr = view.get(IndexProperties.ALLOWED_MODULES, String.class);
+        final ModuleSet modules = new ModuleSet(moduleStr);
         return modules.containsModule(Types.EMAIL);
     }
 
-    private void scheduleFolderJobs(Session session, Map<Integer, Set<MailFolder>> allFolders, IndexingService indexingService, boolean updateOnly) throws OXException {
-        int contextId = session.getContextId();
-        int userId = session.getUserId();
-        Random random = new Random();
-        ConfigurationService configurationService = SmalServiceLookup.getServiceStatic(ConfigurationService.class);
-        boolean useOffset = configurationService.getBoolProperty("com.openexchange.mail.smal.useOffset", true);
-        for (Integer accountId : allFolders.keySet()) {
-            Set<MailFolder> folders = allFolders.get(accountId);
-            MailConfig mailConfig = MailConfig.getConfig(new JobMailConfig(), session, accountId);
+    private void scheduleFolderJobs(final Session session, final Map<Integer, Set<MailFolder>> allFolders, final IndexingService indexingService, final boolean updateOnly) throws OXException {
+        final int contextId = session.getContextId();
+        final int userId = session.getUserId();
+        final Random random = new Random();
+        final ConfigurationService configurationService = SmalServiceLookup.getServiceStatic(ConfigurationService.class);
+        final boolean useOffset = configurationService.getBoolProperty("com.openexchange.mail.smal.useOffset", true);
+        for (final Integer accountId : allFolders.keySet()) {
+            final Set<MailFolder> folders = allFolders.get(accountId);
+            final MailConfig mailConfig = MailConfig.getConfig(new JobMailConfig(), session, accountId);
 
-            for (MailFolder folder : folders) {
+            for (final MailFolder folder : folders) {
                 int offset = 0;
                 if (useOffset) {
                     offset = random.nextInt(MAX_OFFSET);
@@ -188,7 +217,7 @@ public class SmalSessionEventHandler implements EventHandler {
                     priority = 5;
                 }
 
-                JobInfo jobInfo = MailJobInfo.newBuilder(MailFolderJob.class)
+                final JobInfo jobInfo = MailJobInfo.newBuilder(MailFolderJob.class)
                     .login(mailConfig.getLogin())
                     .accountId(accountId)
                     .contextId(contextId)
@@ -198,7 +227,7 @@ public class SmalSessionEventHandler implements EventHandler {
                     .folder(folder.getFullname())
                     .build();
 
-                Date startDate = new Date(System.currentTimeMillis() + offset);
+                final Date startDate = new Date(System.currentTimeMillis() + offset);
                 indexingService.scheduleJobWithProgressiveInterval(jobInfo, startDate, JOB_TIMEOUT, START_INTERVAL, PROGRESSION_RATE, priority, updateOnly);
             }
 
@@ -206,8 +235,8 @@ public class SmalSessionEventHandler implements EventHandler {
             if (useOffset) {
                 offset = random.nextInt(MAX_OFFSET);
             }
-            Date startDate = new Date(System.currentTimeMillis() + offset);
-            JobInfo checkDeletedJobInfo = MailJobInfo.newBuilder(CheckForDeletedFoldersJob.class)
+            final Date startDate = new Date(System.currentTimeMillis() + offset);
+            final JobInfo checkDeletedJobInfo = MailJobInfo.newBuilder(CheckForDeletedFoldersJob.class)
                 .accountId(accountId)
                 .contextId(contextId)
                 .userId(userId)
@@ -241,13 +270,13 @@ public class SmalSessionEventHandler implements EventHandler {
         }
 
         @Override
-        public void setPort(int port) {}
+        public void setPort(final int port) {}
 
         @Override
-        public void setSecure(boolean secure) {}
+        public void setSecure(final boolean secure) {}
 
         @Override
-        public void setServer(String server) {}
+        public void setServer(final String server) {}
 
         @Override
         public IMailProperties getMailProperties() {
@@ -255,10 +284,10 @@ public class SmalSessionEventHandler implements EventHandler {
         }
 
         @Override
-        public void setMailProperties(IMailProperties mailProperties) {}
+        public void setMailProperties(final IMailProperties mailProperties) {}
 
         @Override
-        protected void parseServerURL(String serverURL) throws OXException {}
+        protected void parseServerURL(final String serverURL) throws OXException {}
 
     }
 }

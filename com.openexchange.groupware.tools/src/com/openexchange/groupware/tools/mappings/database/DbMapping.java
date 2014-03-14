@@ -52,7 +52,6 @@ package com.openexchange.groupware.tools.mappings.database;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.Mapping;
 
@@ -86,9 +85,10 @@ public interface DbMapping<T, O> extends Mapping<T, O> {
 	/**
 	 * Gets the readable name of the mapped property.
 	 *
-	 * @return the readable name
+     * @param object The object
+	 * @return The readable name
 	 */
-	String getReadableName();
+	String getReadableName(O object);
 
 	/**
 	 * Gets the underlying SQL type of the database column.

@@ -424,16 +424,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private void closeSafely(final IMAPStore imapStore) {
-        try {
-            imapStore.close();
-        } catch (final MessagingException e) {
-            LOG.error("Error while closing IMAP store.", e);
-        } catch (final RuntimeException e) {
-            LOG.error("Error while closing IMAP store.", e);
-        }
-    }
-
     @Override
     protected MailConfig createNewMailConfig() {
         return new IMAPConfig(accountId);
@@ -552,7 +542,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            final javax.mail.Session imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class);
+            final javax.mail.Session imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class, MailProperties.getInstance().isEnforceSecureConnection());
             /*
              * Check if debug should be enabled
              */
@@ -563,7 +553,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             IMAPStore imapStore = null;
             try {
                 /*
-                 * Get store
+                 * Get connected store
                  */
                 imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass);
                 /*
@@ -676,7 +666,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             {
                 final Class<? extends IMAPStore> clazz = useIMAPStoreCache() ? IMAPStoreCache.getInstance().getStoreClass() : JavaIMAPStore.class;
-                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz);
+                imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, accountId > 0 && MailProperties.getInstance().isEnforceSecureConnection());
             }
             /*
              * Check if debug should be enabled
@@ -1204,7 +1194,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
     }
 
-    private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps, final Class<? extends IMAPStore> storeClass) {
+    private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps, final Class<? extends IMAPStore> storeClass, final boolean forceSecure) throws OXException {
         /*
          * Custom IMAP store
          */
@@ -1241,23 +1231,34 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Specify SSL protocols
              */
-            imapProps.put("mail.imap.ssl.protocols", "SSLv3 TLSv1");
+            imapProps.put("mail.imap.ssl.protocols", config.getIMAPProperties().getSSLProtocols());
         } else {
             /*
              * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
              */
-            if (config.getIMAPProperties().isEnableTls()) {
+            if (forceSecure || config.getIMAPProperties().isEnableTls()) {
                 try {
                     final String serverUrl = new StringAllocator(36).append(IDNA.toASCII(config.getServer())).append(':').append(config.getPort()).toString();
                     final Map<String, String> capabilities = IMAPCapabilityAndGreetingCache.getCapabilities(serverUrl, false, config.getIMAPProperties());
                     if (null != capabilities) {
                         if (capabilities.containsKey("STARTTLS")) {
                             imapProps.put("mail.imap.starttls.enable", "true");
+                        } else if (forceSecure) {
+                            // No SSL demanded and IMAP server seems not to support TLS
+                            throw MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
                         }
                     } else {
+                        if (forceSecure) {
+                            // No SSL demanded and IMAP server seems not to support TLS
+                            throw MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
+                        }
                         imapProps.put("mail.imap.starttls.enable", "true");
                     }
                 } catch (final IOException e) {
+                    if (forceSecure) {
+                        // No SSL demanded and IMAP server seems not to support TLS
+                        throw MailExceptionCode.NON_SECURE_DENIED.create(e, config.getServer());
+                    }
                     imapProps.put("mail.imap.starttls.enable", "true");
                 }
             }
@@ -1272,7 +1273,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Specify SSL protocols
              */
-            imapProps.put("mail.imap.ssl.protocols", "SSLv3 TLSv1");
+            imapProps.put("mail.imap.ssl.protocols", config.getIMAPProperties().getSSLProtocols());
             // imapProps.put("mail.imap.ssl.enable", "true");
             /*
              * Needed for JavaMail >= 1.4
@@ -1341,6 +1342,18 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     }
                 }
                 sb.append(lineSeparator);
+            }
+        }
+    }
+
+    private static void closeSafely(final IMAPStore imapStore) {
+        if (null != imapStore) {
+            try {
+                imapStore.close();
+            } catch (final MessagingException e) {
+                LOG.error("Error while closing IMAP store.", e);
+            } catch (final RuntimeException e) {
+                LOG.error("Error while closing IMAP store.", e);
             }
         }
     }

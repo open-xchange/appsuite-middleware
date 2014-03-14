@@ -2,10 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Subscribe Xing Bundle
 Bundle-SymbolicName: com.openexchange.subscribe.xing
-Bundle-Version: 7.0.1
+Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.ajax.container,
+ com.openexchange.config,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.datatypes.genericonf,
@@ -23,6 +24,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.subscribe,
+ com.openexchange.subscribe.crawler,
  com.openexchange.threadpool,
  com.openexchange.tools.session,
  com.openexchange.xing,

@@ -920,6 +920,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     int[] getUserMailAccountIDs(final int user, final int cid, final Connection con) throws OXException {
+        if (null == con) {
+            return getUserMailAccountIDs(user, cid);
+        }
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {

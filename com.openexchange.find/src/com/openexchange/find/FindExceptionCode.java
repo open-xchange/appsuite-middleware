@@ -105,7 +105,11 @@ public enum FindExceptionCode implements DisplayableOXExceptionCode {
     /**
      * The facet \"%1$s\" is mandatory and has to be set.
      */
-    MISSING_MANDATORY_FACET(FindExceptionMessages.MISSING_MANDATORY_FACET, Category.CATEGORY_USER_INPUT, 11, FindExceptionMessages.MISSING_MANDATORY_FACET);
+    MISSING_MANDATORY_FACET(FindExceptionMessages.MISSING_MANDATORY_FACET, Category.CATEGORY_USER_INPUT, 11, FindExceptionMessages.MISSING_MANDATORY_FACET),
+    /**
+     * Could not parse \"%1$s\".
+     */
+    PARSING_ERROR(FindExceptionMessages.PARSING_ERROR_MSG, Category.CATEGORY_USER_INPUT, 12, FindExceptionMessages.PARSING_ERROR_MSG);
     ;
 
     public static final String PREFIX = "FIND";

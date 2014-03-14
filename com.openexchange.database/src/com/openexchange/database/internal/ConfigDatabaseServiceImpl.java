@@ -49,14 +49,10 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
-import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import com.openexchange.caching.CacheService;
+import com.openexchange.database.Assignment;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -75,11 +71,13 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private final Pools pools;
     private final ConfigDatabaseAssignmentService assignmentService;
+    private final ContextDatabaseAssignmentImpl contextAssignment;
     private final ReplicationMonitor monitor;
 
     ConfigDatabaseServiceImpl(ConfigDatabaseAssignmentService assignmentService, Pools pools, ReplicationMonitor monitor) {
         super();
         this.assignmentService = assignmentService;
+        contextAssignment = new ContextDatabaseAssignmentImpl(this);
         this.pools = pools;
         this.monitor = monitor;
     }
@@ -109,6 +107,18 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         }
     }
 
+    void setCacheService(CacheService service) {
+        contextAssignment.setCacheService(service);
+    }
+
+    void removeCacheService() {
+        contextAssignment.removeCacheService();
+    }
+
+    AssignmentImpl getAssignment(int contextId) throws OXException {
+        return contextAssignment.getAssignment(contextId);
+    }
+
     @Override
     public Connection getReadOnly() throws OXException {
         return get(false);
@@ -131,30 +141,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     @Override
     public int[] listContexts(final int poolId) throws OXException {
-        final List<Integer> tmp = new ArrayList<Integer>();
-        final Connection con = getReadOnly();
-        final String getcid = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement(getcid);
-            stmt.setInt(1, poolId);
-            stmt.setInt(2, poolId);
-            result = stmt.executeQuery();
-            while (result.next()) {
-                tmp.add(I(result.getInt(1)));
-            }
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
-            backReadOnly(con);
-        }
-        final int[] retval = new int[tmp.size()];
-        for (int i = 0; i < tmp.size(); i++) {
-            retval[i] = tmp.get(i).intValue();
-        }
-        return retval;
+        return contextAssignment.getContextsInDatabase(poolId);
     }
 
     @Override
@@ -165,5 +152,63 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     @Override
     public String getServerName() throws OXException {
         return Server.getServerName();
+    }
+
+    @Override
+    public int getWritablePool(int contextId) throws OXException {
+        final Assignment assign = contextAssignment.getAssignment(contextId);
+        return assign.getWritePoolId();
+    }
+
+    @Override
+    public String getSchemaName(int contextId) throws OXException {
+        return contextAssignment.getAssignment(contextId).getSchema();
+    }
+
+    @Override
+    public int[] getContextsInSameSchema(int contextId) throws OXException {
+        final Assignment assign = contextAssignment.getAssignment(contextId);
+        final Connection con = getReadOnly();
+        try {
+            return contextAssignment.getContextsFromSchema(con, assign.getWritePoolId(), assign.getSchema());
+        } finally {
+            backReadOnly(con);
+        }
+    }
+
+    @Override
+    public int[] getContextsInSameSchema(Connection con, int contextId) throws OXException {
+        final Assignment assign = contextAssignment.getAssignment(contextId);
+        return contextAssignment.getContextsFromSchema(con, assign.getWritePoolId(), assign.getSchema());
+    }
+
+    @Override
+    public int[] getContextsInSchema(Connection con, int poolId, String schema) throws OXException {
+        return contextAssignment.getContextsFromSchema(con, poolId, schema);
+    }
+
+    @Override
+    public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException {
+        return contextAssignment.getUnfilledSchemas(con, poolId, maxContexts);
+    }
+
+    @Override
+    public void invalidate(final int contextId) {
+        contextAssignment.invalidateAssignment(contextId);
+    }
+
+    @Override
+    public void writeAssignment(Connection con, Assignment assignment) throws OXException {
+        contextAssignment.writeAssignment(con, assignment);
+    }
+
+    @Override
+    public void deleteAssignment(Connection con, int contextId) throws OXException {
+        contextAssignment.deleteAssignment(con, contextId);
+    }
+
+    @Override
+    public void lock(Connection con) throws OXException {
+        contextAssignment.lock(con);
     }
 }

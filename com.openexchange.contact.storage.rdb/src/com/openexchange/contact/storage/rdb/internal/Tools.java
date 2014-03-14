@@ -70,6 +70,8 @@ import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.java.Charsets;
 import com.openexchange.l10n.SuperCollator;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -127,36 +129,37 @@ public final class Tools {
     }
 
     /**
-     * Extracts the relevant information from a {@link DataTruncation}
-     * exception and puts it into a corresponding {@link OXException}.
+     * Extracts the relevant information from a {@link DataTruncation} exception and puts it into a corresponding {@link OXException}.
      *
-     * @param connection
-     * @param e
-     * @param contact
-     * @param table
-     * @return
+     * @param session The user session
+     * @param connection A (readable) db connection
+     * @param e The data truncation exception
+     * @param contact The affected contact
+     * @param table The database table
+     * @return The exception
      * @throws OXException
      */
-    public static OXException getTruncationException(final Connection connection, final DataTruncation e, final Contact contact,
-    		final Table table) throws OXException {
-        final String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+    public static OXException getTruncationException(Session session, Connection connection, DataTruncation e, Contact contact, Table table) throws OXException {
+        String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
+        com.openexchange.java.StringAllocator stringAllocator = new com.openexchange.java.StringAllocator();
         /*
          * create truncated attributes
          */
-        final OXException.Truncated[] truncatedAttributes = new OXException.Truncated[truncatedColumns.length];
+        OXException.Truncated[] truncatedAttributes = new OXException.Truncated[truncatedColumns.length];
         for (int i = 0; i < truncatedColumns.length; i++) {
-        	final String columnLabel = truncatedColumns[i];
-        	final int maximumSize =  getMaximumSize(connection, table, columnLabel);
-        	final ContactField field = Mappers.CONTACT.getMappedField(columnLabel);
-    		final DbMapping<? extends Object, Contact> mapping = Mappers.CONTACT.get(field);
-    		final Object object = mapping.get(contact);
-			final int actualSize = null != object && String.class.isInstance(object) ?
-					Charsets.getBytes((String) object, Charsets.UTF_8).length : 0;
-			stringBuilder.append(mapping.getReadableName());
-			truncatedAttributes[i] = new MappedTruncation<Contact>(mapping, maximumSize, actualSize, mapping.getReadableName());
+        	String columnLabel = truncatedColumns[i];
+        	int maximumSize =  getMaximumSize(connection, table, columnLabel);
+        	ContactField field = Mappers.CONTACT.getMappedField(columnLabel);
+    		DbMapping<? extends Object, Contact> mapping = Mappers.CONTACT.get(field);
+    		Object object = mapping.get(contact);
+			int actualSize = null != object && String.class.isInstance(object) ?
+			    Charsets.getBytes((String) object, Charsets.UTF_8).length : 0;
+			String readableName = Translator.getInstance().translate(
+			    ServerSessionAdapter.valueOf(session).getUser().getLocale(), mapping.getReadableName(contact));
+			stringAllocator.append(readableName);
+			truncatedAttributes[i] = new MappedTruncation<Contact>(mapping, maximumSize, actualSize, readableName);
         	if (i != truncatedColumns.length - 1) {
-        		stringBuilder.append(", ");
+        		stringAllocator.append(", ");
         	}
 		}
         /*
@@ -165,10 +168,10 @@ public final class Tools {
         final OXException truncationException;
         if (truncatedAttributes.length > 0) {
             final OXException.Truncated truncated = truncatedAttributes[0];
-            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(),
+            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringAllocator.toString(),
             		Integer.valueOf(truncated.getMaxSize()), Integer.valueOf(truncated.getLength()));
         } else {
-            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringBuilder.toString(), Integer.valueOf(-1),
+            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringAllocator.toString(), Integer.valueOf(-1),
             		Integer.valueOf(-1));
         }
         for (final OXException.Truncated truncated : truncatedAttributes) {

@@ -233,7 +233,7 @@ public class RdbTaskSearch extends TaskSearch {
         builder.append(SQL.allFoldersWhere(all, own, shared));
         
         //set titles
-        Set<String> titleFilters = searchObject.getTitleFilters();
+        Set<String> titleFilters = searchObject.getTitles();
         if (titleFilters != null && titleFilters.size() > 0) {
             for(String t : titleFilters) {
                 builder.append(" AND ");
@@ -244,7 +244,7 @@ public class RdbTaskSearch extends TaskSearch {
         }
         
         //set descriptions
-        Set<String> descriptionFilters = searchObject.getDescriptionFilters();
+        Set<String> descriptionFilters = searchObject.getNotes();
         if (descriptionFilters != null && descriptionFilters.size() > 0) {
             for(String t : descriptionFilters) {
                 builder.append(" AND ");
@@ -269,7 +269,7 @@ public class RdbTaskSearch extends TaskSearch {
         }
         
         //set attachment
-        Set<String> attachmentFilters = searchObject.getAttachmentFilters();
+        Set<String> attachmentFilters = searchObject.getAttachmentNames();
         if (attachmentFilters != null && attachmentFilters.size() > 0) {
             for(String t : attachmentFilters) {
                 builder.append(" AND ");
@@ -297,7 +297,7 @@ public class RdbTaskSearch extends TaskSearch {
         if (searchObject.hasParticipants()) {
             builder.append(" AND ( ");
             int i = 0;
-            for(Integer id : searchObject.getInternalParticipants()) {
+            for(Integer id : searchObject.getUserIDs()) {
                 if (i++ > 0)
                     builder.append(" AND ");
                 builder.append(" t.id IN ( SELECT tp.task FROM task_participant AS tp WHERE t.id = tp.task AND t.cid = tp.cid AND tp.user = ? )");

@@ -191,13 +191,13 @@ public class TaskSearchObjectBuilder {
      * @param filters
      */
     private void addTitleFilters(List<String> filters) {
-        Set<String> tf = searchObject.getTitleFilters();
+        Set<String> tf = searchObject.getTitles();
         if (tf == null)
             tf = new HashSet<String>(filters.size());
         for(String q : filters) {
             tf.add(wrapWithWildcards(q));
         }
-        searchObject.setTitleFilters(tf);
+        searchObject.setTitles(tf);
     }
     
     /**
@@ -206,13 +206,13 @@ public class TaskSearchObjectBuilder {
      * @param filters
      */
     private void addDescriptionFilters(List<String> filters) {
-        Set<String> df = searchObject.getDescriptionFilters();
+        Set<String> df = searchObject.getNotes();
         if (df == null)
             df = new HashSet<String>(filters.size());
         for(String q : filters) {
             df.add(wrapWithWildcards(q));
         }
-        searchObject.setDescriptionFilters(df);
+        searchObject.setNotes(df);
     }
     
     /**
@@ -264,17 +264,17 @@ public class TaskSearchObjectBuilder {
      * @param filters
      */
     private void addAttachmentFilters(List<String> filters) {
-        Set<String> af = searchObject.getAttachmentFilters();
+        Set<String> af = searchObject.getAttachmentNames();
         if (af == null)
             af = new HashSet<String>(filters.size());
         for(String q : filters) {
             af.add(wrapWithWildcards(q));
         }
-        searchObject.setAttachmentFilters(af);
+        searchObject.setAttachmentNames(af);
     }
     
     /**
-     * Set the reccurence type filter
+     * Set the recurrence type filter
      * @param filters
      * @throws OXException
      */
@@ -290,7 +290,7 @@ public class TaskSearchObjectBuilder {
     }
     
     private void addParticipantFilters(List<String> filters) throws OXException {
-        Set<Integer> intP = searchObject.getInternalParticipants();
+        Set<Integer> intP = searchObject.getUserIDs();
         Set<String> extP = searchObject.getExternalParticipants();
         
         if (intP == null)
@@ -307,7 +307,7 @@ public class TaskSearchObjectBuilder {
             }
         }
         
-        searchObject.setInternalParticipants(intP);
+        searchObject.setUserIDs(intP);
         searchObject.setExternalParticipants(extP);
         
         searchObject.setHasInternalParticipants(intP.size() > 0);

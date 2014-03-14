@@ -175,4 +175,6 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public static final String PING_FAILED_AUTH_MSG = "Validation of server %1$s failed due to invalid credentials";
 
+    public static final String NON_SECURE_DENIED_MSG = "Server %1$s does not support being accessed using a secure connection.";
+
 }

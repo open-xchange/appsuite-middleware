@@ -93,6 +93,14 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_CREDENTIALS("Invalid credentials.", INVALID_CREDENTIALS_MSG, Category.CATEGORY_USER_INPUT, 6),
     /**
+     * Missing user mapping for user "%1$s". Login failed.
+     */
+    INVALID_CREDENTIALS_MISSING_USER_MAPPING("Missing user mapping for user \"%1$s\". Login failed.", INVALID_CREDENTIALS_MSG, Category.CATEGORY_USER_INPUT, 6),
+    /**
+     * Missing context mapping for context "%1$s". Login failed. 
+     */
+    INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING("Missing context mapping for context \"%1$s\". Login failed.", INVALID_CREDENTIALS_MSG, Category.CATEGORY_USER_INPUT, 6),
+    /**
      * Missing property %1$s.
      */
     MISSING_PROPERTY("Missing property %1$s.", MESSAGE, Category.CATEGORY_CONFIGURATION, 9),

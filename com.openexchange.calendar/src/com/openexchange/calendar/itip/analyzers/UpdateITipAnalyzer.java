@@ -72,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -129,6 +130,8 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         boolean differ = true;
 
         if (original != null) {
+            // TODO: Needs to be removed, when we handle external resources.
+            addResourcesToUpdate(original, update);
             if (isOutdated(update, original)) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
                 analysis.recommendAction(ITipAction.IGNORE);
@@ -271,6 +274,41 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
 
         }
         return analysis;
+    }
+
+    /**
+     * Adds all existing Resources to the participant list of the update.
+     *
+     * @param original
+     * @param update
+     */
+    private void addResourcesToUpdate(CalendarDataObject original, CalendarDataObject update) {
+        if (original.getParticipants() == null || original.getParticipants().length == 0) {
+            return;
+        }
+        
+        List<Participant> newParticipants = new ArrayList<Participant>();
+        for (Participant p : original.getParticipants()) {
+            if (p.getType() == Participant.RESOURCE || p.getType() == Participant.RESOURCEGROUP) {
+                newParticipants.add(p);
+            }
+        }
+        
+        if (newParticipants.isEmpty()) {
+            return;
+        }
+        
+        if (update.getParticipants() == null || update.getParticipants().length == 0) {
+            update.setParticipants(newParticipants);
+            return;
+        }
+        
+        List<Participant> participants = Arrays.asList(update.getParticipants());
+        for (Participant p : newParticipants) {
+            if (!participants.contains(p)) {
+                update.addParticipant(p);
+            }
+        }
     }
 
     private boolean isOutdated(CalendarDataObject update, CalendarDataObject original) {

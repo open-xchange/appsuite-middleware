@@ -748,17 +748,21 @@ public abstract class SessionServlet extends AJAXServlet {
     public static String extractSecret(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client, final String originalUserAgent) {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
-            Cookie cookie = cookies.get(SECRET_PREFIX + getHash(cookieHash, req, hash, client));
-            if (null != cookie) {
-                return cookie.getValue();
-            }
-            if (isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
-                cookie = cookies.get(SECRET_PREFIX + hash);
+            if (cookies.isEmpty()) {
+                LOG.info("Empty Cookies in HTTP request. No session secret can be looked up.");
+            } else {
+                Cookie cookie = cookies.get(SECRET_PREFIX + getHash(cookieHash, req, hash, client));
                 if (null != cookie) {
                     return cookie.getValue();
                 }
+                if (isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
+                    cookie = cookies.get(SECRET_PREFIX + hash);
+                    if (null != cookie) {
+                        return cookie.getValue();
+                    }
+                }
+                LOG.info("Didn't find an appropriate Cookie for name \"{}\" (CookieHashSource={}) which provides the session secret.", (SECRET_PREFIX + getHash(cookieHash, req, hash, client)), cookieHash.toString());
             }
-            LOG.info("Didn't find an appropriate Cookie for name \"{}\" (CookieHashSource={}) which provides the session secret.", (SECRET_PREFIX + getHash(cookieHash, req, hash, client)), cookieHash.toString());
         } else {
             LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
         }

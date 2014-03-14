@@ -198,30 +198,4 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @param con connection to return.
      */
     void back(int poolId, Connection con);
-
-    int getWritablePool(int contextId) throws OXException;
-
-    String getSchemaName(int contextId) throws OXException;
-
-    /**
-     * Finds all contexts their data is stored in the same schema and on the same database like the given one.
-     * @param contextId identifier of a context.
-     * @return all contexts having their data in the same schema and on the same database.
-     * @throws OXException if some problem occurs.
-     */
-    int[] getContextsInSameSchema(int contextId) throws OXException;
-
-    /**
-     * Invalidates all cached database pooling information for a context. This are especially the assignments to database servers.
-     * @param contextId unique identifier of the context.
-     * @throws OXException if resolving the server identifier fails.
-     */
-    void invalidate(int contextId) throws OXException;
-
-    /**
-     * Writes a database assignment for a certain context.
-     * @param assignment the assignment to write.
-     */
-    void writeAssignment(Connection con, Assignment assignment) throws OXException;
-
 }

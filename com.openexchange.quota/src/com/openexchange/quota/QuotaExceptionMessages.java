@@ -59,7 +59,15 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class QuotaExceptionMessages implements LocalizableStrings {
 
-    public static final String QUOTA_EXCEEDED_MSG = "Quota exceeded. Please delete some items in order to create new ones.";
+    public static final String QUOTA_EXCEEDED_MSG = "Quota exceeded. Please delete some items in order to create new ones. Please note: The quota refers to all items of all users in this context.";
+
+    public static final String QUOTA_EXCEEDED_CALENDAR_MSG = "Quota exceeded for calendar. Quota limit: %2$s. Quota used: %1$s. Please delete some appointments in order to create new ones. Please note: The quota refers to all appointments of all users in this context.";
+
+    public static final String QUOTA_EXCEEDED_CONTACTS_MSG = "Quota exceeded for contacts. Quota limit: %2$s. Quota used: %1$s. Please delete some contacts in order to create new ones. Please note: The quota refers to all contacts of all users in this context.";
+
+    public static final String QUOTA_EXCEEDED_TASKS_MSG = "Quota exceeded for tasks. Quota limit: %2$s. Quota used: %1$s. Please delete some tasks in order to create new ones. Please note: The quota refers to all tasks of all users in this context.";
+
+    public static final String QUOTA_EXCEEDED_FILES_MSG = "Quota exceeded for files. Quota limit: %2$s. Quota used: %1$s. Please delete some files in order to create new ones. Please note: The quota refers to all files of all users in this context.";
 
     /**
      * Initializes a new {@link QuotaExceptionMessages}.

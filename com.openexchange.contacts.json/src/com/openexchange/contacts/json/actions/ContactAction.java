@@ -161,15 +161,19 @@ public abstract class ContactAction implements AJAXActionService {
      *
      * @param contacts The collection to add the contacts to
      * @param searchIterator The search iterator to get the contacts from
+     * @param excludedUserID A user ID to exclude from the results, or a value <code>&lt; 0</code> to ignore
      * @return The latest last-modified timestamp of all added contacts
      * @throws OXException
      */
-    protected static Date addContacts(Collection<Contact> contacts, SearchIterator<Contact> searchIterator) throws OXException {
+    protected static Date addContacts(Collection<Contact> contacts, SearchIterator<Contact> searchIterator, int excludedUserID) throws OXException {
         Date lastModified = new Date(0);
         if (null != searchIterator) {
             try {
                 while (searchIterator.hasNext()) {
                     Contact contact = searchIterator.next();
+                    if (0 < excludedUserID && excludedUserID == contact.getInternalUserId()) {
+                        continue; // skip
+                    }
                     lastModified = getLatestModified(lastModified, contact);
                     contacts.add(contact);
                 }

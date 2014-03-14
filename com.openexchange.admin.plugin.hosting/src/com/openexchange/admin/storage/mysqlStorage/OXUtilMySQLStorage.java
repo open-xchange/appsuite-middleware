@@ -64,6 +64,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -174,161 +175,176 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public void changeDatabase(final Database db) throws StorageException {
-
-        Connection con = null;
-        PreparedStatement prep = null;
-
+        // Get connection
+        final Connection con;
         try {
-
             con = cache.getConnectionForConfigDB();
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+
+        // Process it...
+        boolean rollback = true;
+        try {
             con.setAutoCommit(false);
 
-            if (db.getName() != null && db.getName().length() > 0) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.name = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setString(1, db.getName());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
+            // TODO: Add lock here
+            // SELECT * FROM <table> WHERE <where-clause> FOR UPDATE
+            //   or
+            // SELECT COUNT(*) FROM <table> FOR UPDATE   to lock complete table
 
-            if (db.getLogin() != null && db.getLogin().length() > 0) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.login = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setString(1, db.getLogin());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getPassword() != null && db.getPassword().length() > 0) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.password = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setString(1, db.getPassword());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getDriver() != null && db.getDriver().length() > 0) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.driver = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setString(1, db.getDriver());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getPoolInitial() != null) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.initial = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getPoolInitial().intValue());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getPoolMax() != null) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.max = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getPoolMax().intValue());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getPoolHardLimit() != null) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.hardlimit = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getPoolHardLimit().intValue());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getUrl() != null && db.getUrl().length() > 0) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.url = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setString(1, db.getUrl());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getClusterWeight() != null) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_cluster.weight = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getClusterWeight().intValue());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            if (db.getMaxUnits() != null) {
-                prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_cluster.max_units = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setInt(1, db.getMaxUnits().intValue());
-                prep.setInt(2, db.getId().intValue());
-                prep.setInt(3, db.getId().intValue());
-                prep.setInt(4, db.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-            }
-
+            changeDatabase(db, con);
             con.commit();
+            rollback = false;
         } catch (final DataTruncation dt) {
+            DBUtils.rollback(con);
+            rollback = false;
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException sql) {
-                LOG.error("Rollback failed for configdb connection", sql);
-            }
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final PoolException pe) {
-            LOG.error("Pool Error", pe);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException sql) {
-                LOG.error("Rollback failed for configdb connection", sql);
-            }
-            throw new StorageException(pe);
-        } catch (final SQLException sqle) {
-            LOG.error("SQL Error", sqle);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException sql) {
-                LOG.error("Rollback failed for configdb connection", sql);
-            }
-            throw new StorageException(sqle);
+        } catch (final SQLException sql) {
+            DBUtils.rollback(con);
+            rollback = false;
+            LOG.error("SQL Error", sql);
+            throw new StorageException(sql.toString(), sql);
         } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException ee) {
-                LOG.error("Error closing statement", ee);
+            if (rollback) {
+                DBUtils.rollback(con);
             }
+            DBUtils.autocommit(con);
             try {
-                if (con != null) {
-                    cache.pushConnectionForConfigDB(con);
-                }
+                cache.pushConnectionForConfigDB(con);
             } catch (final PoolException e) {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }
+        }
+    }
+
+    private void changeDatabase(final Database db, final Connection con) throws SQLException {
+        PreparedStatement prep = null;
+        try {
+            final StringBuilder sqlBuilder = new StringBuilder(2048);
+            sqlBuilder.append("UPDATE db_pool,db_cluster SET ");
+
+            final List<Object> params = new LinkedList<Object>();
+            boolean first = true;
+
+            if (db.getName() != null && db.getName().length() > 0) {
+                first = false;
+                sqlBuilder.append("db_pool.name = ?");
+                params.add(db.getName());
+            }
+
+            if (db.getLogin() != null && db.getLogin().length() > 0) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.login = ?");
+                params.add(db.getLogin());
+            }
+
+            if (db.getPassword() != null && db.getPassword().length() > 0) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.password = ?");
+                params.add(db.getPassword());
+            }
+
+            if (db.getDriver() != null && db.getDriver().length() > 0) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.driver = ?");
+                params.add(db.getDriver());
+            }
+
+            if (db.getPoolInitial() != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.initial = ?");
+                params.add(db.getPoolInitial());
+            }
+
+            if (db.getPoolMax() != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.max = ?");
+                params.add(db.getPoolMax());
+            }
+
+            if (db.getPoolHardLimit() != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.hardlimit = ?");
+                params.add(db.getPoolHardLimit());
+            }
+
+            if (db.getUrl() != null && db.getUrl().length() > 0) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_pool.url = ?");
+                params.add(db.getUrl());
+            }
+
+            if (db.getClusterWeight() != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_cluster.weight = ?");
+                params.add(db.getClusterWeight());
+            }
+
+            if (db.getMaxUnits() != null) {
+                if (first) {
+                    first = false;
+                } else {
+                    sqlBuilder.append(", ");
+                }
+                sqlBuilder.append("db_cluster.max_units = ?");
+                params.add(db.getMaxUnits());
+            }
+
+            if (first) {
+                // No changes applied
+                return;
+            }
+
+            // Finish SQL
+            sqlBuilder.append(" WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
+            params.add(db.getId());
+            params.add(db.getId());
+            params.add(db.getId());
+
+            // Create statement, fill parameters, and execute update
+            prep = con.prepareStatement(sqlBuilder.toString());
+            final int size = params.size();
+            for (int pos = 1; pos <= size; pos++) {
+                prep.setObject(pos, params.get(pos - 1));
+            }
+            prep.executeUpdate();
+        } finally {
+            DBUtils.closeSQLStuff(prep);
         }
     }
 

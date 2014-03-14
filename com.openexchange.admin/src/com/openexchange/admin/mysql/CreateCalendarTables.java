@@ -209,8 +209,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "pfid INT4 DEFAULT -2 NOT NULL,"
         + "reminder INT4 UNSIGNED,"
         + "cid INT4 UNSIGNED NOT NULL,"
-        + "occurrence INT(10) unsigned NOT NULL DEFAULT '0',"
-        + "PRIMARY KEY (cid, object_id, member_uid, pfid, occurrence),"
+        + "PRIMARY KEY (cid, object_id, member_uid, pfid),"
         + "UNIQUE INDEX member (cid, member_uid, object_id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
@@ -230,8 +229,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "pfid INT4 DEFAULT -2 NOT NULL,"
         + "reminder INT4 UNSIGNED,"
         + "cid INT4 UNSIGNED NOT NULL,"
-        + "occurrence INT(10) unsigned NOT NULL DEFAULT '0',"
-        + "PRIMARY KEY (cid, object_id, member_uid, pfid, occurrence),"
+        + "PRIMARY KEY (cid, object_id, member_uid, pfid),"
         + "UNIQUE INDEX member (cid, member_uid, object_id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
@@ -250,8 +248,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "displayName VARCHAR(255),"
         + "confirm INT4 UNSIGNED NOT NULL,"
         + "reason TEXT,"
-        + "occurrence INT(10) unsigned NOT NULL DEFAULT '0',"
-        + "PRIMARY KEY (cid,objectId,`mailAddress`(255),occurrence)"
+        + "PRIMARY KEY (cid,objectId,`mailAddress`(255))"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
@@ -269,8 +266,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "displayName VARCHAR(255),"
         + "confirm INT4 UNSIGNED NOT NULL,"
         + "reason TEXT,"
-        + "occurrence INT(10) unsigned NOT NULL DEFAULT '0',"
-        + "PRIMARY KEY (cid,objectId,`mailAddress`(255),occurrence)"
+        + "PRIMARY KEY (cid,objectId,`mailAddress`(255))"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**

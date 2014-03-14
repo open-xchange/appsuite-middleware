@@ -1527,8 +1527,29 @@ public final class IMAPCommandsCollection {
 
     private final static String TEMPL_STORE_FLAGS = "STORE %s %sFLAGS (%s)";
 
-    private static final String ALL_COLOR_LABELS =
-        "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
+    private static final Object ALL_COLOR_LABELS = "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
+
+    /**
+     * Clears an sets only known colors in user defined IMAP flag
+     * <p>
+     * All known color labels:
+     * <code>$cl_0&nbsp;$cl_1&nbsp;$cl_2&nbsp;$cl_3&nbsp;$cl_4&nbsp;$cl_5&nbsp;$cl_6&nbsp;$cl_7&nbsp;$cl_8&nbsp;$cl_9&nbsp;$cl_10</code>
+     * <code>cl_0&nbsp;cl_1&nbsp;cl_2&nbsp;cl_3&nbsp;cl_4&nbsp;cl_5&nbsp;cl_6&nbsp;cl_7&nbsp;cl_8&nbsp;cl_9&nbsp;cl_10</code>
+     * 
+     * @param imapFolder - the imap folder
+     * @param msgUIDs - the message UIDs
+     * @param colorLabelFlag - the color id
+     * @return <code>true</code> if color could be set successfully; otherwise <code>false</code>
+     * @throws MessagingException - if an error occurs in underlying protocol
+     */
+    public static void clearAndSetColorLabelSafely(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException, OXException {
+        // Only set colors allowed in ALL_COLOR_LABELS
+        if (!MailMessage.isValidColorLabel(colorLabelFlag)) {
+            throw IMAPException.create(IMAPException.Code.FLAG_FAILED, colorLabelFlag, "Unknown color label.");
+        }
+        clearAllColorLabels(imapFolder, msgUIDs);
+        setColorLabel(imapFolder, msgUIDs, colorLabelFlag);
+    }
 
     /**
      * Clears all set color label (which are stored as user flags) from messages which correspond to given UIDs.
@@ -1542,7 +1563,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
      * @throws MessagingException - if an error occurs in underlying protocol
      */
-    public static boolean clearAllColorLabels(final IMAPFolder imapFolder, final long[] msgUIDs) throws MessagingException {
+    private static boolean clearAllColorLabels(final IMAPFolder imapFolder, final long[] msgUIDs) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -1566,6 +1587,7 @@ public final class IMAPCommandsCollection {
                 Response[] r = null;
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
+
                     final String command = String.format(format, args[i], "-", ALL_COLOR_LABELS);
                     r = performCommand(p, command);
                     response = r[r.length - 1];
@@ -1601,7 +1623,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
      * @throws MessagingException - if an error occurs in underlying protocol
      */
-    public static boolean setColorLabel(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException {
+    private static boolean setColorLabel(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*

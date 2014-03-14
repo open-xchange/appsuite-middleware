@@ -884,27 +884,6 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
-    public Date setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
-        if (optOccurrenceId <= 0) {
-            return setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
-        }
-
-        if (session == null) {
-            throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
-        }
-        final Context ctx = Tools.getContext(session);
-        if (confirmMessage != null) {
-            String error = null;
-            error = Check.containsInvalidChars(confirmMessage);
-            if (error != null) {
-                throw OXCalendarExceptionCodes.INVALID_CHARACTER.create("Confirm Message", error);
-            }
-        }
-
-        return cimp.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage, session, ctx);
-    }
-
-    @Override
     public Date setExternalConfirmation(final int objectId, final int folderId, final String mail, final int confirm, final String message) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -920,6 +899,86 @@ public class CalendarSql implements AppointmentSQLInterface {
         return cimp.setExternalConfirmation(objectId, folderId, mail, confirm, message, session, ctx);
     }
 
+    /**
+     * {@inheritDoc
+
+     */
+    @Override
+    public Date setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
+        if (optOccurrenceId <= 0) {
+            return setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
+        }
+
+        if (session == null) {
+            throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
+        }
+        if (confirmMessage != null) {
+            String error = null;
+            error = Check.containsInvalidChars(confirmMessage);
+            if (error != null) {
+                throw OXCalendarExceptionCodes.INVALID_CHARACTER.create("Confirm Message", error);
+            }
+        }
+
+        CalendarDataObject edao = new CalendarDataObject();
+        CalendarDataObject cdao = new CalendarDataObject();
+
+        try {
+            edao = getObjectById(objectId);
+        } catch (SQLException x) {
+            LOG.warn("Not able to retrieve original object!", x);
+        }
+
+        final RecurringResultsInterface recurringResultsInterface = new CalendarCollection().calculateRecurring(edao, 0, 0, optOccurrenceId);
+
+        if (recurringResultsInterface != null) {
+            final RecurringResultInterface rs = recurringResultsInterface.getRecurringResult(0);
+
+            if (rs != null) {
+                cdao.setContext(edao.getContext());
+                cdao.setEndDate(new Date(rs.getEnd()));
+                cdao.setRecurrencePosition(rs.getPosition());
+                cdao.setStartDate(new Date(rs.getStart()));
+                cdao.setIgnoreConflicts(true);
+                cdao.setObjectID(objectId);
+                cdao.setLastModified(edao.getLastModified());
+
+                ArrayList<UserParticipant> users = new ArrayList<UserParticipant>();
+                for (final UserParticipant cur : edao.getUsers()) {
+
+                    if (cur.getIdentifier() == userId) {
+                        UserParticipant participant = null;
+                        try {
+                            participant = cur.clone();
+                            participant.setConfirm(confirm);
+                            participant.setConfirmMessage(confirmMessage);
+
+                            users.add(participant);
+                        } catch (CloneNotSupportedException e) {
+                            LOG.error("Cloning participant not possible", e);
+                        }
+                        continue;
+                    }
+                    users.add(cur);
+                }
+                cdao.setUsers(users);
+                this.updateAppointmentObject(cdao, folderId, edao.getLastModified());
+
+            } else {
+                throw OXCalendarExceptionCodes.OCCURRENCE_IS_EXCEPTION.create(objectId);
+            }
+        }
+        else {
+            throw OXCalendarExceptionCodes.NO_SERIES.create(objectId);
+        }
+
+        return cdao.getLastModified();
+    }
+
+    /**
+     * {@inheritDoc
+
+     */
     @Override
     public Date setExternalConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final String mail, final int confirm, final String message) throws OXException {
         if (optOccurrenceId <= 0) {
@@ -931,16 +990,10 @@ public class CalendarSql implements AppointmentSQLInterface {
         if ((mail == null) || Strings.isEmpty(mail)) {
             throw OXCalendarExceptionCodes.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD.create();
         }
-        final Context ctx = Tools.getContext(session);
-        if (message != null) {
-            String error = null;
-            error = Check.containsInvalidChars(message);
-            if (error != null) {
-                throw OXCalendarExceptionCodes.INVALID_CHARACTER.create("Confirm Message", error);
-            }
-        }
-        return cimp.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message, session, ctx);
 
+        // TODO for User Story 65449000: handle external users (see com.openexchange.calendar.CalendarSql.setUserConfirmation(int, int, int,
+        // int, int, String))
+        return null;
     }
 
     @Override

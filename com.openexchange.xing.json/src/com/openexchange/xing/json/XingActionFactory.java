@@ -58,6 +58,22 @@ import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.json.actions.AbstractXingAction;
+import com.openexchange.xing.json.actions.ChangeStatusAction;
+import com.openexchange.xing.json.actions.CommentActivityAction;
+import com.openexchange.xing.json.actions.ContactRequestAction;
+import com.openexchange.xing.json.actions.CreateProfileAction;
+import com.openexchange.xing.json.actions.DeleteActivityAction;
+import com.openexchange.xing.json.actions.DeleteCommentActivityAction;
+import com.openexchange.xing.json.actions.UserFeedAction;
+import com.openexchange.xing.json.actions.GetActivityLikesAction;
+import com.openexchange.xing.json.actions.GetCommentsActivityAction;
+import com.openexchange.xing.json.actions.InviteRequestAction;
+import com.openexchange.xing.json.actions.LikeActivityAction;
+import com.openexchange.xing.json.actions.NewsFeedAction;
+import com.openexchange.xing.json.actions.ShareActivityAction;
+import com.openexchange.xing.json.actions.ShareLinkAction;
+import com.openexchange.xing.json.actions.ShowActivityAction;
+import com.openexchange.xing.json.actions.UnlikeActivityAction;
 
 
 /**
@@ -75,7 +91,23 @@ public class XingActionFactory implements AJAXActionServiceFactory {
      */
     public XingActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractXingAction>(4);
+        actions = new ConcurrentHashMap<String, AbstractXingAction>(16);
+        actions.put("invite", new InviteRequestAction(serviceLookup));
+        actions.put("contact_request", new ContactRequestAction(serviceLookup));
+        actions.put("newsfeed", new NewsFeedAction(serviceLookup));
+        actions.put("userfeed", new UserFeedAction(serviceLookup));
+        actions.put("create", new CreateProfileAction(serviceLookup));
+        actions.put("comment", new CommentActivityAction(serviceLookup));
+        actions.put("get_comments", new GetCommentsActivityAction(serviceLookup));
+        actions.put("delete_comment", new DeleteCommentActivityAction(serviceLookup));
+        actions.put("like", new LikeActivityAction(serviceLookup));
+        actions.put("unlike", new UnlikeActivityAction(serviceLookup));
+        actions.put("get_likes", new GetActivityLikesAction(serviceLookup));
+        actions.put("change_status", new ChangeStatusAction(serviceLookup));
+        actions.put("share_link", new ShareLinkAction(serviceLookup));
+        actions.put("show_activity", new ShowActivityAction(serviceLookup));
+        actions.put("share_activity", new ShareActivityAction(serviceLookup));
+        actions.put("delete_activity", new DeleteActivityAction(serviceLookup));
     }
 
     @Override

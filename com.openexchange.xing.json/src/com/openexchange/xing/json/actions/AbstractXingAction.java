@@ -49,22 +49,33 @@
 
 package com.openexchange.xing.json.actions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import javax.mail.internet.AddressException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.xing.UserField;
+import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.json.XingRequest;
+import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link AbstractXingAction} - The abstract XING action.
@@ -72,7 +83,9 @@ import com.openexchange.xing.json.XingRequest;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractXingAction implements AJAXActionService {
-
+    
+    private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
+    
     private final ServiceLookup services;
 
     /**
@@ -141,6 +154,97 @@ public abstract class AbstractXingAction implements AJAXActionService {
         final ServerSession session = req.getSession();
         final int xingOAuthAccount = provider.getXingOAuthAccount(session);
         return provider.accessFor(xingOAuthAccount, session);
+    }
+    
+    /**
+     * Get an instance to the XingAPI
+     * @param req the XingRequest
+     * @return an instance to XingAPI
+     * @throws OXException
+     */
+    protected XingAPI<WebAuthSession> getXingAPI(XingRequest req) throws OXException {
+        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        return xingOAuthAccess.getXingAPI();
+    }
+    
+    /**
+     * Get the UserFields from the specified parameter object.
+     * 
+     * @param user_fields as a comma separated String
+     * @return a {@link Collection} with {@link UserField}s, or null
+     * @throws OXException
+     */
+    protected Collection<UserField> getUserFields(Object user_fields) throws OXException {
+        Collection<UserField> optUserFields = null;
+        if (user_fields != null) {
+            if (user_fields instanceof String) {
+                String[] split = Strings.splitByComma((String) user_fields);
+                optUserFields = new ArrayList<UserField>();
+                for(String s : split) {
+                    try {
+                        optUserFields.add(USER_FIELDS.get(Integer.parseInt(s)));
+                    } catch (NumberFormatException e) {
+                        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(s, "user_field");
+                    }
+                }
+            }
+        }
+        return optUserFields;
+    }
+
+    /**
+     * Get the value of the specified mandatory parameter from the specified {@link XingRequest}.
+     * 
+     * @param request
+     * @param param the parameter's name
+     * @return the value of the parameter
+     * @throws OXException if the parameter is missing from the request.
+     */
+    protected String getMandatoryStringParameter(XingRequest request, String param) throws OXException {
+        String pv = request.getParameter(param);
+        if (pv == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(param);
+        }
+        return pv;
+    }
+
+    /**
+     * Get the specified integer parameter from the specified request.
+     * 
+     * @param request
+     * @param param the parameter's name
+     * @return the parameter as integer, or -1 if not present.
+     * @throws OXException if the parameter value cannot be parsed to an integer
+     */
+    protected int getOptIntParameter(XingRequest request, String param) throws OXException {
+        String p = request.getParameter(param);
+        if (p != null) {
+            try {
+                return Integer.parseInt(p);
+            } catch (NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(param, p);
+            }
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * Validates the value of an email address
+     * 
+     * @param request
+     * @param email the mail address to validate
+     * @return the unicode representation of the mail address
+     * @throws OXException if the parameter is missing from the request.
+     */
+    protected String validateMailAddress(String email) throws OXException {
+        try {
+            final QuotedInternetAddress addr = new QuotedInternetAddress(email, false);
+            email = QuotedInternetAddress.toIDN(addr.getAddress());
+            return email;
+        } catch (final AddressException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
     }
 
     /**

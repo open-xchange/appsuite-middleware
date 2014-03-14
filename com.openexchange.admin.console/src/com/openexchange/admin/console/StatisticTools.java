@@ -680,19 +680,7 @@ public class StatisticTools extends AbstractJMXTools {
                         final long[] longArray = (long[]) attribute;
                         sb.append(Arrays.toString(longArray) + "\n");
                     } else {
-                        if (attributeInfo.getName().equalsIgnoreCase("collectioncount") || attributeInfo.getName().equalsIgnoreCase(
-                            "collectiontime")) {
-                            if (attribute instanceof Long) {
-                                Long attributeValue = (Long) attribute;
-                                if (uptimeHours > 1) {
-                                    sb.append((attributeValue.doubleValue() / uptimeHours) + "\n");
-                                } else {
-                                    sb.append(0 + "\n");
-                                }
-                            }
-                        } else {
-                            sb.append(attribute.toString() + "\n");
-                        }
+                        sb.append(attribute.toString() + "\n");
                     }
                 }
             }

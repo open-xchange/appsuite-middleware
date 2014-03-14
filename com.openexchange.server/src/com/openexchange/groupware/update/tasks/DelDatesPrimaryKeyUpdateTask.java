@@ -111,7 +111,7 @@ public class DelDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { DelDateExternalDropForeignKeyUpdateTask.class.getName() };
     }
 
 }

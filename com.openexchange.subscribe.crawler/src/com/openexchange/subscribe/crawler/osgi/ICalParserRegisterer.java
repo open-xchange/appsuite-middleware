@@ -63,9 +63,9 @@ import com.openexchange.data.conversion.ical.ICalParser;
 public class ICalParserRegisterer implements ServiceTrackerCustomizer<ICalParser,ICalParser> {
 
     private final BundleContext context;
-    private final Activator activator;
+    private final CrawlersActivator activator;
 
-    public ICalParserRegisterer(final BundleContext context, final Activator activator) {
+    public ICalParserRegisterer(final BundleContext context, final CrawlersActivator activator) {
         super();
         this.context = context;
         this.activator = activator;

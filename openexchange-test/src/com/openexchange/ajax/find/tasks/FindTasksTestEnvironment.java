@@ -141,6 +141,8 @@ public class FindTasksTestEnvironment {
     private final static UUID trackingID = UUID.randomUUID();
     
     private Map<String, List<Integer>> rootTasks = new HashMap<String, List<Integer>>();
+    
+    private Map<Integer, Task> tasks = new HashMap<Integer, Task>();
 
     /**
      * Initializes a new {@link FindTasksTestEnvironment}.
@@ -518,6 +520,8 @@ public class FindTasksTestEnvironment {
         
         t = client.execute(new com.openexchange.ajax.task.actions.GetRequest(folder, t.getObjectID())).getTask(client.getValues().getTimeZone());
         
+        tasks.put(t.getObjectID(), t);
+        
         return t;
     }
 
@@ -648,5 +652,14 @@ public class FindTasksTestEnvironment {
      */
     public static final ActiveFacet createGlobalFacet(String query) {
         return new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(Collections.singletonList("global"), query));
+    }
+    
+    /**
+     * Get a task
+     * @param id
+     * @return
+     */
+    public Task getTask(int id) {
+        return tasks.get(id);
     }
 }

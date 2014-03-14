@@ -41,7 +41,8 @@ import org.osgi.service.event.EventHandler;
  */
 public class EventHandlerProxy {
 
-    private static final int PROCESSING_TIME_WARNING_THRESHOLD = 200;
+    /** The threshold after which time-consuming event handlers are logged at {@link LogWrapper#LOG_WARNING} level */
+    private static final int PROCESSING_TIME_WARNING_THRESHOLD = 2000;
 
     /** The service reference for the event handler. */
     private final ServiceReference<EventHandler> reference;

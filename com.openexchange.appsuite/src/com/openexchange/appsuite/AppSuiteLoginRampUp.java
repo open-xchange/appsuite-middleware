@@ -98,7 +98,6 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
                 // Omit result on error. Let the UI deal with this
             }
             
-            
             try {
                 JSONObject jslobs = new JSONObject();
                 JSONArray lobs = (JSONArray) ox.perform(request()
@@ -106,7 +105,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
                     .action("list")
                     .data(
                         new JSONArray(
-                                Arrays.asList("io.ox/core", "io.ox/core/updates", "io.ox/mail", "io.ox/contacts", "io.ox/calendar", "io.ox/core/settingOptions", "io.ox/caldav", "io.ox/files", "io.ox/tours", "io.ox/mail/emoji", "io.ox/tasks")
+                                Arrays.asList("io.ox/core", "io.ox/core/updates", "io.ox/mail", "io.ox/contacts", "io.ox/calendar", "io.ox/core/settingOptions", "io.ox/caldav", "io.ox/files", "io.ox/tours", "io.ox/mail/emoji", "io.ox/tasks", "io.ox/office")
                         ), "json"
                     ).format("json").build(), null, session).getResultObject();
                 for(int i = 0, size = lobs.length(); i < size; i++) {
@@ -138,8 +137,24 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
                 // Omit result on error. Let the UI deal with this
             }
             
+            JSONObject folder = new JSONObject();
             try {
-                rampUp.put("rootFolder", ox.perform(request().module("folders").action("get").params("id", "1", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(), null, session).getResultObject());
+                folder.put("1", ox.perform(request().module("folders").action("get").params("id", "1", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(), null, session).getResultObject());
+            } catch (OXException x) {
+                // Omit result on error. Let the UI deal with this
+            }
+            
+            try {
+                folder.put("default0/INBOX", ox.perform(request().module("folders").action("get").params("id", "default0/INBOX", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(), null, session).getResultObject());
+            } catch (OXException x) {
+                // Omit result on error. Let the UI deal with this
+            }
+            rampUp.put("folder", folder);
+            
+            try {
+                JSONObject folderlist = new JSONObject();
+                folderlist.put("1", ox.perform(request().module("folders").action("list").params("parent", "1", "tree", "1", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,3010,3020,3030").format("json").build(), null, session).getResultObject());
+                rampUp.put("folderlist", folderlist);
             } catch (OXException x) {
                 // Omit result on error. Let the UI deal with this
             }

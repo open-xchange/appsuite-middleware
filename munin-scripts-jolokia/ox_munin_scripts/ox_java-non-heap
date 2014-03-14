@@ -67,12 +67,17 @@ if ($response->is_ok()){
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
-	"java.lang:name=CMS Perm Gen,type=MemoryPool",
-	"Usage",
-	"used");
+	"java.lang:*,name=*Perm Gen,type=MemoryPool",
+	"Usage");
 $response = $jmx->request($request);
 if ($response->is_ok()){
-	print "b.value ",$response->value(),"\n";
+	my %hash = %{$response->value()};
+	###this should only have 1 returned value
+	foreach my $val (values %hash) {
+		my %innerHash = %{$val};
+		my %usage = %{$innerHash{Usage}};
+		print "b.value ",$usage{used},"\n";
+	}
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,

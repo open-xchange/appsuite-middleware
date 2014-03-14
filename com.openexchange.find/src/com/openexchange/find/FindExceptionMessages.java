@@ -83,4 +83,7 @@ public class FindExceptionMessages implements LocalizableStrings {
     // The facet \"%1$s\" is mandatory and has to be set.
     public static final String MISSING_MANDATORY_FACET = "The facet \"%1$s\" is mandatory and has to be set.";
 
+    // Could not parse \"%1$s\".
+    public static final String PARSING_ERROR_MSG = "Could not parse \"%1$s\".";
+
 }

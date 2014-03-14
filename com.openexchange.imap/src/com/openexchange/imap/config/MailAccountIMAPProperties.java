@@ -289,4 +289,14 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return Boolean.parseBoolean(tmp.trim());
     }
 
+    @Override
+    public String getSSLProtocols() {
+        final String tmp = properties.get("com.openexchange.imap.ssl.protocols");
+        if (null == tmp) {
+            return IMAPProperties.getInstance().getSSLProtocols();
+        }
+
+        return tmp.trim();
+    }
+
 }

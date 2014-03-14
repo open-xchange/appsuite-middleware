@@ -141,22 +141,6 @@ public interface CalendarSqlImp {
 
     public Date setUserConfirmation(int oid, int folderId, int uid, int confirm, String confirm_message, Session so, Context ctx) throws OXException;
 
-    /**
-     * Sets the confirmation for an occurrence of an appointment series for an internal user
-     * 
-     * @param objectId - id of the confirmed object
-     * @param folderId - id of the folder that contains the confirmed object
-     * @param optOccurrenceId - id of the occurrence of a series to set the confirmation for
-     * @param userId - id of the user that confirmed
-     * @param confirm - status of the confirmation
-     * @param confirmMessage - message of the confirmation
-     * @param session - related session
-     * @param ctx - used context
-     * @return Date of successful execution
-     * @throws OXException
-     */
-    public Date setUserConfirmation(int objectId, int folderId, int optOccurrenceId, int userId, int confirm, String confirmMessage, Session session, Context ctx) throws OXException;
-
     boolean checkIfFolderContainsForeignObjects(int uid, int fid, Context c, Connection readcon, int foldertype) throws SQLException;
 
     boolean checkIfFolderIsEmpty(int uid, int fid, Context c, Connection readcon, int foldertype) throws SQLException;
@@ -182,22 +166,6 @@ public interface CalendarSqlImp {
     int getFolder(Session session, int objectId) throws OXException;
 
     public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message, Session so, Context ctx) throws OXException;
-
-    /**
-     * Sets the confirmation for an occurrence of an appointment series for an external user
-     * 
-     * @param objectId - id of the confirmed object
-     * @param folderId - id of the folder that contains the confirmed object
-     * @param optOccurrenceId - id of the occurrence of a series to set the confirmation for
-     * @param mailAddress - address of the external user
-     * @param confirm - status of the confirmation
-     * @param message - message of the confirmation
-     * @param session - related session
-     * @param ctx - used context
-     * @return Date of successful execution
-     * @throws OXException
-     */
-    public Date setExternalConfirmation(int objectId, int folderId, int optOccurrenceId, String mail, int confirm, String mailAddress, Session session, Context ctx) throws OXException;
 
     public int countAppointments(Session session) throws OXException;
 

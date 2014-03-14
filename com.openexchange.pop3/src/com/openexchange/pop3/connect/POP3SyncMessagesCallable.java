@@ -195,7 +195,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         final String frequencyStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE);
         if (null == frequencyStr) {
             // Fallback to 10 minutes
-            LOG.warn("Missing POP3 property \"{}\". Using fallback of {} minutes.", POP3StoragePropertyNames.PROPERTY_REFRESH_RATE, FALLBACK_MINUTES, new Throwable());
+            // LOG.warn("Missing POP3 property \"{}\". Using fallback of {} minutes.", POP3StoragePropertyNames.PROPERTY_REFRESH_RATE, FALLBACK_MINUTES, new Throwable());
             return FALLBACK_MINUTES * 60L * 1000L;
         }
         int minutes = 0;

@@ -157,8 +157,7 @@ public final class IMAPCapabilityAndGreetingCache {
         }
         Future<CapabilityAndGreeting> f = map.get(address);
         if (null == f) {
-            final FutureTask<CapabilityAndGreeting> ft =
-                new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(address, isSecure, imapProperties));
+            final FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(address, isSecure, imapProperties));
             f = map.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;

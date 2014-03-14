@@ -263,6 +263,24 @@ public class ParticipantTools {
         }
     }
 
+    /**
+     * Gets the personal alarm setting from an appointment.
+     *
+     * @param appointment The appointment
+     * @param userID The ID of the user to get the reminder time for
+     * @return The reminder minutes, or <code>-1</code> if not set
+     */
+    public static int getReminderMinutes(Appointment appointment, int userID) {
+        if (null != appointment && null != appointment.getUsers()) {
+            for (UserParticipant user : appointment.getUsers()) {
+                if (user.getIdentifier() == userID) {
+                    return user.containsAlarm() ? user.getAlarmMinutes() : -1;
+                }
+            }
+        }
+        return -1;
+    }
+
     private ParticipantTools() {
         super();
     }

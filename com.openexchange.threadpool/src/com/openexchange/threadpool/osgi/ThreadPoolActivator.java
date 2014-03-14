@@ -66,7 +66,9 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessionCount.SessionThreadCounterImpl;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
 import com.openexchange.timer.TimerService;
@@ -102,7 +104,8 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
              */
             final ConfigurationService confService = getService(ConfigurationService.class);
             final ThreadPoolProperties init = new ThreadPoolProperties().init(confService);
-            threadPool = ThreadPoolServiceImpl.newInstance(init);
+            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(init);
+            this.threadPool = threadPool;
             if (init.isPrestartAllCoreThreads()) {
                 threadPool.prestartAllCoreThreads();
             }
@@ -151,6 +154,27 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
                     @Override
                     public void handleEvent(final Event event) {
+                        final AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                            @Override
+                            public Void call() throws Exception {
+                                try {
+                                    doHandleEvent(event);
+                                } catch (final Exception e) {
+                                    LOG.warn("Handling event {} failed.", event.getTopic(), e);
+                                }
+                                return null;
+                            }
+                        };
+                        threadPool.submit(task, CallerRunsBehavior.<Void> getInstance());
+                    }
+
+                    /**
+                     * Handles given event.
+                     *
+                     * @param event The event
+                     */
+                    protected void doHandleEvent(final Event event) {
                         final String topic = event.getTopic();
                         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
                             @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);

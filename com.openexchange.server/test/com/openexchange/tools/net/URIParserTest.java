@@ -309,4 +309,5 @@ public class URIParserTest {
             assertEquals("toString does not work: \"" + s + "\".", expected, uri.toString());
         }
     }
+
 }

@@ -80,6 +80,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -561,7 +562,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         // Start sync process
         POP3Store pop3Store = null;
         try {
-            final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false, session, !expunge);
+            final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false, session, !expunge, pop3AccountId > 0 && MailProperties.getInstance().isEnforceSecureConnection());
             pop3Store = result.getPop3Store();
             boolean uidlNotSupported = false;
             if (result.containsWarnings()) {

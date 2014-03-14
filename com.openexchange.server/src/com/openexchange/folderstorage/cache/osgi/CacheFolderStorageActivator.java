@@ -84,7 +84,9 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link CacheFolderStorageActivator} - {@link BundleActivator Activator} for cache folder storage.
@@ -215,12 +217,38 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         registrations = new ArrayList<ServiceRegistration<?>>(4);
         registrations.add(context.registerService(FolderStorage.class, cacheFolderStorage, dictionary));
         // Register event handler for content-related changes on a mail folder
-        final CacheFolderStorage tmp = cacheFolderStorage;
+        final CacheFolderStorage cache = cacheFolderStorage;
         {
             final EventHandler eventHandler = new EventHandler() {
 
                 @Override
                 public void handleEvent(final Event event) {
+                    final ThreadPoolService threadPool = getService(ThreadPoolService.class);
+                    if (null == threadPool) {
+                        doHandleEvent(cache, event);
+                    } else {
+                        final AbstractTask<Void> t = new AbstractTask<Void>() {
+
+                            @Override
+                            public Void call() throws Exception {
+                                try {
+                                    doHandleEvent(cache, event);
+                                } catch (final Exception e) {
+                                    LOG.warn("Handling event {} failed.", event.getTopic(), e);
+                                }
+                                return null;
+                            }
+                        };
+                        threadPool.submit(t, CallerRunsBehavior.<Void> getInstance());
+                    }
+                }
+
+                /**
+                 * Handles given event.
+                 *
+                 * @param event The event
+                 */
+                protected void doHandleEvent(final CacheFolderStorage tmp, final Event event) {
                     final Object operation = event.getProperty("operation");
                     if (null != operation && operation.toString().startsWith("update")) {
                         return;
@@ -247,6 +275,32 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
                 @Override
                 public void handleEvent(final Event event) {
+                    final ThreadPoolService threadPool = getService(ThreadPoolService.class);
+                    if (null == threadPool) {
+                        doHandleEvent(cache, event);
+                    } else {
+                        final AbstractTask<Void> t = new AbstractTask<Void>() {
+
+                            @Override
+                            public Void call() throws Exception {
+                                try {
+                                    doHandleEvent(cache, event);
+                                } catch (final Exception e) {
+                                    LOG.warn("Handling event {} failed.", event.getTopic(), e);
+                                }
+                                return null;
+                            }
+                        };
+                        threadPool.submit(t, CallerRunsBehavior.<Void> getInstance());
+                    }
+                }
+
+                /**
+                 * Handles given event.
+                 *
+                 * @param event The event
+                 */
+                protected void doHandleEvent(final CacheFolderStorage tmp, final Event event) {
                     if (FolderEventConstants.TOPIC_IDENTIFIERS.equals(event.getTopic())) {
                         final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
                         final String oldFolder = (String) event.getProperty(FolderEventConstants.PROPERTY_OLD_IDENTIFIER);
@@ -278,6 +332,32 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
                 @Override
                 public void handleEvent(final Event event) {
+                    final ThreadPoolService threadPool = getService(ThreadPoolService.class);
+                    if (null == threadPool) {
+                        doHandleEvent(event);
+                    } else {
+                        final AbstractTask<Void> t = new AbstractTask<Void>() {
+
+                            @Override
+                            public Void call() throws Exception {
+                                try {
+                                    doHandleEvent(event);
+                                } catch (final Exception e) {
+                                    LOG.warn("Handling event {} failed.", event.getTopic(), e);
+                                }
+                                return null;
+                            }
+                        };
+                        threadPool.submit(t, CallerRunsBehavior.<Void> getInstance());
+                    }
+                }
+
+                /**
+                 * Handles given event.
+                 *
+                 * @param event The event
+                 */
+                protected void doHandleEvent(final Event event) {
                     final String topic = event.getTopic();
                     if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                         handleDroppedSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
@@ -290,7 +370,12 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     }
                 }
 
-                private void handleDroppedSession(final Session session) {
+                /**
+                 * Handles given event.
+                 *
+                 * @param event The event
+                 */
+                protected void handleDroppedSession(final Session session) {
                     if (session.isTransient()) {
                         return;
                     }
@@ -320,15 +405,41 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
                 @Override
                 public void handleEvent(final Event event) {
-                    String serviceID = (String)event.getProperty(FileStorageEventConstants.SERVICE);
-                    String accountID = (String)event.getProperty(FileStorageEventConstants.ACCOUNT_ID);
-                    String folderID = (String)event.getProperty(FileStorageEventConstants.FOLDER_ID);
-                    Session session = (Session)event.getProperty(FileStorageEventConstants.SESSION);
+                    final ThreadPoolService threadPool = getService(ThreadPoolService.class);
+                    if (null == threadPool) {
+                        doHandleEvent(cache, event);
+                    } else {
+                        final AbstractTask<Void> t = new AbstractTask<Void>() {
+
+                            @Override
+                            public Void call() throws Exception {
+                                try {
+                                    doHandleEvent(cache, event);
+                                } catch (final Exception e) {
+                                    LOG.warn("Handling event {} failed.", event.getTopic(), e);
+                                }
+                                return null;
+                            }
+                        };
+                        threadPool.submit(t, CallerRunsBehavior.<Void> getInstance());
+                    }
+                }
+
+                /**
+                 * Handles given event.
+                 *
+                 * @param event The event
+                 */
+                protected void doHandleEvent(final CacheFolderStorage tmp, final Event event) {
                     try {
-                        String uniqueID = new FolderID(serviceID, accountID, folderID).toUniqueID();
+                        final String serviceID = (String)event.getProperty(FileStorageEventConstants.SERVICE);
+                        final String accountID = (String)event.getProperty(FileStorageEventConstants.ACCOUNT_ID);
+                        final String folderID = (String)event.getProperty(FileStorageEventConstants.FOLDER_ID);
+                        final Session session = (Session)event.getProperty(FileStorageEventConstants.SESSION);
+                        final String uniqueID = new FolderID(serviceID, accountID, folderID).toUniqueID();
                         tmp.removeFromGlobalCache(uniqueID, FolderStorage.REAL_TREE_ID, session.getContextId());
                         tmp.removeFromCache(uniqueID, FolderStorage.REAL_TREE_ID, false, session);
-                    } catch (OXException e) {
+                    } catch (final OXException e) {
                         LOG.error("", e);
                     }
                 }

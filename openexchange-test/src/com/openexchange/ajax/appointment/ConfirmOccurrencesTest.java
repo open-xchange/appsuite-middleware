@@ -335,9 +335,6 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         for (UserParticipant p : appointment.getUsers()) {
             assertEquals("Wrong confirmation status.", status, p.getConfirm());
             assertEquals("Wrong confirmation message.", message, p.getConfirmMessage());
-            if (expectedOccurrence != NOT_EXISTENT) {
-                assertEquals(expectedOccurrence, p.getOccurrence());
-            }
         }
     }
 

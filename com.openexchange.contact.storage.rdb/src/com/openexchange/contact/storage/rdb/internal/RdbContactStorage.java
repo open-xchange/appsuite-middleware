@@ -201,8 +201,11 @@ public class RdbContactStorage extends DefaultContactStorage {
                 Quota quota = quotaService.getQuotaFor(Resource.CONTACT, ResourceDescription.getEmptyResourceDescription(), session);
                 if (null != quota) {
                     long quotaValue = quota.getQuota(QuotaType.AMOUNT);
-                    if (0 < quotaValue && quotaValue <= executor.count(connection, Table.CONTACTS, contextID)) {
-                        throw QuotaExceptionCodes.QUOTA_EXCEEDED.create();
+                    if (0 < quotaValue) {
+                        final long used = executor.count(connection, Table.CONTACTS, contextID);
+                        if (quotaValue <= used) {
+                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_CONTACTS.create(used, quotaValue);
+                        }
                     }
                 }
             }
@@ -239,7 +242,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             connectionHelper.commit();
         } catch (DataTruncation e) {
             DBUtils.rollback(connection);
-            throw Tools.getTruncationException(connection, e, contact, Table.CONTACTS);
+            throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
         } catch (SQLException e) {
             DBUtils.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
@@ -491,7 +494,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             connectionHelper.commit();
         } catch (DataTruncation e) {
             DBUtils.rollback(connection);
-            throw Tools.getTruncationException(connection, e, contact, Table.CONTACTS);
+            throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -559,7 +562,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             connectionHelper.commit();
         } catch (DataTruncation e) {
             DBUtils.rollback(connectionHelper.getWritable());
-            throw Tools.getTruncationException(connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
+            throw Tools.getTruncationException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
