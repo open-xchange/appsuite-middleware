@@ -84,6 +84,7 @@ import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IDManager;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.util.IDMap;
@@ -98,6 +99,16 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     private static final String ID_MAP_NAME = "ID_MAP";
 
     private static final String RESOURCE_MAP_NAME = "RESOURCE_MAP";
+
+    @BeforeClass
+    public static void setUp() {
+        ID.ID_MANAGER_REF.set(new IDManager());
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        ID.ID_MANAGER_REF.set(null);
+    }
 
     public HazelcastResourceDirectoryTest() throws OXException {
         super(ID_MAP_NAME, RESOURCE_MAP_NAME);

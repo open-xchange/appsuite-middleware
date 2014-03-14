@@ -211,7 +211,7 @@ public class RTClientStateImpl implements RTClientState {
 
     @Override
     public boolean isTimedOut(long timestamp) {
-        return 1 * 60 * 1000 < (timestamp - lastSeen);
+        return 30 * 60 * 1000 < (timestamp - lastSeen);
     }
 
     public void setLastSeen(long lastSeen) {
