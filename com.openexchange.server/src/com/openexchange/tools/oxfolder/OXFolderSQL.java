@@ -657,14 +657,14 @@ public final class OXFolderSQL {
                 wc = DBPool.pickupWriteable(ctx);
                 closeWriteCon = true;
             }
-            startedTransaction = writeCon.getAutoCommit();
+            startedTransaction = wc.getAutoCommit();
             if (startedTransaction) {
-                writeCon.setAutoCommit(false);
+                wc.setAutoCommit(false);
                 rollback = true;
             }
 
             // Acquire lock
-            lock(folderId, ctx.getContextId(), writeCon);
+            lock(folderId, ctx.getContextId(), wc);
 
             // Do the update
             stmt = wc.prepareStatement(SQL_UPDATE_PERMS);
@@ -680,9 +680,9 @@ public final class OXFolderSQL {
 
             if (failed) {
                 if (startedTransaction) {
-                    writeCon.commit();
+                    wc.commit();
                     rollback = false;
-                    writeCon.setAutoCommit(true);
+                    wc.setAutoCommit(true);
                 }
                 return false;
             }
@@ -693,17 +693,17 @@ public final class OXFolderSQL {
             updateLastModified(folderId, System.currentTimeMillis(), wc, ctx);
 
             if (startedTransaction) {
-                writeCon.commit();
+                wc.commit();
                 rollback = false;
-                writeCon.setAutoCommit(true);
+                wc.setAutoCommit(true);
             }
 
             return true;
         } finally {
             if (startedTransaction && rollback) {
-                if (null != writeCon) {
-                    writeCon.rollback();
-                    writeCon.setAutoCommit(true);
+                if (null != wc) {
+                    wc.rollback();
+                    wc.setAutoCommit(true);
                 }
             }
             closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
@@ -741,14 +741,14 @@ public final class OXFolderSQL {
                 wc = DBPool.pickupWriteable(ctx);
                 closeWriteCon = true;
             }
-            startedTransaction = writeCon.getAutoCommit();
+            startedTransaction = wc.getAutoCommit();
             if (startedTransaction) {
-                writeCon.setAutoCommit(false);
+                wc.setAutoCommit(false);
                 rollback = true;
             }
 
             // Acquire lock
-            lock(folderId, ctx.getContextId(), writeCon);
+            lock(folderId, ctx.getContextId(), wc);
 
             // Do the update
             stmt = wc.prepareStatement(SQL_ADD_PERMS);
@@ -766,17 +766,17 @@ public final class OXFolderSQL {
             final boolean success = executeUpdate(stmt) == 1;
 
             if (startedTransaction) {
-                writeCon.commit();
+                wc.commit();
                 rollback = false;
-                writeCon.setAutoCommit(true);
+                wc.setAutoCommit(true);
             }
 
             return success;
         } finally {
             if (startedTransaction && rollback) {
-                if (null != writeCon) {
-                    writeCon.rollback();
-                    writeCon.setAutoCommit(true);
+                if (null != wc) {
+                    wc.rollback();
+                    wc.setAutoCommit(true);
                 }
             }
             closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
