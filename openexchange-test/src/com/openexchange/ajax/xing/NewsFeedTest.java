@@ -50,10 +50,15 @@
 package com.openexchange.ajax.xing;
 
 import java.io.IOException;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.xing.actions.CommentActivityRequest;
+import com.openexchange.ajax.xing.actions.CommentActivityResponse;
+import com.openexchange.ajax.xing.actions.DeleteCommentRequest;
+import com.openexchange.ajax.xing.actions.DeleteCommentResponse;
 import com.openexchange.ajax.xing.actions.GetCommentsRequest;
 import com.openexchange.ajax.xing.actions.GetCommentsResponse;
 import com.openexchange.ajax.xing.actions.NewsFeedRequest;
@@ -141,8 +146,19 @@ public class NewsFeedTest extends AbstractAJAXSession {
         assertEquals("XING-0021", response.getException().getErrorCode());
     }
     
-    public void testCommentActivity() {
+    /**
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    public void testCommentActivity() throws OXException, IOException, JSONException {
+        JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
+        String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
         
+        final CommentActivityRequest request = new CommentActivityRequest(activityId, UUID.randomUUID().toString(), true);
+        final CommentActivityResponse response = client.execute(request);
+        assertNotNull(response);
     }
     
     /**
@@ -157,6 +173,22 @@ public class NewsFeedTest extends AbstractAJAXSession {
         
         final GetCommentsRequest request = new GetCommentsRequest(activityId, -1, -1, new int[0], true);
         final GetCommentsResponse response = client.execute(request);
+        assertNotNull(response);
+    }
+    
+    /**
+     * Test delete 1st comment from 1st activity
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    public void testDeleteComment() throws OXException, IOException, JSONException {
+        JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
+        String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
+        String commentId = json.getJSONArray("network_activities").getJSONObject(0).getJSONObject("comments").getJSONArray("latest_comments").getJSONObject(0).getString("id");
+        
+        final DeleteCommentRequest request = new DeleteCommentRequest(activityId, commentId, true);
+        final DeleteCommentResponse response = client.execute(request);
         assertNotNull(response);
     }
 }

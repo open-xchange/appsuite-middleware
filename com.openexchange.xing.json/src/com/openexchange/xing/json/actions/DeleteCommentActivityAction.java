@@ -76,8 +76,8 @@ public class DeleteCommentActivityAction extends AbstractNewsFeedAction {
      */
     @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String activityId = getStringMandatoryParameter(req, "activity_id");
-        String id = getStringMandatoryParameter(req, "id");
+        String activityId = getMandatoryStringParameter(req, "activity_id");
+        String id = getMandatoryStringParameter(req, "comment_id");
         getXingAPI(req).deleteComment(activityId, id);
         return new AJAXRequestResult(Boolean.TRUE, "native");
     }

@@ -55,19 +55,19 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Header.SimpleHeader;
 
 /**
  * {@link CommentActivityRequest}
- *
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CommentActivityRequest extends AbstractXingRequest<CommentActivityResponse> {
-    
+
     private final String activityId;
-    
+
     private final String text;
-    
 
     /**
      * Initializes a new {@link CommentActivityRequest}.
@@ -78,7 +78,8 @@ public class CommentActivityRequest extends AbstractXingRequest<CommentActivityR
         this.text = text;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
     @Override
@@ -86,17 +87,21 @@ public class CommentActivityRequest extends AbstractXingRequest<CommentActivityR
         return Method.POST;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "comment"));
-        return null;
+        List<URLParameter> params = new ArrayList<URLParameter>();
+        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "comment"));
+        params.add(new URLParameter("activity_id", activityId));
+        params.add(new URLParameter("text", text));
+        return params.toArray(new Parameter[params.size()]);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -104,13 +109,21 @@ public class CommentActivityRequest extends AbstractXingRequest<CommentActivityR
         return new CommentActivityParser(failOnError);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
      */
     @Override
     public Object getBody() throws IOException, JSONException {
-        // TODO Auto-generated method stub
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#getHeaders()
+     */
+    @Override
+    public Header[] getHeaders() {
+        return new Header[] { new SimpleHeader("Content-Type", "application/json") };
+    }
 }

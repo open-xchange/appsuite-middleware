@@ -901,21 +901,21 @@ public class XingAPI<S extends Session> {
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
      */
-    public Map<String, Object> commentActivity(final String activityId, final String text) throws XingException {
+    public void commentActivity(final String activityId, final String text) throws XingException {
         assertAuthenticated();
         try {
             final List<String> params = new ArrayList<String>(1);
             params.add("text");
             params.add(text);
-
-            final JSONObject response = RESTUtility.request(
+            
+            RESTUtility.streamRequest(
                 Method.POST,
                 session.getAPIServer(),
                 "/activities/" + activityId + "/comments",
                 VERSION,
                 params.toArray(new String[0]),
-                session).toObject();
-            return response.asMap();
+                session,
+                Arrays.asList(XingServerException._201_CREATED));
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -977,16 +977,17 @@ public class XingAPI<S extends Session> {
      * @return 
      * @throws XingException
      */
-    public Map<String, Object> deleteComment(final String activityId, final String commentId) throws XingException {
+    public void deleteComment(final String activityId, final String commentId) throws XingException {
         assertAuthenticated();
         try {
-            final JSONObject response = RESTUtility.request(
+            RESTUtility.streamRequest(
                 Method.DELETE,
                 session.getAPIServer(),
-                "/activities/" + activityId + "comments/" + commentId,
+                "/activities/" + activityId + "/comments/" + commentId,
                 VERSION,
-                session).toObject();
-            return response.asMap();
+                null,
+                session,
+                Arrays.asList(XingServerException._204_NO_CONTENT));
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }

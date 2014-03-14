@@ -80,7 +80,7 @@ public class GetCommentsActivityAction extends AbstractNewsFeedAction {
      */
     @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String activityId = getStringMandatoryParameter(req, "activity_id");
+        String activityId = getMandatoryStringParameter(req, "activity_id");
         int optLimit = getOptIntParameter(req, "limit");
         int optOffset = getOptIntParameter(req, "offset");
         Collection<UserField> optUserFields = getUserFields(req.getParameter("user_fields"));

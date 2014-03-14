@@ -76,7 +76,7 @@ public class LikeActivityAction extends AbstractNewsFeedAction {
      */
     @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String activityId = getStringMandatoryParameter(req, "activity_id");
+        String activityId = getMandatoryStringParameter(req, "activity_id");
         getXingAPI(req).likeActivity(activityId);
         return new AJAXRequestResult(Boolean.TRUE, "native");
     }

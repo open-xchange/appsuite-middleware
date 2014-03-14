@@ -53,7 +53,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -66,7 +65,7 @@ import com.openexchange.xing.session.WebAuthSession;
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CommentActivityAction extends AbstractXingAction {
+public class CommentActivityAction extends AbstractNewsFeedAction {
 
     /**
      * Initializes a new {@link CommentActivityAction}.
@@ -81,17 +80,8 @@ public class CommentActivityAction extends AbstractXingAction {
      */
     @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String activityId = req.getParameter("activity_id");
-        String text = req.getParameter("text");
-
-        if (activityId == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("activity_id");
-        }
-
-        if (text == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("text");
-        }
-
+        String activityId = getMandatoryStringParameter(req, "activity_id");
+        String text = getMandatoryStringParameter(req, "text");
         if (text.length() > 600) {
             throw XingExceptionCodes.COMMENT_SIZE_EXCEEDED.create();
         }
