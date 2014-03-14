@@ -73,7 +73,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.services.Services;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
@@ -383,7 +382,7 @@ final class ListLsubCollection {
          * Debug logs
          */
         if (debug) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
+            final StringBuilder sb = new StringBuilder(1024);
             {
                 final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(listMap);
                 sb.append("LIST cache contains after (re-)initialization:\n");
@@ -394,7 +393,7 @@ final class ListLsubCollection {
             }
             {
                 final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(lsubMap);
-                sb.reinitTo(0);
+                sb.setLength(0);
                 sb.append("LSUB cache contains after (re-)initialization:\n");
                 for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
                     sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
@@ -405,7 +404,7 @@ final class ListLsubCollection {
         /*
          * Consistency check
          */
-        checkConsistency();
+        checkConsistency(imapStore);
         /*
          * Status if enabled
          */
@@ -454,7 +453,7 @@ final class ListLsubCollection {
         }
         if (debug) {
             final long dur = System.currentTimeMillis() - st;
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+            final StringBuilder sb = new StringBuilder(128);
             sb.append("LIST/LSUB cache");
             if (doStatus || doGetAcl) {
                 sb.append(" (");
@@ -522,13 +521,13 @@ final class ListLsubCollection {
         }
         if (debug) {
             final long dur = System.currentTimeMillis() - st;
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+            final StringBuilder sb = new StringBuilder(64);
             sb.append("LIST/LSUB cache built GETACL entries in ").append(dur).append("msec.");
             LOG.debug(sb.toString());
         }
     }
 
-    private void checkConsistency() {
+    private void checkConsistency(final IMAPStore imapStore) {
         final ListLsubEntryImpl rootEntry = listMap.get(ROOT_FULL_NAME);
         /*
          * Ensure every LSUB'ed entry occurs in LIST'ed entries
@@ -543,28 +542,34 @@ final class ListLsubCollection {
                     /*
                      * Either shared or user namespace
                      */
-                    final ListLsubEntryImpl lle = new ListLsubEntryImpl(entry.getValue(), true);
-                    listMap.put(fullName, lle);
-                    /*
-                     * Determine parent
-                     */
-                    final int pos = fullName.lastIndexOf(lle.getSeparator());
-                    if (pos >= 0) {
+                    if (existsSafe(fullName, imapStore)) {
+                        final ListLsubEntryImpl lle = new ListLsubEntryImpl(entry.getValue(), true);
+                        listMap.put(fullName, lle);
                         /*
-                         * Non-root level
+                         * Determine parent
                          */
-                        final String parentFullName = fullName.substring(0, pos);
-                        final ListLsubEntryImpl parent = listMap.get(parentFullName);
-                        {
-                            lle.setParent(parent);
-                            parent.addChild(lle);
+                        final int pos = fullName.lastIndexOf(lle.getSeparator());
+                        if (pos >= 0) {
+                            /*
+                             * Non-root level
+                             */
+                            final String parentFullName = fullName.substring(0, pos);
+                            final ListLsubEntryImpl parent = listMap.get(parentFullName);
+                            {
+                                lle.setParent(parent);
+                                parent.addChild(lle);
+                            }
+                        } else {
+                            /*
+                             * Root level
+                             */
+                            lle.setParent(rootEntry);
+                            rootEntry.addChild(lle);
                         }
                     } else {
-                        /*
-                         * Root level
-                         */
-                        lle.setParent(rootEntry);
-                        rootEntry.addChild(lle);
+                        IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
+                        final ListLsubEntryImpl lle = entry.getValue();
+                        dropEntryFrom(lle, listMap);
                     }
                 } else {
                     /*
@@ -590,6 +595,16 @@ final class ListLsubCollection {
         if (null != p) {
             p.removeChild(lle);
         }
+    }
+
+    private static boolean existsSafe(final String fullName, final IMAPStore imapStore) {
+        try {
+            return imapStore.getFolder(fullName).exists();
+        } catch (final MessagingException e) {
+            // Swallow
+            LOG.debug("Failed checking existence for {}", fullName, e);
+        }
+        return false;
     }
 
     /**
@@ -706,7 +721,7 @@ final class ListLsubCollection {
         final String command = "LIST";
         final Response[] r;
         {
-            final String sCmd = new StringAllocator(command).append(" (SPECIAL-USE) \"\" \"*\"").toString();
+            final String sCmd = new StringBuilder(command).append(" (SPECIAL-USE) \"\" \"*\"").toString();
             r = performCommand(protocol, sCmd);
             LOG.debug("{0} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, r.length);
         }
@@ -756,7 +771,7 @@ final class ListLsubCollection {
         final String command = lsub ? "LSUB" : "LIST";
         final Response[] r;
         {
-            final String sCmd = new StringAllocator(command).append(" \"\" \"*\"").toString();
+            final String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
             r = performCommand(protocol, sCmd);
             LOG.debug("{} cache filled with >>{1}<< which returned {} response line(s).", (command), sCmd, r.length);
         }
@@ -1184,7 +1199,7 @@ final class ListLsubCollection {
         String mbox = BASE64MailboxEncoder.encode(fullName);
         Argument args = new Argument();
         args.writeString(mbox);
-        final Response[] r = performCommand(protocol, new StringAllocator(command).append(" \"\"").toString(), args);
+        final Response[] r = performCommand(protocol, new StringBuilder(command).append(" \"\"").toString(), args);
         args = null;
         mbox = null;
         final Response response = r[r.length - 1];
@@ -1237,7 +1252,7 @@ final class ListLsubCollection {
                 public String toString() {
                     final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>();
                     tm.putAll(map);
-                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
+                    final StringBuilder sb = new StringBuilder(1024);
                     sb.append((lsub ? "LSUB" : "LIST") + " cache contains after adding single entry \"");
                     sb.append(fullName).append("\":\n");
                     for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
@@ -1425,6 +1440,27 @@ final class ListLsubCollection {
         checkDeprecated();
         return lsubMap.get(fullName);
     }
+
+    /**
+     * Gets the LSUB entries.
+     *
+     * @return The LSUB entries
+     */
+    public List<ListLsubEntry> getLsubs() {
+        checkDeprecated();
+        return new ArrayList<ListLsubEntry>(lsubMap.values());
+    }
+
+    /**
+     * Gets the LIST entries.
+     *
+     * @return The LIST entries
+     */
+    public List<ListLsubEntry> getLists() {
+        checkDeprecated();
+        return new ArrayList<ListLsubEntry>(listMap.values());
+    }
+
 
     private static final TObjectIntHashMap<String> POS_MAP;
 
@@ -2002,7 +2038,7 @@ final class ListLsubCollection {
 
         @Override
         public String toString() {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("{ ").append(lsubMap == null ? "LSUB" : "LIST");
+            final StringBuilder sb = new StringBuilder(128).append("{ ").append(lsubMap == null ? "LSUB" : "LIST");
             sb.append(" fullName=\"").append(fullName).append('"');
             sb.append(", parent=");
             if (null == parent) {
@@ -2060,7 +2096,7 @@ final class ListLsubCollection {
 
     } // End of class ListLsubEntryImpl
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final String lineSeparator) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
         if (null == trace) {
             sb.append("<missing stack trace>\n");
             return;
@@ -2102,7 +2138,7 @@ final class ListLsubCollection {
             return INBOX;
         }
         if (fullName.length() > 5 && upperCase.startsWith("INBOX") && separator == upperCase.charAt(5)) {
-            return new StringAllocator(INBOX).append(separator).append(fullName.substring(6)).toString();
+            return new StringBuilder(INBOX).append(separator).append(fullName.substring(6)).toString();
         }
         return fullName;
     }

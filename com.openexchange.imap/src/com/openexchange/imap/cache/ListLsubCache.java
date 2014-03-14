@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.imap.cache;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
@@ -127,13 +128,19 @@ public final class ListLsubCache {
         return new Key(session.getUserId(), session.getContextId());
     }
 
+    /**
+     * The virtual region name.
+     */
+    public static final String REGION = "ListLsubCache";
+
+    /** The default timeout for LIST/LSUB cache (5 minutes) */
     private static final long DEFAULT_TIMEOUT = 300000;
 
     private static final String INBOX = "INBOX";
 
     private static final boolean DO_STATUS = false;
 
-    private static final boolean DO_GETACL = true;
+    private static final boolean DO_GETACL = false;
 
     private static final ConcurrentMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>> MAP = new NonBlockingHashMap<Key, ConcurrentMap<Integer, Future<ListLsubCollection>>>();
 
@@ -150,8 +157,20 @@ public final class ListLsubCache {
      * @param session The session providing user information
      */
     public static void dropFor(final Session session) {
-        MAP.remove(keyFor(session));
-        LOG.debug("Cleaned user-sensitive LIST/LSUB cache for user {} in context {}", session.getUserId(), session.getContextId());
+        if (null != session) {
+            dropFor(session.getUserId(), session.getContextId());
+        }
+    }
+
+    /**
+     * Drop caches for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public static void dropFor(final int userId, final int contextId) {
+        MAP.remove(new Key(userId, contextId));
+        LOG.debug("Cleaned user-sensitive LIST/LSUB cache for user {} in context {}", userId, contextId);
     }
 
     /**
@@ -199,7 +218,18 @@ public final class ListLsubCache {
      * @param session The session
      */
     public static void clearCache(final int accountId, final Session session) {
-        final ConcurrentMap<Integer, Future<ListLsubCollection>> map = MAP.get(keyFor(session));
+        clearCache(accountId, session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Clears the cache.
+     *
+     * @param accountId The account ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public static void clearCache(final int accountId, final int userId, final int contextId) {
+        final ConcurrentMap<Integer, Future<ListLsubCollection>> map = MAP.get(new Key(userId, contextId));
         if (null == map) {
             return;
         }
@@ -262,6 +292,10 @@ public final class ListLsubCache {
         return getCachedLISTEntry(INBOX, accountId, imapFolder, session).getSeparator();
     }
 
+    private static boolean seemsValid(final ListLsubEntry entry) {
+        return (null != entry) && (entry.canOpen() || entry.isNamespace() || entry.hasChildren());
+    }
+
     /**
      * Gets cached LSUB entry for specified full name.
      *
@@ -277,7 +311,7 @@ public final class ListLsubCache {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
             final ListLsubEntry entry = collection.getLsub(fullName);
-            if (null != entry && (entry.canOpen() || entry.isNamespace())) {
+            if (seemsValid(entry)) {
                 return entry;
             }
         }
@@ -290,7 +324,7 @@ public final class ListLsubCache {
              * Return
              */
             ListLsubEntry entry = collection.getLsub(fullName);
-            if (null != entry && (entry.canOpen() || entry.isNamespace())) {
+            if (seemsValid(entry)) {
                 return entry;
             }
             /*
@@ -318,7 +352,7 @@ public final class ListLsubCache {
             final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
             if (isAccessible(collection)) {
                 final ListLsubEntry entry = collection.getList(fullName);
-                if (null != entry && (entry.canOpen() || entry.isNamespace())) {
+                if (seemsValid(entry)) {
                     return entry;
                 }
             }
@@ -331,7 +365,7 @@ public final class ListLsubCache {
                  * Return
                  */
                 ListLsubEntry entry = collection.getList(fullName);
-                if (null != entry/* && (entry.canOpen() || entry.isNamespace())*/) {
+                if (seemsValid(entry)) {
                     return entry;
                 }
                 /*
@@ -407,7 +441,7 @@ public final class ListLsubCache {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
             final ListLsubEntry entry = collection.getList(fullName);
-            if (null != entry && (entry.canOpen() || entry.isNamespace() || entry.hasChildren())) {
+            if (seemsValid(entry)) {
                 return entry;
             }
         }
@@ -420,7 +454,7 @@ public final class ListLsubCache {
              * Return
              */
             ListLsubEntry entry = collection.getList(fullName);
-            if (null != entry && (entry.canOpen() || entry.isNamespace() || entry.hasChildren())) {
+            if (seemsValid(entry)) {
                 return entry;
             }
             /*
@@ -452,6 +486,58 @@ public final class ListLsubCache {
     }
 
     /**
+     * Gets all LIST/LSUB entries.
+     *
+     * @param optParentFullName The optional full name of the parent
+     * @param accountId The account identifier
+     * @param subscribedOnly <code>false</code> for LIST entries; otherwise <code>true</code> for LSUB ones
+     * @param imapStore The IMAP store
+     * @param session The session
+     * @return All LSUB entries
+     * @throws OXException If loading the entry fails
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static List<ListLsubEntry> getAllEntries(final String optParentFullName, final int accountId, final boolean subscribedOnly, final IMAPStore imapStore, final Session session) throws OXException, MessagingException {
+        final IMAPFolder imapFolder = (IMAPFolder) imapStore.getDefaultFolder();
+        final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        if (isAccessible(collection)) {
+            if (null != optParentFullName) {
+                final ListLsubEntry entry = subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName);
+                if (null != entry) {
+                    return entry.getChildren();
+                }
+            } else {
+                return subscribedOnly ? collection.getLsubs() : collection.getLists();
+            }
+        }
+        synchronized (collection) {
+            if (checkTimeStamp(imapFolder, collection)) {
+                if (null != optParentFullName) {
+                    final ListLsubEntry entry = subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName);
+                    if (null != entry) {
+                        return entry.getChildren();
+                    }
+                } else {
+                    return subscribedOnly ? collection.getLsubs() : collection.getLists();
+                }
+            }
+            /*
+             * Update & re-check
+             */
+            collection.reinit(imapStore, DO_STATUS, DO_GETACL);
+            if (null != optParentFullName) {
+                final ListLsubEntry entry = subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName);
+                if (null != entry) {
+                    return entry.getChildren();
+                }
+                return Collections.emptyList();
+            } else {
+                return subscribedOnly ? collection.getLsubs() : collection.getLists();
+            }
+        }
+    }
+
+    /**
      * Gets cached LIST/LSUB entry for specified full name.
      *
      * @param fullName The full name
@@ -465,8 +551,8 @@ public final class ListLsubCache {
     public static ListLsubEntry[] getCachedEntries(final String fullName, final int accountId, final IMAPFolder imapFolder, final Session session) throws OXException, MessagingException {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
-            ListLsubEntry listEntry = collection.getList(fullName);
-            if (null != listEntry && (listEntry.canOpen() || listEntry.isNamespace())) {
+            final ListLsubEntry listEntry = collection.getList(fullName);
+            if (seemsValid(listEntry)) {
                 final ListLsubEntry lsubEntry = collection.getLsub(fullName);
                 final ListLsubEntry emptyEntryFor = ListLsubCollection.emptyEntryFor(fullName);
                 return new ListLsubEntry[] { listEntry, lsubEntry == null ? emptyEntryFor : lsubEntry };
@@ -474,7 +560,7 @@ public final class ListLsubCache {
         }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
-                final ListLsubEntry listEntry = collection.getLsub(fullName);
+                final ListLsubEntry listEntry = collection.getList(fullName);
                 final ListLsubEntry lsubEntry = collection.getLsub(fullName);
                 final ListLsubEntry emptyEntryFor = ListLsubCollection.emptyEntryFor(fullName);
                 return new ListLsubEntry[] { listEntry == null ? emptyEntryFor : listEntry, lsubEntry == null ? emptyEntryFor : lsubEntry };
@@ -483,7 +569,7 @@ public final class ListLsubCache {
              * Return
              */
             ListLsubEntry listEntry = collection.getList(fullName);
-            if (null == listEntry || (!listEntry.canOpen() && !listEntry.isNamespace())) {
+            if (!seemsValid(listEntry)) {
                 /*
                  * Update & re-check
                  */
