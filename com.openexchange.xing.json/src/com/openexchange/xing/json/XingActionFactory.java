@@ -58,19 +58,19 @@ import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.json.actions.AbstractXingAction;
-import com.openexchange.xing.json.actions.ChangeStatusRequestAction;
-import com.openexchange.xing.json.actions.CommentActivityRequestAction;
+import com.openexchange.xing.json.actions.ChangeStatusAction;
+import com.openexchange.xing.json.actions.CommentActivityAction;
 import com.openexchange.xing.json.actions.ContactRequestAction;
-import com.openexchange.xing.json.actions.CreateRequestAction;
-import com.openexchange.xing.json.actions.DeleteActivityRequestAction;
+import com.openexchange.xing.json.actions.CreateProfileAction;
+import com.openexchange.xing.json.actions.DeleteActivityAction;
 import com.openexchange.xing.json.actions.FeedRequestAction;
-import com.openexchange.xing.json.actions.GetCommentsActivityRequestAction;
+import com.openexchange.xing.json.actions.GetCommentsActivityAction;
 import com.openexchange.xing.json.actions.InviteRequestAction;
-import com.openexchange.xing.json.actions.LikeActivityRequestAction;
-import com.openexchange.xing.json.actions.NewsFeedRequestAction;
-import com.openexchange.xing.json.actions.ShareActivityRequestAction;
-import com.openexchange.xing.json.actions.ShareLinkRequestAction;
-import com.openexchange.xing.json.actions.ShowActivityRequestAction;
+import com.openexchange.xing.json.actions.LikeActivityAction;
+import com.openexchange.xing.json.actions.NewsFeedAction;
+import com.openexchange.xing.json.actions.ShareActivityAction;
+import com.openexchange.xing.json.actions.ShareLinkAction;
+import com.openexchange.xing.json.actions.ShowActivityAction;
 
 
 /**
@@ -91,17 +91,17 @@ public class XingActionFactory implements AJAXActionServiceFactory {
         actions = new ConcurrentHashMap<String, AbstractXingAction>(6);
         actions.put("invite", new InviteRequestAction(serviceLookup));
         actions.put("contact_request", new ContactRequestAction(serviceLookup));
-        actions.put("newsfeed", new NewsFeedRequestAction(serviceLookup));
-        actions.put("create", new CreateRequestAction(serviceLookup));
-        actions.put("comment", new CommentActivityRequestAction(serviceLookup));
-        actions.put("get_comments", new GetCommentsActivityRequestAction(serviceLookup));
-        actions.put("like", new LikeActivityRequestAction(serviceLookup));
+        actions.put("newsfeed", new NewsFeedAction(serviceLookup));
+        actions.put("create", new CreateProfileAction(serviceLookup));
+        actions.put("comment", new CommentActivityAction(serviceLookup));
+        actions.put("get_comments", new GetCommentsActivityAction(serviceLookup));
+        actions.put("like", new LikeActivityAction(serviceLookup));
         actions.put("feed", new FeedRequestAction(serviceLookup));
-        actions.put("change_status", new ChangeStatusRequestAction(serviceLookup));
-        actions.put("share_link", new ShareLinkRequestAction(serviceLookup));
-        actions.put("show_activity", new ShowActivityRequestAction(serviceLookup));
-        actions.put("share_activity", new ShareActivityRequestAction(serviceLookup));
-        actions.put("delete_activity", new DeleteActivityRequestAction(serviceLookup));
+        actions.put("change_status", new ChangeStatusAction(serviceLookup));
+        actions.put("share_link", new ShareLinkAction(serviceLookup));
+        actions.put("show_activity", new ShowActivityAction(serviceLookup));
+        actions.put("share_activity", new ShareActivityAction(serviceLookup));
+        actions.put("delete_activity", new DeleteActivityAction(serviceLookup));
     }
 
     @Override
