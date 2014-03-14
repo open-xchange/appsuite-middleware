@@ -95,6 +95,7 @@ public class XingActionFactory implements AJAXActionServiceFactory {
         actions.put("invite", new InviteRequestAction(serviceLookup));
         actions.put("contact_request", new ContactRequestAction(serviceLookup));
         actions.put("newsfeed", new NewsFeedAction(serviceLookup));
+        actions.put("userfeed", new FeedAction(serviceLookup));
         actions.put("create", new CreateProfileAction(serviceLookup));
         actions.put("comment", new CommentActivityAction(serviceLookup));
         actions.put("get_comments", new GetCommentsActivityAction(serviceLookup));
@@ -102,7 +103,6 @@ public class XingActionFactory implements AJAXActionServiceFactory {
         actions.put("like", new LikeActivityAction(serviceLookup));
         actions.put("unlike", new UnlikeActivityAction(serviceLookup));
         actions.put("get_likes", new GetActivityLikesAction(serviceLookup));
-        actions.put("feed", new FeedAction(serviceLookup));
         actions.put("change_status", new ChangeStatusAction(serviceLookup));
         actions.put("share_link", new ShareLinkAction(serviceLookup));
         actions.put("show_activity", new ShowActivityAction(serviceLookup));
