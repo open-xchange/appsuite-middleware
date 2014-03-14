@@ -53,7 +53,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
@@ -77,7 +76,7 @@ public final class DeleteActivityAction extends AbstractXingAction {
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String activityId = getStringMandatoryParameter(req, "activity_id");
+        final String activityId = getMandatoryStringParameter(req, "activity_id");
 
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();

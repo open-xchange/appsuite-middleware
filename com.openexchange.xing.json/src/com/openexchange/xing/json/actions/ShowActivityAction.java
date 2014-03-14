@@ -57,7 +57,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -82,7 +81,7 @@ public final class ShowActivityAction extends AbstractXingAction {
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String activityId = getStringMandatoryParameter(req, "activity_id");
+        final String activityId = getMandatoryStringParameter(req, "activity_id");
         // User Fields
         Collection<UserField> optUserFields = getUserFields(req.getParameter("user_fields"));
 

@@ -65,7 +65,7 @@ import com.openexchange.xing.session.WebAuthSession;
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CommentActivityAction extends AbstractNewsFeedAction {
+public class CommentActivityAction extends AbstractXingAction {
 
     /**
      * Initializes a new {@link CommentActivityAction}.

@@ -49,13 +49,10 @@
 
 package com.openexchange.xing.json.actions;
 
-import javax.mail.internet.AddressException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.Path;
 import com.openexchange.xing.XingAPI;
@@ -83,7 +80,7 @@ public final class ContactRequestAction extends AbstractXingAction {
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
         // Get & validate E-Mail address
-        String address = getStringMandatoryParameter(req, "email");
+        String address = getMandatoryStringParameter(req, "email");
         address = validateMailAddress(address);
 
         final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);

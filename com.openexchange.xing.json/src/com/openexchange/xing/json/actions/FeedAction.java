@@ -52,17 +52,13 @@ package com.openexchange.xing.json.actions;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-import javax.mail.internet.AddressException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
@@ -91,7 +87,7 @@ public class FeedAction extends AbstractXingAction {
         Date optUntil = null;
         Collection<UserField> optUserFields = null;
         
-        String address = getStringMandatoryParameter(req, "email");
+        String address = getMandatoryStringParameter(req, "email");
         address = validateMailAddress(address);
         
         // Since/Until

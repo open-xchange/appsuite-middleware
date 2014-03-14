@@ -52,14 +52,10 @@ package com.openexchange.xing.json.actions;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import javax.mail.internet.AddressException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.InvitationStats;
 import com.openexchange.xing.User;
 import com.openexchange.xing.XingAPI;
@@ -87,7 +83,7 @@ public final class InviteRequestAction extends AbstractXingAction {
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
         // Get & validate E-Mail address
-        String address = getStringMandatoryParameter(req, "email");
+        String address = getMandatoryStringParameter(req, "email");
         address = validateMailAddress(address);
 
         final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);

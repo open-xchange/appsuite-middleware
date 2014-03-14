@@ -78,7 +78,7 @@ public final class ShareLinkAction extends AbstractXingAction {
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String url = getStringMandatoryParameter(req, "url");
+        final String url = getMandatoryStringParameter(req, "url");
         try {
             URLEncoder.encode(url, "ISO-8859-1");
         } catch (UnsupportedEncodingException e) {

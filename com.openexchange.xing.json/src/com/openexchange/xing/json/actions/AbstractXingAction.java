@@ -195,7 +195,7 @@ public abstract class AbstractXingAction implements AJAXActionService {
      * @return the value of the parameter
      * @throws OXException if the parameter is missing from the request.
      */
-    protected String getStringMandatoryParameter(XingRequest request, String param) throws OXException {
+    protected String getMandatoryStringParameter(XingRequest request, String param) throws OXException {
         String pv = request.getParameter(param);
         if (pv == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(param);

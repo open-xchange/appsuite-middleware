@@ -49,14 +49,10 @@
 
 package com.openexchange.xing.json.actions;
 
-import java.util.Arrays;
-import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -72,8 +68,6 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public final class ShareActivityAction extends AbstractXingAction {
 
-    private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
-
     /**
      * Initializes a new {@link ShareActivityAction}.
      */
@@ -83,7 +77,7 @@ public final class ShareActivityAction extends AbstractXingAction {
 
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String activityId = getStringMandatoryParameter(req, "activity_id");
+        final String activityId = getMandatoryStringParameter(req, "activity_id");
 
         final String text = req.getParameter("text");
         if (text != null) {
