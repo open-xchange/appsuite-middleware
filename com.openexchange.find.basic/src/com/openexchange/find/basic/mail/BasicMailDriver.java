@@ -133,8 +133,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private static final Logger LOG = LoggerFactory.getLogger(BasicMailDriver.class);
 
-    public BasicMailDriver() {
+    private final String virtualAllMessagesFolder;
+
+    public BasicMailDriver(String virtualAllMessagesFolder) {
         super();
+        this.virtualAllMessagesFolder = virtualAllMessagesFolder;
     }
 
     @Override
@@ -166,8 +169,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     @Override
     public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
         String folderName = searchRequest.getFolderId();
-        if (folderName == null) {
+        if (folderName == null && (virtualAllMessagesFolder == null || virtualAllMessagesFolder.isEmpty())) {
             throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
+        }
+        if (folderName == null) {
+            folderName = virtualAllMessagesFolder;
         }
 
         FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folderName);

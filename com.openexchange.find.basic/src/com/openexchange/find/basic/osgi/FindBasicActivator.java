@@ -96,7 +96,9 @@ public class FindBasicActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        registerService(ModuleSearchDriver.class, new BasicMailDriver(), defaultProperties());
+        ConfigurationService configService = getService(ConfigurationService.class);
+        String virtualAllMessagesFolder = configService.getProperty("com.openexchange.find.allMessagesFolder");
+        registerService(ModuleSearchDriver.class, new BasicMailDriver(virtualAllMessagesFolder), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicDriveDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicContactsDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
