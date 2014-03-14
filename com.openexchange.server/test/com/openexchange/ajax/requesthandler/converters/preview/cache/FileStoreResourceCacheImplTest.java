@@ -130,7 +130,7 @@ public class FileStoreResourceCacheImplTest {
             Assert.assertTrue(exceptionClass.isInstance(e.getCause()));
         }
         Assert.assertTrue(exceptionThrown);
-        Mockito.verify(databaseService).getWritable(anyInt());
+        Mockito.verify(databaseService, Mockito.times(2)).getWritable(anyInt());
         InOrder autoCommitOrder = Mockito.inOrder(connection);
         autoCommitOrder.verify(connection).setAutoCommit(false);
         autoCommitOrder.verify(connection).setAutoCommit(true);
