@@ -82,6 +82,7 @@ public interface CacheEventService {
     /**
      * Adds a cache listener to receive cache events for a specific region.
      *
+     * @param region The region name the listener is interested in
      * @param listener The cache listener to add
      */
     void addListener(String region, CacheListener listener);
@@ -89,6 +90,7 @@ public interface CacheEventService {
     /**
      * Removes a registered cache listener.
      *
+     * @param region The region name the listener was interested in
      * @param listener The cache listener to remove
      */
     void removeListener(String region, CacheListener listener);
