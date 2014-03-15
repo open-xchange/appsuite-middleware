@@ -113,8 +113,9 @@ public final class IMAPActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ThreadPoolService.class,
-            TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class, EventAdmin.class, CacheEventService.class };
+            ConfigurationService.class, CacheService.class, CacheEventService.class, UserService.class, MailAccountStorageService.class,
+            ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class,
+            EventAdmin.class };
     }
 
     @Override
@@ -153,6 +154,7 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Trackers
              */
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
+            track(CacheEventService.class, new ListLsubInvalidator(context));
             openTrackers();
             /*
              * Register login handler
