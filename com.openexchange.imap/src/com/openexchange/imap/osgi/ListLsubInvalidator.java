@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,38 @@
  *
  */
 
-package com.openexchange.folderstorage.cache.osgi;
+package com.openexchange.imap.osgi;
 
-import java.io.Serializable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
-import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
-import com.openexchange.folderstorage.internal.Tools;
+import com.openexchange.imap.cache.ListLsubCache;
 
 
 /**
- * {@link FolderMapInvalidator} - Invalidates folder map.
+ * {@link ListLsubInvalidator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
-public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService> {
+public final class ListLsubInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService> {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(FolderMapInvalidator.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ListLsubInvalidator.class);
+
+    private static final String REGION = ListLsubCache.REGION;
 
     private final BundleContext context;
 
     /**
-     * Initializes a new {@link FolderMapInvalidator}.
+     * Initializes a new {@link ListLsubInvalidator}.
      *
      * @param context The bundle context
      */
-    public FolderMapInvalidator(final BundleContext context) {
+    public ListLsubInvalidator(final BundleContext context) {
         super();
         this.context = context;
     }
@@ -91,34 +90,20 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
             LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);
 
             final String region = cacheEvent.getRegion();
-            if ("GlobalFolderCache".equals(region)) {
-                final int contextId = Tools.getUnsignedInteger(cacheEvent.getGroupName());
-                if (null == cacheEvent.getKey()) {
-                    FolderMapManagement.getInstance().dropFor(contextId);
-                } else {
-                    final Serializable[] keys = ((CacheKey) cacheEvent.getKey()).getKeys();
-                    final String id = keys[1].toString();
-                    final String treeId = keys[0].toString();
-                    removeFromUserCache(id, treeId, contextId);
-                }
-            } else if ("OXFolderCache".equals(region)) {
-                final CacheKey cacheKey = (CacheKey) cacheEvent.getKey();
-                final String id = cacheKey.getKeys()[0].toString();
-                final String treeId = FolderStorage.REAL_TREE_ID;
-                removeFromUserCache(id, treeId, cacheKey.getContextId());
+            if (REGION.equals(region)) {
+                final String key = cacheEvent.getKey().toString(); // <user-id> + "@" + <context-id>
+                final int pos = key.indexOf('@');
+                final int userId = Integer.parseInt(key.substring(0, pos));
+                final int contextId = Integer.parseInt(key.substring(pos + 1));
+                ListLsubCache.dropFor(userId, contextId);
             }
         }
-    }
-
-    private void removeFromUserCache(final String id, final String treeId, final int contextId) {
-        FolderMapManagement.getInstance().dropFor(id, treeId, -1, contextId);
     }
 
     @Override
     public CacheEventService addingService(final ServiceReference<CacheEventService> reference) {
         final CacheEventService service = context.getService(reference);
-        service.addListener("GlobalFolderCache", this);
-        service.addListener("OXFolderCache", this);
+        service.addListener(REGION, this);
         return service;
     }
 
@@ -129,8 +114,7 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
 
     @Override
     public void removedService(final ServiceReference<CacheEventService> reference, final CacheEventService service) {
-        service.removeListener("GlobalFolderCache", this);
-        service.removeListener("OXFolderCache", this);
+        service.removeListener(REGION, this);
         context.ungetService(reference);
     }
 

@@ -1,3 +1,7 @@
+* 2014-03-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31582: Invalidate affected users' LIST/LSUB cache on IMAP folder changes & remotely distribute this
+
 * 2014-03-14 - marc.arens@open-xchange.com
 
  - Fix for bug 29802: Send LeaveStanza on behalf of timed out client 
