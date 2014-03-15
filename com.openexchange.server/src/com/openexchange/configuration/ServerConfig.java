@@ -54,6 +54,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -163,6 +164,8 @@ public final class ServerConfig implements Reloadable {
         } catch (final Exception e) {
             LOG.warn("Could not reload infostore configuration.", e);
         }
+
+        LoginWriter.invalidateRandomTokenEnabled();
     }
 
     public void initialize(final ConfigurationService confService) {
