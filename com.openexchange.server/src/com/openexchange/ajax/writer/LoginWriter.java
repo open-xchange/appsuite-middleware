@@ -174,6 +174,8 @@ public final class LoginWriter {
 
     /**
      * Invalidates cached setting for <code>"com.openexchange.ajax.login.randomToken"</code>.
+     *
+     * @see ConfigurationProperty#RANDOM_TOKEN
      */
     public static void invalidateRandomTokenEnabled() {
         randomTokenEnabled = null;
