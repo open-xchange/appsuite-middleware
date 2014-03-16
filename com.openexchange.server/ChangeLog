@@ -1,3 +1,7 @@
+* 2014-03-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30848: Properly recognize & transmit an S/MIME encrypted mail
+
 * 2014-03-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 31154: Necessary Ant tasks for our build system have not be available by default on Debian Squeeze but on Wheezy. Adding an
