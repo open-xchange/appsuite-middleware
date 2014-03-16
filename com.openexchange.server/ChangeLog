@@ -1,4 +1,8 @@
-* 2014-03-14 - thorben.betten@open-xchange.com
+* 2014-03-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30848: Properly recognize & transmit an S/MIME encrypted mail
+
+* 2014-03-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 31582: Invalidate affected users' LIST/LSUB cache on IMAP folder changes & remotely distribute this
  - Fix for bug 31463: Enhanced login response writer to check login string against possible ACE E-Mail address; convert to IDN if so
