@@ -99,7 +99,7 @@ public final class ConfirmAction extends AppointmentAction {
         // Get parameters
         final int objectId = req.checkInt(DataFields.ID);
         final int folderId = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        Date timestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
+        Date timestamp = null;
         final int optOccurrenceId = req.optInt(AJAXServlet.PARAMETER_OCCURRENCE);
 
         // Get request body
