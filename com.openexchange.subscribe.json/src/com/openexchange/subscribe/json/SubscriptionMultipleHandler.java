@@ -222,7 +222,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         } else {
             tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
         }
-        
+
         return createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, tz);
     }
 
@@ -249,7 +249,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         } else {
             tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
         }
-        
+
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
         final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
@@ -351,7 +351,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         } else {
             tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
         }
-        
+
         return createResponse(subscription, request.optString("__serverURL"), tz);
     }
 
@@ -391,6 +391,9 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             final Subscription subscription = new Subscription();
             subscription.setContext(context);
             subscription.setId(id);
+            if (null == subscription.getSession()) {
+                subscription.setSession(session);
+            }
             subscribeService.unsubscribe(subscription);
         }
         return 1;

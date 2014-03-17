@@ -2,6 +2,7 @@
 
  - Fix for bug 31587: Pass obtained BundleContext instance to initializing method, not the stored one to ensure working on most recent bundle/framework state
  - Fix for bug 31602 + 31603: Deal with possible absence of needed service
+ - Fix for bug 31601: Ensure a session reference is present prior to performing permission checks
 
 * 2014-03-16 - thorben.betten@open-xchange.com
 
