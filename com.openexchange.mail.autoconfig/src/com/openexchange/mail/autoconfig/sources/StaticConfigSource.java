@@ -98,11 +98,6 @@ public abstract class StaticConfigSource implements ConfigSource {
     }
 
     @Override
-    public int getRanking() {
-        return 0;
-    }
-
-    @Override
     public final Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
         if (null != filter && filter.accept(emailDomain)) {
             return getStaticAutoconfig(emailLocalPart, emailDomain, password, user, context);

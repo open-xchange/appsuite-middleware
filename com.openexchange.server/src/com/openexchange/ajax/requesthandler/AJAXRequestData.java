@@ -1100,6 +1100,7 @@ public class AJAXRequestData {
             UploadEvent uploadEvent = this.uploadEvent;
             if (null == uploadEvent) {
                 uploadEvent = AJAXServlet.processUploadStatic(httpServletRequest);
+                this.uploadEvent = uploadEvent;
                 final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
                 while (iterator.hasNext()) {
                     thisFiles.add(iterator.next());
@@ -1109,7 +1110,6 @@ public class AJAXRequestData {
                     final String name = names.next();
                     putParameter(name, uploadEvent.getFormField(name));
                 }
-                this.uploadEvent = uploadEvent;
             }
         }
     }

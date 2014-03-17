@@ -15,10 +15,11 @@ else
 DEB_DH_GENCONTROL_ARGS_ALL = -- -Vdist:Depends="sun-java6-jre|java6-runtime-headless"
 endif
 
-PKGNAME = open-xchange-osgi
-ROOT = $(CURDIR)/debian/$(PKGNAME)
+ifeq "$(DIST_CODE)" "squeeze"
+    DEB_JARS = ant-nodeps
+endif
 
 JAVA_HOME = /usr/lib/jvm/default-java
-DEB_ANT_ARGS = -Dbasedir=build -DdestDir=$(ROOT) -DpackageName=$(PKGNAME)
+DEB_ANT_ARGS = -DdestDir=$(DEB_DESTDIR) -DpackageName=$(DEB_SOURCE_PACKAGE)
 DEB_ANT_BUILDFILE = build/build.xml
 DEB_ANT_INSTALL_TARGET = build

@@ -102,14 +102,12 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
                 if (datagramPacket.getLength() > 0) {
                     // Packet received
                     final String mailboxName = getMailboxName(datagramPacket);
-                    registry.fireEvent(mailboxName);
+                    registry.scheduleEvent(mailboxName);
                 } else {
                     LOG.warn("recieved empty udp package: {}", datagramSocket);
                 }
             } catch (final IOException e) {
                 LOG.error("Receiving of UDP packet failed", e);
-            } catch (final OXException e) {
-                LOG.error("Failed to create push event", e);
             }
         }
     }

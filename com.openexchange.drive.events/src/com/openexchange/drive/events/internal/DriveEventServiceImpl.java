@@ -71,6 +71,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -165,44 +168,68 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
 
     @Override
     public void handleEvent(final Event event) {
-
         LOG.trace("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("event", event);}});
-
+        /*
+         * check event
+         */
         if (false == check(event)) {
             LOG.debug("Unable to handle incomplete event: {}", event);
             return;
         }
-        /*
-         * extract properties
-         */
         String fileName = (String)event.getProperty(FILE_NAME);
         if (false == Strings.isEmpty(fileName) && fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
             LOG.trace("Skipping event processing for temporary file: {}", fileName);
             return;
         }
-        Session session = (Session)event.getProperty(SESSION);
-        Integer contextID = Integer.valueOf(session.getContextId());
-        String folderID = (String)(event.containsProperty(PARENT_FOLDER_ID) ?
-            event.getProperty(PARENT_FOLDER_ID) : event.getProperty(FOLDER_ID));
-        String[] folderPath = (String[])event.getProperty(FOLDER_PATH);
         /*
-         * get buffer for this context
+         * create task to insert affected folders into buffer
          */
-        FolderBuffer buffer = folderBuffers.get(contextID);
-        if (null == buffer) {
-            buffer = new FolderBuffer(contextID, consolidationTime, maxDelayTime, defaultDelayTime);
-            FolderBuffer existingBuffer = folderBuffers.putIfAbsent(Integer.valueOf(contextID), buffer);
-            if (null != existingBuffer) {
-                buffer = existingBuffer;
+        AbstractTask<Void> insertTask = new AbstractTask<Void>() {
+
+            @Override
+            public Void call() throws Exception {
+                /*
+                 * extract properties
+                 */
+                Session session = (Session)event.getProperty(SESSION);
+                Integer contextID = Integer.valueOf(session.getContextId());
+                String folderID = (String)(event.containsProperty(PARENT_FOLDER_ID) ?
+                    event.getProperty(PARENT_FOLDER_ID) : event.getProperty(FOLDER_ID));
+                String[] folderPath = (String[])event.getProperty(FOLDER_PATH);
+                /*
+                 * get buffer for this context
+                 */
+                FolderBuffer buffer = folderBuffers.get(contextID);
+                if (null == buffer) {
+                    buffer = new FolderBuffer(contextID, consolidationTime, maxDelayTime, defaultDelayTime);
+                    FolderBuffer existingBuffer = folderBuffers.putIfAbsent(Integer.valueOf(contextID), buffer);
+                    if (null != existingBuffer) {
+                        buffer = existingBuffer;
+                    }
+                }
+                /*
+                 * add to buffer
+                 */
+                if (null != folderPath) {
+                    buffer.add(session, folderID, Arrays.asList(folderPath));
+                } else {
+                    buffer.add(session, folderID);
+                }
+                return null;
             }
-        }
+        };
         /*
-         * add to buffer
+         * add event to buffer asynchronously if possible
          */
-        if (null != folderPath) {
-            buffer.add(session, folderID, Arrays.asList(folderPath));
-        } else {
-            buffer.add(session, folderID);
+        try {
+            ThreadPoolService threadPoolService = DriveEventServiceLookup.getService(ThreadPoolService.class, false);
+            if (null != threadPoolService) {
+                threadPoolService.submit(insertTask, CallerRunsBehavior.<Void>getInstance());
+            } else {
+                insertTask.call();
+            }
+        } catch (Exception e) {
+            LOG.warn("Error adding drive event to folder buffer ", e);
         }
     }
 

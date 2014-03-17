@@ -92,7 +92,7 @@ public class AutoconfigResultConverter implements ResultConverter {
             return new JSONObject(1);
         }
         try {
-            JSONObject json = new JSONObject(12);
+            final JSONObject json = new JSONObject(12);
             json.put("login", autoconfig.getUsername());
             json.put("mail_server", autoconfig.getMailServer());
             json.put("transport_server", autoconfig.getTransportServer());
@@ -102,6 +102,10 @@ public class AutoconfigResultConverter implements ResultConverter {
             json.put("transport_protocol", autoconfig.getTransportProtocol());
             json.put("mail_secure", autoconfig.isMailSecure());
             json.put("transport_secure", autoconfig.isTransportSecure());
+            final String sourceName = autoconfig.getSource();
+            if (null != sourceName) {
+                json.put("config_source", sourceName);
+            }
             return json;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
