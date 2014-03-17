@@ -56,6 +56,7 @@ import static com.openexchange.find.basic.mail.Constants.FIELD_SUBJECT;
 import static com.openexchange.find.basic.mail.Constants.FIELD_TIME;
 import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
 import static com.openexchange.find.basic.mail.Constants.QUERY_FIELDS;
+import static com.openexchange.find.basic.mail.Constants.QUERY_FIELDS_BODY;
 import static com.openexchange.find.basic.mail.Constants.RECIPIENT_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.SENDER_AND_RECIPIENT_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.SENDER_FIELDS;
@@ -229,14 +230,12 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 FIELD_SUBJECT,
                 prefix);
             facets.add(subjectFacet);
-            if (searchMailBody) {
-                Facet bodyFacet = new FieldFacet(
-                    MailFacetType.MAIL_TEXT,
-                    new FormattableDisplayItem(MailStrings.FACET_MAIL_TEXT, prefix),
-                    FIELD_BODY,
-                    prefix);
-                facets.add(bodyFacet);
-            }
+            Facet bodyFacet = new FieldFacet(
+                MailFacetType.MAIL_TEXT,
+                new FormattableDisplayItem(MailStrings.FACET_MAIL_TEXT, prefix),
+                FIELD_BODY,
+                prefix);
+            facets.add(bodyFacet);
         }
     }
 
@@ -372,6 +371,9 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             return null;
         }
 
+        if (searchMailBody) {
+            return termFor(QUERY_FIELDS_BODY, queries, OP.AND, folder.isSent());
+        }
         return termFor(QUERY_FIELDS, queries, OP.AND, folder.isSent());
     }
 

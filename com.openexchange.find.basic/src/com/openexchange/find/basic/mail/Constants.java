@@ -86,6 +86,8 @@ public class Constants {
 
     static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC });
 
+    static final List<String> QUERY_FIELDS_BODY = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC, FIELD_BODY });
+
     static List<String> asList(String str) {
         return Collections.singletonList(str);
     }
