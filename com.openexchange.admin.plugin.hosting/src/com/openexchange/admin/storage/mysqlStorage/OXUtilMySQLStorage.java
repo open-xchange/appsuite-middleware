@@ -189,11 +189,14 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         try {
             con.setAutoCommit(false);
 
-            // TODO: Add lock here
-            // SELECT * FROM <table> WHERE <where-clause> FOR UPDATE
-            //   or
-            // SELECT COUNT(*) FROM <table> FOR UPDATE   to lock complete table
+            // Lock appropriate rows
+            final Integer id = db.getId();
+            if (null == id) {
+                throw new StorageException("Missing database identifier");
+            }
+            lock(id.intValue(), con);
 
+            // Change database
             changeDatabase(db, con);
             con.commit();
             rollback = false;
@@ -217,6 +220,24 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             } catch (final PoolException e) {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }
+        }
+    }
+
+    private void lock(final int id, final Connection con) throws SQLException {
+        if (id <= 0 || null == con) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            if (con.getAutoCommit()) {
+                throw new SQLException("Connection is not in transaction state.");
+            }
+            stmt = con.prepareStatement("SELECT cluster_id FROM db_cluster JOIN db_pool ON db_cluster.write_db_pool_id=db_pool.db_pool_id OR db_cluster.read_db_pool_id=db_pool.db_pool_id WHERE db_cluster.write_db_pool_id=? OR db_cluster.read_db_pool_id=? FOR UPDATE");
+            stmt.setInt(1, id);
+            stmt.setInt(2, id);
+            stmt.executeQuery();
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 
