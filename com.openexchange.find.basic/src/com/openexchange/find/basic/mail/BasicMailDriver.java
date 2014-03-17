@@ -134,10 +134,12 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     private static final Logger LOG = LoggerFactory.getLogger(BasicMailDriver.class);
 
     private final String virtualAllMessagesFolder;
+    private static boolean searchMailBody;
 
-    public BasicMailDriver(String virtualAllMessagesFolder) {
+    public BasicMailDriver(String virtualAllMessagesFolder, boolean searchMailBody) {
         super();
         this.virtualAllMessagesFolder = virtualAllMessagesFolder;
+        BasicMailDriver.searchMailBody = searchMailBody;
     }
 
     @Override
@@ -215,13 +217,15 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 new FormattableDisplayItem(MailStrings.FACET_SUBJECT, prefix),
                 FIELD_SUBJECT,
                 prefix);
-            Facet bodyFacet = new FieldFacet(
-                MailFacetType.MAIL_TEXT,
-                new FormattableDisplayItem(MailStrings.FACET_MAIL_TEXT, prefix),
-                FIELD_BODY,
-                prefix);
             facets.add(subjectFacet);
-            facets.add(bodyFacet);
+            if (searchMailBody) {
+                Facet bodyFacet = new FieldFacet(
+                    MailFacetType.MAIL_TEXT,
+                    new FormattableDisplayItem(MailStrings.FACET_MAIL_TEXT, prefix),
+                    FIELD_BODY,
+                    prefix);
+                facets.add(bodyFacet);
+            }
         }
     }
 

@@ -98,7 +98,8 @@ public class FindBasicActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
         ConfigurationService configService = getService(ConfigurationService.class);
         String virtualAllMessagesFolder = configService.getProperty("com.openexchange.find.mail.allMessagesFolder");
-        registerService(ModuleSearchDriver.class, new BasicMailDriver(virtualAllMessagesFolder), defaultProperties());
+        boolean searchMailBody = configService.getBoolProperty("com.openexchange.find.basic.mail.searchmailbody", false);
+        registerService(ModuleSearchDriver.class, new BasicMailDriver(virtualAllMessagesFolder, searchMailBody), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicDriveDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicContactsDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
