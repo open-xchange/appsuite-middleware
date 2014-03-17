@@ -49,54 +49,45 @@
 
 package com.openexchange.find.spi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.find.AutocompleteRequest;
-import com.openexchange.find.AutocompleteResult;
-import com.openexchange.find.Module;
-import com.openexchange.find.SearchRequest;
-import com.openexchange.find.SearchResult;
-import com.openexchange.tools.session.ServerSession;
+import java.io.Serializable;
+import com.openexchange.find.common.CommonFacetType;
+
 
 /**
- * A {@link ModuleSearchDriver} has to be implemented for every module that enables searching via the find API.
+ * Encapsulates some configuration settings for clients. A {@link SearchConfiguration}
+ * is specific per {@link ModuleSearchDriver} implementation and may additionally
+ * depend on the requesting user resp. its session.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public interface ModuleSearchDriver {
+public class SearchConfiguration implements Serializable {
+
+    private static final long serialVersionUID = 1009264293278859341L;
+
+    private boolean requiresFolder = false;
+
+    public SearchConfiguration() {
+        super();
+    }
 
     /**
-     * Gets the module supported by this driver.
-     *
-     * @return The module supported by this driver.
+     * Sets that the user-specific search driver requires a set
+     * {@link CommonFacetType#FOLDER} facet on search requests.
      */
-    Module getModule();
+    public SearchConfiguration setRequiresFolder() {
+        requiresFolder  = true;
+        return this;
+    }
 
     /**
-     * Checks if this driver applies to a given {@link ServerSession}.
+     * Returns if the user-specific search driver requires a set
+     * {@link CommonFacetType#FOLDER} facet on search requests.
      *
-     * @return <code>true</code> if valid; otherwise <code>false</code>
+     * @return <code>true</code>, if the folder facet is mandatory.
      */
-    boolean isValidFor(ServerSession session) throws OXException;
-
-    SearchConfiguration getSearchConfiguration(ServerSession session) throws OXException;
-
-    /**
-     * Performs an auto-complete request.
-     *
-     * @param autocompleteRequest The associated request
-     * @param session The associated session
-     * @return The {@link AutocompleteResult}. Never <code>null</code>.
-     */
-    AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException;
-
-    /**
-     * Performs a search request.
-     *
-     * @param searchRequest The associated request
-     * @param session The associated session
-     * @return The {@link SearchResult}. Never <code>null</code>.
-     */
-    SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException;
+    public boolean requiresFolder() {
+        return requiresFolder;
+    }
 
 }

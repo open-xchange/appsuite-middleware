@@ -47,56 +47,63 @@
  *
  */
 
-package com.openexchange.find.spi;
+package com.openexchange.find.internal;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.find.AutocompleteRequest;
-import com.openexchange.find.AutocompleteResult;
-import com.openexchange.find.Module;
-import com.openexchange.find.SearchRequest;
-import com.openexchange.find.SearchResult;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.find.internal.SearchDriverManager.CachedConfig;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
+
 
 /**
- * A {@link ModuleSearchDriver} has to be implemented for every module that enables searching via the find API.
+ * {@link MandatoryFolders}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public interface ModuleSearchDriver {
+public class MandatoryFolders implements PreferencesItemService {
 
-    /**
-     * Gets the module supported by this driver.
-     *
-     * @return The module supported by this driver.
-     */
-    Module getModule();
+    private final SearchDriverManager driverManager;
 
-    /**
-     * Checks if this driver applies to a given {@link ServerSession}.
-     *
-     * @return <code>true</code> if valid; otherwise <code>false</code>
-     */
-    boolean isValidFor(ServerSession session) throws OXException;
+    public MandatoryFolders(final SearchDriverManager driverManager) {
+        super();
+        this.driverManager = driverManager;
+    }
 
-    SearchConfiguration getSearchConfiguration(ServerSession session) throws OXException;
+    @Override
+    public String[] getPath() {
+        return new String[] { "search", "mandatory", "folder" };
+    }
 
-    /**
-     * Performs an auto-complete request.
-     *
-     * @param autocompleteRequest The associated request
-     * @param session The associated session
-     * @return The {@link AutocompleteResult}. Never <code>null</code>.
-     */
-    AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException;
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
 
-    /**
-     * Performs a search request.
-     *
-     * @param searchRequest The associated request
-     * @param session The associated session
-     * @return The {@link SearchResult}. Never <code>null</code>.
-     */
-    SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException;
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return true;
+            }
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                ServerSessionAdapter serverSession = new ServerSessionAdapter(session, ctx, user, userConfig);
+                List<CachedConfig> configs = driverManager.getConfigurations(serverSession);
+                setting.setEmptyMultiValue();
+                for (CachedConfig config : configs) {
+                    if (config.getSearchConfig().requiresFolder()) {
+                        setting.addMultiValue(config.getModule().getIdentifier());
+                    }
+                }
+            }
+        };
+    }
 
 }

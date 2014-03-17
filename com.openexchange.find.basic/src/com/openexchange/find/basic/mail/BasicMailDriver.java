@@ -92,6 +92,7 @@ import com.openexchange.find.mail.MailConstants;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.mail.MailStrings;
+import com.openexchange.find.spi.SearchConfiguration;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
@@ -153,6 +154,16 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     @Override
+    public SearchConfiguration getSearchConfiguration(ServerSession session) throws OXException {
+        SearchConfiguration config = new SearchConfiguration();
+        if (Strings.isEmpty(virtualAllMessagesFolder)) {
+            config.setRequiresFolder();
+        }
+
+        return config;
+    }
+
+    @Override
     protected AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         String prefix = autocompleteRequest.getPrefix();
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
@@ -171,7 +182,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     @Override
     public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
         String folderName = searchRequest.getFolderId();
-        if (folderName == null && (virtualAllMessagesFolder == null || virtualAllMessagesFolder.isEmpty())) {
+        if (folderName == null && Strings.isEmpty(virtualAllMessagesFolder)) {
             throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
         }
         if (folderName == null) {

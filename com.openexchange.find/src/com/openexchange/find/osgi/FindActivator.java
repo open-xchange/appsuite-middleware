@@ -55,8 +55,11 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import com.openexchange.find.SearchService;
+import com.openexchange.find.internal.MandatoryFolders;
+import com.openexchange.find.internal.SearchDriverManager;
 import com.openexchange.find.internal.SearchServiceImpl;
 import com.openexchange.find.spi.ModuleSearchDriver;
+import com.openexchange.groupware.settings.PreferencesItemService;
 
 /**
  * The activator for find bundle.
@@ -68,7 +71,8 @@ import com.openexchange.find.spi.ModuleSearchDriver;
 public class FindActivator implements BundleActivator {
 
     private volatile ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker;
-    private volatile ServiceRegistration<SearchService> registration;
+    private volatile ServiceRegistration<SearchService> searchServiceRegistration;
+    private volatile ServiceRegistration<PreferencesItemService> mandatoryFoldersRegistration;
 
     /**
      * Initializes a new {@link FindActivator}.
@@ -82,13 +86,15 @@ public class FindActivator implements BundleActivator {
         final Logger logger = org.slf4j.LoggerFactory.getLogger(FindActivator.class);
         logger.info("Starting bundle: com.openexchange.find");
         try {
-            final SearchServiceImpl searchService = new SearchServiceImpl(context);
+            final SearchDriverManager driverManager = new SearchDriverManager(context);
+            final SearchServiceImpl searchService = new SearchServiceImpl(driverManager);
 
-            final ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker = new ServiceTracker<ModuleSearchDriver, ModuleSearchDriver>(context, ModuleSearchDriver.class, searchService);
+            final ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker = new ServiceTracker<ModuleSearchDriver, ModuleSearchDriver>(context, ModuleSearchDriver.class, driverManager);
             this.driverTracker = driverTracker;
             driverTracker.open();
 
-            registration = context.registerService(SearchService.class, searchService, null);
+            searchServiceRegistration = context.registerService(SearchService.class, searchService, null);
+            mandatoryFoldersRegistration = context.registerService(PreferencesItemService.class, new MandatoryFolders(driverManager), null);
 
             logger.info("Bundle successfully started: com.openexchange.find");
         } catch (final Exception e) {
@@ -102,10 +108,16 @@ public class FindActivator implements BundleActivator {
         final Logger logger = org.slf4j.LoggerFactory.getLogger(FindActivator.class);
         logger.info("Stopping bundle: com.openexchange.find");
         try {
-            final ServiceRegistration<SearchService> registration = this.registration;
-            if (registration != null) {
-                registration.unregister();
-                this.registration = null;
+            final ServiceRegistration<SearchService> searchServiceRegistration = this.searchServiceRegistration;
+            if (searchServiceRegistration != null) {
+                searchServiceRegistration.unregister();
+                this.searchServiceRegistration = null;
+            }
+
+            final ServiceRegistration<PreferencesItemService> mandatoryFoldersRegistration = this.mandatoryFoldersRegistration;
+            if (mandatoryFoldersRegistration != null) {
+                mandatoryFoldersRegistration.unregister();
+                this.mandatoryFoldersRegistration = null;
             }
 
             final ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker = this.driverTracker;
