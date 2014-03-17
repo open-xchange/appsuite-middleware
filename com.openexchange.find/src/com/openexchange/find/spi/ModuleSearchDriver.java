@@ -75,10 +75,18 @@ public interface ModuleSearchDriver {
     /**
      * Checks if this driver applies to a given {@link ServerSession}.
      *
+     * @param session The associated session
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
     boolean isValidFor(ServerSession session) throws OXException;
 
+    /**
+     * Gets the driver-specific {@link SearchConfiguration}. May be individual for the
+     * given session.
+     *
+     * @param session The associated session
+     * @return The configuration; never <code>null</code>.
+     */
     SearchConfiguration getSearchConfiguration(ServerSession session) throws OXException;
 
     /**
