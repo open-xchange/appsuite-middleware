@@ -60,6 +60,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.xing.Contacts;
 import com.openexchange.xing.Path;
 import com.openexchange.xing.User;
 
@@ -100,16 +101,17 @@ public class XingInvestigationResultConverter implements ResultConverter {
         XingInvestigationResult investigation = (XingInvestigationResult) object;
         JSONObject jResult = new JSONObject();
         try {
-            jResult.put("user", investigation.getUser().toJSON());
-            Path shortestPath = investigation.getShortestPath();
+            User user = investigation.getUser();
+            if (user != null) {
+                jResult.put("profile", user.toJSON());
+                Path shortestPath = investigation.getShortestPath();
                 if (shortestPath != null) {
-                List<User> inBetween = shortestPath.getInBetween();
-                if (inBetween.size() > 0) {
-                    JSONArray jPath = new JSONArray(inBetween.size());
-                    for (User user : inBetween) {
-                        jPath.put(user.toJSON());
-                    }
-                    jResult.put("path", jPath);
+                    jResult.put("path", buildUsersArray(shortestPath.getInBetween()));
+                }
+
+                Contacts sharedContacts = investigation.getSharedContacts();
+                if (sharedContacts != null) {
+                    jResult.put("sharedContacts", buildUsersArray(sharedContacts.getUsers()));
                 }
             }
         } catch (JSONException e) {
@@ -117,6 +119,18 @@ public class XingInvestigationResultConverter implements ResultConverter {
         }
 
         result.setResultObject(jResult, "json");
+    }
+
+    private JSONArray buildUsersArray(List<User> users) {
+        if (users == null || users.isEmpty()) {
+            return null;
+        }
+
+        JSONArray jUsers = new JSONArray(users.size());
+        for (User user : users) {
+            jUsers.put(user.toJSON());
+        }
+        return jUsers;
     }
 
 //    TODO: implement or delete based on UI requirements. See https://dev.xing.com/docs/get/users/:id

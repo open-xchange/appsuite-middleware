@@ -49,6 +49,7 @@
 
 package com.openexchange.halo.xing;
 
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -67,12 +68,15 @@ import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.xing.Contacts;
 import com.openexchange.xing.Path;
 import com.openexchange.xing.PhotoUrls;
+import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
+import com.openexchange.xing.exception.XingApiException;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.session.WebAuthSession;
@@ -122,15 +126,31 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
     public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
         XingAPI<WebAuthSession> api = getAPI(session);
         com.openexchange.xing.User userInfo = loadXingUser(api, query, session);
-
-        Path shortestPath = null;
+        XingInvestigationResult result = new XingInvestigationResult(userInfo);
         if (userInfo != null) {
             try {
                 com.openexchange.xing.User sessionUser = api.userInfo();
                 String sessionUserId = sessionUser.getId();
                 String otherId = userInfo.getId();
                 if (!sessionUserId.equals(otherId)) {
-                    shortestPath = api.getShortestPath(sessionUserId, userInfo.getId());
+                    EnumSet<UserField> fields = EnumSet.noneOf(UserField.class);
+                    fields.add(UserField.DISPLAY_NAME);
+                    fields.add(UserField.FIRST_NAME);
+                    fields.add(UserField.LAST_NAME);
+                    fields.add(UserField.PHOTO_URLS);
+                    try {
+                        Path shortestPath = api.getShortestPath(sessionUserId, userInfo.getId(), fields);
+                        result.setShortestPath(shortestPath);
+                    } catch (XingApiException e) {
+                        LOG.warn("Could not load shortest path from XING.", e);
+                    }
+
+                    try {
+                        Contacts sharedContacts = api.getSharedContactsWith(otherId, 0, 0, UserField.LAST_NAME, fields);
+                        result.setSharedContacts(sharedContacts);
+                    } catch (XingApiException e) {
+                        LOG.warn("Could not load shared contacts from XING.", e);
+                    }
                 }
             } catch (final XingUnlinkedException e) {
                 throw XingExceptionCodes.UNLINKED_ERROR.create();
@@ -139,7 +159,6 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
             }
         }
 
-        XingInvestigationResult result = new XingInvestigationResult(userInfo, shortestPath);
         return new AJAXRequestResult(result, XingInvestigationResult.class.getName());
     }
 
