@@ -220,7 +220,12 @@ public class XingServerException extends XingException {
 
     @Override
     public String toString() {
-        return "XingServerException (" + server + "): " + error + " " + reason + " (" + body.error + ")";
+        return "XingServerException (" + server + "): " + error + " " + reason + " (" + (body == null ? "" : body.error) + ")";
+    }
+
+    @Override
+    public String getMessage() {
+        return toString();
     }
 
     /**

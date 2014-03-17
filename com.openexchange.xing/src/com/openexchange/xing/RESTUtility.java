@@ -66,6 +66,7 @@ import java.util.Scanner;
 import javax.net.ssl.SSLException;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -90,6 +91,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.xing.exception.XingApiException;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingIOException;
@@ -433,7 +435,11 @@ public class RESTUtility {
                 throw new XingServerException(response);
             }
             // This is from Xing, and we shouldn't be getting it
-            throw new XingParseException(bin);
+            String body = XingParseException.stringifyBody(bin);
+            if (Strings.isEmpty(body)) {
+                throw new XingServerException(response, result);
+            }
+            throw new XingParseException("failed to parse: " + body);
         } catch (final OutOfMemoryError e) {
             throw new XingException(e);
         } finally {
