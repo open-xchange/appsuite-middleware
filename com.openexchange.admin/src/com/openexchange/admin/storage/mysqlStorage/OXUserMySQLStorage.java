@@ -271,18 +271,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         stmt.addBatch();
                         existing.remove(cap);
                     }
-                    final String attributedCap = "+" + cap;
-                    if (existing.contains(attributedCap)) {
+                    final String plusCap = "+" + cap;
+                    if (existing.contains(plusCap)) {
                         if (null == stmt) {
                             stmt = con.prepareStatement("DELETE FROM capability_user WHERE cid=? AND user=? AND cap=?");
                             stmt.setInt(1, contextId);
                             stmt.setInt(2, user.getId().intValue());
                         }
-                        stmt.setString(3, attributedCap);
+                        stmt.setString(3, plusCap);
                         stmt.addBatch();
-                        existing.remove(attributedCap);
+                        existing.remove(plusCap);
                     }
-                    capsToInsert.add("-" + cap);
+                    final String minusCap = "-" + cap;
+                    if (!existing.contains(minusCap)) {
+                        capsToInsert.add(minusCap);
+                    }
                 }
                 if (null != stmt) {
                     stmt.executeBatch();
@@ -292,6 +295,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // Insert new ones
             if (!capsToInsert.isEmpty()) {
+                for (final String capToAdd : capsToAdd) {
+                    final String minusCap = "-" + capToAdd;
+                    if (existing.contains(minusCap)) {
+                        if (null == stmt) {
+                            stmt = con.prepareStatement("DELETE FROM capability_user WHERE cid=? AND user=? AND cap=?");
+                            stmt.setInt(1, contextId);
+                            stmt.setInt(2, user.getId().intValue());
+                        }
+                        stmt.setString(3, minusCap);
+                        stmt.addBatch();
+                    }
+                }
+                if (null != stmt) {
+                    stmt.executeBatch();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+
                 stmt = con.prepareStatement("INSERT INTO capability_user (cid, user, cap) VALUES (?, ?, ?)");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, user.getId().intValue());

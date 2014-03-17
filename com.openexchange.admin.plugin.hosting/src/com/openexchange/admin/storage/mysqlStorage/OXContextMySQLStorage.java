@@ -2172,17 +2172,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         stmt.addBatch();
                         existing.remove(cap);
                     }
-                    final String attributedCap = "+" + cap;
-                    if (existing.contains(attributedCap)) {
+                    final String plusCap = "+" + cap;
+                    if (existing.contains(plusCap)) {
                         if (null == stmt) {
                             stmt = con.prepareStatement("DELETE FROM capability_context WHERE cid=? AND cap=?");
                             stmt.setInt(1, contextId);
                         }
-                        stmt.setString(2, attributedCap);
+                        stmt.setString(2, plusCap);
                         stmt.addBatch();
-                        existing.remove(attributedCap);
+                        existing.remove(plusCap);
                     }
-                    capsToInsert.add("-" + cap);
+                    final String minusCap = "-" + cap;
+                    if (!existing.contains(minusCap)) {
+                        capsToInsert.add(minusCap);
+                    }
                 }
                 if (null != stmt) {
                     stmt.executeBatch();
@@ -2192,6 +2195,23 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             // Insert new ones
             if (!capsToInsert.isEmpty()) {
+                for (final String capToAdd : capsToAdd) {
+                    final String minusCap = "-" + capToAdd;
+                    if (existing.contains(minusCap)) {
+                        if (null == stmt) {
+                            stmt = con.prepareStatement("DELETE FROM capability_context WHERE cid=? AND cap=?");
+                            stmt.setInt(1, contextId);
+                        }
+                        stmt.setString(2, minusCap);
+                        stmt.addBatch();
+                    }
+                }
+                if (null != stmt) {
+                    stmt.executeBatch();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+
                 stmt = con.prepareStatement("INSERT INTO capability_context (cid, cap) VALUES (?, ?)");
                 stmt.setInt(1, contextId);
                 for (final String cap : capsToInsert) {
