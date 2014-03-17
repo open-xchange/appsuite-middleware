@@ -358,12 +358,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         log.debug("{} - {} - {} - {}", ctx, admin_user, access_combination_name, auth);
 
-        final UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
+        UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
         if(access==null){
             // no such access combination name defined in configuration
             // throw error!
             throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
         }
+        access = access.clone();
 
         return createcommon(ctx, admin_user, null, access, auth);
     }
@@ -1064,6 +1065,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } else {
             createaccess = access;
         }
+        createaccess = createaccess.clone();
 
         Context ret = ctx;
         ret = oxcox.create(ret, admin_user, createaccess);
@@ -1203,12 +1205,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            final UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
+            UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
             if(access==null){
                 // no such access combination name defined in configuration
                 // throw error!
                 throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
             }
+            access = access.clone();
             callPluginMethod("changeModuleAccess", ctx, access_combination_name, auth);
 
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();

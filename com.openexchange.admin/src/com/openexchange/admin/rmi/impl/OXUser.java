@@ -486,12 +486,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
 
-            final UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
+            UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
             if(access==null){
                 // no such access combination name defined in configuration
                 // throw error!
                 throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
             }
+            access = access.clone();
             if (access.isPublicFolderEditable() && user_id != tool.getAdminForContext(ctx)) {
                 // publicFolderEditable can only be applied to the context administrator.
                 access.setPublicFolderEditable(false);
@@ -595,12 +596,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         basicauth.doAuthentication(auth, ctx);
 
 
-        final UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
+        UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
         if(access==null){
             // no such access combination name defined in configuration
             // throw error!
             throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
         }
+        access = access.clone();
 
         if (access.isPublicFolderEditable()) {
             // publicFolderEditable can only be applied to the context administrator.
@@ -1167,7 +1169,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public UserModuleAccess moduleAccessForName(final String accessCombinationName) {
-        return null == accessCombinationName ? null : cache.getAccessCombinationNames().get(accessCombinationName);
+        if (null == accessCombinationName) {
+            return null;
+        }
+        final UserModuleAccess moduleAccess = cache.getAccessCombinationNames().get(accessCombinationName);
+        return null == moduleAccess ? null : moduleAccess.clone();
     }
 
     @Override

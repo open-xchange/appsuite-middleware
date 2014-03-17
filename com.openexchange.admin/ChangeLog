@@ -5,7 +5,7 @@
 
 * 2014-03-12 - thorben.betten@open-xchange.com
 
- - Fix for bug 28587: Ignore unused flags/permissions on access-combination equality check
+ - Fix for bug 28587: Ignore unused flags/permissions on access-combination equality check + Clone access-combination fetched from cache, do not operate on it
 
 * 2014-03-06 - thorben.betten@open-xchange.com
 

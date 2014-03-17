@@ -60,7 +60,7 @@ import java.lang.reflect.Field;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
-public class UserModuleAccess implements Serializable {
+public class UserModuleAccess implements Serializable, Cloneable {
 
     /**
      * For serialization
@@ -135,6 +135,15 @@ public class UserModuleAccess implements Serializable {
      */
     public UserModuleAccess() {
         super();
+    }
+
+    @Override
+    public UserModuleAccess clone() {
+        try {
+            return (UserModuleAccess) super.clone();
+        } catch (final CloneNotSupportedException e) {
+            throw new InternalError("CloneNotSupportedException although Colenable is implemented");
+        }
     }
 
     /**
