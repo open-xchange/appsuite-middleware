@@ -113,7 +113,7 @@ public class UserFeedAction extends AbstractXingAction {
             throw XingExceptionCodes.NOT_A_MEMBER.create(address);
         }
 
-        Map<String, Object> feed = xingAPI.getFeed(xingId, optSince, optUntil, optUserFields);
+        Map<String, Object> feed = xingAPI.getUserFeed(xingId, optSince, optUntil, optUserFields);
         JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(feed);
 
         return new AJAXRequestResult(result);

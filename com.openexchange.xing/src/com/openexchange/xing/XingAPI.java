@@ -936,7 +936,7 @@ public class XingAPI<S extends Session> {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public Map<String, Object> getFeed(String xingUserId, Date optSince, Date optUntil, Collection<UserField> optUserFields) throws XingException {
+    public Map<String, Object> getUserFeed(String xingUserId, Date optSince, Date optUntil, Collection<UserField> optUserFields) throws XingException {
         assertAuthenticated();
         try {
             // Add parameters

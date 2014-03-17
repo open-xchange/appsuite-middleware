@@ -63,7 +63,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class ChangeStatusRequest extends AbstractXingRequest<ChangeStatusResponse> {
     
-    private final String email;
 
     private final String message;
 
@@ -72,9 +71,8 @@ public class ChangeStatusRequest extends AbstractXingRequest<ChangeStatusRespons
      * 
      * @param foe
      */
-    public ChangeStatusRequest(final String email, final String message, boolean foe) {
+    public ChangeStatusRequest(final String message, boolean foe) {
         super(foe);
-        this.email = email;
         this.message = message;
     }
 
@@ -95,7 +93,6 @@ public class ChangeStatusRequest extends AbstractXingRequest<ChangeStatusRespons
     public Parameter[] getParameters() throws IOException, JSONException {
         List<URLParameter> params = new ArrayList<URLParameter>();
         params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "change_status"));
-        params.add(new URLParameter("email", email));
         params.add(new URLParameter("message", message));
         return params.toArray(new URLParameter[params.size()]);
     }
