@@ -1189,6 +1189,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         try {
             DBUtils.startTransaction(con);
+
+            lock(dbId, con);
+
             if (isMaster) {
                 try {
                     stmt = con.prepareStatement("DELETE db_pool FROM db_pool JOIN db_cluster WHERE db_pool.db_pool_id=db_cluster.read_db_pool_id AND db_cluster.write_db_pool_id=?");
