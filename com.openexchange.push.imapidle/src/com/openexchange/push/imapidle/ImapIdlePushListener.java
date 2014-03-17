@@ -412,7 +412,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 }
             }
         }
-        imapIdleFuture = threadPool.submit(ThreadPools.task(this, getClass().getName()));
+        imapIdleFuture = threadPool.submit(ThreadPools.task(this, ImapIdlePushListener.class.getSimpleName()));
     }
 
     /**
@@ -626,23 +626,40 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             launderOXException(e);
             // Non-aborting OXException
             dropSessionRef("MSG".equals(e.getPrefix()) && (1001 == e.getCode() || 1000 == e.getCode()));
+            // Close & sleep
+            closeMailAccess(mailAccess);
+            mailAccess = null;
             sleep(errDelay, e);
         } catch (final MessagingException e) {
             dropSessionRef(e instanceof javax.mail.AuthenticationFailedException);
+            // Close & sleep
+            closeMailAccess(mailAccess);
+            mailAccess = null;
             sleep(errDelay, e);
         } catch (final MissingSessionException e) {
             throw e;
         } catch (final RuntimeException e) {
             dropSessionRef(false);
+            // Close & sleep
+            closeMailAccess(mailAccess);
+            mailAccess = null;
             sleep(errDelay, e);
         } finally {
-            if (null != mailAccess) {
-                mailAccess.close(false);
-                mailAccess = null;
-            }
+            closeMailAccess(mailAccess);
+            mailAccess = null;
             running.set(false);
         }
         return true;
+    }
+
+    private void closeMailAccess(final MailAccess<?, ?> mailAccess) {
+        if (null != mailAccess) {
+            try {
+                mailAccess.close(false);
+            } catch (final Exception x) {
+                // Ignore
+            }
+        }
     }
 
     private void sleep(final int errDelay, final Exception e) {
