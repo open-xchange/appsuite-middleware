@@ -52,6 +52,9 @@ if [ ${1:-0} -eq 2 ]; then
     if ! ox_exists_property com.openexchange.pop3.logDeniedPing $pfile; then
         ox_set_property com.openexchange.pop3.logDeniedPing true $pfile
     fi
+
+    # SoftwareChange_Request-1931
+    ox_add_property com.openexchange.pop3.ssl.protocols "SSLv3 TLSv1" /opt/open-xchange/etc/pop3.properties
 fi
 
 %clean

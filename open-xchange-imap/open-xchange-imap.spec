@@ -67,6 +67,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-1668
     ox_add_property com.openexchange.imap.storeContainerType boundary-aware $PFILE
+
+    # SoftwareChange_Request-1931
+    ox_add_property com.openexchange.imap.ssl.protocols "SSLv3 TLSv1" /opt/open-xchange/etc/imap.properties
 fi
 
 %clean
