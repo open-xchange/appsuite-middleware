@@ -1392,7 +1392,7 @@ public class XingAPI<S extends Session> {
                 jLeadDesc,
                 session,
                 Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT)).response;
-            final JSONObject jResponse = RESTUtility.parseAsJSON(resp).toObject();
+            final JSONObject jResponse = RESTUtility.parseAsJSON(resp, Arrays.asList(XingServerException._200_OK)).toObject();
             return jResponse.asMap();
         } catch (final JSONException e) {
             throw new XingException(e);
