@@ -142,7 +142,7 @@ public class RESTUtility {
      */
     public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final Session session) throws XingException {
         final HttpResponse resp = streamRequest(method, host, path, apiVersion, null, session).response;
-        return parseAsJSON(resp);
+        return parseAsJSON(resp, Arrays.asList(XingServerException._200_OK));
     }
 
     /**
@@ -167,7 +167,7 @@ public class RESTUtility {
      */
     public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final String[] params, final Session session) throws XingException {
         final HttpResponse resp = streamRequest(method, host, path, apiVersion, params, session).response;
-        return parseAsJSON(resp);
+        return parseAsJSON(resp, Arrays.asList(XingServerException._200_OK));
     }
 
     /**
@@ -192,7 +192,7 @@ public class RESTUtility {
      */
     public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final String[] params, final Session session, final List<Integer> expectedStatusCode) throws XingException {
         final HttpResponse resp = streamRequest(method, host, path, apiVersion, params, session, expectedStatusCode).response;
-        return parseAsJSON(resp);
+        return parseAsJSON(resp, expectedStatusCode);
     }
 
     /**
@@ -396,8 +396,9 @@ public class RESTUtility {
 
     /**
      * Reads in content from an {@link HttpResponse} and parses it as JSON.
-     *
+     * 
      * @param response the {@link HttpResponse}.
+     * @param expectedStatusCode - Contains the expected status code on successful response
      * @return a parsed JSON object, typically a Map or a JSONArray.
      * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
@@ -407,7 +408,7 @@ public class RESTUtility {
      * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public static JSONValue parseAsJSON(final HttpResponse response) throws XingException {
+    public static JSONValue parseAsJSON(final HttpResponse response, final List<Integer> expectedStatusCode) throws XingException {
         JSONValue result = null;
 
         BufferedReader bin = null;
@@ -447,7 +448,7 @@ public class RESTUtility {
         }
 
         final int statusCode = response.getStatusLine().getStatusCode();
-        if (statusCode != XingServerException._200_OK) {
+        if (false == expectedStatusCode.contains(statusCode)) {
             if (statusCode == XingServerException._401_UNAUTHORIZED) {
                 throw new XingUnlinkedException();
             }
@@ -579,7 +580,7 @@ public class RESTUtility {
 
             if (false == expectedStatusCode.contains(statusCode)) {
                 // This will throw the right thing: either a XingServerException or a XingProxyException
-                parseAsJSON(response);
+                parseAsJSON(response, expectedStatusCode);
             }
             return response;
         } catch (final SSLException e) {
