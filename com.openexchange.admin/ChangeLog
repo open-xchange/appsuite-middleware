@@ -3,6 +3,7 @@
  - Fix for bug 31611: Properly re-add capability and added option to clean capabilities from storage
  - Fix for bug 31633: Properly acquire next identifier using a transaction
  - Fix for bug 29979: Added appropriate row locks to support concurrent user create operations
+ - Fix for bug 31643: Check validity of passed user/context
 
 * 2014-03-17 - thorben.betten@open-xchange.com
 

@@ -193,6 +193,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     @Override
     public Set<String> getCapabilities(final Context ctx, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        if (null == ctx) {
+            throw new InvalidDataException("Missing context.");
+        }
+
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
         new BasicAuthenticator(context).doAuthentication(auth);
@@ -223,6 +227,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     public void changeCapabilities(final Context ctx, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty()) && (null == capsToDrop || capsToDrop.isEmpty())) {
             throw new InvalidDataException("No capabilities specified.");
+        }
+        if (null == ctx) {
+            throw new InvalidDataException("Missing context.");
         }
 
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;

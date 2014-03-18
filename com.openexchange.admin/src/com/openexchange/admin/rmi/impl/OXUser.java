@@ -141,6 +141,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public Set<String> getCapabilities(final Context ctx, final User user, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        if (null == ctx) {
+            throw new InvalidDataException("Missing context.");
+        }
+        if (null == user) {
+            throw new InvalidDataException("Missing user.");
+        }
+
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
         try {
@@ -181,6 +188,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     public void changeCapabilities(final Context ctx, final User user, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty()) && (null == capsToDrop || capsToDrop.isEmpty())) {
             throw new InvalidDataException("No capabilities specified.");
+        }
+        if (null == ctx) {
+            throw new InvalidDataException("Missing context.");
+        }
+        if (null == user) {
+            throw new InvalidDataException("Missing user.");
         }
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
