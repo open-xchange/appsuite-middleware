@@ -117,6 +117,18 @@ public interface OAuthServiceMetaData {
      * @throws OXException
      */
     String getAPISecret(Session session) throws OXException;
+    
+    /**
+     * Get the consumer key (upsell)
+     * @return the consumer key
+     */
+    String getConsumerKey();
+    
+    /**
+     * Get the consumer secret (upsell)
+     * @return the consumer secret
+     */
+    String getConsumerSecret();
 
     /**
      * Indicates if this meta data needs a request token to obtain authorization URL.

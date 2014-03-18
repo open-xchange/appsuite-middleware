@@ -73,7 +73,7 @@ import com.openexchange.session.Session;
 public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
 
     private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.xing.apiKey",
-        "com.openexchange.oauth.xing.apiSecret"};
+        "com.openexchange.oauth.xing.apiSecret", "com.openexchange.oauth.xing.consumerKey", "com.openexchange.oauth.xing.consumerSecret"};
 
     // -------------------------------------------------------------------------------------------------- //
 
@@ -90,6 +90,10 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
         this.services = services;
         id = "com.openexchange.oauth.xing";
         displayName = "XING OAuth";
+        setAPIKeyName("com.openexchange.oauth.xing.apiKey");
+        setAPISecretName("com.openexchange.oauth.xing.apiSecret");
+        setConsumerKeyName("com.openexchange.oauth.xing.consumerKey");
+        setConsumerSecretName("com.openexchange.oauth.xing.consumerSecret");
 
         final ConfigurationService configService = services.getService(ConfigurationService.class);
         if (null == configService) {
@@ -106,6 +110,18 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiSecret");
         }
         this.apiSecret = apiSecret;
+        
+        final String consumerKey = configService.getProperty("com.openexchange.oauth.xing.consumerKey");
+        if (Strings.isEmpty(consumerKey)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.consumerKey");
+        }
+        this.consumerKey = consumerKey;
+        
+        final String consumerSecret = configService.getProperty("com.openexchange.oauth.xing.consumerSecret");
+        if (Strings.isEmpty(consumerSecret)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.consumerSecret");
+        }
+        this.consumerSecret = consumerSecret;
     }
 
     @Override
@@ -131,6 +147,18 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiSecret");
         }
         this.apiSecret = apiSecret;
+        
+        final String consumerKey = configService.getProperty("com.openexchange.oauth.xing.consumerKey");
+        if (Strings.isEmpty(consumerKey)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.consumerKey");
+        }
+        this.consumerKey = consumerKey;
+        
+        final String consumerSecret = configService.getProperty("com.openexchange.oauth.xing.consumerSecret");
+        if (Strings.isEmpty(consumerSecret)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.consumerSecret");
+        }
+        this.consumerKey = consumerSecret;
     }
 
     @Override

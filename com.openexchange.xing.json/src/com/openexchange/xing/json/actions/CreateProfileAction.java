@@ -68,6 +68,7 @@ import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
 import com.openexchange.xing.session.AppKeyPair;
+import com.openexchange.xing.session.ConsumerPair;
 import com.openexchange.xing.session.WebAuthSession;
 
 
@@ -125,7 +126,7 @@ public class CreateProfileAction extends AbstractXingAction {
 
         OAuthService oauthService = getService(OAuthService.class);
         OAuthServiceMetaData m = oauthService.getMetaDataRegistry().getService("com.openexchange.oauth.xing", req.getSession().getUserId(), req.getSession().getContextId());
-        WebAuthSession session = new WebAuthSession(new AppKeyPair(m.getAPIKey(), m.getAPISecret()));
+        WebAuthSession session = new WebAuthSession(new AppKeyPair(m.getAPIKey(), m.getAPISecret()), new ConsumerPair(m.getConsumerKey(), m.getConsumerSecret()));
 
         XingAPI<WebAuthSession> xingAPI = new XingAPI<WebAuthSession>(session);
         Map<String, Object> lead = xingAPI.signUpLead(leadDescription);
