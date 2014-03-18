@@ -78,9 +78,11 @@ public final class FindTestSuite {
     public static Test suite() {
         final TestSuite tests = new TestSuite("com.openexchange.ajax.find.FindTestSuite");
         tests.addTestSuite(com.openexchange.ajax.find.calendar.QueryTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.calendar.AutocompleteTest.class);
+        //disable AutoCompleteTest for now
+        //tests.addTestSuite(com.openexchange.ajax.find.calendar.AutocompleteTest.class);
         tests.addTestSuite(com.openexchange.ajax.find.contacts.QueryTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
+        //disable AutoCompleteTest for now
+        //tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
         tests.addTestSuite(BasicMailTest.class);
         tests.addTestSuite(BasicDriveTest.class);
         tests.addTestSuite(FindTasksTestsFilterCombinations.class);
