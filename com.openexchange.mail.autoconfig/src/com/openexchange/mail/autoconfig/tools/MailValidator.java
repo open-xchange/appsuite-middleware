@@ -54,14 +54,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Map;
 import java.util.Properties;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
+import javax.mail.Service;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.Transport;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.sun.mail.smtp.SMTPTransport;
 
 /**
  * {@link MailValidator}
@@ -70,9 +73,21 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public class MailValidator {
 
-    private static final int DEFAULT_TIMEOUT = 1000;
+    private static final int DEFAULT_CONNECT_TIMEOUT = 1000;
+    private static final int DEFAULT_TIMEOUT = 10000;
 
+    /**
+     * Validates for successful authentication against specified IMAP server.
+     *
+     * @param host The IMAP host
+     * @param port The IMAP port
+     * @param secure Whether to establish a secure connection
+     * @param user The login
+     * @param pwd The password
+     * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
+     */
     public static boolean validateImap(String host, int port, boolean secure, String user, String pwd) {
+        Store store = null;
         try {
             String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
             Properties props = new Properties();
@@ -87,24 +102,37 @@ public class MailValidator {
                     props.put("mail.imap.ssl.protocols", sslProtocols);
                 }
             }
-            int timeout = DEFAULT_TIMEOUT;
             props.put("mail.imap.socketFactory.fallback", "false");
-            props.put("mail.imap.connectiontimeout", timeout);
-            props.put("mail.imap.timeout", timeout);
+            props.put("mail.imap.connectiontimeout", DEFAULT_CONNECT_TIMEOUT);
+            props.put("mail.imap.timeout", DEFAULT_TIMEOUT);
             props.put("mail.imap.socketFactory.port", port);
             Session session = Session.getInstance(props, null);
-            Store store = session.getStore("imap");
+            store = session.getStore("imap");
             store.connect(host, port, user, pwd);
-            store.close();
+            closeSafe(store);
+            store = null;
         } catch (AuthenticationFailedException e) {
             return false;
         } catch (MessagingException e) {
             return false;
+        } finally {
+            closeSafe(store);
         }
         return true;
     }
 
+    /**
+     * Validates for successful authentication against specified POP3 server.
+     *
+     * @param host The POP3 host
+     * @param port The POP3 port
+     * @param secure Whether to establish a secure connection
+     * @param user The login
+     * @param pwd The password
+     * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
+     */
     public static boolean validatePop3(String host, int port, boolean secure, String user, String pwd) {
+        Store store = null;
         try {
             Properties props = new Properties();
             String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
@@ -119,24 +147,52 @@ public class MailValidator {
                     props.put("mail.pop3.ssl.protocols", sslProtocols);
                 }
             }
-            int timeout = DEFAULT_TIMEOUT;
             props.put("mail.pop3.socketFactory.fallback", "false");
             props.put("mail.pop3.socketFactory.port", port);
-            props.put("mail.pop3.connectiontimeout", timeout);
-            props.put("mail.pop3.timeout", timeout);
+            props.put("mail.pop3.connectiontimeout", DEFAULT_CONNECT_TIMEOUT);
+            props.put("mail.pop3.timeout", DEFAULT_TIMEOUT);
             Session session = Session.getInstance(props, null);
-            Store store = session.getStore("pop3");
+            store = session.getStore("pop3");
             store.connect(host, port, user, pwd);
-            store.close();
+            closeSafe(store);
+            store = null;
         } catch (AuthenticationFailedException e) {
             return false;
         } catch (MessagingException e) {
             return false;
+        } finally {
+            closeSafe(store);
         }
         return true;
     }
 
+    /**
+     * Validates for successful authentication against specified SMTP server.
+     *
+     * @param host The SMTP host
+     * @param port The SMTP port
+     * @param secure Whether to establish a secure connection
+     * @param user The login
+     * @param pwd The password
+     * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
+     */
     public static boolean validateSmtp(String host, int port, boolean secure, String user, String pwd) {
+        return validateSmtp(host, port, secure, user, pwd, null);
+    }
+
+    /**
+     * Validates for successful authentication against specified SMTP server.
+     *
+     * @param host The SMTP host
+     * @param port The SMTP port
+     * @param secure Whether to establish a secure connection
+     * @param user The login
+     * @param pwd The password
+     * @param optProperties The optional container for arbitrary properties
+     * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
+     */
+    public static boolean validateSmtp(String host, int port, boolean secure, String user, String pwd, Map<String, Object> optProperties) {
+        Transport transport = null;
         try {
             String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
             Properties props = new Properties();
@@ -153,19 +209,30 @@ public class MailValidator {
             }
             props.put("mail.smtp.socketFactory.port", port);
             //props.put("mail.smtp.auth", "true");
-            int timeout = DEFAULT_TIMEOUT;
-            props.put("mail.smtp.connectiontimeout", timeout);
-            props.put("mail.smtp.timeout", timeout);
+            props.put("mail.smtp.connectiontimeout", DEFAULT_CONNECT_TIMEOUT);
+            props.put("mail.smtp.timeout", DEFAULT_TIMEOUT);
             props.put("mail.smtp.socketFactory.fallback", "false");
+            props.put("mail.smtp.auth", "true");
             Session session = Session.getInstance(props, null);
-            Transport transport = session.getTransport("smtp");
+            transport = session.getTransport("smtp");
             transport.connect(host, port, user, pwd);
-            transport.close();
+
+            if (null != optProperties) {
+                final SMTPTransport smtpTransport = (SMTPTransport) transport;
+                if (!smtpTransport.supportsExtension("AUTH") && !smtpTransport.supportsExtension("AUTH=LOGIN")) {
+                    // No authentication mechanism supported
+                    optProperties.put("smtp.auth-supported", Boolean.FALSE);
+                }
+            }
+
+            closeSafe(transport);
+            transport = null;
         } catch (AuthenticationFailedException e) {
             return false;
         } catch (MessagingException e) {
-            e.printStackTrace();
             return false;
+        } finally {
+            closeSafe(transport);
         }
         return true;
     }
@@ -182,9 +249,8 @@ public class MailValidator {
             /*
              * Set connect timeout
              */
-            int timeout = DEFAULT_TIMEOUT;
-            s.connect(new InetSocketAddress(host, port), timeout);
-            s.setSoTimeout(timeout);
+            s.connect(new InetSocketAddress(host, port), DEFAULT_CONNECT_TIMEOUT);
+            s.setSoTimeout(DEFAULT_TIMEOUT);
             InputStream in = s.getInputStream();
             OutputStream out = s.getOutputStream();
             StringBuilder sb = new StringBuilder(512);
@@ -238,9 +304,8 @@ public class MailValidator {
             /*
              * Set connect timeout
              */
-            int timeout = DEFAULT_TIMEOUT;
-            s.connect(new InetSocketAddress(host, port), timeout);
-            s.setSoTimeout(timeout);
+            s.connect(new InetSocketAddress(host, port), DEFAULT_CONNECT_TIMEOUT);
+            s.setSoTimeout(DEFAULT_TIMEOUT);
             InputStream in = s.getInputStream();
             OutputStream out = s.getOutputStream();
             StringBuilder sb = new StringBuilder(512);
@@ -294,9 +359,8 @@ public class MailValidator {
             /*
              * Set connect timeout
              */
-            int timeout = DEFAULT_TIMEOUT;
-            s.connect(new InetSocketAddress(host, port), timeout);
-            s.setSoTimeout(timeout);
+            s.connect(new InetSocketAddress(host, port), DEFAULT_CONNECT_TIMEOUT);
+            s.setSoTimeout(DEFAULT_TIMEOUT);
             InputStream in = s.getInputStream();
             OutputStream out = s.getOutputStream();
             StringBuilder sb = new StringBuilder(512);
@@ -347,4 +411,15 @@ public class MailValidator {
             }
         }
     }
+
+    private static void closeSafe(final Service service) {
+        if (null != service) {
+            try {
+                service.close();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
+
 }

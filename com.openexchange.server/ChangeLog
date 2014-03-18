@@ -1,6 +1,7 @@
 * 2014-03-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 31157: Keep trailing whitespace character in signature-delimiting line
+ - Fix for bug 31629: Handle SMTP server that do not support authentication 
 
 * 2014-03-18 - marcus.klein@open-xchange.com
 
