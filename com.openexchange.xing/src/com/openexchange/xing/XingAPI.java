@@ -72,7 +72,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.activation.FileTypeMap;
-import org.apache.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1386,14 +1385,11 @@ public class XingAPI<S extends Session> {
             jLeadDesc.put("reg_consumer_key", session.getConsumerPair().key);
             jLeadDesc.put("reg_consumer_secret", session.getConsumerPair().secret);
 
-            final HttpResponse resp = RESTUtility.basicRequest(
+            final JSONObject jResponse = RESTUtility.basicRequest(
                 Method.POST,
                 url,
                 jLeadDesc,
                 session,
-                Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT)).response;
-            final JSONObject jResponse = RESTUtility.parseAsJSON(
-                resp,
                 Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT)).toObject();
             return jResponse.asMap();
         } catch (final JSONException e) {
