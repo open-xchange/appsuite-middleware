@@ -952,7 +952,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         try {
             con = cache.getConnectionForConfigDB();
 
-            final int srv_id = IDGenerator.getId(con);
+            final int srv_id = nextId(con);
 
             con.setAutoCommit(false);
             rollback = true;
