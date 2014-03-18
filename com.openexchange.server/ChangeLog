@@ -1,3 +1,8 @@
+* 2014-03-18 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31599: Corrected RPM post installation script to not modify logback.xml anymore if log configuration migration has performed
+   once.
+
 * 2014-03-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 31587: Pass obtained BundleContext instance to initializing method, not the stored one to ensure working on most recent bundle/framework state

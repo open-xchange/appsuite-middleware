@@ -846,16 +846,28 @@ ox_add_property com.openexchange.log.suppressedCategories USER_INPUT /opt/open-x
 ox_add_property com.openexchange.mail.account.blacklist "" /opt/open-xchange/etc/mail.properties
 
 # SoftwareChange_Request-1772
-MODIFIED=$(rpm --verify open-xchange-core | grep file-logging.properties | grep 5 | wc -l)
-if [ -e /opt/open-xchange/etc/file-logging.properties -a $MODIFIED -eq 1 ]; then
-    # Configuration has been modified after installation. Try to migrate.
-    TMPFILE=$(mktemp)
-    /opt/open-xchange/sbin/extractJULModifications -i /opt/open-xchange/etc/file-logging.properties | /opt/open-xchange/sbin/convertJUL2Logback -o $TMPFILE
-    /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r $TMPFILE -d @name
+if [ ( -e /opt/open-xchange/etc/file-logging.properties ) -a ( ! ( -e /opt/open-xchange/etc/log4j.xml ) ) ]; then
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/appender[@name=\'ASYNC\']/appender-ref -r -
+<configuration>
+    <appender name="ASYNC">
+        <appender-ref ref="FILE_COMPAT"/>
+    </appender>
+</configuration>
+EOF
     cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
-    /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/root -r $TMPFILE
-    cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
-    rm -f /opt/open-xchange/etc/logback.xml.new $TMPFILE
+    rm -f /opt/open-xchange/etc/logback.xml.new
+    MODIFIED=$(rpm --verify open-xchange-core | grep file-logging.properties | grep 5 | wc -l)
+    if [ $MODIFIED -eq 1 ]; then
+        # Configuration has been modified after installation. Try to migrate.
+        TMPFILE=$(mktemp)
+        /opt/open-xchange/sbin/extractJULModifications -i /opt/open-xchange/etc/file-logging.properties | /opt/open-xchange/sbin/convertJUL2Logback -o $TMPFILE
+        /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r $TMPFILE -d @name
+        cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+        /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/root -r $TMPFILE
+        cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+        rm -f /opt/open-xchange/etc/logback.xml.new $TMPFILE
+    fi
+
 fi
 rm -f /opt/open-xchange/etc/file-logging.properties
 if [ -e /opt/open-xchange/etc/log4j.xml ]; then
