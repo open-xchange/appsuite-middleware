@@ -122,7 +122,7 @@ public class XingInvestigationResultConverter implements ResultConverter {
     }
 
     private JSONArray buildUsersArray(List<User> users) {
-        if (users == null || users.isEmpty()) {
+        if (users == null) {
             return null;
         }
 
