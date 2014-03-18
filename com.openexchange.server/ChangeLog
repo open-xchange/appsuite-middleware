@@ -1,3 +1,8 @@
+* 2014-03-18 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31599: Corrected RPM post installation script to not modify logback.xml anymore if log configuration migration has performed
+   once.
+
 * 2014-03-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 30848: Properly recognize & transmit an S/MIME encrypted mail
