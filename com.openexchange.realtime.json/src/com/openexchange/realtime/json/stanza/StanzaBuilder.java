@@ -55,7 +55,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.json.JSONExceptionMessage;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
@@ -218,7 +217,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
             elementName = payload.getString("element");
         } catch (JSONException e) {
             RealtimeException realtimeException = RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(
-                JSONExceptionMessage.MISSING_KEY_MSG,
+                "Obligatory key \"%1$s\" is missing from the Stanza",
                 "element"));
             throw realtimeException;
         }
@@ -226,7 +225,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
             data = payload.get("data");
         } catch (JSONException e) {
             RealtimeException realtimeException = RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(
-                JSONExceptionMessage.MISSING_KEY_MSG,
+                "Obligatory key \"%1$s\" is missing from the Stanza",
                 "data"));
             throw realtimeException;
         }
@@ -279,7 +278,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
                 node.addChild(payloadToPayloadTreeNode(jsonObject));
             } catch (JSONException e) {
                 RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(
-                    JSONExceptionMessage.ERROR_WHILE_BUILDING_MSG,
+                    "Error while building Stanza: \"%1$s\"",
                     "JSONObject expected"));
             }
         }
