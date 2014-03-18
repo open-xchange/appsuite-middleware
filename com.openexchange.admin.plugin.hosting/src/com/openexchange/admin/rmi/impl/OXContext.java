@@ -192,6 +192,34 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
+    public Set<String> getCapabilities(final Context ctx, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+
+        new BasicAuthenticator(context).doAuthentication(auth);
+
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (final NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
+
+        try {
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            return oxcox.getCapabilities(ctx);
+        } catch (final StorageException e) {
+            log.error("", e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error("", e);
+            throw e;
+        }
+    }
+
+    @Override
     public void changeCapabilities(final Context ctx, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty()) && (null == capsToDrop || capsToDrop.isEmpty())) {
             throw new InvalidDataException("No capabilities specified.");

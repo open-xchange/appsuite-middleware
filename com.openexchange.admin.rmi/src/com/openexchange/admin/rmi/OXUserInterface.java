@@ -228,7 +228,24 @@ public interface OXUserInterface extends Remote {
     public User getContextAdmin(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException;
 
     /**
-     * Changes specified context's capabilities.
+     * Gets specified user's capabilities.
+     *
+     * @param ctx The context
+     * @param user The user
+     * @param auth The credentials
+     * @return The capabilities
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
+    public Set<String> getCapabilities(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Changes specified user's capabilities.
      *
      * @param ctx The context
      * @param user The user

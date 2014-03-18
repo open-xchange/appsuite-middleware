@@ -227,6 +227,46 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public Set<String> getCapabilities(Context ctx, User user) throws StorageException {
+        final int contextId = ctx.getId().intValue();
+        // SQL resources
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForContext(contextId);
+
+            stmt = con.prepareStatement("SELECT cap FROM capability_user WHERE cid=? AND user=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, user.getId().intValue());
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.<String> emptySet();
+            }
+            final Set<String> caps = new HashSet<String>(16);
+            do {
+                caps.add(rs.getString(1));
+            } while (rs.next());
+            return caps;
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing connection to pool for context {}!", contextId, e);
+                }
+            }
+        }
+    }
+
+    @Override
     public void changeCapabilities(final Context ctx, final User user, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials auth) throws StorageException {
         final int contextId = ctx.getId().intValue();
         // SQL resources
@@ -374,10 +414,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (autocommit) {
                 autocommit(con);
             }
-            try {
-                cache.pushConnectionForContext(contextId, con);
-            } catch (final PoolException e) {
-                log.error("Error pushing connection to pool for context {}!", contextId, e);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing connection to pool for context {}!", contextId, e);
+                }
             }
         }
     }

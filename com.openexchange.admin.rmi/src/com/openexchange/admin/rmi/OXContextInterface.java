@@ -385,6 +385,20 @@ public interface OXContextInterface extends Remote {
     public void change(final Context ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
 
     /**
+     * Gets specified context's capabilities.
+     *
+     * @param ctx The context
+     * @param auth The credentials
+     * @return The capabilities
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public Set<String> getCapabilities(Context ctx, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+
+    /**
      * Changes specified context's capabilities.
      *
      * @param ctx The context

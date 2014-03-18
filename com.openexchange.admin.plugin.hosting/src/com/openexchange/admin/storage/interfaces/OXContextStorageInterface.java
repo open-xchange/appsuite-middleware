@@ -192,6 +192,15 @@ public abstract class OXContextStorageInterface {
     public abstract void changeQuota(Context ctx, List<String> modules, long quota, Credentials auth) throws StorageException;
 
     /**
+     * Gets the current capabilities for denoted context.
+     *
+     * @param ctx The context
+     * @return The current capabilities
+     * @throws StorageException If retrieving capabilities fails
+     */
+    public abstract Set<String> getCapabilities(Context ctx) throws StorageException;
+
+    /**
      * Changes specified context's capabilities.
      *
      * @param ctx The context
