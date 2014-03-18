@@ -444,6 +444,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected static final String OPT_CAPABILITIES_TO_ADD = "capabilities-to-add";
     protected static final String OPT_CAPABILITIES_TO_REMOVE = "capabilities-to-remove";
+    protected static final String OPT_CAPABILITIES_TO_DROP = "capabilities-to-drop";
 
     protected static final String OPT_QUOTA_MODULE = "quota-module";
     protected static final String OPT_QUOTA_VALUE = "quota-value";
@@ -631,6 +632,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected CLIOption capsToAdd = null;
     protected CLIOption capsToRemove = null;
+    protected CLIOption capsToDrop = null;
 
     protected CLIOption quotaModule = null;
     protected CLIOption quotaValue = null;
@@ -1854,6 +1856,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.capsToRemove = setLongOpt(parser,OPT_CAPABILITIES_TO_REMOVE,"The capabilities to remove as a comma-separated string; e.g. \"cap2, cap2\"", true, false,false);
     }
 
+    protected void setCapsToDrop(final AdminParser parser) {
+        this.capsToDrop = setLongOpt(parser,OPT_CAPABILITIES_TO_DROP,"The capabilities to drop (clean from storage) as a comma-separated string; e.g. \"cap2, cap2\"", true, false,false);
+    }
+
     protected void setQuotaModule(final AdminParser parser) {
         this.quotaModule = setLongOpt(parser,OPT_QUOTA_MODULE,"The (comma-separated) list of identifiers for those modules to which to apply the quota value; currently supported values: [task, calendar, contact, infostore]", true, false,false);
     }
@@ -1989,6 +1995,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             setCapsToRemove(parser);
         }
         return parseAndSetCapabilities(capsToRemove, parser);
+    }
+
+    public Set<String> parseAndSetCapabilitiesToDrop(final AdminParser parser) {
+        if (null == capsToDrop) {
+            setCapsToDrop(parser);
+        }
+        return parseAndSetCapabilities(capsToDrop, parser);
     }
 
     private Set<String> parseAndSetCapabilities(final CLIOption cliOption, final AdminParser parser) {

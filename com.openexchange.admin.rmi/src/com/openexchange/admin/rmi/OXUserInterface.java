@@ -234,6 +234,7 @@ public interface OXUserInterface extends Remote {
      * @param user The user
      * @param capsToAdd The capabilities to add
      * @param capsToRemove The capabilities to remove
+     * @param capsToDrop The capabilities to drop; e.g. clean from storage
      * @param auth The credentials
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occurred.
@@ -243,7 +244,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Manipulate user data within the given context.

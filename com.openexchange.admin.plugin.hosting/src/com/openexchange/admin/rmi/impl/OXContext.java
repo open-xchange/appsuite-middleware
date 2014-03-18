@@ -192,8 +192,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
-    public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
-        if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty())) {
+    public void changeCapabilities(final Context ctx, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty()) && (null == capsToDrop || capsToDrop.isEmpty())) {
             throw new InvalidDataException("No capabilities specified.");
         }
 
@@ -215,7 +215,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.changeCapabilities(ctx, capsToAdd, capsToRemove, auth);
+            oxcox.changeCapabilities(ctx, capsToAdd, capsToRemove, capsToDrop, auth);
         } catch (final StorageException e) {
             log.error("", e);
             throw e;

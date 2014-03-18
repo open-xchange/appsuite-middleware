@@ -226,7 +226,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Credentials auth) throws StorageException {
+    public void changeCapabilities(final Context ctx, final User user, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials auth) throws StorageException {
         final int contextId = ctx.getId().intValue();
         // SQL resources
         Connection con = null;
@@ -238,6 +238,30 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             con.setAutoCommit(false); // BEGIN
             autocommit = true;
             rollback = true;
+            // First drop
+            if (null != capsToDrop && !capsToDrop.isEmpty()) {
+                for (final String cap : capsToDrop) {
+                    if (null == stmt) {
+                        stmt = con.prepareStatement("DELETE FROM capability_user WHERE cid=? AND user=? AND cap=?");
+                        stmt.setInt(1, contextId);
+                        stmt.setInt(2, user.getId().intValue());
+                    }
+                    stmt.setString(3, cap);
+                    stmt.addBatch();
+                    if (cap.startsWith("-")) {
+                        stmt.setString(2, cap.substring(1));
+                        stmt.addBatch();
+                    } else {
+                        stmt.setString(2, "-"+cap);
+                        stmt.addBatch();
+                    }
+                }
+                if (null != stmt) {
+                    stmt.executeBatch();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+            }
             // Determine what is already present
             final Set<String> existing;
             {
@@ -351,7 +375,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             try {
                 cache.pushConnectionForContext(contextId, con);
-            } catch (PoolException e) {
+            } catch (final PoolException e) {
                 log.error("Error pushing connection to pool for context {}!", contextId, e);
             }
         }

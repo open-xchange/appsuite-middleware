@@ -2129,7 +2129,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
-    public void changeCapabilities(final Context ctx, final Set<String> capsToAdd, final Set<String> capsToRemove, final Credentials auth) throws StorageException {
+    public void changeCapabilities(final Context ctx, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials auth) throws StorageException {
         final int contextId = ctx.getId().intValue();
         // SQL resources
         Connection con = null;
@@ -2141,6 +2141,29 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             con.setAutoCommit(false); // BEGIN
             autocommit = true;
             rollback = true;
+            // First drop
+            if (null != capsToDrop && !capsToDrop.isEmpty()) {
+                for (final String cap : capsToDrop) {
+                    if (null == stmt) {
+                        stmt = con.prepareStatement("DELETE FROM capability_context WHERE cid=? AND cap=?");
+                        stmt.setInt(1, contextId);
+                    }
+                    stmt.setString(2, cap);
+                    stmt.addBatch();
+                    if (cap.startsWith("-")) {
+                        stmt.setString(2, cap.substring(1));
+                        stmt.addBatch();
+                    } else {
+                        stmt.setString(2, "-"+cap);
+                        stmt.addBatch();
+                    }
+                }
+                if (null != stmt) {
+                    stmt.executeBatch();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+            }
             // Determine what is already present
             final Set<String> existing;
             {
@@ -2249,7 +2272,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             try {
                 cache.pushConnectionForContext(contextId, con);
-            } catch (PoolException e) {
+            } catch (final PoolException e) {
                 LOG.error("Error pushing connection to pool for context {}!", contextId, e);
             }
         }

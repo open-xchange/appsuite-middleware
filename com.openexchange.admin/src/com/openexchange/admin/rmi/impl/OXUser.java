@@ -140,8 +140,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty())) {
+    public void changeCapabilities(final Context ctx, final User user, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty()) && (null == capsToDrop || capsToDrop.isEmpty())) {
             throw new InvalidDataException("No capabilities specified.");
         }
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
@@ -160,7 +160,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
-            oxu.changeCapabilities(ctx, user, capsToAdd, capsToRemove, auth);
+            oxu.changeCapabilities(ctx, user, capsToAdd, capsToRemove, capsToDrop, auth);
         } catch (final StorageException e) {
             log.error("", e);
             throw e;

@@ -109,7 +109,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     public void changeCapabilities(final ChangeCapabilities parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            contextInterface.changeCapabilities(soap2Context(parameters.ctx), parseToSet(parameters.capsToAdd), parseToSet(parameters.capsToRemove), soap2Credentials(parameters.auth));
+            contextInterface.changeCapabilities(soap2Context(parameters.ctx), parseToSet(parameters.capsToAdd), parseToSet(parameters.capsToRemove), parseToSet(parameters.capsToDrop), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
         } catch (final InvalidCredentialsException e) {

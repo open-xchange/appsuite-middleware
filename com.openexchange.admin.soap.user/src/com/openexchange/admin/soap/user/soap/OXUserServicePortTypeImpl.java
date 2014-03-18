@@ -90,7 +90,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     public void changeCapabilities(final ChangeCapabilities parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
-            userInterface.changeCapabilities(soap2Context(parameters.ctx), soap2User(parameters.user), parseToSet(parameters.capsToAdd), parseToSet(parameters.capsToRemove), soap2Credentials(parameters.auth));
+            userInterface.changeCapabilities(soap2Context(parameters.ctx), soap2User(parameters.user), parseToSet(parameters.capsToAdd), parseToSet(parameters.capsToRemove), parseToSet(parameters.capsToDrop), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
         } catch (final InvalidCredentialsException e) {

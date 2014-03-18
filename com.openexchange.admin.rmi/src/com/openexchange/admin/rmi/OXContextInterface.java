@@ -390,6 +390,7 @@ public interface OXContextInterface extends Remote {
      * @param ctx The context
      * @param capsToAdd The capabilities to add
      * @param capsToRemove The capabilities to remove
+     * @param capsToDrop The capabilities to drop; e.g. clean from storage
      * @param auth The credentials
      * @throws RemoteException
      * @throws InvalidCredentialsException
@@ -397,7 +398,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException
      * @throws InvalidDataException
      */
-    public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
 
     /**
      * Changes specified context's capabilities.

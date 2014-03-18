@@ -110,8 +110,9 @@ public class Change extends ChangeCore {
 
         final Set<String> capabilitiesToAdd = parseAndSetCapabilitiesToAdd(parser);
         final Set<String> capabilitiesToRemove = parseAndSetCapabilitiesToRemove(parser);
-        if ((null != capabilitiesToAdd && !capabilitiesToAdd.isEmpty()) || (null != capabilitiesToRemove && !capabilitiesToRemove.isEmpty())) {
-            oxctx.changeCapabilities(ctx, capabilitiesToAdd, capabilitiesToRemove, auth);
+        final Set<String> capabilitiesToDrop = parseAndSetCapabilitiesToDrop(parser);
+        if ((null != capabilitiesToAdd && !capabilitiesToAdd.isEmpty()) || (null != capabilitiesToRemove && !capabilitiesToRemove.isEmpty()) || (null != capabilitiesToDrop && !capabilitiesToDrop.isEmpty())) {
+            oxctx.changeCapabilities(ctx, capabilitiesToAdd, capabilitiesToRemove, capabilitiesToDrop, auth);
         }
 
         final String module = parseAndSetQuotaModule(parser);
@@ -138,6 +139,7 @@ public class Change extends ChangeCore {
         setModuleAccessOptions(parser);
         setCapsToAdd(parser);
         setCapsToRemove(parser);
+        setCapsToDrop(parser);
         setQuotaModule(parser);
         setQuotaValue(parser);
     }
