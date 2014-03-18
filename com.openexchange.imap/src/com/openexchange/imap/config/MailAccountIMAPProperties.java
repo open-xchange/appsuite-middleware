@@ -270,6 +270,11 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     @Override
+    public boolean forceImapSearch() {
+        return IMAPProperties.getInstance().forceImapSearch();
+    }
+
+    @Override
     public boolean isImapSort() {
         final String tmp = properties.get("com.openexchange.imap.imapSort");
         if (null == tmp) {

@@ -98,6 +98,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean imapSearch;
 
+    private boolean forceImapSearch;
+
     private boolean fastFetch;
 
     private boolean notifyRecent;
@@ -194,8 +196,9 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
         {
             final String imapSearchStr = configuration.getProperty("com.openexchange.imap.imapSearch", "imap").trim();
-            imapSearch = "imap".equalsIgnoreCase(imapSearchStr);
-            logBuilder.append("\tIMAP-Search: ").append(imapSearch).append('\n');
+            forceImapSearch = "force-imap".equalsIgnoreCase(imapSearchStr);
+            imapSearch = forceImapSearch || "imap".equalsIgnoreCase(imapSearchStr);
+            logBuilder.append("\tIMAP-Search: ").append(imapSearch).append(forceImapSearch ? " (forced)\n" : '\n');
         }
 
         {
@@ -395,6 +398,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     protected void resetFields() {
         imapSort = false;
         imapSearch = false;
+        forceImapSearch = false;
         fastFetch = true;
         propagateClientIPAddress = false;
         enableTls = true;
@@ -468,6 +472,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isImapSearch() {
         return imapSearch;
+    }
+
+    @Override
+    public boolean forceImapSearch() {
+        return forceImapSearch;
     }
 
     @Override
