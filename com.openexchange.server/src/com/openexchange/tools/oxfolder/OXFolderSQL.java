@@ -111,6 +111,7 @@ public final class OXFolderSQL {
     }
 
     private static final String SQL_LOCK = "SELECT fuid FROM oxfolder_tree WHERE cid=? AND fuid=? FOR UPDATE";
+    private static final String SQL_LOCK_BACKUP = "SELECT fuid FROM del_oxfolder_tree WHERE cid=? AND fuid=? FOR UPDATE";
 
     /**
      * Performs a lock on the folder entry in associated table.
@@ -121,6 +122,19 @@ public final class OXFolderSQL {
      * @throws SQLException If lock attempt fails
      */
     public static void lock(final int folderId, final int contextId, final Connection con) throws SQLException {
+        lock(folderId, contextId, false, con);
+    }
+
+    /**
+     * Performs a lock on the folder entry in associated table.
+     *
+     * @param folderId The folder identifier
+     * @param contextId The context identifier
+     * @param backupTable <code>true</code> to also put a lock on backup tables; otherwise <code>false</code>
+     * @param con The connection to use
+     * @throws SQLException If lock attempt fails
+     */
+    public static void lock(final int folderId, final int contextId, final boolean backupTable, final Connection con) throws SQLException {
         if (null == con) {
             return;
         }
@@ -133,6 +147,14 @@ public final class OXFolderSQL {
             stmt.setInt(1, contextId);
             stmt.setInt(2, folderId);
             stmt.executeQuery();
+
+            if (backupTable) {
+                closeSQLStuff(stmt);
+                stmt = con.prepareStatement(SQL_LOCK_BACKUP);
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, folderId);
+                stmt.executeQuery();
+            }
         } finally {
             closeSQLStuff(stmt);
         }
@@ -1484,7 +1506,7 @@ public final class OXFolderSQL {
         PreparedStatement stmt = null;
         try {
             // Acquire lock
-            lock(folderId, ctx.getContextId(), writeCon);
+            lock(folderId, ctx.getContextId(), backup, writeCon);
 
             // Do delete
             if (backup) {
@@ -1597,7 +1619,7 @@ public final class OXFolderSQL {
         PreparedStatement stmt = null;
         try {
             // Acquire lock
-            lock(folderId, ctx.getContextId(), writeCon);
+            lock(folderId, ctx.getContextId(), true, writeCon);
 
             // Clean backup tables
             stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
@@ -1677,9 +1699,10 @@ public final class OXFolderSQL {
         }
         PreparedStatement stmt = null;
         try {
-            /*
-             * Copy backup entries into oxfolder_tree and oxfolder_permissions
-             */
+            // Acquire lock
+            lock(folderId, ctx.getContextId(), true, writeCon);
+
+            // Copy backup entries into oxfolder_tree and oxfolder_permissions
             stmt = writeCon.prepareStatement(SQL_RESTORE_OT);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);

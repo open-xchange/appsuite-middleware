@@ -53,6 +53,7 @@ import static com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageComm
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -398,12 +399,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement stmtinsertattribute = null;
         PreparedStatement stmtdelattribute = null;
 
+        boolean rollback = false;
+
 
         final int userId = usrdata.getId().intValue();
         try {
 
             // first fill the user_data hash to update user table
             con.setAutoCommit(false);
+            rollback = true;
+
+            lock(contextId, con);
 
             // ########## Update login2user table if USERNAME_CHANGEABLE=true
             // ##################
@@ -969,6 +975,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // fire up
             con.commit();
+            rollback = false;
 
             /*-
              *
@@ -1020,81 +1027,60 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.info("User {} changed!", userId);
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            rollback(con);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            rollback(con);
             throw new StorageException(e);
         } catch (final ServiceException e) {
             log.error("Required service is missing.", e);
-            rollback(con);
             throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
             log.error("Error", e);
-            rollback(con);
             throw new StorageException(e);
         } catch (final IllegalAccessException e) {
             log.error("Error", e);
-            rollback(con);
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
             log.error("Error", e);
-            rollback(con);
             throw new StorageException(e);
         } catch (final SecurityException e) {
             log.error("Error", e);
-            rollback(con);
             throw new StorageException(e);
         } catch (final NoSuchMethodException e) {
             log.error("Error", e);
-            rollback(con);
             throw new StorageException(e);
         } catch (final NoSuchAlgorithmException e) {
             log.error("Error", e);
-            rollback(con);
             throw new StorageException(e);
         } catch (final UnsupportedEncodingException e) {
             log.error("Error", e);
-            rollback(con);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
             log.error("", e);
-            rollback(con);
             throw e;
         } catch (final OXException e) {
             log.error("Error", e);
-            rollback(con);
             throw new StorageException(e);
         } catch (final URISyntaxException e) {
             log.error("", e);
-            rollback(con);
             throw new StorageException(e.toString());
         } finally {
-            try {
-                if (folder_update != null) {
-                    folder_update.close();
-                }
-            } catch (final SQLException e) {
-                log.error("SQL Error closing statement", e);
+            if (rollback) {
+                DBUtils.rollback(con);
             }
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error("SQL Error closing statement", e);
-            }
+            DBUtils.closeSQLStuff(folder_update);
+            DBUtils.closeSQLStuff(stmt);
+
             closePreparedStatement(stmtupdateattribute);
             closePreparedStatement(stmtinsertattribute);
             closePreparedStatement(stmtdelattribute);
 
-            try {
-                if (con != null) {
+            if (con != null) {
+                try {
                     cache.pushConnectionForContext(contextId, con);
+                } catch (final PoolException exp) {
+                    log.error("Pool Error pushing ox write connection to pool!", exp);
                 }
-            } catch (final PoolException exp) {
-                log.error("Pool Error pushing ox write connection to pool!", exp);
             }
         }
     }
@@ -1739,60 +1725,88 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         ServerUserSetting.getInstance(con).setFolderTree(i(ctx.getId()), userId, folderTree);
     }
 
+    private int nextId(final int contextId, final int type, final Connection con) throws SQLException {
+        boolean rollback = false;
+        try {
+            // BEGIN
+            con.setAutoCommit(false);
+            rollback = true;
+            // Acquire next available identifier
+            final int id = IDGenerator.getId(contextId, type, con);
+            // COMMIT
+            con.commit();
+            rollback = false;
+            return id;
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+        }
+    }
+
+    private void lock(final int contextId, final Connection con) throws SQLException {
+        if (null == con) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            if (con.getAutoCommit()) {
+                throw new SQLException("Connection is not in transaction state.");
+            }
+            stmt = con.prepareStatement("SELECT COUNT(*) FROM user WHERE cid=? FOR UPDATE");
+            stmt.setInt(1, contextId);
+            stmt.executeQuery();
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     @Override
     public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess) throws StorageException {
         final int context_id = ctx.getId();
         Connection write_ox_con = null;
+        boolean rollback = false;
         try {
             write_ox_con = cache.getConnectionForContext(context_id);
+
+            final int internal_user_id = nextId(context_id, com.openexchange.groupware.Types.PRINCIPAL, write_ox_con);
+            final int contact_id = nextId(context_id, com.openexchange.groupware.Types.CONTACT, write_ox_con);
+            final int uid_number = (Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0) ? nextId(context_id, com.openexchange.groupware.Types.UID_NUMBER, write_ox_con) : -1;
+
             write_ox_con.setAutoCommit(false);
+            rollback = true;
 
-            final int internal_user_id = IDGenerator.getId(context_id, com.openexchange.groupware.Types.PRINCIPAL, write_ox_con);
-            write_ox_con.commit();
-            final int contact_id = IDGenerator.getId(context_id, com.openexchange.groupware.Types.CONTACT, write_ox_con);
-            write_ox_con.commit();
-
-            int uid_number = -1;
-            if (Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0) {
-                uid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.UID_NUMBER, write_ox_con);
-                write_ox_con.commit();
-            }
+            lock(context_id, write_ox_con);
 
             final int retval = create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id, uid_number);
-
             write_ox_con.commit();
+            rollback = false;
             log.info("User {} created!", retval);
             return retval;
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            dorollback(write_ox_con);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
-            // rollback operations on ox db connection
-            dorollback(write_ox_con);
             throw new StorageException(sql.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             //no rollback operations on ox db connection needed, as the pool did not return any connection
             throw new StorageException(e);
-        } catch (final StorageException e) {
-            dorollback(write_ox_con);
-            throw e;
         } catch (final RuntimeException e) {
             log.error("", e);
-            // rollback operations on ox db connection
-            if (null != write_ox_con) {
-                dorollback(write_ox_con);
-            }
             throw e;
         } finally {
-            try {
-                if (write_ox_con != null) {
+            if (rollback) {
+                dorollback(write_ox_con);
+            }
+            DBUtils.autocommit(write_ox_con);
+            if (write_ox_con != null) {
+                try {
                     cache.pushConnectionForContext(context_id, write_ox_con);
+                } catch (final PoolException ex) {
+                    log.error("Pool Error pushing ox write connection to pool!", ex);
                 }
-            } catch (final PoolException ex) {
-                log.error("Pool Error pushing ox write connection to pool!", ex);
             }
         }
     }
@@ -2444,8 +2458,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("Pool Error", e);
             throw new StorageException(e);
         }
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
+            lock(ctx.getId(), con);
+
             // Loop through the int[] and change the module access rights for each user
             for (final int userId : userIds) {
                 // first get all groups the user is in
@@ -2455,6 +2474,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 myChangeInsertModuleAccess(ctx, userId, moduleAccess, false, con, groupsForUser);
             }
             con.commit();
+            rollback = false;
 
             /*-
              *
@@ -2496,17 +2516,20 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // End of JCS
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            rollback(con);
             throw new StorageException(e.toString());
         } catch (final RuntimeException e) {
             log.error("", e);
-            rollback(con);
             throw e;
         } finally {
-            try {
-                cache.pushConnectionForContext(i(ctx.getId()), con);
-            } catch (final PoolException e) {
-                log.error("Pool Error pushing ox write connection to pool!", e);
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContext(i(ctx.getId()), con);
+                } catch (final PoolException e) {
+                    log.error("Pool Error pushing ox write connection to pool!", e);
+                }
             }
         }
     }
