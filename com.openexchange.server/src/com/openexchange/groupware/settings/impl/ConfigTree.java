@@ -318,6 +318,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.folder.SharedFolders.class,
             com.openexchange.groupware.settings.tree.modules.infostore.GUI.class,
             com.openexchange.groupware.settings.tree.modules.infostore.Module.class,
+            com.openexchange.groupware.settings.tree.modules.infostore.folder.Trash.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.ICal.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.SyncML.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.VCard.class,

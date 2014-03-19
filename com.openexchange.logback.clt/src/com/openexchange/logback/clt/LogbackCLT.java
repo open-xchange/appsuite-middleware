@@ -51,8 +51,11 @@ package com.openexchange.logback.clt;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.management.InstanceNotFoundException;
@@ -77,10 +80,12 @@ import org.apache.commons.lang.ArrayUtils;
 import ch.qos.logback.classic.Level;
 import com.openexchange.exception.Category;
 import com.openexchange.logging.mbean.LogbackConfigurationMBean;
+import com.openexchange.logging.mbean.LogbackMBeanResponse;
+import com.openexchange.logging.mbean.LogbackMBeanResponse.MessageType;
 
 /**
  * {@link LogbackCLT}
- *
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class LogbackCLT {
@@ -93,7 +98,7 @@ public class LogbackCLT {
 
     private static String jmxPassword;
 
-    private static String jmxPort = "9999"; //defaults to 9999
+    private static String jmxPort = "9999"; // defaults to 9999
 
     private static final Options options = new Options();
     static {
@@ -107,11 +112,15 @@ public class LogbackCLT {
         options.addOption(createOption("c", "context", true, false, "The context id for which to enable logging", false));
         options.addOption(createOption("oec", "override-exception-categories", true, false, "Override the exception categories to be suppressed", false));
         options.addOption(createOption("s", "session", true, false, "The session id for which to enable logging", false));
-        options.addOption(createOption("l", "level", true, false, "Define the log level", false));
+        Option o = createOption("l", "level", false, true, "Define the log level (e.g. -l com.openexchange.appsuite=DEBUG)", false);
+        o.setArgs(Short.MAX_VALUE);
+        options.addOption(o);
         options.addOption(createOption("h", "help", false, false, "Print usage of the command line tool", false));
         options.addOption(createOption("ll", "list-loggers", false, true, "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2> OR the keyword 'dynamic' that instructs the command line tool to fetch all dynamically modified loggers. Any other keyword is then ignored, and a full list will be retrieved.", false));
         options.addOption(createOption("lf", "list-filters", false, false, "Get a list with all logging filters of the system", false));
+        options.addOption(createOption("cf", "clear-filters", false, false, "Clear all logging filters", false));
         options.addOption(createOption("le", "list-exception-category", false, false, "Get a list with all supressed exception categories", false));
+        options.addOption(createOption("U", "JMX-User", true, false, "JMX user", false));
         options.addOption(createOption("U", "JMX-User", true, false, "JMX user", false));
         options.addOption(createOption("P", "JMX-Password", true, false, "JMX password", false));
         options.addOption(createOption("p", "JMX-Port", true, false, "JMX port (default:9999)", false));
@@ -121,7 +130,7 @@ public class LogbackCLT {
 
     /**
      * Create an {@link Option} with the {@link OptionBuilder}
-     *
+     * 
      * @param shortName short name of the option
      * @param longName long name of the option
      * @param hasArgs whether it has arguments
@@ -145,7 +154,7 @@ public class LogbackCLT {
         try {
             CommandLine cl = parser.parse(options, args);
             String method = null;
-            Object[] params = null;
+            List<Object> params = new ArrayList<Object>();
 
             String sessionID = null;
             int contextID = 0;
@@ -162,20 +171,21 @@ public class LogbackCLT {
             if (cl.hasOption("p")) {
                 jmxPort = cl.getOptionValue("p");
             }
-
+            
             if (cl.hasOption("s")) {
                 sessionID = cl.getOptionValue("s");
                 method = cl.hasOption("a") ? "filterSession" : "removeSessionFilter";
-                params = new Object[] {sessionID};
+                params.add(sessionID);
             } else if (cl.hasOption("c")) {
                 contextID = getIntValue(cl.getOptionValue("c"));
                 if (cl.hasOption("u")) {
                     userID = getIntValue(cl.getOptionValue("u"));
                     method = cl.hasOption("a") ? "filterUser" : "removeUserFilter";
-                    params = new Object[]{userID, contextID};
+                    params.add(userID);
+                    params.add(contextID);
                 } else {
                     method = cl.hasOption("a") ? "filterContext" : "removeContextFilter";
-                    params = new Object[]{contextID};
+                    params.add(contextID);
                 }
             } else if (cl.hasOption("oec")) {
                 method = "overrideExceptionCategories";
@@ -194,43 +204,43 @@ public class LogbackCLT {
                             printUsage(-1);
                         }
                     }
-                    params = new Object[] {builder.subSequence(0, builder.length() - 1).toString()};
+                    params.add(builder.subSequence(0, builder.length() - 1).toString());
                 } else {
                     printUsage(-1);
                 }
 
             } else if (cl.hasOption("l")) {
-                String level = cl.getOptionValue("l");
-                String[] logLevelValues = cl.getArgs();
-                if (isValidLogLevel(level)) {
-                    params = new Object[] {level, logLevelValues};
-                    method = "setLogLevel";
-                }
+                method = "modifyLogLevels";
+                params.add(getLoggerMap(cl.getOptionValues("l")));
             } else if (cl.hasOption("le")) {
                 method = "listExceptionCategories";
-                params = null;
             } else if (cl.hasOption("lf")) {
                 method = "listFilters";
-                params = null;
             } else if (cl.hasOption("ll")) {
                 String[] llargs = cl.getArgs();
                 if (llargs.length > 1) {
                     method = "getLevelForLoggers";
-                    params = new Object[]{llargs};
+                    params.add(llargs);
                 } else if (llargs.length == 1 && llargs[0].equals("dynamic")) {
                     method = "listDynamicallyModifiedLoggers";
-                    params = null;
                 } else {
                     method = "listAllLoggers";
-                    params = null;
                 }
+            } else if (cl.hasOption("cf")) {
+                method = "clearFilters";
             } else if (cl.hasOption("h")) {
                 printUsage(0);
             } else {
                 printUsage(-1);
             }
 
-            invokeMBeanMethod(method, params, getSignatureOf(method));
+            if (method.startsWith("filter")) {
+                params.add(getLoggerMap(cl.getOptionValues("l")));
+            } else if (method.startsWith("remove")) {
+                params.add(getLoggerList(cl.getOptionValues("l")));
+            }
+
+            invokeMBeanMethod(method, params.toArray(new Object[params.size()]), getSignatureOf(method));
             System.exit(0);
 
         } catch (ParseException e) {
@@ -240,7 +250,49 @@ public class LogbackCLT {
     }
 
     /**
+     * Convert array to map
+     * @param loggersLevels
+     * @return
+     */
+    private static final Map<String, Level> getLoggerMap(String[] loggersLevels) {
+        if (loggersLevels != null) {
+            Map<String, Level> levels = new HashMap<String, Level>();
+            for (String s : loggersLevels) {
+                String[] split = s.split("=");
+                if (split.length == 2) {
+                    if (isValidLogLevel(split[1])) {
+                        levels.put(split[0], Level.valueOf(split[1]));
+                    }
+                } else {
+                    System.err.println("Warning: Ignoring unrecognized parameter for -l option");
+                }
+            }
+            return levels;
+        } else {
+            return Collections.emptyMap();
+        }
+    }
+
+    /**
+     * Convert array to list
+     * @param loggersArray
+     * @return
+     */
+    private static final List<String> getLoggerList(String[] loggersArray) {
+        if (loggersArray != null) {
+            List<String> loggers = new ArrayList<String>(loggersArray.length);
+            for (String s : loggersArray) {
+                loggers.add(s);
+            }
+            return loggers;
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    /**
      * Invoke the specified MBean method with the specified signature and specified parameters
+     * 
      * @param methodName
      * @param params
      * @param signature
@@ -249,7 +301,10 @@ public class LogbackCLT {
     private static final void invokeMBeanMethod(String methodName, Object[] params, String[] signature) {
         boolean error = true;
         try {
-            ObjectName logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
+            ObjectName logbackConfObjName = new ObjectName(
+                LogbackConfigurationMBean.DOMAIN,
+                LogbackConfigurationMBean.KEY,
+                LogbackConfigurationMBean.VALUE);
             JMXServiceURL jmxServiceURL = new JMXServiceURL(serviceURL + jmxPort + "/server");
             JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, createEnvironment());
             MBeanServerConnection mbeanServerConnection = jmxConnector.getMBeanServerConnection();
@@ -258,23 +313,31 @@ public class LogbackCLT {
             if (o instanceof Set) {
                 Set<String> set = (Set<String>) o;
                 Iterator<String> i = set.iterator();
-                while(i.hasNext()) {
+                while (i.hasNext()) {
                     System.out.println(i.next());
+                }
+            } else if (o instanceof LogbackMBeanResponse) {
+                LogbackMBeanResponse response = (LogbackMBeanResponse) o;
+                for(MessageType t : MessageType.values()) {
+                    List <String> msgs = response.getMessages(t);
+                    if (msgs.size() > 0) {
+                        System.out.println(t.toString() + ": " + response.getMessages(t));
+                    }
                 }
             } else {
                 StringBuilder builder = new StringBuilder();
                 builder.append("Operation '").append(methodName).append("' with parameters: {");
-                for(Object p : params) {
+                for (Object p : params) {
                     if (p instanceof String[]) {
                         String[] s = (String[]) p;
-                        for(String str : s) {
+                        for (String str : s) {
                             builder.append(str).append(", ");
                         }
                     } else {
                         builder.append(p).append(", ");
                     }
                 }
-                builder.setCharAt(builder.length() - 2, '}'); //replace last comma "," with a curly bracket "}"
+                builder.setCharAt(builder.length() - 2, '}'); // replace last comma "," with a curly bracket "}"
                 builder.append("succeeded.\n");
                 System.out.println(builder.toString());
             }
@@ -294,13 +357,14 @@ public class LogbackCLT {
             e.printStackTrace();
         } finally {
             if (error) {
-                System.exit(-1);
+                printUsage(-1);
             }
         }
     }
 
     /**
      * Validate whether the specified log level is in a recognized logback {@link Level}
+     * 
      * @param value loglevel
      * @return true/false
      */
@@ -310,8 +374,8 @@ public class LogbackCLT {
             return true;
         }
         StringBuilder builder = new StringBuilder();
-        builder.append("Error: Unknown log level: \"").append(value).append("\".")
-                .append("Requires a valid log level: ").append(validLogLevels).append("\n");
+        builder.append("Error: Unknown log level: \"").append(value).append("\".").append("Requires a valid log level: ").append(
+            validLogLevels).append("\n");
         printUsage(-1);
 
         return false;
@@ -319,6 +383,7 @@ public class LogbackCLT {
 
     /**
      * Verify whether the specified category is a valid OX Category
+     * 
      * @param category
      * @return
      */
@@ -328,11 +393,11 @@ public class LogbackCLT {
         }
         try {
             Category.EnumCategory.valueOf(Category.EnumCategory.class, category);
-                return true;
+            return true;
         } catch (IllegalArgumentException e) {
             StringBuilder builder = new StringBuilder();
-            builder.append("Error: Unknown category: \"").append(category).append("\".\"\n")
-                   .append("Requires a valid category: ").append(getValidCategories()).append("\n");
+            builder.append("Error: Unknown category: \"").append(category).append("\".\"\n").append("Requires a valid category: ").append(
+                getValidCategories()).append("\n");
             System.out.println(builder.toString());
             printUsage(-1);
         }
@@ -341,12 +406,13 @@ public class LogbackCLT {
 
     /**
      * Return all valid OX Categories
+     * 
      * @return
      */
     private static final String getValidCategories() {
         StringBuilder builder = new StringBuilder();
         builder.append("{");
-        for(Category.EnumCategory c : Category.EnumCategory.values()) {
+        for (Category.EnumCategory c : Category.EnumCategory.values()) {
             builder.append(c.toString()).append(", ");
         }
         builder.setCharAt(builder.length() - 2, '}');
@@ -355,6 +421,7 @@ public class LogbackCLT {
 
     /**
      * Get the int value
+     * 
      * @param value
      * @return
      */
@@ -370,13 +437,14 @@ public class LogbackCLT {
 
     /**
      * Print usage
-     *
+     * 
      * @param exitCode
      */
     private static final void printUsage(int exitCode) {
         HelpFormatter hf = new HelpFormatter();
         hf.setWidth(120);
-        hf.printHelp("logconf [ [-a | -d] [ [-u <userid> -c <contextid>] | [-s <sessionid>] | [-c <contextid>] ] ] [-l <loglevel> <logger name 1> ... <logger name n>] [-lf] [-ll] [-oec <category 1> ... <category n>] [-le] [-h]",
+        hf.printHelp(
+            "logconf [[-a | -d] [-c <contextid> [-u <userid>] | -s <sessionid>] [-l <logger_name>=<logger_level> ...] [-U <JMX-User> -P <JMX-Password> [-p <JMX-Port>]]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] | [-h]",
             null,
             options,
             "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories());
@@ -385,6 +453,7 @@ public class LogbackCLT {
 
     /**
      * Get the signature of the specified method as an array of Strings
+     * 
      * @param methodName
      * @return
      */
@@ -403,7 +472,7 @@ public class LogbackCLT {
             if (types != null && types.length > 0) {
                 signature = new String[types.length];
                 int s = 0;
-                for(Class<?> c : types) {
+                for (Class<?> c : types) {
                     signature[s++] = c.getName();
                 }
                 return signature;
@@ -417,12 +486,13 @@ public class LogbackCLT {
 
     /**
      * Create JMX Environment
+     * 
      * @return
      */
     private static Map<String, Object> createEnvironment() {
         Map<String, Object> environment = new HashMap<String, Object>();
         if (jmxUser != null && jmxPassword != null) {
-            environment.put(JMXConnector.CREDENTIALS, new String[]{jmxUser, jmxPassword});
+            environment.put(JMXConnector.CREDENTIALS, new String[] { jmxUser, jmxPassword });
         }
         return environment;
     }

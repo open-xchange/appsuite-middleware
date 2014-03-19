@@ -47,18 +47,35 @@
  *
  */
 
-package com.openexchange.realtime.handle;
+package com.openexchange.groupware.infostore.database;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import java.util.List;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
- * {@link HandleExceptionMessage}
+ * {@link BatchFilenameReserver}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class HandleExceptionMessage implements LocalizableStrings {
+public interface BatchFilenameReserver {
 
-    /** Could not send directed Presence to resource: %1$s */
-    public static final String DIRECT_PRESENCE_FAILED_MSG = "Could not send directed Presence to resource: %1$s";
+    /**
+     * Silently cleans up any previous reservation held by this filename reserver.
+     */
+    void cleanUp();
+
+    /**
+     * Reserves the filenames of the supplied documents in their target folders.
+     *
+     * @param documents The documents to reserve the filenames for
+     * @param adjustAsNeeded <code>true</code> to automatically adjust the filenames in case of conflicts in the target folder,
+     *                       <code>false</code>, otherwise
+     * @return The reservations, each one mapped to its corresponding document
+     * @throws OXException
+     */
+    Map<DocumentMetadata, FilenameReservation> reserve(List<DocumentMetadata> documents, boolean adjustAsNeeded) throws OXException;
+
 }
+

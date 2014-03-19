@@ -156,7 +156,14 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     @Override
     public void unsubscribe(final Subscription subscription) throws OXException {
-        checkDelete(loadSubscription(subscription.getContext(), subscription.getId(), null));
+        final Subscription loadedSubscription = loadSubscription(subscription.getContext(), subscription.getId(), null);
+        if (null == loadedSubscription) {
+            throw SubscriptionErrorMessage.SubscriptionNotFound.create();
+        }
+        if (loadedSubscription.getSession() == null) {
+            loadedSubscription.setSession(subscription.getSession());
+        }
+        checkDelete(loadedSubscription);
         STORAGE.get().forgetSubscription(subscription);
     }
 
@@ -366,6 +373,9 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
 
         for (Subscription subscription : subscriptionsToDelete) {
+            if (null == subscription.getSession()) {
+                subscription.setSession(serverSession);
+            }
             unsubscribe(subscription);
         }
     }

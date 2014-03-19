@@ -44,6 +44,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-1795
     ox_add_property com.openexchange.smtp.logTransport false /opt/open-xchange/etc/smtp.properties
+
+    # SoftwareChange_Request-1931
+    ox_add_property com.openexchange.smtp.ssl.protocols "SSLv3 TLSv1" /opt/open-xchange/etc/smtp.properties
 fi
 
 %clean
@@ -59,6 +62,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Mar 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-03-13
 * Mon Mar 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-12
 * Fri Mar 07 2014 Marcus Klein <marcus.klein@open-xchange.com>

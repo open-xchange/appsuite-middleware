@@ -73,6 +73,11 @@ public interface Session {
      * Returns the currently logged in user's access token and secret.
      */
     public AccessTokenPair getAccessTokenPair();
+    
+    /**
+     * Returns the consumer key/secret pair
+     */
+    public ConsumerPair getConsumerPair();
 
     /**
      * Returns the locale to use. Must not return null. Currently, this is used

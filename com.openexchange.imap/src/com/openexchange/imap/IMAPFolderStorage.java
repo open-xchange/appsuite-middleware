@@ -76,6 +76,8 @@ import javax.mail.Quota;
 import javax.mail.Quota.Resource;
 import javax.mail.StoreClosedException;
 import javax.mail.search.FlagTerm;
+import com.openexchange.caching.events.CacheEvent;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -1842,7 +1844,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             /*
                              * Does affect ListLsubCache of other users, too
                              */
-                            dropListLsubCachesFor(entities.toArray(new ACL[0]));
+                            dropListLsubCachesForOther(entities.toArray(new ACL[entities.size()]));
                         }
                     }
                 }
@@ -2595,7 +2597,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (deleteMe.isOpen()) {
             deleteMe.close(false);
         }
-        final ACL[] oldACLs = getACLSafe(deleteMe);
+        final ACL[] oldACLs = imapConfig.isSupportsACLs() ? getACLSafe(deleteMe) : null;
         /*
          * Unsubscribe prior to deletion
          */
@@ -2614,7 +2616,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         RightsCache.removeCachedRights(deleteMe, session, accountId);
         UserFlagsCache.removeUserFlags(deleteMe, session, accountId);
         // Affected users, too
-        dropListLsubCachesFor(oldACLs);
+        dropListLsubCachesForOther(oldACLs);
     }
 
     private boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs, final ACLExtension aclExtension) throws OXException {
@@ -2737,7 +2739,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         /*
          * Perform RENAME
          */
-        final ACL[] acls = getACLSafe(toMove);
+        final ACL[] acls = imapConfig.isSupportsACLs() ? getACLSafe(toMove) : null;
         final boolean subscribed = toMove.isSubscribed();
         if (!toMove.renameTo(newFolder)) {
             throw IMAPException.create(
@@ -2770,7 +2772,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, moveFullname);
         }
         // Affected users, too
-        dropListLsubCachesFor(acls);
+        dropListLsubCachesForOther(acls);
 
         return newFolder;
     }
@@ -2857,21 +2859,39 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return (examined == newACLs.size());
     }
 
-    private void dropListLsubCachesFor(final ACL[] acls) {
+    private void dropListLsubCachesForOther(final ACL[] acls) {
+        if (null == acls || 0 == acls.length) {
+            return;
+        }
+        final CacheEventService cacheEventService = Services.optService(CacheEventService.class);
         final UserStorage us = UserStorage.getInstance();
         for (final ACL acl : acls) {
-            try {
-                final User[] users = us.searchUserByMailLogin(acl.getName(), ctx);
-                for (final User user : users) {
-                    final int userId = user.getId();
-                    if (userId != session.getUserId()) {
-                        ListLsubCache.dropFor(userId, ctx.getContextId());
+            if (null != acl) {
+                final String entityName = acl.getName();
+                if (!imapConfig.getLogin().equals(entityName)) {
+                    try {
+                        final User[] users = us.searchUserByMailLogin(entityName, ctx);
+                        for (final User user : users) {
+                            final int userId = user.getId();
+                            if (userId != session.getUserId()) {
+                                ListLsubCache.dropFor(userId, ctx.getContextId());
+                                if (null != cacheEventService) {
+                                    final CacheEvent event = newCacheEventFor(userId);
+                                    LOG.debug("fireInvalidate: {}", event);
+                                    cacheEventService.notify(this, event, false);
+                                }
+                            }
+                        }
+                    } catch (final OXException e) {
+                        LOG.debug("Could not resolve users for entity name {}", entityName, e);
                     }
                 }
-            } catch (final OXException e) {
-                LOG.debug("Could not resolve users for entity name {}", acl.getName(), e);
             }
         }
+    }
+
+    private CacheEvent newCacheEventFor(final int userId) {
+        return CacheEvent.INVALIDATE(ListLsubCache.REGION, null, new StringAllocator(16).append(userId).append('@').append(ctx.getContextId()).toString());
     }
 
     private static String stripPOSTRight(final String rights) {

@@ -1,3 +1,46 @@
+* 2014-03-19 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 31399: Don't suppress exception
+
+* 2014-03-19 - ioannis.chouklis@open-xchange.com
+ 
+ -  Fix for Bug 31637: [L3] Unclear usage of logconf '-u' and '-c' parameter
+
+* 2014-03-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31644: Properly collect available text parts on reply if original message contains multipart/alternative appendix
+ - Fix for bug 31470: Adjusted description of property "com.openexchange.mail.filter.useUTF7FolderEncoding" to also consider Cyrus IMAP
+                      server setting "sieve_utf8fileinto"
+
+* 2014-03-19 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31646: Be aware of unknown folder type 
+
+* 2014-03-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31157: Keep trailing whitespace character in signature-delimiting line
+ - Fix for bug 31629: Handle SMTP server that do not support authentication 
+
+* 2014-03-18 - marcus.klein@open-xchange.com
+
+ - Fix for bug 31599: Corrected RPM post installation script to not modify logback.xml anymore if log configuration migration has performed
+   once.
+
+* 2014-03-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31587: Pass obtained BundleContext instance to initializing method, not the stored one to ensure working on most recent bundle/framework state
+ - Fix for bug 31602 + 31603: Deal with possible absence of needed service
+ - Fix for bug 31601: Ensure a session reference is present prior to performing permission checks
+
+* 2014-03-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30848: Properly recognize & transmit an S/MIME encrypted mail
+
+* 2014-03-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31582: Invalidate affected users' LIST/LSUB cache on IMAP folder changes & remotely distribute this
+ - Fix for bug 31463: Enhanced login response writer to check login string against possible ACE E-Mail address; convert to IDN if so
+
 * 2014-03-14 - marc.arens@open-xchange.com
 
  - Fix for bug 29802: Send LeaveStanza on behalf of timed out client 

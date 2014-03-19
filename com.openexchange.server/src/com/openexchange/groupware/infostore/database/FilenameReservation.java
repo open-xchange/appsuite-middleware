@@ -47,19 +47,27 @@
  *
  */
 
-package com.openexchange.realtime.presence.subscribe;
+package com.openexchange.groupware.infostore.database;
 
-import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link PresenceSubscribeExceptionMessages} - Translatable error messages.
+ * {@link FilenameReservation}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PresenceSubscribeExceptionMessages implements LocalizableStrings {
+public interface FilenameReservation {
+    /**
+     * Gets the filename.
+     *
+     * @return The filename
+     */
+    String getFilename();
 
-    /** Invalid context ID. Couldn't find context for: %1$s */
-    public static final String INVALID_CONTEXT_ID = "Invalid context ID. Couldn't find context for: %1$s";
+    /**
+     * Gets a value indicating whether the filename was adjusted during reservation.
+     *
+     * @return <code>true</code> if the filename was adjusted, <code>false</code>, otherwise
+     */
+    boolean wasAdjusted();
 
 }

@@ -93,8 +93,9 @@ public class Change extends ChangeCore {
 
         final Set<String> capabilitiesToAdd = parseAndSetCapabilitiesToAdd(parser);
         final Set<String> capabilitiesToRemove = parseAndSetCapabilitiesToRemove(parser);
-        if ((null != capabilitiesToAdd && !capabilitiesToAdd.isEmpty()) || (null != capabilitiesToRemove && !capabilitiesToRemove.isEmpty())) {
-            oxusr.changeCapabilities(ctx, usr, capabilitiesToAdd, capabilitiesToRemove, auth);
+        final Set<String> capabilitiesToDrop = parseAndSetCapabilitiesToDrop(parser);
+        if ((null != capabilitiesToAdd && !capabilitiesToAdd.isEmpty()) || (null != capabilitiesToRemove && !capabilitiesToRemove.isEmpty()) || (null != capabilitiesToDrop && !capabilitiesToDrop.isEmpty())) {
+            oxusr.changeCapabilities(ctx, usr, capabilitiesToAdd, capabilitiesToRemove, capabilitiesToDrop, auth);
         }
     }
 
@@ -103,5 +104,6 @@ public class Change extends ChangeCore {
         setAddAccessRightCombinationNameOption(parser);
         setCapsToAdd(parser);
         setCapsToRemove(parser);
+        setCapsToDrop(parser);
     }
 }

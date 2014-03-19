@@ -2129,7 +2129,46 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
-    public void changeCapabilities(final Context ctx, final Set<String> capsToAdd, final Set<String> capsToRemove, final Credentials auth) throws StorageException {
+    public Set<String> getCapabilities(Context ctx) throws StorageException {
+        final int contextId = ctx.getId().intValue();
+        // SQL resources
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForContext(contextId);
+
+            stmt = con.prepareStatement("SELECT cap FROM capability_context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.<String> emptySet();
+            }
+            final Set<String> caps = new HashSet<String>(16);
+            do {
+                caps.add(rs.getString(1));
+            } while (rs.next());
+            return caps;
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (final PoolException e) {
+                    LOG.error("Error pushing connection to pool for context {}!", contextId, e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void changeCapabilities(final Context ctx, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials auth) throws StorageException {
         final int contextId = ctx.getId().intValue();
         // SQL resources
         Connection con = null;
@@ -2141,6 +2180,29 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             con.setAutoCommit(false); // BEGIN
             autocommit = true;
             rollback = true;
+            // First drop
+            if (null != capsToDrop && !capsToDrop.isEmpty()) {
+                for (final String cap : capsToDrop) {
+                    if (null == stmt) {
+                        stmt = con.prepareStatement("DELETE FROM capability_context WHERE cid=? AND cap=?");
+                        stmt.setInt(1, contextId);
+                    }
+                    stmt.setString(2, cap);
+                    stmt.addBatch();
+                    if (cap.startsWith("-")) {
+                        stmt.setString(2, cap.substring(1));
+                        stmt.addBatch();
+                    } else {
+                        stmt.setString(2, "-"+cap);
+                        stmt.addBatch();
+                    }
+                }
+                if (null != stmt) {
+                    stmt.executeBatch();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+            }
             // Determine what is already present
             final Set<String> existing;
             {
@@ -2172,17 +2234,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         stmt.addBatch();
                         existing.remove(cap);
                     }
-                    final String attributedCap = "+" + cap;
-                    if (existing.contains(attributedCap)) {
+                    final String plusCap = "+" + cap;
+                    if (existing.contains(plusCap)) {
                         if (null == stmt) {
                             stmt = con.prepareStatement("DELETE FROM capability_context WHERE cid=? AND cap=?");
                             stmt.setInt(1, contextId);
                         }
-                        stmt.setString(2, attributedCap);
+                        stmt.setString(2, plusCap);
                         stmt.addBatch();
-                        existing.remove(attributedCap);
+                        existing.remove(plusCap);
                     }
-                    capsToInsert.add("-" + cap);
+                    final String minusCap = "-" + cap;
+                    if (!existing.contains(minusCap)) {
+                        capsToInsert.add(minusCap);
+                    }
                 }
                 if (null != stmt) {
                     stmt.executeBatch();
@@ -2192,6 +2257,23 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             // Insert new ones
             if (!capsToInsert.isEmpty()) {
+                for (final String capToAdd : capsToAdd) {
+                    final String minusCap = "-" + capToAdd;
+                    if (existing.contains(minusCap)) {
+                        if (null == stmt) {
+                            stmt = con.prepareStatement("DELETE FROM capability_context WHERE cid=? AND cap=?");
+                            stmt.setInt(1, contextId);
+                        }
+                        stmt.setString(2, minusCap);
+                        stmt.addBatch();
+                    }
+                }
+                if (null != stmt) {
+                    stmt.executeBatch();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+
                 stmt = con.prepareStatement("INSERT INTO capability_context (cid, cap) VALUES (?, ?)");
                 stmt.setInt(1, contextId);
                 for (final String cap : capsToInsert) {
@@ -2227,10 +2309,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             if (autocommit) {
                 autocommit(con);
             }
-            try {
-                cache.pushConnectionForContext(contextId, con);
-            } catch (PoolException e) {
-                LOG.error("Error pushing connection to pool for context {}!", contextId, e);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (final PoolException e) {
+                    LOG.error("Error pushing connection to pool for context {}!", contextId, e);
+                }
             }
         }
     }

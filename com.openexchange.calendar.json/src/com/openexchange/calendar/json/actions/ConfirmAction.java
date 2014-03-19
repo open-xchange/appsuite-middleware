@@ -63,8 +63,10 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -99,7 +101,7 @@ public final class ConfirmAction extends AppointmentAction {
         // Get parameters
         final int objectId = req.checkInt(DataFields.ID);
         final int folderId = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        Date timestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
+        Date timestamp = null;
         final int optOccurrenceId = req.optInt(AJAXServlet.PARAMETER_OCCURRENCE);
 
         // Get request body
@@ -115,7 +117,11 @@ public final class ConfirmAction extends AppointmentAction {
             userId = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
         }
 
-        final AppointmentSQLInterface appointmentSql = getService().createAppointmentSql(session);
+        final AppointmentSqlFactoryService factoryService = getService();
+        if (null == factoryService) {
+            throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
+        }
+        final AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
 
         boolean isUser = (participant.getType() == Participant.USER) || (participant.getType() == 0);
         boolean isExternal = participant.getType() == Participant.EXTERNAL_USER;

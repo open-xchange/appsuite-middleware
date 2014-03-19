@@ -271,6 +271,17 @@ public final class IMAPConfig extends MailConfig {
     }
 
     /**
+     * Checks if IMAP search is configured to be forced and corresponding capability is available.
+     *
+     * @return <code>true</code> if IMAP search is configured to be forced and corresponding capability is available; otherwise <code>false</code>
+     */
+    public boolean forceImapSearch() {
+        final boolean forceImapSearch = IMAPProperties.getInstance().forceImapSearch();
+        final IMAPCapabilities capabilities = imapCapabilities;
+        return (capabilities != null) ? (forceImapSearch && (capabilities.hasIMAP4rev1() || capabilities.hasIMAP4())) : forceImapSearch;
+    }
+
+    /**
      * Checks if IMAP sort is configured and corresponding capability is available.
      *
      * @return <code>true</code> if IMAP sort is configured and corresponding capability is available; otherwise <code>false</code>

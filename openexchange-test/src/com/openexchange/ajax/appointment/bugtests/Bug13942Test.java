@@ -107,7 +107,7 @@ public class Bug13942Test extends AbstractAJAXSession {
         AppointmentInsertResponse response = getClient().execute(request);
         response.fillObject(appointment);
 
-        ConfirmRequest confirmRequest = new ConfirmRequest(getClientB().getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), CalendarObject.ACCEPT, "yap", true);
+        ConfirmRequest confirmRequest = new ConfirmRequest(getClientB().getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), CalendarObject.ACCEPT, "yap", appointment.getLastModified(), true);
         ConfirmResponse confirmResponse = getClientB().execute(confirmRequest);
         appointment.setLastModified(confirmResponse.getTimestamp());
 

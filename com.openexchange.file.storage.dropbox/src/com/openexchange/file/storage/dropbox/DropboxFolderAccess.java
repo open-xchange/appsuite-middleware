@@ -128,6 +128,11 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
     }
 
     @Override
+    public FileStorageFolder getTrashFolder() throws OXException {
+        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+    }
+
+    @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
         return new FileStorageFolder[0];
     }

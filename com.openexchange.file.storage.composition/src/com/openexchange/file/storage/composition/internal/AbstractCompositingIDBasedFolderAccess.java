@@ -211,7 +211,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
     @Override
     public String deleteFolder(String folderId) throws OXException {
-        return deleteFolder(folderId, true);
+        return deleteFolder(folderId, false);
     }
 
     @Override
@@ -220,7 +220,9 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
         folderAccess.deleteFolder(folderID.getFolderId(), hardDelete);
-        fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folderID, path)));
+        Dictionary<String, Object> eventProperties = getEventProperties(folderID, path);
+        eventProperties.put(FileStorageEventConstants.HARD_DELETE, Boolean.valueOf(hardDelete));
+        fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, eventProperties));
         return folderID.toUniqueID();
     }
 
@@ -303,6 +305,19 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
             }
         }
         return null;
+    }
+
+    @Override
+    public FileStorageFolder getTrashFolder() throws OXException {
+        for (AccessWrapper accessWrapper : getAllAccountAccesses()) {
+            FileStorageAccountAccess accountAccess = accessWrapper.accountAccess;
+            FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
+            FileStorageFolder trashFolder = folderAccess.getTrashFolder();
+            if (null != trashFolder) {
+                return IDManglingFolder.withUniqueID(trashFolder, accountAccess.getService().getId(), accountAccess.getAccountId());
+            }
+        }
+        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 
     @Override

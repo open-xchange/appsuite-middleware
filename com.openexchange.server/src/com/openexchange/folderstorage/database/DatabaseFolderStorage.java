@@ -115,6 +115,7 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
@@ -665,7 +666,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
             final Context context = storageParameters.getContext();
-            final int folderId;
+            int folderId = -1;
             if (TaskContentType.getInstance().equals(contentType)) {
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.TASK, con, context);
             } else if (CalendarContentType.getInstance().equals(contentType)) {
@@ -673,9 +674,15 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             } else if (ContactContentType.getInstance().equals(contentType)) {
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.CONTACT, con, context);
             } else if (InfostoreContentType.getInstance().equals(contentType)) {
-                folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.INFOSTORE, con, context);
-            } else {
-                return null;
+                if (TrashType.getInstance().equals(type)) {
+                    folderId = OXFolderSQL.getUserDefaultFolder(
+                        session.getUserId(), FolderObject.INFOSTORE, getTypeByFolderType(type), con, context);
+                } else {
+                    folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.INFOSTORE, con, context);
+                }
+            }
+            if (-1 == folderId) {
+                throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(contentType, treeId);
             }
             return String.valueOf(folderId);
         } catch (final SQLException e) {
@@ -706,6 +713,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     return p.getCreatedBy() == user.getId() ? PrivateType.getInstance() : SharedType.getInstance();
                 } else if (FolderObject.PUBLIC == parentType) {
                     return PublicType.getInstance();
+                } else if (FolderObject.TRASH == parentType) {
+                    return TrashType.getInstance();
                 }
             } finally {
                 provider.close();
@@ -1943,6 +1952,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         if (PublicType.getInstance().equals(type)) {
             return FolderObject.PUBLIC;
         }
+        if (TrashType.getInstance().equals(type)) {
+            return FolderObject.TRASH;
+        }
         return FolderObject.SYSTEM_TYPE;
     }
 
@@ -1955,6 +1967,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         }
         if (SharedType.getInstance().equals(type)) {
             return FolderObject.SHARED;
+        }
+        if (TrashType.getInstance().equals(type)) {
+            return FolderObject.TRASH;
         }
         return FolderObject.SYSTEM_TYPE;
     }

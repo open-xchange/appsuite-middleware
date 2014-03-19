@@ -97,7 +97,7 @@ public final class InviteRequestAction extends AbstractXingAction {
 
         final List<String> alreadyInvited = invitationStats.getAlreadyInvited();
         if (null != alreadyInvited && new HashSet<String>(alreadyInvited).contains(address)) {
-            return new AJAXRequestResult(Boolean.TRUE, "native");
+            throw XingExceptionCodes.ALREADY_INVITED.create(address);
         }
 
         final List<String> invalidAddresses = invitationStats.getInvalidAddresses();
@@ -105,10 +105,12 @@ public final class InviteRequestAction extends AbstractXingAction {
             throw XingExceptionCodes.INVALID_EMAIL_ADDRESS.create(address);
         }
 
+        final String xingId = xingAPI.findByEmail(address);
+
         final List<User> alreadyMember = invitationStats.getAlreadyMember();
         if (null != alreadyMember) {
             for (final User member : alreadyMember) {
-                if (member.getActiveMail().equals(address)) {
+                if (member.getId().equals(xingId)) {
                     throw XingExceptionCodes.ALREADY_MEMBER.create(address);
                 }
             }

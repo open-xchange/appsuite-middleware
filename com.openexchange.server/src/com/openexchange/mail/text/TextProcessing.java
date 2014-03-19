@@ -97,7 +97,7 @@ public final class TextProcessing {
             final int mlen = foldMe.length() - 1;
             for (end = mlen; end >= 0; end--) {
                 c = foldMe.charAt(end);
-                if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
+                if (c != '\r' && c != '\n') {
                     break;
                 }
             }

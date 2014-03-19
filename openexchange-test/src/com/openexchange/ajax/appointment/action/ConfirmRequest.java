@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.action;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,6 +82,8 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
 
     private int occurrence;
 
+    private Date lastModified;
+
     /**
      * For external users
      *
@@ -93,7 +96,7 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
      * @param mail
      * @param failOnError
      */
-    public ConfirmRequest(int folderId, int objectId, int occurrence, int confirmStatus, String confirmMessage, String mail, boolean failOnError) {
+    public ConfirmRequest(int folderId, int objectId, int occurrence, int confirmStatus, String confirmMessage, String mail, Date lastModified, boolean failOnError) {
         super();
         this.folderId = folderId;
         this.objectId = objectId;
@@ -101,12 +104,13 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
         this.confirmStatus = confirmStatus;
         this.confirmMessage = confirmMessage;
         this.mail = mail;
+        this.lastModified = lastModified;
         this.failOnError = failOnError;
         this.type = Participant.EXTERNAL_USER;
     }
 
-    public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, String mail, boolean failOnError) {
-        this(folderId, objectId, 0, confirmStatus, confirmMessage, mail, failOnError);
+    public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, String mail, Date lastModified, boolean failOnError) {
+        this(folderId, objectId, 0, confirmStatus, confirmMessage, mail, lastModified, failOnError);
     }
 
     /**
@@ -121,7 +125,7 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
      * @param user
      * @param failOnError
      */
-    public ConfirmRequest(int folderId, int objectId, int occurrence, int confirmStatus, String confirmMessage, int user, boolean failOnError) {
+    public ConfirmRequest(int folderId, int objectId, int occurrence, int confirmStatus, String confirmMessage, int user, Date lastModified, boolean failOnError) {
         super();
         this.folderId = folderId;
         this.objectId = objectId;
@@ -129,18 +133,19 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
         this.confirmStatus = confirmStatus;
         this.confirmMessage = confirmMessage;
         this.user = user;
+        this.lastModified = lastModified;
         this.failOnError = failOnError;
         this.type = Participant.USER;
         
     }
 
-    public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, int user, boolean failOnError) {
-        this(folderId, objectId, 0, confirmStatus, confirmMessage, user, failOnError);
+    public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, int user, Date lastModified, boolean failOnError) {
+        this(folderId, objectId, 0, confirmStatus, confirmMessage, user, lastModified, failOnError);
     }
     
 
-    public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, boolean failOnError) {
-        this(folderId, objectId, confirmStatus, confirmMessage, 0, failOnError);
+    public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, Date lastModified, boolean failOnError) {
+        this(folderId, objectId, confirmStatus, confirmMessage, 0, lastModified, failOnError);
     }
 
     @Override
@@ -169,6 +174,7 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CONFIRM));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ID, objectId));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified));
         if (occurrence > 0) {
             parameterList.add(new Parameter(AJAXServlet.PARAMETER_OCCURRENCE, occurrence));
         }

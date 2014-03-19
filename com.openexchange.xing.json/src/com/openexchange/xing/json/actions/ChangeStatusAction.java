@@ -80,18 +80,11 @@ public final class ChangeStatusAction extends AbstractXingAction {
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
         final String message = getMandatoryStringParameter(req, "message");
         // Get & validate email
-        String address = getMandatoryStringParameter(req, "email");
-        address = validateMailAddress(address);
 
         final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        final String xingId = xingAPI.findByEmail(address);
 
-        if (Strings.isEmpty(xingId)) {
-            // Already connected
-            throw XingExceptionCodes.NOT_A_MEMBER.create(address);
-        }
-        xingAPI.changeStatusMessage(xingId, message);
+        xingAPI.changeStatusMessage(xingOAuthAccess.getXingUserId(), message);
 
         return new AJAXRequestResult(Boolean.TRUE, "native");
     }

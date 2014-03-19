@@ -52,6 +52,9 @@ if [ ${1:-0} -eq 2 ]; then
     if ! ox_exists_property com.openexchange.pop3.logDeniedPing $pfile; then
         ox_set_property com.openexchange.pop3.logDeniedPing true $pfile
     fi
+
+    # SoftwareChange_Request-1931
+    ox_add_property com.openexchange.pop3.ssl.protocols "SSLv3 TLSv1" /opt/open-xchange/etc/pop3.properties
 fi
 
 %clean
@@ -68,6 +71,8 @@ fi
 
 
 %changelog
+* Thu Mar 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-03-13
 * Mon Mar 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-12
 * Fri Mar 07 2014 Marcus Klein <marcus.klein@open-xchange.com>

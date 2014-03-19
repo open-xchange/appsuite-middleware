@@ -129,6 +129,7 @@ import com.openexchange.folderstorage.outlook.sql.Update;
 import com.openexchange.folderstorage.outlook.sql.Utility;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -2695,6 +2696,9 @@ public final class OutlookFolderStorage implements FolderStorage {
         } else if (showPersonalBelowInfoStore(session, altNames) && id.equals(getDefaultInfoStoreFolderId(session))) {
             folder.setParentID(INFOSTORE);
             folder.setName(FolderStrings.DEFAULT_FILES_FOLDER_NAME);
+        } else if (MODULE_FILE == folder.getContentType().getModule() && TrashType.getInstance().equals(folder.getType())) {
+            folder.setParentID(INFOSTORE);
+            folder.setName(altNames ? FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME : FolderStrings.SYSTEM_TRASH_INFOSTORE_FOLDER_NAME);
         }
     }
 

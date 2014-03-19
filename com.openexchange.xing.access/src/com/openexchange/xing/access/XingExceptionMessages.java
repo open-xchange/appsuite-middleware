@@ -82,6 +82,9 @@ public final class XingExceptionMessages implements LocalizableStrings {
     // E-Mail address is invalid
     public static final String INVALID_EMAIL_ADDRESS_MSG = "E-Mail address is invalid";
 
+    // Already sent an invitation to E-Mail address
+    public static final String ALREADY_INVITED_MSG = "Already sent an invitation to E-Mail address";
+
     // The E-Mail address already belongs to a XING user
     public static final String ALREADY_MEMBER_MSG = "The E-Mail address already belongs to a XING user";
 

@@ -587,6 +587,11 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
+        return removeDocument(ids, sequenceNumber, false);
+    }
+
+    @Override
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
         try {
             final List<IDTuple> ret = new ArrayList<FileStorageFileAccess.IDTuple>();
             for (final IDTuple id : ids) {

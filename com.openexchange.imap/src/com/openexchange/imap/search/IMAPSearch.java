@@ -120,9 +120,10 @@ public final class IMAPSearch {
             hasSearchCapability = imapCapabilities.hasIMAP4() || imapCapabilities.hasIMAP4rev1();
         }
         if (mailFields.contains(MailField.BODY) || mailFields.contains(MailField.FULL)) {
-            if (hasSearchCapability && (msgCount >= MailProperties.getInstance().getMailFetchLimit())) {
+            if (hasSearchCapability && (imapConfig.forceImapSearch() || (msgCount >= MailProperties.getInstance().getMailFetchLimit()))) {
                 /*
-                 * Too many messages in IMAP folder. Fall-back to IMAP-bases search and accept a non-type-sensitive search
+                 * Too many messages in IMAP folder or IMAP-based search should be forced.
+                 * Fall-back to IMAP-based search and accept a non-type-sensitive search.
                  */
                 final int[] seqNums = issueIMAPSearch(imapFolder, searchTerm);
                 if (null != seqNums) {
@@ -143,9 +144,9 @@ public final class IMAPSearch {
             return list.toArray();
         }
         /*
-         * Perform an IMAP-based search if IMAP search is enabled through configuration or number of messages to search in exceeds limit.
+         * Perform an IMAP-based search if IMAP search is forces through configuration or is enabled and number of messages exceeds limit.
          */
-        if (imapConfig.isImapSearch() || (hasSearchCapability && (msgCount >= MailProperties.getInstance().getMailFetchLimit()))) {
+        if (imapConfig.forceImapSearch() || (imapConfig.isImapSearch() || (hasSearchCapability && (msgCount >= MailProperties.getInstance().getMailFetchLimit())))) {
             final int[] seqNums = issueIMAPSearch(imapFolder, searchTerm);
             if (null != seqNums) {
                 return seqNums;

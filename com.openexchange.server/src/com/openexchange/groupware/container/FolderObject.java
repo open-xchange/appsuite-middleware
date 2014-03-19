@@ -260,6 +260,8 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     public static final int SHARED = 3;
 
+    public static final int TRASH = 16;
+
     public static final int SYSTEM_TYPE = SYSTEM_MODULE; // Formerly 6;
 
     private static final int[] SORTED_TYPES = { PRIVATE, PUBLIC, SHARED };
@@ -350,7 +352,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     /**
      * Initializes a new {@link FolderObject}
-     * 
+     *
      * @param folderName The folder name
      * @param objectId The object ID
      * @param module The module; {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
@@ -448,7 +450,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     /**
      * Gets the module; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE}, {@link #MAIL},
      * or {@link #INFOSTORE}
-     * 
+     *
      * @return The module; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
      *         {@link #MAIL}, or {@link #INFOSTORE}
      */
@@ -467,7 +469,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     /**
      * Sets the module
-     * 
+     *
      * @param module The module to set; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE}
      *            , {@link #MAIL}, or {@link #INFOSTORE}
      */

@@ -16,10 +16,12 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,10 +89,43 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     }
 
     @Override
+    public String getUserCapabilities(Context ctx, User user, Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
+        final OXUserInterface userInterface = getUserInterface();
+        try {
+            final Set<String> capabilities = userInterface.getCapabilities(soap2Context(ctx), soap2User(user), soap2Credentials(auth));
+            if (null == capabilities || capabilities.isEmpty()) {
+                return "There are no capabilities set for user " + user.getId() + " in context " + ctx.getId();
+            }
+
+            final Iterator<String> iterator = new TreeSet<String>(capabilities).iterator();
+            final StringBuilder sb = new StringBuilder(capabilities.size() << 4);
+            sb.append(iterator.next());
+            for (int i = capabilities.size(); i-- > 1;) {
+                sb.append(", ").append(iterator.next());
+            }
+            return sb.toString();
+        } catch (final RemoteException e) {
+            throw new RemoteException_Exception(e.getMessage(), e);
+        } catch (final InvalidCredentialsException e) {
+            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+        } catch (final NoSuchContextException e) {
+            throw new NoSuchContextException_Exception(e.getMessage(), e);
+        } catch (final StorageException e) {
+            throw new StorageException_Exception(e.getMessage(), e);
+        } catch (final InvalidDataException e) {
+            throw new InvalidDataException_Exception(e.getMessage(), e);
+        } catch (final DatabaseUpdateException e) {
+            throw new DatabaseUpdateException_Exception(e.getMessage(), e);
+        } catch (final NoSuchUserException e) {
+            throw new NoSuchUserException_Exception(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public void changeCapabilities(final ChangeCapabilities parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
-            userInterface.changeCapabilities(soap2Context(parameters.ctx), soap2User(parameters.user), parseToSet(parameters.capsToAdd), parseToSet(parameters.capsToRemove), soap2Credentials(parameters.auth));
+            userInterface.changeCapabilities(soap2Context(parameters.ctx), soap2User(parameters.user), parseToSet(parameters.capsToAdd), parseToSet(parameters.capsToRemove), parseToSet(parameters.capsToDrop), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
         } catch (final InvalidCredentialsException e) {

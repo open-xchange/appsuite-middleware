@@ -454,8 +454,22 @@ public class OXFolderAccess {
      * @throws OXException If operation fails
      */
     public final FolderObject getDefaultFolder(final int userId, final int module) throws OXException {
+        return getDefaultFolder(userId, module, -1);
+    }
+
+    /**
+     * Determines user's default folder of given module.
+     *
+     * @param userId The user ID
+     * @param module The module
+     * @param type The type, or <code>-1</code> if not applicable
+     * @return The user's default folder of given module
+     * @throws OXException If operation fails
+     */
+    public final FolderObject getDefaultFolder(final int userId, final int module, final int type) throws OXException {
         try {
-            final int folderId = OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx);
+            final int folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx) :
+                OXFolderSQL.getUserDefaultFolder(userId, module, type, readCon, ctx);
             if (folderId == -1) {
                 if (FolderObject.INFOSTORE != module) {
                     throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
@@ -464,15 +478,22 @@ public class OXFolderAccess {
                         Integer.valueOf(ctx.getContextId()));
                 }
                 /*
-                 * Re-Create default infostore folder
+                 * Re-Create default infostore / infostore trash folder
                  */
+                User user = UserStorage.getInstance().getUser(userId, ctx);
+                final int fuid;
                 final Connection wc = DBPool.pickupWriteable(ctx);
                 try {
                     wc.setAutoCommit(false);
-                    final String displayName = UserStorage.getInstance().getUser(userId, ctx).getDisplayName();
-                    final int fuid = new OXFolderAdminHelper().addUserToInfoStore(userId, displayName, ctx.getContextId(), wc);
+                    if (FolderObject.TRASH == type) {
+                        if (false == OXFolderAdminHelper.CREATE_INFOSTORE_TRASH) {
+                            return null;
+                        }
+                        fuid = new OXFolderAdminHelper().addUserTrashToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
+                    } else {
+                        fuid = new OXFolderAdminHelper().addUserToInfoStore(userId, user.getDisplayName(), ctx.getContextId(), wc);
+                    }
                     wc.commit();
-                    return getFolderObject(fuid);
                 } catch (final SQLException e) {
                     DBUtils.rollback(wc);
                     throw e;
@@ -483,6 +504,7 @@ public class OXFolderAccess {
                     DBUtils.autocommit(wc);
                     DBPool.closeWriterSilent(ctx, wc);
                 }
+                return getFolderObject(fuid);
             }
             return getFolderObject(folderId);
         } catch (final OXException e) {

@@ -164,8 +164,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			change.setException(true);
 			change.setMaster(original);
 			if (matchingException != null) {
-				final ParticipantChange participantChange = applyParticipantChange(
-						exception, matchingException, message.getMethod(), message);
+			    ParticipantChange participantChange = applyParticipantChange(exception, matchingException, message.getMethod(), message);
 				participantChange.setComment(message.getComment());
 
 				change = new ITipChange();
@@ -179,8 +178,15 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
 				analysis.addChange(change);
 			} else {
-				analysis.addAnnotation(new ITipAnnotation(
-						Messages.CHANGE_PARTICIPANT_STATE_IN_UNKNOWN_APPOINTMENT, locale));
+                ParticipantChange participantChange = applyParticipantChange(exception, original, message.getMethod(), message);
+			    change.setCurrentAppointment(original);
+			    change.setNewAppointment(exception);
+			    change.setType(Type.CREATE);
+			    change.setParticipantChange(participantChange);
+			    describeReplyDiff(message, change, wrapper, session);
+			    analysis.addChange(change);
+			    
+				//analysis.addAnnotation(new ITipAnnotation(Messages.CHANGE_PARTICIPANT_STATE_IN_UNKNOWN_APPOINTMENT, locale));
 			}
 		}
 		if (containsPartyCrasher(analysis)) {
@@ -329,7 +335,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				// Explicitely ignore title update
 				update.setTitle(original.getTitle());
 			}
-		} else {
+		} else if (!update.containsRecurrenceDatePosition() && !update.containsRecurrencePosition()) {
 			// The Reply may only override participant states
 			final AppointmentDiff diff = AppointmentDiff.compare(update, original,
 					CalendarObject.PARTICIPANTS, CalendarObject.USERS,
@@ -337,6 +343,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			for (final FieldUpdate upd : diff.getUpdates()) {
 				update.set(upd.getFieldNumber(), upd.getNewValue());
 			}
+		} else {
+		    // hier wir
 		}
 
 		final List<Participant> newParticipants = new ArrayList<Participant>();

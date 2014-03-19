@@ -244,7 +244,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      *
      * @throws Exception If no needed services are specified and immediately starting bundle fails
      */
-    private final void init() throws Exception {
+    private final void init(final BundleContext context) throws Exception {
         updateServiceState();
         final Class<?>[] classes = getNeededServices();
         if (null == classes) {
@@ -429,7 +429,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     public void start(final BundleContext context) throws Exception {
         try {
             this.context = context;
-            init();
+            init(context);
         } catch (final org.osgi.framework.ServiceException e) {
             LOG.error("", e);
             // Do not re-throw!

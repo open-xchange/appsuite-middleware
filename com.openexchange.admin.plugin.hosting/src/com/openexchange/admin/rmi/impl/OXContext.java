@@ -192,9 +192,44 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
-    public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
-        if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty())) {
+    public Set<String> getCapabilities(final Context ctx, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        if (null == ctx) {
+            throw new InvalidDataException("Missing context.");
+        }
+
+        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+
+        new BasicAuthenticator(context).doAuthentication(auth);
+
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (final NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
+
+        try {
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            return oxcox.getCapabilities(ctx);
+        } catch (final StorageException e) {
+            log.error("", e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error("", e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void changeCapabilities(final Context ctx, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty()) && (null == capsToDrop || capsToDrop.isEmpty())) {
             throw new InvalidDataException("No capabilities specified.");
+        }
+        if (null == ctx) {
+            throw new InvalidDataException("Missing context.");
         }
 
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
@@ -215,7 +250,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.changeCapabilities(ctx, capsToAdd, capsToRemove, auth);
+            oxcox.changeCapabilities(ctx, capsToAdd, capsToRemove, capsToDrop, auth);
         } catch (final StorageException e) {
             log.error("", e);
             throw e;
@@ -358,12 +393,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         log.debug("{} - {} - {} - {}", ctx, admin_user, access_combination_name, auth);
 
-        final UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
+        UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
         if(access==null){
             // no such access combination name defined in configuration
             // throw error!
             throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
         }
+        access = access.clone();
 
         return createcommon(ctx, admin_user, null, access, auth);
     }
@@ -1064,6 +1100,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } else {
             createaccess = access;
         }
+        createaccess = createaccess.clone();
 
         Context ret = ctx;
         ret = oxcox.create(ret, admin_user, createaccess);
@@ -1203,12 +1240,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            final UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
+            UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
             if(access==null){
                 // no such access combination name defined in configuration
                 // throw error!
                 throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
             }
+            access = access.clone();
             callPluginMethod("changeModuleAccess", ctx, access_combination_name, auth);
 
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();

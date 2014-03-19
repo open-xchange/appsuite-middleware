@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.management.MBeanInfo;
@@ -66,14 +67,14 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 import com.openexchange.log.LogProperties.Name;
+import com.openexchange.logging.mbean.LogbackMBeanResponse.MessageType;
 import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
  * {@link LogbackConfiguration}
- *
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -86,20 +87,26 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     // -------------------------------------------------------------------------------------------- //
 
     private final LoggerContext loggerContext;
+
     private final JoranConfigurator configurator;
+
     private final Map<String, Level> dynamicallyModifiedLoggers;
+
     private final Map<String, String> methodDescriptions;
+
     private final Map<String, String[]> methodParameters;
+
     private final Map<String, String[]> methodParameterDescriptions;
+
     private final TurboFilterCache turboFilterCache;
+
     private final RankingAwareTurboFilterList rankingAwareTurboFilterList;
+
     private final IncludeStackTraceServiceImpl traceServiceImpl;
 
     /**
-     * Initializes a new {@link LogbackConfiguration}.
-     *
-     * Reads the MBean annotations and adds those to the method* maps.
-     *
+     * Initializes a new {@link LogbackConfiguration}. Reads the MBean annotations and adds those to the method* maps.
+     * 
      * @throws NotCompliantMBeanException
      */
     public LogbackConfiguration(final LoggerContext loggerContext, final RankingAwareTurboFilterList rankingAwareTurboFilterList, final IncludeStackTraceServiceImpl traceServiceImpl) throws NotCompliantMBeanException {
@@ -123,10 +130,10 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
         configurator.setContext(loggerContext);
 
-        Class<?> [] interfaces = this.getClass().getInterfaces();
-        if (interfaces.length == 1) { //just in case, should always be equals to 1
+        Class<?>[] interfaces = this.getClass().getInterfaces();
+        if (interfaces.length == 1) { // just in case, should always be equals to 1
             Method[] methods = interfaces[0].getMethods();
-            for(Method m : methods) {
+            for (Method m : methods) {
                 if (m.isAnnotationPresent(MBeanMethodAnnotation.class)) {
                     MBeanMethodAnnotation a = m.getAnnotation(MBeanMethodAnnotation.class);
                     methodParameters.put(m.getName(), a.parameters());
@@ -148,49 +155,67 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     }
 
     @Override
-    public void filterContext(int contextID) {
-        LOG.debug("New context filter created for context with ID \"{}\" and policy \"ACCEPT\"", Integer.valueOf(contextID));
-        createExtendedMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID), FilterReply.ACCEPT);
+    public LogbackMBeanResponse filterContext(int contextID, Map<String, Level> loggers) {
+        return createExtendedMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID), loggers, FilterReply.ACCEPT);
     }
 
     @Override
-    public void filterUser(int userID, int contextID) {
-        LOG.debug("New user filter created for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", Integer.valueOf(userID), Integer.valueOf(contextID));
+    public LogbackMBeanResponse filterUser(int userID, int contextID, Map<String, Level> loggers) {
         StringBuilder builder = new StringBuilder(2048).append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)));
         builder.append(":").append(createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
         String key = builder.toString();
-        builder = null;
+        builder.setLength(0);
+        LogbackMBeanResponse response = new LogbackMBeanResponse();
 
-        ExtendedMDCFilter filter = new ExtendedMDCFilter(getLoggerWhitelist());
-        filter.addTuple(Name.SESSION_USER_ID.getName(), Integer.toString(userID));
-        filter.addTuple(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID));
-        filter.setName(key);
-
-        if (!turboFilterCache.putIfAbsent(key, filter)) {
-            LOG.debug("Duplicate user filter for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", Integer.valueOf(userID), Integer.valueOf(contextID));
+        ExtendedMDCFilter filter = (ExtendedMDCFilter) turboFilterCache.get(key);
+        if (filter == null) {
+            filter = new ExtendedMDCFilter(getLoggerWhitelist());
+            filter.addTuple(Name.SESSION_USER_ID.getName(), Integer.toString(userID));
+            filter.addTuple(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID));
+            filter.setName(key);
+            builder.append("Created new ");
+        } else {
+            builder.append("Updating ");
         }
+        builder.append("filter for user with ID \"").append(userID).append("\", in context with ID \"").append(contextID).append("\" and policy \"ACCEPT\"");
+        response.addMessage(builder.toString(), MessageType.INFO);
+        
+        addLoggersToFilter(getLoggerWhitelist(), loggers, filter, response);
+        
+        turboFilterCache.put(key, filter);
+        LOG.info(builder.toString());        
+        
+        return response;
     }
 
     @Override
-    public void filterSession(String sessionID) {
-        LOG.debug("New session filter created for session with ID \"{}\" and policy \"ACCEPT\"", sessionID);
-        createExtendedMDCFilter(Name.SESSION_SESSION_ID.getName(), sessionID, FilterReply.ACCEPT);
+    public LogbackMBeanResponse filterSession(String sessionID, Map<String, Level> loggers) {
+        return createExtendedMDCFilter(Name.SESSION_SESSION_ID.getName(), sessionID, loggers, FilterReply.ACCEPT);
     }
 
     @Override
-    public void setLogLevel(String level, String[] loggers) {
-        for (String s : loggers) {
-            Level l = Level.valueOf(level);
+    public LogbackMBeanResponse modifyLogLevels(Map<String, Level> loggers) {
+        LogbackMBeanResponse response = new LogbackMBeanResponse();
+        StringBuilder builder = new StringBuilder();
+        for (String s : loggers.keySet()) {
+            Level l = loggers.get(s);
             loggerContext.getLogger(s).setLevel(l);
             dynamicallyModifiedLoggers.put(s, l);
-            LOG.debug("Setting log level for \"{}\" to \"{}\"", s, level);
+            builder.setLength(0);
+            builder.append("Setting log level for \"").append(s).append("\" to \"").append(l).append("\"");
+            response.addMessage(builder.toString(), MessageType.INFO);
+            LOG.info(builder.toString());
         }
+        return response;
     }
 
     @Override
-    public void overrideExceptionCategories(String categories) {
-        LOG.debug("Setting suppressed Exception Categories to \"{}\"", categories);
+    public LogbackMBeanResponse overrideExceptionCategories(String categories) {
+        LogbackMBeanResponse response = new LogbackMBeanResponse();
+        LOG.info("Setting suppressed Exception Categories to \"{}\"", categories);
         ExceptionCategoryFilter.setCategories(categories);
+        response.addMessage("Setting suppressed Exception Categories to " + categories, MessageType.INFO);
+        return response;
     }
 
     @Override
@@ -203,28 +228,108 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     }
 
     @Override
-    public void removeContextFilter(int contextID) {
-        removeFilter(createKey(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID)));
-        LOG.debug("Removed context filter with context ID \"{}\"", Integer.valueOf(contextID));
+    public LogbackMBeanResponse removeContextFilter(int contextID, List<String> loggers) {
+        LogbackMBeanResponse response = new LogbackMBeanResponse();
+        String key = createKey(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID));
+        StringBuilder builder = new StringBuilder();
+        if (loggers.isEmpty()) {
+            removeFilter(key);
+            builder.setLength(0);
+            builder.append("Removed context filter with context ID \"").append(contextID).append("\"");
+            LOG.info(builder.toString());
+            response.addMessage(builder.toString(), MessageType.INFO);
+        } else {
+            ExtendedMDCFilter filter = (ExtendedMDCFilter) turboFilterCache.get(key);
+            if (filter != null) {
+                for (String s : loggers) {
+                    filter.removeLogger(s);
+                    builder.setLength(0);
+                    builder.append("Removed logger \"").append(s).append("\"").append(" from context filter with context ID \"").append(contextID).append("\"");
+                    response.addMessage(builder.toString(), MessageType.INFO);
+                    LOG.info(builder.toString());
+                }
+            } else {
+                builder.setLength(0);
+                builder.append("Context filter with contextID \"").append(contextID).append("\" does not exist.");
+                LOG.info(builder.toString());
+                response.addMessage(builder.toString(), MessageType.WARNING);
+            }
+        }
+        return response;
     }
 
     @Override
-    public void removeUserFilter(int userID, int contextID) {
-        StringBuilder builder = new StringBuilder(2048).append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)));
+    public LogbackMBeanResponse removeUserFilter(int userID, int contextID, List<String> loggers) {
+        LogbackMBeanResponse response = new LogbackMBeanResponse();
+        StringBuilder builder = new StringBuilder().append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)));
         builder.append(":").append(createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
-        removeFilter(builder.toString());
-        LOG.debug("Removed user filter for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", Integer.valueOf(userID), Integer.valueOf(contextID));
+        String key = builder.toString();
+        
+        if (loggers.isEmpty()) {
+            removeFilter(key);
+            builder.setLength(0);
+            builder.append("Removed user filter for user with ID \"").append(userID).append("\", context with ID \"").append(contextID).append("\" and policy \"ACCEPT\"");
+            LOG.info(builder.toString());
+            response.addMessage(builder.toString(), MessageType.INFO);
+        } else {
+            ExtendedMDCFilter filter = (ExtendedMDCFilter) turboFilterCache.get(key);
+            if (filter != null) {
+                for (String s : loggers) {
+                    filter.removeLogger(s);
+                    builder.setLength(0);
+                    builder.append("Removed logger \"").append(s).append("\"").append(" from ")
+                            .append(" user filter for user with ID \"").append(userID)
+                            .append("\", context with ID \"").append(contextID).append("\" and policy \"ACCEPT\"");
+                    LOG.info(builder.toString());
+                    response.addMessage(builder.toString(), MessageType.INFO);
+                }
+            } else {
+                builder.append("User filter for user with ID \"").append(userID).append("\", context with ID \"").append(contextID).append("\" and policy \"ACCEPT\" does not exist");
+                LOG.info(builder.toString());
+                response.addMessage(builder.toString(), MessageType.WARNING);
+            }
+        }
+        
+        return response;
     }
 
     @Override
-    public void removeSessionFilter(String sessionID) {
-        removeFilter(createKey(Name.SESSION_SESSION_ID.getName(), sessionID));
+    public LogbackMBeanResponse removeSessionFilter(String sessionID, List<String> loggers) {
+        LogbackMBeanResponse response = new LogbackMBeanResponse();
+        String key = createKey(Name.SESSION_SESSION_ID.getName(), sessionID);
+        StringBuilder builder = new StringBuilder();
+        if (loggers.isEmpty()) {
+            removeFilter(key);
+            builder.setLength(0);
+            builder.append("Removed session filter with ID \"").append(sessionID).append("\"");
+            LOG.info(builder.toString());
+            response.addMessage(builder.toString(), MessageType.INFO);
+        } else {
+            ExtendedMDCFilter filter = (ExtendedMDCFilter) turboFilterCache.get(key);
+            if (filter != null) {
+                for (String s : loggers) {
+                    filter.removeLogger(s);
+                    builder.setLength(0);
+                    builder.append("Removed logger \"").append(s).append("\"").append(" from ")
+                        .append(" session filter with ID \"").append(sessionID)
+                        .append("\" and policy \"ACCEPT\"");
+                    response.addMessage(builder.toString(), MessageType.INFO);
+                    LOG.info(builder.toString());
+                }
+            } else {
+                builder.setLength(0);
+                builder.append("Session filter with ID \"").append(sessionID).append("\"").append(" does not exist.");
+                LOG.info(builder.toString());
+                response.addMessage(builder.toString(), MessageType.WARNING);
+            }
+        }
+        return response;
     }
 
     @Override
     public Set<String> listAllLoggers() {
         Set<String> loggers = new HashSet<String>();
-        for(ch.qos.logback.classic.Logger l : loggerContext.getLoggerList()) {
+        for (ch.qos.logback.classic.Logger l : loggerContext.getLoggerList()) {
             loggers.add(getLoggerNameAndLevel(l));
         }
         return loggers;
@@ -232,22 +337,24 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
     @Override
     public Set<String> listFilters() {
+        StringBuilder builder = new StringBuilder();
         Set<String> filters = new HashSet<String>();
-        for (TurboFilter tf : loggerContext.getTurboFilterList()) {
-            final String name = tf.getName();
-            if (null != name) {
-                filters.add(name);
-            }
+        for (String key : turboFilterCache.keySet()) {
+            filters.add(builder.append(turboFilterCache.get(key).toString()).toString());
+            builder.setLength(0);
         }
         return filters;
     }
 
-
     @Override
-    public synchronized void removeAllFilters() {
+    public synchronized LogbackMBeanResponse clearFilters() {
+        LogbackMBeanResponse response = new LogbackMBeanResponse();
         rankingAwareTurboFilterList.clear();
         turboFilterCache.clear();
-        LOG.debug("Removed all filters");
+        String msg = "Removed all filters";
+        LOG.info(msg);
+        response.addMessage(msg, MessageType.INFO);
+        return response;
     }
 
     @Override
@@ -259,12 +366,11 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         return l;
     }
 
-
     @Override
     public Set<String> listDynamicallyModifiedLoggers() {
         Set<String> loggers = new HashSet<String>();
         Iterator<String> keys = dynamicallyModifiedLoggers.keySet().iterator();
-        while(keys.hasNext()) {
+        while (keys.hasNext()) {
             loggers.add(getLoggerNameAndLevel(loggerContext.getLogger(keys.next())));
         }
         return loggers;
@@ -297,7 +403,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
     /**
      * Delegate method for MBeanOperationInfo
-     *
+     * 
      * @param map
      * @param op
      * @param param
@@ -315,16 +421,29 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     /**
      * Create an MDCFilter based on the specified key/value/filter
      */
-    private final void createExtendedMDCFilter(String key, String value, FilterReply onMatch) {
+    private final LogbackMBeanResponse createExtendedMDCFilter(String key, String value, Map<String, Level> loggers, FilterReply onMatch) {
+        LogbackMBeanResponse response = new LogbackMBeanResponse();
         String sKey = createKey(key, value);
-
-        ExtendedMDCFilter filter = new ExtendedMDCFilter(getLoggerWhitelist());
-        filter.addTuple(key, value);
-        filter.setName(sKey);
-
-        if (!turboFilterCache.putIfAbsent(sKey, filter)) {
-            LOG.debug("Duplicate filter for \"{}\" with ID \"{}\" and policy \"ACCEPT\"", key, value);
+        ExtendedMDCFilter filter = (ExtendedMDCFilter) turboFilterCache.get(sKey);
+        StringBuilder builder = new StringBuilder();
+        
+        if (filter == null) {
+            filter = new ExtendedMDCFilter(getLoggerWhitelist());
+            filter.addTuple(key, value);
+            filter.setName(sKey);
+            builder.append("Created new ");
+        } else {
+            builder.append("Updated ");
         }
+        builder.append("filter with key \"").append(key).append("\" and value \"").append(value).append("\" and policy \"ACCEPT\"");
+        response.addMessage(builder.toString(), MessageType.INFO);
+        
+        addLoggersToFilter(getLoggerWhitelist(), loggers, filter, response);
+        
+        turboFilterCache.put(sKey, filter);
+        LOG.info(builder.toString());
+        
+        return response;
     }
 
     /**
@@ -345,14 +464,14 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
     /**
      * Get a stringified version of logger name and level
-     *
+     * 
      * @param logger
      * @return
      */
     private String getLoggerNameAndLevel(ch.qos.logback.classic.Logger logger) {
-       StringBuilder builder = new StringBuilder();
-       builder.append("Logger: ").append(logger.getName()).append(", Level: ").append(logger.getLevel());
-       return builder.toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append("Logger: ").append(logger.getName()).append(", Level: ").append(logger.getLevel());
+        return builder.toString();
     }
 
     private Set<String> getLoggerWhitelist() {
@@ -369,5 +488,34 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
         return resultSet;
     }
-
+    
+    /**
+     * Add the specified loggers to the filter in regard to the whitelist
+     * 
+     * @param whitelist of loggers
+     * @param loggers to add to the filter
+     * @param filter the filter
+     * @param response the response object
+     */
+    private static final void addLoggersToFilter(Set<String> whitelist, Map<String, Level> loggers, ExtendedMDCFilter filter, LogbackMBeanResponse response) {
+        for (String s : loggers.keySet()) {
+            boolean added = false;
+            for (String wl : whitelist) {
+                if (s.startsWith(wl)) {
+                    Level l = loggers.get(s);
+                    filter.addLogger(s, l);
+                    String msg = "Added logger \"" + s + "\" with level \"" + l + "\""; 
+                    response.addMessage(msg, MessageType.INFO);
+                    added = true;
+                    break;
+                }
+            }
+            if (!added) {
+                String msg = "The provided logger \"" + s + "\" is not in the whitelist, hence it is not added to the filter.";
+                response.addMessage(msg, MessageType.WARNING);
+                LOG.warn(msg);
+            }
+        }
+    }
 }
+

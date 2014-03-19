@@ -58,9 +58,9 @@ import javax.mail.MessagingException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.imap.cache.FolderCache;
@@ -95,7 +95,7 @@ public final class IMAPException extends OXException {
     /**
      * The IMAP error code enumeration.
      */
-    public static enum Code implements OXExceptionCode {
+    public static enum Code implements DisplayableOXExceptionCode {
 
         /**
          * Missing parameter in mail connection: %1$s
@@ -427,6 +427,11 @@ public final class IMAPException extends OXException {
          */
         public OXException create(final Throwable cause, final Object... args) {
             return OXExceptionFactory.getInstance().create(this, cause, args);
+        }
+
+        @Override
+        public String getDisplayMessage() {
+            return imapCode.getDisplayMessage();
         }
 
     }

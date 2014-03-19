@@ -89,6 +89,9 @@ public class DeleteSubscriptionAction extends AbstractSubscribeAction {
             final Subscription subscription = new Subscription();
             subscription.setContext(context);
             subscription.setId(id);
+            if (null == subscription.getSession()) {
+                subscription.setSession(subscribeRequest.getServerSession());
+            }
             subscribeService.unsubscribe(subscription);
         }
         return new AJAXRequestResult(Integer.valueOf(1), "json");

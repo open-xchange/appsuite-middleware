@@ -53,7 +53,6 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.json.JSONExceptionMessage;
 import com.openexchange.realtime.json.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
@@ -90,7 +89,7 @@ public class StanzaBuilderSelector {
         }
         String element = json.optString("element");
         if (element == null) {
-            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(JSONExceptionMessage.MISSING_KEY_MSG);
+            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create("Obligatory key \"%1$s\" is missing from the Stanza");
         }
         if (element.equalsIgnoreCase("iq")) {
             return new IQBuilder(from, json, session);
@@ -99,7 +98,7 @@ public class StanzaBuilderSelector {
         } else if (element.equalsIgnoreCase("presence")) {
             return new PresenceBuilder(from, json, session);
         } else {
-            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(JSONExceptionMessage.MISSING_BUILDER_FOR_ELEMENT_MSG);
+            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create("Could not find a builder for the given element: . \"%1$s\"");
         }
     }
 }

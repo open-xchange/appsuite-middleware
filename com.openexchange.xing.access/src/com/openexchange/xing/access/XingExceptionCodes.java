@@ -148,7 +148,10 @@ public enum XingExceptionCodes implements DisplayableOXExceptionCode {
      * Text message size exceeds 140 chars.
      */
     TEXT_MESSAGE_SIZE_EXCEEDED("Text message size exceeds 140 chars.", Category.CATEGORY_USER_INPUT, 24, XingExceptionMessages.TEXT_MESSAGE_SIZE_EXCEEDED_MSG),
-
+    /**
+     * Already sent invitation to E-Mail address: %1$s
+     */
+    ALREADY_INVITED("Already sent invitation to E-Mail address: %1$s", Category.CATEGORY_USER_INPUT, 25, XingExceptionMessages.ALREADY_INVITED_MSG),
     ;
 
     private final Category category;

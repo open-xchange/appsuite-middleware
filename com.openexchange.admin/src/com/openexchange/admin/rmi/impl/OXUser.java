@@ -140,9 +140,60 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty())) {
+    public Set<String> getCapabilities(final Context ctx, final User user, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        if (null == ctx) {
+            throw new InvalidDataException("Missing context.");
+        }
+        if (null == user) {
+            throw new InvalidDataException("Missing user.");
+        }
+
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            checkContextAndSchema(ctx);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+            final int user_id = user.getId().intValue();
+            if (!tool.existsUser(ctx, user_id)) {
+                throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
+            }
+            return oxu.getCapabilities(ctx, user);
+        } catch (final StorageException e) {
+            log.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            log.error("", e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            log.error("", e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error("", e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            log.error("", e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void changeCapabilities(final Context ctx, final User user, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty()) && (null == capsToDrop || capsToDrop.isEmpty())) {
             throw new InvalidDataException("No capabilities specified.");
+        }
+        if (null == ctx) {
+            throw new InvalidDataException("Missing context.");
+        }
+        if (null == user) {
+            throw new InvalidDataException("Missing user.");
         }
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
@@ -160,7 +211,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
-            oxu.changeCapabilities(ctx, user, capsToAdd, capsToRemove, auth);
+            oxu.changeCapabilities(ctx, user, capsToAdd, capsToRemove, capsToDrop, auth);
         } catch (final StorageException e) {
             log.error("", e);
             throw e;
@@ -486,12 +537,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
 
-            final UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
+            UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
             if(access==null){
                 // no such access combination name defined in configuration
                 // throw error!
                 throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
             }
+            access = access.clone();
             if (access.isPublicFolderEditable() && user_id != tool.getAdminForContext(ctx)) {
                 // publicFolderEditable can only be applied to the context administrator.
                 access.setPublicFolderEditable(false);
@@ -595,12 +647,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         basicauth.doAuthentication(auth, ctx);
 
 
-        final UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
+        UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
         if(access==null){
             // no such access combination name defined in configuration
             // throw error!
             throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
         }
+        access = access.clone();
 
         if (access.isPublicFolderEditable()) {
             // publicFolderEditable can only be applied to the context administrator.
@@ -1167,7 +1220,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public UserModuleAccess moduleAccessForName(final String accessCombinationName) {
-        return null == accessCombinationName ? null : cache.getAccessCombinationNames().get(accessCombinationName);
+        if (null == accessCombinationName) {
+            return null;
+        }
+        final UserModuleAccess moduleAccess = cache.getAccessCombinationNames().get(accessCombinationName);
+        return null == moduleAccess ? null : moduleAccess.clone();
     }
 
     @Override

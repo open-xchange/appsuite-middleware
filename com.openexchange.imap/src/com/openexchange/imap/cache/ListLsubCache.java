@@ -128,6 +128,11 @@ public final class ListLsubCache {
         return new Key(session.getUserId(), session.getContextId());
     }
 
+    /**
+     * The virtual region name.
+     */
+    public static final String REGION = "ListLsubCache";
+
     /** The default timeout for LIST/LSUB cache (5 minutes) */
     private static final long DEFAULT_TIMEOUT = 300000;
 
@@ -213,7 +218,18 @@ public final class ListLsubCache {
      * @param session The session
      */
     public static void clearCache(final int accountId, final Session session) {
-        final ConcurrentMap<Integer, Future<ListLsubCollection>> map = MAP.get(keyFor(session));
+        clearCache(accountId, session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Clears the cache.
+     *
+     * @param accountId The account ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public static void clearCache(final int accountId, final int userId, final int contextId) {
+        final ConcurrentMap<Integer, Future<ListLsubCollection>> map = MAP.get(new Key(userId, contextId));
         if (null == map) {
             return;
         }

@@ -119,6 +119,13 @@ public interface IIMAPProperties extends IMailProperties {
     public boolean isImapSearch();
 
     /**
+     * Checks if IMAP search is enabled and should be forced regardless of the mail fetch limit.
+     *
+     * @return <code>true</code> if IMAP search should be forced; otherwise <code>false</code>
+     */
+    public boolean forceImapSearch();
+
+    /**
      * Checks if IMAP sort is enabled.
      *
      * @return <code>true</code> if IMAP sort is enabled; otherwise <code>false</code>

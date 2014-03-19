@@ -78,6 +78,41 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
 
+    @Override
+    public final AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+        AutocompleteResult autocompleteResult = doAutocomplete(autocompleteRequest, session);
+        List<Facet> modifiedFacets = new LinkedList<Facet>();
+        if (!autocompleteRequest.getPrefix().isEmpty()) {
+            Facet globalFacet = new FieldFacet(
+                CommonFacetType.GLOBAL,
+                new FormattableDisplayItem(getFormatStringForGlobalFacet(), autocompleteRequest.getPrefix()),
+                new Filter(Collections.singletonList(CommonFacetType.GLOBAL.getId()),
+                    Collections.singletonList(autocompleteRequest.getPrefix())));
+            modifiedFacets.add(globalFacet);
+        }
+
+        filterFacets(autocompleteResult.getFacets(), autocompleteRequest.getActiveFactes(), modifiedFacets);
+        autocompleteResult.setFacets(modifiedFacets);
+        return autocompleteResult;
+    }
+
+    @Override
+    public SearchConfiguration getSearchConfiguration(ServerSession session) throws OXException {
+        return new SearchConfiguration();
+    }
+
+    /**
+     * The format string to construct the display item for the global facet.
+     * Something like "%1$s <i>in file name</i>". Must contain exactly one
+     * string reference that will be replaced with the current prefix.
+     */
+    protected abstract String getFormatStringForGlobalFacet();
+
+    /**
+     * @see ModuleSearchDriver#autocomplete(ServerSession, AutocompleteRequest)
+     */
+    protected abstract AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException;
+
     /**
      * Builds the facet for folder types (private, public , shared, external) that is indicated on {@link ModuleSearchDriver#getConfiguration(com.openexchange.tools.session.ServerSession) getConfiguration(ServerSession)} invocation.
      *
@@ -161,34 +196,4 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
     protected static String prepareFacetValueId(String prefix, int contextId, String objectId) {
         return prefix + '/' + Integer.toString(contextId) + '/' + objectId;
     }
-
-    @Override
-    public final AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
-        AutocompleteResult autocompleteResult = doAutocomplete(autocompleteRequest, session);
-        List<Facet> modifiedFacets = new LinkedList<Facet>();
-        if (!autocompleteRequest.getPrefix().isEmpty()) {
-            Facet globalFacet = new FieldFacet(
-                CommonFacetType.GLOBAL,
-                new FormattableDisplayItem(getFormatStringForGlobalFacet(), autocompleteRequest.getPrefix()),
-                new Filter(Collections.singletonList(CommonFacetType.GLOBAL.getId()),
-                    Collections.singletonList(autocompleteRequest.getPrefix())));
-            modifiedFacets.add(globalFacet);
-        }
-
-        filterFacets(autocompleteResult.getFacets(), autocompleteRequest.getActiveFactes(), modifiedFacets);
-        autocompleteResult.setFacets(modifiedFacets);
-        return autocompleteResult;
-    }
-
-    /**
-     * The format string to construct the display item for the global facet.
-     * Something like "%1$s <i>in file name</i>". Must contain exactly one
-     * string reference that will be replaced with the current prefix.
-     */
-    protected abstract String getFormatStringForGlobalFacet();
-
-    /**
-     * @see ModuleSearchDriver#autocomplete(ServerSession, AutocompleteRequest)
-     */
-    protected abstract AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException;
 }

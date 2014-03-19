@@ -61,6 +61,7 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.database.DatabaseService;
@@ -114,8 +115,9 @@ public final class IMAPActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ThreadPoolService.class,
-            TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class, EventAdmin.class };
+            ConfigurationService.class, CacheService.class, CacheEventService.class, UserService.class, MailAccountStorageService.class,
+            ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class,
+            EventAdmin.class };
     }
 
     @Override
@@ -154,6 +156,7 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Trackers
              */
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
+            track(CacheEventService.class, new ListLsubInvalidator(context));
             openTrackers();
             /*
              * Register login handler

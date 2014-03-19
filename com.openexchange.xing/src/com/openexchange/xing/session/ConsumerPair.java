@@ -47,32 +47,23 @@
  *
  */
 
-package com.openexchange.loxandra;
+package com.openexchange.xing.session;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link LoxandraExceptionMessages} - Exception messages for {@link OXException} that must be translated.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link ConsumerPair}.
+ * Holds a consumer key/secret pair for the create profile workflow (upsell)
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class LoxandraExceptionMessages implements LocalizableStrings {
+public class ConsumerPair extends TokenPair {
 
-    // An error occurred: %1$s
-    public static final String ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // A configuration error: %1$s
-    public static final String CONFIG_ERROR_MSG = "A configuration error: %1$s";
+    private static final long serialVersionUID = -2767600578054678436L;
 
     /**
-     * Prevent instantiation.
+     * Initializes a new {@link ConsumerPair}.
      */
-    private LoxandraExceptionMessages() {
-        super();
+    public ConsumerPair(String consumerKey, String secret) {
+        super(consumerKey, secret);
     }
 }

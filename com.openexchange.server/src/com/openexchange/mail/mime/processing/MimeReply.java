@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
+import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.mail.mime.filler.MimeMessageFiller.setReplyHeaders;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
@@ -652,7 +653,7 @@ public final class MimeReply {
      * @throws MessagingException
      * @throws IOException
      */
-    private static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final LocaleAndTimeZone ltz, final UserSettingMail usm, final javax.mail.Session mailSession, final Session session, final int accountId, final List<String> replyTexts) throws OXException, MessagingException, IOException {
+    static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final LocaleAndTimeZone ltz, final UserSettingMail usm, final javax.mail.Session mailSession, final Session session, final int accountId, final List<String> replyTexts) throws OXException, MessagingException, IOException {
         final StringBuilder textBuilder = new StringBuilder(8192);
         final ContentType contentType = msg.getContentType();
         boolean found = false;
@@ -799,7 +800,7 @@ public final class MimeReply {
         final ContentType partContentType = new ContentType();
         final boolean htmlPreferred = pc.usm.isDisplayHtmlInlineContent();
         boolean found = false;
-        if (htmlPreferred && mpContentType.startsWithAny(MimeTypes.MIME_MULTIPART_ALTERNATIVE, MimeTypes.MIME_MULTIPART_RELATED) && count >= 2) {
+        if (htmlPreferred && count >= 2 && mpContentType.startsWithAny(MimeTypes.MIME_MULTIPART_ALTERNATIVE, MimeTypes.MIME_MULTIPART_RELATED)) {
             /*
              * Prefer HTML content within multipart/alternative part
              */
@@ -814,7 +815,7 @@ public final class MimeReply {
             /*
              * Get any text content
              */
-            found = getTextContent(htmlPreferred, !htmlPreferred, multipartPart, count, partContentType, accountId, pc);
+            found = getTextContent(false, !htmlPreferred, multipartPart, count, partContentType, accountId, pc);
             if (!found) {
                 /*
                  * No HTML part found, retry with any text part
@@ -960,6 +961,8 @@ public final class MimeReply {
                         if (nextContentType.startsWith(TEXT) && (avoidHTML ? !nextContentType.startsWith(TEXT_HTM) : true) && MimeProcessingUtility.isInline(nextPart, nextContentType) && !MimeProcessingUtility.isSpecial(nextContentType.getBaseType())) {
                             String text = MimeProcessingUtility.handleInlineTextPart(nextPart, nextContentType, pc.usm.isDisplayHtmlInlineContent());
                             pc.textBuilder.append(text);
+                        } else if (nextContentType.startsWith(MULTIPART)) {
+                            gatherAllTextContents(nextPart, nextContentType, accountId, pc);
                         }
                     }
                     return true;
@@ -1070,18 +1073,6 @@ public final class MimeReply {
             this.ltz = ltz;
             this.replyTexts = replyTexts;
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static final Pattern PATTERN_CONTENT = Pattern.compile("(<[a-zA-Z]+[^>]*?>)?\\p{L}+");

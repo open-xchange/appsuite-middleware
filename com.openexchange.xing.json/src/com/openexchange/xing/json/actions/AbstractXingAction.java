@@ -83,9 +83,9 @@ import com.openexchange.xing.session.WebAuthSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractXingAction implements AJAXActionService {
-    
+
     private static final List<UserField> USER_FIELDS = Arrays.asList(UserField.values());
-    
+
     private final ServiceLookup services;
 
     /**
@@ -155,21 +155,22 @@ public abstract class AbstractXingAction implements AJAXActionService {
         final int xingOAuthAccount = provider.getXingOAuthAccount(session);
         return provider.accessFor(xingOAuthAccount, session);
     }
-    
+
     /**
-     * Get an instance to the XingAPI
-     * @param req the XingRequest
-     * @return an instance to XingAPI
-     * @throws OXException
+     * Get an instance to the {@link XingAPI}.
+     *
+     * @param req The XING request
+     * @return A {@link XingAPI} instance
+     * @throws OXException If instance cannot be returned
      */
     protected XingAPI<WebAuthSession> getXingAPI(XingRequest req) throws OXException {
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         return xingOAuthAccess.getXingAPI();
     }
-    
+
     /**
      * Get the UserFields from the specified parameter object.
-     * 
+     *
      * @param user_fields as a comma separated String
      * @return a {@link Collection} with {@link UserField}s, or null
      * @throws OXException
@@ -194,7 +195,7 @@ public abstract class AbstractXingAction implements AJAXActionService {
 
     /**
      * Get the value of the specified mandatory parameter from the specified {@link XingRequest}.
-     * 
+     *
      * @param request
      * @param param the parameter's name
      * @return the value of the parameter
@@ -210,7 +211,7 @@ public abstract class AbstractXingAction implements AJAXActionService {
 
     /**
      * Get the specified integer parameter from the specified request.
-     * 
+     *
      * @param request
      * @param param the parameter's name
      * @return the parameter as integer, or -1 if not present.
@@ -218,30 +219,26 @@ public abstract class AbstractXingAction implements AJAXActionService {
      */
     protected int getOptIntParameter(XingRequest request, String param) throws OXException {
         String p = request.getParameter(param);
-        if (p != null) {
-            try {
-                return Integer.parseInt(p);
-            } catch (NumberFormatException e) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(param, p);
-            }
-        } else {
+        if (p == null) {
             return -1;
+        }
+        try {
+            return Integer.parseInt(p);
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(param, p);
         }
     }
 
     /**
      * Validates the value of an email address
-     * 
-     * @param request
-     * @param email the mail address to validate
-     * @return the unicode representation of the mail address
+     *
+     * @param email The E-Mail address to validate
+     * @return The Unicode representation of the mail address
      * @throws OXException if the parameter is missing from the request.
      */
     protected String validateMailAddress(String email) throws OXException {
         try {
-            final QuotedInternetAddress addr = new QuotedInternetAddress(email, false);
-            email = QuotedInternetAddress.toIDN(addr.getAddress());
-            return email;
+            return QuotedInternetAddress.toIDN(new QuotedInternetAddress(email, false).getAddress());
         } catch (final AddressException e) {
             throw MimeMailException.handleMessagingException(e);
         }

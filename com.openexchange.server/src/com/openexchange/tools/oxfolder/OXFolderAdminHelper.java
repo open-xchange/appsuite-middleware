@@ -98,6 +98,9 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OXFolderAdminHelper {
 
+    /** Enable once we're ready */
+    static final boolean CREATE_INFOSTORE_TRASH = false;
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderAdminHelper.class);
 
     private static final boolean ADMIN_EDITABLE = false;
@@ -1440,6 +1443,8 @@ public final class OXFolderAdminHelper {
 
     private static final String DEFAULT_TASK_NAME = "My Tasks";
 
+    private static final String DEFAULT_INFOSTORE_TRASH_NAME = "Deleted files";
+
     /**
      * Creates default folders for modules task, calendar, contact, and infostore for given user ID
      *
@@ -1495,7 +1500,12 @@ public final class OXFolderAdminHelper {
             if (defaultTaskName == null || defaultTaskName.length() == 0) {
                 defaultTaskName = DEFAULT_TASK_NAME;
             }
-            LOG.info("Folder names determined for default folders:\n\tCalendar={}\tContact={}\tTask={}", defaultCalName, defaultConName, defaultTaskName);
+            String defaultInfostoreTrashName = strHelper.getString(FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME);
+            if (defaultInfostoreTrashName == null || defaultInfostoreTrashName.length() == 0) {
+                defaultInfostoreTrashName = DEFAULT_INFOSTORE_TRASH_NAME;
+            }
+            LOG.info("Folder names determined for default folders:\n\tCalendar={}\tContact={}\tTask={}\tInfostore Trash={}",
+                defaultCalName, defaultConName, defaultTaskName, defaultInfostoreTrashName);
             /*
              * Insert default calendar folder
              */
@@ -1548,6 +1558,17 @@ public final class OXFolderAdminHelper {
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             LOG.info("User's default INFOSTORE folder successfully created");
+            if (CREATE_INFOSTORE_TRASH) {
+                /*
+                 * Insert default infostore trash folder
+                 */
+                fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+                fo.setType(FolderObject.TRASH);
+                fo.setFolderName(defaultInfostoreTrashName);
+                newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
+                OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+                LOG.info("User's default INFOSTORE trash folder successfully created");
+            }
             LOG.info("All user default folders were successfully created");
             /*
              * TODO: Set standard special folders (projects, ...) located beneath system user folder
@@ -1603,6 +1624,56 @@ public final class OXFolderAdminHelper {
             final int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             LOG.info("User's default INFOSTORE folder successfully created");
+            return newFolderId;
+        } catch (final SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Creates default trash folder for infostore module for given user ID
+     *
+     * @param userId The user ID
+     * @param language The user's language to translate the folder name into
+     * @param cid The context ID
+     * @param writeCon A writable connection to (master) database
+     * @return THe folder identifier
+     * @throws OXException If user's default infostore folder could not be created successfully
+     */
+    public int addUserTrashToInfoStore(final int userId, final String language, final int cid, final Connection writeCon) throws OXException {
+        try {
+            final Context ctx = new ContextImpl(cid);
+            /*
+             * Get folder name
+             */
+            StringHelper strHelper = StringHelper.valueOf(LocaleTools.getLocale(language));
+            String folderName = strHelper.getString(FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME);
+            if (folderName == null || folderName.length() == 0) {
+                folderName = DEFAULT_INFOSTORE_TRASH_NAME;
+            }
+            /*
+             * Insert default infostore trash folder
+             */
+            final long creatingTime = System.currentTimeMillis();
+            final OCLPermission defaultPerm = new OCLPermission();
+            defaultPerm.setEntity(userId);
+            defaultPerm.setGroupPermission(false);
+            defaultPerm.setAllPermission(
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION);
+            defaultPerm.setFolderAdmin(true);
+            final FolderObject fo = new FolderObject();
+            fo.setPermissionsAsArray(new OCLPermission[] { defaultPerm });
+            fo.setDefaultFolder(true);
+            fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+            fo.setType(FolderObject.TRASH);
+            fo.setFolderName(folderName);
+            fo.setModule(FolderObject.INFOSTORE);
+            final int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            LOG.info("User's default INFOSTORE trash folder successfully created");
             return newFolderId;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());

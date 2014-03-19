@@ -67,6 +67,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-1668
     ox_add_property com.openexchange.imap.storeContainerType boundary-aware $PFILE
+
+    # SoftwareChange_Request-1931
+    ox_add_property com.openexchange.imap.ssl.protocols "SSLv3 TLSv1" /opt/open-xchange/etc/imap.properties
 fi
 
 %clean
@@ -82,6 +85,8 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Thu Mar 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-03-13
 * Mon Mar 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-12
 * Fri Mar 07 2014 Marcus Klein <marcus.klein@open-xchange.com>

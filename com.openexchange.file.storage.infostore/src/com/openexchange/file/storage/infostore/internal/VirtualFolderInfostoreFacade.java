@@ -186,6 +186,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public int[] moveDocuments(ServerSession session, int ids[], long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
+        return ids;
+    }
+
+    @Override
     public void removeUser(final int userId, final Context context, final ServerSession session) {
         // Nothing to do.
     }

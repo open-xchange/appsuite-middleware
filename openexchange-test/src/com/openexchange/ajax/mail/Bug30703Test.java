@@ -81,10 +81,12 @@ public class Bug30703Test extends AbstractAJAXSession {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        System.out.println("--==dasejkfhsdkfjhsk==-- Set Up");
     }
 
     @Override
     protected void tearDown() throws Exception {
+        System.out.println("--==dasejkfhsdkfjhsk==-- Tear Down");
         try {
             StopPOP3ServerRequest stopReq = new StopPOP3ServerRequest();
             client.execute(stopReq);
@@ -143,14 +145,15 @@ public class Bug30703Test extends AbstractAJAXSession {
     }
 
     private void setupAccount(String host, int port) throws Exception {
+        String user = "Bug30703_User";
         mailAccountDescription = new MailAccountDescription();
         mailAccountDescription.setName("Bug30703Test_Account");
-        mailAccountDescription.setPrimaryAddress("bob@test.invalid");
+        mailAccountDescription.setPrimaryAddress(user + "@test.invalid");
         mailAccountDescription.parseMailServerURL("pop3://" + host + ":" + port);
-        mailAccountDescription.setLogin("oxuser");
+        mailAccountDescription.setLogin(user);
         mailAccountDescription.setPassword("secret");
-        mailAccountDescription.parseTransportServerURL("172.16.62.10");
-        mailAccountDescription.setTransportLogin("oxuser");
+        mailAccountDescription.parseTransportServerURL("smtp://" + host + ":" + port);
+        mailAccountDescription.setTransportLogin(user);
         mailAccountDescription.setTransportPassword("secret");
         mailAccountDescription.setConfirmedSpam("confirmedSpam");
         mailAccountDescription.setConfirmedHam("confirmedHam");

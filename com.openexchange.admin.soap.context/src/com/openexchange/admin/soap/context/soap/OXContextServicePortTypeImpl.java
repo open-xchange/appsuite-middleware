@@ -16,10 +16,12 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -106,10 +108,39 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
+    public String getContextCapabilities(Context ctx, Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
+        final OXContextInterface contextInterface = getContextInterface();
+        try {
+            final Set<String> capabilities = contextInterface.getCapabilities(soap2Context(ctx), soap2Credentials(auth));
+            if (null == capabilities || capabilities.isEmpty()) {
+                return "There are no capabilities set for context " + ctx.getId();
+            }
+
+            final Iterator<String> iterator = new TreeSet<String>(capabilities).iterator();
+            final StringBuilder sb = new StringBuilder(capabilities.size() << 4);
+            sb.append(iterator.next());
+            for (int i = capabilities.size(); i-- > 1;) {
+                sb.append(", ").append(iterator.next());
+            }
+            return sb.toString();
+        } catch (final RemoteException e) {
+            throw new RemoteException_Exception(e.getMessage(), e);
+        } catch (final InvalidCredentialsException e) {
+            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+        } catch (final NoSuchContextException e) {
+            throw new NoSuchContextException_Exception(e.getMessage(), e);
+        } catch (final StorageException e) {
+            throw new StorageException_Exception(e.getMessage(), e);
+        } catch (final InvalidDataException e) {
+            throw new InvalidDataException_Exception(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public void changeCapabilities(final ChangeCapabilities parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            contextInterface.changeCapabilities(soap2Context(parameters.ctx), parseToSet(parameters.capsToAdd), parseToSet(parameters.capsToRemove), soap2Credentials(parameters.auth));
+            contextInterface.changeCapabilities(soap2Context(parameters.ctx), parseToSet(parameters.capsToAdd), parseToSet(parameters.capsToRemove), parseToSet(parameters.capsToDrop), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
         } catch (final InvalidCredentialsException e) {

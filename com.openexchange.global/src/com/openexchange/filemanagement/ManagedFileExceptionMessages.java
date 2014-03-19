@@ -64,11 +64,6 @@ public class ManagedFileExceptionMessages implements LocalizableStrings {
     public static final String FILE_NOT_FOUND_MSG = "File not found: %1$s";
 
     /**
-     * I/O error: %1$s
-     */
-    public static final String IO_ERROR_MSG = "I/O error: %1$s";
-
-    /**
      * No such managed file associated with ID: %1$s
      */
     public static final String NOT_FOUND_MSG = "No such managed file associated with ID: %1$s";

@@ -83,7 +83,8 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.mail.json.actions.GetAttachmentActionTest.class,
     com.openexchange.ajax.requesthandler.converters.preview.cache.FileStoreResourceCacheImplTest.class,
     com.openexchange.server.services.SharedInfostoreJSlobTest.class,
-    com.openexchange.groupware.upload.quotachecker.MailUploadQuotaCheckerTest.class
+    com.openexchange.groupware.upload.quotachecker.MailUploadQuotaCheckerTest.class,
+    com.openexchange.mail.text.TextProcessingTest.class
 })
 public class UnitTests {
 

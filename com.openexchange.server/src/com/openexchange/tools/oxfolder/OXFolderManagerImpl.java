@@ -1376,6 +1376,30 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         default:
             throw OXFolderExceptionCode.UNKNOWN_MODULE.create(Integer.valueOf(module), Integer.valueOf(ctx.getContextId()));
         }
+        /*
+         * delete subfolders, too, when clearing the trash folder
+         */
+        if (FolderObject.TRASH == fo.getType()) {
+            /*
+             * Gather all deletable subfolders recursively
+             */
+            TIntObjectMap<TIntObjectMap<?>> deleteableFolders = new TIntObjectHashMap<TIntObjectMap<?>>();
+            try {
+                TIntList subfolders = OXFolderSQL.getSubfolderIDs(fo.getObjectID(), readCon, ctx);
+                for (int i = 0; i < subfolders.size(); i++) {
+                    deleteableFolders.putAll(gatherDeleteableFolders(
+                        subfolders.get(i), user.getId(), userPerms, StringCollection.getSqlInString(user.getId(), user.getGroups())));
+                }
+            } catch (SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            }
+            /*
+             * Delete subfolders
+             */
+            if (0 < deleteableFolders.size()) {
+                deleteValidatedFolders(deleteableFolders, lastModified, fo.getType());
+            }
+        }
         return fo;
     }
 

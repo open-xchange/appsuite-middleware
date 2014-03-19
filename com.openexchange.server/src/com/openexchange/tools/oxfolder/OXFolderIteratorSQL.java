@@ -131,6 +131,8 @@ public final class OXFolderIteratorSQL {
 
     private static final int PUBLIC = FolderObject.PUBLIC;
 
+    private static final int TRASH = FolderObject.TRASH;
+
     private static final int SHARED = FolderObject.SHARED;
 
     private static final int SYSTEM_TYPE = FolderObject.SYSTEM_TYPE;
@@ -1323,7 +1325,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If module's visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
     public static boolean hasVisibleFoldersNotSeenInTreeView(final int module, final int userId, final int[] groups, final UserPermissionBits permissionBits, final Context ctx, final Connection readCon) throws OXException {
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(PUBLIC);
+        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type IN (").append(PUBLIC).append(TRASH).append(')');
         condBuilder.append(") AND (ot.module = ").append(module);
         condBuilder.append(')');
         Connection rc = readCon;

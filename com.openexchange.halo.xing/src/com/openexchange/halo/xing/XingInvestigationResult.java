@@ -49,6 +49,7 @@
 
 package com.openexchange.halo.xing;
 
+import com.openexchange.xing.Contacts;
 import com.openexchange.xing.Path;
 import com.openexchange.xing.User;
 
@@ -61,18 +62,18 @@ public class XingInvestigationResult {
 
     private final User user;
 
-    private final Path shortestPath;
+    private Path shortestPath;
+
+    private Contacts sharedContacts;
 
     /**
      * Initializes a new {@link XingInvestigationResult}.
      * @param user The user found in XING. Possibly <code>null</code>.
-     * @param shortestPath The shortest path from the session
-     * users XING contact to the found one. Possibly <code>null</code>.
+     *
      */
-    public XingInvestigationResult(User user, Path shortestPath) {
+    public XingInvestigationResult(User user) {
         super();
         this.user = user;
-        this.shortestPath = shortestPath;
     }
 
     /**
@@ -92,6 +93,33 @@ public class XingInvestigationResult {
      */
     public Path getShortestPath() {
         return shortestPath;
+    }
+
+    /**
+     * Sets the shortest path from the session users XING contact to the found one.
+     *
+     * @param shortestPath The path.
+     */
+    public void setShortestPath(Path shortestPath) {
+        this.shortestPath = shortestPath;
+    }
+
+    /**
+     * Gets the contacts shared between the session user and the target user.
+     *
+     * @return The contacts or <code>null</code>.
+     */
+    public Contacts getSharedContacts() {
+        return sharedContacts;
+    }
+
+    /**
+     * Sets the contacts shared between the session user and the target user.
+     *
+     * @param sharedContacts The shared contacts.
+     */
+    public void setSharedContacts(Contacts sharedContacts) {
+        this.sharedContacts = sharedContacts;
     }
 
 }

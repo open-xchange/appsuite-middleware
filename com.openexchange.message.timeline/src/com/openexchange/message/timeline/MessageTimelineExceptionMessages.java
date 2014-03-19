@@ -59,12 +59,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class MessageTimelineExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
     // Maximum number of messages already stored for client %1$s
     public static final String NO_MORE_MSGS_MSG = "Maximum number of messages already stored for client %1$s";
 

@@ -55,13 +55,9 @@ package com.openexchange.groupware.infostore.database;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface InfostoreFilenameReservation {
+public interface InfostoreFilenameReservation extends FilenameReservation {
 
     public void destroySilently();
-
-    public String getFilename();
-
-	public boolean wasAdjusted();
 
 	public void setWasAdjusted(boolean b);
 

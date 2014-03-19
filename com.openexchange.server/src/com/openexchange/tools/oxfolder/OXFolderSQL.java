@@ -111,6 +111,7 @@ public final class OXFolderSQL {
     }
 
     private static final String SQL_LOCK = "SELECT fuid FROM oxfolder_tree WHERE cid=? AND fuid=? FOR UPDATE";
+    private static final String SQL_LOCK_BACKUP = "SELECT fuid FROM del_oxfolder_tree WHERE cid=? AND fuid=? FOR UPDATE";
 
     /**
      * Performs a lock on the folder entry in associated table.
@@ -121,6 +122,19 @@ public final class OXFolderSQL {
      * @throws SQLException If lock attempt fails
      */
     public static void lock(final int folderId, final int contextId, final Connection con) throws SQLException {
+        lock(folderId, contextId, false, con);
+    }
+
+    /**
+     * Performs a lock on the folder entry in associated table.
+     *
+     * @param folderId The folder identifier
+     * @param contextId The context identifier
+     * @param backupTable <code>true</code> to also put a lock on backup tables; otherwise <code>false</code>
+     * @param con The connection to use
+     * @throws SQLException If lock attempt fails
+     */
+    public static void lock(final int folderId, final int contextId, final boolean backupTable, final Connection con) throws SQLException {
         if (null == con) {
             return;
         }
@@ -133,6 +147,14 @@ public final class OXFolderSQL {
             stmt.setInt(1, contextId);
             stmt.setInt(2, folderId);
             stmt.executeQuery();
+
+            if (backupTable) {
+                closeSQLStuff(stmt);
+                stmt = con.prepareStatement(SQL_LOCK_BACKUP);
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, folderId);
+                stmt.executeQuery();
+            }
         } finally {
             closeSQLStuff(stmt);
         }
@@ -231,7 +253,7 @@ public final class OXFolderSQL {
      * @param module The module
      * @param readCon A connection with read capability
      * @param ctx The context
-     * @return The folder ID of user's default folder of given module
+     * @return The folder ID of user's default folder of given module, or <code>-1</code> if not found
      * @throws OXException If a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
@@ -249,6 +271,45 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, userId);
             stmt.setInt(3, module);
+            rs = executeQuery(stmt);
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return -1;
+        } finally {
+            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+        }
+    }
+
+    private static final String SQL_DEFAULTFLDTYPE = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.created_from = ? AND ot.module = ? AND ot.type = ? AND ot.default_flag = 1";
+
+    /**
+     * Gets the specified user's default folder of given module and type
+     *
+     * @param userId The user ID
+     * @param module The module
+     * @param type The type
+     * @param readCon A connection with read capability
+     * @param ctx The context
+     * @return The folder ID of user's default folder of given module, or <code>-1</code> if not found
+     * @throws OXException If a pooling error occurs
+     * @throws SQLException If a SQL error occurs
+     */
+    public static int getUserDefaultFolder(final int userId, final int module, final int type, final Connection readCon, final Context ctx) throws OXException, SQLException {
+        Connection rc = readCon;
+        boolean closeReadCon = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (rc == null) {
+                rc = DBPool.pickup(ctx);
+                closeReadCon = true;
+            }
+            stmt = rc.prepareStatement(SQL_DEFAULTFLDTYPE);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, userId);
+            stmt.setInt(3, module);
+            stmt.setInt(4, type);
             rs = executeQuery(stmt);
             if (rs.next()) {
                 return rs.getInt(1);
@@ -1484,7 +1545,7 @@ public final class OXFolderSQL {
         PreparedStatement stmt = null;
         try {
             // Acquire lock
-            lock(folderId, ctx.getContextId(), writeCon);
+            lock(folderId, ctx.getContextId(), backup, writeCon);
 
             // Do delete
             if (backup) {
@@ -1597,7 +1658,7 @@ public final class OXFolderSQL {
         PreparedStatement stmt = null;
         try {
             // Acquire lock
-            lock(folderId, ctx.getContextId(), writeCon);
+            lock(folderId, ctx.getContextId(), true, writeCon);
 
             // Clean backup tables
             stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
@@ -1677,9 +1738,10 @@ public final class OXFolderSQL {
         }
         PreparedStatement stmt = null;
         try {
-            /*
-             * Copy backup entries into oxfolder_tree and oxfolder_permissions
-             */
+            // Acquire lock
+            lock(folderId, ctx.getContextId(), true, writeCon);
+
+            // Copy backup entries into oxfolder_tree and oxfolder_permissions
             stmt = writeCon.prepareStatement(SQL_RESTORE_OT);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);

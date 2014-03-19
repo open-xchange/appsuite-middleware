@@ -72,7 +72,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import javax.activation.FileTypeMap;
-import org.apache.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -311,7 +310,8 @@ public class XingAPI<S extends Session> {
     }
 
     /**
-     * Gets the shortest contact path between a user and any other XING user.
+     * Gets the shortest contact path between a user and any other XING user. The path only
+     * contains the IDs of the users.
      *
      * @param fromId The XING user id
      * @param toId The other XING user id
@@ -324,24 +324,38 @@ public class XingAPI<S extends Session> {
      *             catch this exception which signals that some kind of error occurred.
      */
     public Path getShortestPath(final String fromId, final String toId) throws XingException {
+        return getShortestPath(fromId, toId, null);
+    }
+
+    /**
+     * Gets the shortest contact path between a user and any other XING user.
+     *
+     * @param fromId The XING user id
+     * @param toId The other XING user id
+     * @param userFields List of user attributes to return. If <code>null</code> or empty, only the ID will be returned.
+     * @return The contact path or <code>null</code> if no path exists.
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public Path getShortestPath(final String fromId, final String toId, Collection<UserField> userFields) throws XingException {
         assertAuthenticated();
         try {
-            final Collection<UserField> fields = EnumSet.noneOf(UserField.class);
-            fields.add(UserField.FIRST_NAME);
-            fields.add(UserField.LAST_NAME);
-            fields.add(UserField.DISPLAY_NAME);
-            fields.add(UserField.ACTIVE_EMAIL);
-
             final List<String> params = new ArrayList<String>(4);
             params.add("all_paths");
             params.add("false");
-            params.add("user_fields");
-            params.add(collectionToCsv(fields, new Stringer<UserField>() {
-                @Override
-                public String getString(final UserField element) {
-                    return element.getFieldName();
-                }
-            }));
+            if (userFields != null && !userFields.isEmpty()) {
+                params.add("user_fields");
+                params.add(collectionToCsv(userFields, new Stringer<UserField>() {
+                    @Override
+                    public String getString(final UserField element) {
+                        return element.getFieldName();
+                    }
+                }));
+            }
 
             final JSONObject responseInformation = RESTUtility.request(
                 Method.GET,
@@ -419,7 +433,7 @@ public class XingAPI<S extends Session> {
             final boolean serverSort = (null == orderBy || SUPPORTED_SORT_FIELDS.contains(orderBy));
             if (serverSort) {
                 if (null != orderBy) {
-                    params.add("orderBy");
+                    params.add("order_by");
                     params.add(orderBy.getFieldName());
                 }
             }
@@ -503,6 +517,81 @@ public class XingAPI<S extends Session> {
             // Sort users
             Collections.sort(users, (null == orderBy ? UserField.ID : orderBy).getComparator(false));
             return new Contacts(total, users);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+
+    /**
+     * Returns the list of contacts who are direct contacts of both the given and the current user.
+     *
+     * @param userId The user to get the shared contacts from.
+     * @param limit The number of contacts to be returned. Must be zero or a positive number. Default: <code>10</code>, Maximum:
+     *            <code>100</code>. If its value is equal to zero, default limit is passed to request
+     * @param offset The offset. Must be zero or a positive number. Default: <code>0</code>
+     * @param orderBy Determines the ascending order of the returned list. Currently only supports <code>"last_name"</code>. Defaults to
+     *            <code>"id"</code>
+     * @param userFields List of user attributes to return. If this parameter is not used, only the ID will be returned.
+     * @return The contacts shared with the given user.
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public Contacts getSharedContactsWith(final String userId, final int limit, final int offset, final UserField orderBy, final Collection<UserField> userFields) throws XingException {
+        if (limit < 0 || limit > MAX_LIMIT) {
+            throw new XingException("Invalid limit: " + limit + ". Must be zero OR less than or equal to " + MAX_LIMIT);
+        }
+        if (offset < 0) {
+            throw new XingException("Invalid offset: " + offset + ". Must be greater than or equal to zero.");
+        }
+        assertAuthenticated();
+        try {
+            // Add parameters limit & offset
+            final List<String> params = new ArrayList<String>(Arrays.asList(
+                "limit",
+                Integer.toString(limit == 0 ? DEFAULT_LIMIT : limit),
+                "offset",
+                Integer.toString(offset)));
+            // Add order-by
+            final boolean serverSort = (null == orderBy || SUPPORTED_SORT_FIELDS.contains(orderBy));
+            if (serverSort) {
+                if (null != orderBy) {
+                    params.add("order_by");
+                    params.add(orderBy.getFieldName());
+                }
+            }
+            // Add user fields
+            if (null != userFields && !userFields.isEmpty()) {
+                params.add("user_fields");
+                final Iterator<UserField> iter = userFields.iterator();
+                final StringAllocator fields = new StringAllocator(userFields.size() << 4);
+                fields.append(iter.next().getFieldName());
+                while (iter.hasNext()) {
+                    fields.append(',').append(iter.next().getFieldName());
+                }
+                params.add(fields.toString());
+            }
+
+            final JSONObject responseInformation = RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/" + userId + "/contacts/shared",
+                VERSION,
+                params.toArray(new String[0]),
+                session).toObject();
+
+            if (serverSort) {
+                return new Contacts(responseInformation.getJSONObject("shared_contacts"));
+            }
+            // Manually sort contacts
+            final Contacts contacts = new Contacts(responseInformation.getJSONObject("shared_contacts"));
+            Collections.sort(contacts.getUsers(), (null == orderBy ? UserField.ID : orderBy).getComparator(false));
+            return contacts;
+        } catch (final JSONException e) {
+            throw new XingException(e);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -836,7 +925,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Gets the user feed; a stream of activities recently performed by the user.
-     * 
+     *
      * @param xingUserId The ID of the user whose contacts' activities are to be returned
      * @param optSince Only returns activities that are newer than the specified time stamp. <b>Can't be combined with until!</b>
      * @param optUntil Only returns activities that are older than the specified time stamp. <b>Can't be combined with since!</b>
@@ -846,7 +935,7 @@ public class XingAPI<S extends Session> {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public Map<String, Object> getFeed(String xingUserId, Date optSince, Date optUntil, Collection<UserField> optUserFields) throws XingException {
+    public Map<String, Object> getUserFeed(String xingUserId, Date optSince, Date optUntil, Collection<UserField> optUserFields) throws XingException {
         assertAuthenticated();
         try {
             // Add parameters
@@ -894,7 +983,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Creates a comment for a certain network activity.
-     * 
+     *
      * @param activityId the activity id
      * @param text comment
      * @return A map representing the outcome of the operation
@@ -907,7 +996,7 @@ public class XingAPI<S extends Session> {
             final List<String> params = new ArrayList<String>(1);
             params.add("text");
             params.add(text);
-            
+
             RESTUtility.streamRequest(
                 Method.POST,
                 session.getAPIServer(),
@@ -920,10 +1009,10 @@ public class XingAPI<S extends Session> {
             throw new XingException(e);
         }
     }
-    
+
     /**
      * Retrieves a list with comments for the specified activity.
-     * 
+     *
      * @param activityId the id of the activity
      * @param optLimit restricts the number of comments to be returned. (Optional, Default 10)
      * @param optOffset the offset (Optional, Default 0)
@@ -940,12 +1029,12 @@ public class XingAPI<S extends Session> {
                 params.add("limit");
                 params.add(Integer.toString(optLimit));
             }
-            
+
             if (optOffset > 0) {
                 params.add("offset");
                 params.add(Integer.toString(optOffset));
             }
-            
+
             if (optUserFields != null && !optUserFields.isEmpty()) {
                 params.add("user_fields");
                 params.add(collectionToCsv(optUserFields, new Stringer<UserField>() {
@@ -955,7 +1044,7 @@ public class XingAPI<S extends Session> {
                     }
                 }));
             }
-            
+
             final JSONObject response = RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
@@ -968,10 +1057,10 @@ public class XingAPI<S extends Session> {
             throw new XingException(e);
         }
     }
-    
+
     /**
      * Deletes the comment specified under the provided commentId for the activity specified under the provided activityId
-     * 
+     *
      * @param activityId
      * @param commentId
      * @throws XingException
@@ -994,7 +1083,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Change the status message of the user
-     * 
+     *
      * @param userId The userId
      * @param message The status message
      * @return The hardcoded string <code>Status update has been posted<code> on success
@@ -1024,7 +1113,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Like a certain network activity
-     * 
+     *
      * @param The id of the activity
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
@@ -1045,10 +1134,10 @@ public class XingAPI<S extends Session> {
             throw new XingException(e);
         }
     }
-    
+
     /**
      * Unlike a certain network activity
-     * 
+     *
      * @param The id of the activity
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
      *             meaning of each error code.
@@ -1069,10 +1158,10 @@ public class XingAPI<S extends Session> {
             throw new XingException(e);
         }
     }
-    
+
     /**
      * Retrieves a list of users who liked the specified activity.
-     * 
+     *
      * @param activityId the id of the activity
      * @param optLimit restricts the number of comments to be returned. (Optional, Default 10)
      * @param optOffset the offset (Optional, Default 0)
@@ -1089,12 +1178,12 @@ public class XingAPI<S extends Session> {
                 params.add("limit");
                 params.add(Integer.toString(optLimit));
             }
-            
+
             if (optOffset > 0) {
                 params.add("offset");
                 params.add(Integer.toString(optOffset));
             }
-            
+
             if (optUserFields != null && !optUserFields.isEmpty()) {
                 params.add("user_fields");
                 params.add(collectionToCsv(optUserFields, new Stringer<UserField>() {
@@ -1104,7 +1193,7 @@ public class XingAPI<S extends Session> {
                     }
                 }));
             }
-            
+
             final JSONObject response = RESTUtility.request(
                 Method.GET,
                 session.getAPIServer(),
@@ -1120,7 +1209,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Shows an activity
-     * 
+     *
      * @param activityId The id of the activity
      * @param optUserFields The list of user attributes to be returned in nested user objects. If this parameter is not used, only the ID
      *            will be returned.
@@ -1159,7 +1248,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Shares an activity
-     * 
+     *
      * @param activityId The id of the activity
      * @param optTextMessage An optional text message - up to 140 characters
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
@@ -1193,7 +1282,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Deletes an activity
-     * 
+     *
      * @param activityId The id of the activity
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
@@ -1221,7 +1310,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Shares a link in network activity
-     * 
+     *
      * @param uri
      * @return A map reprecenting the outcome of the operation
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
@@ -1293,16 +1382,15 @@ public class XingAPI<S extends Session> {
                 jLeadDesc.put("tandc_check", leadDescription.isTandcCheck());
             }
 
-            jLeadDesc.put("reg_consumer_key", session.getAppKeyPair().key);
-            jLeadDesc.put("reg_consumer_secret", session.getAppKeyPair().secret);
+            jLeadDesc.put("reg_consumer_key", session.getConsumerPair().key);
+            jLeadDesc.put("reg_consumer_secret", session.getConsumerPair().secret);
 
-            final HttpResponse resp = RESTUtility.basicRequest(
+            final JSONObject jResponse = RESTUtility.basicRequest(
                 Method.POST,
                 url,
                 jLeadDesc,
                 session,
-                Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT)).response;
-            final JSONObject jResponse = RESTUtility.parseAsJSON(resp).toObject();
+                Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT)).toObject();
             return jResponse.asMap();
         } catch (final JSONException e) {
             throw new XingException(e);

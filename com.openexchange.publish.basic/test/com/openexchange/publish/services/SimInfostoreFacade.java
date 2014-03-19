@@ -340,4 +340,9 @@ public class SimInfostoreFacade implements InfostoreFacade {
         // Nothing to do
     }
 
+    @Override
+    public int[] moveDocuments(ServerSession session, int[] ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
+        return ids;
+    }
+
 }

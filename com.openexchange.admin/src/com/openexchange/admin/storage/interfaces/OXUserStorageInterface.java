@@ -191,16 +191,26 @@ public abstract class OXUserStorageInterface {
 
     /**
      * Changes specified context's capabilities.
-     * 
+     *
      * @param ctx The context
      * @param user The user
      * @param capsToAdd The capabilities to add
      * @param capsToRemove The capabilities to remove
+     * @param capsToDrop The capabilities to drop; e.g. clean from storage
      * @param auth The credentials
      * @throws StorageException When an error in the subsystems occurred.
      */
-    public abstract void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Credentials auth) throws StorageException;
+    public abstract void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws StorageException;
 
+    /**
+     * Gets the current capabilities for denoted user.
+     *
+     * @param ctx The context
+     * @param user The user
+     * @return The current capabilities
+     * @throws StorageException If retrieving capabilities fails
+     */
+    public abstract Set<String> getCapabilities(Context ctx, User user) throws StorageException;
 
     /**
      * Manipulate user data within the given context.

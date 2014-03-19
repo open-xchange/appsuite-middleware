@@ -47,55 +47,40 @@
  *
  */
 
-package com.openexchange.mail.smal.impl;
+package com.openexchange.folderstorage.type;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.folderstorage.Type;
 
 /**
- * {@link SmalExceptionMessages} - Exception messages that must be translated.
+ * {@link TrashType}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class SmalExceptionMessages implements LocalizableStrings {
+public final class TrashType implements Type {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // Missing property: %1$s
-    public static final String MISSING_PROPERTY_MSG = "Missing property: %1$s";
-
-    // Invalid property value in property "%1$s": %2$s
-    public static final String INVALID_PROPERTY_MSG = "Invalid property value in property \"%1$s\": %2$s";
-
-    // A JSON error occurred: %1$s
-    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
-
-    // HTTP request to server %1$s failed. Status line: %2$s
-    public static final String HTTP_REQUEST_FAILED_MSG = "HTTP request to server \"%1$s\" failed. Status line: %2$s";
-
-    // JSON request failed. Error code: %1$s. Error message: %2$s
-    public static final String JSON_REQUEST_FAILED_MSG = "JSON request failed. Error code: %1$s. Error message: %2$s";
-
-    // A remote error occurred: %1$s
-    public static final String REMOTE_ERROR_MSG = "A remote error occurred: %1$s";
-
-    // An index fault occurred: %1$s
-    public static final String INDEX_FAULT_MSG = "An index fault occurred: %1$s";
-
-    // A HTTP error occurred: %1$s
-    public static final String HTTP_ERROR_MSG = "A HTTP error occurred: %1$s";
-
-    // Unparseable HTTP response: %1$s
-    public static final String UNPARSEABLE_HTTP_RESPONSE_MSG = "Unparseable HTTP response: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+    private static final long serialVersionUID = 3366945411556953361L;
+    private static final TrashType instance = new TrashType();
 
     /**
-     * Initializes a new {@link SmalExceptionMessages}.
+     * Gets the {@link TrashType} instance.
+     *
+     * @return The {@link TrashType} instance
      */
-    private SmalExceptionMessages() {
+    public static TrashType getInstance() {
+        return instance;
+    }
+
+    /**
+     * Initializes a new {@link TrashType}.
+     */
+    private TrashType() {
         super();
+    }
+
+    @Override
+    public int getType() {
+        // Taken from FolderObject.TRASH
+        return 16;
     }
 
 }

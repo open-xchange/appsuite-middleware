@@ -166,16 +166,16 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             }
         }
 
+        CalendarDataObject clone = update.clone();
         if (write) {
-            CalendarDataObject clone = update.clone();
             util.updateAppointment(clone, session, original.getLastModified());
             original.setLastModified(clone.getLastModified());
         }
 
-        saveConfirmations(session, appointmentDiff, update);
+        saveConfirmations(session, appointmentDiff, clone);
 
-        appointment.setObjectID(update.getObjectID());
-        appointment.setParentFolderID(update.getParentFolderID());
+        appointment.setObjectID(clone.getObjectID());
+        appointment.setParentFolderID(clone.getParentFolderID());
 
         if (update.containsRecurrencePosition()) {
             appointment.setRecurrencePosition(update.getRecurrencePosition());
