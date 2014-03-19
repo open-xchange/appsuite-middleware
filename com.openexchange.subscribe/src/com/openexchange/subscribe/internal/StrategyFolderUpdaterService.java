@@ -91,20 +91,21 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
 
         final Collection<T> dataInFolder = strategy.getData(target, session);
 
-        for(final T element : data) {
-            try {
+        try {
+            for(final T element : data) {
                 final T bestMatch = findBestMatch(element, dataInFolder, session);
                 if(bestMatch == null) {
                     strategy.save(element, session);
                 } else {
                     strategy.update(bestMatch, element, session);
                 }
-            } catch (final OXException x) {
-                LOG.error("", x);
             }
+        } catch (final OXException x) {
+            LOG.error("", x);
+            throw x;
+        } finally {
+            strategy.closeSession(session);
         }
-
-        strategy.closeSession(session);
     }
 
     @Override
@@ -113,24 +114,25 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
 
         final Collection<T> dataInFolder = strategy.getData(target, session);
 
-        for(final T element : data) {
-            try {
+        try {
+            for(final T element : data) {
                 final T bestMatch = findBestMatch(element, dataInFolder, session);
                 if(bestMatch == null) {
                     strategy.save(element, session);
                 } else {
                     strategy.update(bestMatch, element, session);
                 }
-            } catch (final OXException x) {
-                if (null == errors) {
-                    LOG.error("", x);
-                } else {
-                    errors.add(x);
-                }
             }
+        } catch (final OXException x) {
+            if (null == errors) {
+                LOG.error("", x);
+            } else {
+                errors.add(x);
+            }
+            throw x;
+        } finally {
+            strategy.closeSession(session);
         }
-
-        strategy.closeSession(session);
     }
 
     private T findBestMatch(final T element, final Collection<T> dataInFolder, final Object session) throws OXException {
