@@ -55,7 +55,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import org.slf4j.Logger;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.tools.images.osgi.Services;
 
 /**
  * {@link Scheduler}
@@ -65,17 +68,44 @@ import org.slf4j.Logger;
  */
 public final class Scheduler {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(Scheduler.class);
+    /** The logger */
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(Scheduler.class);
 
-    private static final Scheduler INSTANCE = new Scheduler();
+    private static volatile Scheduler instance;
+
+    /**
+     * Shuts-down the scheduler
+     */
+    public static void shutDown() {
+        Scheduler tmp = instance;
+        if (null != tmp) {
+            synchronized (Scheduler.class) {
+                tmp = instance;
+                if (null != tmp) {
+                    tmp.stop();
+                    instance = null;
+                }
+            }
+        }
+    }
 
     /**
      * Gets the scheduler instance.
      *
-     * @return The instance.
+     * @return The instance
      */
     public static Scheduler getInstance() {
-        return INSTANCE;
+        Scheduler tmp = instance;
+        if (null == tmp) {
+            synchronized (Scheduler.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    tmp = new Scheduler();
+                    instance = tmp;
+                }
+            }
+        }
+        return tmp;
     }
 
     // ------------------------------------------------------------------------------------------------ //
@@ -88,8 +118,20 @@ public final class Scheduler {
      */
     private Scheduler() {
         super();
-        pool = Executors.newFixedThreadPool(10, new SchedulerThreadFactory());
+        final ConfigurationService configService = Services.getService(ConfigurationService.class);
+        final int defaultNumThreads = 10;
+        final int numThreads = null == configService ? defaultNumThreads : configService.getIntProperty("com.openexchange.tools.images.scheduler.numThreads", defaultNumThreads);
+        final ThreadPoolExecutor newPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(numThreads, new SchedulerThreadFactory());
+        newPool.prestartAllCoreThreads();
+        pool = newPool;
         runningThreads = new HashMap<Object, TaskExecuter>(256);
+    }
+
+    /**
+     * Shuts-down this scheduler.
+     */
+    private void stop() {
+        pool.shutdown();
     }
 
     /**
@@ -148,7 +190,11 @@ public final class Scheduler {
                 synchronized (tasks) {
                     task = tasks.remove(0);
                 }
+
+                // Perform image transformation
                 task.run();
+
+                // Check for more...
                 synchronized (runningThreads) {
                     running = !tasks.isEmpty();
                     if (!running) {

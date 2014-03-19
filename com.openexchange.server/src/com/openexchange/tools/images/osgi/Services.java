@@ -47,44 +47,72 @@
  *
  */
 
-package com.openexchange.tools.images.impl;
+package com.openexchange.tools.images.osgi;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import com.openexchange.java.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.ImageTransformations;
-import com.openexchange.tools.images.transformations.ImageTransformationsTask;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link JavaImageTransformationService}
+ * {@link Services} - The static service lookup.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JavaImageTransformationService implements ImageTransformationService {
+public final class Services {
 
     /**
-     * Initializes a new {@link JavaImageTransformationService}.
+     * Initializes a new {@link Services}.
      */
-    public JavaImageTransformationService() {
+    private Services() {
         super();
     }
 
-    @Override
-    public ImageTransformations transfom(BufferedImage sourceImage) {
-        return new ImageTransformationsTask(sourceImage);
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Override
-    public ImageTransformations transfom(InputStream imageStream) throws IOException {
-        return new ImageTransformationsTask(imageStream);
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
-    @Override
-    public ImageTransformations transfom(byte[] imageData) throws IOException {
-        return transfom(new UnsynchronizedByteArrayInputStream(imageData));
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Imaging stuff not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }
