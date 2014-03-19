@@ -81,12 +81,10 @@ public class Bug30703Test extends AbstractAJAXSession {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        System.out.println("--==dasejkfhsdkfjhsk==-- Set Up");
     }
 
     @Override
     protected void tearDown() throws Exception {
-        System.out.println("--==dasejkfhsdkfjhsk==-- Tear Down");
         try {
             StopPOP3ServerRequest stopReq = new StopPOP3ServerRequest();
             client.execute(stopReq);
