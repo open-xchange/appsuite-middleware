@@ -86,7 +86,8 @@ public class OXRequest extends Request {
 
     private String XForwardProto = null;
     private int XForwardPort = 0;
-    private final boolean isConsiderXForwards = grizzlyConfig.isConsiderXForwards();
+    private boolean isConsiderXForwards = grizzlyConfig.isConsiderXForwards();
+    private boolean isForcedSecurity = false;
 
     protected OXRequest(Response response) {
         super(response);
@@ -96,6 +97,8 @@ public class OXRequest extends Request {
     protected void recycle() {
         XForwardProto = null;
         XForwardPort = 0;
+        isConsiderXForwards = grizzlyConfig.isConsiderXForwards();
+        isForcedSecurity = false;
         super.recycle();
     }
 
@@ -368,6 +371,27 @@ public class OXRequest extends Request {
         }
 
         return charset;
+    }
+
+    /*
+     * We can't look up certificate or ssl attributes as long as the http balancer terminates ssl in our setup. Yet we have to set the
+     * Request to secure for e.g. using the correct schema(http/https) when generating urls and the request reached the balancer via https.
+     * To circumvent problems arising when clients ask for e.g. certificate or ssl attributes on an unsecure Request that is marked as
+     * secure we'll return null.
+     */
+    @Override
+    public Object getAttribute(String name) {
+        if( Globals.SSL_CERTIFICATE_ATTR.equals(name) || isSSLAttribute(name)) {
+            //Did we force a secure request although the balancer terminated https
+            Object attribute = getAttribute("com.openexchange.http.isForcedSecurity");
+            if(attribute != null) {
+                isForcedSecurity = (Boolean)attribute;
+            }
+            if(isForcedSecurity) {
+                return null;
+            }
+        }
+        return super.getAttribute(name);
     }
 
 }
