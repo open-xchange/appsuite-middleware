@@ -82,6 +82,12 @@ public class DummyFolderAccess extends AbstractFileStorageFolderAccess {
     }
 
     @Override
+    public FileStorageFolder getTrashFolder() throws OXException {
+        System.out.println("GET TRASH FOLDER");
+        return getRootFolder();
+    }
+
+    @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
         System.out.println("GET PUBLIC FOLDERS");
         return new FileStorageFolder[0];

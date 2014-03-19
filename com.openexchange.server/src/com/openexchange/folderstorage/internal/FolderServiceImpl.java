@@ -158,22 +158,32 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final User ruser, final Context context, final FolderServiceDecorator decorator) throws OXException {
+        return getDefaultFolder(user, treeId, contentType, PrivateType.getInstance(), ruser, context, decorator);
+    }
+
+    @Override
+    public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final Type type, final User ruser, final Context context, final FolderServiceDecorator decorator) throws OXException {
         final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType.toString());
         }
-        final String folderId = folderStorage.getDefaultFolderID(user, treeId, contentType, PrivateType.getInstance(), new StorageParametersImpl(user, context));
+        final String folderId = folderStorage.getDefaultFolderID(user, treeId, contentType, type, new StorageParametersImpl(user, context));
         return new GetPerformer(user, context, decorator).doGet(treeId, folderId);
     }
 
     @Override
     public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final Session session, final FolderServiceDecorator decorator) throws OXException {
+        return getDefaultFolder(user, treeId, contentType, PrivateType.getInstance(), session, decorator);
+    }
+
+    @Override
+    public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final Type type, final Session session, final FolderServiceDecorator decorator) throws OXException {
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType.toString());
         }
-        final String folderId = folderStorage.getDefaultFolderID(serverSession.getUser(), treeId, contentType, PrivateType.getInstance(), new StorageParametersImpl(serverSession));
+        final String folderId = folderStorage.getDefaultFolderID(serverSession.getUser(), treeId, contentType, type, new StorageParametersImpl(serverSession));
         return new GetPerformer(serverSession, decorator).doGet(treeId, folderId);
     }
 

@@ -382,6 +382,22 @@ public interface FileStorageFileAccess extends TransactionAware {
     List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException;
 
     /**
+     * Removes the files with the given identifiers from the folder. Documents identifiers that could not be removed due to an
+     * edit-delete conflict are returned.
+     * <p>
+     * If <code>hardDelete</code> is not set and a document is not yet located below the default trash folder it is backed up, otherwise
+     * it is deleted permanently.
+     *
+     * @param ids The identifiers
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @param hardDelete <code>true</code> to permanently remove the documents, <code>false</code> to move the documents to the default
+     *                   trash folder of the storage
+     * @return The IDs of documents that could not be deleted due to an edit-delete conflict
+     * @throws OXException If operation fails
+     */
+    List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException;
+
+    /**
      * Remove a certain version of a file
      *
      * @param folderId The folder identifier

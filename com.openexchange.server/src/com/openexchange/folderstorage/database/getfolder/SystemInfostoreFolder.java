@@ -178,6 +178,9 @@ public final class SystemInfostoreFolder {
                     }
                 } else if (fuid == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID) {
                     subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME)));
+                } else if (FolderObject.TRASH == fo.getType()) {
+                    subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(
+                        altNames ? FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME : FolderStrings.SYSTEM_TRASH_INFOSTORE_FOLDER_NAME)));
                 } else {
                     subfolderIds.add(toArray(String.valueOf(fuid), fo.getFolderName()));
                 }

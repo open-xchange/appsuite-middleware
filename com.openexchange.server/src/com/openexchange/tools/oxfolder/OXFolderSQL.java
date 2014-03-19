@@ -253,7 +253,7 @@ public final class OXFolderSQL {
      * @param module The module
      * @param readCon A connection with read capability
      * @param ctx The context
-     * @return The folder ID of user's default folder of given module
+     * @return The folder ID of user's default folder of given module, or <code>-1</code> if not found
      * @throws OXException If a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
@@ -271,6 +271,45 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, userId);
             stmt.setInt(3, module);
+            rs = executeQuery(stmt);
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return -1;
+        } finally {
+            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+        }
+    }
+
+    private static final String SQL_DEFAULTFLDTYPE = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.created_from = ? AND ot.module = ? AND ot.type = ? AND ot.default_flag = 1";
+
+    /**
+     * Gets the specified user's default folder of given module and type
+     *
+     * @param userId The user ID
+     * @param module The module
+     * @param type The type
+     * @param readCon A connection with read capability
+     * @param ctx The context
+     * @return The folder ID of user's default folder of given module, or <code>-1</code> if not found
+     * @throws OXException If a pooling error occurs
+     * @throws SQLException If a SQL error occurs
+     */
+    public static int getUserDefaultFolder(final int userId, final int module, final int type, final Connection readCon, final Context ctx) throws OXException, SQLException {
+        Connection rc = readCon;
+        boolean closeReadCon = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (rc == null) {
+                rc = DBPool.pickup(ctx);
+                closeReadCon = true;
+            }
+            stmt = rc.prepareStatement(SQL_DEFAULTFLDTYPE);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, userId);
+            stmt.setInt(3, module);
+            stmt.setInt(4, type);
             rs = executeQuery(stmt);
             if (rs.next()) {
                 return rs.getInt(1);

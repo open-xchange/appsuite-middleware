@@ -47,54 +47,35 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.groupware.infostore.database;
 
+import java.util.List;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
- * {@link FileStorageEventConstants}
+ * {@link BatchFilenameReserver}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FileStorageEventConstants {
+public interface BatchFilenameReserver {
 
-    public static final String UPDATE_TOPIC = "com/openexchange/groupware/infostore/update";
+    /**
+     * Silently cleans up any previous reservation held by this filename reserver.
+     */
+    void cleanUp();
 
-    public static final String CREATE_TOPIC = "com/openexchange/groupware/infostore/insert";
-
-    public static final String DELETE_TOPIC = "com/openexchange/groupware/infostore/delete";
-
-    public static final String ACCESS_TOPIC = "com/openexchange/groupware/infostore/access";
-
-    public static final String ALL_TOPICS = "com/openexchange/groupware/infostore/*";
-
-    public static final String UPDATE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/update";
-
-    public static final String CREATE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/insert";
-
-    public static final String DELETE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/delete";
-
-    public static final String ALL_FOLDER_TOPICS = "com/openexchange/groupware/fsfolder/*";
-
-    public static final String SESSION = "session";
-
-    public static final String SERVICE = "service";
-
-    public static final String ACCOUNT_ID = "accountId";
-
-    public static final String FOLDER_ID = "folderId";
-
-    public static final String PARENT_FOLDER_ID = "parentFolderId";
-
-    public static final String FOLDER_PATH = "folderPath";
-
-    public static final String OBJECT_ID = "objectId";
-
-    public static final String FILE_NAME = "fileName";
-
-    public static final String VERSIONS = "versions";
-
-    public static final String E_TAG = "eTag";
-
-    public static final String HARD_DELETE = "hardDelete";
+    /**
+     * Reserves the filenames of the supplied documents in their target folders.
+     *
+     * @param documents The documents to reserve the filenames for
+     * @param adjustAsNeeded <code>true</code> to automatically adjust the filenames in case of conflicts in the target folder,
+     *                       <code>false</code>, otherwise
+     * @return The reservations, each one mapped to its corresponding document
+     * @throws OXException
+     */
+    Map<DocumentMetadata, FilenameReservation> reserve(List<DocumentMetadata> documents, boolean adjustAsNeeded) throws OXException;
 
 }
+

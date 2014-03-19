@@ -140,7 +140,7 @@ public interface FolderService {
     FolderResponse<UserizedFolder[]> getAllVisibleFolders(String treeId, FolderFilter filter, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
-     * Gets this storage's default folder for specified user.
+     * Gets this storage's default folder (private type) for specified user.
      *
      * @param user The user whose default folder shall be returned
      * @param treeId The tree identifier
@@ -154,7 +154,22 @@ public interface FolderService {
     UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, User ruser, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
-     * Gets this storage's default folder for specified user.
+     * Gets this storage's default folder for specified user and type.
+     *
+     * @param user The user whose default folder shall be returned
+     * @param treeId The tree identifier
+     * @param contentType The content type or the default folder
+     * @param type The type of the folder
+     * @param ruser The requesting user
+     * @param context The context
+     * @param decorator The optional folder service decorator
+     * @return The default folder for specified user
+     * @throws OXException If the default folder cannot be returned
+     */
+    UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, Type type, User ruser, Context context, FolderServiceDecorator decorator) throws OXException;
+
+    /**
+     * Gets this storage's default folder (private type) for specified user.
      *
      * @param user The user whose default folder shall be returned
      * @param treeId The tree identifier
@@ -165,6 +180,20 @@ public interface FolderService {
      * @throws OXException If the default folder cannot be returned
      */
     UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, Session session, FolderServiceDecorator decorator) throws OXException;
+
+    /**
+     * Gets this storage's default folder for specified user.
+     *
+     * @param user The user whose default folder shall be returned
+     * @param treeId The tree identifier
+     * @param contentType The content type or the default folder
+     * @param type The type of the folder
+     * @param session The session
+     * @param decorator The optional folder service decorator
+     * @return The default folder for specified user
+     * @throws OXException If the default folder cannot be returned
+     */
+    UserizedFolder getDefaultFolder(User user, String treeId, ContentType contentType, Type type, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.

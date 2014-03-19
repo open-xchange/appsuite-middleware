@@ -90,6 +90,17 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
     FileStorageFolder getPersonalFolder() throws OXException;
 
     /**
+     * Gets the folder considered as trash folder.
+     * <p>
+     * <b>Note</b>: If trash folder is not supported by this file storage, {@link FileStorageExceptionCodes#NO_SUCH_FOLDER
+     * NO_SUCH_FOLDER} is thrown.
+     *
+     * @return The corresponding instance of {@link FileStorageFolder}
+     * @throws OXException If either such a folder does not exist or could not be fetched
+     */
+    FileStorageFolder getTrashFolder() throws OXException;
+
+    /**
      * Gets the public folders.
      *
      * @return The corresponding instances of {@link FileStorageFolder}

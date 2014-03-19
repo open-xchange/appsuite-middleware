@@ -534,6 +534,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public List<String> removeDocument(final List<String> ids, final long sequenceNumber) throws OXException {
+        return removeDocument(ids, sequenceNumber, true);
+    }
+
+    @Override
+    public List<String> removeDocument(final List<String> ids, final long sequenceNumber, final boolean hardDelete) throws OXException {
         /*
          * get affected file storages
          */
@@ -554,19 +559,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         final List<String> notDeleted = new ArrayList<String>(ids.size());
         for (final Map.Entry<FileStorageFileAccess, List<IDTuple>> deleteOp : deleteOperations.entrySet()) {
             final FileStorageFileAccess access = deleteOp.getKey();
-            final List<IDTuple> toDelete = deleteOp.getValue();
-            /*
-             * reload & remember documents to get folder ID for upcoming event
-             */
-            final List<File> reloaded = new ArrayList<File>();
-            TimedResult<File> documents = access.getDocuments(toDelete, Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
-            if (documents != null) {
-                SearchIterator<File> it = documents.results();
-                while (it.hasNext()) {
-                    File file = it.next();
-                    reloaded.add(file);
-                }
-            }
+            final List<IDTuple> toDelete = ensureFolderIDs(access, deleteOp.getValue());
             /*
              * delete
              */
@@ -574,7 +567,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
                 @Override
                 protected List<IDTuple> callInTransaction(FileStorageFileAccess access) throws OXException {
-                    return access.removeDocument(toDelete, sequenceNumber);
+                    return access.removeDocument(toDelete, sequenceNumber, hardDelete);
                 }
             };
             final List<IDTuple> conflicted = removeDocumentDelegation.call(access);
@@ -594,18 +587,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             String accountId = access.getAccountAccess().getAccountId();
             toDelete.removeAll(conflicted);
             for (IDTuple tuple : toDelete) {
-                String fileFolder = tuple.getFolder();
-                String id = tuple.getId();
-                if (fileFolder == null) {
-                    for (File file : reloaded) {
-                        if (file.getId().equals(id)) {
-                            fileFolder = file.getFolderId();
-                        }
-                    }
-                }
-                String folderId = new FolderID(serviceId, accountId, fileFolder).toUniqueID();
-                String objectId = new FileID(serviceId, accountId, fileFolder, id).toUniqueID();
-                postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderId, objectId, null, null));
+                String folderId = new FolderID(serviceId, accountId, tuple.getFolder()).toUniqueID();
+                String fileId = new FileID(serviceId, accountId, tuple.getFolder(), tuple.getId()).toUniqueID();
+                postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderId, fileId, null, null));
             }
         }
         return notDeleted;
@@ -1539,6 +1523,44 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         if (null != pattern && 0 != pattern.length() && com.openexchange.java.SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
             throw FileStorageExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.create(I(minimumSearchCharacters));
         }
+    }
+
+    /**
+     * Processes the list of supplied ID tuples to ensure that each entry has an assigned folder ID.
+     *
+     * @param access The file access to query if folder IDs are missing
+     * @param idTuples The ID tuples to process
+     * @return The ID tuples, with each entry holding its full file- and folder-ID information
+     * @throws OXException
+     */
+    //TODO: This is weird. The client already sends fileID:folderID pairs, though they get stripped for the infostore currently
+    //      when generating the corresponding com.openexchange.file.storage.composition.FileID.
+    private static List<IDTuple> ensureFolderIDs(FileStorageFileAccess access, List<IDTuple> idTuples) throws OXException {
+        if (null == idTuples || 0 == idTuples.size()) {
+            return idTuples;
+        }
+        List<IDTuple> incompleteTuples = new ArrayList<FileStorageFileAccess.IDTuple>();
+        for (IDTuple tuple : idTuples) {
+            if (null == tuple.getFolder()) {
+                incompleteTuples.add(tuple);
+            }
+        }
+        if (0 < incompleteTuples.size()) {
+            SearchIterator<File> searchIterator = null;
+            try {
+                searchIterator = access.getDocuments(
+                    incompleteTuples, Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID })).results();
+                for (int i = 0; i < incompleteTuples.size() && searchIterator.hasNext(); i++) {
+                    File file = searchIterator.next();
+                    incompleteTuples.get(i).setFolder(file.getFolderId());
+                }
+            } finally {
+                if (null != searchIterator) {
+                    searchIterator.close();
+                }
+            }
+        }
+        return idTuples;
     }
 
     private EventProperty extractRemoteAddress() {

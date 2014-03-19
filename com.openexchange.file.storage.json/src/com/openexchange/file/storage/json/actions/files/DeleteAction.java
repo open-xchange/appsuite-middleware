@@ -52,6 +52,7 @@ package com.openexchange.file.storage.json.actions.files;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
@@ -64,16 +65,17 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
  */
 @Action(method = RequestMethod.PUT, name = "delete", description = "Delete infoitems", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted infoitems.") }, requestBody = "An array with objects to delete. The fields for the object are described in Full identifier for an infostore document.", responseDescription = "An array with [[]].")
+    @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted infoitems."),
+    @Parameter(name = "hardDelete", type=Type.BOOLEAN, description = "Optional, defaults to \"true\". Set to \"false\" to not delete the file permanently, but move it to the default trash folder.")
+}, requestBody = "An array with objects to delete. The fields for the object are described in Full identifier for an infostore document.", responseDescription = "An array with [[]].")
 public class DeleteAction extends AbstractWriteAction {
 
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.requireBody().require(Param.TIMESTAMP);
-
+        boolean hardDelete = false == "false".equals(request.getParameter("hardDelete"));
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        final List<String> conflicting = fileAccess.removeDocument(request.getIds(), request.getTimestamp());
-
+        final List<String> conflicting = fileAccess.removeDocument(request.getIds(), request.getTimestamp(), hardDelete);
         return result(conflicting, request);
     }
 

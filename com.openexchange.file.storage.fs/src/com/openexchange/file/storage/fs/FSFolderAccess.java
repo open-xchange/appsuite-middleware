@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileStorageFolderAccess;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.session.Session;
@@ -155,6 +156,11 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
             dir.mkdirs();
         }
         return getFolder(session.getUserlogin());
+    }
+
+    @Override
+    public FileStorageFolder getTrashFolder() throws OXException {
+        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 
     @Override

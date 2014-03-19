@@ -47,54 +47,53 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.groupware.infostore.database.impl;
+
+import com.openexchange.groupware.infostore.database.FilenameReservation;
 
 
 /**
- * {@link FileStorageEventConstants}
+ * {@link BatchFilenameReservation}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FileStorageEventConstants {
+public class BatchFilenameReservation implements FilenameReservation {
 
-    public static final String UPDATE_TOPIC = "com/openexchange/groupware/infostore/update";
+    private final String fileName;
+    private final boolean wasAdjusted;
+    private final byte[] reservationID;
 
-    public static final String CREATE_TOPIC = "com/openexchange/groupware/infostore/insert";
+    /**
+     * Initializes a new {@link BatchFilenameReservation}.
+     *
+     * @param reservationID The reservation ID
+     * @param fileName the filename
+     * @param wasAdjusted <code>true</code> if the filename has been adjusted to fulfill the reservation, <code>false</code>, otherwise
+     */
+    public BatchFilenameReservation(byte[] reservationID, String fileName, boolean wasAdjusted) {
+        super();
+        this.reservationID = reservationID;
+        this.fileName = fileName;
+        this.wasAdjusted = wasAdjusted;
+    }
 
-    public static final String DELETE_TOPIC = "com/openexchange/groupware/infostore/delete";
+    /**
+     * Gets the reservation ID.
+     *
+     * @return The reservation ID
+     */
+    public byte[] getReservationID() {
+        return reservationID;
+    }
 
-    public static final String ACCESS_TOPIC = "com/openexchange/groupware/infostore/access";
+    @Override
+    public String getFilename() {
+        return fileName;
+    }
 
-    public static final String ALL_TOPICS = "com/openexchange/groupware/infostore/*";
-
-    public static final String UPDATE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/update";
-
-    public static final String CREATE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/insert";
-
-    public static final String DELETE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/delete";
-
-    public static final String ALL_FOLDER_TOPICS = "com/openexchange/groupware/fsfolder/*";
-
-    public static final String SESSION = "session";
-
-    public static final String SERVICE = "service";
-
-    public static final String ACCOUNT_ID = "accountId";
-
-    public static final String FOLDER_ID = "folderId";
-
-    public static final String PARENT_FOLDER_ID = "parentFolderId";
-
-    public static final String FOLDER_PATH = "folderPath";
-
-    public static final String OBJECT_ID = "objectId";
-
-    public static final String FILE_NAME = "fileName";
-
-    public static final String VERSIONS = "versions";
-
-    public static final String E_TAG = "eTag";
-
-    public static final String HARD_DELETE = "hardDelete";
+    @Override
+    public boolean wasAdjusted() {
+        return wasAdjusted;
+    }
 
 }

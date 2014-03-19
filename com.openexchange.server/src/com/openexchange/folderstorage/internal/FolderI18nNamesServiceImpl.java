@@ -123,6 +123,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers.add(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
+        identifiers.add(FolderStrings.SYSTEM_TRASH_INFOSTORE_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_SHARED_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME);
         identifiers.add(FolderStrings.VIRTUAL_LIST_CALENDAR_FOLDER_NAME);
@@ -132,6 +133,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers.add(FolderStrings.SYSTEM_FILES_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME);
+        identifiers.add(FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME);
         identifiers.add(FolderStrings.VIRTUAL_LIST_FILES_FOLDER_NAME);
     }
 

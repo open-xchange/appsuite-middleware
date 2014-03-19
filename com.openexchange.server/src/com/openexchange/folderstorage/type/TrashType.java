@@ -47,54 +47,40 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.folderstorage.type;
 
+import com.openexchange.folderstorage.Type;
 
 /**
- * {@link FileStorageEventConstants}
+ * {@link TrashType}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FileStorageEventConstants {
+public final class TrashType implements Type {
 
-    public static final String UPDATE_TOPIC = "com/openexchange/groupware/infostore/update";
+    private static final long serialVersionUID = 3366945411556953361L;
+    private static final TrashType instance = new TrashType();
 
-    public static final String CREATE_TOPIC = "com/openexchange/groupware/infostore/insert";
+    /**
+     * Gets the {@link TrashType} instance.
+     *
+     * @return The {@link TrashType} instance
+     */
+    public static TrashType getInstance() {
+        return instance;
+    }
 
-    public static final String DELETE_TOPIC = "com/openexchange/groupware/infostore/delete";
+    /**
+     * Initializes a new {@link TrashType}.
+     */
+    private TrashType() {
+        super();
+    }
 
-    public static final String ACCESS_TOPIC = "com/openexchange/groupware/infostore/access";
-
-    public static final String ALL_TOPICS = "com/openexchange/groupware/infostore/*";
-
-    public static final String UPDATE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/update";
-
-    public static final String CREATE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/insert";
-
-    public static final String DELETE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/delete";
-
-    public static final String ALL_FOLDER_TOPICS = "com/openexchange/groupware/fsfolder/*";
-
-    public static final String SESSION = "session";
-
-    public static final String SERVICE = "service";
-
-    public static final String ACCOUNT_ID = "accountId";
-
-    public static final String FOLDER_ID = "folderId";
-
-    public static final String PARENT_FOLDER_ID = "parentFolderId";
-
-    public static final String FOLDER_PATH = "folderPath";
-
-    public static final String OBJECT_ID = "objectId";
-
-    public static final String FILE_NAME = "fileName";
-
-    public static final String VERSIONS = "versions";
-
-    public static final String E_TAG = "eTag";
-
-    public static final String HARD_DELETE = "hardDelete";
+    @Override
+    public int getType() {
+        // Taken from FolderObject.TRASH
+        return 16;
+    }
 
 }

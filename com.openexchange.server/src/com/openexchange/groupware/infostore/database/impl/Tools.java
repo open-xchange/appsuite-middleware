@@ -47,54 +47,67 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.groupware.infostore.database.impl;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * {@link FileStorageEventConstants}
+ * {@link Tools}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FileStorageEventConstants {
+public class Tools {
 
-    public static final String UPDATE_TOPIC = "com/openexchange/groupware/infostore/update";
+    private static final Pattern IS_NUMBERED_WITH_EXTENSION = Pattern.compile("\\(\\d+\\)\\.");
+    private static final Pattern IS_NUMBERED = Pattern.compile("\\(\\d+\\)$");
 
-    public static final String CREATE_TOPIC = "com/openexchange/groupware/infostore/insert";
+    /**
+     * Appends or modifies a counter in the 'name' part of the supplied filename. For example, passing the filename
+     * <code>test.txt</code> and a counter of <code>2</code> will result in the string <code>test (2).txt</code>, while the filename
+     * <code>test (1).txt</code> would be changed to <code>test (2).txt</code>.
+     *
+     * @param filename The filename to enhance
+     * @param counter The counter to append
+     * @return The enhanced filename
+     */
+    public static String enhance(final String filename, final int counter) {
+        if (null == filename) {
+            return filename;
+        }
+        StringBuilder stringBuilder = new StringBuilder(filename);
 
-    public static final String DELETE_TOPIC = "com/openexchange/groupware/infostore/delete";
+        Matcher matcher = IS_NUMBERED_WITH_EXTENSION.matcher(filename);
+        if (matcher.find()) {
+            final int start = matcher.start();
+            final int end = matcher.end();
+            stringBuilder.replace(start, end - 1, " (" + counter + ")");
+            return stringBuilder.toString();
+        }
 
-    public static final String ACCESS_TOPIC = "com/openexchange/groupware/infostore/access";
+        matcher = IS_NUMBERED.matcher(filename);
+        if (matcher.find()) {
+            final int start = matcher.start();
+            final int end = matcher.end();
+            stringBuilder.replace(start, end, " (" + counter + ")");
+            return stringBuilder.toString();
+        }
 
-    public static final String ALL_TOPICS = "com/openexchange/groupware/infostore/*";
+        int index = filename.lastIndexOf('.');
+        if (index == -1) {
+            index = filename.length();
+        }
 
-    public static final String UPDATE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/update";
+        stringBuilder.insert(index, " (" + counter + ")");
 
-    public static final String CREATE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/insert";
+        return stringBuilder.toString();
+    }
 
-    public static final String DELETE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/delete";
-
-    public static final String ALL_FOLDER_TOPICS = "com/openexchange/groupware/fsfolder/*";
-
-    public static final String SESSION = "session";
-
-    public static final String SERVICE = "service";
-
-    public static final String ACCOUNT_ID = "accountId";
-
-    public static final String FOLDER_ID = "folderId";
-
-    public static final String PARENT_FOLDER_ID = "parentFolderId";
-
-    public static final String FOLDER_PATH = "folderPath";
-
-    public static final String OBJECT_ID = "objectId";
-
-    public static final String FILE_NAME = "fileName";
-
-    public static final String VERSIONS = "versions";
-
-    public static final String E_TAG = "eTag";
-
-    public static final String HARD_DELETE = "hardDelete";
+    /**
+     * Initializes a new {@link Tools}.
+     */
+    private Tools() {
+        super();
+    }
 
 }

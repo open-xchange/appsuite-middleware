@@ -65,10 +65,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.ReuseReadConProvider;
@@ -85,8 +84,11 @@ import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreTimedResult;
+import com.openexchange.groupware.infostore.database.BatchFilenameReserver;
+import com.openexchange.groupware.infostore.database.FilenameReservation;
 import com.openexchange.groupware.infostore.database.InfostoreFilenameReservation;
 import com.openexchange.groupware.infostore.database.InfostoreFilenameReserver;
+import com.openexchange.groupware.infostore.database.impl.BatchFilenameReserverImpl;
 import com.openexchange.groupware.infostore.database.impl.CheckSizeSwitch;
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
@@ -100,6 +102,7 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.database.impl.ReplaceDocumentIntoDelTableAction;
 import com.openexchange.groupware.infostore.database.impl.SelectForUpdateFilenameReserver;
+import com.openexchange.groupware.infostore.database.impl.Tools;
 import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.index.InfostoreUUID;
@@ -128,6 +131,7 @@ import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaService;
@@ -759,7 +763,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(filename, "");
                 }
                 int cnt = count;
-                InfostoreFilenameReservation r = reserve(enhance(filename, ++cnt), folderId, id, ctx, cnt);
+                InfostoreFilenameReservation r = reserve(Tools.enhance(filename, ++cnt), folderId, id, ctx, cnt);
                 r.setWasAdjusted(true);
                 return r;
             }
@@ -767,39 +771,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
         }
         return reservation;
-    }
-
-    private static final Pattern IS_NUMBERED_WITH_EXTENSION = Pattern.compile("\\(\\d+\\)\\.");
-
-    private static final Pattern IS_NUMBERED = Pattern.compile("\\(\\d+\\)$");
-
-    private String enhance(final String filename, final int c) {
-        final StringBuilder stringBuilder = new StringBuilder(filename);
-
-        Matcher matcher = IS_NUMBERED_WITH_EXTENSION.matcher(filename);
-        if (matcher.find()) {
-            final int start = matcher.start();
-            final int end = matcher.end();
-            stringBuilder.replace(start, end - 1, "(" + c + ")");
-            return stringBuilder.toString();
-        }
-
-        matcher = IS_NUMBERED.matcher(filename);
-        if (matcher.find()) {
-            final int start = matcher.start();
-            final int end = matcher.end();
-            stringBuilder.replace(start, end, "(" + c + ")");
-            return stringBuilder.toString();
-        }
-
-        int index = filename.lastIndexOf('.');
-        if (index == -1) {
-            index = filename.length();
-        }
-
-        stringBuilder.insert(index, "(" + c + ")");
-
-        return stringBuilder.toString();
     }
 
     protected QuotaFileStorage getFileStorage(final Context ctx) throws OXException {
@@ -1187,6 +1158,212 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 getFileStorage(context).deleteFiles(filestoreLocations.toArray(new String[filestoreLocations.size()]));
             }
         }
+    }
+
+    /**
+     * Gets a list of infostore documents.
+     *
+     * @param provider The DB provider
+     * @param context The context
+     * @param ids The object IDs of the documents to get
+     * @param metadata The metadata to retrieve
+     * @return The documents
+     * @throws OXException
+     */
+    private static List<DocumentMetadata> getAllDocuments(DBProvider provider, Context context, int[] ids, Metadata[] metadata) throws OXException {
+        if (null == ids || 0 == ids.length) {
+            return Collections.emptyList();
+        }
+        if (1 == ids.length) {
+            return InfostoreIterator.allDocumentsWhere("infostore.id = " + ids[0], metadata, provider, context).asList();
+        }
+        StringAllocator stringAllocator = new StringAllocator("infostore.id IN (");
+        stringAllocator.append(String.valueOf(ids[0]));
+        for (int i = 1; i < ids.length; i++) {
+            stringAllocator.append(',').append(String.valueOf(ids[i]));
+        }
+        stringAllocator.append(')');
+        return InfostoreIterator.allDocumentsWhere(stringAllocator.toString(), metadata, provider, context).asList();
+    }
+
+    /**
+     * Moves the supplied documents to another folder.
+     *
+     * @param session The server session
+     * @param documents The source documents to move
+     * @param destinationFolderID The destination folder ID
+     * @param sequenceNumber The client timestamp to catch concurrent modifications
+     * @param adjustFilenamesAsNeeded <code>true</code> to adjust filenames in target folder automatically, <code>false</code>, otherwise
+     * @return A list of documents that could not be moved due to concurrent modifications
+     * @throws OXException
+     */
+    protected List<DocumentMetadata> moveDocuments(ServerSession session, List<DocumentMetadata> documents, long destinationFolderID,
+        long sequenceNumber, boolean adjustFilenamesAsNeeded) throws OXException {
+        /*
+         * check destination folder permissions
+         */
+        Map<Long, EffectivePermission> folderPermissions = new HashMap<Long, EffectivePermission>();
+        EffectivePermission destinationFolderPermission = security.getFolderPermission(
+            destinationFolderID, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        if (false == destinationFolderPermission.canCreateObjects()) {
+            throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
+        }
+        folderPermissions.put(Long.valueOf(destinationFolderID), destinationFolderPermission);
+        /*
+         * check source folder permissions, write locks and client timestamp
+         */
+        List<DocumentMetadata> rejectedDocuments = new ArrayList<DocumentMetadata>();
+        List<DocumentMetadata> sourceDocuments = new ArrayList<DocumentMetadata>(documents.size());
+        for (DocumentMetadata document : documents) {
+            if (destinationFolderID == document.getFolderId()) {
+                continue;
+            }
+            Long folderID = Long.valueOf(document.getFolderId());
+            EffectivePermission folderPermission = folderPermissions.get(folderID);
+            if (null == folderPermission) {
+                folderPermission = security.getFolderPermission(
+                    folderID, session.getContext(), session.getUser(), session.getUserPermissionBits());
+                folderPermissions.put(folderID, folderPermission);
+            }
+            if (false == new EffectiveInfostorePermission(folderPermission, document, session.getUser()).canDeleteObject()) {
+                throw InfostoreExceptionCodes.NO_DELETE_PERMISSION.create();
+            }
+            checkWriteLock(document, session);
+            if (document.getSequenceNumber() <= sequenceNumber) {
+                sourceDocuments.add(document);
+            } else {
+                rejectedDocuments.add(document);
+            }
+        }
+        if (0 < sourceDocuments.size()) {
+            /*
+             * prepare move
+             */
+            Date now = new Date();
+            BatchFilenameReserver filenameReserver = new BatchFilenameReserverImpl(session.getContext(), this);
+            try {
+                List<DocumentMetadata> tombstoneDocuments = new ArrayList<DocumentMetadata>(sourceDocuments.size());
+                List<DocumentMetadata> documentsToUpdate = new ArrayList<DocumentMetadata>(sourceDocuments.size());
+                List<DocumentMetadata> versionsToUpdate = new ArrayList<DocumentMetadata>();
+                for (DocumentMetadata document : sourceDocuments) {
+                    /*
+                     * prepare updated document
+                     */
+                    DocumentMetadataImpl documentToUpdate = new DocumentMetadataImpl(document);
+                    documentToUpdate.setLastModified(now);
+                    documentToUpdate.setModifiedBy(session.getUserId());
+                    documentToUpdate.setFolderId(destinationFolderID);
+                    documentsToUpdate.add(documentToUpdate);
+                    /*
+                     * prepare tombstone entry in del_infostore table for source document
+                     */
+                    DocumentMetadataImpl tombstoneDocument = new DocumentMetadataImpl(document);
+                    tombstoneDocument.setLastModified(now);
+                    tombstoneDocument.setModifiedBy(session.getUserId());
+                    tombstoneDocuments.add(tombstoneDocument);
+                }
+                /*
+                 * reserve filenames
+                 */
+                Map<DocumentMetadata, FilenameReservation> reservations = filenameReserver.reserve(documentsToUpdate, adjustFilenamesAsNeeded);
+                if (adjustFilenamesAsNeeded) {
+                    /*
+                     * take over adjusted filenames; remember to update document version, too
+                     */
+                    for (Entry<DocumentMetadata, FilenameReservation> entry : reservations.entrySet()) {
+                        FilenameReservation reservation = entry.getValue();
+                        if (reservation.wasAdjusted()) {
+                            DocumentMetadata document = entry.getKey();
+                            if (document.getFileName().equals(document.getTitle())) {
+                                document.setTitle(reservation.getFilename());
+                            }
+                            document.setFileName(reservation.getFilename());
+                            versionsToUpdate.add(document);
+                        }
+                    }
+                }
+                /*
+                 * perform tombstone creations
+                 */
+                ReplaceDocumentIntoDelTableAction tombstoneAction = new ReplaceDocumentIntoDelTableAction();
+                tombstoneAction.setContext(session.getContext());
+                tombstoneAction.setDocuments(tombstoneDocuments);
+                tombstoneAction.setProvider(this);
+                tombstoneAction.setQueryCatalog(QUERIES);
+                perform(tombstoneAction, true);
+                /*
+                 * perform document move
+                 */
+                UpdateDocumentAction updateAction = new UpdateDocumentAction();
+                updateAction.setContext(session.getContext());
+                updateAction.setDocuments(documentsToUpdate);
+                updateAction.setOldDocuments(sourceDocuments);
+                updateAction.setProvider(this);
+                updateAction.setQueryCatalog(QUERIES);
+                updateAction.setModified(new Metadata[] {
+                    Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL
+                });
+                updateAction.setTimestamp(sequenceNumber);
+                perform(updateAction, true);
+                /*
+                 * perform version update (only required in case of adjusted filenames)
+                 */
+                if (0 < versionsToUpdate.size()) {
+                    UpdateVersionAction updateVersionAction = new UpdateVersionAction();
+                    updateVersionAction.setContext(session.getContext());
+                    updateVersionAction.setDocuments(versionsToUpdate);
+                    updateVersionAction.setOldDocuments(sourceDocuments);
+                    updateVersionAction.setProvider(this);
+                    updateVersionAction.setQueryCatalog(QUERIES);
+                    updateVersionAction.setModified(new Metadata[] { Metadata.FILENAME_LITERAL, Metadata.TITLE_LITERAL });
+                    updateVersionAction.setTimestamp(sequenceNumber);
+                    perform(updateVersionAction, true);
+                }
+                /*
+                 * re-index moved documents
+                 */
+                for (DocumentMetadata sourceDocument : sourceDocuments) {
+                    indexDocument(session.getContext(), session.getUserId(), sourceDocument.getId(), sourceDocument.getFolderId(), false);
+                }
+            } finally {
+                filenameReserver.cleanUp();
+            }
+        }
+        /*
+         * return rejected documents
+         */
+        return rejectedDocuments;
+    }
+
+    @Override
+    public int[] moveDocuments(ServerSession session, int[] ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
+        if (null == ids || 0 == ids.length) {
+            return new int[0];
+        }
+        long destinationFolderID;
+        try {
+            destinationFolderID = Long.valueOf(targetFolderID).longValue();
+        } catch (NumberFormatException e) {
+            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(targetFolderID, e);
+        }
+        /*
+         * get documents to move
+         */
+        DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
+        List<DocumentMetadata> allDocuments = getAllDocuments(reuseProvider, session.getContext(), ids, Metadata.VALUES_ARRAY);
+        /*
+         * perform move
+         */
+        List<DocumentMetadata> rejectedDocuments = moveDocuments(
+            session, allDocuments, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
+        if (null == rejectedDocuments || 0 == rejectedDocuments.size()) {
+            return new int[0];
+        }
+        int[] rejectedIDs = new int[rejectedDocuments.size()];
+        for (int i = 0; i < rejectedIDs.length; i++) {
+            rejectedIDs[i] = rejectedDocuments.get(i).getId();
+        }
+        return rejectedIDs;
     }
 
     @Override

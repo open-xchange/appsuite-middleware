@@ -789,6 +789,14 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
+        return removeDocument(ids, sequenceNumber, true);
+    }
+
+    @Override
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
+        if (false == hardDelete) {
+            throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+        }
         try {
             final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (final IDTuple idTuple : ids) {

@@ -201,7 +201,15 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber) throws OXException {
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
+        return removeDocument(ids, sequenceNumber, true);
+    }
+
+    @Override
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
+        if (false == hardDelete) {
+            throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+        }
         List<IDTuple> notRemoved = new ArrayList<IDTuple>();
         for (IDTuple tuple : ids) {
             String folderId = tuple.getFolder();

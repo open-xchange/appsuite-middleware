@@ -180,13 +180,31 @@ public interface IDBasedFileAccess extends TransactionAware {
     void removeDocument(String folderId, long sequenceNumber) throws OXException;
 
     /**
-     * Removes the documents with the given IDs from the folder. Documents' identifiers that could not be removed due to an edit-delete conflict are returned.
+     * Permanently removes the documents with the given IDs from the folder. Documents' identifiers that could not be removed due to an
+     * edit-delete conflict are returned.
+     *
      * @param ids The identifiers
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
-     * @return
+     * @return The IDs of documents that could not be deleted due to an edit-delete conflict
      * @throws OXException If operation fails
      */
     List<String> removeDocument(List<String> ids, long sequenceNumber) throws OXException;
+
+    /**
+     * Removes the documents with the given IDs from the folder. Documents' identifiers that could not be removed due to an edit-delete
+     * conflict are returned.
+     * <p>
+     * If <code>hardDelete</code> is not set and a document is not yet located below the default trash folder it is backed up, otherwise
+     * it is deleted permanently.
+     *
+     * @param ids The identifiers
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @param hardDelete <code>true</code> to permanently remove the documents, <code>false</code> to move the documents to the default
+     *                   trash folder of the storage
+     * @return The IDs of documents that could not be deleted due to an edit-delete conflict
+     * @throws OXException If operation fails
+     */
+    List<String> removeDocument(List<String> ids, long sequenceNumber, boolean hardDelete) throws OXException;
 
     /**
      * Remove a certain version of a file

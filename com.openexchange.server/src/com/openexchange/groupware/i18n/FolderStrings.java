@@ -79,6 +79,8 @@ public class FolderStrings implements LocalizableStrings {
 
     public static final String SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME = "Public infostore";
 
+    public static final String SYSTEM_TRASH_INFOSTORE_FOLDER_NAME = "Trash infostore";
+
     public static final String VIRTUAL_LIST_TASK_FOLDER_NAME = "Other task folders";
 
     public static final String VIRTUAL_LIST_CALENDAR_FOLDER_NAME = "Other calendar folders";
@@ -105,5 +107,8 @@ public class FolderStrings implements LocalizableStrings {
 
     public static final String SYSTEM_PUBLIC_FILES_FOLDER_NAME = "Public files";
 
+    public static final String SYSTEM_TRASH_FILES_FOLDER_NAME = "Deleted files";
+
     public static final String VIRTUAL_LIST_FILES_FOLDER_NAME = "Other files";
+
 }

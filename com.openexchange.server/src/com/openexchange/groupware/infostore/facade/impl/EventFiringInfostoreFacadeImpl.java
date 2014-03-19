@@ -173,6 +173,24 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
     }
 
     @Override
+    protected List<DocumentMetadata> moveDocuments(ServerSession session, List<DocumentMetadata> documents, long destinationFolderID,
+        long sequenceNumber, boolean adjustFilenamesAsNeeded) throws OXException {
+        List<DocumentMetadata> rejectedDocuments = super.moveDocuments(
+            session, documents, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
+        if (null != documents && 0 < documents.size()) {
+            for (DocumentMetadata document : documents) {
+                if (null != rejectedDocuments && rejectedDocuments.contains(document)) {
+                    continue;
+                }
+                fireEvent(FileStorageEventHelper.buildUpdateEvent(session, SERVICE_ID, ACCOUNT_ID,
+                    new FolderID(SERVICE_ID, ACCOUNT_ID, String.valueOf(destinationFolderID)).toUniqueID(),
+                    getFileID(document), document.getFileName()));
+            }
+        }
+        return rejectedDocuments;
+    }
+
+    @Override
     public int[] removeVersion(int id, int[] versionIds, ServerSession session) throws OXException {
         if (null == versionIds || 0 == versionIds.length) {
             return super.removeVersion(id, versionIds, session);

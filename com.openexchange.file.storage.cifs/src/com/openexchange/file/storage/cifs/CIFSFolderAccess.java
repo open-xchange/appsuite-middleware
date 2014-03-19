@@ -334,6 +334,11 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
         }
     }
 
+    @Override
+    public FileStorageFolder getTrashFolder() throws OXException {
+        throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
+    }
+
     private static final SmbFileFilter DICTIONARY_FILTER = new SmbFileFilter() {
 
         @Override
