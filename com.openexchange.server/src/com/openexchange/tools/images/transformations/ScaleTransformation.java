@@ -95,7 +95,10 @@ public class ScaleTransformation implements ImageTransformation {
             break;
         }
         transformationContext.addExpense(ImageTransformations.HIGH_EXPENSE);
-        return new ResampleOp(constrain).filter(sourceImage, null);
+        ResampleOp resampleOp = new ResampleOp(constrain);
+        // Do not use more than calling thread
+        resampleOp.setNumberOfThreads(1);
+        return resampleOp.filter(sourceImage, null);
     }
 
     @Override
