@@ -220,9 +220,9 @@ public class ImageTransformationsImpl implements ImageTransformations {
      *
      * @param formatName the image format to use, or <code>null</code> if not relevant
      * @return The transformed image
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
-    private BufferedImage getImage(String formatName) throws IOException {
+    protected BufferedImage getImage(String formatName) throws IOException {
         BufferedImage image = getSourceImage(formatName);
         if (null != image && image.getHeight() > 3 && image.getWidth() > 3) {
             ImageInformation imageInformation = null != this.metadata ? getImageInformation(this.metadata) : null;
