@@ -1,3 +1,7 @@
+* 2014-03-19 - ioannis.chouklis@open-xchange.com
+ 
+ -  Fix for Bug 31637: [L3] Unclear usage of logconf '-u' and '-c' parameter
+
 * 2014-03-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 31644: Properly collect available text parts on reply if original message contains multipart/alternative appendix

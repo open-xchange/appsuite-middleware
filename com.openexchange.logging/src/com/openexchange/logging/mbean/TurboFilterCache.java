@@ -51,6 +51,7 @@ package com.openexchange.logging.mbean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Marker;
@@ -62,7 +63,7 @@ import ch.qos.logback.core.spi.FilterReply;
  * {@link TurboFilterCache} - Manages {@link TurboFilter} instances that perform filtering of log events based on user/context/session.
  * <p>
  * Moreover it signals a higher ranking than default to let that filter be executed in first place.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TurboFilterCache extends ExtendedTurboFilter {
@@ -95,6 +96,14 @@ public final class TurboFilterCache extends ExtendedTurboFilter {
 
     public void remove(final String key) {
         map.remove(key);
+    }
+
+    public TurboFilter get(final String key) {
+        return map.get(key);
+    }
+
+    public Set<String> keySet() {
+        return map.keySet();
     }
 
     @Override
