@@ -1,6 +1,8 @@
 * 2014-03-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 31644: Properly collect available text parts on reply if original message contains multipart/alternative appendix
+ - Fix for bug 31470: Adjusted description of property "com.openexchange.mail.filter.useUTF7FolderEncoding" to also consider Cyrus IMAP
+                      server setting "sieve_utf8fileinto"
 
 * 2014-03-19 - tobias.friedrich@open-xchange.com
 
