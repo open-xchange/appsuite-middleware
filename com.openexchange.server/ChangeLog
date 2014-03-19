@@ -1,3 +1,7 @@
+* 2014-03-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31644: Properly collect available text parts on reply if original message contains multipart/alternative appendix
+
 * 2014-03-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 31587: Pass obtained BundleContext instance to initializing method, not the stored one to ensure working on most recent bundle/framework state
