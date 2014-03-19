@@ -142,14 +142,11 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		if(!exists) {
 			return;
 		}
-//		OXFolderManager oxma = new OXFolderManagerImpl(getSession());
-//		OXFolderAction oxfa = new OXFolderAction(getSession());
 		Connection con = null;
 		try {
 			con = provider.getWriteConnection(getSession().getContext());
 			final OXFolderManager oxma = OXFolderManager.getInstance(getSession(), con, con);
 			oxma.deleteFolder(new FolderObject(id), true, FileStorageFileAccess.DISTANT_FUTURE);
-			//oxfa.deleteFolder(id, getSession(),con, con, true,System.currentTimeMillis()); // FIXME
 			exists = false;
 			factory.removed(this);
 		} catch (final OXException x) {
