@@ -140,7 +140,9 @@ public final class FolderWriter {
             }
             fo.setFolderName(folder.getName());
             fo.setModule(folder.getContentType().getModule());
-            fo.setType(folder.getType().getType());
+            if (null != folder.getType()) {
+                fo.setType(folder.getType().getType());
+            }
             fo.setCreatedBy(folder.getCreatedBy());
             jsonPutter.put(aff.getColumnName(), aff.renderJSON(aff.getValue(fo, serverSession)));
         }
@@ -602,7 +604,9 @@ public final class FolderWriter {
             }
             fo.setFolderName(folder.getName());
             fo.setModule(folder.getContentType().getModule());
-            fo.setType(folder.getType().getType());
+            if (null != folder.getType()) {
+                fo.setType(folder.getType().getType());
+            }
             fo.setCreatedBy(folder.getCreatedBy());
             retval.add(fo);
         }

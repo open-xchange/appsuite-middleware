@@ -1,3 +1,7 @@
+* 2014-03-19 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31646: Be aware of unknown folder type 
+
 * 2014-03-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 31157: Keep trailing whitespace character in signature-delimiting line
