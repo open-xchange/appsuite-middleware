@@ -52,6 +52,7 @@ package com.openexchange.mail.dataobjects;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -73,20 +74,9 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.TimeZoneUtils;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link MailMessage} - Abstract super class for all {@link MailMessage} subclasses.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-/**
- * {@link MailMessage}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-/**
- * {@link MailMessage}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -287,7 +277,7 @@ public abstract class MailMessage extends MailPart {
 
     /**
      * Tests if specified string contains a valid color label
-     * 
+     *
      * @param cl The string to check
      * @return <code>true</code> if specified string is a valid color label; otherwise <code>false</code>
      */
