@@ -444,7 +444,7 @@ public class LogbackCLT {
         HelpFormatter hf = new HelpFormatter();
         hf.setWidth(120);
         hf.printHelp(
-            "logconf [[-a | -d] [-c <contextid> [-u <userid>] | -s <sessionid>] [-l <logger_name>=<logger_level>] [-U <JMX-User> -P <JMX-Password> [-p <JMX-Port>]]] | [-oec <category_1>, ..., <category_n>] | [-cf] | [-lf] | [-ll [<logger_1>, ..., <logger_n>] | [dynamic]] | [-le] | [-h]",
+            "logconf [[-a | -d] [-c <contextid> [-u <userid>] | -s <sessionid>] [-l <logger_name>=<logger_level> ...] [-U <JMX-User> -P <JMX-Password> [-p <JMX-Port>]]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] | [-h]",
             null,
             options,
             "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories());
