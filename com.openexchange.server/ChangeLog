@@ -1,3 +1,7 @@
+* 2014-03-19 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 31399: Don't suppress exception
+
 * 2014-03-19 - ioannis.chouklis@open-xchange.com
  
  -  Fix for Bug 31637: [L3] Unclear usage of logconf '-u' and '-c' parameter
