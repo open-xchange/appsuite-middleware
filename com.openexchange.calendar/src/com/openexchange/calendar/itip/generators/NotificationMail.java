@@ -107,6 +107,8 @@ public class NotificationMail {
 	private boolean attachmentUpdate;
 
 	private boolean sortedParticipants;
+	
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotificationMail.class);
 
     public ITipMessage getMessage() {
         return itipMessage;
@@ -287,34 +289,43 @@ public class NotificationMail {
     		return false;
     	}
     	if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
+    	    LOG.debug("1: User: {}, {} {}", recipient.getEmail(), recipient.getConfiguration().forceCancelMails(), isCancelMail());
     		return true;
     	}
     	if (appointment != null && appointment.containsNotification() && !appointment.getNotification()) {
+            LOG.debug("2: User: {}, {} {}", recipient.getEmail(), appointment.containsNotification(), appointment.getNotification());
     		return false;
     	}
     	if (appointment != null && stateType.equals(Type.NEW) && endsInPast(appointment)) {
+            LOG.debug("3: User: {}, {} {}", recipient.getEmail(), stateType.name(), endsInPast(appointment));
     	    return false;
     	}
-    	if (appointment != null && original != null && stateType.equals(Type.MODIFIED)
-    	                        && isNotWorthUpdateNotification(original, appointment)) {
+    	if (appointment != null && original != null && stateType.equals(Type.MODIFIED)  && isNotWorthUpdateNotification(original, appointment)) {
+            LOG.debug("4: User: {}, {} {}", recipient.getEmail(), stateType.name(), isNotWorthUpdateNotification(original, appointment));
     	    return false;
     	}
     	if (appointment != null && stateType.equals(Type.DELETED)) {
+            LOG.debug("5: User: {}, {}", recipient.getEmail(), stateType.name());
     	    return false;
     	}
     	if (! anInterestingFieldChanged()) {
+            LOG.debug("6: User: {}, {}", anInterestingFieldChanged());
     		return false;
     	}
         if (stateType == Type.MODIFIED && onlyPseudoChangesOnParticipants()) {
+            LOG.debug("7: User: {}, {} {}", stateType.name(), onlyPseudoChangesOnParticipants());
             return false;
         }
         if (getRecipient().getConfiguration().sendITIP() && itipMessage != null) {
+            LOG.debug("8: User: {}, {}", getRecipient().getConfiguration().sendITIP());
             return true;
         }
         if (!getRecipient().getConfiguration().interestedInChanges()) {
+            LOG.debug("9: User: {}, {}", getRecipient().getConfiguration().interestedInChanges());
             return false;
         }
         if (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly()) {
+            LOG.debug("10: User: {}, {} {}", getRecipient().getConfiguration().interestedInStateChanges(), isAboutStateChangesOnly());
             return false;
         }
         return true;
