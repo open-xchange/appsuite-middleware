@@ -81,7 +81,7 @@ public class Tools {
         if (matcher.find()) {
             final int start = matcher.start();
             final int end = matcher.end();
-            stringBuilder.replace(start, end - 1, " (" + counter + ")");
+            stringBuilder.replace(start, end - 1, "(" + counter + ")");
             return stringBuilder.toString();
         }
 
@@ -89,7 +89,7 @@ public class Tools {
         if (matcher.find()) {
             final int start = matcher.start();
             final int end = matcher.end();
-            stringBuilder.replace(start, end, " (" + counter + ")");
+            stringBuilder.replace(start, end, "(" + counter + ")");
             return stringBuilder.toString();
         }
 
