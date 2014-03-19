@@ -50,11 +50,14 @@
 package com.openexchange.ajax.mailaccount;
 
 import java.io.IOException;
+import java.util.List;
 import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateResponse;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mailaccount.MailAccountDescription;
 
 /**
@@ -108,11 +111,41 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
             fail(e.getMessage());
         }
 
-        updateMailAccountDescription(mailAccountDescription, MailConfig.getProperty(MailConfig.Property.LOGIN));
+        mailAccountDescription.setMailServer(MailConfig.getProperty(MailConfig.Property.SERVER));
+        mailAccountDescription.setMailPort(Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT)));
+        mailAccountDescription.setMailProtocol("imap");
+        mailAccountDescription.setMailSecure(false);
+        mailAccountDescription.setLogin(MailConfig.getProperty(MailConfig.Property.LOGIN));
+        mailAccountDescription.setPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
+        mailAccountDescription.setTransportServer((String) null);
+        response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription));
+        assertTrue("Valid access data in mail account do not pass validation but should", response.isValidated());
+        
+        mailAccountDescription.setMailServer(MailConfig.getProperty(MailConfig.Property.SERVER));
+        mailAccountDescription.setMailPort(Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT)));
+        mailAccountDescription.setMailProtocol("imap");
+        mailAccountDescription.setMailSecure(false);
+        mailAccountDescription.setLogin(MailConfig.getProperty(MailConfig.Property.LOGIN));
+        mailAccountDescription.setPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
+        mailAccountDescription.setTransportLogin(MailConfig.getProperty(MailConfig.Property.LOGIN));
+        mailAccountDescription.setTransportPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
+        mailAccountDescription.setTransportServer(MailConfig.getProperty(MailConfig.Property.SERVER));
+        mailAccountDescription.setTransportPort(25);
+        mailAccountDescription.setTransportProtocol("smtp");
+        mailAccountDescription.setTransportSecure(false);
 
         response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription));
         assertTrue("Valid access data in mail/transport account do not pass validation but should", response.isValidated());
+//        
+//        Response resp = response.getResponse();
+//        assertTrue(resp.hasWarnings());
+//
+//        List<OXException> respExceptions = resp.getWarnings();
+//        for (OXException e : respExceptions) {
+//            assertEquals("Expected MailAccountValidateRequest to throw MailExceptionCode.NON_SECURE_WARNING warning, but actual warning is " + e,MailExceptionCode.NON_SECURE_WARNING.getNumber(), e.getCode());
+//        }
 
+//        assertEquals(, response.getErrorMessage());
         // With tree parameter
 //        mailAccountDescription.setMailServer(MailConfig.getProperty(MailConfig.Property.SERVER));
 //        mailAccountDescription.setMailPort(Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT)));

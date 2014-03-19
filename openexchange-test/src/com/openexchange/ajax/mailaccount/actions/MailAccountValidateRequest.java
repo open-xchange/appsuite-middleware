@@ -91,6 +91,7 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
     public Object getBody() throws JSONException {
         final JSONObject json = MailAccountWriter.write(wrap(account));
         json.put("password", account.getPassword());
+        json.put("transport_password", account.getTransportPassword());
         return json;
     }
 

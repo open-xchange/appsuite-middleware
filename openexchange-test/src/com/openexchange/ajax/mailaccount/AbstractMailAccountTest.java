@@ -106,6 +106,7 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
     protected void updateMailAccountDescription(final MailAccountDescription mailAccountDescription, String user) {
         mailAccountDescription.setMailServer(MailConfig.getProperty(MailConfig.Property.SERVER));
         mailAccountDescription.setMailPort(Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT)));
+        
         mailAccountDescription.setMailProtocol("imap");
         mailAccountDescription.setMailSecure(false);
         mailAccountDescription.setLogin(user);
@@ -113,6 +114,8 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
         mailAccountDescription.setTransportServer(MailConfig.getProperty(MailConfig.Property.SERVER));
         mailAccountDescription.setTransportPort(25);
         mailAccountDescription.setTransportProtocol("smtp");
+        mailAccountDescription.setTransportLogin(user);
+        mailAccountDescription.setTransportPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
         mailAccountDescription.setTransportSecure(false);
     }
 
