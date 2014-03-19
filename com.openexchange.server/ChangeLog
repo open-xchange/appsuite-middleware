@@ -4,6 +4,10 @@
  - Fix for bug 31700: Increase sync timeout to 1900 to respect com.openexchange.usm.eas.ping.max_heartbeat
  - Fix for bug 31701: Document workaround for Apache < 2.4 and set up combined balancing proxy for usm and eas
  - Fix for bug 31702: Document workaround for Apache < 2.4 and set up combined balancing proxy for usm and eas
+
+* 2014-03-19 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31646: Be aware of unknown folder type 
  
 * 2014-03-18 - marcus.klein@open-xchange.com
 

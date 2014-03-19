@@ -266,7 +266,7 @@ public final class EffectivePermission implements Permission {
     }
 
     private int getType() {
-        return type.getType();
+        return null != type ? type.getType() : -1;
     }
 
     private int getModule() {
