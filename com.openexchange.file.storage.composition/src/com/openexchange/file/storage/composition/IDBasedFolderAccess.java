@@ -244,8 +244,8 @@ public interface IDBasedFolderAccess extends TransactionAware {
     /**
      * Deletes an existing file storage folder identified through given identifier.
      * <p>
-     * If <code>hardDelete</code> is not set and folder is not located below default trash folder it is backed up (including subfolder tree)
-     * in default trash folder; otherwise it is deleted permanently.
+     * If <code>hardDelete</code> is not set, the storage supports a trash folder, and the folder is not yet located below that trash
+     * folder, it is backed up (including the subfolder tree), otherwise it is deleted permanently.
      * <p>
      * While another backup folder with the same name already exists below default trash folder, an increasing serial number is appended to
      * folder name until its name is unique inside default trash folder's subfolders. E.g.: If folder "DeleteMe" already exists below

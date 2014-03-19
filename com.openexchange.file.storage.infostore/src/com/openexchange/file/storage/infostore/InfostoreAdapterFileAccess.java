@@ -229,7 +229,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
-        return removeDocument(ids, sequenceNumber, true);
+        return removeDocument(ids, sequenceNumber, false);
     }
 
     @Override
@@ -249,57 +249,67 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
              */
             conflicted = infostore.removeDocument(infostoreIDs, sequenceNumber, sessionObj);
         } else {
-            FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
-            String trashFolderID = folderAccess.getTrashFolder().getId();
-            String rootFolderID = folderAccess.getRootFolder().getId();
             /*
-             * distinguish between files already in or below trash folder
+             * check for presence of trash folder
              */
-            List<Integer> filesToDelete = new ArrayList<Integer>();
-            List<Integer> filesToMove = new ArrayList<Integer>();
-            Map<String, FileStorageFolder> knownFolders = new HashMap<String, FileStorageFolder>();
-            for (IDTuple tuple : ids) {
-                String folderID = tuple.getFolder();
-                while (null != folderID && false == trashFolderID.equals(folderID) && false == rootFolderID.equals(folderID)) {
-                    FileStorageFolder folder = knownFolders.get(folderID);
-                    if (null == folder) {
-                        folder = folderAccess.getFolder(folderID);
-                        knownFolders.put(folderID, folder);
+            String trashFolderID = getTrashFolderID();
+            if (null == trashFolderID) {
+                /*
+                 * perform hard-deletion instead
+                 */
+                conflicted = infostore.removeDocument(infostoreIDs, sequenceNumber, sessionObj);
+            } else {
+                /*
+                 * distinguish between files already in or below trash folder
+                 */
+                FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
+                String rootFolderID = folderAccess.getRootFolder().getId();
+                List<Integer> filesToDelete = new ArrayList<Integer>();
+                List<Integer> filesToMove = new ArrayList<Integer>();
+                Map<String, FileStorageFolder> knownFolders = new HashMap<String, FileStorageFolder>();
+                for (IDTuple tuple : ids) {
+                    String folderID = tuple.getFolder();
+                    while (null != folderID && false == trashFolderID.equals(folderID) && false == rootFolderID.equals(folderID)) {
+                        FileStorageFolder folder = knownFolders.get(folderID);
+                        if (null == folder) {
+                            folder = folderAccess.getFolder(folderID);
+                            knownFolders.put(folderID, folder);
+                        }
+                        folderID = folder.getParentId();
                     }
-                    folderID = folder.getParentId();
+                    if (trashFolderID.equals(folderID)) {
+                        filesToDelete.add(Integer.valueOf(tuple.getId()));
+                    } else {
+                        filesToMove.add(Integer.valueOf(tuple.getId()));
+                    }
                 }
-                if (trashFolderID.equals(folderID)) {
-                    filesToDelete.add(Integer.valueOf(tuple.getId()));
-                } else {
-                    filesToMove.add(Integer.valueOf(tuple.getId()));
+                /*
+                 * hard-delete already deleted files
+                 */
+                if (0 < filesToDelete.size()) {
+                    int[] idsToDelete = new int[filesToDelete.size()];
+                    for (int i = 0; i < idsToDelete.length; i++) {
+                        idsToDelete[i] = filesToDelete.get(i).intValue();
+                    }
+                    conflicted = infostore.removeDocument(idsToDelete, sequenceNumber, sessionObj);
                 }
-            }
-            /*
-             * hard-delete already deleted files
-             */
-            if (0 < filesToDelete.size()) {
-                int[] idsToDelete = new int[filesToDelete.size()];
-                for (int i = 0; i < idsToDelete.length; i++) {
-                    idsToDelete[i] = filesToDelete.get(i).intValue();
-                }
-                conflicted = infostore.removeDocument(idsToDelete, sequenceNumber, sessionObj);
-            }
-            /*
-             * move other files to trash folder
-             */
-            if (0 < filesToMove.size()) {
-                int[] idsToMove = new int[filesToMove.size()];
-                for (int i = 0; i < idsToMove.length; i++) {
-                    idsToMove[i] = filesToMove.get(i).intValue();
-                }
-                int[] conflicted2 = infostore.moveDocuments(sessionObj, idsToMove, sequenceNumber, trashFolderID, true);
-                if (null == conflicted || 0 == conflicted.length) {
-                    conflicted = conflicted2;
-                } else if (null != conflicted2 && 0 < conflicted2.length){
-                    int[] temp = new int[conflicted.length + conflicted2.length];
-                    System.arraycopy(conflicted, 0, temp, 0, conflicted.length);
-                    System.arraycopy(conflicted2, 0, temp, conflicted.length, conflicted2.length);
-                    conflicted = temp;
+                /*
+                 * move other files to trash folder
+                 */
+                if (0 < filesToMove.size()) {
+                    int[] idsToMove = new int[filesToMove.size()];
+                    for (int i = 0; i < idsToMove.length; i++) {
+                        idsToMove[i] = filesToMove.get(i).intValue();
+                    }
+                    int[] conflicted2 = infostore.moveDocuments(sessionObj, idsToMove, sequenceNumber, trashFolderID, true);
+                    if (null == conflicted || 0 == conflicted.length) {
+                        conflicted = conflicted2;
+                    } else if (null != conflicted2 && 0 < conflicted2.length){
+                        int[] temp = new int[conflicted.length + conflicted2.length];
+                        System.arraycopy(conflicted, 0, temp, 0, conflicted.length);
+                        System.arraycopy(conflicted2, 0, temp, conflicted.length, conflicted2.length);
+                        conflicted = temp;
+                    }
                 }
             }
         }
@@ -679,6 +689,27 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
             return VIRTUAL_INFOSTORE;
         }
         return infostore;
+    }
+
+    /**
+     * Gets the ID of the trash folder.
+     *
+     * @return The trash folder ID, or <code>null</code> if not found
+     * @throws OXException
+     */
+    private String getTrashFolderID() throws OXException {
+        FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
+        try {
+            FileStorageFolder trashFolder = folderAccess.getTrashFolder();
+            if (null != trashFolder) {
+                return trashFolder.getId();
+            }
+        } catch (OXException e) {
+            if (false == FileStorageExceptionCodes.NO_SUCH_FOLDER.equals(e)) {
+                throw e;
+            }
+        }
+        return null;
     }
 
 }

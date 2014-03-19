@@ -66,14 +66,14 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 @Action(method = RequestMethod.PUT, name = "delete", description = "Delete infoitems", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted infoitems."),
-    @Parameter(name = "hardDelete", type=Type.BOOLEAN, description = "Optional, defaults to \"true\". Set to \"false\" to not delete the file permanently, but move it to the default trash folder.")
+    @Parameter(name = "hardDelete", type=Type.BOOLEAN, description = "Optional, defaults to \"false\". If set to \"true\", the file is deleted permanently. Otherwise, and if the underlying storage supports a trash folder and the file is not yet located below the trash folder, it is moved to the trash folder.")
 }, requestBody = "An array with objects to delete. The fields for the object are described in Full identifier for an infostore document.", responseDescription = "An array with [[]].")
 public class DeleteAction extends AbstractWriteAction {
 
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.requireBody().require(Param.TIMESTAMP);
-        boolean hardDelete = false == "false".equals(request.getParameter("hardDelete"));
+        boolean hardDelete = "true".equals(request.getParameter("hardDelete"));
         final IDBasedFileAccess fileAccess = request.getFileAccess();
         final List<String> conflicting = fileAccess.removeDocument(request.getIds(), request.getTimestamp(), hardDelete);
         return result(conflicting, request);

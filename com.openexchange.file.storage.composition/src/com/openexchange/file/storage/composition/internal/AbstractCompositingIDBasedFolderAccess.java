@@ -211,7 +211,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
     @Override
     public String deleteFolder(String folderId) throws OXException {
-        return deleteFolder(folderId, true);
+        return deleteFolder(folderId, false);
     }
 
     @Override

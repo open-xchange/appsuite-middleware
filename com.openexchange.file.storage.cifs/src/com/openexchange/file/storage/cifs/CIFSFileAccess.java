@@ -534,14 +534,11 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
-        return removeDocument(ids, sequenceNumber, true);
+        return removeDocument(ids, sequenceNumber, false);
     }
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
-        if (false == hardDelete) {
-            throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
-        }
         try {
             final List<IDTuple> ret = new ArrayList<IDTuple>();
             for (final IDTuple id : ids) {

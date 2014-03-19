@@ -79,6 +79,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.FileStorageEventHelper.EventProperty;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -534,7 +535,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public List<String> removeDocument(final List<String> ids, final long sequenceNumber) throws OXException {
-        return removeDocument(ids, sequenceNumber, true);
+        return removeDocument(ids, sequenceNumber, false);
     }
 
     @Override
@@ -589,7 +590,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             for (IDTuple tuple : toDelete) {
                 String folderId = new FolderID(serviceId, accountId, tuple.getFolder()).toUniqueID();
                 String fileId = new FileID(serviceId, accountId, tuple.getFolder(), tuple.getId()).toUniqueID();
-                postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderId, fileId, null, null));
+                EventProperty property = new EventProperty(FileStorageEventConstants.HARD_DELETE, Boolean.valueOf(hardDelete));
+                postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderId, fileId, null, null, property));
             }
         }
         return notDeleted;

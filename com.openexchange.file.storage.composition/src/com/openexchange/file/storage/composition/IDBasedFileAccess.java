@@ -180,8 +180,12 @@ public interface IDBasedFileAccess extends TransactionAware {
     void removeDocument(String folderId, long sequenceNumber) throws OXException;
 
     /**
-     * Permanently removes the documents with the given IDs from the folder. Documents' identifiers that could not be removed due to an
+     * Removes the files with the given identifiers from the folder. Documents identifiers that could not be removed due to an
      * edit-delete conflict are returned.
+     * <p>
+     * Calling this method should have the same effect as invoking {@link #removeDocument(List, long, boolean)} with
+     * <code>hardDelete</code> set to <code>false</code>, i.e. if the storage supports a trash folder, and a document is not yet located
+     * below that trash folder, it is backed up, otherwise it is deleted permanently.
      *
      * @param ids The identifiers
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
@@ -194,13 +198,13 @@ public interface IDBasedFileAccess extends TransactionAware {
      * Removes the documents with the given IDs from the folder. Documents' identifiers that could not be removed due to an edit-delete
      * conflict are returned.
      * <p>
-     * If <code>hardDelete</code> is not set and a document is not yet located below the default trash folder it is backed up, otherwise
-     * it is deleted permanently.
+     * If <code>hardDelete</code> is <code>false</code>, the storage supports a trash folder, and a document is not yet located below
+     * that trash folder, it is backed up, otherwise it is deleted permanently.
      *
      * @param ids The identifiers
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @param hardDelete <code>true</code> to permanently remove the documents, <code>false</code> to move the documents to the default
-     *                   trash folder of the storage
+     *                   trash folder of the storage if possible
      * @return The IDs of documents that could not be deleted due to an edit-delete conflict
      * @throws OXException If operation fails
      */

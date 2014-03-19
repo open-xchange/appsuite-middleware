@@ -348,14 +348,11 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber) throws OXException {
-        return removeDocument(ids, sequenceNumber, true);
+        return removeDocument(ids, sequenceNumber, false);
     }
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
-        if (false == hardDelete) {
-            throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
-        }
         for (IDTuple idTuple : ids) {
             toFile(idTuple.getFolder(), idTuple.getId()).delete();
         }
