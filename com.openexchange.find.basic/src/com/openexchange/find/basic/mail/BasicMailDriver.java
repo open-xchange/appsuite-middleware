@@ -55,8 +55,6 @@ import static com.openexchange.find.basic.mail.Constants.FIELD_FROM;
 import static com.openexchange.find.basic.mail.Constants.FIELD_SUBJECT;
 import static com.openexchange.find.basic.mail.Constants.FIELD_TIME;
 import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
-import static com.openexchange.find.basic.mail.Constants.QUERY_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.QUERY_FIELDS_BODY;
 import static com.openexchange.find.basic.mail.Constants.RECIPIENT_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.SENDER_AND_RECIPIENT_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.SENDER_FIELDS;
@@ -135,13 +133,16 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private static final Logger LOG = LoggerFactory.getLogger(BasicMailDriver.class);
 
-    private final String virtualAllMessagesFolder;
-    private static boolean searchMailBody;
+    // Denotes if simple queries (from the global facet) be searched within the mail body
+    private final boolean searchMailBody;
 
-    public BasicMailDriver(String virtualAllMessagesFolder, boolean searchMailBody) {
+    // Name of an optional virtual all-messages folder for primary accounts
+    private final String virtualAllMessagesFolder;
+
+    public BasicMailDriver(final String virtualAllMessagesFolder, final boolean searchMailBody) {
         super();
         this.virtualAllMessagesFolder = virtualAllMessagesFolder;
-        BasicMailDriver.searchMailBody = searchMailBody;
+        this.searchMailBody = searchMailBody;
     }
 
     @Override
@@ -349,8 +350,9 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return null;
     }
 
-    private static SearchTerm<?> prepareSearchTerm(MailFolder folder, List<String> queries, List<Filter> filters) throws OXException {
-        SearchTerm<?> queryTerm = prepareQueryTerm(folder, queries);
+    private SearchTerm<?> prepareSearchTerm(MailFolder folder, List<String> queries, List<Filter> filters) throws OXException {
+        List<String> queryFields = searchMailBody ? Constants.QUERY_FIELDS_BODY : Constants.QUERY_FIELDS;
+        SearchTerm<?> queryTerm = prepareQueryTerm(folder, queryFields, queries);
         SearchTerm<?> filterTerm = prepareFilterTerm(folder, filters);
         SearchTerm<?> searchTerm = null;
         if (filterTerm == null || queryTerm == null) {
@@ -366,15 +368,12 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return searchTerm;
     }
 
-    private static SearchTerm<?> prepareQueryTerm(MailFolder folder, List<String> queries) throws OXException {
+    private static SearchTerm<?> prepareQueryTerm(MailFolder folder, List<String> fields, List<String> queries) throws OXException {
         if (queries == null || queries.isEmpty()) {
             return null;
         }
 
-        if (searchMailBody) {
-            return termFor(QUERY_FIELDS_BODY, queries, OP.AND, folder.isSent());
-        }
-        return termFor(QUERY_FIELDS, queries, OP.AND, folder.isSent());
+        return termFor(fields, queries, OP.AND, folder.isSent());
     }
 
     private static SearchTerm<?> prepareFilterTerm(MailFolder folder, List<Filter> filters) throws OXException {
