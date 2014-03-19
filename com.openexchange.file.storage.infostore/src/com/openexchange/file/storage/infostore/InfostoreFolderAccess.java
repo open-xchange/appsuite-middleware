@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.infostore;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
@@ -157,9 +158,16 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public FileStorageFolder getTrashFolder() throws OXException {
-        final FolderService service = Services.getService(FolderService.class);
-        return FolderWriter.writeFolder(service.getDefaultFolder(
-            session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), TrashType.getInstance(), session, null));
+        FolderService service = Services.getService(FolderService.class);
+        try {
+            return FolderWriter.writeFolder(service.getDefaultFolder(
+                session.getUser(), REAL_TREE_ID, InfostoreContentType.getInstance(), TrashType.getInstance(), session, null));
+        } catch (OXException e) {
+            if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
+                throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);
+            }
+            throw e;
+        }
     }
 
     @Override
