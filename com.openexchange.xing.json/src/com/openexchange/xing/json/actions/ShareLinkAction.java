@@ -49,11 +49,12 @@
 
 package com.openexchange.xing.json.actions;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.RESTUtility;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
@@ -78,7 +79,11 @@ public final class ShareLinkAction extends AbstractXingAction {
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
         String url = getMandatoryStringParameter(req, "url");
-        url = RESTUtility.encodeUrl(url);
+        try {
+            url = URLEncoder.encode(url, "ISO-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            // Ignore
+        }
 
         XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();

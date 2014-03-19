@@ -97,7 +97,7 @@ public final class InviteRequestAction extends AbstractXingAction {
 
         final List<String> alreadyInvited = invitationStats.getAlreadyInvited();
         if (null != alreadyInvited && new HashSet<String>(alreadyInvited).contains(address)) {
-            return new AJAXRequestResult(Boolean.TRUE, "native");
+            throw XingExceptionCodes.ALREADY_INVITED.create(address);
         }
 
         final List<String> invalidAddresses = invitationStats.getInvalidAddresses();
