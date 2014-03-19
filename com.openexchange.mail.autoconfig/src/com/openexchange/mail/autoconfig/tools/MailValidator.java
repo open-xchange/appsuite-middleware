@@ -421,5 +421,4 @@ public class MailValidator {
             }
         }
     }
-
 }
