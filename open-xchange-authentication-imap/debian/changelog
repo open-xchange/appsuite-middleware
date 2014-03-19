@@ -1,3 +1,9 @@
+open-xchange-authentication-imap (7.4.2-14) stable; urgency=low
+
+  * Build for patch 2014-03-13
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 13 Mar 2014 14:35:07 +0100
+
 open-xchange-authentication-imap (7.4.2-13) stable; urgency=low
 
   * Build for patch 2013-03-12
