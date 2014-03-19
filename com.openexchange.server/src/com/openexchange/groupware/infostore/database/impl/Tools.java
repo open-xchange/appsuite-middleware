@@ -49,8 +49,11 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.Strings;
 
 /**
  * {@link Tools}
@@ -94,7 +97,7 @@ public class Tools {
         }
 
         int index = filename.lastIndexOf('.');
-        if (index == -1) {
+        if (0 >= index) {
             index = filename.length();
         }
 
@@ -102,6 +105,43 @@ public class Tools {
 
         return stringBuilder.toString();
     }
+
+    /**
+     * Creates a string containing a placeholder for a possible enhancement counter for each of the supplied filenames. Those strings
+     * are meant to be used in SQL <code>LIKE</code> statements to detect conflicting filenames.
+     *
+     * @param fileNames The filenames to generate the wildcard strings for
+     * @return The wildcard strings
+     */
+    public static Set<String> getEnhancedWildcards(Set<String> fileNames) {
+        Set<String> possibleWildcards = new HashSet<String>(fileNames.size());
+        for (String filename : fileNames) {
+            if (false == Strings.isEmpty(filename)) {
+                StringBuilder stringBuilder = new StringBuilder(filename);
+                Matcher matcher = IS_NUMBERED_WITH_EXTENSION.matcher(filename);
+                if (matcher.find()) {
+                    stringBuilder.replace(matcher.start(), matcher.end() - 1, "(%)");
+                    possibleWildcards.add(stringBuilder.toString());
+                    continue;
+                }
+                matcher = IS_NUMBERED.matcher(filename);
+                if (matcher.find()) {
+                    stringBuilder.replace(matcher.start(), matcher.end(), "(%)");
+                    possibleWildcards.add(stringBuilder.toString());
+                    continue;
+                }
+                int index = filename.lastIndexOf('.');
+                if (0 >= index) {
+                    index = filename.length();
+                }
+                stringBuilder.insert(index, " (%)");
+                possibleWildcards.add(stringBuilder.toString());
+                continue;
+            }
+        }
+        return possibleWildcards;
+    }
+
 
     /**
      * Initializes a new {@link Tools}.

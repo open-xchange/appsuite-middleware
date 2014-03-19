@@ -142,9 +142,7 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
                 /*
                  * get conflicting filenames in target folder
                  */
-                List<DocumentMetadata> conflictingDocuments = getDocumentsWithFilename(
-                    con, context.getContextId(), folderID, getFileNames(documentsInFolder));
-                Set<String> usedNames = getFileNames(conflictingDocuments);
+                Set<String> usedNames = getConflictingFilenames(con, context.getContextId(), folderID, getFileNames(documentsInFolder));
                 /*
                  * prepare required reservations, adjusting target filenames as needed
                  */
@@ -289,46 +287,52 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
         }
     }
 
-    private static List<DocumentMetadata> getDocumentsWithFilename(Connection connection, int contextID, long targetFolderID, Collection<String> fileNames) throws SQLException {
+    private static Set<String> getConflictingFilenames(Connection connection, int contextID, long targetFolderID, Set<String> fileNames) throws SQLException {
         if (null == fileNames || 0 == fileNames.size()) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
+        Set<String> possibleWildcards = Tools.getEnhancedWildcards(fileNames);
         StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("SELECT infostore.id,infostore_document.filename FROM infostore JOIN infostore_document ")
-            .append("ON infostore.cid=? AND infostore_document.cid=? AND infostore.version=infostore_document.version_number ")
-            .append("AND infostore.id=infostore_document.infostore_id WHERE infostore.folder_id=? AND infostore_document.filename")
+        stringAllocator.append("SELECT DISTINCT infostore_document.filename FROM infostore JOIN infostore_document ")
+            .append("ON infostore.cid=infostore_document.cid AND infostore.version=infostore_document.version_number ")
+            .append("AND infostore.id=infostore_document.infostore_id WHERE infostore.cid=? AND infostore.folder_id=? ")
+            .append("AND (infostore_document.filename")
         ;
         if (1 == fileNames.size()) {
-            stringAllocator.append("=?;");
+            stringAllocator.append("=?");
         } else {
             stringAllocator.append(" IN (?");
             for (int i = 1; i < fileNames.size(); i++) {
                 stringAllocator.append(",?");
             }
-            stringAllocator.append(");");
+            stringAllocator.append(")");
         }
-        List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
+        for (int i = 0; i < possibleWildcards.size(); i++) {
+            stringAllocator.append(" OR infostore_document.filename LIKE ?");
+        }
+        stringAllocator.append(");");
+        Set<String> conflictingFilenames = new HashSet<String>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             stmt = connection.prepareStatement(stringAllocator.toString());
             int parameterIndex = 0;
             stmt.setInt(++parameterIndex, contextID);
-            stmt.setInt(++parameterIndex, contextID);
             stmt.setLong(++parameterIndex, targetFolderID);
             for (String filename : fileNames) {
                 stmt.setString(++parameterIndex, filename);
             }
+            for (String possibleWildcard : possibleWildcards) {
+                stmt.setString(++parameterIndex, possibleWildcard);
+            }
             result = stmt.executeQuery();
             while (result.next()) {
-                DocumentMetadataImpl document = new DocumentMetadataImpl(result.getInt(1));
-                document.setFileName(result.getString(2));
-                documents.add(document);
+                conflictingFilenames.add(result.getString(1));
             }
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
         }
-        return documents;
+        return conflictingFilenames;
     }
 
     private static boolean lockFolder(Connection connection, int contextID, long targetFolderID) throws SQLException {
