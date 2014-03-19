@@ -1,3 +1,15 @@
+open-xchange-datamining (7.4.2-15) stable; urgency=low
+
+  * Build for patch 2014-03-24
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Mon, 17 Mar 2014 14:05:39 +0100
+
+open-xchange-datamining (7.4.2-14) stable; urgency=low
+
+  * Build for patch 2014-03-13
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Thu, 13 Mar 2014 14:35:23 +0100
+
 open-xchange-datamining (7.4.2-13) stable; urgency=low
 
   * Build for patch 2013-03-12

@@ -57,11 +57,15 @@ import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.MulticastResult;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
+import com.openexchange.drive.events.gcm.GCMKeyProvider;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link GCMDriveEventPublisher}
@@ -74,11 +78,11 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
     private static final String SERIVCE_ID = "gcm";
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GCMDriveEventPublisher.class);
 
-    private final Sender sender;
-
-    public GCMDriveEventPublisher(String key) {
+    /**
+     * Initializes a new {@link GCMDriveEventPublisher}.
+     */
+    public GCMDriveEventPublisher() {
         super();
-        this.sender = new Sender(key);
     }
 
     @Override
@@ -96,6 +100,15 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
             LOG.error("unable to get subscriptions for service {}", SERIVCE_ID, e);
         }
         if (null != subscriptions && 0 < subscriptions.size()) {
+            Sender sender = null;
+            try {
+                sender = getSender();
+            } catch (OXException e) {
+                LOG.error("Error getting GCM sender", e);
+            }
+            if (null == sender) {
+                return;
+            }
             String pushTokenReference = event.getPushTokenReference();
             for (int i = 0; i < subscriptions.size(); i += MULTICAST_LIMIT) {
                 /*
@@ -114,14 +127,20 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                 /*
                  * send chunk
                  */
-                MulticastResult result = null;
-                try {
-                    result = sender.sendNoRetry(getMessage(event), registrationIDs);
-                } catch (IOException e) {
-                    LOG.warn("error publishing drive event", e);
-                }
-                if (null != result) {
-                    LOG.debug("{}", result);
+                if (0 < registrationIDs.size()) {
+                    MulticastResult result = null;
+                    try {
+                        result = sender.sendNoRetry(getMessage(event), registrationIDs);
+                    } catch (IOException e) {
+                        LOG.warn("error publishing drive event", e);
+                    }
+                    if (null != result) {
+                        LOG.debug("{}", result);
+                    }
+                    /*
+                     * process results
+                     */
+                    processResult(event.getContextID(), registrationIDs, result);
                 }
             }
         }
@@ -229,6 +248,24 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
             .addData("action", "sync")
 //            .addData("folders", event.getFolderIDs().toString())
         .build();
+    }
+
+    /**
+     * Gets a GCM sender based on the configured API key.
+     *
+     * @return The GCM sender
+     * @throws OXException
+     */
+    private static Sender getSender() throws OXException {
+        GCMKeyProvider keyProvider = Services.getOptionalService(GCMKeyProvider.class);
+        if (null == keyProvider) {
+            throw ServiceExceptionCode.absentService(GCMKeyProvider.class);
+        }
+        String key = keyProvider.getKey();
+        if (Strings.isEmpty(key)) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openexchange.drive.events.gcm.key");
+        }
+        return new Sender(keyProvider.getKey());
     }
 
 }

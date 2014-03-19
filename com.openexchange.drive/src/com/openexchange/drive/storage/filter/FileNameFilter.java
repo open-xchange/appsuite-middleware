@@ -21,7 +21,7 @@ public abstract class FileNameFilter implements FileFilter {
 
     @Override
     public boolean accept(File file) throws OXException {
-        return null != file && accept(file.getFileName());
+        return null != file && null != file.getFileName() && accept(file.getFileName());
     }
 
 }

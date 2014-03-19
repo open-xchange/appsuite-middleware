@@ -49,9 +49,12 @@
 
 package com.openexchange.drive.events.gcm.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.Constants;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.DriveEventService;
+import com.openexchange.drive.events.gcm.GCMKeyProvider;
 import com.openexchange.drive.events.gcm.internal.GCMDriveEventPublisher;
 import com.openexchange.drive.events.gcm.internal.Services;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
@@ -85,12 +88,28 @@ public class GCMActivator extends HousekeepingActivator {
         Services.set(this);
         ConfigurationService configService = Services.getService(ConfigurationService.class, true);
         if (configService.getBoolProperty("com.openexchange.drive.events.gcm.enabled", false)) {
-            String property = "com.openexchange.drive.events.gcm.key";
-            String key = configService.getProperty(property);
-            if (Strings.isEmpty(key)) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property);
+            /*
+             * register GCM key provider if specified via config file (with a low ranking)
+             */
+            final String configuredKey = configService.getProperty("com.openexchange.drive.events.gcm.key");
+            if (false == Strings.isEmpty(configuredKey)) {
+                Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
+                dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
+                registerService(GCMKeyProvider.class, new GCMKeyProvider() {
+
+                    @Override
+                    public String getKey() {
+                        return configuredKey;
+                    }
+                }, dictionary);
+                LOG.info("Successfully registered GCM key provider.");
+            } else {
+                LOG.info("No GCM key confgiured, skipping key provider registration.");
             }
-            getService(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher(key));
+            /*
+             * register publisher
+             */
+            getService(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher());
         } else {
             LOG.info("Drive events via GCM are disabled, skipping publisher registration.");
         }

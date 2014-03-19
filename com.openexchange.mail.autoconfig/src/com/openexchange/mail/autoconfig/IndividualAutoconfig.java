@@ -57,102 +57,115 @@ package com.openexchange.mail.autoconfig;
  */
 public class IndividualAutoconfig extends Autoconfig {
 
-    private Autoconfig delegate;
+    private final Autoconfig delegate;
     private String individualUsername;
 
     public IndividualAutoconfig(Autoconfig autoconfig) {
-        super(autoconfig.getRanking());
+        super();
         this.delegate = autoconfig;
     }
 
+    @Override
     public int hashCode() {
         return delegate.hashCode();
     }
 
-    public int getRanking() {
-        return delegate.getRanking();
-    }
-
-    public int compareTo(Autoconfig o) {
-        return delegate.compareTo(o);
-    }
-
+    @Override
     public String getMailServer() {
         return delegate.getMailServer();
     }
 
+    @Override
     public void setMailServer(String mailServer) {
         delegate.setMailServer(mailServer);
     }
 
+    @Override
     public String getTransportServer() {
         return delegate.getTransportServer();
     }
 
+    @Override
     public void setTransportServer(String transportServer) {
         delegate.setTransportServer(transportServer);
     }
 
+    @Override
     public String getMailProtocol() {
         return delegate.getMailProtocol();
     }
 
+    @Override
     public void setMailProtocol(String mailProtocol) {
         delegate.setMailProtocol(mailProtocol);
     }
 
+    @Override
     public boolean equals(Object obj) {
         return delegate.equals(obj);
     }
 
+    @Override
     public String getTransportProtocol() {
         return delegate.getTransportProtocol();
     }
 
+    @Override
     public void setTransportProtocol(String transportProtocol) {
         delegate.setTransportProtocol(transportProtocol);
     }
 
-    public int getMailPort() {
+    @Override
+    public Integer getMailPort() {
         return delegate.getMailPort();
     }
 
+    @Override
     public void setMailPort(int mailPort) {
         delegate.setMailPort(mailPort);
     }
 
-    public int getTransportPort() {
+    @Override
+    public Integer getTransportPort() {
         return delegate.getTransportPort();
     }
 
+    @Override
     public void setTransportPort(int transportPort) {
         delegate.setTransportPort(transportPort);
     }
 
-    public boolean isMailSecure() {
+    @Override
+    public Boolean isMailSecure() {
         return delegate.isMailSecure();
     }
 
+    @Override
     public void setMailSecure(boolean mailSecure) {
         delegate.setMailSecure(mailSecure);
     }
 
-    public boolean isTransportSecure() {
+    @Override
+    public Boolean isTransportSecure() {
         return delegate.isTransportSecure();
     }
 
+    @Override
     public void setTransportSecure(boolean transportSecure) {
         delegate.setTransportSecure(transportSecure);
     }
 
+    @Override
     public String getUsername() {
         return individualUsername;
     }
 
+    @Override
     public void setUsername(String username) {
         individualUsername = username;
     }
 
+    @Override
     public String toString() {
         return delegate.toString();
     }
