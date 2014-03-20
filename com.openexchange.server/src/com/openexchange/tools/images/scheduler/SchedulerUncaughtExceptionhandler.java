@@ -67,7 +67,7 @@ final class SchedulerUncaughtExceptionhandler implements UncaughtExceptionHandle
      *
      * @return The instance
      */
-    public static SchedulerUncaughtExceptionhandler getInstance() {
+    static SchedulerUncaughtExceptionhandler getInstance() {
         return INSTANCE;
     }
 

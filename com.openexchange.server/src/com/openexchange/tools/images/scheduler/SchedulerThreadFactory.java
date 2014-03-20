@@ -60,7 +60,7 @@ import com.openexchange.java.StringAllocator;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public final class SchedulerThreadFactory implements ThreadFactory {
+ final class SchedulerThreadFactory implements ThreadFactory {
 
     private final AtomicInteger threadNumber;
     private final String namePrefix;
@@ -68,7 +68,7 @@ public final class SchedulerThreadFactory implements ThreadFactory {
     /**
      * Initializes a new {@link SchedulerThreadFactory}.
      */
-    public SchedulerThreadFactory() {
+    SchedulerThreadFactory() {
         super();
         threadNumber = new AtomicInteger();
         this.namePrefix = "ImageScheduler-";
