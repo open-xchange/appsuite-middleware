@@ -102,14 +102,7 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
     @Override
     protected BufferedImage getImage(final String formatName) throws IOException {
-        final Callable<BufferedImage> task = new Callable<BufferedImage>() {
-
-            @Override
-            public BufferedImage call() throws Exception {
-                return superGetImage(formatName);
-            }
-        };
-        final FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(task);
+        final FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new CallableImpl(formatName));
         // TODO: Pass appropriate key object to accumulate tasks for the same caller/session/whatever
         Scheduler.getInstance().execute(null, ft);
         return ThreadPools.getFrom(ft, EXCEPTION_FACTORY);
@@ -124,6 +117,22 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
      */
     protected BufferedImage superGetImage(final String formatName) throws IOException {
         return super.getImage(formatName);
+    }
+
+    // --------------------------------------------------------------------------------------------------------- //
+
+    private final class CallableImpl implements Callable<BufferedImage> {
+
+        private final String formatName;
+
+        CallableImpl(final String formatName) {
+            this.formatName = formatName;
+        }
+
+        @Override
+        public BufferedImage call() throws Exception {
+            return superGetImage(formatName);
+        }
     }
 
 }
