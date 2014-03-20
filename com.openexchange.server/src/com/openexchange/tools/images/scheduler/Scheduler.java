@@ -51,7 +51,6 @@ package com.openexchange.tools.images.scheduler;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -174,12 +173,12 @@ public final class Scheduler {
 
     private final class TaskExecuter implements Runnable {
 
-        private final List<Runnable> tasks = new LinkedList<Runnable>();
+        private final LinkedList<Runnable> tasks = new LinkedList<Runnable>();
         private final Object m_key;
 
         public TaskExecuter(final Runnable task, final Object key) {
             m_key = key;
-            tasks.add(task);
+            tasks.addLast(task);
         }
 
         @Override
@@ -188,7 +187,7 @@ public final class Scheduler {
             do {
                 Runnable task = null;
                 synchronized (tasks) {
-                    task = tasks.remove(0);
+                    task = tasks.removeFirst();
                 }
 
                 // Perform image transformation
@@ -206,7 +205,7 @@ public final class Scheduler {
 
         public void add(final Runnable task) {
             synchronized (tasks) {
-                tasks.add(task);
+                tasks.addLast(task);
             }
         }
     }
