@@ -481,28 +481,27 @@ public class OXFolderAccess {
                  * Re-Create default infostore / infostore trash folder
                  */
                 User user = UserStorage.getInstance().getUser(userId, ctx);
-                final int fuid;
+                int fuid = -1;
                 final Connection wc = DBPool.pickupWriteable(ctx);
                 try {
-                    wc.setAutoCommit(false);
                     if (FolderObject.TRASH == type) {
                         if (false == OXFolderAdminHelper.CREATE_INFOSTORE_TRASH) {
                             return null;
                         }
-                        fuid = new OXFolderAdminHelper().addUserTrashToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
+                        fuid = addUserTrashToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
                     } else {
-                        fuid = new OXFolderAdminHelper().addUserToInfoStore(userId, user.getDisplayName(), ctx.getContextId(), wc);
+                        fuid = addUserToInfoStore(userId, user.getDisplayName(), ctx.getContextId(), wc);
                     }
-                    wc.commit();
                 } catch (final SQLException e) {
-                    DBUtils.rollback(wc);
                     throw e;
                 } catch (final Exception e) {
-                    DBUtils.rollback(wc);
                     throw e;
                 } finally {
-                    DBUtils.autocommit(wc);
-                    DBPool.closeWriterSilent(ctx, wc);
+                    if (fuid > 0) {
+                        DBPool.closeWriterSilent(ctx, wc);
+                    } else {
+                        DBPool.closeWriterAfterReading(ctx, wc);
+                    }
                 }
                 return getFolderObject(fuid);
             }
@@ -513,6 +512,46 @@ public class OXFolderAccess {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
+        }
+    }
+
+    private final int addUserTrashToInfoStore(final int userId, final String language, final int contextId, final Connection writeCon) throws OXException, SQLException {
+        boolean rollback = false;
+        try {
+            writeCon.setAutoCommit(false);
+            rollback = true;
+
+            final int fuid = new OXFolderAdminHelper().addUserTrashToInfoStore(userId, language, contextId, writeCon);
+
+            writeCon.commit();
+            rollback = false;
+
+            return fuid;
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(writeCon);
+            }
+            DBUtils.autocommit(writeCon);
+        }
+    }
+
+    private final int addUserToInfoStore(final int userId, final String displayName, final int contextId, final Connection writeCon) throws OXException, SQLException {
+        boolean rollback = false;
+        try {
+            writeCon.setAutoCommit(false);
+            rollback = true;
+
+            final int fuid = new OXFolderAdminHelper().addUserToInfoStore(userId, displayName, contextId, writeCon);
+
+            writeCon.commit();
+            rollback = false;
+
+            return fuid;
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(writeCon);
+            }
+            DBUtils.autocommit(writeCon);
         }
     }
 
