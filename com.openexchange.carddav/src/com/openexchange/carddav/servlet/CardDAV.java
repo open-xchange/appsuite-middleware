@@ -53,7 +53,6 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
 import com.openexchange.carddav.servlet.CarddavPerformer.Action;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -175,7 +174,12 @@ public class CardDAV extends OXServlet {
 
     private boolean checkPermission(ServerSession session) {
         try {
-            ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.carddav.enabled", boolean.class);
+            ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
+            if (null == configViewFactory) {
+                // Unable to check...
+                return false;
+            }
+            ComposedConfigProperty<Boolean> property = configViewFactory.getView(session.getUserId(), session.getContextId()).property("com.openexchange.carddav.enabled", boolean.class);
             return property.isDefined() && property.get() && session.getUserPermissionBits().hasContact();
 
         } catch (OXException e) {
