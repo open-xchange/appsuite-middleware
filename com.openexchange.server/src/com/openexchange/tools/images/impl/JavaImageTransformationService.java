@@ -73,18 +73,33 @@ public class JavaImageTransformationService implements ImageTransformationServic
     }
 
     @Override
-    public ImageTransformations transfom(BufferedImage sourceImage) {
-        return new ImageTransformationsTask(sourceImage);
+    public ImageTransformations transfom(final BufferedImage sourceImage) {
+        return transfom(sourceImage, null);
     }
 
     @Override
-    public ImageTransformations transfom(InputStream imageStream) throws IOException {
-        return new ImageTransformationsTask(imageStream);
+    public ImageTransformations transfom(final BufferedImage sourceImage, final Object source) {
+        return new ImageTransformationsTask(sourceImage, source);
     }
 
     @Override
-    public ImageTransformations transfom(byte[] imageData) throws IOException {
-        return transfom(new UnsynchronizedByteArrayInputStream(imageData));
+    public ImageTransformations transfom(final InputStream imageStream) throws IOException {
+        return transfom(imageStream, null);
+    }
+
+    @Override
+    public ImageTransformations transfom(final InputStream imageStream, final Object source) throws IOException {
+        return new ImageTransformationsTask(imageStream, source);
+    }
+
+    @Override
+    public ImageTransformations transfom(final byte[] imageData) throws IOException {
+        return transfom(imageData, null);
+    }
+
+    @Override
+    public ImageTransformations transfom(final byte[] imageData, final Object source) throws IOException {
+        return transfom(new UnsynchronizedByteArrayInputStream(imageData), source);
     }
 
 }

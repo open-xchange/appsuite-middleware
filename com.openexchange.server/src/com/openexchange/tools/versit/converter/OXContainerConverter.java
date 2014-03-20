@@ -121,6 +121,7 @@ import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.TransformedImage;
 import com.openexchange.tools.io.IOUtils;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
@@ -199,17 +200,12 @@ public class OXContainerConverter {
     }
 
     private final Context ctx;
-
     private final TimeZone timezone;
-
-    private String organizerMailAddress;
-
+    private final String organizerMailAddress;
+    private final Session optSession;
     private boolean sendUTC = true;
-
     private boolean sendFloating;
-
     private boolean addDisplayName4DList;
-
     private boolean skipOxCTypeAttribute;
 
     public OXContainerConverter(final TimeZone timezone, final String organizerMailAddress) {
@@ -217,28 +213,39 @@ public class OXContainerConverter {
         this.timezone = timezone;
         this.organizerMailAddress = organizerMailAddress;
         ctx = null;
+        optSession = null;
     }
 
     public OXContainerConverter(final Session session) throws ConverterException, OXException {
         super();
-        try {
-            ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final OXException e) {
-            throw new ConverterException(e);
+        if (session instanceof ServerSession) {
+            ctx = ((ServerSession) session).getContext();
+        } else {
+            try {
+                ctx = ContextStorage.getStorageContext(session.getContextId());
+            } catch (final OXException e) {
+                throw new ConverterException(e);
+            }
         }
         timezone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+        this.organizerMailAddress = null;
+        this.optSession = session;
     }
 
     public OXContainerConverter(final Session session, final Context ctx) throws OXException {
         super();
         this.ctx = ctx;
         timezone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+        this.organizerMailAddress = null;
+        this.optSession = session;
     }
 
     public OXContainerConverter(final Context ctx, final TimeZone tz) {
         super();
         this.ctx = ctx;
         timezone = tz;
+        this.organizerMailAddress = null;
+        this.optSession = null;
     }
 
     public void close() {
@@ -1093,26 +1100,27 @@ public class OXContainerConverter {
      * Performs a crop operation on the source image as defined by the
      * supplied clipping rectangle.
      *
-     * @param source the source image
+     * @param imageBytes the source image
      * @param clipRect the clip rectangle from an 'X-ABCROP-RECTANGLE' property
      * @param formatName the target image format
      * @return the cropped image
      * @throws IOException
      * @throws OXException
      */
-    private static byte[] doABCrop(byte[] source, Rectangle clipRect, String formatName) throws IOException, OXException {
+    private byte[] doABCrop(byte[] imageBytes, Rectangle clipRect, String formatName) throws IOException, OXException {
     	InputStream inputStream = null;
     	try {
     		/*
     		 * read source image
     		 */
-    		inputStream = new ByteArrayInputStream(source);
+    		inputStream = new ByteArrayInputStream(imageBytes);
         	BufferedImage sourceImage = ImageIO.read(inputStream);
         	/*
         	 * crop the image
         	 */
         	ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class, true);
-        	return imageService.transfom(sourceImage).crop(clipRect.x * -1,
+        	Object source = null == optSession ? null : optSession.getSessionID();
+        	return imageService.transfom(sourceImage, source).crop(clipRect.x * -1,
         			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height).getBytes(formatName);
     	} finally {
     		Streams.close(inputStream);
@@ -1122,7 +1130,7 @@ public class OXContainerConverter {
     /**
      * Scales an image if needed to fit into the supplied rectangular area.
      *
-     * @param source The image data
+     * @param imageBytes The image data
      * @param maxWidth The maximum target width
      * @param maxHeight The maximum target height
      * @param formatName The image format name
@@ -1130,14 +1138,14 @@ public class OXContainerConverter {
      * @throws IOException
      * @throws OXException
      */
-    private static TransformedImage scaleImageIfNeeded(byte[] source, int maxWidth, int maxHeight, String formatName) throws IOException, OXException {
-        ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(
-            ImageTransformationService.class, true);
+    private TransformedImage scaleImageIfNeeded(byte[] imageBytes, int maxWidth, int maxHeight, String formatName) throws IOException, OXException {
+        ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class, true);
+        Object source = null == optSession ? null : optSession.getSessionID();
         if (0 < maxWidth || 0 < maxHeight) {
-            return imageService.transfom(source).scale(maxWidth, maxHeight, ScaleType.CONTAIN).getTransformedImage(formatName);
-        } else {
-            return imageService.transfom(source).getTransformedImage(formatName);
+            return imageService.transfom(imageBytes, source).scale(maxWidth, maxHeight, ScaleType.CONTAIN).getTransformedImage(formatName);
         }
+
+        return imageService.transfom(imageBytes, source).getTransformedImage(formatName);
     }
 
     /**
@@ -1149,7 +1157,7 @@ public class OXContainerConverter {
      * @throws IOException
      * @throws OXException
      */
-    private static TransformedImage scaleImageIfNeeded(byte[] source, String formatName) throws IOException, OXException {
+    private TransformedImage scaleImageIfNeeded(byte[] source, String formatName) throws IOException, OXException {
         if (null != source) {
             int maxWidth = -1;
             int maxHeight = -1;

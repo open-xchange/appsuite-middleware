@@ -130,7 +130,11 @@ public final class Scheduler {
      * Shuts-down this scheduler.
      */
     private void stop() {
-        pool.shutdown();
+        try {
+            pool.shutdownNow();
+        } catch (final Exception x) {
+            // Ignore
+        }
     }
 
     /**
@@ -144,11 +148,13 @@ public final class Scheduler {
         TaskExecuter executer = null;
         synchronized (runningThreads) {
             final TaskExecuter runningExecutor = runningThreads.get(key);
-            if (runningExecutor != null) {
-                runningExecutor.add(task);
-            } else {
+            if (runningExecutor == null) {
+                // None present, yet. Create a new executer.
                 executer = new TaskExecuter(task, key);
                 runningThreads.put(key, executer);
+            } else {
+                // Use existing one
+                runningExecutor.add(task);
             }
         }
         if (executer != null) {
@@ -174,15 +180,17 @@ public final class Scheduler {
     private final class TaskExecuter implements Runnable {
 
         private final LinkedList<Runnable> tasks = new LinkedList<Runnable>();
-        private final Object m_key;
+        private final Object taskKey;
 
-        public TaskExecuter(final Runnable task, final Object key) {
-            m_key = key;
+        TaskExecuter(final Runnable task, final Object key) {
+            super();
+            taskKey = key;
             tasks.addLast(task);
         }
 
         @Override
         public void run() {
+            final Thread currentThread = Thread.currentThread();
             boolean running;
             do {
                 Runnable task = null;
@@ -197,17 +205,22 @@ public final class Scheduler {
                 synchronized (runningThreads) {
                     running = !tasks.isEmpty();
                     if (!running) {
-                        runningThreads.remove(m_key);
+                        runningThreads.remove(taskKey);
                     }
                 }
-            } while (running);
+            } while (running && !currentThread.isInterrupted());
         }
 
-        public void add(final Runnable task) {
+        /**
+         * Adds given task to this executer.
+         *
+         * @param task The task to add
+         */
+        void add(final Runnable task) {
             synchronized (tasks) {
                 tasks.addLast(task);
             }
         }
-    }
+    } // End of class TaskExecuter
 
 }

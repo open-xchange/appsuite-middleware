@@ -517,7 +517,17 @@ public class FileResponseRendererTest extends TestCase {
         }
 
         @Override
+        public ImageTransformations transfom(BufferedImage sourceImage, Object source) {
+            return new TestableImageTransformations(imageData, expenses);
+        }
+
+        @Override
         public ImageTransformations transfom(InputStream imageStream) throws IOException {
+            return new TestableImageTransformations(imageData, expenses);
+        }
+
+        @Override
+        public ImageTransformations transfom(InputStream imageStream, Object source) throws IOException {
             return new TestableImageTransformations(imageData, expenses);
         }
 
@@ -526,6 +536,10 @@ public class FileResponseRendererTest extends TestCase {
             return new TestableImageTransformations(imageData, expenses);
         }
 
+        @Override
+        public ImageTransformations transfom(byte[] imageData, Object source) throws IOException {
+            return new TestableImageTransformations(imageData, expenses);
+        }
     }
 
 }

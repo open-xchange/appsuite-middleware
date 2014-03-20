@@ -66,6 +66,7 @@ import com.openexchange.tools.images.scheduler.Scheduler;
  */
 public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
+    /** The exception factory constant */
     private static final ExpectedExceptionFactory<IOException> EXCEPTION_FACTORY = new ExpectedExceptionFactory<IOException>() {
 
         @Override
@@ -85,26 +86,27 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
      * Initializes a new {@link ImageTransformationsTask}.
      *
      * @param sourceImage The source image
+     * @param optSource The source for this invocation; if <code>null</code> calling {@link Thread} is referenced as source
      */
-    public ImageTransformationsTask(final BufferedImage sourceImage) {
-        super(sourceImage);
+    public ImageTransformationsTask(final BufferedImage sourceImage, final Object optSource) {
+        super(sourceImage, optSource);
     }
 
     /**
      * Initializes a new {@link ImageTransformationsTask}.
      *
      * @param sourceImageStream The image input stream
-     * @throws IOException If an I/O error occurs
+     * @param optSource The source for this invocation; if <code>null</code> calling {@link Thread} is referenced as source
      */
-    public ImageTransformationsTask(final InputStream sourceImageStream) throws IOException {
-        super(sourceImageStream);
+    public ImageTransformationsTask(final InputStream sourceImageStream, final Object optSource) {
+        super(sourceImageStream, optSource);
     }
 
     @Override
     protected BufferedImage getImage(final String formatName) throws IOException {
         final FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new CallableImpl(formatName));
-        // TODO: Pass appropriate key object to accumulate tasks for the same caller/session/whatever
-        Scheduler.getInstance().execute(null, ft);
+        // Pass appropriate key object to accumulate tasks for the same caller/session/whatever
+        Scheduler.getInstance().execute(optSource, ft);
         return ThreadPools.getFrom(ft, EXCEPTION_FACTORY);
     }
 
@@ -115,7 +117,7 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
      * @return The transformed image
      * @throws IOException if an I/O error occurs
      */
-    protected BufferedImage superGetImage(final String formatName) throws IOException {
+    protected BufferedImage doGetImage(final String formatName) throws IOException {
         return super.getImage(formatName);
     }
 
@@ -131,7 +133,7 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
         @Override
         public BufferedImage call() throws Exception {
-            return superGetImage(formatName);
+            return doGetImage(formatName);
         }
     }
 

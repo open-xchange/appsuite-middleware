@@ -107,9 +107,11 @@ public class ImageTransformationsImpl implements ImageTransformations {
     private BufferedImage sourceImage;
     private Metadata metadata;
     private boolean compress;
+    protected final Object optSource;
 
-    private ImageTransformationsImpl(BufferedImage sourceImage, InputStream sourceImageStream) {
+    private ImageTransformationsImpl(final BufferedImage sourceImage, final InputStream sourceImageStream, final Object optSource) {
         super();
+        this.optSource = optSource;
         this.sourceImage = sourceImage;
         this.sourceImageStream = sourceImageStream;
         this.transformations = new ArrayList<ImageTransformation>();
@@ -120,19 +122,20 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * Initializes a new {@link ImageTransformationsImpl}.
      *
      * @param sourceImage The source image
+     * @param optSource The source for this invocation; if <code>null</code> calling {@link Thread} is referenced as source
      */
-    public ImageTransformationsImpl(BufferedImage sourceImage) {
-        this(sourceImage, null);
+    public ImageTransformationsImpl(final BufferedImage sourceImage, final Object optSource) {
+        this(sourceImage, null, optSource);
     }
 
     /**
      * Initializes a new {@link ImageTransformationsImpl}.
      *
      * @param sourceImage The source image
-     * @throws IOException
+     * @param optSource The source for this invocation; if <code>null</code> calling {@link Thread} is referenced as source
      */
-    public ImageTransformationsImpl(InputStream sourceImageStream) throws IOException {
-        this(null, sourceImageStream);
+    public ImageTransformationsImpl(final InputStream sourceImageStream, final Object optSource) {
+        this(null, sourceImageStream, optSource);
     }
 
     @Override

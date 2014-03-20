@@ -809,7 +809,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             stream.mark(131072); // 128KB
         }
         // Start transformations: scale, rotate, ...
-        final ImageTransformations transformations = scaler.transfom(stream);
+        final ImageTransformations transformations = scaler.transfom(stream, request.getSession().getSessionID());
         // Rotate by default when not delivering as download
         final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
         if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
