@@ -673,9 +673,9 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
     private void sleep(final int errDelay, final Exception e) {
         if (isDebugEnabled()) {
-            LOG.error("Interrupted while IDLE'ing: {}, sleeping for {}ms", e.getMessage(), errDelay, e);
+            LOG.debug("Interrupted while IDLE'ing: {}, sleeping for {}ms", e.getMessage(), errDelay, e);
         } else {
-            LOG.info("Interrupted while IDLE'ing: {}, sleeping for {}ms", e.getMessage(), errDelay);
+            LOG.debug("Interrupted while IDLE'ing: {}, sleeping for {}ms", e.getMessage(), errDelay);
         }
         try {
             Thread.sleep(errDelay);
