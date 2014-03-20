@@ -898,18 +898,57 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public Filestore findFilestoreForContext() throws StorageException {
-        for (final int id : listAllFilestoreIds()) {
-            final Filestore filestore = getFilestore(id, false);
-            // This is the special value for not adding contexts to this filestore.
-            if (isContextLimitReached(filestore)) {
-                continue;
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, COUNT(context.cid) AS num FROM filestore JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
+            rs = stmt.executeQuery();
+            
+            if (!rs.next()) {
+                // None found
+                throw new StorageException("No usable or free enough filestore found");
             }
-            if (!enoughSpaceForContext(filestore)) {
-                continue;
+            
+            do {
+                final int numberOfCurrentlyAssignedContexts = rs.getInt(3);
+                final int maxNumberOfCurrentlyAssignedContexts = rs.getInt(2);
+                if (numberOfCurrentlyAssignedContexts < maxNumberOfCurrentlyAssignedContexts) {
+                    // Suitable filestore found
+                    final int filestoreId = rs.getInt(1);
+                    
+                    // Close resources as no more needed
+                    DBUtils.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
+                    
+                    // Get filestore
+                    return getFilestore(filestoreId, false, con);
+                }
+            } while (rs.next());
+            
+            // None found
+            throw new StorageException("No usable or free enough filestore found");
+        } catch (final DataTruncation dt) {
+            LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
+        } catch (final SQLException ecp) {
+            LOG.error("SQL Error", ecp);
+            throw new StorageException(ecp);
+        } catch (final PoolException pe) {
+            LOG.error("Pool Error", pe);
+            throw new StorageException(pe);
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (con != null) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
+                }
             }
-            return filestore;
         }
-        throw new StorageException("No usable or free enough filestore found");
     }
 
     @Override
@@ -1307,13 +1346,34 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      */
     @Override
     public Filestore getFilestore(final int id, final boolean loadRealUsage) throws StorageException {
-        final Connection con;
+        Connection con = null;
         try {
             con = cache.getConnectionForConfigDB();
+            return getFilestore(id, loadRealUsage, con);
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
+        } finally {
+            if (null != con)
+            try {
+                cache.pushConnectionForConfigDB(con);
+            } catch (final PoolException e) {
+                LOG.error("Error pushing configdb connection to pool!", e);
+            }
         }
+    }
+    
+    /**
+     * Loads all filestore information. BEWARE! If loadRealUsage is set to <code>true</code> this operation may be very expensive because
+     * the filestore usage for all contexts stored in that filestore must be loaded. Setting this parameter to <code>false</code> will set
+     * the read usage of the filestore to 0.
+     *
+     * @param id unique identifier of the filestore.
+     * @param loadRealUsage <code>true</code> to load the real file store usage of that filestore.
+     * @return all filestore information
+     * @throws StorageException if loading the filestore information fails.
+     */
+    private Filestore getFilestore(final int id, final boolean loadRealUsage, final Connection con) throws StorageException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         final Filestore fs;
@@ -1335,11 +1395,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(e);
         } finally {
             closeSQLStuff(result, stmt);
-            try {
-                cache.pushConnectionForConfigDB(con);
-            } catch (final PoolException e) {
-                LOG.error("Error pushing configdb connection to pool!", e);
-            }
         }
         final FilestoreUsage usage = getUsage(id, loadRealUsage);
         fs.setUsed(L(toMB(usage.getUsage())));
