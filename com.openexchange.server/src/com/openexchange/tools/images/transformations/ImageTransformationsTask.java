@@ -106,7 +106,10 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
     protected BufferedImage getImage(final String formatName) throws IOException {
         final FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new CallableImpl(formatName));
         // Pass appropriate key object to accumulate tasks for the same caller/session/whatever
-        Scheduler.getInstance().execute(optSource, ft);
+        final boolean success = Scheduler.getInstance().execute(optSource, ft);
+        if (!success) {
+            throw new IOException("Image transformation rejected");
+        }
         return ThreadPools.getFrom(ft, EXCEPTION_FACTORY);
     }
 

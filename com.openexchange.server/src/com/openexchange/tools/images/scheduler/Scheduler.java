@@ -142,8 +142,10 @@ public final class Scheduler {
      *
      * @param optKey The optional key; if <code>null</code> calling {@link Thread} instance is referenced as key
      * @param task The task to execute
+     * @return <code>true</code> if successfully scheduled for being executed; otherwise <code>false</code> to signal that task cannot be
+     *         accepted for execution.
      */
-    public void execute(final Object optKey, final Runnable task) {
+    public boolean execute(final Object optKey, final Runnable task) {
         final Object key = null == optKey ? Thread.currentThread() : optKey;
         TaskExecuter executer = null;
         synchronized (runningThreads) {
@@ -157,22 +159,31 @@ public final class Scheduler {
                 runningExecutor.add(task);
             }
         }
+
+        // Delegate to new executer if not null
         if (executer != null) {
-            executeTask(executer);
+            return executeTask(executer);
         }
+
+        // Otherwise passed to an already existing executer
+        return true;
     }
 
     /**
      * Execute the task in a free thread or create a new one.
      *
      * @param executer The task to execute
+     * @return <code>true</code> if successfully scheduled for being executed; otherwise <code>false</code> to signal that task cannot be
+     *         accepted for execution.
      */
-    private void executeTask(final TaskExecuter executer) {
+    private boolean executeTask(final TaskExecuter executer) {
         try {
             pool.execute(executer);
         } catch (final Throwable t) {
             LOGGER.warn("Couldn't execute image transformation task.", t);
+            return false;
         }
+        return true;
     }
 
     // ----------------------------------------------------------------------------------------------- //
