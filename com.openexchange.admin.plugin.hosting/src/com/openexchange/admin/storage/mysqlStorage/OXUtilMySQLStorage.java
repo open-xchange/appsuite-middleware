@@ -905,31 +905,49 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con = cache.getConnectionForConfigDB();
             stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, COUNT(context.cid) AS num FROM filestore JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
             rs = stmt.executeQuery();
-            
+
             if (!rs.next()) {
                 // None found
-                throw new StorageException("No usable or free enough filestore found");
+                throw new StorageException("No filestore found");
             }
-            
-            do {
-                final int numberOfCurrentlyAssignedContexts = rs.getInt(3);
-                final int maxNumberOfCurrentlyAssignedContexts = rs.getInt(2);
-                if (numberOfCurrentlyAssignedContexts < maxNumberOfCurrentlyAssignedContexts) {
-                    // Suitable filestore found
-                    final int filestoreId = rs.getInt(1);
-                    
-                    // Close resources as no more needed
-                    DBUtils.closeSQLStuff(rs, stmt);
-                    rs = null;
-                    stmt = null;
-                    
-                    // Get filestore
-                    return getFilestore(filestoreId, false, con);
+
+            // Load potential candidates
+            class Candidate {
+                final int id;
+                final int maxNumberOfContexts;
+                final int numberOfContexts;
+
+                Candidate(int id, int maxNumberOfContexts, int numberOfContexts) {
+                    super();
+                    this.id = id;
+                    this.maxNumberOfContexts = maxNumberOfContexts;
+                    this.numberOfContexts = numberOfContexts;
                 }
+            }
+
+            final List<Candidate> candidates = new LinkedList<Candidate>();
+            do {
+                candidates.add(new Candidate(rs.getInt(1), rs.getInt(2), rs.getInt(3)));
             } while (rs.next());
-            
+
+            // Close resources as no more needed
+            DBUtils.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            // Find a suitable one from ordered list of candidates
+            for (final Candidate candidate : candidates) {
+                if (candidate.maxNumberOfContexts > 0 && candidate.numberOfContexts < candidate.maxNumberOfContexts) {
+                    // Get filestore
+                    final Filestore filestore = getFilestore(candidate.id, false, con);
+                    if (enoughSpaceForContext(filestore)) {
+                        return filestore;
+                    }
+                }
+            }
+
             // None found
-            throw new StorageException("No usable or free enough filestore found");
+            throw new StorageException("No usable or suitable filestore found");
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
@@ -1354,15 +1372,16 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
-            if (null != con)
-            try {
-                cache.pushConnectionForConfigDB(con);
-            } catch (final PoolException e) {
-                LOG.error("Error pushing configdb connection to pool!", e);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
             }
         }
     }
-    
+
     /**
      * Loads all filestore information. BEWARE! If loadRealUsage is set to <code>true</code> this operation may be very expensive because
      * the filestore usage for all contexts stored in that filestore must be loaded. Setting this parameter to <code>false</code> will set
