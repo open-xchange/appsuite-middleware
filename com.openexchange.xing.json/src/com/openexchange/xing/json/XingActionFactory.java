@@ -64,16 +64,17 @@ import com.openexchange.xing.json.actions.ContactRequestAction;
 import com.openexchange.xing.json.actions.CreateProfileAction;
 import com.openexchange.xing.json.actions.DeleteActivityAction;
 import com.openexchange.xing.json.actions.DeleteCommentActivityAction;
-import com.openexchange.xing.json.actions.UserFeedAction;
 import com.openexchange.xing.json.actions.GetActivityLikesAction;
 import com.openexchange.xing.json.actions.GetCommentsActivityAction;
 import com.openexchange.xing.json.actions.InviteRequestAction;
 import com.openexchange.xing.json.actions.LikeActivityAction;
 import com.openexchange.xing.json.actions.NewsFeedAction;
+import com.openexchange.xing.json.actions.RevokeContactRequestAction;
 import com.openexchange.xing.json.actions.ShareActivityAction;
 import com.openexchange.xing.json.actions.ShareLinkAction;
 import com.openexchange.xing.json.actions.ShowActivityAction;
 import com.openexchange.xing.json.actions.UnlikeActivityAction;
+import com.openexchange.xing.json.actions.UserFeedAction;
 
 
 /**
@@ -94,6 +95,7 @@ public class XingActionFactory implements AJAXActionServiceFactory {
         actions = new ConcurrentHashMap<String, AbstractXingAction>(16);
         actions.put("invite", new InviteRequestAction(serviceLookup));
         actions.put("contact_request", new ContactRequestAction(serviceLookup));
+        actions.put("revoke_contact_request", new RevokeContactRequestAction(serviceLookup));
         actions.put("newsfeed", new NewsFeedAction(serviceLookup));
         actions.put("userfeed", new UserFeedAction(serviceLookup));
         actions.put("create", new CreateProfileAction(serviceLookup));

@@ -924,6 +924,30 @@ public class XingAPI<S extends Session> {
     }
 
     /**
+     * Revokes a contact request between the current user (<code>userId</code>) and the specified user (<code>recipientUserId</code>).
+     * 
+     * @param userId The identifier of the user
+     * @param recipientUserId The identifier of the recipient
+     * @param optMessage The optional message
+     * @throws XingException If contact request fails
+     */
+    public void revokeContactRequest(final String senderId, final String recipientUserId) throws XingException {
+        assertAuthenticated();
+        try {
+
+            RESTUtility.streamRequest(
+                Method.DELETE,
+                session.getAPIServer(),
+                "/users/" + recipientUserId + "/contact_requests/" + senderId,
+                VERSION,
+                null,
+                session,
+                Arrays.asList(XingServerException._204_NO_CONTENT));
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+    /**
      * Gets the user feed; a stream of activities recently performed by the user.
      *
      * @param xingUserId The ID of the user whose contacts' activities are to be returned
@@ -1090,22 +1114,21 @@ public class XingAPI<S extends Session> {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public Map<String, Object> changeStatusMessage(final String userId, final String message) throws XingException {
+    public void changeStatusMessage(final String userId, final String message) throws XingException {
         assertAuthenticated();
         try {
             final List<String> params = new ArrayList<String>(4);
             params.add("message");
             params.add(message);
 
-            final JSONObject response = RESTUtility.request(
+            RESTUtility.streamRequest(
                 Method.POST,
                 session.getAPIServer(),
                 "/users/" + userId + "/status_message",
                 VERSION,
                 params.toArray(new String[0]),
                 session,
-                Arrays.asList(XingServerException._201_CREATED)).toObject();
-            return response.asMap();
+                Arrays.asList(XingServerException._201_CREATED));
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
