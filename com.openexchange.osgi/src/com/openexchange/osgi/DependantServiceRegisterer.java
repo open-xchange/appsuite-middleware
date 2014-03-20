@@ -116,17 +116,25 @@ public class DependantServiceRegisterer<S> implements ServiceTrackerCustomizer<O
             lock.unlock();
         }
         if (needsRegistration) {
-            try {
-                Constructor<? extends S> constructor = serviceClass.getConstructor(neededServices);
-                registeredService = constructor.newInstance(foundServices);
-                LOG.trace("Registering service {}", serviceClass.getName());
-                registration = context.registerService(serviceType, registeredService, properties);
-            } catch (Throwable t) {
-                LOG.error("Can not register {}", serviceClass.getName(), t);
-            }
+            register();
         }
         setState();
         return obj;
+    }
+
+    /**
+     * You can overwrite this method to do something else to start up your code with the needed services. If you want to register a servlet,
+     * it would be wise to have HttpService as the first service in the needed services list, so you can easily access it.
+     */
+    protected void register() {
+        try {
+            Constructor<? extends S> constructor = serviceClass.getConstructor(neededServices);
+            registeredService = constructor.newInstance(foundServices);
+            LOG.trace("Registering service {}", serviceClass.getName());
+            registration = context.registerService(serviceType, registeredService, properties);
+        } catch (Throwable t) {
+            LOG.error("Can not register {}", serviceClass.getName(), t);
+        }
     }
 
     @Override
@@ -154,21 +162,32 @@ public class DependantServiceRegisterer<S> implements ServiceTrackerCustomizer<O
             lock.unlock();
         }
         if (null != unregister) {
-            LOG.trace("Unregistering service {}", serviceClass.getName());
-            unregister.unregister();
-            try {
-                Method method = serviceClass.getMethod("shutDown", new Class<?>[0]);
-                method.invoke(registeredService, new Object[0]);
-            } catch (SecurityException e) {
-                // Service does not have a shutDown() method.
-            } catch (NoSuchMethodException e) {
-                // Service does not have a shutDown() method.
-            } catch (Throwable t) {
-                LOG.error("Can not shut down {}", serviceClass.getName(), t);
-            }
+            unregister(unregister, service);
         }
         setState();
         context.ungetService(reference);
+    }
+
+    /**
+     * You can overwrite this method to do something else to shut down your code if one of the needed services is gone. If you overwrote
+     * {@link #register()} and you did not register an OSGi service, just ignore the unregister parameter. If you registered a servlet and
+     * the HttpService is gone, it is not available anymore in neededServices but from the given service parameter.
+     * @param unregister OSGi service registration that needs to be unregistered.
+     * @param service OSGi service that is taken down.
+     */
+    protected void unregister(ServiceRegistration<?> unregister, Object service) {
+        LOG.trace("Unregistering service {}", serviceClass.getName());
+        unregister.unregister();
+        try {
+            Method method = serviceClass.getMethod("shutDown", new Class<?>[0]);
+            method.invoke(registeredService, new Object[0]);
+        } catch (SecurityException e) {
+            // Service does not have a shutDown() method.
+        } catch (NoSuchMethodException e) {
+            // Service does not have a shutDown() method.
+        } catch (Throwable t) {
+            LOG.error("Can not shut down {}", serviceClass.getName(), t);
+        }
     }
 
     private void setState() {
