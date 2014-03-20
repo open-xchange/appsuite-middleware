@@ -20,9 +20,11 @@ if ($ARGV[0] and $ARGV[0] eq "config") {
     print "a.label TaskCount\n";
     print "a.draw LINE1\n";
     print "a.type DERIVE\n";
+    print "a.min 0\n";
     print "b.label CompletedTaskCount\n";
     print "b.draw LINE1\n";
     print "b.type DERIVE\n";
+    print "b.min 0\n";
     exit 0
 }
 
