@@ -917,7 +917,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 final int maxNumberOfContexts;
                 final int numberOfContexts;
 
-                Candidate(int id, int maxNumberOfContexts, int numberOfContexts) {
+                Candidate(final int id, final int maxNumberOfContexts, final int numberOfContexts) {
                     super();
                     this.id = id;
                     this.maxNumberOfContexts = maxNumberOfContexts;
