@@ -80,6 +80,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
@@ -313,9 +314,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 return capabilities;
             }
             // Obtain user permissions
-            final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(
-                serverSession.getUserId(),
-                serverSession.getContext());
+            final Context context = serverSession.getContext();
+            final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
             // Capabilities by user permission bits
             for (final Permission p : Permission.byBits(userPermissionBits.getPermissionBits())) {
                 capabilities.add(getCapability(p));
@@ -323,6 +323,13 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             // Apply capabilities for non-transient sessions
             if (!serverSession.isTransient()) {
                 userPermissionBits.setGroups(serverSession.getUser().getGroups());
+                // Webmail
+                if (serverSession.getUserId() == context.getMailadmin()) {
+                    final boolean adminMailLoginEnabled = services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.adminMailLoginEnabled", false);
+                    if (!adminMailLoginEnabled) {
+                        capabilities.remove(getCapability(Permission.WEBMAIL));
+                    }
+                }
                 // Portal
                 if (userPermissionBits.hasPortal()) {
                     capabilities.add(getCapability("portal"));

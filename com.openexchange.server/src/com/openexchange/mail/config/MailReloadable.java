@@ -54,9 +54,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailReloadable} - Collects reloadables for mail module.
@@ -113,6 +116,17 @@ public final class MailReloadable implements Reloadable {
             if (null != mailProperties) {
                 mailProperties.resetProperties();
                 mailProperties.loadProperties();
+            }
+            
+            // Clear capabilities cache as "com.openexchange.mail.adminMailLoginEnabled" affects them
+            final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                try {
+                    final Cache cache = cacheService.getCache("Capabilities");
+                    cache.clear();
+                } catch (final Exception x) {
+                    // Ignore
+                }
             }
         } catch (final OXException e) {
             LOGGER.warn("Failed to reload mail properties", e);

@@ -1,3 +1,7 @@
+* 2014-03-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31657: Drop "webmail" capability for context administrator if "com.openexchange.mail.adminMailLoginEnabled" is set to "false"
+
 * 2014-03-19 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 31399: Don't suppress exception
