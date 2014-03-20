@@ -108,6 +108,18 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
+    public Connection getConnection(int poolId, String schema) throws PoolException {
+        final Connection con;
+        try {
+            con = getService().get(poolId, schema);
+        } catch (OXException e) {
+            log.error("Error pickup context database write connection from pool!", e);
+            throw new PoolException(e.getMessage());
+        }
+        return con;
+    }
+
+    @Override
     public Connection getConnectionForContextNoTimeout(int contextId) throws PoolException {
         final Connection con;
         try {
@@ -180,6 +192,21 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
+    public boolean pushConnection(int poolId, Connection con) throws PoolException {
+        try {
+            if (null != con && !con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            log.error("Error pushing context database write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().back(poolId, con);
+        }
+        return true;
+    }
+
+    @Override
     public int getServerId() throws PoolException {
         final int serverId;
         try {
@@ -225,6 +252,16 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     public int[] getContextInSchema(Connection con, int poolId, String schema) throws PoolException {
         try {
             return getService().getContextsInSchema(con, poolId, schema);
+        } catch (OXException e) {
+            log.error("Error getting all contexts from the same schema.", e);
+            throw new PoolException(e.getMessage());
+        }
+    }
+
+    @Override
+    public int[] listContexts(int poolId) throws PoolException {
+        try {
+            return getService().listContexts(poolId);
         } catch (OXException e) {
             log.error("Error getting all contexts from the same schema.", e);
             throw new PoolException(e.getMessage());

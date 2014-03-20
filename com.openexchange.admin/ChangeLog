@@ -1,3 +1,7 @@
+* 2014-03-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29976: Robust listing of contexts by database to deal with intermediately deleted contexts
+
 * 2014-03-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 31611: Properly re-add capability and added option to clean capabilities from storage

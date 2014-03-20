@@ -786,38 +786,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     @Override
     public Context[] searchContextByDatabase(final Database db_host) throws StorageException {
-        Connection con = null;
-        // maybe we should make the search pattern configurable
-        PreparedStatement stmt = null;
-
         try {
-            con = cache.getConnectionForConfigDB();
-            stmt = con.prepareStatement("SELECT context_server2db_pool.cid FROM context_server2db_pool INNER JOIN (server,db_pool) ON (context_server2db_pool.server_id=server.server_id AND db_pool.db_pool_id=context_server2db_pool.read_db_pool_id OR context_server2db_pool.write_db_pool_id=db_pool.db_pool_id) WHERE server.name=? AND db_pool.db_pool_id=?");
-            final String serverName = AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(AdminProperties.Prop.SERVER_NAME, "local");
-            stmt.setString(1, serverName);
-            stmt.setInt(2, db_host.getId().intValue());
-            final ResultSet rs = stmt.executeQuery();
-            final ArrayList<Context> list = new ArrayList<Context>();
-            while (rs.next()) {
-                // TODO: This could be filled with the query directly to
-                // optimize performance
-                list.add(contextCommon.getData(
-                    new Context(I(rs.getInt(1))),
-                    con,
-                    Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"))));
+            // Load context identifiers
+            final int[] contextIds = cache.getPool().listContexts(db_host.getId());
+
+            // Load each context's data
+            final List<Integer> cids = new ArrayList<Integer>(contextIds.length);
+            for (int contextId : contextIds) {
+                cids.add(I(contextId));
             }
-            rs.close();
-            stmt.close();
-            return list.toArray(new Context[list.size()]);
+
+            return contextCommon.loadContexts(cids, Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE","100")), null, false);
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e);
-        } finally {
-            closePreparedStatement(stmt);
-            pushConnectionToPoolConfigDB(con);
         }
     }
 

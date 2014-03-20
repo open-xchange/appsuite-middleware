@@ -64,6 +64,8 @@ public interface OXAdminPoolInterface {
 
     Connection getConnectionForContextNoTimeout(int contextId) throws PoolException;
 
+    Connection getConnection(int poolId, String schema) throws PoolException;
+
     boolean pushConnectionForConfigDB(Connection con) throws PoolException;
 
     boolean pushConnectionForContext(int contextId, Connection con) throws PoolException;
@@ -71,6 +73,8 @@ public interface OXAdminPoolInterface {
     boolean pushConnectionForContextAfterReading(int contextId, Connection con) throws PoolException;
 
     boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException;
+
+    boolean pushConnection(int poolId, Connection con) throws PoolException;
 
     int getServerId() throws PoolException;
 
@@ -83,6 +87,8 @@ public interface OXAdminPoolInterface {
     int[] getContextInSameSchema(Connection con, int contextId) throws PoolException;
 
     int[] getContextInSchema(Connection con, int poolId, String schema) throws PoolException;
+
+    int[] listContexts(int poolId) throws PoolException;
 
     int getWritePool(int contextId) throws PoolException;
 
