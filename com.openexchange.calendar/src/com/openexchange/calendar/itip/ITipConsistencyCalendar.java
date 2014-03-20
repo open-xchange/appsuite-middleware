@@ -518,7 +518,6 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
         return delegate.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage);
     }
 
-
     @Override
     public Date setExternalConfirmation(int objectId, int folderId, int optOccurrenceId, String mail, int confirm, String message) throws OXException {
         return delegate.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message);

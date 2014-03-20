@@ -375,19 +375,17 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     @Override
     public Date setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
         if (optOccurrenceId <= 0) {
-            LOG.warn("No occurrence to set confirmation for found. Delegate set confirmation for whole series!");
+            LOG.warn("No occurrence to set confirmation for found. Delegate set confirmation for whole series or one time appointment!");
             return setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
         }
 
-        final Date retval = delegate.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage);
-
-        return retval;
+        return delegate.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage);
     }
 
     @Override
     public Date setExternalConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final String mail, final int confirm, final String message) throws OXException {
         if (optOccurrenceId <= 0) {
-            LOG.warn("No occurrence to set confirmation for found. Delegate set confirmation for whole series!");
+            LOG.warn("No occurrence to set confirmation for found. Delegate set confirmation for whole series or one time appointment!");
             return setExternalConfirmation(objectId, folderId, mail, confirm, message);
         }
         return delegate.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message);

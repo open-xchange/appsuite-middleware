@@ -206,15 +206,4 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
      * An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.
      */
     public static final String DUPLICATE_EXTERNAL_PARTICIPANT_MSG = "An external participant with the E-Mail address %1$s is already included. Please remove participant duplicate and retry.";
-
-    /**
-     * Displayed to the user when he tries to set e. g. confirmation status for an occurrence of an appointment but the appointment is just
-     * a one time appointment.
-     */
-    public static final String NO_SERIES_DISPLAY = "You can not set occurrence information for an one time appointment.";
-
-    /**
-     * Displayed to the user when an occurrence of a series was changed to and an exception was created.
-     */
-    public static final String OCCURRENCE_IS_EXCEPTION_DISPLAY = "You tried to change an occurrence of a series which is now an exception. Please reload and change the exception.";
 }
