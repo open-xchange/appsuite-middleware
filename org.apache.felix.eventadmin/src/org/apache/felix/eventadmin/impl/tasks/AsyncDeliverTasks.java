@@ -21,7 +21,6 @@ package org.apache.felix.eventadmin.impl.tasks;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.felix.eventadmin.impl.handler.EventHandlerProxy;
@@ -130,14 +129,14 @@ public class AsyncDeliverTasks
 
     private final class TaskExecuter implements Runnable
     {
-        private final List<EventTask> m_tasks = new LinkedList<EventTask>();
+        private final LinkedList<EventTask> m_tasks = new LinkedList<EventTask>();
 
         private final Object m_key;
 
         public TaskExecuter(final Collection<EventHandlerProxy> tasks, final Event event, final Object key)
         {
             m_key = key;
-            m_tasks.add(new EventTask(tasks, event));
+            m_tasks.addLast(new EventTask(tasks, event));
         }
 
         @Override
@@ -149,7 +148,7 @@ public class AsyncDeliverTasks
                 EventTask eventTask = null;
                 synchronized ( m_tasks )
                 {
-                    eventTask = m_tasks.remove(0);
+                    eventTask = m_tasks.removeFirst();
                 }
                 m_deliver_task.execute(eventTask.tasks, eventTask.event, true);
                 if (deliveredEvents.incrementAndGet() < 0L) {
@@ -170,7 +169,7 @@ public class AsyncDeliverTasks
         {
             synchronized ( m_tasks )
             {
-                m_tasks.add(new EventTask(tasks, event));
+                m_tasks.addLast(new EventTask(tasks, event));
             }
         }
     }
