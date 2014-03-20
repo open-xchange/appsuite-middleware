@@ -189,15 +189,13 @@ public class AsyncDeliverTasks
     public final class Measurement {
 
         private final long timestamp;
+        private final long measuredPostedEvents;
+        private final long measuredDeliveredEvents;
 
-        private final long postedEvents;
-
-        private final long deliveredEvents;
-
-        public Measurement(long postedEvents, long deliveredEvents) {
+        Measurement(long postedEvents, long deliveredEvents) {
             super();
-            this.postedEvents = postedEvents;
-            this.deliveredEvents = deliveredEvents;
+            this.measuredPostedEvents = postedEvents;
+            this.measuredDeliveredEvents = deliveredEvents;
             this.timestamp = System.currentTimeMillis();
         }
 
@@ -212,14 +210,14 @@ public class AsyncDeliverTasks
          * Gets the total number of events that have been enqueued via {@link EventAdmin#postEvent(Event)}.
          */
         public long getPostedEvents() {
-            return postedEvents;
+            return measuredPostedEvents;
         }
 
         /**
          * Gets the total number of events that have already been delivered.
          */
         public long getDeliveredEvents() {
-            return deliveredEvents;
+            return measuredDeliveredEvents;
         }
     }
 
