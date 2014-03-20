@@ -795,6 +795,7 @@ public final class OXFolderSQL {
         Connection wc = writeCon;
         boolean closeWriteCon = false;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         boolean rollback = false;
         boolean startedTransaction = false;
         try {
@@ -810,21 +811,38 @@ public final class OXFolderSQL {
 
             // Acquire lock
             lock(folderId, ctx.getContextId(), wc);
-
-            // Do the update
-            stmt = wc.prepareStatement(SQL_ADD_PERMS);
+            
+            stmt = wc.prepareStatement("SELECT 1 FROM oxfolder_permissions WHERE cid=? AND permission_id=? AND fuid=? AND system=?");
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
-            stmt.setInt(pos++, folderId);
             stmt.setInt(pos++, permissionId);
-            stmt.setInt(pos++, isGroup ? 1 : 0);
-            stmt.setInt(pos++, folderPermission);
-            stmt.setInt(pos++, objectReadPermission);
-            stmt.setInt(pos++, objectWritePermission);
-            stmt.setInt(pos++, objectDeletePermission);
-            stmt.setInt(pos++, isAdmin ? 1 : 0);
+            stmt.setInt(pos++, folderId);
             stmt.setInt(pos++, system);
-            final boolean success = executeUpdate(stmt) == 1;
+            rs = stmt.executeQuery();
+            final boolean alreadyExists = rs.next();
+            closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            // Do the update if absent
+            final boolean success;
+            if (alreadyExists) {
+                success = true;
+            } else {
+                stmt = wc.prepareStatement(SQL_ADD_PERMS);
+                pos = 1;
+                stmt.setInt(pos++, ctx.getContextId());
+                stmt.setInt(pos++, folderId);
+                stmt.setInt(pos++, permissionId);
+                stmt.setInt(pos++, isGroup ? 1 : 0);
+                stmt.setInt(pos++, folderPermission);
+                stmt.setInt(pos++, objectReadPermission);
+                stmt.setInt(pos++, objectWritePermission);
+                stmt.setInt(pos++, objectDeletePermission);
+                stmt.setInt(pos++, isAdmin ? 1 : 0);
+                stmt.setInt(pos++, system);
+                success = executeUpdate(stmt) == 1;
+            }
 
             if (startedTransaction) {
                 wc.commit();
@@ -840,7 +858,7 @@ public final class OXFolderSQL {
                     wc.setAutoCommit(true);
                 }
             }
-            closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
+            closeResources(rs, stmt, closeWriteCon ? wc : null, false, ctx);
         }
     }
 
