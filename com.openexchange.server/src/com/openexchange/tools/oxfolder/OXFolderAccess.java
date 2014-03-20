@@ -492,10 +492,6 @@ public class OXFolderAccess {
                     } else {
                         fuid = addUserToInfoStore(userId, user.getDisplayName(), ctx.getContextId(), wc);
                     }
-                } catch (final SQLException e) {
-                    throw e;
-                } catch (final Exception e) {
-                    throw e;
                 } finally {
                     if (fuid > 0) {
                         DBPool.closeWriterSilent(ctx, wc);
@@ -510,7 +506,7 @@ public class OXFolderAccess {
             throw e;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
