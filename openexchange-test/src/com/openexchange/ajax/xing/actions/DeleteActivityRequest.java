@@ -92,7 +92,7 @@ public class DeleteActivityRequest extends AbstractXingRequest<DeleteActivityRes
     public Parameter[] getParameters() throws IOException, JSONException {
         List<URLParameter> params = new ArrayList<URLParameter>();
         params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "delete_activity"));
-        params.add(new URLParameter("activityId", activityId));
+        params.add(new URLParameter("activity_id", activityId));
         return params.toArray(new URLParameter[params.size()]);
     }
 

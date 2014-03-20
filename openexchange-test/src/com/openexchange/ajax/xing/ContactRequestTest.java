@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,79 +47,46 @@
  *
  */
 
-package com.openexchange.ajax.xing.actions;
+package com.openexchange.ajax.xing;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.xing.actions.ContactJoinRequest;
+import com.openexchange.ajax.xing.actions.ContactJoinResponse;
+import com.openexchange.ajax.xing.actions.ContactJoinRevokeRequest;
+import com.openexchange.ajax.xing.actions.ContactJoinRevokeResponse;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ShowActivityRequest}
- * 
+ * {@link ContactRequestTest}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ShowActivityRequest extends AbstractXingRequest<ShowActivityResponse> {
-    
-    private final String activityId;
-
-    private final int[] fields;
+public class ContactRequestTest extends AbstractAJAXSession {
 
     /**
-     * Initializes a new {@link ShowActivityRequest}.
+     * Initializes a new {@link ContactRequestTest}.
      * 
-     * @param foe
+     * @param name
      */
-    public ShowActivityRequest(final String activityId, final int[] fields, boolean foe) {
-        super(foe);
-        this.activityId = activityId;
-        this.fields = fields;
+    public ContactRequestTest(String name) {
+        super(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+    /**
+     * Test the contact request action; first revoke existing contact request
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
      */
-    @Override
-    public Method getMethod() {
-        return Method.GET;
+    public void testContactRequestAction() throws OXException, IOException, JSONException {
+        final ContactJoinRevokeRequest revokeRequest = new ContactJoinRevokeRequest("ewaldbartkowiak@googlemail.com", true);
+        final ContactJoinRevokeResponse revokeResponse = client.execute(revokeRequest);
+        assertNotNull(revokeResponse);
+        final ContactJoinRequest request = new ContactJoinRequest("ewaldbartkowiak@googlemail.com", true);
+        final ContactJoinResponse response = client.execute(request);
+        assertNotNull(response);
     }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "show_activity"));
-        params.add(new URLParameter("activity_id", activityId));
-
-        if (fields != null && fields.length > 0) {
-            params.add(new Parameter("user_fields", fields));
-        }
-        return params.toArray(new URLParameter[params.size()]);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public AbstractAJAXParser<? extends ShowActivityResponse> getParser() {
-        return new ShowActivityParser(failOnError);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
 }

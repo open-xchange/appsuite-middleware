@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,77 +49,33 @@
 
 package com.openexchange.ajax.xing.actions;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 
 /**
- * {@link ShowActivityRequest}
- * 
+ * {@link ContactJoinRevokeParser}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ShowActivityRequest extends AbstractXingRequest<ShowActivityResponse> {
-    
-    private final String activityId;
-
-    private final int[] fields;
+public class ContactJoinRevokeParser extends AbstractAJAXParser<ContactJoinRevokeResponse> {
 
     /**
-     * Initializes a new {@link ShowActivityRequest}.
+     * Initializes a new {@link ContactJoinRevokeParser}.
      * 
-     * @param foe
+     * @param failOnError
      */
-    public ShowActivityRequest(final String activityId, final int[] fields, boolean foe) {
-        super(foe);
-        this.activityId = activityId;
-        this.fields = fields;
+    protected ContactJoinRevokeParser(boolean failOnError) {
+        super(failOnError);
     }
 
     /*
      * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
      */
     @Override
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "show_activity"));
-        params.add(new URLParameter("activity_id", activityId));
-
-        if (fields != null && fields.length > 0) {
-            params.add(new Parameter("user_fields", fields));
-        }
-        return params.toArray(new URLParameter[params.size()]);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public AbstractAJAXParser<? extends ShowActivityResponse> getParser() {
-        return new ShowActivityParser(failOnError);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
+    protected ContactJoinRevokeResponse createResponse(Response response) throws JSONException {
+        return new ContactJoinRevokeResponse(response);
     }
 
 }

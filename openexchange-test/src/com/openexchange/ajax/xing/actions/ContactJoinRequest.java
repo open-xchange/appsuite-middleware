@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,28 +55,24 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
+
 
 /**
- * {@link ShowActivityRequest}
- * 
+ * {@link ContactJoinRequest}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ShowActivityRequest extends AbstractXingRequest<ShowActivityResponse> {
-    
-    private final String activityId;
+public class ContactJoinRequest extends AbstractXingRequest<ContactJoinResponse> {
 
-    private final int[] fields;
-
+    final String email;
     /**
-     * Initializes a new {@link ShowActivityRequest}.
+     * Initializes a new {@link ContactJoinRequest}.
      * 
      * @param foe
      */
-    public ShowActivityRequest(final String activityId, final int[] fields, boolean foe) {
+    public ContactJoinRequest(final String email, boolean foe) {
         super(foe);
-        this.activityId = activityId;
-        this.fields = fields;
+        this.email = email;
     }
 
     /*
@@ -84,8 +80,8 @@ public class ShowActivityRequest extends AbstractXingRequest<ShowActivityRespons
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
     @Override
-    public Method getMethod() {
-        return Method.GET;
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.POST;
     }
 
     /*
@@ -93,14 +89,10 @@ public class ShowActivityRequest extends AbstractXingRequest<ShowActivityRespons
      * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
     @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "show_activity"));
-        params.add(new URLParameter("activity_id", activityId));
-
-        if (fields != null && fields.length > 0) {
-            params.add(new Parameter("user_fields", fields));
-        }
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        List<URLParameter> params = new ArrayList<URLParameter>();
+        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "contact_request"));
+        params.add(new URLParameter("email", email));
         return params.toArray(new URLParameter[params.size()]);
     }
 
@@ -109,8 +101,8 @@ public class ShowActivityRequest extends AbstractXingRequest<ShowActivityRespons
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
-    public AbstractAJAXParser<? extends ShowActivityResponse> getParser() {
-        return new ShowActivityParser(failOnError);
+    public AbstractAJAXParser<? extends ContactJoinResponse> getParser() {
+        return new ContactJoinParser(failOnError);
     }
 
     /*

@@ -96,7 +96,7 @@ public class ShareActivityRequest extends AbstractXingRequest<ShareActivityRespo
     public Parameter[] getParameters() throws IOException, JSONException {
         List<URLParameter> params = new ArrayList<URLParameter>();
         params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "share_activity"));
-        params.add(new URLParameter("id", activityId));
+        params.add(new URLParameter("activity_id", activityId));
         if (text != null && text.length() > 0) {
             params.add(new URLParameter("text", text));
         }
