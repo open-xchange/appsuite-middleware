@@ -1,3 +1,7 @@
+* 2014-03-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31657: Drop "webmail" capability for context administrator if "com.openexchange.mail.adminMailLoginEnabled" is set to "false"
+
 * 2014-03-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 31644: Properly collect available text parts on reply if original message contains multipart/alternative appendix
