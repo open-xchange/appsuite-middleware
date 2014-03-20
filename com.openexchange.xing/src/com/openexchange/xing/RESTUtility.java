@@ -147,10 +147,7 @@ public class RESTUtility {
         case POST: {
             final HttpPost post = new HttpPost(url);
             if (null != requestInformation) {
-                post.setEntity(new InputStreamEntity(
-                    new JSONInputStream(requestInformation, "UTF-8"),
-                    requestInformation.length(),
-                    ContentType.APPLICATION_JSON));
+                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"),requestInformation.toString().length(),ContentType.APPLICATION_JSON));
             }
             req = post;
         }
@@ -369,7 +366,7 @@ public class RESTUtility {
             {
                 final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
                 if (null != requestInformation) {
-                    post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
+                    post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), requestInformation.toString().length(), ContentType.APPLICATION_JSON));
                 }
                 req = post;
             }
