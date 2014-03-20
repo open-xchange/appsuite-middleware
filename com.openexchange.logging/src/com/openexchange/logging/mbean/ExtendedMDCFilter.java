@@ -104,7 +104,7 @@ public class ExtendedMDCFilter extends TurboFilter {
             }
         }
 
-        if (check && loggerCheck) {
+        if ((check && levels.isEmpty()) || (check && loggerCheck)) {
             for (Tuple t : tuples) {
                 String v = MDC.get(t.getKey());
                 if (v == null) {
