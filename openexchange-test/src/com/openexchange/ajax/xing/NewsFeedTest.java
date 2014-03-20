@@ -145,6 +145,8 @@ public class NewsFeedTest extends AbstractAJAXSession {
     }
 
     /**
+     * Simple test to verify that the action fetches the user activities
+     * 
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -156,17 +158,26 @@ public class NewsFeedTest extends AbstractAJAXSession {
     }
 
     /**
+     * Test to verify that the action fetches the user activities; verify userfields
+     * 
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
     public void testUserFeedWithUserFields() throws OXException, IOException, JSONException {
-        final int[] uf = { UserField.DISPLAY_NAME.ordinal() };
+        final int[] uf = { UserField.DISPLAY_NAME.ordinal(), UserField.FIRST_NAME.ordinal() };
         final UserFeedRequest request = new UserFeedRequest("dimitribronkowitsch@googlemail.com", -1, -1, uf, true);
         final UserFeedResponse response = client.execute(request);
         assertNotNull(response);
     }
 
+    /**
+     * Test error code for mutually exclusive URL parameters 'since' and 'until'
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
     public void testUserFeedBetweenAndUntil() throws OXException, IOException, JSONException {
         final int[] uf = { UserField.DISPLAY_NAME.ordinal() };
         final UserFeedRequest request = new UserFeedRequest("dimitribronkowitsch@googlemail.com", 123, 123, uf, false);

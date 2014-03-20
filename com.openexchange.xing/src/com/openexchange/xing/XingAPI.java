@@ -928,7 +928,6 @@ public class XingAPI<S extends Session> {
      * 
      * @param userId The identifier of the user
      * @param recipientUserId The identifier of the recipient
-     * @param optMessage The optional message
      * @throws XingException If contact request fails
      */
     public void revokeContactRequest(final String senderId, final String recipientUserId) throws XingException {
@@ -1413,7 +1412,7 @@ public class XingAPI<S extends Session> {
                 url,
                 jLeadDesc,
                 session,
-                Arrays.asList(XingServerException._201_CREATED)).toObject();
+                Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT)).toObject();
             return jResponse.asMap();
         } catch (final JSONException e) {
             throw new XingException(e);

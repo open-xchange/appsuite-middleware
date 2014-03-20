@@ -71,6 +71,13 @@ public class CreateProfileTest extends AbstractAJAXSession {
         super(n);
     }
     
+    /**
+     * Test to check profile registration on XING
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
     public void testCreateCoReg() throws OXException, IOException, JSONException {
         final CreateRequest request = new CreateRequest("testing.tester@open-xchange.com", true, "testing", "tester", "en", true);
         final CreateResponse response = client.execute(request);
