@@ -80,11 +80,13 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
 
     private final AdminCache cache;
     private final long averageSize;
+    private final boolean failOnMissing;
 
-    public FilestoreUsageLoader(AdminCache cache, long averageSize) {
+    public FilestoreUsageLoader(AdminCache cache, long averageSize, boolean failOnMissing) {
         super();
         this.cache = cache;
         this.averageSize = averageSize;
+        this.failOnMissing = failOnMissing;
     }
 
     @Override
@@ -109,7 +111,7 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         for (Entry<Integer, Map<String, Map<Integer, Context>>> readIdEntry : readIdMap.entrySet()) {
             for (Entry<String, Map<Integer, Context>> schemaEntry : readIdEntry.getValue().entrySet()) {
                 try {
-                    retval.addAll(loadUsage(schemaEntry.getValue()));
+                    retval.addAll(loadUsage(readIdEntry.getKey(), schemaEntry.getKey(), schemaEntry.getValue()));
                 } catch (StorageException e) {
                     throw new PipesAndFiltersException(e);
                 }
@@ -120,11 +122,10 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
 
     private static final String SQL = "SELECT cid,used FROM filestore_usage";
 
-    private Collection<Context> loadUsage(Map<Integer, Context> contexts) throws StorageException {
-        int cid = contexts.values().iterator().next().getId().intValue();
-        Connection con;
+    private Collection<Context> loadUsage(int poolId, String schema, Map<Integer, Context> contexts) throws StorageException {
+        final Connection con;
         try {
-            con = cache.getConnectionForContext(cid);
+            con = cache.getPool().getConnection(poolId, schema);
         } catch (PoolException e) {
             throw new StorageException(e);
         }
@@ -144,19 +145,19 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(rs, stmt);
-            if (null != con) {
-                try {
-                    cache.pushConnectionForContextAfterReading(cid, con);
-                } catch (PoolException e) {
-                    LOG.error("", e);
-                }
+            try {
+                cache.getPool().pushConnection(poolId, con);
+            } catch (PoolException e) {
+                LOG.error("", e);
             }
         }
-        for (Context context : contexts.values()) {
-            if (!context.isUsedQuotaset()) {
-                throw new StorageException("Was not able to find a filestore usage for context " + context.getId()
-                    + ". Please consider running update tasks on all existing schemas or at least on schema "
-                    + context.getReadDatabase().getScheme());
+        if (failOnMissing) {
+            for (Context context : contexts.values()) {
+                if (!context.isUsedQuotaset()) {
+                    throw new StorageException("Was not able to find a filestore usage for context " + context.getId()
+                        + ". Please consider running update tasks on all existing schemas or at least on schema "
+                        + context.getReadDatabase().getScheme());
+                }
             }
         }
         return contexts.values();

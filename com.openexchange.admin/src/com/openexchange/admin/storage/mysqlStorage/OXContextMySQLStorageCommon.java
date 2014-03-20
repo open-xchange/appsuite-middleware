@@ -111,7 +111,6 @@ public class OXContextMySQLStorageCommon {
         final int context_id = ctx.getId();
 
         try {
-            oxdb_read = cache.getConnectionForContext(context_id);
 
             prep = configdb_con.prepareStatement("SELECT context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema, login2context.login_info FROM context LEFT JOIN ( login2context, context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id AND context.cid = login2context.cid ) WHERE context.cid = ? AND server.name = ?");
             prep.setInt(1, context_id);
@@ -175,6 +174,8 @@ public class OXContextMySQLStorageCommon {
 
             rs.close();
             prep.close();
+
+            oxdb_read = cache.getConnectionForContext(context_id);
 
             prep = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
             prep.setInt(1, context_id);
@@ -270,7 +271,7 @@ public class OXContextMySQLStorageCommon {
                 output = output.addFilter(f);
             }
         }
-        output = output.addFilter(new LoginInfoLoader(cache)).addFilter(new FilestoreUsageLoader(cache, averageSize)).addFilter(new DynamicAttributesLoader(cache));
+        output = output.addFilter(new LoginInfoLoader(cache)).addFilter(new FilestoreUsageLoader(cache, averageSize, failOnMissing)).addFilter(new DynamicAttributesLoader(cache));
         final SortedMap<Integer, Context> retval = new TreeMap<Integer, Context>();
         try {
             while (output.hasData()) {
