@@ -84,7 +84,7 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
-	"com.openexchange.pooling:,name=DB Pool $Database",
+	"com.openexchange.pooling:name=DB Pool $Database",
 	"NumActive");
 $response = $jmx->request($request);
 if ($response->is_ok()){
@@ -92,7 +92,7 @@ if ($response->is_ok()){
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
-	"com.openexchange.pooling:,name=DB Pool $Database",
+	"com.openexchange.pooling:name=DB Pool $Database",
 	"NumIdle");
 $response = $jmx->request($request);
 if ($response->is_ok()){
@@ -100,7 +100,7 @@ if ($response->is_ok()){
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
-	"com.openexchange.pooling:,name=DB Pool $Database",
+	"com.openexchange.pooling:name=DB Pool $Database",
 	"NumWaiting");
 $response = $jmx->request($request);
 if ($response->is_ok()){
@@ -108,7 +108,7 @@ if ($response->is_ok()){
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
-	"com.openexchange.pooling:,name=DB Pool $Database",
+	"com.openexchange.pooling:name=DB Pool $Database",
 	"PoolSize");
 $response = $jmx->request($request);
 if ($response->is_ok()){
@@ -116,7 +116,7 @@ if ($response->is_ok()){
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
-	"com.openexchange.pooling:,name=DB Pool $Database",
+	"com.openexchange.pooling:name=DB Pool $Database",
 	"NumBrokenConnections");
 $response = $jmx->request($request);
 if ($response->is_ok()){

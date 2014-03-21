@@ -79,7 +79,7 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
-	"com.openexchange.pooling:,name=DB Pool $Database",
+	"com.openexchange.pooling:name=DB Pool $Database",
 	"MinUseTime");
 $response = $jmx->request($request);
 if ($response->is_ok()){
@@ -87,7 +87,7 @@ if ($response->is_ok()){
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
-	"com.openexchange.pooling:,name=DB Pool $Database",
+	"com.openexchange.pooling:name=DB Pool $Database",
 	"AvgUseTime");
 $response = $jmx->request($request);
 if ($response->is_ok()){
@@ -95,7 +95,7 @@ if ($response->is_ok()){
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
-	"com.openexchange.pooling:,name=DB Pool $Database",
+	"com.openexchange.pooling:name=DB Pool $Database",
 	"MaxUseTime");
 $response = $jmx->request($request);
 if ($response->is_ok()){
