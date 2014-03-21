@@ -292,17 +292,23 @@ public class NotificationMail {
     	if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
     		return true;
     	}
-        LOG.debug("2: User: {}, {} {}", recipient.getEmail(), appointment.containsNotification(), appointment.getNotification());
-    	if (appointment != null && appointment.containsNotification() && !appointment.getNotification()) {
-    		return false;
+    	if (appointment != null) {
+            LOG.debug("2: User: {}, {} {}", recipient.getEmail(), appointment.containsNotification(), appointment.getNotification());
+        	if (appointment.containsNotification() && !appointment.getNotification()) {
+        		return false;
+        	}
     	}
-        LOG.debug("3: User: {}, {} {}", recipient.getEmail(), stateType.name(), endsInPast(appointment));
-    	if (appointment != null && stateType.equals(Type.NEW) && endsInPast(appointment)) {
-    	    return false;
+    	if (appointment != null) {
+            LOG.debug("3: User: {}, {} {}", recipient.getEmail(), stateType.name(), endsInPast(appointment));
+        	if (stateType.equals(Type.NEW) && endsInPast(appointment)) {
+        	    return false;
+        	}
     	}
-        LOG.debug("4: User: {}, {} {}", recipient.getEmail(), stateType.name(), isNotWorthUpdateNotification(original, appointment));
-    	if (appointment != null && original != null && stateType.equals(Type.MODIFIED)  && isNotWorthUpdateNotification(original, appointment)) {
-    	    return false;
+    	if (appointment != null && original != null) {
+            LOG.debug("4: User: {}, {} {}", recipient.getEmail(), stateType.name(), isNotWorthUpdateNotification(original, appointment));
+        	if (stateType.equals(Type.MODIFIED)  && isNotWorthUpdateNotification(original, appointment)) {
+        	    return false;
+        	}
     	}
         LOG.debug("5: User: {}, {}", recipient.getEmail(), stateType.name());
     	if (appointment != null && stateType.equals(Type.DELETED)) {
