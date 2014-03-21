@@ -96,6 +96,23 @@ public final class EventSystemActivator extends HousekeepingActivator {
         final EventSystemServiceImpl serviceImpl = new EventSystemServiceImpl(this, handlers);
         this.serviceImpl = serviceImpl;
         registerService(EventSystemService.class, serviceImpl);
+
+        /*-
+         *
+        {
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            props.put(EventConstants.EVENT_TOPIC, "com/openexchange/provisioning/*");
+            EventHandler dummyEventHandler = new EventHandler() {
+
+                @Override
+                public void handleEvent(Event event) {
+                    System.out.println("Received event: " + event.getTopic() + " by Thread " + Thread.currentThread().getName());
+                }
+            };
+            registerService(EventHandler.class, dummyEventHandler, props);
+        }
+         *
+         */
     }
 
     @Override
