@@ -1,3 +1,7 @@
+* 2014-03-21 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31705: Always populate all field names during Portable serialization  
+
 * 2014-03-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 31707: Method did not list empty file stores due to wrong SQL statement. Corrected that SQL statement.

@@ -107,6 +107,8 @@ public class PortableCacheEvent extends AbstractCustomPortable {
         writer.writeUTF("o", operation.getId());
         if (null == key) {
             writer.writeInt("k", 0);
+            writer.writeInt("c", -1);
+            writer.writeInt("s", -1);
         } else if (CacheKey.class.isInstance(key)) {
             writer.writeInt("k", 1);
             CacheKey cacheKey = (CacheKey)key;
@@ -123,6 +125,8 @@ public class PortableCacheEvent extends AbstractCustomPortable {
             }
         } else {
             writer.writeInt("k", 2);
+            writer.writeInt("c", -1);
+            writer.writeInt("s", -1);
             writer.getRawDataOutput().writeObject(key);
         }
     }
