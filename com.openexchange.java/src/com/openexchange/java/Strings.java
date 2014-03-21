@@ -354,10 +354,11 @@ public class Strings {
         if (coll == null) {
             return null;
         }
-        if (coll.size() == 0) {
+        final int size = coll.size();
+        if (size == 0) {
             return "";
         }
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator();
+        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(size << 4);
         for (final Object obj : coll) {
             if (obj == null) {
                 builder.append("null");
