@@ -101,7 +101,7 @@ public class ShowActivityRequest extends AbstractXingRequest<ShowActivityRespons
         if (fields != null && fields.length > 0) {
             params.add(new Parameter("user_fields", fields));
         }
-        return params.toArray(new URLParameter[params.size()]);
+        return params.toArray(new Parameter[params.size()]);
     }
 
     /*

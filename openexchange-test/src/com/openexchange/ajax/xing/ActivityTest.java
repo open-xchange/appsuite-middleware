@@ -79,6 +79,7 @@ import com.openexchange.ajax.xing.actions.ShowActivityResponse;
 import com.openexchange.ajax.xing.actions.UnlikeActivityRequest;
 import com.openexchange.ajax.xing.actions.UnlikeActivityResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.xing.UserField;
 
 /**
  * {@link ActivityTest}
@@ -126,22 +127,27 @@ public class ActivityTest extends AbstractAJAXSession {
      * @throws IOException
      * @throws JSONException
      */
-    public void testActivityCRUD() throws OXException, IOException, JSONException {
-        postActivity();
-        showActivity();
+    public void testCreateDeleteStatusMessage() throws OXException, IOException, JSONException {
+        final ChangeStatusRequest createRequest = new ChangeStatusRequest("My new status", true);
+        final ChangeStatusResponse createResponse = client.execute(createRequest);
+        assertNotNull(createResponse);
         deleteActivity();
     }
 
+
     /**
-     * Tests the change status action
+     * Tests the show activity action with user fields
      * 
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
-    private void postActivity() throws OXException, IOException, JSONException {
-        final ChangeStatusRequest request = new ChangeStatusRequest("My new status", true);
-        final ChangeStatusResponse response = client.execute(request);
+    public void testShowActivityWithUserFields() throws OXException, IOException, JSONException {
+        JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
+        String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
+        final int[] uf = { UserField.FIRST_NAME.ordinal(), UserField.LAST_NAME.ordinal(), UserField.DISPLAY_NAME.ordinal() };
+        final ShowActivityRequest request = new ShowActivityRequest(activityId, uf, true);
+        final ShowActivityResponse response = client.execute(request);
         assertNotNull(response);
     }
 
@@ -152,7 +158,7 @@ public class ActivityTest extends AbstractAJAXSession {
      * @throws IOException
      * @throws JSONException
      */
-    private void showActivity() throws OXException, IOException, JSONException {
+    public void testShowActivity() throws OXException, IOException, JSONException {
         JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
         String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
         final ShowActivityRequest request = new ShowActivityRequest(activityId, new int[0], true);
@@ -265,7 +271,7 @@ public class ActivityTest extends AbstractAJAXSession {
                 break;
             }
         }
-        assertFalse("An activity with this permission could not being found " + permission, (activityId.equals("-1")));
+        assertTrue("An activity with this permission could not being found " + permission, found);
         return activityId;
     }
 }
