@@ -165,7 +165,7 @@ public class NewsFeedTest extends AbstractAJAXSession {
      * @throws JSONException
      */
     public void testUserFeedWithUserFields() throws OXException, IOException, JSONException {
-        final int[] uf = { UserField.DISPLAY_NAME.ordinal(), UserField.FIRST_NAME.ordinal() };
+        final int[] uf = { UserField.DISPLAY_NAME.ordinal(), UserField.GENDER.ordinal() };
         final UserFeedRequest request = new UserFeedRequest("dimitribronkowitsch@googlemail.com", -1, -1, uf, true);
         final UserFeedResponse response = client.execute(request);
         assertNotNull(response);
