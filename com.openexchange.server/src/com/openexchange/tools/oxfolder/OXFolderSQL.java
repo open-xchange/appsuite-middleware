@@ -811,7 +811,7 @@ public final class OXFolderSQL {
 
             // Acquire lock
             lock(folderId, ctx.getContextId(), wc);
-            
+
             stmt = wc.prepareStatement("SELECT 1 FROM oxfolder_permissions WHERE cid=? AND permission_id=? AND fuid=? AND system=?");
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
@@ -1051,28 +1051,7 @@ public final class OXFolderSQL {
 
     private static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folder, final long creatingTime, final boolean acceptDefaultFlag, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
         Connection writeCon = writeConArg;
-        /*
-         * Insert Folder
-         */
-        int permissionFlag = FolderObject.CUSTOM_PERMISSION;
-        /*
-         * Set Permission Flag
-         */
-        if (folder.getType() == FolderObject.PRIVATE) {
-            if (folder.getPermissions().size() == 1) {
-                permissionFlag = FolderObject.PRIVATE_PERMISSION;
-            }
-        } else if (folder.getType() == FolderObject.PUBLIC) {
-            final int permissionsSize = folder.getPermissions().size();
-            final Iterator<OCLPermission> iter = folder.getPermissions().iterator();
-            for (int i = 0; i < permissionsSize; i++) {
-                final OCLPermission oclPerm = iter.next();
-                if (oclPerm.getEntity() == OCLPermission.ALL_GROUPS_AND_USERS && oclPerm.getFolderPermission() > OCLPermission.NO_PERMISSIONS) {
-                    permissionFlag = FolderObject.PUBLIC_PERMISSION;
-                    break;
-                }
-            }
-        }
+        int permissionFlag = determinePermissionFlag(folder);
         boolean closeWriteCon = false;
         try {
             if (writeCon == null) {
@@ -1212,22 +1191,7 @@ public final class OXFolderSQL {
         /*
          * Update Folder
          */
-        int permissionFlag = FolderObject.CUSTOM_PERMISSION;
-        if (folder.getType() == FolderObject.PRIVATE) {
-            if (folder.getPermissions().size() == 1) {
-                permissionFlag = FolderObject.PRIVATE_PERMISSION;
-            }
-        } else if (folder.getType() == FolderObject.PUBLIC) {
-            final int permissionsSize = folder.getPermissions().size();
-            final Iterator<OCLPermission> iter = folder.getPermissions().iterator();
-            for (int i = 0; i < permissionsSize; i++) {
-                final OCLPermission oclPerm = iter.next();
-                if (oclPerm.getEntity() == OCLPermission.ALL_GROUPS_AND_USERS && oclPerm.getFolderPermission() > OCLPermission.NO_PERMISSIONS) {
-                    permissionFlag = FolderObject.PUBLIC_PERMISSION;
-                    break;
-                }
-            }
-        }
+        int permissionFlag = determinePermissionFlag(folder);
         boolean closeWriteCon = false;
         try {
             if (writeCon == null) {
@@ -1246,10 +1210,12 @@ public final class OXFolderSQL {
                 // Do the update
                 int pos = 1;
                 final boolean containsMeta = folder.containsMeta();
+                final boolean containsCreatedBy = folder.containsCreatedBy();
                 if (folder.containsFolderName()) {
-                    stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname=?" + (containsMeta ? ",meta=?" : "") + ",changing_date=?,changed_from=?,permission_flag=?,module=? " +
-                    "WHERE cid=? AND fuid=? AND NOT EXISTS (SELECT 1 FROM (" +
-                    "SELECT fname,fuid FROM oxfolder_tree WHERE cid=? AND parent=? AND parent>?) AS ft WHERE ft.fname=? AND ft.fuid<>?);");
+                    stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname=?" + (containsMeta ? ",meta=?" : "") +
+                        ",changing_date=?,changed_from=?,permission_flag=?,module=?" + (containsCreatedBy ? ",created_from=?" : "") +
+                        " WHERE cid=? AND fuid=? AND NOT EXISTS (SELECT 1 FROM (" +
+                        "SELECT fname,fuid FROM oxfolder_tree WHERE cid=? AND parent=? AND parent>?) AS ft WHERE ft.fname=? AND ft.fuid<>?);");
                     stmt.setString(pos++, folder.getFolderName());
                     if (containsMeta) {
                         final Map<String, Object> meta = folder.getMeta();
@@ -1268,6 +1234,9 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, userId);
                     stmt.setInt(pos++, permissionFlag);
                     stmt.setInt(pos++, folder.getModule());
+                    if (containsCreatedBy) {
+                        stmt.setInt(pos++, folder.getCreatedBy());
+                    }
                     stmt.setInt(pos++, ctx.getContextId());
                     stmt.setInt(pos++, folder.getObjectID());
                     stmt.setInt(pos++, ctx.getContextId());
@@ -1282,7 +1251,9 @@ public final class OXFolderSQL {
                     stmt.close();
                     stmt = null;
                 } else {
-                    stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET " + (containsMeta ? "meta = ?, " : "") + "changing_date = ?, changed_from = ?, " + "permission_flag = ?, module = ? WHERE cid = ? AND fuid = ?");
+                    stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET " + (containsMeta ? "meta = ?, " : "") +
+                        "changing_date = ?, changed_from = ?, " + "permission_flag = ?, module = ? " +
+                        (containsCreatedBy ? ", created_from = ? " : "") + "WHERE cid = ? AND fuid = ?");
                     if (containsMeta) {
                         final Map<String, Object> meta = folder.getMeta();
                         if (null == meta || meta.isEmpty()) {
@@ -1300,6 +1271,9 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, userId);
                     stmt.setInt(pos++, permissionFlag);
                     stmt.setInt(pos++, folder.getModule());
+                    if (containsCreatedBy) {
+                        stmt.setInt(pos++, folder.getCreatedBy());
+                    }
                     stmt.setInt(pos++, ctx.getContextId());
                     stmt.setInt(pos++, folder.getObjectID());
                     executeUpdate(stmt);
@@ -2719,6 +2693,33 @@ public final class OXFolderSQL {
             }
             throw e;
         }
+    }
+
+    /**
+     * Determines the permission flag based on the supplied folder's type and permissions.
+     *
+     * @param folder The folder to get the permission flag for
+     * @return The permission flag, i.e. one of {@link FolderObject#CUSTOM_PERMISSION}, {@link FolderObject#PRIVATE_PERMISSION},
+     *         {@link FolderObject#PUBLIC_PERMISSION},
+     */
+    private static int determinePermissionFlag(final FolderObject folder) {
+        int permissionFlag = FolderObject.CUSTOM_PERMISSION;
+        if (folder.getType() == FolderObject.PRIVATE) {
+            if (folder.getPermissions().size() == 1) {
+                permissionFlag = FolderObject.PRIVATE_PERMISSION;
+            }
+        } else if (folder.getType() == FolderObject.PUBLIC) {
+            final int permissionsSize = folder.getPermissions().size();
+            final Iterator<OCLPermission> iter = folder.getPermissions().iterator();
+            for (int i = 0; i < permissionsSize; i++) {
+                final OCLPermission oclPerm = iter.next();
+                if (oclPerm.getEntity() == OCLPermission.ALL_GROUPS_AND_USERS && oclPerm.getFolderPermission() > OCLPermission.NO_PERMISSIONS) {
+                    permissionFlag = FolderObject.PUBLIC_PERMISSION;
+                    break;
+                }
+            }
+        }
+        return permissionFlag;
     }
 
 }
