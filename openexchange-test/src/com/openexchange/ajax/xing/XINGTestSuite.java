@@ -61,9 +61,9 @@ import com.openexchange.ajax.subscribe.test.SubscriptionFolderIconTest;
 import com.openexchange.ajax.subscribe.test.UpdateSubscriptionTest;
 
 /**
- * {@link SubscribeTestSuite}
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link XINGTestSuite}
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class XINGTestSuite extends TestSuite {
 
