@@ -373,20 +373,34 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
-    public Date setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
+    public CalendarDataObject setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
         if (optOccurrenceId <= 0) {
             LOG.warn("No occurrence to set confirmation for found. Delegate set confirmation for whole series or one time appointment!");
-            return setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
+            CalendarDataObject retval = new CalendarDataObject();
+            retval.setLastModified(setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage));
+            return retval;
         }
-
-        return delegate.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage);
+        CalendarDataObject retval = null;
+        try {
+            CalendarDataObject original = getObjectById(objectId);
+            retval = delegate.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage);
+            if (retval.getObjectID() > 0 && retval.getObjectID() != objectId) { // Change exception was created
+                retval = getObjectById(retval.getObjectID());
+                generateUpdateMail(folderId, original, retval);
+            }
+        } catch (SQLException e) {
+            throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
+        }
+        return retval;
     }
 
     @Override
-    public Date setExternalConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final String mail, final int confirm, final String message) throws OXException {
+    public CalendarDataObject setExternalConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final String mail, final int confirm, final String message) throws OXException {
         if (optOccurrenceId <= 0) {
             LOG.warn("No occurrence to set confirmation for found. Delegate set confirmation for whole series or one time appointment!");
-            return setExternalConfirmation(objectId, folderId, mail, confirm, message);
+            CalendarDataObject retval = new CalendarDataObject();
+            retval.setLastModified(setExternalConfirmation(objectId, folderId, mail, confirm, message));
+            return retval;
         }
         return delegate.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message);
     }
@@ -476,22 +490,26 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
                     reloaded.setNotification(cdao.getNotification());
                 }
                 calculateExceptionPosition(cdao, original, false);
-                final ITipMailGenerator generator = generators.create(original, reloaded, session, onBehalfOf(inFolder));
-                final List<NotificationParticipant> recipients = generator.getRecipients();
-                for (final NotificationParticipant notificationParticipant : recipients) {
-                    NotificationMail mail;
-                    mail = generator.generateUpdateMailFor(notificationParticipant);
-                    if (mail != null) {
-                        if (mail.getStateType() == null) {
-                            mail.setStateType(State.Type.MODIFIED);
-                        }
-                        sender.sendMail(mail, session);
-                    }
-                }
+                generateUpdateMail(inFolder, original, reloaded);
             }
             return retval;
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
+        }
+    }
+
+    private void generateUpdateMail(final int inFolder, final CalendarDataObject original, final CalendarDataObject reloaded) throws OXException {
+        final ITipMailGenerator generator = generators.create(original, reloaded, session, onBehalfOf(inFolder));
+        final List<NotificationParticipant> recipients = generator.getRecipients();
+        for (final NotificationParticipant notificationParticipant : recipients) {
+            NotificationMail mail;
+            mail = generator.generateUpdateMailFor(notificationParticipant);
+            if (mail != null) {
+                if (mail.getStateType() == null) {
+                    mail.setStateType(State.Type.MODIFIED);
+                }
+                sender.sendMail(mail, session);
+            }
         }
     }
 

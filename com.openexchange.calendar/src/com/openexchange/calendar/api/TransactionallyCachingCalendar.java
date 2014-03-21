@@ -286,13 +286,13 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
     }
 
     @Override
-    public Date setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
+    public CalendarDataObject setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
         cached.remove(objectId);
         return delegate.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage);
     }
 
     @Override
-    public Date setExternalConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final String mail, final int confirm, final String message) throws OXException {
+    public CalendarDataObject setExternalConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final String mail, final int confirm, final String message) throws OXException {
         cached.remove(objectId);
         return delegate.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message);
     }
