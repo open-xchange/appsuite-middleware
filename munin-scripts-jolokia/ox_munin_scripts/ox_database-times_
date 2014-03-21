@@ -83,7 +83,7 @@ $request = new JMX::Jmx4Perl::Request(READ,
 	"MinUseTime");
 $response = $jmx->request($request);
 if ($response->is_ok()){
-	print "a.value $response->value()\n";
+	print "a.value ",$response->value(),"\n";
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
@@ -91,7 +91,7 @@ $request = new JMX::Jmx4Perl::Request(READ,
 	"AvgUseTime");
 $response = $jmx->request($request);
 if ($response->is_ok()){
-	print "b.value $response->value()\n";
+	print "b.value ",$response->value(),"\n";
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
@@ -99,5 +99,5 @@ $request = new JMX::Jmx4Perl::Request(READ,
 	"MaxUseTime");
 $response = $jmx->request($request);
 if ($response->is_ok()){
-	print "c.value $response->value()\n";
+	print "c.value ",$response->value(),"\n";
 }

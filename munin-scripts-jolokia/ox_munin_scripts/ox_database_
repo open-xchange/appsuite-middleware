@@ -88,7 +88,7 @@ $request = new JMX::Jmx4Perl::Request(READ,
 	"NumActive");
 $response = $jmx->request($request);
 if ($response->is_ok()){
-	print "a.value $response->value()\n";
+	print "a.value ",$response->value(),"\n";
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
@@ -96,7 +96,7 @@ $request = new JMX::Jmx4Perl::Request(READ,
 	"NumIdle");
 $response = $jmx->request($request);
 if ($response->is_ok()){
-	print "b.value $response->value()\n";
+	print "b.value ",$response->value(),"\n";
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
@@ -104,7 +104,7 @@ $request = new JMX::Jmx4Perl::Request(READ,
 	"NumWaiting");
 $response = $jmx->request($request);
 if ($response->is_ok()){
-	print "c.value $response->value()\n";
+	print "c.value ",$response->value(),"\n";
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
@@ -112,7 +112,7 @@ $request = new JMX::Jmx4Perl::Request(READ,
 	"PoolSize");
 $response = $jmx->request($request);
 if ($response->is_ok()){
-	print "d.value $response->value()\n";
+	print "d.value ",$response->value(),"\n";
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
@@ -120,5 +120,5 @@ $request = new JMX::Jmx4Perl::Request(READ,
 	"NumBrokenConnections");
 $response = $jmx->request($request);
 if ($response->is_ok()){
-	print "e.value $response->value()\n";
+	print "e.value ",$response->value(),"\n";
 }
