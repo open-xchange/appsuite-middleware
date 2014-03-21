@@ -51,7 +51,6 @@ package com.openexchange.find.basic.drive;
 
 import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
 import static com.openexchange.java.Autoboxing.I2i;
-import static com.openexchange.java.Autoboxing.i;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,6 +60,7 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.infostore.ToInfostoreTermVisitor;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.AndTerm;
@@ -150,18 +150,66 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
 
     @Override
     public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
+        int userId = session.getUserId();
         InfostoreSearchEngine searchEngine = Services.getInfostoreSearchEngine();
         if (null == searchEngine) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreFacade.class.getName());
         }
+        IDBasedFolderAccessFactory folderAccessFactory = Services.getIdBasedFolderAccessFactory();
+        if (null == folderAccessFactory) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFolderAccessFactory.class.getName());
+        }
         SearchTerm<?> term = null;
         List<SearchTerm<?>> terms = null;
+        List<Integer> folderIds = new ArrayList<Integer>();
         List<ActiveFacet> facets = searchRequest.getActiveFacets();
         if (facets.size() > 1) {
-             terms = new ArrayList<SearchTerm<?>>(facets.size());
+            terms = new ArrayList<SearchTerm<?>>(facets.size());
         }
         for (ActiveFacet facet : facets) {
             Filter filter = facet.getFilter();
+            if (filter.getFields().contains(Constants.FIELD_FOLDER_TYPE)) {
+                String query = "";
+                for (int i = 0; i < filter.getFields().size(); i++) {
+                    if (filter.getFields().get(i).equals(Constants.FIELD_FOLDER_TYPE)) {
+                        query = filter.getQueries().get(i);
+                        break;
+                    }
+                }
+                OXFolderAccess access = new OXFolderAccess(session.getContext());
+                FolderObject defaultFolder = access.getDefaultFolder(userId, FolderObject.INFOSTORE);
+                folderIds.add(defaultFolder.getObjectID());
+                List<Integer> subfolders = new LinkedList<Integer>();
+                if (defaultFolder.hasSubfolders()) {
+                    try {
+                        subfolders.addAll(defaultFolder.getSubfolderIds(true, session.getContext()));
+                    } catch (SQLException e) {
+                        // should not happen?
+                    }
+                }
+                if (query.equals(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())) {
+                    for (int folder : subfolders) {
+                        if (access.getFolderType(folder, userId) != FolderObject.PUBLIC) {
+                            folderIds.add(folder);
+                        }
+                    }
+                }
+                if (query.equals(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())) {
+                    for (int folder : subfolders) {
+                        if (access.getFolderType(folder, userId) != FolderObject.PRIVATE) {
+                            folderIds.add(folder);
+                        }
+                    }
+                }
+                if (query.equals(FolderTypeDisplayItem.Type.SHARED.getIdentifier())) {
+                    for (int folder : subfolders) {
+                        if (access.getFolderType(folder, userId) != FolderObject.SHARED) {
+                            folderIds.add(folder);
+                        }
+                    }
+                }
+
+            }
             term = Utils.termFor(filter);
             if (null != terms) {
                 terms.add(term);
@@ -175,13 +223,13 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         }
 
         final String folderId = searchRequest.getFolderId();
-        List<Integer> folderIds;
-        if (folderId == null) {
-            folderIds = Collections.emptyList();
-        } else {
+        if (folderIds.size() == 0 && null != folderId) {
             folderIds = Collections.singletonList(Integer.valueOf(folderId));
+        } else {
+            if (folderId != null) {
+                folderIds.add(Integer.valueOf(folderId));
+            }
         }
-
         ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
         term.visit(visitor);
 
@@ -425,37 +473,6 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         } finally {
             SearchIterators.close(it);
         }
-    }
-
-    private List<FolderObject> getAutocompleteFolders(ServerSession session, AutocompleteRequest request, int folderType) throws OXException {
-        String prefix = request.getPrefix();
-        int userId = session.getUserId();
-
-        InfostoreSearchEngine searchEngine = Services.getInfostoreSearchEngine();
-        if (null == searchEngine) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreSearchEngine.class.getName());
-        }
-        OXFolderAccess access = new OXFolderAccess(session.getContext());
-        FolderObject defaultFolder = access.getDefaultFolder(userId, FolderObject.INFOSTORE);
-
-        List<Integer> subfolders = new LinkedList<Integer>();
-        if (defaultFolder.hasSubfolders()) {
-            try {
-                subfolders.addAll(defaultFolder.getSubfolderIds(true, session.getContext()));
-            } catch (SQLException e) {
-                // should not happen?
-            }
-        }
-        subfolders.add(0, defaultFolder.getObjectID());
-        List<FolderObject> folders = new ArrayList<FolderObject>(subfolders.size());
-        for (Integer i : subfolders) {
-            if (folderType == access.getFolderType(i(i), userId)) {
-                if (access.getFolderName(i(i)).startsWith(prefix)) {
-                    folders.add(access.getFolderObject(i(i)));
-                }
-            }
-        }
-        return folders;
     }
 
 }
