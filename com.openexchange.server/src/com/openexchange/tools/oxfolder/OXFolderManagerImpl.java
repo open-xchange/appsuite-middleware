@@ -1423,6 +1423,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         return deleteFolder(fo, checkPermissions, lastModified, false);
     }
 
+    @Override
     public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified, boolean hardDelete) throws OXException {
         final int folderId = fo.getObjectID();
         if (folderId <= 0) {
