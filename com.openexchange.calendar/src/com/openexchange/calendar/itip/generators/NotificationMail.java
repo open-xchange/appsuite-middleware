@@ -288,46 +288,47 @@ public class NotificationMail {
     	if (endsInPast(appointment)) {
     		return false;
     	}
+        LOG.debug("1: User: {}, {} {}", recipient.getEmail(), recipient.getConfiguration().forceCancelMails(), isCancelMail());
     	if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
-    	    LOG.debug("1: User: {}, {} {}", recipient.getEmail(), recipient.getConfiguration().forceCancelMails(), isCancelMail());
     		return true;
     	}
+        LOG.debug("2: User: {}, {} {}", recipient.getEmail(), appointment.containsNotification(), appointment.getNotification());
     	if (appointment != null && appointment.containsNotification() && !appointment.getNotification()) {
-            LOG.debug("2: User: {}, {} {}", recipient.getEmail(), appointment.containsNotification(), appointment.getNotification());
     		return false;
     	}
+        LOG.debug("3: User: {}, {} {}", recipient.getEmail(), stateType.name(), endsInPast(appointment));
     	if (appointment != null && stateType.equals(Type.NEW) && endsInPast(appointment)) {
-            LOG.debug("3: User: {}, {} {}", recipient.getEmail(), stateType.name(), endsInPast(appointment));
     	    return false;
     	}
+        LOG.debug("4: User: {}, {} {}", recipient.getEmail(), stateType.name(), isNotWorthUpdateNotification(original, appointment));
     	if (appointment != null && original != null && stateType.equals(Type.MODIFIED)  && isNotWorthUpdateNotification(original, appointment)) {
-            LOG.debug("4: User: {}, {} {}", recipient.getEmail(), stateType.name(), isNotWorthUpdateNotification(original, appointment));
     	    return false;
     	}
+        LOG.debug("5: User: {}, {}", recipient.getEmail(), stateType.name());
     	if (appointment != null && stateType.equals(Type.DELETED)) {
-            LOG.debug("5: User: {}, {}", recipient.getEmail(), stateType.name());
     	    return false;
     	}
+        LOG.debug("6: User: {}, {}", recipient.getEmail(), anInterestingFieldChanged());
     	if (! anInterestingFieldChanged()) {
-            LOG.debug("6: User: {}, {}", anInterestingFieldChanged());
     		return false;
     	}
+        LOG.debug("7: User: {}, {} {}", recipient.getEmail(), stateType.name(), onlyPseudoChangesOnParticipants());
         if (stateType == Type.MODIFIED && onlyPseudoChangesOnParticipants()) {
-            LOG.debug("7: User: {}, {} {}", stateType.name(), onlyPseudoChangesOnParticipants());
             return false;
         }
+        LOG.debug("8: User: {}, {}", recipient.getEmail(), getRecipient().getConfiguration().sendITIP());
         if (getRecipient().getConfiguration().sendITIP() && itipMessage != null) {
-            LOG.debug("8: User: {}, {}", getRecipient().getConfiguration().sendITIP());
             return true;
         }
+        LOG.debug("9: User: {}, {}", recipient.getEmail(), getRecipient().getConfiguration().interestedInChanges());
         if (!getRecipient().getConfiguration().interestedInChanges()) {
-            LOG.debug("9: User: {}, {}", getRecipient().getConfiguration().interestedInChanges());
             return false;
         }
+        LOG.debug("10: User: {}, {} {}", recipient.getEmail(), getRecipient().getConfiguration().interestedInStateChanges(), isAboutStateChangesOnly());
         if (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly()) {
-            LOG.debug("10: User: {}, {} {}", getRecipient().getConfiguration().interestedInStateChanges(), isAboutStateChangesOnly());
             return false;
         }
+        LOG.debug("11: User: {}", recipient.getEmail());
         return true;
     }
 
