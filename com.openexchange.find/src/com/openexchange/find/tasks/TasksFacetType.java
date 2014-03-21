@@ -61,13 +61,13 @@ import com.openexchange.java.Strings;
  */
 public enum TasksFacetType implements FacetType {
 
-    TASK_PARTICIPANTS(TasksStrings.FACET_TASK_PARTICIPANTS),
-    TASK_FOLDERS(TasksStrings.FACET_TASK_FOLDERS),
-    TASK_TITLE(TasksStrings.FACET_TASK_TITLE),
-    TASK_DESCRIPTION(TasksStrings.FACET_TASK_DESCRIPTION),
-    TASK_ATTACHMENT_NAME(TasksStrings.FACET_TASK_ATTACHMENT_NAME),
-    TASK_TYPE(TasksStrings.FACET_TASK_TYPE),
-    TASK_STATUS(TasksStrings.FACET_TASK_STATUS), ;
+    TASK_PARTICIPANTS(TasksStrings.FACET_TASK_PARTICIPANTS,false),
+    TASK_FOLDERS(TasksStrings.FACET_TASK_FOLDERS, false),
+    TASK_TITLE(TasksStrings.FACET_TASK_TITLE, true),
+    TASK_DESCRIPTION(TasksStrings.FACET_TASK_DESCRIPTION, true),
+    TASK_ATTACHMENT_NAME(TasksStrings.FACET_TASK_ATTACHMENT_NAME, true),
+    TASK_TYPE(TasksStrings.FACET_TASK_TYPE, false),
+    TASK_STATUS(TasksStrings.FACET_TASK_STATUS, false), ;
 
     private static final Map<String, TasksFacetType> typesById = new HashMap<String, TasksFacetType>();
     static {
@@ -77,9 +77,11 @@ public enum TasksFacetType implements FacetType {
     }
 
     private final String displayName;
+    private final boolean isFieldFacet;
 
-    private TasksFacetType(final String displayName) {
+    private TasksFacetType(final String displayName, final boolean isFieldFacet) {
         this.displayName = displayName;
+        this.isFieldFacet = isFieldFacet;
     }
 
     @Override
@@ -94,7 +96,7 @@ public enum TasksFacetType implements FacetType {
 
     @Override
     public boolean isFieldFacet() {
-        return false;
+        return isFieldFacet;
     }
 
     @Override
