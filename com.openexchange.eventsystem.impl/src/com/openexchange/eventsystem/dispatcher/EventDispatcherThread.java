@@ -1,4 +1,4 @@
-/*
+/*-
  *
  *    OPEN-XCHANGE legal information
  *
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,23 @@
  *
  */
 
-package com.openexchange.eventsystem.osgi;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.eventsystem.EventSystemService;
-import com.openexchange.eventsystem.dispatcher.EventDispatcher;
-import com.openexchange.eventsystem.internal.EventHandlerTracker;
-import com.openexchange.eventsystem.internal.EventSystemServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
-
+package com.openexchange.eventsystem.dispatcher;
 
 /**
- * {@link EventSystemActivator} - The activator for event system.
+ * {@link EventDispatcherThread} - Used for sending the events.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.2
  */
-public final class EventSystemActivator extends HousekeepingActivator {
-
-    /** The event system service */
-    private volatile EventSystemServiceImpl serviceImpl;
+public final class EventDispatcherThread extends Thread {
 
     /**
-     * Initializes a new {@link EventSystemActivator}.
+     * Initializes a new {@link EventDispatcherThread}.
+     *
+     * @param target The {@link Runnable} target.
+     * @param name The thread name
      */
-    public EventSystemActivator() {
-        super();
+    public EventDispatcherThread(final Runnable target, final String name) {
+        super(target, name);
     }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, ThreadPoolService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        // Tracker for event handlers
-        final EventHandlerTracker handlers = new EventHandlerTracker(context);
-        rememberTracker(handlers);
-        openTrackers();
-
-        // Initialize through acquiring instance
-        EventDispatcher.getInstance();
-
-        // Register service
-        final EventSystemServiceImpl serviceImpl = new EventSystemServiceImpl(this, handlers);
-        this.serviceImpl = serviceImpl;
-        registerService(EventSystemService.class, serviceImpl);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        final EventSystemServiceImpl serviceImpl = this.serviceImpl;
-        if (null != serviceImpl) {
-            serviceImpl.shutdown();
-            this.serviceImpl = null;
-        }
-        EventDispatcher.shutDown();
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
-
 }

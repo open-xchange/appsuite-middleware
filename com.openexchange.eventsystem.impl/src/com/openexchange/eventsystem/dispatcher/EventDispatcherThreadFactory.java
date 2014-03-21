@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,48 @@
  *
  */
 
-package com.openexchange.eventsystem.osgi;
+package com.openexchange.eventsystem.dispatcher;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.eventsystem.EventSystemService;
-import com.openexchange.eventsystem.dispatcher.EventDispatcher;
-import com.openexchange.eventsystem.internal.EventHandlerTracker;
-import com.openexchange.eventsystem.internal.EventSystemServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+import com.openexchange.java.StringAllocator;
 
 
 /**
- * {@link EventSystemActivator} - The activator for event system.
+ * {@link EventDispatcherThreadFactory} - The thread factory for event dispatcher.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.2
+ * @since 7.6.0
  */
-public final class EventSystemActivator extends HousekeepingActivator {
+ final class EventDispatcherThreadFactory implements ThreadFactory {
 
-    /** The event system service */
-    private volatile EventSystemServiceImpl serviceImpl;
+    private final AtomicInteger threadNumber;
+    private final String namePrefix;
 
     /**
-     * Initializes a new {@link EventSystemActivator}.
+     * Initializes a new {@link EventDispatcherThreadFactory}.
      */
-    public EventSystemActivator() {
+    EventDispatcherThreadFactory() {
         super();
+        threadNumber = new AtomicInteger();
+        this.namePrefix = "EventDispatcher-";
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, ThreadPoolService.class };
+    public Thread newThread(Runnable r) {
+        final Thread t = new EventDispatcherThread(r, getThreadName(threadNumber.incrementAndGet(), namePrefix));
+        t.setUncaughtExceptionHandler(EventDispatcherUncaughtExceptionhandler.getInstance());
+        return t;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        // Tracker for event handlers
-        final EventHandlerTracker handlers = new EventHandlerTracker(context);
-        rememberTracker(handlers);
-        openTrackers();
-
-        // Initialize through acquiring instance
-        EventDispatcher.getInstance();
-
-        // Register service
-        final EventSystemServiceImpl serviceImpl = new EventSystemServiceImpl(this, handlers);
-        this.serviceImpl = serviceImpl;
-        registerService(EventSystemService.class, serviceImpl);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        final EventSystemServiceImpl serviceImpl = this.serviceImpl;
-        if (null != serviceImpl) {
-            serviceImpl.shutdown();
-            this.serviceImpl = null;
+    private static String getThreadName(int threadNumber, String namePrefix) {
+        StringAllocator retval = new StringAllocator(namePrefix.length() + 7);
+        retval.append(namePrefix);
+        for (int i = threadNumber; i < 1000000; i *= 10) {
+            retval.append('0');
         }
-        EventDispatcher.shutDown();
-        Services.setServiceLookup(null);
-        super.stopBundle();
+        retval.append(threadNumber);
+        return retval.toString();
     }
 
 }

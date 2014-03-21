@@ -71,35 +71,4 @@ public interface EventSystemService {
      */
     void publish(Event event) throws OXException;
 
-    /**
-     * Delivers given event, thus available for exactly one listener that subscribed to the topic of the event.
-     * <p>
-     * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.2.gif" alt="p2p" width="480">
-     *
-     * @param event The event
-     * @throws OXException If enqueue operations fails
-     */
-    void deliver(Event event) throws OXException;
-
-    /**
-     * Creates a "synchronized" event handler for specified event handler. <br>
-     * Synchronized in terms of only one listener of the same type will be allowed to handle the event.
-     *
-     * <pre>
-     *         EventSystemService eventSystemService = ...;
-     *
-     *         final Dictionary<String, String> dict = new Hashtable<String, String>(2);
-     *         dict.put(EventConstants.EVENT_TOPIC, "some/interesting/topics/*");
-     *
-     *         final EventHandler synchronizedEventHandler = eventSystemService.synchronizedEventHandler(new MyEventHandler());
-     *
-     *         registerService(EventHandler.class, synchronizedEventHandler, dict);
-     * </pre>
-     *
-     * @param eventHandler The delegate event handler
-     * @return The "synchronized" event handler for specified event handler
-     * @throws OXException If generating a "synchronized" event handler fails
-     */
-    EventHandler synchronizedEventHandler(EventHandler eventHandler) throws OXException;
-
 }

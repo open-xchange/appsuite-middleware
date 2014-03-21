@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,65 +49,70 @@
 
 package com.openexchange.eventsystem.osgi;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.eventsystem.EventSystemService;
-import com.openexchange.eventsystem.dispatcher.EventDispatcher;
-import com.openexchange.eventsystem.internal.EventHandlerTracker;
-import com.openexchange.eventsystem.internal.EventSystemServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link EventSystemActivator} - The activator for event system.
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.2
  */
-public final class EventSystemActivator extends HousekeepingActivator {
-
-    /** The event system service */
-    private volatile EventSystemServiceImpl serviceImpl;
+public final class Services {
 
     /**
-     * Initializes a new {@link EventSystemActivator}.
+     * Initializes a new {@link Services}.
      */
-    public EventSystemActivator() {
+    private Services() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, ThreadPoolService.class };
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        // Tracker for event handlers
-        final EventHandlerTracker handlers = new EventHandlerTracker(context);
-        rememberTracker(handlers);
-        openTrackers();
-
-        // Initialize through acquiring instance
-        EventDispatcher.getInstance();
-
-        // Register service
-        final EventSystemServiceImpl serviceImpl = new EventSystemServiceImpl(this, handlers);
-        this.serviceImpl = serviceImpl;
-        registerService(EventSystemService.class, serviceImpl);
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        final EventSystemServiceImpl serviceImpl = this.serviceImpl;
-        if (null != serviceImpl) {
-            serviceImpl.shutdown();
-            this.serviceImpl = null;
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. com.openexchange.eventsystem.impl not started?");
         }
-        EventDispatcher.shutDown();
-        Services.setServiceLookup(null);
-        super.stopBundle();
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

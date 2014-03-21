@@ -59,7 +59,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.eventsystem.Event;
 import com.openexchange.eventsystem.EventHandler;
 
 
@@ -238,16 +237,6 @@ public final class EventHandlerTracker extends ServiceTracker<EventHandler, Even
         }
 
         return handlers;
-    }
-
-    /**
-     * Dispatches Event to EventHandlers
-     *
-     * @param eventListener
-     * @param eventObject
-     */
-    public void dispatchEvent(final EventHandlerReference eventListener, final Event eventObject) {
-        eventListener.handleEvent(eventObject);
     }
 
 }

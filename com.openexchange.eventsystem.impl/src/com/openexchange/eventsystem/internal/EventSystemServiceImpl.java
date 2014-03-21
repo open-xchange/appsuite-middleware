@@ -49,16 +49,11 @@
 
 package com.openexchange.eventsystem.internal;
 
-import java.util.Map;
+import java.util.Set;
 import com.openexchange.eventsystem.Event;
-import com.openexchange.eventsystem.EventHandler;
 import com.openexchange.eventsystem.EventSystemService;
+import com.openexchange.eventsystem.dispatcher.EventDispatcher;
 import com.openexchange.exception.OXException;
-import com.openexchange.ms.MessageListener;
-import com.openexchange.ms.MsService;
-import com.openexchange.ms.Queue;
-import com.openexchange.ms.Topic;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -69,72 +64,59 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class EventSystemServiceImpl implements EventSystemService {
 
-    private static final String NAME_TOPIC = EventSystemConstants.NAME_TOPIC;
-    private static final String NAME_QUEUE = EventSystemConstants.NAME_QUEUE;
-
     // ----------------------------------------------------------------------------------------- //
 
     private final ServiceLookup services;
+    private final EventHandlerTracker handlers;
 
     /**
      * Initializes a new {@link EventSystemServiceImpl}.
-     *
-     * @throws OXException If initialization fails
      */
-    public EventSystemServiceImpl(final ServiceLookup services, final EventHandlerTracker handlers) throws OXException {
+    public EventSystemServiceImpl(final ServiceLookup services, final EventHandlerTracker handlers) {
         super();
         this.services = services;
+        this.handlers = handlers;
+    }
 
-        final MsService msService = getMsService();
-        final Topic<Map<String, Object>> topic = msService.getTopic(NAME_TOPIC);
-        final Queue<Map<String, Object>> queue = msService.getQueue(NAME_QUEUE);
+    private <S> S getService(Class<? extends S> clazz) {
+        return services.getService(clazz);
+    }
 
-        final MessageListener<Map<String, Object>> messageListener = new EventDistributingMessageListener(handlers, true);
-        topic.addMessageListener(messageListener);
-        queue.addMessageListener(messageListener);
+    private <S> S optService(Class<? extends S> clazz) {
+        return services.getOptionalService(clazz);
     }
 
     /**
      * Shuts-down this event system.
      */
     public void shutdown() {
-        final MsService service = services.getOptionalService(MsService.class);
-        if (null != service) {
-            service.getTopic(NAME_TOPIC).cancel();
-        }
-    }
-
-    private MsService getMsService() throws OXException {
-        final MsService service = services.getService(MsService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.serviceUnavailable(MsService.class);
-        }
-        return service;
+        // Nothing to do
     }
 
     @Override
     public void publish(final Event event) throws OXException {
-        if (null == event) {
-            return;
-        }
-        final MsService msService = getMsService();
-        final Topic<Map<String, Object>> topic = msService.getTopic(NAME_TOPIC);
-        topic.publish(EventUtility.wrap(event));
+        dispatchEvent(event);
     }
 
-    @Override
-    public void deliver(final Event event) throws OXException {
-        if (null == event) {
+    /**
+     * Dispatches an event to EventHandler. All exceptions are logged except when dealing with LogEntry.
+     *
+     * @param event to be delivered
+     * @param isAsync must be set to true for asynchronous event delivery, false for synchronous delivery.
+     */
+    private void dispatchEvent(final Event event) {
+        if (event == null) {
             return;
         }
-        final MsService msService = getMsService();
-        final Queue<Map<String, Object>> queue = msService.getQueue(NAME_QUEUE);
-        queue.offer(EventUtility.wrap(event));
-    }
 
-    @Override
-    public EventHandler synchronizedEventHandler(final EventHandler eventHandler) throws OXException {
-        return new TalkingStickEventHandler(eventHandler, services);
+        final Set<EventHandlerReference> eventHandlers = this.handlers.getHandlers(event.getTopic());
+        // If there are no handlers, then we are done
+        if (eventHandlers.isEmpty()) {
+            return;
+        }
+
+        // Dispatch event
+        EventDispatcher.getInstance().execute(eventHandlers, event);
     }
 
 }
