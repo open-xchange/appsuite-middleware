@@ -109,7 +109,12 @@ public enum FindExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Could not parse \"%1$s\".
      */
-    PARSING_ERROR(FindExceptionMessages.PARSING_ERROR_MSG, Category.CATEGORY_USER_INPUT, 12, FindExceptionMessages.PARSING_ERROR_MSG);
+    PARSING_ERROR(FindExceptionMessages.PARSING_ERROR_MSG, Category.CATEGORY_USER_INPUT, 12, FindExceptionMessages.PARSING_ERROR_MSG),
+    /**
+     * An error occurred: %1$s
+     */
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 13, OXExceptionStrings.MESSAGE),
+
     ;
 
     public static final String PREFIX = "FIND";
