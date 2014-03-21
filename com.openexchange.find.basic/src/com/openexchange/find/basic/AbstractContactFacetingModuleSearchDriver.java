@@ -172,24 +172,25 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * Performs a contact search by prefix.
      *
      * @param session The server session
-     * @param prefix The search prefix; no need to append a wildcard here
+     * @param prefix The search prefix; no need to append a wild-card here
      * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
      *                     otherwise
      * @param folderIDs A list of folder IDs to restrict the search for, or <code>null</code> to search in all visible folders
      * @return A list of found contacts, sorted using the {@link UseCountComparator} comparator
-     * @throws OXException
+     * @throws OXException If contact search fails
      */
     private List<Contact> searchContacts(ServerSession session, String prefix, boolean requireEmail, List<String> folderIDs, int limit) throws OXException {
         SortOptions sortOptions = new SortOptions(SORT_ORDER);
         sortOptions.setLimit(0 < limit ? limit : DEFAULT_LIMIT);
         List<Contact> contacts = null;
-        SearchIterator<Contact> searchIterator = null;
-        try {
-            searchIterator = Services.getContactService().searchContacts(
-                session, getSearchObject(prefix, requireEmail, folderIDs), CONTACT_FIELDS, sortOptions);
-            contacts = SearchIteratorAdapter.toList(searchIterator);
-        } finally {
-            SearchIterators.close(searchIterator);
+        {
+            SearchIterator<Contact> searchIterator = null;
+            try {
+                searchIterator = Services.getContactService().searchContacts(session, getSearchObject(prefix, requireEmail, folderIDs), CONTACT_FIELDS, sortOptions);
+                contacts = SearchIteratorAdapter.toList(searchIterator);
+            } finally {
+                SearchIterators.close(searchIterator);
+            }
         }
         if (null == contacts) {
             return Collections.emptyList();

@@ -81,12 +81,20 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, Module module, ServerSession session) throws OXException {
-        return requireDriver(session, module).autocomplete(autocompleteRequest, session);
+        try {
+            return requireDriver(session, module).autocomplete(autocompleteRequest, session);
+        } catch (final RuntimeException e) {
+            throw FindExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
     public SearchResult search(SearchRequest searchRequest, Module module, ServerSession session) throws OXException {
-        return requireDriver(session, module).search(searchRequest, session);
+        try {
+            return requireDriver(session, module).search(searchRequest, session);
+        } catch (final RuntimeException e) {
+            throw FindExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     private ModuleSearchDriver requireDriver(ServerSession session, Module module) throws OXException {

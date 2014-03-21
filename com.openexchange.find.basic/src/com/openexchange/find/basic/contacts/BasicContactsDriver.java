@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.contact.ContactFieldOperand;
@@ -68,6 +69,7 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.contacts.ContactsStrings;
@@ -204,15 +206,21 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * add ContactsFacetType.CONTACT facet dynamically
          */
-        List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
-        List<FacetValue> contactValues = new ArrayList<FacetValue>(contacts.size());
-        for (Contact contact : contacts) {
-            String id = ContactsFacetType.CONTACT.getId();
-            Filter filter = new Filter(Collections.singletonList(id), String.valueOf(contact.getObjectID()));
-            contactValues.add(new FacetValue(prepareFacetValueId(id, session.getContextId(),
-                Integer.toString(contact.getObjectID())), new ContactDisplayItem(contact), 1, filter));
+        List<FacetValue> contactValues = new LinkedList<FacetValue>();
+        {
+            List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
+            if (null != contacts && !contacts.isEmpty()) {
+                for (Contact contact : contacts) {
+                    String id = ContactsFacetType.CONTACT.getId();
+                    Filter filter = new Filter(Collections.singletonList(id), String.valueOf(contact.getObjectID()));
+                    contactValues.add(new FacetValue(prepareFacetValueId(id, session.getContextId(),
+                        Integer.toString(contact.getObjectID())), new ContactDisplayItem(contact), 1, filter));
+                }
+            }
         }
-        facets.add(new Facet(ContactsFacetType.CONTACT, contactValues));
+        if (!contactValues.isEmpty()) {
+            facets.add(new Facet(ContactsFacetType.CONTACT, contactValues));
+        }
         /*
          * add other facets
          */

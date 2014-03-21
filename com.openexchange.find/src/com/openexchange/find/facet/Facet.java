@@ -69,15 +69,21 @@ public class Facet implements Serializable {
     private static final long serialVersionUID = -8445505622030799014L;
 
     private final FacetType type;
-
     private final List<FacetValue> values;
 
-
-    public Facet(FacetType type, List<FacetValue> values) {
+    /**
+     * Initializes a new {@link Facet}.
+     * 
+     * @param type The type
+     * @param values The values
+     * @throws NullPointerException If one of given parameters is <code>null</code>
+     * @throws IllegalArgumentException If values is empty
+     */
+    public Facet(final FacetType type, final List<FacetValue> values) {
         super();
         checkNotNull(type);
         checkNotNull(values);
-        checkArgument(values.size() > 0);
+        checkArgument(!values.isEmpty());
         this.type = type;
         this.values = values;
     }
