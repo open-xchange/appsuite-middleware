@@ -76,7 +76,7 @@ public final class EventDispatcher {
     private static volatile EventDispatcher instance;
 
     /**
-     * Shuts-down the scheduler
+     * Shuts-down the event dispatcher.
      */
     public static void shutDown() {
         EventDispatcher tmp = instance;
@@ -121,8 +121,10 @@ public final class EventDispatcher {
     private EventDispatcher() {
         super();
         final ConfigurationService configService = Services.getService(ConfigurationService.class);
+        // Get max. number of threads to utilize
         final int defaultNumThreads = 10;
         final int numThreads = null == configService ? defaultNumThreads : configService.getIntProperty("com.openexchange.eventsystem.dispatcher.numThreads", defaultNumThreads);
+        // Setup a new fixed thread pool
         final ThreadPoolExecutor newPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(numThreads, new EventDispatcherThreadFactory());
         newPool.prestartAllCoreThreads();
         pool = newPool;
