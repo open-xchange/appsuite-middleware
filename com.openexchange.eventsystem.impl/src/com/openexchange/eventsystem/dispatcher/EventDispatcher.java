@@ -51,6 +51,7 @@ package com.openexchange.eventsystem.dispatcher;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -214,7 +215,7 @@ public final class EventDispatcher {
                 }
 
                 // Perform image transformation
-                execute(task.handlers, task.event);
+                execute(task.handlers, task.event, currentThread);
 
                 // Check for more...
                 synchronized (runningThreads) {
@@ -243,9 +244,11 @@ public final class EventDispatcher {
          *
          * @param handlers The event handlers
          * @param event The event
+         * @param currentThread The currently executing thread
          */
-        public void execute(final Collection<EventHandlerReference> handlers, final Event event) {
-            for (final EventHandlerReference handler : handlers) {
+        public void execute(final Collection<EventHandlerReference> handlers, final Event event, final Thread currentThread) {
+            for (final Iterator<EventHandlerReference> iter = handlers.iterator(); iter.hasNext() && !currentThread.isInterrupted();) {
+                final EventHandlerReference handler = iter.next();
                 handler.handleEvent(event);
             }
         }
@@ -257,7 +260,7 @@ public final class EventDispatcher {
         final Collection<EventHandlerReference> handlers;
         final Event event;
 
-        EventTask(Collection<EventHandlerReference> handlers, Event event) {
+        EventTask(final Collection<EventHandlerReference> handlers, final Event event) {
             super();
             this.handlers = handlers;
             this.event = event;
