@@ -142,6 +142,7 @@ public class AsyncDeliverTasks
         @Override
         public void run()
         {
+            final Thread currentThread = Thread.currentThread();
             boolean running;
             do
             {
@@ -162,7 +163,7 @@ public class AsyncDeliverTasks
                         m_running_threads.remove(m_key);
                     }
                 }
-            } while ( running );
+            } while ( running && !currentThread.isInterrupted() );
         }
 
         public void add(final Collection<EventHandlerProxy> tasks, final Event event)
