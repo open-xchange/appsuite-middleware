@@ -1,3 +1,7 @@
+* 2014-03-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31677: Properly do the thread-sort for subscribed POP3 accounts accessed via Unified Mail
+
 * 2014-03-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 31366: Support configurable formats for logged login/logout events
