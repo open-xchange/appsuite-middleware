@@ -51,14 +51,17 @@ package com.openexchange.pop3;
 
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -75,7 +78,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class POP3MessageStorage extends MailMessageStorage {
+public final class POP3MessageStorage extends MailMessageStorage implements ISimplifiedThreadStructure {
 
     /**
      * Serial version UID
@@ -195,6 +198,14 @@ public final class POP3MessageStorage extends MailMessageStorage {
             setAccountInfo(mails);
         }
         return mails;
+    }
+
+    @Override
+    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
+        if (!(pop3MessageStorage instanceof ISimplifiedThreadStructure)) {
+            throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+        }
+        return ((ISimplifiedThreadStructure) pop3MessageStorage).getThreadSortedMessages(folder, includeSent, cache, indexRange, max, sortField, order, fields);
     }
 
     @Override
