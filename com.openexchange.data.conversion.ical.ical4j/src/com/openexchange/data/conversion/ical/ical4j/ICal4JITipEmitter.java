@@ -51,7 +51,6 @@ package com.openexchange.data.conversion.ical.ical4j;
 
 import java.util.List;
 import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Comment;
 import net.fortuna.ical4j.model.property.Method;

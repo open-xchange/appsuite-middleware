@@ -131,6 +131,7 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase {
 
         publicationService = new InfostoreDocumentPublicationService(this.fileAccessFactory) {
 
+            @Override
             public Publication getPublication(Context ctx, String secret) throws OXException {
                 if (simContext.getContextId() == 1337 && secret.equalsIgnoreCase("theSecret")) {
                     return publication;

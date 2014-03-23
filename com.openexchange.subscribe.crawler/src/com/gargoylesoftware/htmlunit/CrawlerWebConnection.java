@@ -87,7 +87,6 @@ import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.util.EncodingUtil;
 import org.apache.commons.logging.impl.SimpleLog;
-import org.slf4j.Logger;
 
 
 /**

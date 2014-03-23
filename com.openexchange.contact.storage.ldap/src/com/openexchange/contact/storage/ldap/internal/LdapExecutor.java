@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.storage.ldap.internal;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

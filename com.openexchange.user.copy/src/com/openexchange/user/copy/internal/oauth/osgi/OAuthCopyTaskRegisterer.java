@@ -80,6 +80,7 @@ public class OAuthCopyTaskRegisterer implements ServiceTrackerCustomizer<IDGener
     /**
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
+    @Override
     public IDGeneratorService addingService(final ServiceReference<IDGeneratorService> reference) {
         final IDGeneratorService service = context.getService(reference);
         task = new OAuthCopyTask(service);
@@ -91,12 +92,14 @@ public class OAuthCopyTaskRegisterer implements ServiceTrackerCustomizer<IDGener
     /**
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
+    @Override
     public void modifiedService(final ServiceReference<IDGeneratorService> reference, final IDGeneratorService service) {
     }
 
     /**
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
+    @Override
     public void removedService(final ServiceReference<IDGeneratorService> reference, final IDGeneratorService service) {
         if (registerService != null) {
             registerService.unregister();

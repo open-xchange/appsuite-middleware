@@ -69,10 +69,12 @@ public class ContactCopyActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         serviceRegistration  = context.registerService(CopyUserTaskService.class, new ContactCopyTask(), null);
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         if (serviceRegistration != null) {
             serviceRegistration.unregister();

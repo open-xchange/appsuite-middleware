@@ -4,7 +4,6 @@ package com.openexchange.filemanagement.distributed.osgi;
 import java.util.Map;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;

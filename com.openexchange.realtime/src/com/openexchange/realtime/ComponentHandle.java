@@ -51,7 +51,6 @@ package com.openexchange.realtime;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 

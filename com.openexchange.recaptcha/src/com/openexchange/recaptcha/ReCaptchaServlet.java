@@ -52,7 +52,6 @@ package com.openexchange.recaptcha;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.config.ConfigurationService;

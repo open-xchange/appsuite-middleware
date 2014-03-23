@@ -55,7 +55,6 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;

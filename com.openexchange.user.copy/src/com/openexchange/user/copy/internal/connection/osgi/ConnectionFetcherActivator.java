@@ -67,11 +67,13 @@ public final class ConnectionFetcherActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker<DatabaseService, DatabaseService>(context, DatabaseService.class, new ConnectionFetcherRegisterer(context));
         tracker.open();
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         tracker.close();
     }

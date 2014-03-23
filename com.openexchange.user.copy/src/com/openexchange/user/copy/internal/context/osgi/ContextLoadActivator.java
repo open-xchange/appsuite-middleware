@@ -67,11 +67,13 @@ public final class ContextLoadActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker<ContextService, ContextService>(context, ContextService.class, new ContextLoadTaskRegisterer(context));
         tracker.open();
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         tracker.close();
     }

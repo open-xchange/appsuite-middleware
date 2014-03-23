@@ -124,7 +124,8 @@ public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 	 *
 	 */
 
-	public  HTTPRequestBuilder getBuilder() {
+	@Override
+    public  HTTPRequestBuilder getBuilder() {
 		return new ApacheClientRequestBuilder(fileManager, this);
 	}
 

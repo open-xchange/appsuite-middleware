@@ -74,6 +74,7 @@ public class CommandActivator extends HousekeepingActivator {
             this.context = context;
         }
 
+        @Override
         public String getHelp() {
             final StringBuilder help = new StringBuilder();
             help.append("\tucs - lists all registered CopyUserTaskServices.\n");

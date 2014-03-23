@@ -52,7 +52,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-import org.slf4j.Logger;
 import com.openexchange.admin.tools.PropertyHandler;
 
 public class PropertyHandlerExtended extends PropertyHandler {

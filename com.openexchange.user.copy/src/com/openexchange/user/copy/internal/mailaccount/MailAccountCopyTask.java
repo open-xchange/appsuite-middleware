@@ -84,6 +84,7 @@ public class MailAccountCopyTask implements CopyUserTaskService {
         super();
     }
 
+    @Override
     public String[] getAlreadyCopied() {
         return new String[] {
             UserCopyTask.class.getName(),
@@ -92,14 +93,17 @@ public class MailAccountCopyTask implements CopyUserTaskService {
         };
     }
 
+    @Override
     public String getObjectName() {
         return MailAccount.class.getName();
     }
 
+    @Override
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
         // Nothing to do
     }
 
+    @Override
     public ObjectMapping<?> copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
         final CopyTools copyTools = new CopyTools(copied);
         final int srcContextId = copyTools.getSourceContextId().intValue();

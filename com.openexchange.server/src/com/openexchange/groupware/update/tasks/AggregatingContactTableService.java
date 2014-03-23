@@ -54,7 +54,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;

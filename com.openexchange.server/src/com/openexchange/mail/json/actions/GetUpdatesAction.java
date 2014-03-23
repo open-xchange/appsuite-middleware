@@ -60,7 +60,6 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;

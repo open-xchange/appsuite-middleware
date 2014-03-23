@@ -54,7 +54,6 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.scripting.rhino.JSON;
 

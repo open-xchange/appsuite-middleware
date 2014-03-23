@@ -49,7 +49,6 @@
 
 package com.openexchange.caldav;
 
-import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;

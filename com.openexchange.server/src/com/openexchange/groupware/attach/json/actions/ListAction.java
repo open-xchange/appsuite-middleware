@@ -69,7 +69,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.log.Log;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;

@@ -99,7 +99,6 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
-import com.openexchange.java.StringAllocator;
 
 /**
  * Grizzly OSGi HttpService implementation.

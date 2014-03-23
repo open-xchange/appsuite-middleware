@@ -71,7 +71,6 @@ import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.writer.ResponseWriter;

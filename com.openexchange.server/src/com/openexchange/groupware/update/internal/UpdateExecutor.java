@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.databaseold.Database;

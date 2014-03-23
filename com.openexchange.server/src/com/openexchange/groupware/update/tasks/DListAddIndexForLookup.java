@@ -56,7 +56,6 @@ import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;

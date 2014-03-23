@@ -83,7 +83,8 @@ public class ApacheHTTPRequest implements HTTPRequest {
 		this.reqBuilder = builder;
 	}
 
-	public HTTPResponse execute() throws OXException {
+	@Override
+    public HTTPResponse execute() throws OXException {
 		try {
 			HttpState state = coreBuilder.getState();
 			if (state != null) {
@@ -107,12 +108,14 @@ public class ApacheHTTPRequest implements HTTPRequest {
 		}
 	}
 
-	public Map<String, String> getHeaders() {
+	@Override
+    public Map<String, String> getHeaders() {
 		return headers;
 	}
 
 
-	public Map<String, String> getParameters() {
+	@Override
+    public Map<String, String> getParameters() {
 		return parameters;
 	}
 

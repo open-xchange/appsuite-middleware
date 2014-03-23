@@ -56,7 +56,6 @@ import static com.openexchange.tools.update.Tools.dropIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;

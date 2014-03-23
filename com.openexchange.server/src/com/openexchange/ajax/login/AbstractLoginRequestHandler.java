@@ -79,7 +79,6 @@ import com.openexchange.i18n.LocaleTools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;

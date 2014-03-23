@@ -80,7 +80,6 @@ import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.channel.StanzaDispatcher;
 import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.threadpool.ThreadPools;

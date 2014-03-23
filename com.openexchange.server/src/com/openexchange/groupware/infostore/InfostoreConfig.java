@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore;
 
 import java.io.File;
-import java.text.MessageFormat;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;

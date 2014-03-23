@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.api;
 
-import java.text.MessageFormat;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;

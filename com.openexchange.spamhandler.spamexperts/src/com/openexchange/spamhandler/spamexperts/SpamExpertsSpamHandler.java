@@ -170,6 +170,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         }
     }
 
+    @Override
     public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         LOG.debug("handleSpam");
         LOG.debug("accid: {}, fullname: {}, move: {}, session: {}", accountId, fullname, move, session.toString());

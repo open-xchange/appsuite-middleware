@@ -52,7 +52,6 @@ package com.openexchange.push.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.internal.PushManagerRegistry;
 

@@ -76,11 +76,13 @@ public class ApacheHTTPResponse implements HTTPResponse {
 		this.status = status;
 	}
 	
+    @Override
     public int getStatus() {
         return status;
     }
 
-	public <R> R getPayload(Class<R> type) throws OXException {
+	@Override
+    public <R> R getPayload(Class<R> type) throws OXException {
 		if (payload != null && type.isInstance(payload)) {
 			return (R) payload;
 		}
@@ -88,7 +90,8 @@ public class ApacheHTTPResponse implements HTTPResponse {
 	}
 
 
-	public Map<String, String> getHeaders() {
+	@Override
+    public Map<String, String> getHeaders() {
 		Header[] responseHeaders = method.getResponseHeaders();
 		Map<String, String> headers = new HashMap<String, String>();
 		for (Header header : responseHeaders) {
@@ -97,7 +100,8 @@ public class ApacheHTTPResponse implements HTTPResponse {
 		return headers;
 	}
 
-	public Map<String, String> getCookies() {
+	@Override
+    public Map<String, String> getCookies() {
 		Cookie[] cookies = client.getState().getCookies();
 		Map<String, String> r = new HashMap<String, String>();
 		for (Cookie cookie : cookies) {

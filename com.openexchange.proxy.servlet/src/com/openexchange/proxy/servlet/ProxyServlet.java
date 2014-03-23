@@ -68,7 +68,6 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;

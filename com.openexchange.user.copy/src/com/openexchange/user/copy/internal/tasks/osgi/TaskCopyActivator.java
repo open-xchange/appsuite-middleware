@@ -77,21 +77,25 @@ public class TaskCopyActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker<UserService, UserService>(context, UserService.class.getName(), new ServiceTrackerCustomizer<UserService, UserService>() {
 
             private ServiceRegistration<CopyUserTaskService> registration;
 
+            @Override
             public UserService addingService(final ServiceReference<UserService> reference) {
                 final UserService service = context.getService(reference);
                 registration = context.registerService(CopyUserTaskService.class, new TaskCopyTask(service), null);
                 return service;
             }
 
+            @Override
             public void modifiedService(final ServiceReference<UserService> reference, final UserService service) {
                 // Nope
             }
 
+            @Override
             public void removedService(final ServiceReference<UserService> reference, final UserService service) {
                 registration.unregister();
                 context.ungetService(reference);
@@ -100,6 +104,7 @@ public class TaskCopyActivator implements BundleActivator {
         tracker.open();
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         if (tracker != null) {
             tracker.close();

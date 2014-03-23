@@ -72,14 +72,17 @@ public final class ContextLoadTask implements CopyUserTaskService {
         this.contextService = contextService;
     }
 
+    @Override
     public String[] getAlreadyCopied() {
         return new String[0];
     }
 
+    @Override
     public String getObjectName() {
         return Context.class.getName();
     }
 
+    @Override
     public ContextMapping copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
         final CopyTools copyTools = new CopyTools(copied);
         final ContextMapping retval = new ContextMapping();
@@ -92,6 +95,7 @@ public final class ContextLoadTask implements CopyUserTaskService {
         return retval;
     }
 
+    @Override
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
         // Nothing to do.
     }

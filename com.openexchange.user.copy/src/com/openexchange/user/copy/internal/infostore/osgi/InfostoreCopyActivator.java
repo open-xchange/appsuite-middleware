@@ -67,6 +67,7 @@ public class InfostoreCopyActivator implements BundleActivator {
     /**
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
+    @Override
     public void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker<QuotaFileStorageFactory, QuotaFileStorageFactory>(context, QuotaFileStorageFactory.class, new InfostoreCopyTaskRegisterer(context));
         tracker.open();
@@ -75,6 +76,7 @@ public class InfostoreCopyActivator implements BundleActivator {
     /**
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
+    @Override
     public void stop(final BundleContext context) throws Exception {
         if (tracker != null) {
             tracker.close();

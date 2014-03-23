@@ -52,7 +52,6 @@ package com.openexchange.spamhandler.spamassassin.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import com.openexchange.spamhandler.spamassassin.api.SpamdService;
 
 

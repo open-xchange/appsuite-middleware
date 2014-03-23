@@ -133,6 +133,7 @@ public class ContactCopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
      */
+    @Override
     public String[] getAlreadyCopied() {
         return new String[] {
             UserCopyTask.class.getName(),
@@ -145,6 +146,7 @@ public class ContactCopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getObjectName()
      */
+    @Override
     public String getObjectName() {
         return Contact.class.getName();
     }
@@ -152,6 +154,7 @@ public class ContactCopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#copyUser(java.util.Map)
      */
+    @Override
     public IntegerMapping copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
         final CopyTools copyTools = new CopyTools(copied);
         final Integer srcCtxId = copyTools.getSourceContextId();
@@ -461,6 +464,7 @@ public class ContactCopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#done(java.util.Map, boolean)
      */
+    @Override
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
     }
 

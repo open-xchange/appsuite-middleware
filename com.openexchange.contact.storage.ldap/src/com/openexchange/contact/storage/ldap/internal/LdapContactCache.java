@@ -50,7 +50,6 @@
 package com.openexchange.contact.storage.ldap.internal;
 
 import java.io.Serializable;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

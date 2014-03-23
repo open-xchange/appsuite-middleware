@@ -54,7 +54,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.push.imapidle.ImapIdlePushListener;
 import com.openexchange.push.imapidle.ImapIdlePushListenerRegistry;

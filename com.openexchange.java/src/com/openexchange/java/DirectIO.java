@@ -52,7 +52,6 @@ package com.openexchange.java;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import org.slf4j.Logger;
 
 /**
  * {@link DirectIO} - A utility class for direct byte buffers and I/O.

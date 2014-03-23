@@ -53,7 +53,6 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 

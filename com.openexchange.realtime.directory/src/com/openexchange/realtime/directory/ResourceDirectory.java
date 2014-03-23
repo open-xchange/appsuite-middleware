@@ -52,7 +52,6 @@ package com.openexchange.realtime.directory;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.util.IDMap;
 

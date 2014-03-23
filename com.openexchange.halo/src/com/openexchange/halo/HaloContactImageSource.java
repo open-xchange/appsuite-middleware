@@ -50,7 +50,6 @@
 package com.openexchange.halo;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.session.ServerSession;
 
 

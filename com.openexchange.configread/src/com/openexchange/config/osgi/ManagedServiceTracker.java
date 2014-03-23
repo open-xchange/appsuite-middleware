@@ -57,7 +57,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 
 

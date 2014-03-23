@@ -69,7 +69,6 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.contacts.ContactsStrings;

@@ -56,7 +56,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import com.openexchange.management.ManagementService;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessionCount.SessionThreadCountMBean;

@@ -59,7 +59,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
-import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;

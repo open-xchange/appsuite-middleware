@@ -90,6 +90,7 @@ public class RTProtocolTest {
     long nextSequence = -1;
     
     RTProtocol protocol = new RTProtocolImpl() {
+        @Override
         public void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) {
             bufferEmptied = true;
         };

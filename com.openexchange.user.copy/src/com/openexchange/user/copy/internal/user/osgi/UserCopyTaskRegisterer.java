@@ -80,6 +80,7 @@ public class UserCopyTaskRegisterer implements ServiceTrackerCustomizer<UserServ
     /**
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
+    @Override
     public UserService addingService(final ServiceReference<UserService> reference) {
         final UserService service = context.getService(reference);
         task = new UserCopyTask(service);
@@ -91,12 +92,14 @@ public class UserCopyTaskRegisterer implements ServiceTrackerCustomizer<UserServ
     /**
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
+    @Override
     public void modifiedService(final ServiceReference<UserService> reference, final UserService service) {
     }
 
     /**
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
+    @Override
     public void removedService(final ServiceReference<UserService> reference, final UserService service) {
         serviceRegistration.unregister();
         context.ungetService(reference);

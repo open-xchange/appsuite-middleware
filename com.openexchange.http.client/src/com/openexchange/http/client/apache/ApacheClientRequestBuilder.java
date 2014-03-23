@@ -76,23 +76,28 @@ public class ApacheClientRequestBuilder extends AbstractBuilder implements
 		this.client = client;
 	}
 	
-	public HTTPPutRequestBuilder put() {
+	@Override
+    public HTTPPutRequestBuilder put() {
 		return new ApachePutRequestBuilder(this);
 	}
 	
-	public HTTPPostRequestBuilder post() {
+	@Override
+    public HTTPPostRequestBuilder post() {
 		return new ApachePostRequestBuilder(this);
 	}
 	
-	public HTTPMultipartPostRequestBuilder multipartPost() {
+	@Override
+    public HTTPMultipartPostRequestBuilder multipartPost() {
 		return new ApacheMultipartPostRequestBuilder(this, fileManager);
 	}
 	
-	public HTTPGetRequestBuilder get() {
+	@Override
+    public HTTPGetRequestBuilder get() {
 		return new ApacheGetRequestBuilder(this);
 	}
 	
-	public HTTPDeleteRequestBuilder delete() {
+	@Override
+    public HTTPDeleteRequestBuilder delete() {
 		return new ApacheDeleteRequestBuilder(this);
 	}
 

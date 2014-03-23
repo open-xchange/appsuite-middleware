@@ -69,11 +69,13 @@ public class AttachmentCopyActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker<QuotaFileStorageFactory, QuotaFileStorageFactory>(context, QuotaFileStorageFactory.class, new AttachmentCopyRegisterer(context));
         tracker.open();
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         tracker.close();
     }

@@ -74,6 +74,7 @@ public class ConnectionFetcherRegisterer implements ServiceTrackerCustomizer<Dat
         this.context = context;
     }
 
+    @Override
     public DatabaseService addingService(final ServiceReference<DatabaseService> reference) {
         final DatabaseService service = context.getService(reference);
         final ConnectionFetcherTask task = new ConnectionFetcherTask(service);
@@ -82,10 +83,12 @@ public class ConnectionFetcherRegisterer implements ServiceTrackerCustomizer<Dat
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference<DatabaseService> reference, final DatabaseService service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference<DatabaseService> reference, final DatabaseService service) {
         registration.unregister();
         context.ungetService(reference);

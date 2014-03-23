@@ -50,7 +50,6 @@
 package com.openexchange.server.impl;
 
 import java.util.Arrays;
-import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;

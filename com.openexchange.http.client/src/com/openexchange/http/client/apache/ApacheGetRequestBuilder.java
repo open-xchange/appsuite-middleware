@@ -61,7 +61,8 @@ public class ApacheGetRequestBuilder extends CommonApacheHTTPRequest<HTTPGetRequ
 		super(coreBuilder);
 	}
 
-	protected HttpMethodBase createMethod(String site) {
+	@Override
+    protected HttpMethodBase createMethod(String site) {
 		return new GetMethod(site);
 	}
 

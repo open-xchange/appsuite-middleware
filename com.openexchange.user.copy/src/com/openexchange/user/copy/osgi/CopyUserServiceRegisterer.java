@@ -75,6 +75,7 @@ public class CopyUserServiceRegisterer implements ServiceTrackerCustomizer<CopyU
         this.context = context;
     }
 
+    @Override
     public CopyUserTaskService addingService(final ServiceReference<CopyUserTaskService> reference) {
         final CopyUserTaskService taskService = context.getService(reference);
         UserCopyServiceImpl copyService = this.copyService;
@@ -88,10 +89,12 @@ public class CopyUserServiceRegisterer implements ServiceTrackerCustomizer<CopyU
         return taskService;
     }
 
+    @Override
     public void modifiedService(final ServiceReference<CopyUserTaskService> reference, final CopyUserTaskService service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference<CopyUserTaskService> reference, final CopyUserTaskService taskService) {
         final UserCopyServiceImpl copyService = this.copyService;
         if (copyService != null) {

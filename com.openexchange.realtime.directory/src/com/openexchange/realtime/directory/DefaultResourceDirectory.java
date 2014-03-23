@@ -50,7 +50,6 @@
 package com.openexchange.realtime.directory;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;

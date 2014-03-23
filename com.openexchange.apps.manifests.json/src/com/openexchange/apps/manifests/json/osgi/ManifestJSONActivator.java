@@ -135,6 +135,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
                 return Collections.unmodifiableList(computedValueTracker.getServiceList());
             }
             
+            @Override
             public List<ManifestContributor> getContributors() {
                 return Collections.unmodifiableList(manifestContributorTracker.getServiceList());
             }

@@ -53,7 +53,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.linkedin.LinkedInService;

@@ -53,7 +53,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;

@@ -52,7 +52,6 @@ package com.openexchange.messaging.twitter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 

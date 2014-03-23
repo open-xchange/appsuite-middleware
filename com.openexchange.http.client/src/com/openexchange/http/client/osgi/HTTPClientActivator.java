@@ -72,12 +72,14 @@ public class HTTPClientActivator extends HousekeepingActivator {
 		@SuppressWarnings("rawtypes")
 		SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
 
-			public void added(ServiceReference<HTTPResponseProcessor> ref,
+			@Override
+            public void added(ServiceReference<HTTPResponseProcessor> ref,
 					HTTPResponseProcessor service) {
 				client.registerProcessor(service);
 			}
 
-			public void removed(ServiceReference<HTTPResponseProcessor> ref,
+			@Override
+            public void removed(ServiceReference<HTTPResponseProcessor> ref,
 					HTTPResponseProcessor service) {
 				client.forgetProcessor(service);
 			}

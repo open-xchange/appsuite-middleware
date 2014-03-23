@@ -51,7 +51,6 @@ package com.openexchange.messaging.facebook.parser.stream;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

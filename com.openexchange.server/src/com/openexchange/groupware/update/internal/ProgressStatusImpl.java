@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.text.MessageFormat;
 import com.openexchange.groupware.update.ProgressState;
 
 /**

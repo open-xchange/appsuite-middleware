@@ -50,7 +50,6 @@
 package com.openexchange.appsuite.osgi;
 
 import java.io.File;
-import java.text.MessageFormat;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;

@@ -51,7 +51,6 @@ package com.openexchange.admin.reseller.osgi;
 
 import java.rmi.Remote;
 import java.util.Hashtable;
-import org.slf4j.Logger;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;

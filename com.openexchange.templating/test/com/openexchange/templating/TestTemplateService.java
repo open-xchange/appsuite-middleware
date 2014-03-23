@@ -98,6 +98,7 @@ public class TestTemplateService extends TestCase {
     @Mock
     private User user;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -135,6 +136,7 @@ public class TestTemplateService extends TestCase {
         sessionWithoutInfostore = new ServerSessionAdapter(simSession, context, user, noInfostore, new UserPermissionBits(0, 1, 1));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         configService = null;

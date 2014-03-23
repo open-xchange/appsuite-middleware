@@ -66,14 +66,17 @@ public class TrustAllAdapter implements ProtocolSocketFactory {
     
     private TrustAllSSLSocketFactory delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
 
+    @Override
     public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
         return delegate.createSocket(host, port);
     }
 
+    @Override
     public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException, UnknownHostException {
         return delegate.createSocket(host, port, localAddress, localPort);
     }
 
+    @Override
     public Socket createSocket(String host, int port, InetAddress localAddress, int localPort, HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
         Socket socket;
         int timeout = params.getConnectionTimeout();

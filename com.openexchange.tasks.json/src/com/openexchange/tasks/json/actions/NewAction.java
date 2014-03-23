@@ -61,7 +61,6 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.log.Log;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.session.ServerSession;

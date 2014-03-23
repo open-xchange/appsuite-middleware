@@ -5,8 +5,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.commons.logging.LogFactory;
-
 /*
  *
  *    OPEN-XCHANGE legal information

@@ -67,6 +67,7 @@ public class OAuthCopyActivator implements BundleActivator {
     /**
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
+    @Override
     public void start(final BundleContext context) throws Exception {
         tracker = new ServiceTracker<IDGeneratorService, IDGeneratorService>(context, IDGeneratorService.class.getName(), new OAuthCopyTaskRegisterer(context));
         tracker.open();
@@ -75,6 +76,7 @@ public class OAuthCopyActivator implements BundleActivator {
     /**
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
+    @Override
     public void stop(final BundleContext context) throws Exception {
         if (tracker != null) {
             tracker.close();

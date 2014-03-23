@@ -50,11 +50,9 @@
 package com.openexchange.appsuite;
 
 import java.util.Arrays;
-import java.util.Collection;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.osgi.framework.BundleActivator;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.exception.OXException;

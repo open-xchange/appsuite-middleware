@@ -54,7 +54,6 @@ package com.openexchange.custom.parallels.impl;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.MessageFormat;
 import java.util.Arrays;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

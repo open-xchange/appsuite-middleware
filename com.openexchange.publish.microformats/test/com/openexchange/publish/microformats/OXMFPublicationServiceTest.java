@@ -76,6 +76,7 @@ public class OXMFPublicationServiceTest extends TestCase {
 
     private final Publication oldPublication = new Publication();
 
+    @Override
     @Before
     public void setUp() throws Exception {
         publicationService = new OXMFPublicationService() {

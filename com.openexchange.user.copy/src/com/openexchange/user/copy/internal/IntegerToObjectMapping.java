@@ -80,6 +80,7 @@ public abstract class IntegerToObjectMapping<T> implements ObjectMapping<T> {
     /**
      * @see com.openexchange.user.copy.ObjectMapping#getSource(int)
      */
+    @Override
     public T getSource(final int id) {
         return sourceMapping.get(id);
     }
@@ -87,6 +88,7 @@ public abstract class IntegerToObjectMapping<T> implements ObjectMapping<T> {
     /**
      * @see com.openexchange.user.copy.ObjectMapping#getSourceKeys()
      */
+    @Override
     public Set<Integer> getSourceKeys() {
         final Set<Integer> keySet = new HashSet<Integer>(idMapping.keySet());
 
@@ -96,6 +98,7 @@ public abstract class IntegerToObjectMapping<T> implements ObjectMapping<T> {
     /**
      * @see com.openexchange.user.copy.ObjectMapping#getDestination(java.lang.Object)
      */
+    @Override
     public abstract T getDestination(T source);
 
     protected T getDestinationById(final Integer id) {

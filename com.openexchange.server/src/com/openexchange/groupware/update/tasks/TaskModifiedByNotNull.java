@@ -52,7 +52,6 @@ package com.openexchange.groupware.update.tasks;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.MessageFormat;
 import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;

@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.httpclient.impl.scribe;
 
-import java.text.MessageFormat;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.httpclient.URIException;

@@ -50,11 +50,6 @@
 package com.openexchange.publish.microformats;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;

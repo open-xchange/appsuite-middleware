@@ -49,7 +49,6 @@
 
 package com.openexchange.messaging.facebook.parser.user;
 
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
