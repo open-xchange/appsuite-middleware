@@ -85,7 +85,8 @@ public class CXFActivator extends HousekeepingActivator {
         try {
             log.info("Starting Bundle: com.openexchange.soap.cxf");
             // Set logger class
-            LogUtils.setLoggerClass(com.openexchange.soap.cxf.logger.Slf4jLogger.class);
+            //LogUtils.setLoggerClass(com.openexchange.soap.cxf.logger.Slf4jLogger.class);
+            LogUtils.setLoggerClass(org.apache.cxf.common.logging.Slf4jLogger.class);
             // Continue start-up
             final BundleContext context = this.context;
             final String alias = "/webservices";
