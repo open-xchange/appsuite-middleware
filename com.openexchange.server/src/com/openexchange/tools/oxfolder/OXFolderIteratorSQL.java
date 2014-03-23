@@ -1325,9 +1325,7 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If module's visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
     public static boolean hasVisibleFoldersNotSeenInTreeView(final int module, final int userId, final int[] groups, final UserPermissionBits permissionBits, final Context ctx, final Connection readCon) throws OXException {
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type IN (").append(PUBLIC).append(',').append(TRASH).append(')');
-        condBuilder.append(") AND (ot.module = ").append(module);
-        condBuilder.append(')');
+        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type IN (").append(PUBLIC).append(',').append(TRASH).append("))");
         Connection rc = readCon;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -1341,7 +1339,7 @@ public final class OXFolderIteratorSQL {
             /*
              * Statement to select all user-visible public folders
              */
-            stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent", // fuid, parent, ...
+            stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent, ot.module", // fuid, parent, ...
                 permissionIds(userId, groups, ctx),
                 StringCollection.getSqlInString(permissionBits.getAccessibleModules()),
                 condBuilder.toString(),
@@ -1361,10 +1359,12 @@ public final class OXFolderIteratorSQL {
                 return false;
             }
             final TIntIntMap fuid2parent = new TIntIntHashMap(128);
+            final TIntIntMap fuid2module = new TIntIntHashMap(128);
             final TIntSet fuids = new TIntHashSet(128);
             do {
                 final int fuid = rs.getInt(1);
                 fuid2parent.put(fuid, rs.getInt(2));
+                fuid2module.put(fuid, rs.getInt(3));
                 fuids.add(fuid);
             } while (rs.next());
             closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
@@ -1373,8 +1373,9 @@ public final class OXFolderIteratorSQL {
              */
             for (final TIntIntIterator iterator = fuid2parent.iterator(); iterator.hasNext();) {
                 iterator.advance();
+                final int fuid = iterator.key();
                 final int parent = iterator.value();
-                if (parent >= MIN_FOLDER_ID && !fuids.contains(parent)) {
+                if (parent >= MIN_FOLDER_ID && !fuids.contains(parent) && (module == fuid2module.get(fuid))) {
                     return true;
                 }
             }
