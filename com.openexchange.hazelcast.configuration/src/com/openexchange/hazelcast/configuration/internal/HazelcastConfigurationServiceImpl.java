@@ -282,7 +282,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         /*
          * Miscellaneous
          */
-        String loggingType = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true) ? "sl4fj" : "none";
+        String loggingType = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true) ? "slf4j" : "none";
         System.setProperty(GroupProperties.PROP_LOGGING_TYPE, loggingType);
         config.setProperty(GroupProperties.PROP_LOGGING_TYPE, loggingType);
         config.setProperty(GroupProperties.PROP_VERSION_CHECK_ENABLED, "false");
