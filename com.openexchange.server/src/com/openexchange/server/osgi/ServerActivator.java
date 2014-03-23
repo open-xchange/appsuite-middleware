@@ -198,6 +198,7 @@ import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
+import com.openexchange.server.reloadable.GenericReloadable;
 import com.openexchange.server.services.MetaContributors;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -569,6 +570,7 @@ public final class ServerActivator extends HousekeepingActivator {
         // Register server's services
         registerService(Reloadable.class, ServerConfig.getInstance());
         registerService(Reloadable.class, SystemConfig.getInstance());
+        registerService(Reloadable.class, GenericReloadable.getInstance());
         registerService(CharsetProvider.class, new CustomCharsetProvider());
         final GroupService groupService = new GroupServiceImpl();
         registerService(GroupService.class, groupService);

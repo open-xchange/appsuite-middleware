@@ -82,6 +82,7 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.images.Constants;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
@@ -146,6 +147,12 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     @Override
     public ImageTransformations scale(int maxWidth, int maxHeight, ScaleType scaleType) {
+        if (maxWidth > Constants.getMaxWidth()) {
+            throw new IllegalArgumentException("Width " + maxWidth + " exceeds max. supported width " + Constants.getMaxWidth());
+        }
+        if (maxHeight > Constants.getMaxHeight()) {
+            throw new IllegalArgumentException("Height " + maxHeight + " exceeds max. supported height " + Constants.getMaxHeight());
+        }
         transformations.add(new ScaleTransformation(maxWidth, maxHeight, scaleType));
         return this;
     }

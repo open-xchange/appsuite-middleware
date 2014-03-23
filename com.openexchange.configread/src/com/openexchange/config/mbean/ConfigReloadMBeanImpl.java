@@ -111,8 +111,10 @@ public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReload
             Iterator<Reloadable> i = configService.getReloadables().iterator();
             while (i.hasNext()) {
                 Map<String, String[]> configs = i.next().getConfigFileNames();
-                for (String file : configs.keySet()) {
-                    map.put(file, Arrays.asList(configs.get(file)));
+                if (null != configs && !configs.isEmpty()) {
+                    for (String file : configs.keySet()) {
+                        map.put(file, Arrays.asList(configs.get(file)));
+                    }
                 }
             }
             return map;
