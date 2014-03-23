@@ -1,6 +1,7 @@
 * 2014-03-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 31677: Properly do the thread-sort for subscribed POP3 accounts accessed via Unified Mail
+ - Fix for bug 31714: Set upper limits for width/height parameter on image transformation request
 
 * 2014-03-20 - thorben.betten@open-xchange.com
 

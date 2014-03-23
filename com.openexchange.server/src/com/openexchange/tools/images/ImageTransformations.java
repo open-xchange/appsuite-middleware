@@ -88,6 +88,9 @@ public interface ImageTransformations {
      * @param maxHeight The maximum height of the target image
      * @param scaleType The scale type to use
      * @return A self reference
+     * @throws IllegalArgumentException If given maxWidth and/or maxHeight are not supported
+     * @see Constants#MAX_WIDTH
+     * @see Constants#MAX_HEIGHT
      */
     ImageTransformations scale(int maxWidth, int maxHeight, ScaleType scaleType);
 
