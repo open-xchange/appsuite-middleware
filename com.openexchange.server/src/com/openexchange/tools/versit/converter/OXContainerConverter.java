@@ -121,6 +121,7 @@ import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.TransformedImage;
 import com.openexchange.tools.io.IOUtils;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Parameter;
@@ -1142,7 +1143,11 @@ public class OXContainerConverter {
         ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class, true);
         Object source = null == optSession ? null : optSession.getSessionID();
         if (0 < maxWidth || 0 < maxHeight) {
-            return imageService.transfom(imageBytes, source).scale(maxWidth, maxHeight, ScaleType.CONTAIN).getTransformedImage(formatName);
+            try {
+                return imageService.transfom(imageBytes, source).scale(maxWidth, maxHeight, ScaleType.CONTAIN).getTransformedImage(formatName);
+            } catch (final IllegalArgumentException e) {
+                throw AjaxExceptionCodes.BAD_REQUEST.create(e, e.getMessage());
+            }
         }
 
         return imageService.transfom(imageBytes, source).getTransformedImage(formatName);
