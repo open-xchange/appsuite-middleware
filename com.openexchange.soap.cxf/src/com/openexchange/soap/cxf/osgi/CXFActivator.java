@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import javax.servlet.ServletException;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
+import org.apache.cxf.common.logging.LogUtils;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.osgi.framework.BundleContext;
@@ -83,6 +84,9 @@ public class CXFActivator extends HousekeepingActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CXFActivator.class);
         try {
             log.info("Starting Bundle: com.openexchange.soap.cxf");
+            // Set logger class
+            LogUtils.setLoggerClass(com.openexchange.soap.cxf.logger.Slf4jLogger.class);
+            // Continue start-up
             final BundleContext context = this.context;
             final String alias = "/webservices";
             final String alias2 = "/servlet/axis2/services";
