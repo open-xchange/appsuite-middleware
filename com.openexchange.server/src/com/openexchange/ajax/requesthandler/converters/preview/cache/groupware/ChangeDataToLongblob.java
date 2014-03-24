@@ -49,61 +49,59 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 
 /**
- * {@link PreviewCacheCreateDataTableService}
+ * The data column of previewData was previously of type blob. In MySQL
+ * blobs are limited to 65KB, what's likely to small for some preview
+ * images. Therefore the column is enlarged by changing the type to longblob,
+ * which allows data up to 4GB.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public final class PreviewCacheCreateDataTableService extends AbstractCreateTableImpl {
+public class ChangeDataToLongblob extends UpdateTaskAdapter {
 
-    /**
-     * Gets the table names.
-     *
-     * @return The table names.
-     */
-    public static String[] getTablesToCreate() {
-        return new String[] { "previewData" };
-    }
-
-    /**
-     * Gets the CREATE-TABLE statements.
-     *
-     * @return The CREATE statements
-     */
-    public static String[] getCreateStmts() {
-        return new String[] { "CREATE TABLE "+"previewData"+" (" +
-            " cid INT4 unsigned NOT NULL," +
-            " user INT4 unsigned NOT NULL," +
-            " id VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
-            " data LONGBLOB," +
-            " PRIMARY KEY (cid, user, id)," +
-            " INDEX `globaldocument` (cid, id)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
-    }
-
-    /**
-     * Initializes a new {@link PreviewCacheCreateDataTableService}.
-     */
-    public PreviewCacheCreateDataTableService() {
-        super();
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        int contextId = params.getContextId();
+        Connection con = Database.getNoTimeout(contextId, true);
+        boolean rollback = false;
+        try {
+            startTransaction(con);
+            rollback = true;
+            Column cData = new Column("data", "longblob");
+            Tools.checkAndModifyColumns(con, "previewData", cData);
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.backNoTimeout(contextId, true, con);
+        }
     }
 
     @Override
-    public String[] requiredTables() {
-        return new String[] { "preview" };
-    }
-
-    @Override
-    public String[] tablesToCreate() {
-        return getTablesToCreate();
-    }
-
-    @Override
-    protected String[] getCreateStatements() {
-        return getCreateStmts();
+    public String[] getDependencies() {
+        return new String[] { DropDataFromPreviewCacheTable.class.getName(), AddRefIdForPreviewCacheTable.class.getName() };
     }
 
 }

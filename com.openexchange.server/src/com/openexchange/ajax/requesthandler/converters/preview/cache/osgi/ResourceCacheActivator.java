@@ -66,6 +66,7 @@ import com.openexchange.ajax.requesthandler.converters.preview.cache.RdbResource
 import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBean;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBeanImpl;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.AddRefIdForPreviewCacheTable;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.ChangeDataToLongblob;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.ChangeFileNameAndTypeLength;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.DropDataFromPreviewCacheTable;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateDataTableService;
@@ -174,7 +175,8 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
             new AddRefIdForPreviewCacheTable(),
             new PreviewCacheCreateDataTableTask(),
             new DropDataFromPreviewCacheTable(),
-            new ChangeFileNameAndTypeLength()));
+            new ChangeFileNameAndTypeLength(),
+            new ChangeDataToLongblob()));
         registerService(DeleteListener.class, new PreviewCacheDeleteListener());
     }
 
