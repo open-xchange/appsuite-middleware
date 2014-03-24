@@ -935,9 +935,18 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch (SQLException x) {
             LOG.warn("Not able to retrieve original object!", x);
         }
+
+        CalendarDataObject[] changeExceptionsByRecurrence = calendarCollection.getChangeExceptionsByRecurrence(edao.getRecurrenceID(), EXCEPTION_FIELDS, session);
+        for (CalendarDataObject exception : changeExceptionsByRecurrence) {
+            if (exception.getRecurrencePosition() == optOccurrenceId) {
+                CalendarDataObject retval = new CalendarDataObject();
+                retval.setLastModified(setUserConfirmation(exception.getObjectID(), folderId, userId, confirm, confirmMessage));
+                return retval;
+            }
+        }
         CalendarDataObject cdao = edao.clone();
 
-        final RecurringResultsInterface recurringResultsInterface = calendarCollection.calculateRecurring(edao, 0, 0, optOccurrenceId);
+        final RecurringResultsInterface recurringResultsInterface = calendarCollection.calculateRecurringIgnoringExceptions(edao, 0, 0, optOccurrenceId);
 
         if (recurringResultsInterface != null) {
             final RecurringResultInterface rs = recurringResultsInterface.getRecurringResult(0);
@@ -1020,7 +1029,6 @@ public class CalendarSql implements AppointmentSQLInterface {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }
-
         CalendarDataObject[] changeExceptionsByRecurrence = calendarCollection.getChangeExceptionsByRecurrence(objectId, EXCEPTION_FIELDS, session);
         RecurringResultInterface recurringResult = calendarCollection.calculateRecurringIgnoringExceptions(original, 0, 0, optOccurrenceId).getRecurringResult(0);
 
@@ -1056,9 +1064,19 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch (SQLException x) {
             LOG.warn("Not able to retrieve original object!", x);
         }
+
+        CalendarDataObject[] changeExceptionsByRecurrence = calendarCollection.getChangeExceptionsByRecurrence(edao.getRecurrenceID(), EXCEPTION_FIELDS, session);
+        for (CalendarDataObject exception : changeExceptionsByRecurrence) {
+            if (exception.getRecurrencePosition() == optOccurrenceId) {
+                CalendarDataObject retval = new CalendarDataObject();
+                retval.setLastModified(setExternalConfirmation(exception.getObjectID(), folderId, mail, confirm, message));
+                return retval;
+            }
+        }
+
         CalendarDataObject cdao = edao.clone();
 
-        final RecurringResultsInterface recurringResultsInterface = calendarCollection.calculateRecurring(edao, 0, 0, optOccurrenceId);
+        final RecurringResultsInterface recurringResultsInterface = calendarCollection.calculateRecurringIgnoringExceptions(edao, 0, 0, optOccurrenceId);
 
         if (recurringResultsInterface != null) {
             final RecurringResultInterface rs = recurringResultsInterface.getRecurringResult(0);
@@ -1068,6 +1086,9 @@ public class CalendarSql implements AppointmentSQLInterface {
                 cdao.setRecurrencePosition(rs.getPosition());
                 cdao.setStartDate(new Date(rs.getStart()));
                 cdao.setIgnoreConflicts(true);
+                if (cdao.containsOccurrence()) {
+                    cdao.removeUntil();
+                }
 
                 ArrayList<Participant> users = new ArrayList<Participant>();
                 for (final Participant cur : edao.getParticipants()) {
