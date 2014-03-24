@@ -10,5 +10,5 @@ Package: open-xchange-passwordchange-database
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Description: The Open-Xchange Password Change Database Bundle
+Description: The Open-Xchange password-change bundle that only changes the encrypted password in database, but leaves any subsystems (e.g. IMAP/SMTP) as-is
 Conflicts: open-xchange-passwordchange-script

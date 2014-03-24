@@ -14,13 +14,13 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The Open-Xchange Password Change Script Bundle
+Summary:       The Open-Xchange password-change bundle that utilizes a script (e.g. "/bin/changepwd.sh") to change the password
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Conflicts:     open-xchange-passwordchange-database
 
 %description
-The Open-Xchange Password Change Script Bundle
+The Open-Xchange password-change bundle that utilizes a script (e.g. "/bin/changepwd.sh") to change the password
 
 Authors:
 --------

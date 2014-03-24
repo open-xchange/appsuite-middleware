@@ -14,13 +14,13 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The Open-Xchange Password Change Database Bundle
+Summary:       The Open-Xchange password-change bundle that only changes the encrypted password in database, but leaves any subsystems (e.g. IMAP/SMTP) as-is
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Conflicts:     open-xchange-passwordchange-script
 
 %description
-The Open-Xchange Password Change Database Bundle
+The Open-Xchange password-change bundle that only changes the encrypted password in database, but leaves any subsystems (e.g. IMAP/SMTP) as-is
 
 Authors:
 --------

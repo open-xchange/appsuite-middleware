@@ -10,5 +10,5 @@ Package: open-xchange-passwordchange-script
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Description: The Open-Xchange Password Change Script Bundle
+Description: The Open-Xchange password-change bundle that utilizes a script (e.g. "/bin/changepwd.sh") to change the password
 Conflicts: open-xchange-passwordchange-database
