@@ -1,6 +1,7 @@
 * 2014-03-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 31727: Improved descriptions for database-based and script-based password-change bundles
+ - Fix for bug 31717: Improved description of "com.openexchange.servlet.maxInactiveInterval" property
 
 * 2014-03-24 - steffen.templin@open-xchange.com
 
