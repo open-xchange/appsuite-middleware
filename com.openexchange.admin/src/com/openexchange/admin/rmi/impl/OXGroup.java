@@ -54,9 +54,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
@@ -76,6 +74,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXGroupStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
@@ -308,24 +307,18 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e;
         }
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxgroup")) {
-                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context.getService(servicereference);
-                            try {
-                                log.debug("Calling change for plugin: {}", bundlename);
-                                oxgroup.change(ctx, grp, auth);
-                            } catch (final PluginException e) {
-                                log.error("Error while calling change for plugin: {}", bundlename, e);
-                                throw new StorageException(e);
-                            }
-                        }
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
+                    final String bundlename = oxgroup.getClass().getName();
+                    try {
+                        log.debug("Calling change for plugin: {}", bundlename);
+                        oxgroup.change(ctx, grp, auth);
+                    } catch (final PluginException e) {
+                        log.error("Error while calling change for plugin: {}", bundlename, e);
+                        throw new StorageException(e);
                     }
                 }
             }
@@ -395,52 +388,32 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         grp.setId(retval);
         final ArrayList<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle
-                        .getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference
-                                .getProperty("name");
-                        if (null != property
-                                && property.toString().equalsIgnoreCase(
-                                        "oxgroup")) {
-                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context
-                                    .getService(servicereference);
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
+                    final String bundlename = oxgroup.getClass().getName();
+                    try {
+                        log.debug("Calling create for plugin: {}", bundlename);
+                        oxgroup.create(ctx, grp, auth);
+                        interfacelist.add(oxgroup);
+                    } catch (final PluginException e) {
+                        log.error("Error while calling create for plugin: " + bundlename, e);
+                        log.info("Now doing rollback for everything until now...");
+                        for (final OXGroupPluginInterface oxgroupinterface : interfacelist) {
                             try {
-                                log.debug("Calling create for plugin: {}", bundlename);
-                                oxgroup.create(ctx, grp, auth);
-                                interfacelist.add(oxgroup);
-                            } catch (final PluginException e) {
-                                log.error(
-                                        "Error while calling create for plugin: "
-                                                + bundlename, e);
-                                log
-                                        .info("Now doing rollback for everything until now...");
-                                for (final OXGroupPluginInterface oxgroupinterface : interfacelist) {
-                                    try {
-                                        oxgroupinterface.delete(ctx,
-                                                new Group[] { grp }, auth);
-                                    } catch (final PluginException e1) {
-                                        log.error(
-                                                "Error doing rollback for plugin: "
-                                                        + bundlename, e1);
-                                    }
-                                }
-                                try {
-                                    oxGroup.delete(ctx, new Group[] { grp });
-                                } catch (final StorageException e1) {
-                                    log
-                                            .error(
-                                                    "Error doing rollback for creating resource in database",
-                                                    e1);
-                                }
-                                throw new StorageException(e);
+                                oxgroupinterface.delete(ctx, new Group[] { grp }, auth);
+                            } catch (final PluginException e1) {
+                                log.error("Error doing rollback for plugin: " + bundlename, e1);
                             }
                         }
+                        try {
+                            oxGroup.delete(ctx, new Group[] { grp });
+                        } catch (final StorageException e1) {
+                            log.error("Error doing rollback for creating resource in database", e1);
+                        }
+                        throw new StorageException(e);
                     }
                 }
             }
@@ -568,38 +541,22 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
         final ArrayList<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        final java.util.List<Bundle> revbundles = new ArrayList<Bundle>();
-        for (int n = bundles.size() - 1; n >= 0; n--) {
-            revbundles.add(bundles.get(n));
-        }
-        for (final Bundle bundle : revbundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle
-                        .getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference
-                                .getProperty("name");
-                        if (null != property
-                                && property.toString().equalsIgnoreCase(
-                                        "oxgroup")) {
-                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context
-                                    .getService(servicereference);
-                            try {
-                                log.debug("Calling delete for plugin: {}", bundlename);
-                                oxgroup.delete(ctx, grp, auth);
-                                interfacelist.add(oxgroup);
-                            } catch (final PluginException e) {
-                                log.error(
-                                        "Error while calling delete for plugin: "
-                                                + bundlename, e);
-                                throw new StorageException(e);
-                            }
-                        }
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
+                    final String bundlename = oxgroup.getClass().getName();
+                    try {
+                        log.debug("Calling delete for plugin: {}", bundlename);
+                        oxgroup.delete(ctx, grp, auth);
+                        interfacelist.add(oxgroup);
+                    } catch (final PluginException e) {
+                        log.error(
+                                "Error while calling delete for plugin: "
+                                        + bundlename, e);
+                        throw new StorageException(e);
                     }
-
                 }
             }
         }
@@ -677,25 +634,14 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
         Group retgrp = oxGroup.get(ctx, grp);
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle
-                        .getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference
-                                .getProperty("name");
-                        if (null != property
-                                && property.toString().equalsIgnoreCase(
-                                        "oxgroup")) {
-                            final OXGroupPluginInterface oxgroupplugin = (OXGroupPluginInterface) this.context
-                                    .getService(servicereference);
-                            log.debug("Calling getData for plugin: {}", bundlename);
-                            retgrp = oxgroupplugin.get(ctx, retgrp, auth);
-                        }
-                    }
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
+                    final String bundlename = oxgroup.getClass().getName();
+                    log.debug("Calling getData for plugin: {}", bundlename);
+                    retgrp = oxgroup.get(ctx, retgrp, auth);
                 }
             }
         }
@@ -760,30 +706,20 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             retval.add(oxGroup.get(ctx, group));
         }
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle
-                        .getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference
-                                .getProperty("name");
-                        if (null != property
-                                && property.toString().equalsIgnoreCase(
-                                        "oxgroup")) {
-                            final OXGroupPluginInterface oxgroupplugin = (OXGroupPluginInterface) this.context
-                                    .getService(servicereference);
-                            log.debug("Calling get for plugin: {}", bundlename);
-                            for (Group group : retval) {
-                                group = oxgroupplugin.get(ctx, group, auth);
-                            }
-                        }
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
+                    final String bundlename = oxgroup.getClass().getName();
+                    log.debug("Calling get for plugin: {}", bundlename);
+                    for (Group group : retval) {
+                        group = oxgroup.get(ctx, group, auth);
                     }
                 }
             }
         }
+
         return retval.toArray(new Group[retval.size()]);
     }
 

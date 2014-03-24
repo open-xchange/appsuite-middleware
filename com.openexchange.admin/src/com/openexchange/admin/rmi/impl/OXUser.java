@@ -80,7 +80,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
@@ -90,9 +90,6 @@ import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.eventsystem.Event;
-import com.openexchange.eventsystem.EventSystemService;
-import com.openexchange.eventsystem.provisioning.ProviosioningEventConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -250,20 +247,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
         }
-
-        // Signal changed user
-        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-        if (null != eventSystemService) {
-            try {
-                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_UPDATE);
-                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
-                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, user.getId());
-                //event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, user.getName());
-                eventSystemService.publish(event);
-            } catch (final Exception e) {
-                log.warn("Could not distribute user event.", e);
-            }
-        }
     }
 
     @Override
@@ -335,33 +318,27 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         oxu.change(ctx, usrdata);
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE==bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
-                            final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
-                            if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
-                                try {
-                                        log.debug("Calling change for plugin: {}", bundlename);
-                                    oxuser.change(ctx, usrdata, auth);
-                                } catch (final PluginException e) {
-                                    log.error("Error while calling change for plugin: {}", bundlename, e);
-                                    throw new StorageException(e);
-                                } catch (final RuntimeException e) {
-                                    log.error("Error while calling change for plugin: {}", bundlename, e);
-                                    throw new StorageException(e);
-                                }
-                            }
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
+                    if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
+                        try {
+                            log.debug("Calling change for plugin: {}", oxuser.getClass().getName());
+                            oxuser.change(ctx, usrdata, auth);
+                        } catch (final PluginException e) {
+                            log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                            throw new StorageException(e);
+                        } catch (final RuntimeException e) {
+                            log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                            throw new StorageException(e);
                         }
                     }
                 }
             }
         }
+
         // change cached admin credentials if neccessary
         if (isContextAdmin && usrdata.getPassword() != null) {
             final Credentials cauth = ClientAdminThread.cache.getAdminCredentials(ctx);
@@ -421,20 +398,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
         }
-
-        // Signal changed user
-        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-        if (null != eventSystemService) {
-            try {
-                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_UPDATE);
-                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
-                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, usrdata.getId());
-                // event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, usrdata.getName());
-                eventSystemService.publish(event);
-            } catch (final Exception e) {
-                log.warn("Could not distribute user event.", e);
-            }
-        }
     }
 
     @Override
@@ -490,20 +453,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(),e);
         }
         // END OF JCS
-
-        // Signal changed user
-        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-        if (null != eventSystemService) {
-            try {
-                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_UPDATE);
-                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
-                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, user.getId());
-                // event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, user.getName());
-                eventSystemService.publish(event);
-            } catch (final Exception e) {
-                log.warn("Could not distribute user event.", e);
-            }
-        }
     }
 
     @Override
@@ -605,20 +554,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
         // END OF JCS
-
-        // Signal changed user
-        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-        if (null != eventSystemService) {
-            try {
-                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_UPDATE);
-                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
-                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, user.getId());
-                event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, user.getName());
-                eventSystemService.publish(event);
-            } catch (final Exception e) {
-                log.warn("Could not distribute user event.", e);
-            }
-        }
     }
 
     @Override
@@ -791,64 +726,39 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         */
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE==bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
-                            final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
-
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
+                    final String bundlename = oxuser.getClass().getName();
+                    try {
+                        final boolean canHandleContextAdmin = oxuser.canHandleContextAdmin();
+                        if (canHandleContextAdmin || (!canHandleContextAdmin && !tool.isContextAdmin(ctx, usr.getId().intValue()))) {
                             try {
-                                final boolean canHandleContextAdmin = oxuser.canHandleContextAdmin();
-                                if (canHandleContextAdmin || (!canHandleContextAdmin && !tool.isContextAdmin(ctx, usr.getId().intValue()))) {
+                                log.debug("Calling create for plugin: {}", bundlename);
+                                oxuser.create(ctx, usr, access, auth);
+                                interfacelist.add(oxuser);
+                            } catch (final PluginException e) {
+                                log.error("Error while calling create for plugin: {}", bundlename, e);
+                                log.info("Now doing rollback for everything until now...");
+                                for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                                     try {
-                                            log.debug("Calling create for plugin: {}", bundlename);
-                                        oxuser.create(ctx, usr, access, auth);
-                                        interfacelist.add(oxuser);
-                                    } catch (final PluginException e) {
-                                        log.error("Error while calling create for plugin: {}", bundlename, e);
-                                        log.info("Now doing rollback for everything until now...");
-                                        for (final OXUserPluginInterface oxuserinterface : interfacelist) {
-                                            try {
-                                                oxuserinterface.delete(ctx, new User[] { usr }, auth);
-                                            } catch (final PluginException e1) {
-                                                log.error("Error doing rollback for plugin: {}", bundlename, e1);
-                                            } catch (final RuntimeException e1) {
-                                                log.error("Error doing rollback for plugin: {}", bundlename, e1);
-                                            }
-                                        }
-                                        try {
-                                            oxu.delete(ctx, usr);
-                                        } catch (final StorageException e1) {
-                                            log.error("Error doing rollback for creating user in database", e1);
-                                        }
-                                        throw new StorageException(e);
-                                    } catch (final RuntimeException e) {
-                                        log.error("Error while calling create for plugin: {}", bundlename, e);
-                                        log.info("Now doing rollback for everything until now...");
-                                        for (final OXUserPluginInterface oxuserinterface : interfacelist) {
-                                            try {
-                                                oxuserinterface.delete(ctx, new User[] { usr }, auth);
-                                            } catch (final PluginException e1) {
-                                                log.error("Error doing rollback for plugin: {}", bundlename, e1);
-                                            } catch (final RuntimeException e1) {
-                                                log.error("Error doing rollback for plugin: {}", bundlename, e1);
-                                            }
-                                        }
-                                        try {
-                                            oxu.delete(ctx, usr);
-                                        } catch (final StorageException e1) {
-                                            log.error("Error doing rollback for creating user in database", e1);
-                                        }
-                                        throw new StorageException(e);
+                                        oxuserinterface.delete(ctx, new User[] { usr }, auth);
+                                    } catch (final PluginException e1) {
+                                        log.error("Error doing rollback for plugin: {}", bundlename, e1);
+                                    } catch (final RuntimeException e1) {
+                                        log.error("Error doing rollback for plugin: {}", bundlename, e1);
                                     }
                                 }
+                                try {
+                                    oxu.delete(ctx, usr);
+                                } catch (final StorageException e1) {
+                                    log.error("Error doing rollback for creating user in database", e1);
+                                }
+                                throw new StorageException(e);
                             } catch (final RuntimeException e) {
-                                log.error("Error while calling canHandleContextAdmin for plugin: {}", bundlename, e);
+                                log.error("Error while calling create for plugin: {}", bundlename, e);
                                 log.info("Now doing rollback for everything until now...");
                                 for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                                     try {
@@ -867,10 +777,29 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                 throw new StorageException(e);
                             }
                         }
+                    } catch (final RuntimeException e) {
+                        log.error("Error while calling canHandleContextAdmin for plugin: {}", bundlename, e);
+                        log.info("Now doing rollback for everything until now...");
+                        for (final OXUserPluginInterface oxuserinterface : interfacelist) {
+                            try {
+                                oxuserinterface.delete(ctx, new User[] { usr }, auth);
+                            } catch (final PluginException e1) {
+                                log.error("Error doing rollback for plugin: {}", bundlename, e1);
+                            } catch (final RuntimeException e1) {
+                                log.error("Error doing rollback for plugin: {}", bundlename, e1);
+                            }
+                        }
+                        try {
+                            oxu.delete(ctx, usr);
+                        } catch (final StorageException e1) {
+                            log.error("Error doing rollback for creating user in database", e1);
+                        }
+                        throw new StorageException(e);
                     }
                 }
             }
         }
+
         // The mail account cache caches resolved imap logins or primary addresses. Creating or changing a user needs the invalidation of
         // that cached data.
         final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
@@ -891,20 +820,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 log.error("", e);
             } finally {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
-            }
-        }
-
-        // Signal created user
-        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-        if (null != eventSystemService) {
-            try {
-                final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_CREATE);
-                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
-                event.setProperty(ProviosioningEventConstants.PROP_USER_ID, usr.getId());
-                event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, usr.getName());
-                eventSystemService.publish(event);
-            } catch (final Exception e) {
-                log.warn("Could not distribute user event.", e);
             }
         }
 
@@ -983,33 +898,29 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         for (int i = bundles.size() - 1; i >= 0; i--) {
             revbundles.add(bundles.get(i));
         }
-        for (final Bundle bundle : revbundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE==bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
-                            final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
-                            if (!oxuser.canHandleContextAdmin()) {
-                                retusers = removeContextAdmin(ctx, retusers);
-                                if (retusers.length > 0) {
-                                        log.debug("Calling delete for plugin: {}", bundlename);
-                                    final Exception exception = callDeleteForPlugin(ctx, auth, retusers, interfacelist, bundlename, oxuser);
-                                    if (null != exception) {
-                                        exceptionlist.add(exception);
-                                    }
-                                }
-                            } else {
-                                    log.debug("Calling delete for plugin: {}", bundlename);
-                                final Exception exception = callDeleteForPlugin(ctx, auth, retusers, interfacelist, bundlename, oxuser);
-                                if (null != exception) {
-                                    exceptionlist.add(exception);
-                                }
+
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
+                    if (!oxuser.canHandleContextAdmin()) {
+                        retusers = removeContextAdmin(ctx, retusers);
+                        if (retusers.length > 0) {
+                            log.debug("Calling delete for plugin: {}", oxuser.getClass().getName());
+                            final Exception exception = callDeleteForPlugin(ctx, auth, retusers, interfacelist, oxuser.getClass().getName(), oxuser);
+                            if (null != exception) {
+                                exceptionlist.add(exception);
                             }
                         }
+                    } else {
+                        log.debug("Calling delete for plugin: {}", oxuser.getClass().getName());
+                        final Exception exception = callDeleteForPlugin(ctx, auth, retusers, interfacelist, oxuser.getClass().getName(), oxuser);
+                        if (null != exception) {
+                            exceptionlist.add(exception);
+                        }
                     }
+
                 }
             }
         }
@@ -1064,22 +975,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
         // END OF JCS
-
-        // Signal deleted user(s)
-        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-        if (null != eventSystemService) {
-            for (final User user : users) {
-                try {
-                    final Event event = new Event(ProviosioningEventConstants.TOPIC_USER_DELETE);
-                    event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
-                    event.setProperty(ProviosioningEventConstants.PROP_USER_ID, user.getId());
-                    event.setProperty(ProviosioningEventConstants.PROP_USER_NAME, user.getName());
-                    eventSystemService.publish(event);
-                } catch (final Exception e) {
-                    log.warn("Could not distribute user event.", e);
-                }
-            }
-        }
 
         if (!exceptionlist.isEmpty()) {
             final StringBuilder sb = new StringBuilder("The following exceptions occured in the plugins: ");
@@ -1371,7 +1266,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     private Exception callDeleteForPlugin(final Context ctx, final Credentials auth, final User[] retusers, final ArrayList<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
         try {
-                log.debug("Calling delete for plugin: {}", bundlename);
+            log.debug("Calling delete for plugin: {}", bundlename);
             oxuser.delete(ctx, retusers, auth);
             interfacelist.add(oxuser);
             return null;

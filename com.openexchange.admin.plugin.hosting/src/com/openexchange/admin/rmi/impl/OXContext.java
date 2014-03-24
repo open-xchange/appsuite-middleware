@@ -93,7 +93,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
-import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
@@ -103,9 +103,6 @@ import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
-import com.openexchange.eventsystem.Event;
-import com.openexchange.eventsystem.EventSystemService;
-import com.openexchange.eventsystem.provisioning.ProviosioningEventConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.quota.Resource;
@@ -178,7 +175,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            callPluginMethod("changeQuota", ctx, new ArrayList<String>(modules), Long.valueOf(quota), auth);
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        // TODO:
+                    }
+                }
+            }
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.changeQuota(ctx, new ArrayList<String>(modules), quota, auth);
@@ -278,17 +283,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
         }
-
-        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-        if (null != eventSystemService) {
-            try {
-                final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_UPDATE);
-                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
-                eventSystemService.publish(event);
-            } catch (final Exception e) {
-                log.warn("Could not distribute context event.", e);
-            }
-        }
     }
 
     @Override
@@ -332,7 +326,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
 
-            callPluginMethod("change", ctx, auth);
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        oxContextPlugin.change(ctx, auth);
+                    }
+                }
+            }
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             backup_ctx = oxcox.getData(ctx);
@@ -343,6 +345,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final NoSuchContextException e) {
             log.error("", e);
             throw e;
+        } catch (final PluginException e) {
+            log.error("", e);
+            throw new StorageException(e);
         }
 
         try {
@@ -356,17 +361,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
         } catch (final OXException e) {
             log.error("Error invalidating cached infos of context {} in context storage", ctx.getId(),e);
-        }
-
-        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-        if (null != eventSystemService) {
-            try {
-                final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_UPDATE);
-                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
-                eventSystemService.publish(event);
-            } catch (final Exception e) {
-                log.warn("Could not distribute context event.", e);
-            }
         }
     }
 
@@ -455,7 +449,20 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
-            callPluginMethod("delete", ctx, auth);
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        try {
+                            oxContextPlugin.delete(ctx, auth);
+                        } catch (final PluginException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    }
+                }
+            }
 
             oxcox.delete(ctx);
             basicAuthenticator.removeFromAuthCache(ctx);
@@ -488,17 +495,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
         } catch (final OXException e) {
             log.error("Error invalidating context {} in ox context storage", ctx.getId(), e);
-        }
-
-        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-        if (null != eventSystemService) {
-            try {
-                final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_DELETE);
-                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
-                eventSystemService.publish(event);
-            } catch (final Exception e) {
-                log.warn("Could not distribute context event.", e);
-            }
         }
     }
 
@@ -533,7 +529,21 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             /*if (!tool.existsReason(reason_id)) {
                 throw new NoSuchReasonException();
             }*/
-            callPluginMethod("disable", ctx, auth);
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        try {
+                            oxContextPlugin.disable(ctx, auth);
+                        } catch (final PluginException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    }
+                }
+            }
 
             if (!tool.isContextEnabled(ctx)) {
                 throw new OXContextException(OXContextException.CONTEXT_DISABLED);
@@ -591,7 +601,20 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if( ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
                 oxcox.disableAll(reason);
             } else {
-                callPluginMethod("disableAll", auth);
+                // Trigger plugin extensions
+                {
+                    final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                    if (null != pluginInterfaces) {
+                        for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                            try {
+                                oxContextPlugin.disableAll(auth);
+                            } catch (final PluginException e) {
+                                log.error("", e);
+                                throw new StorageException(e);
+                            }
+                        }
+                    }
+                }
             }
         } catch (final StorageException e) {
             log.error("", e);
@@ -641,7 +664,22 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
-            callPluginMethod("enable", ctx, auth);
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        try {
+                            oxContextPlugin.enable(ctx, auth);
+                        } catch (final PluginException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    }
+                }
+            }
+
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.enable(ctx);
         } catch (final StorageException e) {
@@ -669,7 +707,20 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if( ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
                 oxcox.enableAll();
             } else {
-                callPluginMethod("enableAll", auth);
+                // Trigger plugin extensions
+                {
+                    final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                    if (null != pluginInterfaces) {
+                        for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                            try {
+                                oxContextPlugin.enableAll(auth);
+                            } catch (final PluginException e) {
+                                log.error("", e);
+                                throw new StorageException(e);
+                            }
+                        }
+                    }
+                }
             }
         } catch (final StorageException e) {
             log.error("", e);
@@ -1105,19 +1156,24 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         Context ret = ctx;
         ret = oxcox.create(ret, admin_user, createaccess);
         if( isAnyPluginLoaded() ) {
-            try {
-                ret = (Context)callPluginMethod("postCreate", ret, admin_user, createaccess, auth);
-            } catch(final StorageException e) {
-                log.error("",e);
-                // callPluginMethod delete may fail here for what ever reason.
-                // this must not prevent us from cleaning up the rest
-                try {
-                    callPluginMethod("delete", ctx, auth);
-                } catch (final Exception e1) {
-                    log.error("", e);
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXContextPluginInterface contextInterface : pluginInterfaces.getContextPlugins().getServiceList()) {
+                    try {
+                        ret = contextInterface.postCreate(ret, admin_user, createaccess, auth);
+                    } catch (final PluginException e) {
+                        log.error("",e);
+                        // callPluginMethod delete may fail here for what ever reason.
+                        // this must not prevent us from cleaning up the rest
+                        try {
+                            contextInterface.delete(ctx, auth);
+                        } catch (final Exception e1) {
+                            log.error("", e);
+                        }
+                        oxcox.delete(ret);
+                        throw new StorageException(e);
+                    }
                 }
-                oxcox.delete(ret);
-                throw e;
             }
         }
         return ret;
@@ -1175,7 +1231,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            callPluginMethod("changeModuleAccess", ctx, access, auth);
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        oxContextPlugin.changeModuleAccess(ctx, access, auth);
+                    }
+                }
+            }
 
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
 
@@ -1194,17 +1258,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final StorageException e) {
             log.error("", e);
             throw e;
-        }
-
-        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-        if (null != eventSystemService) {
-            try {
-                final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_UPDATE);
-                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
-                eventSystemService.publish(event);
-            } catch (final Exception e) {
-                log.warn("Could not distribute context event.", e);
-            }
+        } catch (final PluginException e) {
+            log.error("", e);
+            throw new StorageException(e);
         }
     }
 
@@ -1247,7 +1303,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
             }
             access = access.clone();
-            callPluginMethod("changeModuleAccess", ctx, access_combination_name, auth);
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        oxContextPlugin.changeModuleAccess(ctx, access_combination_name, auth);
+                    }
+                }
+            }
 
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
 
@@ -1266,17 +1331,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final StorageException e) {
             log.error("", e);
             throw e;
-        }
-
-        final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-        if (null != eventSystemService) {
-            try {
-                final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_UPDATE);
-                event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, ctx.getId());
-                eventSystemService.publish(event);
-            } catch (final Exception e) {
-                log.warn("Could not distribute context event.", e);
-            }
+        } catch (final PluginException e) {
+            log.error("", e);
+            throw new StorageException(e);
         }
     }
 
@@ -1312,7 +1369,20 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
         try {
-            callPluginMethod("downgrade", ctx, auth);
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        try {
+                            oxContextPlugin.downgrade(ctx, auth);
+                        } catch (final PluginException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    }
+                }
+            }
             oxcox.downgrade(ctx);
         } catch (final RuntimeException e) {
             log.error("", e);
@@ -1355,7 +1425,21 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            callPluginMethod("getAccessCombinationName", ctx, auth);
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        try {
+                            oxContextPlugin.getAccessCombinationName(ctx, auth);
+                        } catch (final PluginException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    }
+                }
+            }
+
             // Get admin id and fetch current access object and query cache for its name!
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
 
@@ -1394,7 +1478,21 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            callPluginMethod("getModuleAccess", ctx, auth);
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        try {
+                            oxContextPlugin.getModuleAccess(ctx, auth);
+                        } catch (final PluginException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    }
+                }
+            }
+
             // Get admin id and fetch current access object and return it to the client!
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
             return oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx));
@@ -1462,11 +1560,19 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        try {
-            callPluginMethod("getAdminId", ctx, auth);
-        } catch (final StorageException e) {
-            log.error("", e);
-            throw e;
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                    try {
+                        oxContextPlugin.getAdminId(ctx, auth);
+                    } catch (final PluginException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    }
+                }
+            }
         }
 
         if (!tool.existsContext(ctx)) {
@@ -1485,11 +1591,19 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new InvalidDataException("Given context is invalid");
         }
 
-        try {
-            callPluginMethod("exists", ctx, auth);
-        } catch (final StorageException e) {
-            log.error("", e);
-            throw e;
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                    try {
+                        oxContextPlugin.exists(ctx, auth);
+                    } catch (final PluginException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    }
+                }
+            }
         }
 
         if( null != ctx.getId() ) {

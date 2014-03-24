@@ -67,6 +67,7 @@ import com.openexchange.osgi.util.RankedService;
 public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S, S> implements ServiceListing<S> {
 
     private final SortableConcurrentList<RankedService<S>> services;
+    private final int defaultRanking;
 
     /**
      * Initializes a new {@link RankingAwareNearRegistryServiceTracker}.
@@ -75,8 +76,20 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
      * @param clazz The service's class
      */
     public RankingAwareNearRegistryServiceTracker(final BundleContext context, final Class<S> clazz) {
+        this(context, clazz, 0);
+    }
+
+    /**
+     * Initializes a new {@link RankingAwareNearRegistryServiceTracker}.
+     *
+     * @param context The bundle context
+     * @param clazz The service's class
+     * @param defaultRanking The default ranking
+     */
+    public RankingAwareNearRegistryServiceTracker(final BundleContext context, final Class<S> clazz, final int defaultRanking) {
         super(context, clazz, null);
         services = new SortableConcurrentList<RankedService<S>>();
+        this.defaultRanking = defaultRanking;
     }
 
     /**
@@ -96,7 +109,7 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
     @Override
     public S addingService(final ServiceReference<S> reference) {
         final S service = context.getService(reference);
-        final int ranking = getRanking(reference);
+        final int ranking = getRanking(reference, defaultRanking);
         final RankedService<S> rankedService = new RankedService<S>(service, ranking);
         if (services.add(rankedService)) { // Append to the end of the list
             services.sort();

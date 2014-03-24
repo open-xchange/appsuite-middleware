@@ -52,10 +52,7 @@ package com.openexchange.admin.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
 import com.openexchange.admin.plugins.PluginException;
@@ -72,6 +69,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
@@ -187,27 +185,21 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
         oxRes.change(ctx, res);
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE==bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
-                            final OXResourcePluginInterface oxresource = (OXResourcePluginInterface) this.context.getService(servicereference);
-                            try {
-                                log.info("Calling change for plugin: {}", bundlename);
-                                oxresource.change(ctx, res, auth);
-                            } catch (final PluginException e) {
-                                log.error("Error while calling change for plugin: {}", bundlename, e);
-                                throw new StorageException(e);
-                            }
-                        }
-                    }
-                }
-            }
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+             if (null != pluginInterfaces) {
+                 for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
+                     final String bundlename = oxresource.getClass().getName();
+                     try {
+                         log.info("Calling change for plugin: {}", bundlename);
+                         oxresource.change(ctx, res, auth);
+                     } catch (final PluginException e) {
+                         log.error("Error while calling change for plugin: {}", bundlename, e);
+                         throw new StorageException(e);
+                     }
+                 }
+             }
         }
     }
 
@@ -274,41 +266,35 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
        res.setId(retval);
        final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
 
-       final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-       for (final Bundle bundle : bundles) {
-           final String bundlename = bundle.getSymbolicName();
-           if (Bundle.ACTIVE==bundle.getState()) {
-               final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-               if (null != servicereferences) {
-                   for (final ServiceReference servicereference : servicereferences) {
-                       final Object property = servicereference.getProperty("name");
-                       if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
-                           final OXResourcePluginInterface oxresource = (OXResourcePluginInterface) this.context.getService(servicereference);
-                           try {
-                                   log.debug("Calling create for plugin: {}", bundlename);
-                               oxresource.create(ctx, res, auth);
-                               interfacelist.add(oxresource);
-                           } catch (final PluginException e) {
-                               log.error("Error while calling create for plugin: {}", bundlename, e);
-                               log.info("Now doing rollback for everything until now...");
-                               for (final OXResourcePluginInterface oxresourceinterface : interfacelist) {
-                                   try {
-                                       oxresourceinterface.delete(ctx, res, auth);
-                                   } catch (final PluginException e1) {
-                                       log.error("Error doing rollback for plugin: {}", bundlename, e1);
-                                   }
-                               }
-                               try {
-                                   oxRes.delete(ctx, res);
-                               } catch (final StorageException e1) {
-                                   log.error("Error doing rollback for creating resource in database", e1);
-                               }
-                               throw new StorageException(e);
-                           }
-                       }
-                   }
-               }
-           }
+       // Trigger plugin extensions
+       {
+           final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
+                    final String bundlename = oxresource.getClass().getName();
+                    try {
+                        log.debug("Calling create for plugin: {}", bundlename);
+                        oxresource.create(ctx, res, auth);
+                        interfacelist.add(oxresource);
+                    } catch (final PluginException e) {
+                        log.error("Error while calling create for plugin: {}", bundlename, e);
+                        log.info("Now doing rollback for everything until now...");
+                        for (final OXResourcePluginInterface oxresourceinterface : interfacelist) {
+                            try {
+                                oxresourceinterface.delete(ctx, res, auth);
+                            } catch (final PluginException e1) {
+                                log.error("Error doing rollback for plugin: {}", bundlename, e1);
+                            }
+                        }
+                        try {
+                            oxRes.delete(ctx, res);
+                        } catch (final StorageException e1) {
+                            log.error("Error doing rollback for creating resource in database", e1);
+                        }
+                        throw new StorageException(e);
+                    }
+                }
+            }
        }
 
        return res;
@@ -358,32 +344,22 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        final java.util.List<Bundle> revbundles = new ArrayList<Bundle>();
-        for (int i = bundles.size() - 1; i >= 0; i--) {
-            revbundles.add(bundles.get(i));
-        }
-        for (final Bundle bundle : revbundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE==bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
-                            final OXResourcePluginInterface oxresource = (OXResourcePluginInterface) this.context.getService(servicereference);
-                            try {
-                                log.info("Calling delete for plugin: {}", bundlename);
-                                oxresource.delete(ctx, res, auth);
-                                interfacelist.add(oxresource);
-                            } catch (final PluginException e) {
-                                log.error("Error while calling delete for plugin: {}", bundlename, e);
-                                throw new StorageException(e);
-                            }
-                        }
-                    }
-                }
-            }
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+             if (null != pluginInterfaces) {
+                 for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
+                     final String bundlename = oxresource.getClass().getName();
+                     try {
+                         log.info("Calling delete for plugin: {}", bundlename);
+                         oxresource.delete(ctx, res, auth);
+                         interfacelist.add(oxresource);
+                     } catch (final PluginException e) {
+                         log.error("Error while calling delete for plugin: {}", bundlename, e);
+                         throw new StorageException(e);
+                     }
+                 }
+             }
         }
 
         oxRes.delete(ctx, res);
@@ -424,22 +400,16 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
         Resource retres = oxRes.getData(ctx, res);
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE==bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
-                            final OXResourcePluginInterface oxresourceplugin = (OXResourcePluginInterface) this.context.getService(servicereference);
-                            log.info("Calling getData for plugin: {}", bundlename);
-                            retres = oxresourceplugin.get(ctx, retres, auth);
-                        }
-                    }
-                }
-            }
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+             if (null != pluginInterfaces) {
+                 for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
+                     final String bundlename = oxresource.getClass().getName();
+                     log.info("Calling getData for plugin: {}", bundlename);
+                     retres = oxresource.get(ctx, retres, auth);
+                 }
+             }
         }
 
         return retres;
@@ -495,25 +465,20 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             retval.add(tmp);
         }
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE==bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
-                            final OXResourcePluginInterface oxresourceplugin = (OXResourcePluginInterface) this.context.getService(servicereference);
-                            log.info("Calling get for plugin: {}", bundlename);
-                            for (Resource resource : retval) {
-                                resource = oxresourceplugin.get(ctx, resource, auth);
-                            }
-                        }
-                    }
-                }
-            }
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+             if (null != pluginInterfaces) {
+                 for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
+                     final String bundlename = oxresource.getClass().getName();
+                     log.info("Calling get for plugin: {}", bundlename);
+                     for (Resource resource : retval) {
+                         resource = oxresource.get(ctx, resource, auth);
+                     }
+                 }
+             }
         }
+
         return retval.toArray(new Resource[retval.size()]);
     }
 

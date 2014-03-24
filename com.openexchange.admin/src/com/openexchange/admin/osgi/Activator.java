@@ -67,8 +67,13 @@ import com.openexchange.admin.mysql.CreateOXFolderTables;
 import com.openexchange.admin.mysql.CreateSequencesTables;
 import com.openexchange.admin.mysql.CreateSettingsTables;
 import com.openexchange.admin.mysql.CreateVirtualFolderTables;
+import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
+import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.OXGroupPluginInterface;
+import com.openexchange.admin.plugins.OXResourcePluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.config.ConfigurationService;
@@ -76,9 +81,9 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.eventsystem.EventSystemService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
@@ -101,7 +106,32 @@ public class Activator extends HousekeepingActivator {
         AdminCache.compareAndSetConfigurationService(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         track(CreateTableService.class, new CreateTableCustomizer(context));
-        track(EventSystemService.class, new RegistryServiceTrackerCustomizer<EventSystemService>(context, AdminServiceRegistry.getInstance(), EventSystemService.class));
+
+        // Plugin interfaces
+        {
+            final int defaultRanking = 100;
+
+            final RankingAwareNearRegistryServiceTracker<BasicAuthenticatorPluginInterface> batracker = new RankingAwareNearRegistryServiceTracker<BasicAuthenticatorPluginInterface>(context, BasicAuthenticatorPluginInterface.class, defaultRanking);
+            rememberTracker(batracker);
+
+            final RankingAwareNearRegistryServiceTracker<OXContextPluginInterface> ctracker = new RankingAwareNearRegistryServiceTracker<OXContextPluginInterface>(context, OXContextPluginInterface.class, defaultRanking);
+            rememberTracker(ctracker);
+
+            final RankingAwareNearRegistryServiceTracker<OXUserPluginInterface> utracker = new RankingAwareNearRegistryServiceTracker<OXUserPluginInterface>(context, OXUserPluginInterface.class, defaultRanking);
+            rememberTracker(utracker);
+
+            final RankingAwareNearRegistryServiceTracker<OXGroupPluginInterface> gtracker = new RankingAwareNearRegistryServiceTracker<OXGroupPluginInterface>(context, OXGroupPluginInterface.class, defaultRanking);
+            rememberTracker(gtracker);
+
+            final RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface> rtracker = new RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface>(context, OXResourcePluginInterface.class, defaultRanking);
+            rememberTracker(rtracker);
+
+            final PluginInterfaces.Builder builder = new PluginInterfaces.Builder().basicAuthenticatorPlugins(batracker).contextPlugins(ctracker).groupPlugins(gtracker).resourcePlugins(rtracker).userPlugins(utracker);
+
+            PluginInterfaces.setInstance(builder.build());
+        }
+
+        // Open trackers
         openTrackers();
 
         log.info("Starting Admindaemon...");
@@ -177,6 +207,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         cleanUp();
+        PluginInterfaces.setInstance(null);
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
         log.info("Stopping RMI...");
         final AdminDaemon daemon = this.daemon;

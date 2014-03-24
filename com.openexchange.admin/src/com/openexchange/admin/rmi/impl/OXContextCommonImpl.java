@@ -55,6 +55,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -65,12 +66,9 @@ import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.GenericChecks;
-import com.openexchange.eventsystem.Event;
-import com.openexchange.eventsystem.EventSystemService;
-import com.openexchange.eventsystem.provisioning.ProviosioningEventConstants;
 
 
 public abstract class OXContextCommonImpl extends OXCommonImpl {
@@ -86,7 +84,18 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
     protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, ContextExistsException, InvalidDataException {
 
         try {
-            final Boolean ret = (Boolean)callPluginMethod("checkMandatoryMembersContextCreate", ctx);
+            Boolean ret = null;;
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        ret = oxContextPlugin.checkMandatoryMembersContextCreate(ctx);
+                    }
+                }
+            }
+
             if( ret == null || ( ret != null && ret.booleanValue())  ) {
                 if (!ctx.mandatoryCreateMembersSet()) {
                     throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());
@@ -94,6 +103,8 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             }
         } catch (final EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
+        } catch (final PluginException e) {
+            throw new StorageException(e);
         }
 
         if (tool.existsContext(ctx)) {
@@ -134,11 +145,16 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             Context ret = ctx;
             if( isAnyPluginLoaded() ) {
-                try {
-                    ret = (Context)callPluginMethod("preCreate", ret, admin_user, auth);
-                } catch(final StorageException e) {
-                    log.error("",e);
-                    throw e;
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface contextInterface : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        try {
+                            ret = contextInterface.preCreate(ret, admin_user, auth);
+                        } catch (PluginException e) {
+                            log.error("",e);
+                            throw new StorageException(e);
+                        }
+                    }
                 }
             }
 
@@ -162,17 +178,6 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             }
 
             final Context retval = createmaincall(ret, admin_user, db, access,auth);
-
-            final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
-            if (null != eventSystemService) {
-                try {
-                    final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_CREATE);
-                    event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, retval.getId());
-                    eventSystemService.publish(event);
-                } catch (final Exception e) {
-                    log.warn("Could not distribute context event.", e);
-                }
-            }
 
             return retval;
         } catch (final ContextExistsException e) {
@@ -255,20 +260,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
      * @throws StorageException
      */
     protected boolean isAnyPluginLoaded() throws StorageException {
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+        return null != pluginInterfaces && false == pluginInterfaces.getContextPlugins().getServiceList().isEmpty();
     }
 }

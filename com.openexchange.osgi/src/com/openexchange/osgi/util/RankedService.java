@@ -135,14 +135,27 @@ public final class RankedService<S> implements Comparable<RankedService<S>> {
      * @return The ranking or <code>0</code> (zero) if absent
      */
     public static <S> int getRanking(final ServiceReference<S> reference) {
-        int ranking = 0;
+        return getRanking(reference, 0);
+    }
+
+    /**
+     * Gets the service ranking by look-up of <code>"service.ranking"</code> property.
+     * <p>
+     * See {@link Constants#SERVICE_RANKING}.
+     *
+     * @param reference The service reference providing properties Dictionary object of the service
+     * @param defaultRanking The default ranking if {@link Constants#SERVICE_RANKING} property is absent
+     * @return The ranking or <code>0</code> (zero) if absent
+     */
+    public static <S> int getRanking(final ServiceReference<S> reference, final int defaultRanking) {
+        int ranking = defaultRanking;
         {
             final Object oRanking = reference.getProperty(Constants.SERVICE_RANKING);
             if (null != oRanking) {
                 try {
                     ranking = Integer.parseInt(oRanking.toString().trim());
                 } catch (final NumberFormatException e) {
-                    ranking = 0;
+                    ranking = defaultRanking;
                 }
             }
         }
