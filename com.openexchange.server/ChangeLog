@@ -1,3 +1,7 @@
+* 2014-03-24 - steffen.templin@open-xchange.com
+
+ - Fix for Bug 31037: Enlarged DB cloumns for fileName and fileType in preview table
+
 * 2014-03-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 31677: Properly do the thread-sort for subscribed POP3 accounts accessed via Unified Mail
