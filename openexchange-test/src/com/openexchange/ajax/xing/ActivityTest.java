@@ -236,11 +236,11 @@ public class ActivityTest extends AbstractAJAXSession {
         final DeleteCommentResponse deleteResponse = client.execute(deleteRequest);
         assertNotNull(deleteResponse);
     }
-    
+
     /**
      * Gets an activityId which contains the needed possible actions.
      * 
-     * @param permission the permissions which should be there. Possible permissions on an activity could be COMMENT, LIKE, SHARE or IGNORE
+     * @param permission the permission which should be present. Possible permissions are COMMENT, LIKE, SHARE or IGNORE
      * @return an activity id containing the permission
      * @throws OXException
      * @throws IOException

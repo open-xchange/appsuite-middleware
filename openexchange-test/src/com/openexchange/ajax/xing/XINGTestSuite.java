@@ -65,7 +65,7 @@ public class XINGTestSuite extends TestSuite {
 
     public static Test suite() {
         final TestSuite suite = new TestSuite("com.openexchange.ajax.xing.XINGTestSuite");
-        suite.addTestSuite(NewsFeedTest.class);
+        suite.addTestSuite(FeedTest.class);
         suite.addTestSuite(ActivityTest.class);
         suite.addTestSuite(ContactRequestTest.class);
         return suite;

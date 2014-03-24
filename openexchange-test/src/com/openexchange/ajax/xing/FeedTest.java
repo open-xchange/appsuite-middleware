@@ -62,18 +62,18 @@ import com.openexchange.exception.OXException;
 import com.openexchange.xing.UserField;
 
 /**
- * {@link NewsFeedTest}
+ * {@link FeedTest}
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class NewsFeedTest extends AbstractAJAXSession {
+public class FeedTest extends AbstractAJAXSession {
 
     /**
-     * Initializes a new {@link NewsFeedTest}.
+     * Initializes a new {@link FeedTest}.
      * 
      * @throws Exception
      */
-    public NewsFeedTest(final String name) throws Exception {
+    public FeedTest(final String name) throws Exception {
         super(name);
     }
 
