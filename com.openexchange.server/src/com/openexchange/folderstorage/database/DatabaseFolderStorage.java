@@ -90,6 +90,7 @@ import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
@@ -631,6 +632,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
+            FolderServiceDecorator decorator = storageParameters.getDecorator();
+            boolean hardDelete = null != decorator && (
+                Boolean.TRUE.equals(decorator.getProperty("hardDelete")) || decorator.getBoolProperty("hardDelete"));
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             /*-
              * TODO: Perform last-modified check?
@@ -643,7 +647,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             }
              *
              */
-            folderManager.deleteFolder(fo, true, System.currentTimeMillis());
+            folderManager.deleteFolder(fo, true, System.currentTimeMillis(), hardDelete);
 
             final List<OXException> warnings = folderManager.getWarnings();
             if (null != warnings) {

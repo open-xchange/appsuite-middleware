@@ -121,48 +121,8 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public String deleteFolder(final String folderId, final boolean hardDelete) throws OXException {
-
-        //TODO: switch to Services.getService(FolderService.class).deleteFolder(REAL_TREE_ID, folderId, null, session, hardDelete);
-        //      once it is implemented
-
-        if (false == hardDelete) {
-            /*
-             * move to trash if possible
-             */
-            String trashFolderID = null;
-            try {
-                trashFolderID = getTrashFolder().getId();
-            } catch (OXException e) {
-                if (false == FileStorageExceptionCodes.NO_SUCH_FOLDER.equals(e)) {
-                    throw e;
-                }
-            }
-            if (null != trashFolderID) {
-                /*
-                 * check if folder already below trash
-                 */
-                boolean belowTrash = false;
-                FileStorageFolder[] path = getPath2DefaultFolder(folderId);
-                if (null != path && 0 < path.length) {
-                    for (FileStorageFolder folder : path) {
-                        if (trashFolderID.equals(folder.getId())) {
-                            belowTrash = true;
-                            break;
-                        }
-                    }
-                }
-                if (false == belowTrash) {
-                    /*
-                     * move to trash
-                     */
-                    return moveFolder(folderId, trashFolderID, null, new FolderServiceDecorator().put("autorename", "true"));
-                }
-            }
-        }
-        /*
-         * perform hard deletion in all other cases
-         */
-        Services.getService(FolderService.class).deleteFolder(REAL_TREE_ID, folderId, null, session);
+        Services.getService(FolderService.class).deleteFolder(REAL_TREE_ID, folderId, null, session,
+            new FolderServiceDecorator().put("hardDelete", String.valueOf(hardDelete)));
         return folderId;
     }
 

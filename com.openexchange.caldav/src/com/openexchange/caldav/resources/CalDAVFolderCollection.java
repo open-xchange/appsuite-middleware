@@ -446,7 +446,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         } else {
             try {
                 factory.getFolderService().deleteFolder(factory.getState().getTreeID(), this.folder.getID(),
-                    this.folder.getLastModifiedUTC(), factory.getSession());
+                    this.folder.getLastModifiedUTC(), factory.getSession(), null);
             } catch (OXException e) {
                 throw protocolException(HttpServletResponse.SC_FORBIDDEN);
             }

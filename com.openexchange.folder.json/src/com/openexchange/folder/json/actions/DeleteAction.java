@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.Category;
@@ -66,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -79,7 +81,8 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted folders."),
     @Parameter(name = "tree", description = "(Preliminary) The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
-    @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered.")
+    @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered."),
+    @Parameter(name = "hardDelete", type=Type.BOOLEAN, description = "Optional, defaults to \"false\". If set to \"true\", the folders are deleted permanently. Otherwise, and if the underlying storage supports a trash folder and the folders are not yet located below the trash folder, they are moved to the trash folder.")
 }, requestBody = "An array with object IDs of the folders that shall be deleted.",
 responseDescription = "An array with object IDs of folders that were NOT deleted. There may be a lot of different causes for a not deleted folder: A folder has been modified in the mean time, the user does not have the permission to delete it or those permissions have just been removed, the folder does not exist, etc.")
 public final class DeleteAction extends AbstractFolderAction {
@@ -128,6 +131,7 @@ public final class DeleteAction extends AbstractFolderAction {
          */
         final boolean failOnError = AJAXRequestDataTools.parseBoolParameter("failOnError", request, false);
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        FolderServiceDecorator decorator = new FolderServiceDecorator().put("hardDelete", request.getParameter("hardDelete"));
         final AJAXRequestResult result;
         if (failOnError) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
@@ -136,7 +140,7 @@ public final class DeleteAction extends AbstractFolderAction {
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
                 try {
-                    folderService.deleteFolder(treeId, folderId, timestamp, session);
+                    folderService.deleteFolder(treeId, folderId, timestamp, session, decorator);
                 } catch (final OXException e) {
                     e.setCategory(Category.CATEGORY_ERROR);
                     log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
@@ -160,7 +164,7 @@ public final class DeleteAction extends AbstractFolderAction {
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
                 try {
-                    folderService.deleteFolder(treeId, folderId, timestamp, session);
+                    folderService.deleteFolder(treeId, folderId, timestamp, session, decorator);
                 } catch (final OXException e) {
                     final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
                     log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);

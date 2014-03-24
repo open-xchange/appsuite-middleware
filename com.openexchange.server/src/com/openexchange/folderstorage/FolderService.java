@@ -374,9 +374,10 @@ public interface FolderService {
      * @param timeStamp The requestor's last-modified time stamp
      * @param user The user
      * @param context The context
+     * @param decorator The folder service decorator or <code>null</code>
      * @throws OXException If folder cannot be deleted
      */
-    FolderResponse<Void> deleteFolder(String treeId, String folderId, Date timeStamp, User user, Context context) throws OXException;
+    FolderResponse<Void> deleteFolder(String treeId, String folderId, Date timeStamp, User user, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Deletes the specified folder in given tree.
@@ -387,9 +388,10 @@ public interface FolderService {
      * @param folderId The folder identifier
      * @param timeStamp The requestor's last-modified time stamp
      * @param session The session
+     * @param decorator The folder service decorator or <code>null</code>
      * @throws OXException If folder cannot be deleted
      */
-    FolderResponse<Void> deleteFolder(String treeId, String folderId, Date timeStamp, Session session) throws OXException;
+    FolderResponse<Void> deleteFolder(String treeId, String folderId, Date timeStamp, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Clears the content of specified folder in given tree.

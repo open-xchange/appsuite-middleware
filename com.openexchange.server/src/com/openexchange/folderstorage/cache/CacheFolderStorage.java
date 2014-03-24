@@ -830,12 +830,12 @@ public final class CacheFolderStorage implements FolderStorage {
              * Perform delete
              */
             if (null == session) {
-                new DeletePerformer(storageParameters.getUser(), storageParameters.getContext(), registry).doDelete(
+                new DeletePerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry).doDelete(
                     treeId,
                     folderId,
                     storageParameters.getTimeStamp());
             } else {
-                new DeletePerformer(ServerSessionAdapter.valueOf(session), registry).doDelete(
+                new DeletePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry).doDelete(
                     treeId,
                     folderId,
                     storageParameters.getTimeStamp());

@@ -589,10 +589,17 @@ public final class MailFolderStorage implements FolderStorage {
             mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
             final String fullname = arg.getFullname();
             /*
-             * Only backup if full name does not denote trash (sub)folder
+             * Only backup if full name does not denote trash (sub)folder, and hardDelete property is not set in decorator
              */
             final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
-            final boolean hardDelete = fullname.startsWith(trashFullname);
+            final boolean hardDelete;
+            if (fullname.startsWith(trashFullname)) {
+                hardDelete = true;
+            } else {
+                FolderServiceDecorator decorator = storageParameters.getDecorator();
+                hardDelete = null != decorator && (
+                    Boolean.TRUE.equals(decorator.getProperty("hardDelete")) || decorator.getBoolProperty("hardDelete"));
+            }
             final Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
             mailAccess.getFolderStorage().deleteFolder(fullname, hardDelete);
             addWarnings(mailAccess, storageParameters);

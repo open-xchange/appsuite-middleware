@@ -142,16 +142,16 @@ public final class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public FolderResponse<Void> deleteFolder(final String treeId, final String folderId, final Date timeStamp, final User user, final Context context) throws OXException {
-        final DeletePerformer performer = new DeletePerformer(user, context);
+    public FolderResponse<Void> deleteFolder(final String treeId, final String folderId, final Date timeStamp, final User user, final Context context, final FolderServiceDecorator decorator) throws OXException {
+        final DeletePerformer performer = new DeletePerformer(user, context, decorator);
         performer.doDelete(treeId, folderId, timeStamp);
         return FolderResponseImpl.newFolderResponse(null, performer.getWarnings());
 
     }
 
     @Override
-    public FolderResponse<Void> deleteFolder(final String treeId, final String folderId, final Date timeStamp, final Session session) throws OXException {
-        final DeletePerformer performer = new DeletePerformer(ServerSessionAdapter.valueOf(session));
+    public FolderResponse<Void> deleteFolder(final String treeId, final String folderId, final Date timeStamp, final Session session, final FolderServiceDecorator decorator) throws OXException {
+        final DeletePerformer performer = new DeletePerformer(ServerSessionAdapter.valueOf(session), decorator);
         performer.doDelete(treeId, folderId, timeStamp);
         return FolderResponseImpl.newFolderResponse(null, performer.getWarnings());
     }
