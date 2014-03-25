@@ -78,7 +78,9 @@ import com.openexchange.calendar.itip.generators.OrganizerNotificationMailGenera
     RefreshITipAnalyzerTest.class,
     OrganizerNotificationMailGeneratorTest.class,
     AttendeeOfAppointmentWithExternalOrganizerMailGeneratorTest.class,
-    AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest.class
+    AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest.class,
+    AppointmentDiffTest.class,
+    CalendarSqlTest.class
 })
 public class UnitTests {
     // Test Suite
