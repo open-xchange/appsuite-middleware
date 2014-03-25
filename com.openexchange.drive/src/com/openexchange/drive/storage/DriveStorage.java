@@ -92,6 +92,7 @@ import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAcce
 import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -254,6 +255,40 @@ public class DriveStorage {
             throw DriveExceptionCodes.FILE_NOT_FOUND.create();//TODO: exception for this
         }
         return file;
+    }
+
+    /**
+     * Deletes multiple files.
+     *
+     * @param files The files to delete
+     * @param hardDelete <code>true</code> to hard-delete the files, <code>false</code>, otherwise
+     * @return The files that could <b>not</b> be deleted due to an edit-delete conflict
+     * @throws OXException
+     */
+    public List<File> deleteFiles(List<File> files, boolean hardDelete) throws OXException {
+        Map<String, File> ids = new HashMap<String, File>(files.size());
+        long sequenceNumber = 0;
+        StringAllocator stringAllocator = session.isTraceEnabled() ? new StringAllocator() : null;
+        for (File file : files) {
+            ids.put(file.getId(), file);
+            sequenceNumber = Math.max(sequenceNumber, file.getSequenceNumber());
+            if (null != stringAllocator) {
+                stringAllocator.append(' ').append(combine(getPath(file.getFolderId()), file.getFileName()));
+            }
+        }
+        if (null != stringAllocator) {
+            session.trace(this.toString() + "rm" + (hardDelete ? " -rf " : "") + stringAllocator.toString());
+        }
+        List<String> notRemoved = getFileAccess().removeDocument(new ArrayList<String>(ids.keySet()), sequenceNumber, hardDelete);
+        if (null == notRemoved || 0 == notRemoved.size()) {
+            return Collections.emptyList();
+        } else {
+            List<File> notRemovedFiles = new ArrayList<File>(notRemoved.size());
+            for (String id : notRemoved) {
+                notRemovedFiles.add(ids.get(id));
+            }
+            return notRemovedFiles;
+        }
     }
 
     /**
