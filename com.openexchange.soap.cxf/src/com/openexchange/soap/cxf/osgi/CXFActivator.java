@@ -84,6 +84,12 @@ public class CXFActivator extends HousekeepingActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CXFActivator.class);
         try {
             log.info("Starting Bundle: com.openexchange.soap.cxf");
+            // Set jdk.xml.entityExpansionLimit
+            {
+                final int defaulEntityExpansionLimit = 128000;
+                final int entityExpansionLimit = getService(ConfigurationService.class).getIntProperty("com.openexchange.soap.cxf.entityExpansionLimit", defaulEntityExpansionLimit);
+                System.setProperty("jdk.xml.entityExpansionLimit", Integer.toString(entityExpansionLimit < 0 ? defaulEntityExpansionLimit : entityExpansionLimit));
+            }
             // Set logger class
             //LogUtils.setLoggerClass(com.openexchange.soap.cxf.logger.Slf4jLogger.class);
             LogUtils.setLoggerClass(org.apache.cxf.common.logging.Slf4jLogger.class);
