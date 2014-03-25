@@ -1,6 +1,7 @@
 * 2014-03-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 31747: Added property to adjust JVM XML entityExpansionLimit o certain needs
+ - Fix for bug 31745: Mention the unit for property "com.openexchange.sessiond.sessionDefaultLifeTime"
 
 * 2014-03-25 - tobias.friedrich@open-xchange.com
 
