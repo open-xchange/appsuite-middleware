@@ -114,7 +114,7 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
      * @param requestData The associated request data
      * @throws OXException If any quota restrictions are exceeded
      */
-    protected void checkSize(final long size, AJAXRequestData requestData) throws OXException {
+    protected void checkSize(final long size, final AJAXRequestData requestData) throws OXException {
         if (maxUploadSize.get() == -2) {
             final long configuredSize = AttachmentConfig.getMaxUploadSize();
             long cur;
