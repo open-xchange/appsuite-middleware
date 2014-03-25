@@ -136,7 +136,8 @@ public class UserAdapter implements User {
 
     @Override
     public String[] getAliases() {
-        return delegate.getAliases().toArray(new String[0]);
+        final Set<String> aliases = delegate.getAliases();
+        return null == aliases ? null : aliases.toArray(new String[aliases.size()]);
     }
 
     @Override
