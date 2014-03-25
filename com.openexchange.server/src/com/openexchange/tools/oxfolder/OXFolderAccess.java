@@ -468,38 +468,36 @@ public class OXFolderAccess {
      */
     public final FolderObject getDefaultFolder(final int userId, final int module, final int type) throws OXException {
         try {
-            final int folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx) :
+            int folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx) :
                 OXFolderSQL.getUserDefaultFolder(userId, module, type, readCon, ctx);
-            if (folderId == -1) {
+            if (-1 == folderId) {
                 if (FolderObject.INFOSTORE != module) {
                     throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
                         folderModule2String(module),
                         getUserName(userId, ctx),
                         Integer.valueOf(ctx.getContextId()));
                 }
+                if (FolderObject.TRASH == type && false == OXFolderAdminHelper.CREATE_INFOSTORE_TRASH) {
+                    return null;
+                }
                 /*
                  * Re-Create default infostore / infostore trash folder
                  */
                 User user = UserStorage.getInstance().getUser(userId, ctx);
-                int fuid = -1;
                 final Connection wc = DBPool.pickupWriteable(ctx);
                 try {
                     if (FolderObject.TRASH == type) {
-                        if (false == OXFolderAdminHelper.CREATE_INFOSTORE_TRASH) {
-                            return null;
-                        }
-                        fuid = addUserTrashToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
+                        folderId = addUserTrashToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
                     } else {
-                        fuid = addUserToInfoStore(userId, user.getDisplayName(), ctx.getContextId(), wc);
+                        folderId = addUserToInfoStore(userId, user.getDisplayName(), ctx.getContextId(), wc);
                     }
                 } finally {
-                    if (fuid > 0) {
+                    if (folderId > 0) {
                         DBPool.closeWriterSilent(ctx, wc);
                     } else {
                         DBPool.closeWriterAfterReading(ctx, wc);
                     }
                 }
-                return getFolderObject(fuid);
             }
             return getFolderObject(folderId);
         } catch (final OXException e) {
