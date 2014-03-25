@@ -402,7 +402,18 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
             retval.setLastModified(setExternalConfirmation(objectId, folderId, mail, confirm, message));
             return retval;
         }
-        return delegate.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message);
+        CalendarDataObject retval = null;
+        try {
+            CalendarDataObject original = getObjectById(objectId);
+            retval = delegate.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message);
+            if (retval.getObjectID() > 0 && retval.getObjectID() != objectId) { // Change exception was created
+                retval = getObjectById(retval.getObjectID());
+                generateUpdateMail(folderId, original, retval);
+            }
+        } catch (SQLException e) {
+            throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
+        }
+        return retval;
     }
 
     @Override
