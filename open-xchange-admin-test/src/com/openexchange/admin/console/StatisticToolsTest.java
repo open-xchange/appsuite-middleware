@@ -265,6 +265,6 @@ public class StatisticToolsTest extends AbstractRMITest {
             }
         };
         statisticTools.start(new String[] { "-j", "-H", getRMIHost() }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnEventAdmin);
+        assertEquals("Expected 0 as return code!", 0, this.returnCache);
     }
 }
