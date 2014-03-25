@@ -60,6 +60,8 @@ import com.openexchange.find.internal.SearchDriverManager;
 import com.openexchange.find.internal.SearchServiceImpl;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.java.Strings;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 
 /**
  * The activator for find bundle.
@@ -73,6 +75,7 @@ public class FindActivator implements BundleActivator {
     private volatile ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker;
     private volatile ServiceRegistration<SearchService> searchServiceRegistration;
     private volatile ServiceRegistration<PreferencesItemService> mandatoryFoldersRegistration;
+    private volatile ServiceRegistration<ConfigTreeEquivalent> foldersJSLob;
 
     /**
      * Initializes a new {@link FindActivator}.
@@ -93,8 +96,26 @@ public class FindActivator implements BundleActivator {
             this.driverTracker = driverTracker;
             driverTracker.open();
 
+            final MandatoryFolders mandatoryFolders = new MandatoryFolders(driverManager);
             searchServiceRegistration = context.registerService(SearchService.class, searchService, null);
-            mandatoryFoldersRegistration = context.registerService(PreferencesItemService.class, new MandatoryFolders(driverManager), null);
+            mandatoryFoldersRegistration = context.registerService(PreferencesItemService.class, mandatoryFolders, null);
+            foldersJSLob = context.registerService(ConfigTreeEquivalent.class, new ConfigTreeEquivalent() {
+                private final String configPath = Strings.join(mandatoryFolders.getPath(), "/");
+                @Override
+                public String getConfigTreePath() {
+                    return configPath;
+                }
+
+                @Override
+                public String getJslobPath() {
+                    return "io.ox/core//search/mandatory/folder";
+                }
+
+                @Override
+                public String toString() {
+                    return getConfigTreePath() + " > " + getJslobPath();
+                }
+            }, null);
 
             logger.info("Bundle successfully started: com.openexchange.find");
         } catch (final Exception e) {
@@ -118,6 +139,12 @@ public class FindActivator implements BundleActivator {
             if (mandatoryFoldersRegistration != null) {
                 mandatoryFoldersRegistration.unregister();
                 this.mandatoryFoldersRegistration = null;
+            }
+
+            final ServiceRegistration<ConfigTreeEquivalent> foldersJSLob = this.foldersJSLob;
+            if (foldersJSLob != null) {
+                foldersJSLob.unregister();
+                this.foldersJSLob = null;
             }
 
             final ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker = this.driverTracker;
