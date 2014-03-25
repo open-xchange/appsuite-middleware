@@ -15,7 +15,7 @@
 
 * 2014-03-24 - steffen.templin@open-xchange.com
 
- - Fix for Bug 31037: Enlarged DB cloumns for fileName and fileType in preview table
+ - Fix for Bug 31037: Enlarged DB columns for fileName and fileType in preview table
 
 * 2014-03-23 - thorben.betten@open-xchange.com
 
