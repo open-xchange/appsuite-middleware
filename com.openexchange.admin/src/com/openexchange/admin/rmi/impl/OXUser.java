@@ -208,7 +208,34 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
+
+            // Change capabilities
             oxu.changeCapabilities(ctx, user, capsToAdd, capsToRemove, capsToDrop, auth);
+
+            // Check for context administrator
+            final boolean isContextAdmin = tool.isContextAdmin(ctx, user.getId().intValue());
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
+                        if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
+                            try {
+                                log.debug("Calling changeCapabilities for plugin: {}", oxuser.getClass().getName());
+                                oxuser.changeCapabilities(ctx, user, capsToAdd, capsToRemove, capsToDrop, auth);
+                            } catch (final PluginException e) {
+                                log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                throw new StorageException(e);
+                            } catch (final RuntimeException e) {
+                                log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                throw new StorageException(e);
+                            }
+                        }
+                    }
+                }
+            }
+
         } catch (final StorageException e) {
             log.error("", e);
             throw e;
@@ -425,7 +452,33 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
+
+            // Change module access
             oxu.changeModuleAccess(ctx, user_id, moduleAccess);
+
+            // Check for context administrator
+            final boolean isContextAdmin = tool.isContextAdmin(ctx, user.getId().intValue());
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
+                        if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
+                            try {
+                                log.debug("Calling changeModuleAccess for plugin: {}", oxuser.getClass().getName());
+                                oxuser.changeModuleAccess(ctx, user, moduleAccess, auth);
+                            } catch (final PluginException e) {
+                                log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                throw new StorageException(e);
+                            } catch (final RuntimeException e) {
+                                log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                throw new StorageException(e);
+                            }
+                        }
+                    }
+                }
+            }
         } catch (final StorageException e) {
             log.error("", e);
             throw e;
@@ -497,7 +550,33 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 // publicFolderEditable can only be applied to the context administrator.
                 access.setPublicFolderEditable(false);
             }
+
+            // Change module access
             oxu.changeModuleAccess(ctx, user_id, access);
+
+            // Check for context administrator
+            final boolean isContextAdmin = tool.isContextAdmin(ctx, user.getId().intValue());
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
+                        if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
+                            try {
+                                log.debug("Calling changeModuleAccess for plugin: {}", oxuser.getClass().getName());
+                                oxuser.changeModuleAccess(ctx, user, access_combination_name, auth);
+                            } catch (final PluginException e) {
+                                log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                throw new StorageException(e);
+                            } catch (final RuntimeException e) {
+                                log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                throw new StorageException(e);
+                            }
+                        }
+                    }
+                }
+            }
         } catch (final StorageException e) {
             log.error("", e);
             throw e;

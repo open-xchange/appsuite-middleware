@@ -175,24 +175,28 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.changeQuota(ctx, new ArrayList<String>(modules), quota, auth);
+
             // Trigger plugin extensions
             {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
                     for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
-                        // TODO:
+                        oxContextPlugin.changeQuota(ctx, sModule, quotaValue, auth);
                     }
                 }
             }
 
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.changeQuota(ctx, new ArrayList<String>(modules), quota, auth);
         } catch (final StorageException e) {
             log.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
             log.error("", e);
             throw e;
+        } catch (final PluginException e) {
+            log.error("", e);
+            throw new StorageException(e);
         }
     }
 
@@ -256,12 +260,26 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.changeCapabilities(ctx, capsToAdd, capsToRemove, capsToDrop, auth);
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                        oxContextPlugin.changeCapabilities(ctx, capsToAdd, capsToRemove, capsToDrop, auth);
+                    }
+                }
+            }
+
         } catch (final StorageException e) {
             log.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
             log.error("", e);
             throw e;
+        } catch (final PluginException e) {
+            log.error("", e);
+            throw new StorageException(e);
         }
         final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
         if (null != cacheService) {
