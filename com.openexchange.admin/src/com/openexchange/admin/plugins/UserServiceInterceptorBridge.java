@@ -61,8 +61,6 @@ import com.openexchange.user.UserServiceInterceptorRegistry;
 
 
 /**
- * {@link UserServiceInterceptorBridge}
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
@@ -131,20 +129,44 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterface {
 
     @Override
     public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws PluginException {
-        // TODO Auto-generated method stub
-
+        UserAdapter userAdapter = new UserAdapter(user);
+        ContactAdapter contactAdapter = new ContactAdapter(user);
+        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        for (UserServiceInterceptor interceptor : interceptors) {
+            try {
+                interceptor.afterUpdate(userAdapter, contactAdapter);
+            } catch (OXException e) {
+                throw new PluginException(e);
+            }
+        }
     }
 
     @Override
     public void changeModuleAccess(Context ctx, User user, String access_combination_name, Credentials auth) throws PluginException {
-        // TODO Auto-generated method stub
-
+        UserAdapter userAdapter = new UserAdapter(user);
+        ContactAdapter contactAdapter = new ContactAdapter(user);
+        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        for (UserServiceInterceptor interceptor : interceptors) {
+            try {
+                interceptor.afterUpdate(userAdapter, contactAdapter);
+            } catch (OXException e) {
+                throw new PluginException(e);
+            }
+        }
     }
 
     @Override
     public void changeModuleAccess(Context ctx, User user, UserModuleAccess moduleAccess, Credentials auth) throws PluginException {
-        // TODO Auto-generated method stub
-
+        UserAdapter userAdapter = new UserAdapter(user);
+        ContactAdapter contactAdapter = new ContactAdapter(user);
+        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        for (UserServiceInterceptor interceptor : interceptors) {
+            try {
+                interceptor.afterUpdate(userAdapter, contactAdapter);
+            } catch (OXException e) {
+                throw new PluginException(e);
+            }
+        }
     }
 
 }
