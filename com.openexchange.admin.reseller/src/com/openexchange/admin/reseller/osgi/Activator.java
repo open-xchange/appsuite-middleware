@@ -87,17 +87,17 @@ public class Activator extends HousekeepingActivator {
             registerService(Remote.class, reseller, null);
             LOG.info("RMI Interface for reseller bundle bound to RMI registry");
 
-            final Hashtable<String, String> props = new Hashtable<String, String>();
+            Hashtable<String, String> props = new Hashtable<String, String>(2);
             props.put("name", "BasicAuthenticator");
             LOG.info(BasicAuthenticatorPluginInterface.class.getName());
             registerService(BasicAuthenticatorPluginInterface.class, new ResellerAuth(), props);
 
-            props.clear();
+            props = new Hashtable<String, String>(2);
             props.put("name", "OXContext");
             LOG.info(OXContextPluginInterface.class.getName());
             registerService(OXContextPluginInterface.class, new OXResellerContextImpl(), props);
 
-            props.clear();
+            props = new Hashtable<String, String>(2);
             props.put("name", "OXUser");
             LOG.info(OXUserPluginInterface.class.getName());
             registerService(OXUserPluginInterface.class, new OXResellerUserImpl(), props);
