@@ -63,7 +63,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.osgi.framework.BundleContext;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -2391,16 +2390,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             // JCS
             final BundleContext context = AdminCache.getBundleContext();
             if (null != context) {
-                final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-                    CacheService.class);
+                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 if (null != cacheService) {
                     try {
                         final Cache cache = cacheService.getCache("Capabilities");
                         cache.invalidateGroup(Integer.toString(cid));
                     } catch (final OXException e) {
                         log.error("", e);
-                    } finally {
-                        AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                     }
                 }
             }

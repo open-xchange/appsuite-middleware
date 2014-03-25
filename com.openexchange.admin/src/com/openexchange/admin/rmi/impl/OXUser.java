@@ -58,10 +58,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.idn.IDNA;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import com.damienmiller.BCrypt;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
@@ -79,6 +77,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
@@ -254,23 +253,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error("", e);
             throw e;
         }
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
+        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
-                try {
-                    final Cache jcs = cacheService.getCache("CapabilitiesUser");
-                    jcs.removeFromGroup(user.getId(), ctx.getId().toString());
-                } catch (final OXException e) {
-                    log.error("", e);
-                }
-                try {
-                    final Cache jcs = cacheService.getCache("Capabilities");
-                    jcs.removeFromGroup(user.getId(), ctx.getId().toString());
-                } catch (final OXException e) {
-                    log.error("", e);
-                }
-            } finally {
-                AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+                final Cache jcs = cacheService.getCache("CapabilitiesUser");
+                jcs.removeFromGroup(user.getId(), ctx.getId().toString());
+            } catch (final OXException e) {
+                log.error("", e);
+            }
+            try {
+                final Cache jcs = cacheService.getCache("Capabilities");
+                jcs.removeFromGroup(user.getId(), ctx.getId().toString());
+            } catch (final OXException e) {
+                log.error("", e);
             }
         }
     }
@@ -396,7 +391,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             ClientAdminThread.cache.setAdminCredentials(ctx,mech,cauth);
         }
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
+        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
                 final CacheKey key = cacheService.newCacheKey(ctx.getId().intValue(), userid.intValue());
@@ -420,8 +415,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 jcs.invalidateGroup(ctx.getId().toString());
             } catch (final OXException e) {
                 log.error("", e);
-            } finally {
-                AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
         }
     }
@@ -602,7 +595,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (final OXException e) {
             log.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(),e);
         }
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
+        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
                 final Cache usercCache = cacheService.getCache("User");
@@ -627,8 +620,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             } catch (final OXException e) {
                 log.error("", e);
-            } finally {
-                AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
         }
         // END OF JCS
@@ -880,7 +871,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         // The mail account cache caches resolved imap logins or primary addresses. Creating or changing a user needs the invalidation of
         // that cached data.
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
+        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;
         if (null != cacheService) {
             try {
                 final Cache mailAccountCache = cacheService.getCache("MailAccount");
@@ -896,8 +887,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 folderCache.remove(cacheKey);
             } catch (final OXException e) {
                 log.error("", e);
-            } finally {
-                AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
         }
 
@@ -971,12 +960,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // By this we are able to throw all exceptions to the client while concurrently processing all plugins
         final ArrayList<Exception> exceptionlist = new ArrayList<Exception>();
 
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-        final java.util.List<Bundle> revbundles = new ArrayList<Bundle>();
-        for (int i = bundles.size() - 1; i >= 0; i--) {
-            revbundles.add(bundles.get(i));
-        }
-
         // Trigger plugin extensions
         {
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
@@ -1023,7 +1006,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         oxu.delete(ctx, users);
 
         // JCS
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
+        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;
         if (null != cacheService) {
             try {
                 final Cache usercCache = cacheService.getCache("User");
@@ -1048,8 +1031,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             } catch (final OXException e) {
                 log.error("", e);
-            } finally {
-                AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
         }
         // END OF JCS

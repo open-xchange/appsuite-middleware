@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.osgi.framework.BundleContext;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
@@ -74,6 +73,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXGroupStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
@@ -177,8 +177,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         oxGroup.addMember(ctx, grp_id, members);
 
         // JCS
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-				CacheService.class);
+        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
 		if (null != cacheService) {
 	        try {
 	        	final Cache cache = cacheService.getCache("User");
@@ -188,9 +187,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 	            }
 	        } catch (final OXException e) {
                 log.error("", e);
-            } finally {
-	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
-	        }
+            }
         }
         // END OF JCS
     }
@@ -259,8 +256,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             //JCS
             final User[] new_members = oxGroup.getMembers(ctx, grp.getId());
-            final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-    				CacheService.class);
+            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
     		if (null != cacheService) {
     	        try {
     	        	final Cache cache = cacheService.getCache("User");
@@ -277,8 +273,6 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                     }
     	        } catch (final OXException e) {
     	            log.error("", e);
-    	        } finally {
-    	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
     	        }
             }
 
@@ -423,8 +417,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         // If members sent, remove each from cache
         if (grp.getMembers() != null && grp.getMembers().length > 0) {
             final Integer[] mems = grp.getMembers();
-            final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-    				CacheService.class);
+            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;
     		if (null != cacheService) {
     	        try {
     	        	final Cache cache = cacheService.getCache("User");
@@ -433,29 +426,6 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                     }
     	        } catch (final OXException e) {
     	            log.error("", e);
-    	        } finally {
-    	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
-    	        }
-            }
-        }
-        // END OF JCS
-
-        // JCS
-        // If members sent, remove each from cache
-        if (grp.getMembers() != null && grp.getMembers().length > 0) {
-            final Integer[] mems = grp.getMembers();
-            final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-    				CacheService.class);
-    		if (null != cacheService) {
-    	        try {
-    	        	final Cache cache = cacheService.getCache("User");
-    	        	for (final Integer member_id : mems) {
-                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), member_id));
-                    }
-    	        } catch (final OXException e) {
-    	            log.error("", e);
-    	        } finally {
-    	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
     	        }
             }
         }
@@ -572,8 +542,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             oxGroup.delete(ctx, grp);
 
             //JCS
-            final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-    				CacheService.class);
+            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;
     		if (null != cacheService) {
     	        try {
     	        	final Cache cache = cacheService.getCache("User");
@@ -584,8 +553,6 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                     }
     	        } catch (final OXException e) {
     	            log.error("", e);
-    	        } finally {
-    	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
     	        }
             }
             // END OF JCS
@@ -901,8 +868,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         oxGroup.removeMember(ctx, grp_id, members);
 
         // JCS
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-				CacheService.class);
+        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;
 		if (null != cacheService) {
 	        try {
 	        	final Cache cache = cacheService.getCache("User");
@@ -911,8 +877,6 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 	            }
 	        } catch (final OXException e) {
 	            log.error("", e);
-	        } finally {
-	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
 	        }
         }
         // END OF JCS

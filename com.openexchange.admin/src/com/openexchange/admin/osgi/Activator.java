@@ -76,6 +76,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.auth.Authenticator;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.context.ContextService;
@@ -106,6 +107,7 @@ public class Activator extends HousekeepingActivator {
         AdminCache.compareAndSetConfigurationService(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         track(CreateTableService.class, new CreateTableCustomizer(context));
+        track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
 
         // Plugin interfaces
         {

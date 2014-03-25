@@ -82,7 +82,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceException;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -1031,8 +1030,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // JCS
             final BundleContext context = AdminCache.getBundleContext();
             if (null != context) {
-                final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-                    CacheService.class);
+                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 if (null != cacheService) {
                     try {
                         CacheKey key = cacheService.newCacheKey(contextId, userId);
@@ -1059,8 +1057,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         }
                     } catch (final OXException e) {
                         log.error("", e);
-                    } finally {
-                        AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                     }
                 }
             }
@@ -2363,8 +2359,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // JCS
                 final BundleContext context = AdminCache.getBundleContext();
                 if (null != context) {
-                    final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-                        CacheService.class);
+                    final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;
                     if (null != cacheService) {
                         try {
                             final int contextId = ctx.getId().intValue();
@@ -2381,8 +2376,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache.removeFromGroup(user.getId(), ctx.getId().toString());
                         } catch (final OXException e) {
                             log.error("", e);
-                        } finally {
-                            AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                         }
                     }
                 }
@@ -2530,8 +2523,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // JCS
             final BundleContext context = AdminCache.getBundleContext();
             if (null != context) {
-                final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-                    CacheService.class);
+                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 if (null != cacheService) {
                     try {
                         final int contextId = ctx.getId().intValue();
@@ -2550,8 +2542,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         }
                     } catch (final OXException e) {
                         log.error("", e);
-                    } finally {
-                        AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                     }
                 }
             }

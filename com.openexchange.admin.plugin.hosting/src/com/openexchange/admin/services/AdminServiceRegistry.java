@@ -52,7 +52,7 @@ package com.openexchange.admin.services;
 import com.openexchange.osgi.AbstractServiceRegistry;
 
 /**
- * {@link AdminServiceRegistry} - A registry for services needed by admin.
+ * {@link AdminServiceRegistry} - A registry for services for <i>com.openexchange.admin.plugin.hosting</i> bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

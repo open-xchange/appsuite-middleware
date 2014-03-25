@@ -60,14 +60,10 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
@@ -93,6 +89,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
@@ -281,24 +278,20 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             log.error("", e);
             throw new StorageException(e);
         }
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
+        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
-                try {
-                    final Cache jcs = cacheService.getCache("CapabilitiesContext");
-                    final Serializable key = Integer.valueOf(ctx.getId().intValue());
-                    jcs.remove(key);
-                } catch (final OXException e) {
-                    log.error("", e);
-                }
-                try {
-                    final Cache jcs = cacheService.getCache("Capabilities");
-                    jcs.invalidateGroup(ctx.getId().toString());
-                } catch (final OXException e) {
-                    log.error("", e);
-                }
-            } finally {
-                AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+                final Cache jcs = cacheService.getCache("CapabilitiesContext");
+                final Serializable key = Integer.valueOf(ctx.getId().intValue());
+                jcs.remove(key);
+            } catch (final OXException e) {
+                log.error("", e);
+            }
+            try {
+                final Cache jcs = cacheService.getCache("Capabilities");
+                jcs.invalidateGroup(ctx.getId().toString());
+            } catch (final OXException e) {
+                log.error("", e);
             }
         }
     }
@@ -369,12 +362,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
 
         try {
-            final ContextStorage cs =ContextStorage.getInstance();
+            final ContextStorage cs = ContextStorage.getInstance();
             cs.invalidateContext(ctx.getId().intValue());
-            if(backup_ctx.getLoginMappings()!=null && backup_ctx.getLoginMappings().size()>0){
-                final Iterator<String> itr = backup_ctx.getLoginMappings().iterator();
-                while(itr.hasNext()){
-                    cs.invalidateLoginInfo(itr.next());
+            final Set<String> loginMappings = backup_ctx.getLoginMappings();
+            if (loginMappings != null && !loginMappings.isEmpty()) {
+                for (final String loginMapping : loginMappings) {
+                    cs.invalidateLoginInfo(loginMapping);
                 }
             }
         } catch (final OXException e) {
@@ -498,7 +491,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         try {
             final int contextID = ctx.getId().intValue();
             ContextStorage.getInstance().invalidateContext(contextID);
-            final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
+            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             if (null != cacheService) {
                 try {
                     Cache cache = cacheService.getCache("MailAccount");
@@ -507,8 +500,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     cache.invalidateGroup(ctx.getId().toString());
                 } catch (final OXException e) {
                     log.error("", e);
-                } finally {
-                    AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                 }
             }
         } catch (final OXException e) {
@@ -644,16 +635,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         // Clear context cache
         // CACHE
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-                CacheService.class);
+        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;
         if (null != cacheService) {
             try {
                 final Cache cache = cacheService.getCache("Context");
                 cache.clear();
             } catch (final OXException e) {
                 log.error("", e);
-            } finally {
-                AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
         }
         // END OF CACHE
@@ -748,16 +736,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         // Clear context cache
         // CACHE
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-                CacheService.class);
+        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;
         if (null != cacheService) {
             try {
                 final Cache cache = cacheService.getCache("Context");
                 cache.clear();
             } catch (final OXException e) {
                 log.error("", e);
-            } finally {
-                AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
         }
         // END OF CACHE
@@ -853,33 +838,24 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             Filter<Integer, Integer> filter = null;
             final ArrayList<Filter<Context, Context>> loaderFilter = new ArrayList<Filter<Context,Context>>();
             final ArrayList<Filter<Integer, Integer>> contextFilter = new ArrayList<Filter<Integer,Integer>>();
-            final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
-            for (final Bundle bundle : bundles) {
-                final String bundlename = bundle.getSymbolicName();
-                if (Bundle.ACTIVE==bundle.getState()) {
-                    final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                    if (null != servicereferences) {
-                        for (final ServiceReference servicereference : servicereferences) {
-                            final Object property = servicereference.getProperty("name");
-                            if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
-                                final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
-                                //TODO: Implement check for contextadmin here
-                                    log.debug("Calling list for plugin: {}", bundlename);
-                                try {
-                                    filter = oxctx.filter(auth);
-                                    if (null != filter) {
-                                        contextFilter.add(filter);
-                                    }
-                                    loader = oxctx.list(search_pattern, auth);
-                                    if (null != loader) {
-                                        loaderFilter.add(loader);
-                                    }
-                                } catch (final PluginException e) {
-                                    log.error("Error while calling method list of plugin {}", bundlename,e);
-                                    throw new StorageException(e.getCause());
-                                }
-                            }
+
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXContextPluginInterface oxctx : pluginInterfaces.getContextPlugins().getServiceList()) {
+                    final String bundlename = oxctx.getClass().getName();
+                    log.debug("Calling list for plugin: {}", bundlename);
+                    try {
+                        filter = oxctx.filter(auth);
+                        if (null != filter) {
+                            contextFilter.add(filter);
                         }
+                        loader = oxctx.list(search_pattern, auth);
+                        if (null != loader) {
+                            loaderFilter.add(loader);
+                        }
+                    } catch (final PluginException e) {
+                        log.error("Error while calling method list of plugin {}", bundlename,e);
+                        throw new StorageException(e.getCause());
                     }
                 }
             }
@@ -1530,31 +1506,24 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
      */
     private List<Context> callGetDataPlugins(final List<Context> ctxs, final Credentials auth, final OXContextStorageInterface oxcox) throws StorageException {
         List<OXCommonExtension> retval = null;
-        final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         boolean extensionsFound = false;
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE==bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
-                            extensionsFound = true;
-                            final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
-                                log.debug("Calling getData for plugin: {}", bundlename);
-                            try {
-                                retval = oxctx.getData(ctxs, auth);
-                                addExtensionToContext(ctxs, retval, bundlename);
-                            } catch (final PluginException e) {
-                                log.error("Error while calling method list of plugin {}", bundlename,e);
-                                throw new StorageException(e.getCause());
-                            }
-                        }
-                    }
+
+        PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+        if (null != pluginInterfaces) {
+            for (final OXContextPluginInterface oxctx : pluginInterfaces.getContextPlugins().getServiceList()) {
+                extensionsFound = true;
+                final String bundlename = oxctx.getClass().getName();
+                log.debug("Calling getData for plugin: {}", bundlename);
+                try {
+                    retval = oxctx.getData(ctxs, auth);
+                    addExtensionToContext(ctxs, retval, bundlename);
+                } catch (final PluginException e) {
+                    log.error("Error while calling method list of plugin {}", bundlename,e);
+                    throw new StorageException(e.getCause());
                 }
             }
         }
+
         return extensionsFound ? ctxs : null;
     }
 
