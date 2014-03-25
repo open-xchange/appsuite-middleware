@@ -108,6 +108,8 @@ public class DriveStorage {
 
     private IDBasedFileAccess fileAccess;
     private IDBasedFolderAccess folderAccess;
+    private FileStorageFolder trashFolder;
+    private Boolean hasTrashFolder;
 
     /**
      * Initializes a new {@link DriveStorage}.
@@ -224,17 +226,30 @@ public class DriveStorage {
     }
 
     /**
-     * Deletes a file.
+     * Deletes a file, preferring a "soft-delete" if available.
      *
      * @param file The file to delete
      * @return A file representing the deleted file
      * @throws OXException
      */
     public File deleteFile(File file) throws OXException {
+        return deleteFile(file, false);
+    }
+
+    /**
+     * Deletes a file.
+     *
+     * @param file The file to delete
+     * @param hardDelete <code>true</code> to hard-delete the file, <code>false</code>, otherwise
+     * @return A file representing the deleted file
+     * @throws OXException
+     */
+    public File deleteFile(File file, boolean hardDelete) throws OXException {
         if (session.isTraceEnabled()) {
-            session.trace(this.toString() + "rm " + combine(getPath(file.getFolderId()), file.getFileName()));
+            session.trace(this.toString() + "rm " + (hardDelete ? "-rf " : "") + combine(getPath(file.getFolderId()), file.getFileName()));
         }
-        List<String> notRemoved = getFileAccess().removeDocument(Arrays.asList(new String[] { file.getId() }), file.getSequenceNumber());
+        List<String> notRemoved = getFileAccess().removeDocument(
+            Arrays.asList(new String[] { file.getId() }), file.getSequenceNumber(), hardDelete);
         if (null != notRemoved && 0 < notRemoved.size()) {
             throw DriveExceptionCodes.FILE_NOT_FOUND.create();//TODO: exception for this
         }
@@ -413,13 +428,25 @@ public class DriveStorage {
      * @throws OXException
      */
     public String deleteFolder(String path) throws OXException {
+        return deleteFolder(path, false);
+    }
+
+    /**
+     * Deletes a folder, preferring a "soft-delete" if available.
+     *
+     * @param path The path of the folder to delete
+     * @param hardDelete <code>true</code> to hard-delete the folder, <code>false</code>, otherwise
+     * @return The ID of the deleted folder
+     * @throws OXException
+     */
+    public String deleteFolder(String path, boolean hardDelete) throws OXException {
         if (Strings.isEmpty(path) || ROOT_PATH.equals(path)) {
             throw DriveExceptionCodes.INVALID_PATH.create(path);
         }
         FileStorageFolder folder = getFolder(path);
         knownFolders.forget(path, folder, true);
         if (session.isTraceEnabled()) {
-            session.trace(this.toString() + "rmdir " + path);
+            session.trace(this.toString() + "rmdir " + (hardDelete ? "-rf " : "") + path);
         }
         getFolderAccess().deleteFolder(folder.getId());
         return folder.getId();
@@ -587,6 +614,40 @@ public class DriveStorage {
 
     public FileStorageFolder getFolder(String path) throws OXException {
         return getFolder(path, false);
+    }
+
+    /**
+     * Gets a value indicating whether a trash folder is available for the synchronized account or not.
+     *
+     * @return <code>true</code> if the folder is available, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public boolean hasTrashFolder() throws OXException {
+        if (null == hasTrashFolder) {
+            try {
+                hasTrashFolder = Boolean.valueOf(null != getTrashFolder());
+            } catch (OXException e) {
+                if (FileStorageExceptionCodes.NO_SUCH_FOLDER.equals(e)) {
+                    hasTrashFolder = Boolean.FALSE;
+                } else {
+                    throw e;
+                }
+            }
+        }
+        return hasTrashFolder.booleanValue();
+    }
+
+    /**
+     * Gets the trash folder of the synchronized account
+     *
+     * @return The trash folder
+     * @throws OXException If no trash folder is available
+     */
+    public FileStorageFolder getTrashFolder() throws OXException {
+        if (null == trashFolder) {
+            return getFolderAccess().getTrashFolder();
+        }
+        return trashFolder;
     }
 
     public FileStorageFolder getFolder(String path, boolean createIfNeeded) throws OXException {
