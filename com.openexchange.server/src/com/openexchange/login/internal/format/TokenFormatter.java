@@ -104,7 +104,7 @@ public enum TokenFormatter implements LoginFormatter {
         @Override
         public void formatLogin(final LoginRequest request, final LoginResult result, final StringBuilder sb) {
             sb.append("AuthID:");
-            sb.append(request.getAuthId());
+            sb.append(Strings.sanitizeString(request.getAuthId()));
         }
 
         @Override
@@ -120,7 +120,7 @@ public enum TokenFormatter implements LoginFormatter {
         @Override
         public void formatLogin(final LoginRequest request, final LoginResult result, final StringBuilder sb) {
             sb.append("Agent:");
-            sb.append(request.getUserAgent());
+            sb.append(Strings.sanitizeString(request.getUserAgent()));
         }
 
         @Override
@@ -136,9 +136,9 @@ public enum TokenFormatter implements LoginFormatter {
         @Override
         public void formatLogin(final LoginRequest request, final LoginResult result, final StringBuilder sb) {
             sb.append(" Client:");
-            sb.append(request.getClient());
+            sb.append(Strings.sanitizeString(request.getClient()));
             sb.append('(');
-            sb.append(request.getVersion());
+            sb.append(Strings.sanitizeString(request.getVersion()));
             sb.append(')');
         }
 

@@ -279,6 +279,21 @@ public class Strings {
         return sb.toString();
     }
 
+    private static final Pattern PATTERN_CONTROL = Pattern.compile("[\\x00-\\x1F\\x7F]+");
+
+    /**
+     * Replaces control characters with space characters.
+     *
+     * @param str The string to sanitize
+     * @return The sanitized string
+     */
+    public static String sanitizeString(final String str) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        return PATTERN_CONTROL.matcher(str).replaceAll(" ");
+    }
+
     /**
      * Checks for an empty string.
      *
