@@ -177,4 +177,6 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public static final String NON_SECURE_DENIED_MSG = "Server %1$s does not support being accessed using a secure connection.";
 
+    public static final String ACCOUNT_DOES_NOT_EXIST_MSG = "Mail access is disabled for context administrator.";
+
 }

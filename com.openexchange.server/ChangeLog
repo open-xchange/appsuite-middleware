@@ -2,6 +2,7 @@
 
  - Fix for bug 31747: Added property to adjust JVM XML entityExpansionLimit o certain needs
  - Fix for bug 31745: Mention the unit for property "com.openexchange.sessiond.sessionDefaultLifeTime"
+ - Fix for bug 31189: Added appropriate display message for error code "MSG-0014"
 
 * 2014-03-25 - tobias.friedrich@open-xchange.com
 

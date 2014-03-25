@@ -127,7 +127,7 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Mail account is disabled for admin user in context %1$s
      */
-    ACCOUNT_DOES_NOT_EXIST("Mail account is disabled for admin user in context %1$s", CATEGORY_CONFIGURATION, 14),
+    ACCOUNT_DOES_NOT_EXIST("Mail account is disabled for admin user in context %1$s", MailExceptionStrings.ACCOUNT_DOES_NOT_EXIST_MSG, CATEGORY_CONFIGURATION, 14),
     /**
      * Process was interrupted. Please try again.
      */
