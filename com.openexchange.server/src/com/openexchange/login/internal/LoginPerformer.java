@@ -330,7 +330,7 @@ public final class LoginPerformer {
         } else {
             ThreadPoolCompletionService<Void> completionService = null;
             int blocking = 0;
-            boolean tranzient = login.getSession().isTransient();
+            final boolean tranzient = login.getSession().isTransient();
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
                 if (tranzient && NonTransient.class.isInstance(handler)) {
@@ -342,7 +342,8 @@ public final class LoginPerformer {
                     if (null == completionService) {
                         completionService = new ThreadPoolCompletionService<Void>(executor);
                     }
-                    Callable<Void> callable = new Callable<Void>() {
+                    final Callable<Void> callable = new Callable<Void>() {
+
                         @Override
                         public Void call() {
                             handleSafely(login, handler, true);
@@ -353,6 +354,7 @@ public final class LoginPerformer {
                     blocking++;
                 } else {
                     executor.submit(new LoginPerformerTask() {
+
                         @Override
                         public Object call() {
                             handleSafely(login, handler, true);
@@ -390,7 +392,8 @@ public final class LoginPerformer {
                     if (null == completionService) {
                         completionService = new ThreadPoolCompletionService<Void>(executor);
                     }
-                    Callable<Void> callable = new Callable<Void>() {
+                    final Callable<Void> callable = new Callable<Void>() {
+
                         @Override
                         public Void call() {
                             handleSafely(logout, handler, false);
@@ -401,6 +404,7 @@ public final class LoginPerformer {
                     blocking++;
                 } else {
                     executor.submit(new LoginPerformerTask() {
+
                         @Override
                         public Object call() {
                             handleSafely(logout, handler, false);
