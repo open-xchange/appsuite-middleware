@@ -1,3 +1,7 @@
+* 2014-03-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31716: Don't rely on cookies being accepted by WebDAV clients  
+
 * 2014-03-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 31727: Improved descriptions for database-based and script-based password-change bundles

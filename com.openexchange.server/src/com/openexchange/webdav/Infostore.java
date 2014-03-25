@@ -77,6 +77,11 @@ public class Infostore extends OXServlet {
     }
 
     @Override
+    protected boolean useCookies() {
+        return false;
+    }
+
+    @Override
     protected void doCopy(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         doIt(req, resp, Action.COPY);
     }

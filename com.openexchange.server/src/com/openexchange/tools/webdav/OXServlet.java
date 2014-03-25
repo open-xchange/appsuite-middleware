@@ -355,6 +355,7 @@ public abstract class OXServlet extends WebDavServlet {
                      */
                     final Map<String, Object> properties = new HashMap<String, Object>(1);
                     session = addSession(loginRequest, properties);
+                    resp.addCookie(new Cookie(COOKIE_SESSIONID, session.getSessionID()));
                 }
             } catch (final OXException e) {
                 if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
@@ -365,9 +366,6 @@ public abstract class OXServlet extends WebDavServlet {
                     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                 }
                 return false;
-            }
-            if (useCookies) {
-                resp.addCookie(new Cookie(COOKIE_SESSIONID, session.getSessionID()));
             }
         } else {
             /*
