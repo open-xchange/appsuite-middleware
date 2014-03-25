@@ -162,16 +162,7 @@ public class UserAdapter implements User {
 
     @Override
     public Locale getLocale() {
-        String language = delegate.getLanguage();
-        if (language != null) {
-            try {
-                return LocaleTools.getLocale(delegate.getLanguage());
-            } catch (Exception e) {
-                return null;
-            }
-        }
-
-        return null;
+        return LocaleTools.getLocale(delegate.getLanguage());
     }
 
     @Override
