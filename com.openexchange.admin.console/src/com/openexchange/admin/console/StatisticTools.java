@@ -131,6 +131,22 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_CACHE_STATS_SHORT = 'j';
     private static final String OPT_CACHE_STATS_LONG = "cachestats";
 
+    private static final String OPT_AJPTHREADS_STATS_LONG = "ajpthreadsstats";
+
+    private static final String OPT_AJPTASKS_STATS_LONG = "ajptasksstats";
+
+    private static final String OPT_GENERAL_STATS_LONG = "generalstats";
+
+    private static final String OPT_MAILINTERFACE_STATS_LONG = "mailinterfacestats";
+
+    private static final String OPT_POOLING_STATS_LONG = "poolingstats";
+
+    private static final String OPT_CALLMONITOR_STATS_LONG = "callmonitorstats";
+
+    private static final String OPT_MISC_STATS_LONG = "misc";
+
+    private static final String OPT_OVERVIEW_STATS_LONG = "overview";
+
     private CLIOption xchangestats = null;
     private CLIOption threadpoolstats = null;
     private CLIOption runtimestats = null;
@@ -149,6 +165,14 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption documentconverterstats = null;
     private CLIOption officestats = null;
     private CLIOption eventadminstats = null;
+    private CLIOption ajpthreadsstats = null;
+    private CLIOption ajptasksstats = null;
+    private CLIOption generalstats = null;
+    private CLIOption mailinterfacestats = null;
+    private CLIOption poolingstats = null;
+    private CLIOption callmonitorstats = null;
+    private CLIOption miscstats = null;
+    private CLIOption overviewstats = null;
 
     /**
      * Option for garbage collection statistics
@@ -254,6 +278,40 @@ public class StatisticTools extends AbstractJMXTools {
         }
         if (null != parser.getOptionValue(this.officestats) && 0 == count) {
             System.out.print(showOfficeData(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.ajpthreadsstats) && 0 == count) {
+            System.out.print(showAJPv13ServerThreadsMonitor(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.ajptasksstats) && 0 == count) {
+            System.out.print(showAJPv13TaskMonitor(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.generalstats) && 0 == count) {
+            System.out.print(showGeneralMonitor(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.mailinterfacestats) && 0 == count) {
+            System.out.print(showMailInterfaceMonitor(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.poolingstats) && 0 == count) {
+            System.out.print(showPooling(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.callmonitorstats) && 0 == count) {
+            System.out.print(showCallMonitor(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.miscstats) && 0 == count) {
+            System.out.print(showGeneralMonitor(mbc));
+            System.out.print(showSysThreadingData(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.overviewstats) && 0 == count) {
+            System.out.print(showPooling(mbc));
+            System.out.print(getStats(mbc, "java.lang:type=OperatingSystem"));
             count++;
         }
         if (0 == count) {
@@ -496,6 +554,14 @@ public class StatisticTools extends AbstractJMXTools {
             "shows the OSGi EventAdmin stats",
             false,
             NeededQuadState.notneeded);
+        this.ajpthreadsstats = setLongOpt(parser, OPT_AJPTHREADS_STATS_LONG, "shows the AJP Thread stats", false, false);
+        this.ajptasksstats = setLongOpt(parser, OPT_AJPTASKS_STATS_LONG, "shows the AJP Tasks stats", false, false);
+        this.generalstats = setLongOpt(parser, OPT_GENERAL_STATS_LONG, "shows the open-xchange general stats", false, false);
+        this.mailinterfacestats = setLongOpt(parser, OPT_MAILINTERFACE_STATS_LONG, "shows the open-xchange mailinterface stats", false, false);
+        this.poolingstats = setLongOpt(parser, OPT_POOLING_STATS_LONG, "shows the open-xchange pooling stats", false, false);
+        this.callmonitorstats = setLongOpt(parser, OPT_CALLMONITOR_STATS_LONG, "shows admin.monitor Call Monitor stats", false, false);
+        this.miscstats = setLongOpt(parser, OPT_MISC_STATS_LONG, "shows stats for general and threading", false, false);
+        this.overviewstats = setLongOpt(parser, OPT_OVERVIEW_STATS_LONG, "shows stats for pooling and OperatingSystem", false, false);
     }
 
     static String showMemoryPoolData(MBeanServerConnection con) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
@@ -508,13 +574,35 @@ public class StatisticTools extends AbstractJMXTools {
 
     private static String showOXData(MBeanServerConnection con) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
         StringBuilder sb = new StringBuilder();
-        sb.append(getStats(con, "com.openexchange.admin.monitor:name=CallMonitor"));
-        sb.append(getStats(con, "com.openexchange.monitoring:name=AJPv13ServerThreadsMonitor"));
-        sb.append(getStats(con, "com.openexchange.monitoring:name=AJPv13TaskMonitor"));
-        sb.append(getStats(con, "com.openexchange.monitoring:name=GeneralMonitor"));
-        sb.append(getStats(con, "com.openexchange.monitoring:name=MailInterfaceMonitor"));
-        sb.append(getStats(con, "com.openexchange.pooling:name=*"));
+        sb.append(showCallMonitor(con));
+        sb.append(showGeneralMonitor(con));
+        sb.append(showMailInterfaceMonitor(con));
+        sb.append(showPooling(con));
         return sb.toString();
+    }
+
+    private static StringBuffer showPooling(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.pooling:name=*");
+    }
+
+    private static StringBuffer showMailInterfaceMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.monitoring:name=MailInterfaceMonitor");
+    }
+
+    private static StringBuffer showGeneralMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.monitoring:name=GeneralMonitor");
+    }
+
+    private static StringBuffer showAJPv13TaskMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.monitoring:name=AJPv13TaskMonitor");
+    }
+
+    private static StringBuffer showAJPv13ServerThreadsMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.monitoring:name=AJPv13ServerThreadsMonitor");
+    }
+
+    private static StringBuffer showCallMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.admin.monitor:name=CallMonitor");
     }
 
     private static String showCacheData(MBeanServerConnection mbc) throws MalformedObjectNameException, InstanceNotFoundException, NullPointerException, MBeanException, ReflectionException, IOException, InvalidDataException {

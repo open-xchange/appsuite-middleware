@@ -3,7 +3,7 @@
 #%# capabilities=autoconf
 
 $showruntimestats="/opt/open-xchange/sbin/showruntimestats";
-$showexec="$showruntimestats -x";
+$showexec="$showruntimestats --poolingstats";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
