@@ -102,7 +102,7 @@ public class LineMDCConverter extends MDCConverter {
         }
 
         final String value = mdcPropertyMap.get(key);
-        return value == null ? defaultValue : value;
+        return value == null ? defaultValue : sanitizeString(value);
     }
 
     /**
