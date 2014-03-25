@@ -54,6 +54,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.i18n.LocaleTools;
 
 
 /**
@@ -163,7 +164,7 @@ public class UserAdapter implements User {
         String language = delegate.getLanguage();
         if (language != null) {
             try {
-                return Locale.forLanguageTag(language);
+                return LocaleTools.getLocale(delegate.getLanguage());
             } catch (Exception e) {
                 return null;
             }
