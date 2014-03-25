@@ -62,6 +62,7 @@ public interface UserServiceInterceptor {
 
     /**
      * Gets the ranking for this interceptor, allowing a defined execution order of multiple interceptor implementations.
+     * Execution order is highest first.
      *
      * @return The ranking
      */
@@ -72,8 +73,8 @@ public interface UserServiceInterceptor {
      * <p>
      * Note that further processing is aborted if an exception occurs during invocation.
      *
-     * @param user A reference to the user data of the user being created.
-     * @param contactData A reference to the contact data of the user being created.
+     * @param user A reference to the user data of the user being created. Possibly <code>null</code>.
+     * @param contactData A reference to the contact data of the user being created. Possibly <code>null</code>.
      * @throws OXException If interception fails
      */
     void beforeCreate(User user, Contact contactData) throws OXException;
@@ -82,7 +83,7 @@ public interface UserServiceInterceptor {
      * Invoked after a user is created.
      *
      * @param user A reference to the user data of the created user.
-     * @param contactData A reference to the contact data created user.
+     * @param contactData A reference to the contact data created user. Possibly <code>null</code>.
      * @throws OXException If interception fails
      */
     void afterCreate(User user, Contact contactData) throws OXException;
