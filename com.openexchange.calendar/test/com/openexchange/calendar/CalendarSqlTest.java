@@ -50,6 +50,9 @@
 package com.openexchange.calendar;
 
 import java.sql.Date;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,9 +64,11 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.session.Session;
 
 /**
@@ -73,7 +78,7 @@ import com.openexchange.session.Session;
  * @since 7.6.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({})
+@PrepareForTest({ CalendarCollection.class })
 public class CalendarSqlTest {
 
     @InjectMocks
@@ -82,7 +87,12 @@ public class CalendarSqlTest {
     @Mock
     private Session session;
 
+    @Mock
+    private CalendarCollection calendarCollection;
+
     private int objectId = 111;
+
+    private int exceptionObjectId = 1111;
 
     private int folderId = 222;
 
@@ -99,8 +109,12 @@ public class CalendarSqlTest {
     private Date returnDate = new Date(951782400000L);
 
     @Before
-    public void setUp() {
+    public void setUp() throws OXException {
         MockitoAnnotations.initMocks(this);
+
+        final List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
+        CalendarDataObject[] emptyArray = retval.toArray(new CalendarDataObject[retval.size()]);
+        Mockito.when(calendarCollection.getChangeExceptionsByRecurrence(Matchers.anyInt(), Matchers.any(int[].class), (Session) Matchers.any())).thenReturn(emptyArray);
     }
 
     @Test
@@ -115,6 +129,22 @@ public class CalendarSqlTest {
         Assert.assertEquals(returnDate, setExternalConfirmation.getLastModified());
     }
 
+    @Test(expected = OXException.class)
+    public void testSetExternalConfirmation_mailNotValid_throwException() throws OXException {
+
+        CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
+
+        calendarSqlSpy.setExternalConfirmation(objectId, folderId, occurrence, "", confirm, confirmMessage);
+    }
+
+    @Test(expected = OXException.class)
+    public void testSetExternalConfirmation_mailNotExistend_throwException() throws OXException {
+
+        CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
+
+        calendarSqlSpy.setExternalConfirmation(objectId, folderId, occurrence, null, confirm, confirmMessage);
+    }
+
     @Test
     public void testSetUserConfirmation_occurrenceZero_callSetForSingleAppointment() throws OXException {
 
@@ -125,6 +155,64 @@ public class CalendarSqlTest {
 
         Mockito.verify(calendarSqlSpy, Mockito.times(1)).setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
         Assert.assertEquals(returnDate, setUserConfirmation.getLastModified());
+    }
+
+    @Test
+    public void testSetExternalConfirmation_recurringResultNull_updateSingleAppointment() throws OXException, SQLException {
+        CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
+
+        Mockito.when(calendarCollection.calculateRecurringIgnoringExceptions((CalendarObject) Matchers.any(), Matchers.anyLong(), Matchers.anyLong(), Matchers.anyInt())).thenReturn(null);
+        Mockito.doReturn(returnDate).when(calendarSqlSpy).setExternalConfirmation(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyString(), Matchers.anyInt(), Matchers.anyString());
+
+        Mockito.doNothing().when(calendarSqlSpy).validateConfirmMessage(Matchers.anyString());
+        CalendarDataObject cdo = new CalendarDataObject();
+        Mockito.doReturn(cdo).when(calendarSqlSpy).getObjectById(Matchers.anyInt());
+
+        CalendarDataObject setExternalConfirmation = calendarSqlSpy.setExternalConfirmation(objectId, folderId, occurrence, mail, confirm, confirmMessage);
+
+        Mockito.verify(calendarSqlSpy, Mockito.times(1)).validateConfirmMessage(confirmMessage);
+        Mockito.verify(calendarSqlSpy, Mockito.times(1)).setExternalConfirmation(objectId, folderId, mail, confirm, confirmMessage);
+        Assert.assertEquals(returnDate, setExternalConfirmation.getLastModified());
+    }
+
+    @Test
+    public void testSetUserConfirmation_recurringResultNull_updateSingleAppointment() throws OXException, SQLException {
+        CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
+
+        Mockito.when(calendarCollection.calculateRecurringIgnoringExceptions((CalendarObject) Matchers.any(), Matchers.anyLong(), Matchers.anyLong(), Matchers.anyInt())).thenReturn(null);
+        Mockito.doReturn(returnDate).when(calendarSqlSpy).setUserConfirmation(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt(), Matchers.anyString());
+
+        Mockito.doNothing().when(calendarSqlSpy).validateConfirmMessage(Matchers.anyString());
+        CalendarDataObject cdo = new CalendarDataObject();
+        Mockito.doReturn(cdo).when(calendarSqlSpy).getObjectById(Matchers.anyInt());
+
+        CalendarDataObject setUserConfirmation = calendarSqlSpy.setUserConfirmation(objectId, folderId, occurrence, userId, confirm, confirmMessage);
+
+        Mockito.verify(calendarSqlSpy, Mockito.times(1)).validateConfirmMessage(confirmMessage);
+        Mockito.verify(calendarSqlSpy, Mockito.times(1)).setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
+        Assert.assertEquals(returnDate, setUserConfirmation.getLastModified());
+    }
+
+    @Test
+    public void testSetExternalConfirmation_exceptionAvailable_updateException() throws OXException, SQLException {
+        CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
+
+        final List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
+        CalendarDataObject cdo = new CalendarDataObject();
+        cdo.setRecurrencePosition(occurrence);
+        cdo.setObjectID(exceptionObjectId);
+        retval.add(cdo);
+        Mockito.when(calendarCollection.getChangeExceptionsByRecurrence(Matchers.anyInt(), Matchers.any(int[].class), (Session) Matchers.any())).thenReturn(retval.toArray(new CalendarDataObject[retval.size()]));
+        Mockito.when(calendarCollection.calculateRecurringIgnoringExceptions((CalendarObject) Matchers.any(), Matchers.anyLong(), Matchers.anyLong(), Matchers.anyInt())).thenReturn(null);
+        Mockito.doNothing().when(calendarSqlSpy).validateConfirmMessage(Matchers.anyString());
+        Mockito.doReturn(new CalendarDataObject()).when(calendarSqlSpy).getObjectById(Matchers.anyInt());
+        Mockito.doReturn(returnDate).when(calendarSqlSpy).setExternalConfirmation(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyString(), Matchers.anyInt(), Matchers.anyString());
+
+        CalendarDataObject setExternalConfirmation = calendarSqlSpy.setExternalConfirmation(objectId, folderId, occurrence, mail, confirm, confirmMessage);
+
+        Mockito.verify(calendarSqlSpy, Mockito.times(1)).validateConfirmMessage(confirmMessage);
+        Mockito.verify(calendarSqlSpy, Mockito.times(1)).setExternalConfirmation(exceptionObjectId, folderId, mail, confirm, confirmMessage);
+        Assert.assertEquals(returnDate, setExternalConfirmation.getLastModified());
     }
 
 }
