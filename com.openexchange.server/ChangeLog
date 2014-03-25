@@ -5,6 +5,10 @@
  - Fix for bug 31701: Document workaround for Apache < 2.4 and set up combined balancing proxy for usm and eas
  - Fix for bug 31702: Document workaround for Apache < 2.4 and set up combined balancing proxy for usm and eas
 
+* 2014-03-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31716: Don't rely on cookies being accepted by WebDAV clients  
+
 * 2014-03-19 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31646: Be aware of unknown folder type 
