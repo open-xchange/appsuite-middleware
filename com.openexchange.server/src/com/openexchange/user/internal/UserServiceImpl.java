@@ -65,6 +65,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.UserServiceInterceptorRegistry;
 
 /**
  * {@link UserServiceImpl} - The {@link UserService} implementation
@@ -136,8 +137,13 @@ public final class UserServiceImpl implements UserService {
         int userId = UserStorage.getInstance().createUser(context, user);
         UserImpl created = new UserImpl(user);
         created.setId(userId);
-        afterCreate(created, interceptors);
-        return userId;
+        try {
+            afterCreate(created, interceptors);
+            return userId;
+        } catch(OXException e) {
+            // TODO: interception failed - delete user again?
+            throw e;
+        }
     }
 
     @Override
@@ -148,8 +154,13 @@ public final class UserServiceImpl implements UserService {
         int userId = UserStorage.getInstance().createUser(con, context, user);
         UserImpl created = new UserImpl(user);
         created.setId(userId);
-        afterCreate(created, interceptors);
-        return userId;
+        try {
+            afterCreate(created, interceptors);
+            return userId;
+        } catch(OXException e) {
+            // TODO: interception failed - delete user again?
+            throw e;
+        }
     }
 
     @Override
@@ -197,7 +208,12 @@ public final class UserServiceImpl implements UserService {
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         beforeUpdate(user, interceptors);
         UserStorage.getInstance().updateUser(user, context);
-        afterUpdate(user, interceptors);
+        try {
+            afterUpdate(user, interceptors);
+        } catch(OXException e) {
+            // TODO: interception failed - delete user again?
+            throw e;
+        }
     }
 
     /**

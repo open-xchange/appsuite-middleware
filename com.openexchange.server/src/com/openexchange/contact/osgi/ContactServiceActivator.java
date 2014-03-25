@@ -60,7 +60,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserServiceInterceptor;
-import com.openexchange.user.internal.UserServiceInterceptorRegistry;
+import com.openexchange.user.UserServiceInterceptorRegistry;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 

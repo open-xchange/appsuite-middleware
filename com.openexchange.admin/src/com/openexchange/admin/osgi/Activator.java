@@ -50,6 +50,8 @@
 package com.openexchange.admin.osgi;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -72,6 +74,7 @@ import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
+import com.openexchange.admin.plugins.UserServiceInterceptorBridge;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.tools.AdminCache;
@@ -88,6 +91,8 @@ import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
+import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.UserServiceInterceptorRegistry;
 import com.openexchange.version.Version;
 
 public class Activator extends HousekeepingActivator {
@@ -108,6 +113,8 @@ public class Activator extends HousekeepingActivator {
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         track(CreateTableService.class, new CreateTableCustomizer(context));
         track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
+        UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
+        track(UserServiceInterceptor.class, interceptorRegistry);
 
         // Plugin interfaces
         {
@@ -183,6 +190,12 @@ public class Activator extends HousekeepingActivator {
         } catch (final InvalidSyntaxException e) {
             e.printStackTrace();
         }
+
+        // UserServiceInterceptor Bridge
+        Dictionary<String, String> props = new Hashtable<String, String>(2);
+        props.put("name", "OXUser");
+        props.put(Constants.SERVICE_RANKING, Integer.toString(200));
+        registerService(OXUserPluginInterface.class, new UserServiceInterceptorBridge(interceptorRegistry), props);
 
         //Register CreateTableServices
         registerService(CreateTableService.class, new CreateSequencesTables());

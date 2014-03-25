@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.user.internal;
+package com.openexchange.user;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +57,6 @@ import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.user.UserServiceInterceptor;
 
 
 /**

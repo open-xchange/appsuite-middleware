@@ -82,7 +82,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.user.UserServiceInterceptor;
-import com.openexchange.user.internal.UserServiceInterceptorRegistry;
+import com.openexchange.user.UserServiceInterceptorRegistry;
 
 /**
  * {@link ContactServiceImpl}

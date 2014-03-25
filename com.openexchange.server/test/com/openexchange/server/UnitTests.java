@@ -86,7 +86,7 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.groupware.upload.quotachecker.MailUploadQuotaCheckerTest.class,
     com.openexchange.mail.text.TextProcessingTest.class,
     com.openexchange.login.internal.format.CompositeLoginFormatterTest.class,
-    com.openexchange.user.internal.UserServiceInterceptorRegistryTest.class
+    com.openexchange.user.UserServiceInterceptorRegistryTest.class
 })
 public class UnitTests {
 

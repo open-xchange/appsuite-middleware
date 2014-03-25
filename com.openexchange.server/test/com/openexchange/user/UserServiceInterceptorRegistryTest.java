@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.user.internal;
+package com.openexchange.user;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -57,6 +57,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.user.AbstractUserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.UserServiceInterceptorRegistry;
 
 
 /**
