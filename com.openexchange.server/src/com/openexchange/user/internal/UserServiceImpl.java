@@ -55,6 +55,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -73,6 +75,8 @@ import com.openexchange.user.UserServiceInterceptorRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserServiceImpl implements UserService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final UserServiceInterceptorRegistry interceptorRegistry;
 
@@ -137,13 +141,8 @@ public final class UserServiceImpl implements UserService {
         int userId = UserStorage.getInstance().createUser(context, user);
         UserImpl created = new UserImpl(user);
         created.setId(userId);
-        try {
-            afterCreate(created, interceptors);
-            return userId;
-        } catch(OXException e) {
-            // TODO: interception failed - delete user again?
-            throw e;
-        }
+        afterCreate(created, interceptors);
+        return userId;
     }
 
     @Override
@@ -154,13 +153,8 @@ public final class UserServiceImpl implements UserService {
         int userId = UserStorage.getInstance().createUser(con, context, user);
         UserImpl created = new UserImpl(user);
         created.setId(userId);
-        try {
-            afterCreate(created, interceptors);
-            return userId;
-        } catch(OXException e) {
-            // TODO: interception failed - delete user again?
-            throw e;
-        }
+        afterCreate(created, interceptors);
+        return userId;
     }
 
     @Override
@@ -208,12 +202,7 @@ public final class UserServiceImpl implements UserService {
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         beforeUpdate(user, interceptors);
         UserStorage.getInstance().updateUser(user, context);
-        try {
-            afterUpdate(user, interceptors);
-        } catch(OXException e) {
-            // TODO: interception failed - delete user again?
-            throw e;
-        }
+        afterUpdate(user, interceptors);
     }
 
     /**
@@ -232,7 +221,11 @@ public final class UserServiceImpl implements UserService {
 
     private void afterCreate(User user, List<UserServiceInterceptor> interceptors) throws OXException {
         for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.afterCreate(user, null);
+            try {
+                interceptor.afterCreate(user, null);
+            } catch(OXException e) {
+                LOG.error("Error while calling interceptor.", e);
+            }
         }
     }
 
@@ -244,7 +237,11 @@ public final class UserServiceImpl implements UserService {
 
     private void afterUpdate(User user, List<UserServiceInterceptor> interceptors) throws OXException {
         for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.afterUpdate(user, null);
+            try {
+                interceptor.afterUpdate(user, null);
+            } catch(OXException e) {
+                LOG.error("Error while calling interceptor.", e);
+            }
         }
     }
 
