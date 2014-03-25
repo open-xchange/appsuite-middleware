@@ -84,6 +84,8 @@ public class StatisticToolsTest extends AbstractRMITest {
 
     private int returnEventAdmin;
 
+    private int returnCache;
+
     @Test
     public void testGetXchangeStats() {
         final StatisticTools statisticTools = new StatisticTools() {
@@ -250,6 +252,19 @@ public class StatisticToolsTest extends AbstractRMITest {
             }
         };
         statisticTools.start(new String[] { "-e", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnEventAdmin);
+    }
+
+    @Test
+    public void testCachestats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCache = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-j", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnEventAdmin);
     }
 }

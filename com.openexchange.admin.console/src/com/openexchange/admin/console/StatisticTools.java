@@ -128,6 +128,9 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_OFFICE_STATS_SHORT = 'f';
     private static final String OPT_OFFICE_STATS_LONG = "officestats";
 
+    private static final char OPT_CACHE_STATS_SHORT = 'j';
+    private static final String OPT_CACHE_STATS_LONG = "cachestats";
+
     private CLIOption xchangestats = null;
     private CLIOption threadpoolstats = null;
     private CLIOption runtimestats = null;
@@ -139,6 +142,7 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption memorythreadstats = null;
     private CLIOption memorythreadstatsfull = null;
     private CLIOption sessionStats = null;
+    private CLIOption cacheStats = null;
     private CLIOption usmSessionStats = null;
     private CLIOption clusterStats = null;
     private CLIOption grizzlyStats = null;
@@ -185,6 +189,10 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(getStats(mbc, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
             count++;
         }
+        if (null != parser.getOptionValue(this.cacheStats) && 0 == count) {
+            System.out.print(showCacheData(mbc));
+            count++;
+        }
         if (null != parser.getOptionValue(this.usmSessionStats) && 0 == count) {
             System.out.print(getStats(mbc, "com.openexchange.usm.session", "name", "USMSessionInformation"));
             count++;
@@ -208,6 +216,7 @@ public class StatisticTools extends AbstractJMXTools {
         if (null != parser.getOptionValue(this.allstats) && 0 == count) {
             System.out.print(showOXData(mbc));
             System.out.print(getStats(mbc, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
+            System.out.print(showCacheData(mbc));
             System.out.print(showThreadPoolData(mbc));
             System.out.print(getStats(mbc, "java.lang:type=OperatingSystem"));
             System.out.print(getStats(mbc, "java.lang:type=Runtime"));
@@ -429,6 +438,13 @@ public class StatisticTools extends AbstractJMXTools {
             "shows the statistics of the session container",
             false,
             NeededQuadState.notneeded);
+        this.cacheStats = setShortLongOpt(
+            parser,
+            OPT_CACHE_STATS_SHORT,
+            OPT_CACHE_STATS_LONG,
+            "shows the statistics of the cache objects",
+            false,
+            NeededQuadState.notneeded);
         this.usmSessionStats = setShortLongOpt(
             parser,
             'u',
@@ -501,6 +517,25 @@ public class StatisticTools extends AbstractJMXTools {
         return sb.toString();
     }
 
+    private static String showCacheData(MBeanServerConnection mbc) throws MalformedObjectNameException, InstanceNotFoundException, NullPointerException, MBeanException, ReflectionException, IOException, InvalidDataException {
+        StringBuilder sb = new StringBuilder();
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!Context"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!Filestore"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!OXDBPoolCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!User"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!UserConfiguration"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!UserSettingMail"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!OXFolderCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!OXFolderQueryCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!OXIMAPConCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!OXMessageCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!MailMessageCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!MailConnectionCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!CalendarCache"));
+        sb.append(doOperationReturnString(mbc, "com.openexchange.caching:name=JCSCacheInformation!getMemoryCacheCount!SessionCache"));
+        return sb.toString();
+    }
+    
     static String showThreadPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
         return getStats(mbc, "com.openexchange.threadpool:name=ThreadPoolInformation").toString();
     }
