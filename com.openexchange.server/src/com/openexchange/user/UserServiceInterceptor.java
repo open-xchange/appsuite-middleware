@@ -61,11 +61,11 @@ import com.openexchange.groupware.ldap.User;
 public interface UserServiceInterceptor {
 
     /**
-     * Gets the priority of this interceptor, allowing a defined execution order of multiple interceptor implementations.
+     * Gets the ranking for this interceptor, allowing a defined execution order of multiple interceptor implementations.
      *
-     * @return The priority
+     * @return The ranking
      */
-    int getPriority();
+    int getRanking();
 
     /**
      * Invoked before a user is created.

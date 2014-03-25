@@ -47,55 +47,72 @@
  *
  */
 
-package com.openexchange.groupware.ldap;
+package com.openexchange.user.internal;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.server.Initialization;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.user.UserService;
-import com.openexchange.user.internal.UserServiceImpl;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.user.UserServiceInterceptor;
+
 
 /**
- * {@link UserStorageInit}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public final class UserStorageInit implements Initialization {
+public class UserServiceInterceptorRegistry implements ServiceTrackerCustomizer<UserServiceInterceptor, UserServiceInterceptor> {
 
-    private static final UserStorageInit instance = new UserStorageInit();
+    private final List<UserServiceInterceptor> interceptors = new LinkedList<UserServiceInterceptor>();
 
-    /**
-     * Gets the singleton instance of {@link UserStorageInit}
-     *
-     * @return The singleton instance of {@link UserStorageInit}
-     */
-    public static UserStorageInit getInstance() {
-        return instance;
-    }
+    private final ServiceComparator comparator = new ServiceComparator();
 
-    /**
-     * Initializes a new {@link UserStorageInit}
-     */
-    private UserStorageInit() {
+    private final BundleContext context;
+
+    public UserServiceInterceptorRegistry(BundleContext context) {
         super();
+        this.context = context;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void start() throws OXException {
-        UserStorage.start();
-        ServerServiceRegistry.getInstance().addService(UserService.class, new UserServiceImpl());
+    public synchronized List<UserServiceInterceptor> getInterceptors() {
+        return new ArrayList<UserServiceInterceptor>(interceptors);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void stop() throws OXException {
-        ServerServiceRegistry.getInstance().removeService(UserService.class);
-        UserStorage.stop();
+    public UserServiceInterceptor addingService(ServiceReference<UserServiceInterceptor> reference) {
+        UserServiceInterceptor service = context.getService(reference);
+        addInterceptor(service);
+        return service;
     }
+
+    @Override
+    public void modifiedService(ServiceReference<UserServiceInterceptor> reference, UserServiceInterceptor service) {
+        // nothing to do
+    }
+
+    @Override
+    public void removedService(ServiceReference<UserServiceInterceptor> reference, UserServiceInterceptor service) {
+        removeInterceptor(service);
+        context.ungetService(reference);
+    }
+
+    synchronized void addInterceptor(UserServiceInterceptor interceptor) {
+        interceptors.add(interceptor);
+        Collections.sort(interceptors, comparator);
+    }
+
+    synchronized void removeInterceptor(UserServiceInterceptor interceptor) {
+        interceptors.remove(interceptor);
+    }
+
+    private static final class ServiceComparator implements Comparator<UserServiceInterceptor> {
+        @Override
+        public int compare(UserServiceInterceptor s1, UserServiceInterceptor s2) {
+            return s2.getRanking() - s1.getRanking();
+        }
+    }
+
 }

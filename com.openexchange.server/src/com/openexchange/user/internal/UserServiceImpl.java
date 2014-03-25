@@ -60,9 +60,11 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.user.UserService;
+import com.openexchange.user.UserServiceInterceptor;
 
 /**
  * {@link UserServiceImpl} - The {@link UserService} implementation
@@ -71,11 +73,14 @@ import com.openexchange.user.UserService;
  */
 public final class UserServiceImpl implements UserService {
 
+    private final UserServiceInterceptorRegistry interceptorRegistry;
+
     /**
      * Initializes a new {@link UserServiceImpl}
      */
-    public UserServiceImpl() {
+    public UserServiceImpl(UserServiceInterceptorRegistry interceptorRegistry) {
         super();
+        this.interceptorRegistry = interceptorRegistry;
     }
 
     @Override
@@ -126,13 +131,25 @@ public final class UserServiceImpl implements UserService {
     @Override
     public int createUser(final Context context, final User user) throws OXException {
         checkUser(user);
-        return UserStorage.getInstance().createUser(context, user);
+        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        beforeCreate(user, interceptors);
+        int userId = UserStorage.getInstance().createUser(context, user);
+        UserImpl created = new UserImpl(user);
+        created.setId(userId);
+        afterCreate(created, interceptors);
+        return userId;
     }
 
     @Override
     public int createUser(final Connection con, final Context context, final User user) throws OXException {
         checkUser(user);
-        return UserStorage.getInstance().createUser(con, context, user);
+        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        beforeCreate(user, interceptors);
+        int userId = UserStorage.getInstance().createUser(con, context, user);
+        UserImpl created = new UserImpl(user);
+        created.setId(userId);
+        afterCreate(created, interceptors);
+        return userId;
     }
 
     @Override
@@ -177,7 +194,10 @@ public final class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(final User user, final Context context) throws OXException {
+        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        beforeUpdate(user, interceptors);
         UserStorage.getInstance().updateUser(user, context);
+        afterUpdate(user, interceptors);
     }
 
     /**
@@ -186,6 +206,30 @@ public final class UserServiceImpl implements UserService {
     @Override
     public boolean authenticate(final User user, final String password) throws OXException {
         return UserStorage.authenticate(user, password);
+    }
+
+    private void beforeCreate(User user, List<UserServiceInterceptor> interceptors) throws OXException {
+        for (UserServiceInterceptor interceptor : interceptors) {
+            interceptor.beforeCreate(user, null);
+        }
+    }
+
+    private void afterCreate(User user, List<UserServiceInterceptor> interceptors) throws OXException {
+        for (UserServiceInterceptor interceptor : interceptors) {
+            interceptor.afterCreate(user, null);
+        }
+    }
+
+    private void beforeUpdate(User user, List<UserServiceInterceptor> interceptors) throws OXException {
+        for (UserServiceInterceptor interceptor : interceptors) {
+            interceptor.beforeUpdate(user, null);
+        }
+    }
+
+    private void afterUpdate(User user, List<UserServiceInterceptor> interceptors) throws OXException {
+        for (UserServiceInterceptor interceptor : interceptors) {
+            interceptor.afterUpdate(user, null);
+        }
     }
 
     private void checkUser(final User user) throws OXException {

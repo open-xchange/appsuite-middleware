@@ -109,6 +109,7 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.databaseold.Database;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.event.impl.EventFactoryServiceImpl;
@@ -216,6 +217,9 @@ import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.user.UserService;
+import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.internal.UserServiceImpl;
+import com.openexchange.user.internal.UserServiceInterceptorRegistry;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
@@ -267,12 +271,13 @@ public final class ServerActivator extends HousekeepingActivator {
     private static final String STR_IDENTIFIER = "identifier";
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER = {
-        ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
-        TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
-        CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
-        FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class, CryptoService.class, HttpService.class,
-        SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
-        TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class, SearchService.class };
+        ConfigurationService.class, DatabaseService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class,
+        JDOMParser.class, TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class,
+        AppointmentSqlFactoryService.class, CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class,
+        IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
+        CryptoService.class, HttpService.class, SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class,
+        StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class,
+        SearchService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -388,6 +393,8 @@ public final class ServerActivator extends HousekeepingActivator {
                     registry.addService(classes[i], service);
                 }
             }
+
+            Database.setDatabaseService(getService(DatabaseService.class));
         }
         LOG.info("starting bundle: com.openexchange.server");
         /*
@@ -400,8 +407,7 @@ public final class ServerActivator extends HousekeepingActivator {
             new ConfigurationCustomizer(context));
         confTracker.open(); // We need this for {@link Starter#start()}
         serviceTrackerList.add(confTracker);
-        // move this to the required services once the database component gets into its own bundle.
-        track(DatabaseService.class, new DatabaseCustomizer(context));
+
         // I18n service load
         track(I18nService.class, new I18nServiceListener(context));
 
@@ -560,6 +566,14 @@ public final class ServerActivator extends HousekeepingActivator {
         track(FileStorageFactoryCandidate.class, new CompositeFileStorageFactory());
         track(ManagedFileManagement.class, new RegistryCustomizer<ManagedFileManagement>(context, ManagedFileManagement.class));
 
+        /*
+         * User Service
+         */
+        UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
+        track(UserServiceInterceptor.class, interceptorRegistry);
+        UserService userService = new UserServiceImpl(interceptorRegistry);
+        ServerServiceRegistry.getInstance().addService(UserService.class, userService);
+
         // Start up server the usual way
         starter.start();
         // Open service trackers
@@ -568,6 +582,7 @@ public final class ServerActivator extends HousekeepingActivator {
         }
         openTrackers();
         // Register server's services
+        registerService(UserService.class, userService);
         registerService(Reloadable.class, ServerConfig.getInstance());
         registerService(Reloadable.class, SystemConfig.getInstance());
         registerService(Reloadable.class, GenericReloadable.getInstance());
@@ -576,16 +591,13 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(GroupService.class, groupService);
         ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
         registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
-        registerService(UserService.class, ServerServiceRegistry.getInstance().getService(UserService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registerService(
             UserConfigurationService.class,
             ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
 
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
-        registerService(
-            UserPermissionService.class,
-            ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
+        registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
 
         registerService(ContextService.class, ServerServiceRegistry.getInstance().getService(ContextService.class, true));
         // Register mail stuff
@@ -739,20 +751,7 @@ public final class ServerActivator extends HousekeepingActivator {
         // Cache for generic volatile locks
         {
             final String regionName = "GenLocks";
-            final byte[] ccf = ("jcs.region."+regionName+"=\n" +
-                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
-                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
-                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
-                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=150\n" +
-                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=30\n" +
-                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
-                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
-                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
-                "jcs.region."+regionName+".elementattributes.IdleTime=150\n" +
-                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
-                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            final byte[] ccf = ("jcs.region." + regionName + "=\n" + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + "jcs.region." + regionName + ".cacheattributes.MaxObjects=1000000\n" + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=150\n" + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=30\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=-1\n" + "jcs.region." + regionName + ".elementattributes.IdleTime=150\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
             final LockService lockService = new LockServiceImpl();
             ServerServiceRegistry.getInstance().addService(LockService.class, lockService);

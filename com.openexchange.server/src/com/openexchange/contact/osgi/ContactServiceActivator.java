@@ -59,6 +59,8 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.internal.UserServiceInterceptorRegistry;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -89,7 +91,12 @@ public class ContactServiceActivator extends HousekeepingActivator {
         try {
             LOG.info("starting bundle: com.openexchange.contact.service");
             ContactServiceLookup.set(this);
-            final ContactService contactService = new ContactServiceImpl();
+
+            final UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
+            track(UserServiceInterceptor.class, interceptorRegistry);
+            openTrackers();
+
+            final ContactService contactService = new ContactServiceImpl(interceptorRegistry);
             super.registerService(ContactService.class, contactService);
             ServerServiceRegistry.getInstance().addService(ContactService.class, contactService);
         } catch (final Exception e) {

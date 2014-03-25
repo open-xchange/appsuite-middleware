@@ -81,6 +81,8 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.internal.UserServiceInterceptorRegistry;
 
 /**
  * {@link ContactServiceImpl}
@@ -91,11 +93,14 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  */
 public class ContactServiceImpl extends DefaultContactService {
 
+    private final UserServiceInterceptorRegistry interceptorRegistry;
+
     /**
      * Initializes a new {@link ContactServiceImpl}.
      */
-    public ContactServiceImpl() {
+    public ContactServiceImpl(UserServiceInterceptorRegistry interceptorRegistry) {
         super();
+        this.interceptorRegistry = interceptorRegistry;
     }
 
     @Override
@@ -425,7 +430,10 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * pass through to storage
          */
+        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        beforeUserUpdate(storedContact, interceptors);
         storage.update(session, folderID, objectID, delta, lastRead);
+        afterUserUpdate(updatedContact, interceptors);
         /*
          * merge back differences to supplied contact
          */
@@ -1040,6 +1048,18 @@ public class ContactServiceImpl extends DefaultContactService {
             return null != searchIterator && searchIterator.hasNext();
         } finally {
             Tools.close(searchIterator);
+        }
+    }
+
+    private void beforeUserUpdate(Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
+        for (UserServiceInterceptor interceptor : interceptors) {
+            interceptor.beforeUpdate(null, userContact);
+        }
+    }
+
+    private void afterUserUpdate(Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
+        for (UserServiceInterceptor interceptor : interceptors) {
+            interceptor.afterUpdate(null, userContact);
         }
     }
 

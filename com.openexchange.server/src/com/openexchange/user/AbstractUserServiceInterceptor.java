@@ -60,14 +60,14 @@ import com.openexchange.groupware.ldap.User;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AbstractUserServiceInterceptor implements UserServiceInterceptor {
+public abstract class AbstractUserServiceInterceptor implements UserServiceInterceptor {
 
-    /** The default interceptor priority */
-    protected static final int DEFAULT_PRIORITY = 100;
+    /** The default interceptor ranking */
+    protected static final int DEFAULT_RANKING = 100;
 
     @Override
-    public int getPriority() {
-        return DEFAULT_PRIORITY;
+    public int getRanking() {
+        return DEFAULT_RANKING;
     }
 
     @Override

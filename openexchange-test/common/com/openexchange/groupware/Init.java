@@ -191,7 +191,9 @@ import com.openexchange.tools.file.external.FileStorageFactory;
 import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
 import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 import com.openexchange.user.UserService;
+import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.internal.UserServiceImpl;
+import com.openexchange.user.internal.UserServiceInterceptorRegistry;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
@@ -280,10 +282,6 @@ public final class Init {
          */
         com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
         /**
-         * Setup of user storage.
-         */
-        com.openexchange.groupware.ldap.UserStorageInit.getInstance(),
-        /**
          * Folder initialization
          */
         new FolderInitialization(), com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
@@ -303,7 +301,6 @@ public final class Init {
          * User configuration init
          */
         com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
-        com.openexchange.groupware.ldap.UserStorageInit.getInstance(),
         /**
          * Resource storage init
          */
@@ -626,7 +623,7 @@ public final class Init {
 
     private static void startAndInjectContactServices() {
         if (null == TestServiceRegistry.getInstance().getService(ContactService.class)) {
-            final ContactService contactService = new ContactServiceImpl();
+            final ContactService contactService = new ContactServiceImpl(new UserServiceInterceptorRegistry(null));
             ContactServiceLookup.set(new ServiceLookup() {
                 @Override
                 public <S> S getService(final Class<? extends S> clazz) {
@@ -786,7 +783,12 @@ public final class Init {
 
     private static void startAndInjectUserService() {
         if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
-            final UserService us = new UserServiceImpl();
+            final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
+                @Override
+                public synchronized List<UserServiceInterceptor> getInterceptors() {
+                    return Collections.emptyList();
+                }
+            });
             services.put(UserService.class, us);
             TestServiceRegistry.getInstance().addService(UserService.class, us);
         }
