@@ -58,26 +58,34 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-
 /**
+ * A registry for tracked {@link UserServiceInterceptor interceptors}.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
 public class UserServiceInterceptorRegistry implements ServiceTrackerCustomizer<UserServiceInterceptor, UserServiceInterceptor> {
 
-    private final List<UserServiceInterceptor> interceptors = new LinkedList<UserServiceInterceptor>();
-
-    private final ServiceComparator comparator = new ServiceComparator();
-
+    private final List<UserServiceInterceptor> interceptors;
+    private final Comparator<UserServiceInterceptor> comparator;
     private final BundleContext context;
 
+    /**
+     * Initializes a new {@link UserServiceInterceptorRegistry}.
+     *
+     * @param context The bundle context
+     */
     public UserServiceInterceptorRegistry(BundleContext context) {
         super();
         this.context = context;
-    }
+        interceptors = new LinkedList<UserServiceInterceptor>();
+        comparator = new Comparator<UserServiceInterceptor>() {
 
-    public synchronized List<UserServiceInterceptor> getInterceptors() {
-        return new ArrayList<UserServiceInterceptor>(interceptors);
+            @Override
+            public int compare(UserServiceInterceptor s1, UserServiceInterceptor s2) {
+                return s2.getRanking() - s1.getRanking();
+            }
+        };
     }
 
     @Override
@@ -98,20 +106,32 @@ public class UserServiceInterceptorRegistry implements ServiceTrackerCustomizer<
         context.ungetService(reference);
     }
 
+    /**
+     * Gets the tracked, rank-wise sorted interceptors.
+     *
+     * @return The interceptors
+     */
+    public synchronized List<UserServiceInterceptor> getInterceptors() {
+        return new ArrayList<UserServiceInterceptor>(interceptors);
+    }
+
+    /**
+     * Adds given interceptor.
+     *
+     * @param interceptor The interceptor to add
+     */
     synchronized void addInterceptor(UserServiceInterceptor interceptor) {
         interceptors.add(interceptor);
         Collections.sort(interceptors, comparator);
     }
 
+    /**
+     * Removes given interceptor.
+     *
+     * @param interceptor The interceptor to remove
+     */
     synchronized void removeInterceptor(UserServiceInterceptor interceptor) {
         interceptors.remove(interceptor);
-    }
-
-    private static final class ServiceComparator implements Comparator<UserServiceInterceptor> {
-        @Override
-        public int compare(UserServiceInterceptor s1, UserServiceInterceptor s2) {
-            return s2.getRanking() - s1.getRanking();
-        }
     }
 
 }
