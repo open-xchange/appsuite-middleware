@@ -32,7 +32,7 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "e.label SyncMLConnections\n";
 	print "e.draw LINE1\n";
 	print "f.label IMAPConnections\n";
--	print "f.draw LINE1\n";
+	print "f.draw LINE1\n";
 	print "g.label Threads\n";
 	print "g.draw LINE1\n";
 	exit 0

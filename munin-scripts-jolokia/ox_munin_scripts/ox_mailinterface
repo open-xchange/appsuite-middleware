@@ -18,8 +18,6 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "graph_args --base 1000 -l 0\n";
 	print "graph_category Open Xchange\n";
 	print "graph_vlabel Number\n";
-	print "a.label NumberOfIMAPConnections\n";
-	print "a.draw LINE1\n";
 	print "b.label NumActive\n";
 	print "b.draw LINE1\n";
 	exit 0
@@ -48,14 +46,6 @@ if ($response->is_error()){
 }
 
 ###
-
-$request = new JMX::Jmx4Perl::Request(READ,
-	"com.openexchange.monitoring:name=GeneralMonitor",
-	"NumberOfIMAPConnections");
-$response = $jmx->request($request);
-if ($response->is_ok()){
-	print "a.value ",$response->value(),"\n";
-}
 
 $request = new JMX::Jmx4Perl::Request(READ,
 	"com.openexchange.monitoring:name=MailInterfaceMonitor",

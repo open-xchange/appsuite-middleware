@@ -26,6 +26,8 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "d.draw LINE1\n";
 	print "e.label SyncMLConnections\n";
 	print "e.draw LINE1\n";
+	print "f.label IMAPConnections\n";
+	print "f.draw LINE1\n";
 	print "g.label Threads\n";
 	print "g.draw LINE1\n";
 	exit 0
@@ -85,6 +87,14 @@ $request = new JMX::Jmx4Perl::Request(READ,
 $response = $jmx->request($request);
 if ($response->is_ok()){
 	print "e.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"com.openexchange.monitoring:name=GeneralMonitor",
+	"NumberOfIMAPConnections");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "f.value ",$response->value(),"\n";
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
