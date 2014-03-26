@@ -68,12 +68,12 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
     public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
 
     @Override
-    public String getDeferredURL(final String url) {
-        return deferredURLUsing(url, getDeferrerURL());
+    public String getDeferredURL(final String url, int userId, int contextId) {
+        return deferredURLUsing(url, getDeferrerURL(userId, contextId), userId, contextId);
     }
 
     @Override
-    public String deferredURLUsing(final String url, final String domain) {
+    public String deferredURLUsing(final String url, final String domain, int userId, int contextId) {
         if (url == null) {
             return null;
         }
@@ -91,11 +91,11 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
     }
 
     @Override
-    public boolean seemsDeferred(String url) {
+    public boolean seemsDeferred(String url, int userId, int contextId) {
         if (url == null) {
             return false;
         }
-        String deferrerURL = getDeferrerURL();
+        String deferrerURL = getDeferrerURL(userId, contextId);
         if (Strings.isEmpty(deferrerURL)) {
             return false;
         }
@@ -119,18 +119,20 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
     /**
      * Gets the deferrer URL; e.g. "https://my.maindomain.org"
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The deferrer URL
      */
-    protected abstract String getDeferrerURL();
+    protected abstract String getDeferrerURL(int userId, int contextId);
 
     @Override
-    public boolean isDeferrerURLAvailable() {
-        return !Strings.isEmpty(getDeferrerURL());
+    public boolean isDeferrerURLAvailable(int userId, int contextId) {
+        return !Strings.isEmpty(getDeferrerURL(userId, contextId));
     }
 
     @Override
-    public String getBasicDeferrerURL() {
-    	final String deferrerURL = getDeferrerURL();
+    public String getBasicDeferrerURL(int userId, int contextId) {
+    	final String deferrerURL = getDeferrerURL(userId, contextId);
         if (deferrerURL == null) {
             return new StringAllocator(PREFIX.get().getPrefix()).append("defer").toString();
         }

@@ -69,18 +69,22 @@ public interface DeferringURLService {
      * If no such property is set, passed URL is returned unchanged
      *
      * @param url The URL to defer
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The deferred URL
      */
-    String getDeferredURL(String url);
+    String getDeferredURL(String url, int userId, int contextId);
 
     /**
      * Generates a deferred URL for specified URL using given <code>domain</code>.
      *
      * @param url The URL to defer
      * @param domain The singular domain to use
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The deferred URL
      */
-    String deferredURLUsing(String url, String domain);
+    String deferredURLUsing(String url, String domain, int userId, int contextId);
 
     /**
      * Gets the basic defer URL.
@@ -92,23 +96,29 @@ public interface DeferringURLService {
      * <p>
      * If no such property is set, return value is a relative one according to <code>"ajax/defer"</code>.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The basic defer URL
      */
-    String getBasicDeferrerURL();
+    String getBasicDeferrerURL(int userId, int contextId);
 
     /**
      * Performs a check if passed URL seems to be deferred.
      *
      * @param url The URL to check if deferred
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return <code>true</code> if deferred; otherwise <code>false</code>
      */
-    boolean seemsDeferred(String url);
+    boolean seemsDeferred(String url, int userId, int contextId);
 
     /**
      * Signals if a deferred URL is available.
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return <code>true</code> if a deferred URL is available; otherwise <code>false</code>
      */
-    boolean isDeferrerURLAvailable();
+    boolean isDeferrerURLAvailable(int userId, int contextId);
 
 }

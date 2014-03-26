@@ -90,7 +90,7 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData 
         if (deferrer == null) {
             return callbackUrl;
         }
-        return deferrer.getDeferredURL(callbackUrl);
+        return deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
     }
 
     @Override

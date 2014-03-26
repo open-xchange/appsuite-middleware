@@ -110,13 +110,13 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiSecret");
         }
         this.apiSecret = apiSecret;
-        
+
         final String consumerKey = configService.getProperty("com.openexchange.oauth.xing.consumerKey");
         if (Strings.isEmpty(consumerKey)) {
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.consumerKey");
         }
         this.consumerKey = consumerKey;
-        
+
         final String consumerSecret = configService.getProperty("com.openexchange.oauth.xing.consumerSecret");
         if (Strings.isEmpty(consumerSecret)) {
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.consumerSecret");
@@ -147,13 +147,13 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiSecret");
         }
         this.apiSecret = apiSecret;
-        
+
         final String consumerKey = configService.getProperty("com.openexchange.oauth.xing.consumerKey");
         if (Strings.isEmpty(consumerKey)) {
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.consumerKey");
         }
         this.consumerKey = consumerKey;
-        
+
         final String consumerSecret = configService.getProperty("com.openexchange.oauth.xing.consumerSecret");
         if (Strings.isEmpty(consumerSecret)) {
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.consumerSecret");
@@ -180,8 +180,8 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
         }
 
         final DeferringURLService deferrer = services.getService(DeferringURLService.class);
-        if (null != deferrer && deferrer.isDeferrerURLAvailable()) {
-            return deferrer.getDeferredURL(callbackUrl);
+        if (null != deferrer && deferrer.isDeferrerURLAvailable(session.getUserId(), session.getContextId())) {
+            return deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
         }
 
         return deferredURLUsing(callbackUrl, new StringAllocator(extractProtocol(callbackUrl)).append("://").append(currentHost).toString());

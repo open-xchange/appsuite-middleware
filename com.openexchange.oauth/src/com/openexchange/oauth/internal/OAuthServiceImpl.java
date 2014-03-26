@@ -248,10 +248,13 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     @Override
     public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final String currentHost, final Session session) throws OXException {
         try {
+            final int contextId = session.getContextId();
+            final int userId = session.getUserId();
+
             /*
              * Get associated OAuth meta data implementation
              */
-            final OAuthServiceMetaData metaData = registry.getService(serviceMetaData, session.getUserId(), session.getContextId());
+            final OAuthServiceMetaData metaData = registry.getService(serviceMetaData, userId, contextId);
 
             // ------------------------------------------------------------------------------------------ //
 
@@ -280,8 +283,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             final DeferringURLService ds = Services.getService(DeferringURLService.class);
             {
-                if (null != ds && ds.isDeferrerURLAvailable()) {
-                    final String deferredURL = ds.getDeferredURL(cbUrl);
+                if (null != ds && ds.isDeferrerURLAvailable(userId, contextId)) {
+                    final String deferredURL = ds.getDeferredURL(cbUrl, userId, contextId);
                     if (deferredURL != null) {
                         cbUrl = deferredURL;
                     }
@@ -311,8 +314,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             if (metaData.registerTokenBasedDeferrer() && null != scribeToken) {
                 // Is only applicable if call-back URL is deferred; e.g. /ajax/defer?redirect=http:%2F%2Fmy.host.com%2Fpath...
-                if (null != ds && ds.isDeferrerURLAvailable()) {
-                    if (ds.seemsDeferred(cbUrl)) {
+                if (null != ds && ds.isDeferrerURLAvailable(userId, contextId)) {
+                    if (ds.seemsDeferred(cbUrl, userId, contextId)) {
                         callbackRegistry.add(scribeToken.getToken(), cbUrl);
                     } else {
                         LOG.warn("Call-back URL cannot be registered as it is not deferred: {}", Strings.abbreviate(cbUrl, 32));
