@@ -83,6 +83,7 @@ import com.openexchange.groupware.infostore.search.UrlTerm;
 import com.openexchange.groupware.infostore.search.VersionCommentTerm;
 import com.openexchange.groupware.infostore.search.VersionTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link ToMySqlQueryVisitor}
@@ -107,6 +108,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private static final String PREFIX = " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ";
 
     private static final char[] IMMUNE = new char[] { ' ' };
+    private static final char[] IMMUNE_WILDCARDS = new char[] { ' ', '%', '_', '\\' };
 
     /**
      * Initializes a new {@link ToMySqlQueryVisitor}.
@@ -307,13 +309,13 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(DescriptionTerm descriptionTerm) {
-        String field = "description ";
+        String field = "description";
         parseStringSearchTerm(descriptionTerm, field);
     }
 
     @Override
     public void visit(UrlTerm urlTerm) {
-        String field = "url ";
+        String field = "url";
         parseStringSearchTerm(urlTerm, field);
     }
 
@@ -341,24 +343,87 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         return comp;
     }
 
+    private boolean hasWildCards(final String pattern) {
+        return pattern.indexOf('*') >= 0 || pattern.indexOf('?') >= 0;
+    }
+
+    private String replaceWildcards(final String pattern) {
+        final int length = pattern.length();
+        final StringAllocator sb = new StringAllocator(length);
+
+        for (int i = 0; i < length; i++) {
+            final char c = pattern.charAt(i);
+            switch (c) {
+            case '*':
+                sb.append('%');
+                break;
+            case '?':
+                sb.append('_');
+                break;
+            case '%':
+                sb.append("\\%");
+                break;
+            case '_':
+                sb.append("\\_");
+                break;
+            case '\\':
+                sb.append("\\\\");
+                break;
+            default:
+                sb.append(c);
+                break;
+            }
+        }
+
+        return sb.toString();
+    }
+
     private void parseStringSearchTerm(AbstractStringSearchTerm searchTerm, String field) {
-        String pattern = codec.encode(IMMUNE, searchTerm.getPattern());
+        String pattern = searchTerm.getPattern();
+        final boolean hasWildCards = hasWildCards(pattern);
+        pattern = hasWildCards ? codec.encode(IMMUNE_WILDCARDS, replaceWildcards(pattern)) : codec.encode(IMMUNE, pattern);
+
         field = DOCUMENT + field;
         if (searchTerm.isIgnoreCase()) {
-            field = "UPPER(" + field + ") ";
+            field = new StringAllocator("UPPER(").append(field).append(')').toString();
             if (searchTerm.isSubstringSearch()) {
-                pattern = "UPPER('%" + pattern + "%')";
+                final StringAllocator tmp = new StringAllocator(pattern.length() + 8);
+                tmp.append("UPPER('");
+                if (!pattern.startsWith("%")) {
+                    tmp.append('%');
+                }
+                tmp.append(pattern);
+                if (!pattern.endsWith("%")) {
+                    tmp.append('%');
+                }
+                tmp.append("')");
+                pattern = tmp.toString();
             } else {
                 pattern = "UPPER('" + pattern + "')";
             }
         } else {
-            pattern = '\'' + pattern + '\'';
+            if (searchTerm.isSubstringSearch()) {
+                final StringAllocator tmp = new StringAllocator(pattern.length() + 4);
+                tmp.append('\'');
+                if (!pattern.startsWith("%")) {
+                    tmp.append('%');
+                }
+                tmp.append(pattern);
+                if (!pattern.endsWith("%")) {
+                    tmp.append('%');
+                }
+                tmp.append('\'');
+                pattern = tmp.toString();
+            } else {
+                pattern = '\'' + pattern + '\'';
+            }
         }
+
         sb.append(field);
-        if (searchTerm.isSubstringSearch()) {
-            sb.append(" LIKE ").append(pattern).append(" ");
+        if (hasWildCards || searchTerm.isSubstringSearch()) {
+            sb.append(" LIKE ").append(pattern);
         } else {
-            sb.append(" = ").append(pattern).append(" ");
+            sb.append(" = ").append(pattern);
         }
     }
 
