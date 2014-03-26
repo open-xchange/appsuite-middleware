@@ -110,9 +110,12 @@ public class Trash implements PreferencesItemService {
                 /*
                  * Use infostore default trash folder if available
                  */
+                long start = System.currentTimeMillis();
                 if (InfostoreFacades.isInfoStoreAvailable()) {
+                    LOG.debug("After InfostoreFacades.isInfoStoreAvailable(): {}ms", System.currentTimeMillis() - start);
                     FolderObject trashFolder = new OXFolderAccess(ctx).getDefaultFolder(
                         user.getId(), FolderObject.INFOSTORE, FolderObject.TRASH);
+                    LOG.debug("After OXFolderAccess(ctx).getDefaultFolder(): {}ms", System.currentTimeMillis() - start);
                     if (null != trashFolder) {
                         setting.setSingleValue(Integer.valueOf(trashFolder.getObjectID()));
                     }
