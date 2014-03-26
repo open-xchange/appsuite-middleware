@@ -54,17 +54,26 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-public class LinkedinUpdatesDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
+public class LinkedinUpdatesDataSource extends AbstractLinkedinDataSource {
 
     public LinkedinUpdatesDataSource(final ServiceLookup lookup) {
         super(lookup);
+    }
+
+    @Override
+    public String getId() {
+        return "com.openexchange.halo.linkedIn.updates";
+    }
+
+    @Override
+    public boolean isAvailable(ServerSession session) throws OXException {
+        return hasAccount(session) && hasPlusFeatures(session);
     }
 
     @Override

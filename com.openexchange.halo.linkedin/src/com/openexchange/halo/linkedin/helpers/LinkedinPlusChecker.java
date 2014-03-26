@@ -47,77 +47,35 @@
  *
  */
 
-package com.openexchange.halo.linkedin;
+package com.openexchange.halo.linkedin.helpers;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.halo.linkedin.helpers.LinkedinPlusChecker;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link AbstractLinkedinDataSource}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public abstract class AbstractLinkedinDataSource implements HaloContactDataSource {
+public class LinkedinPlusChecker {
 
-    protected final ServiceLookup serviceLookup;
+    private static final String PLUS_PROPERTY = "com.openexchange.halo.linkedin.enabledMailCapableKey";
 
-    private LinkedinPlusChecker plusChecker;
+    private final ServiceLookup serviceLookup;
 
-    /**
-     * Initializes a new {@link AbstractLinkedinDataSource}.
-     */
-    protected AbstractLinkedinDataSource(final ServiceLookup serviceLookup) {
+    public LinkedinPlusChecker(final ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = ExceptionOnAbsenceServiceLookup.valueOf(serviceLookup);
     }
 
-    /**
-     * Gets the service look-up.
-     */
-    public ServiceLookup getServiceLookup() {
-        return serviceLookup;
+    public boolean hasPlusFeatures(ServerSession session) throws OXException {
+        ConfigViewFactory configViewFactory = serviceLookup.getService(ConfigViewFactory.class);
+        ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+        return view.opt(PLUS_PROPERTY, Boolean.class, false).booleanValue();
     }
-
-    public LinkedInService getLinkedinService() {
-        return serviceLookup.getService(LinkedInService.class);
-    }
-
-    public OAuthService getOauthService() {
-        return serviceLookup.getService(OAuthService.class);
-    }
-
-    public void setPlusChecker(LinkedinPlusChecker plusChecker) {
-        this.plusChecker = plusChecker;
-    }
-
-    protected boolean hasAccount(ServerSession session) throws OXException {
-        int uid = session.getUserId();
-        int cid = session.getContextId();
-        if (getOauthService().getMetaDataRegistry().containsService(LinkedInService.SERVICE_ID, uid, cid)) {
-            return !getOauthService().getAccounts(LinkedInService.SERVICE_ID, session, uid, cid).isEmpty();
-        }
-
-        return false;
-    }
-
-    protected boolean hasPlusFeatures(ServerSession session) throws OXException {
-        if (plusChecker == null) {
-            return false;
-        }
-
-        return plusChecker.hasPlusFeatures(session);
-    }
-
-    @Override
-    public abstract AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException;
 
 }
