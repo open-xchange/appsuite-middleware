@@ -58,7 +58,7 @@ import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
+import com.openexchange.tools.encoding.Base64;
 
 /**
  * {@link HashCalculator} - Calculates the hash string.
@@ -150,28 +150,11 @@ public class HashCalculator {
             if (null != salt) {
                 md.update(salt.getBytes());
             }
-            return format(md.digest());
-            //return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
+            return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
         } catch (final NoSuchAlgorithmException e) {
             LOG.error("", e);
         }
         return "";
-    }
-
-    private final static char[] HEX = "0123456789abcdef".toCharArray();
-
-    private static String format(byte[] bytes) {
-        if (bytes == null) {
-            return "";
-        }
-        StringAllocator sb = new StringAllocator(bytes.length * 2);
-        int b;
-        for (int i = 0; i < bytes.length; i++) {
-            b = bytes[i] & 0xFF;
-            sb.append(HEX[b >>> 4]);
-            sb.append(HEX[b & 0x0F]);
-        }
-        return sb.toString();
     }
 
     /**
