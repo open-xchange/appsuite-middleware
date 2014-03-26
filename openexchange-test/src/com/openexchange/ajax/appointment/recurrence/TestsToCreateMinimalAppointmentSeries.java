@@ -192,8 +192,8 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
 
-        negativeAssertionOnCreate.check(changes, OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_MONTH.create());
-        negativeAssertionOnUpdate.check(changes, OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_MONTH.create());
+        negativeAssertionOnCreate.check(changes, OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_MONTH.create(1));
+        negativeAssertionOnUpdate.check(changes, OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_MONTH.create(1));
     }
 
     public void testShouldCreateYearlyIntervalWithMinimalData() throws Exception {
