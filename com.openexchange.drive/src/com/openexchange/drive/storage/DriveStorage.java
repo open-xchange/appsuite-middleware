@@ -91,6 +91,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
+import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
@@ -533,10 +534,6 @@ public class DriveStorage {
         return getFileAccess().getFileMetadata(id, version);
     }
 
-//    public List<File> getFiles(String path) throws OXException {
-//        return getFilesInFolder(getFolderID(path));
-//    }
-
     /**
      * Gets all synchronized files present in the folder identified by the supplied ID.
      *
@@ -567,7 +564,7 @@ public class DriveStorage {
         if (null == folder.getOwnPermission() || FileStoragePermission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
             return Collections.emptyList();
         }
-        SearchIterator<File> filesIterator = getFilesIterator(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS);
+        SearchIterator<File> filesIterator = searchDocuments(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS);
         if (all) {
             return Filter.apply(filesIterator, new FileNameFilter() {
 
@@ -594,6 +591,18 @@ public class DriveStorage {
     }
 
     /**
+     * Gets a file with a specific name in a path.
+     *
+     * @param path The path of the directory to look for the file
+     * @param name The name of the file
+     * @return The file, or <code>null</code> if not found.
+     * @throws OXException
+     */
+    public File getFileByName(String path, String name) throws OXException {
+        return getFileByName(path, name, false);
+    }
+
+    /**
      * Finds a file with a specific name in a path.
      *
      * @param path The path of the directory to look for the file
@@ -606,17 +615,54 @@ public class DriveStorage {
         return findFileByName(path, name, DriveConstants.FILE_FIELDS, normalizeFileNames);
     }
 
+    /**
+     * Gets a file with a specific name in a path.
+     *
+     * @param path The path of the directory to look for the file
+     * @param name The name of the file
+     * @param normalizeFileNames <code>true</code> to also consider not-normalized filenames, <code>false</code>, otherwise
+     * @return The file, or <code>null</code> if not found.
+     * @throws OXException
+     */
+    public File getFileByName(String path, final String name, boolean normalizeFileNames) throws OXException {
+        return getFileByName(path, name, DriveConstants.FILE_FIELDS, normalizeFileNames);
+    }
+
     private File findFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
-        List<File> files = Filter.apply(getFilesIterator(getFolderID(path), name, fields), new FileNameFilter() {
+        List<File> files = Filter.apply(searchDocuments(getFolderID(path), name, fields), new FileNameFilter() {
 
             @Override
             protected boolean accept(String fileName) throws OXException {
                 return name.equals(fileName) || normalizeFileNames && PathNormalizer.equals(name, fileName);
             }
         });
-        if (1 == files.size()) {
+        return selectFile(files, name);
+    }
+
+    private File getFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
+        List<File> files = Filter.apply(getDocuments(getFolderID(path), name, fields), new FileNameFilter() {
+
+            @Override
+            protected boolean accept(String fileName) throws OXException {
+                return name.equals(fileName) || normalizeFileNames && PathNormalizer.equals(name, fileName);
+            }
+        });
+        return selectFile(files, name);
+    }
+
+    /**
+     * Selects the "best matching" file from the supplied list.
+     *
+     * @param files The possible files
+     * @param name The name to match
+     * @return The best matching file, or <code>null</code> if list was empty
+     */
+    private static File selectFile(List<File> files, String name) {
+        if (null == files || 0 == files.size()) {
+            return null;
+        } else if (1 == files.size()) {
             return files.get(0);
-        } else if (1 < files.size()) {
+        } else {
             File normalizedFile = null;
             for (File file : files) {
                 if (name.equals(file.getFileName())) {
@@ -628,7 +674,6 @@ public class DriveStorage {
             }
             return null != normalizedFile ? normalizedFile : files.get(0);
         }
-        return null;
     }
 
     public String getPath(String folderID) throws OXException {
@@ -716,16 +761,27 @@ public class DriveStorage {
         return String.format(format, product, device);
     }
 
-    private SearchIterator<File> getFilesIterator(String folderID, String pattern, List<Field> fields) throws OXException {
-        if (null != pattern) {
-            // search
-            return getFileAccess().search(pattern, null != fields ? fields : DriveConstants.FILE_FIELDS, folderID, null,
-                SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
-        } else {
-            // get
-            return getFileAccess().getDocuments(
-                folderID, null != fields ? fields : DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT).results();
+    private SearchIterator<File> searchDocuments(String folderID, String pattern, List<Field> fields) throws OXException {
+        if (null == pattern) {
+            return getDocuments(folderID, fields);
         }
+        // search
+        return getFileAccess().search(pattern, null != fields ? fields : DriveConstants.FILE_FIELDS, folderID, null,
+            SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+    }
+
+    private SearchIterator<File> getDocuments(String folderID, String filename, List<Field> fields) throws OXException {
+        if (null == filename) {
+            return getDocuments(folderID, fields);
+        }
+        return getFileAccess().search(Collections.singletonList(folderID), new FileNameTerm(filename, false, false),
+            null != fields ? fields : DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT,
+            FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+    }
+
+    private SearchIterator<File> getDocuments(String folderID, List<Field> fields) throws OXException {
+        return getFileAccess().getDocuments(
+            folderID, null != fields ? fields : DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT).results();
     }
 
     private FileStorageFolder resolveToLeaf(String path, boolean createIfNeeded, boolean throwOnAbsence) throws OXException {
