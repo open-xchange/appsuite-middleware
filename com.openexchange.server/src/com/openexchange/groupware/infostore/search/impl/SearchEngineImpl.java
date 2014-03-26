@@ -50,6 +50,7 @@
 package com.openexchange.groupware.infostore.search.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -124,11 +125,52 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
     @Override
     public SearchIterator<DocumentMetadata> search(final int[] folderIds, final SearchTerm<?> searchTerm, final Metadata[] cols, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
-        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(folderIds, ctx.getContextId(), getResultFieldsSelect(cols), sortedBy, dir);
+
+        Connection con = getReadConnection(ctx);
+
+        List<Integer> all = new ArrayList<Integer>();
+        List<Integer> own = new ArrayList<Integer>();
+        if (folderIds == null || folderIds.length == 0) {
+            final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                user.getId(),
+                user.getGroups(),
+                userPermissions.getAccessibleModules(),
+                FolderObject.INFOSTORE,
+                ctx,
+                con)).asQueue();
+            for (final FolderObject folder : queue) {
+                final EffectivePermission perm = folder.getEffectiveUserPermission(user.getId(), userPermissions);
+                if (perm.canReadAllObjects()) {
+                    all.add(Integer.valueOf(folder.getObjectID()));
+                } else if (perm.canReadOwnObjects()) {
+                    own.add(Integer.valueOf(folder.getObjectID()));
+                }
+            }
+        } else {
+            for (int folderId : folderIds) {
+                final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
+                if (perm.canReadAllObjects()) {
+                    all.add(Integer.valueOf(folderId));
+                } else if (perm.canReadOwnObjects()) {
+                    own.add(Integer.valueOf(folderId));
+                }
+            }
+        }
+
+        if (all.isEmpty() && own.isEmpty()) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+
+        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(I2i(all.toArray(new Integer[all.size()])),
+            I2i(own.toArray(new Integer[own.size()])),
+            ctx.getContextId(),
+            user.getId(),
+            getResultFieldsSelect(cols),
+            sortedBy,
+            dir);
         searchTerm.visit(visitor);
         String sqlQuery = visitor.getMySqlQuery();
 
-        Connection con = getReadConnection(ctx);
         boolean keepConnection = false;
         PreparedStatement stmt = null;
         try {

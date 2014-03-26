@@ -101,6 +101,8 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     private final int dir;
 
+    private final int userId;
+
     private static final String INFOSTORE = "infostore.";
 
     private static final String DOCUMENT = "infostore_document.";
@@ -114,39 +116,62 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
      * Initializes a new {@link ToMySqlQueryVisitor}.
      * @param cols
      */
-    public ToMySqlQueryVisitor(final int[] folderIds, final int contextId, final String cols) {
-        this(folderIds, contextId, cols, null, SearchEngineImpl.NOT_SET);
+    public ToMySqlQueryVisitor(final int[] allFolderIds, final int[] ownFolderIds, final int contextId, final int userId, final String cols) {
+        this(allFolderIds, ownFolderIds, contextId, userId, cols, null, SearchEngineImpl.NOT_SET);
     }
 
-    public ToMySqlQueryVisitor(final int[] folderIds, final int contextId, final String cols, final Metadata sortedBy, final int dir) {
+    public ToMySqlQueryVisitor(final int[] allFolderIds, final int[] ownFolderIds, final int contextId, final int userId, final String cols, final Metadata sortedBy, final int dir) {
         super();
         this.sb = new StringBuilder(8192);
-        sb.append(cols).append(" ");
-        sb.append(PREFIX).append(contextId).append(" AND ");
-        appendInString(folderIds, sb);
         this.codec = new MySQLCodec(Mode.STANDARD);
         this.sortedBy = sortedBy;
         this.dir = dir;
+        this.userId = userId;
+        sb.append(cols).append(" ");
+        sb.append(PREFIX).append(contextId).append(" AND ");
+        appendInString(allFolderIds, ownFolderIds, sb);
     }
 
-    private void appendInString(final int[] folderIds, final StringBuilder sb) {
-        if (null != folderIds) {
-            final int length = folderIds.length;
+    private void appendInString(final int[] allFolderIds, final int[] ownFolderIds, final StringBuilder sb) {
+        boolean needOr = false;
+        if (null != allFolderIds) {
+            needOr = true;
+            final int length = allFolderIds.length;
             if (length > 0) {
                 if (1 == length) {
-                    sb.append(INFOSTORE).append("folder_id = ").append(folderIds[0]);
+                    sb.append(INFOSTORE).append("folder_id = ").append(allFolderIds[0]);
                 } else {
                     sb.append(INFOSTORE).append("folder_id IN ");
-                    sb.append('(');
-                    sb.append(folderIds[0]);
-                    for (int i = 1; i < length; i++) {
-                        sb.append(',').append(folderIds[i]);
-                    }
-                    sb.append(')');
+                    sb.append(appendFolders(allFolderIds));
                 }
-                sb.append(" AND ");
             }
         }
+        if (null != ownFolderIds) {
+            final int length = ownFolderIds.length;
+            if (length > 0) {
+                sb.append(needOr ? " OR " : " AND ");
+                if (1 == length) {
+                    sb.append("(").append(INFOSTORE).append("folder_id = ").append(ownFolderIds[0]);
+                    sb.append(" AND ").append(INFOSTORE).append("created_by = ").append(userId).append(")");
+                } else {
+                    sb.append("(").append(INFOSTORE).append("folder_id IN ");
+                    sb.append(appendFolders(ownFolderIds));
+                    sb.append(" AND ").append(INFOSTORE).append("created_by = ").append(userId).append(")");
+                }
+            }
+        }
+        sb.append(" AND ");
+    }
+
+    private String appendFolders(final int[] folders) {
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        sb.append(folders[0]);
+        for (int i = 1; i < folders.length; i++) {
+            sb.append(',').append(folders[i]);
+        }
+        sb.append(')');
+        return sb.toString();
     }
 
     public String getMySqlQuery() {
