@@ -383,9 +383,9 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         final boolean hasWildCards = hasWildCards(pattern);
         pattern = hasWildCards ? codec.encode(IMMUNE_WILDCARDS, replaceWildcards(pattern)) : codec.encode(IMMUNE, pattern);
 
-        field = DOCUMENT + field;
+        String fieldName = new StringAllocator(DOCUMENT).append(field).toString();
         if (searchTerm.isIgnoreCase()) {
-            field = new StringAllocator("UPPER(").append(field).append(')').toString();
+            fieldName = new StringAllocator("UPPER(").append(fieldName).append(')').toString();
             if (searchTerm.isSubstringSearch()) {
                 final StringAllocator tmp = new StringAllocator(pattern.length() + 8);
                 tmp.append("UPPER('");
@@ -419,7 +419,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             }
         }
 
-        sb.append(field);
+        sb.append(fieldName);
         if (hasWildCards || searchTerm.isSubstringSearch()) {
             sb.append(" LIKE ").append(pattern);
         } else {
