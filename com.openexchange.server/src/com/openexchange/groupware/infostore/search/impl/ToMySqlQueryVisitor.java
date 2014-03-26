@@ -82,6 +82,7 @@ import com.openexchange.groupware.infostore.search.TitleTerm;
 import com.openexchange.groupware.infostore.search.UrlTerm;
 import com.openexchange.groupware.infostore.search.VersionCommentTerm;
 import com.openexchange.groupware.infostore.search.VersionTerm;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 /**
  * {@link ToMySqlQueryVisitor}
@@ -94,6 +95,10 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private final StringBuilder sb;
 
     private final MySQLCodec codec;
+
+    private final Metadata sortedBy;
+
+    private final int dir;
 
     private static final String INFOSTORE = "infostore.";
 
@@ -108,12 +113,18 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
      * @param cols
      */
     public ToMySqlQueryVisitor(final int[] folderIds, final int contextId, final String cols) {
+        this(folderIds, contextId, cols, null, SearchEngineImpl.NOT_SET);
+    }
+
+    public ToMySqlQueryVisitor(final int[] folderIds, final int contextId, final String cols, final Metadata sortedBy, final int dir) {
         super();
         this.sb = new StringBuilder(8192);
         sb.append(cols).append(" ");
         sb.append(PREFIX).append(contextId).append(" AND ");
         appendInString(folderIds, sb);
         this.codec = new MySQLCodec(Mode.STANDARD);
+        this.sortedBy = sortedBy;
+        this.dir = dir;
     }
 
     private void appendInString(final int[] folderIds, final StringBuilder sb) {
@@ -137,6 +148,14 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     }
 
     public String getMySqlQuery() {
+        if (null != sortedBy && dir != SearchEngineImpl.NOT_SET) {
+            sb.append(" ORDER BY ").append(sortedBy.getName());
+            if (dir == SearchEngineImpl.ASC) {
+                sb.append(" ASC");
+            } else if (dir == SearchEngineImpl.DESC) {
+                sb.append(" DESC");
+            }
+        }
         return sb.toString();
     }
 
@@ -337,9 +356,9 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         }
         sb.append(field);
         if (searchTerm.isSubstringSearch()) {
-            sb.append(" LIKE ").append(pattern).append(" ");
+            sb.append(" LIKE '").append(pattern).append("' ");
         } else {
-            sb.append(" = ").append(pattern).append(" ");
+            sb.append(" = '").append(pattern).append("' ");
         }
     }
 
