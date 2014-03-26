@@ -317,10 +317,13 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
             if (false == Action.REMOVE.equals(action.getAction())) {
                 throw new IllegalStateException("Can't perform action " + action + " on server");
             }
-            /*
-             * check if folder should be hard-deleted or moved to trash
-             */
-            if (DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum()) || false == session.hasTempFolder() ||
+            if (session.getStorage().hasTrashFolder()) {
+                /*
+                 * move to trash if available
+                 */
+                String folderID = session.getStorage().deleteFolder(action.getVersion().getPath(), false);
+                removedFolderIDs.add(new FolderID(folderID));
+            } else if (DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum()) || false == session.hasTempFolder() ||
                 false == mayMove(action.getVersion().getPath(), DriveConstants.TEMP_PATH)) {
                 /*
                  * just delete empty directory
@@ -344,7 +347,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                     }
                 } else {
                     /*
-                     * identical folder already in trash, hard-delete the directory
+                     * identical folder already in temp folder, hard-delete the directory
                      */
                     String folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
                     removedFolderIDs.add(new FolderID(folderID));
