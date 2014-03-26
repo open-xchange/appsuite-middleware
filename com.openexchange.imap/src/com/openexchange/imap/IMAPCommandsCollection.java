@@ -231,7 +231,8 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final String mboxName = prepareStringArgument(new StringAllocator("probe").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString());
+                final String fname = new StringAllocator("probe").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
+                final String mboxName = prepareStringArgument(fname);
                 LOG.debug("Trying to probe IMAP server {} for root subfolder capability with mbox name: {}", p.getHost(), mboxName);
                 /*
                  * Perform command: CREATE
@@ -240,9 +241,24 @@ public final class IMAPCommandsCollection {
                 final Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
+                    // Well, CREATE command succeeded. Is folder really on root level...?
+                    sb.reinitTo(0);
+                    boolean retval = true;
+                    // Query the folder
+                    final ListInfo[] li = p.list("", sb.append("*").append(mboxName).append("*").toString());
+                    if (li != null) {
+                        boolean found = false;
+                        for (int i = 0; !found && i < li.length; i++) {
+                            if (fname.equals(li[i].name)) {
+                                found = true;
+                            }
+                        }
+                        retval = found;
+                    }
+                    // Delete probe folder and return
                     sb.reinitTo(0);
                     performCommand(p, sb.append("DELETE ").append(mboxName).toString());
-                    return Boolean.TRUE;
+                    return Boolean.valueOf(retval);
                 }
                 if (response.isNO()) {
                     final String rest = response.getRest();
@@ -1535,7 +1551,7 @@ public final class IMAPCommandsCollection {
      * All known color labels:
      * <code>$cl_0&nbsp;$cl_1&nbsp;$cl_2&nbsp;$cl_3&nbsp;$cl_4&nbsp;$cl_5&nbsp;$cl_6&nbsp;$cl_7&nbsp;$cl_8&nbsp;$cl_9&nbsp;$cl_10</code>
      * <code>cl_0&nbsp;cl_1&nbsp;cl_2&nbsp;cl_3&nbsp;cl_4&nbsp;cl_5&nbsp;cl_6&nbsp;cl_7&nbsp;cl_8&nbsp;cl_9&nbsp;cl_10</code>
-     * 
+     *
      * @param imapFolder - the imap folder
      * @param msgUIDs - the message UIDs
      * @param colorLabelFlag - the color id
