@@ -129,7 +129,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarSql.class);
 
-    private final int EXCEPTION_NOT_FOUND = -1;
+    protected final static int EXCEPTION_NOT_FOUND = -1;
 
     private static final Set<Integer> EXEMPT = new HashSet<Integer>(Arrays.asList(
         Appointment.RECURRENCE_START,
