@@ -356,9 +356,9 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         }
         sb.append(field);
         if (searchTerm.isSubstringSearch()) {
-            sb.append(" LIKE '").append(pattern).append("' ");
+            sb.append(" LIKE ").append(pattern).append(" ");
         } else {
-            sb.append(" = '").append(pattern).append("' ");
+            sb.append(" = ").append(pattern).append(" ");
         }
     }
 
