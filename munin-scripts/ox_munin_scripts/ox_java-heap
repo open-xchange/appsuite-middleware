@@ -4,7 +4,7 @@
 
 
 $showruntimestats="/opt/open-xchange/sbin/showruntimestats";
-$showexec="$showruntimestats -r";
+$showexec="$showruntimestats --memorypool";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {

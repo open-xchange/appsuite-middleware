@@ -147,6 +147,8 @@ public class StatisticTools extends AbstractJMXTools {
 
     private static final String OPT_OVERVIEW_STATS_LONG = "overview";
 
+    private static final String OPT_MEMORYPOOL_STATS_LONG = "memorypool";
+
     private CLIOption xchangestats = null;
     private CLIOption threadpoolstats = null;
     private CLIOption runtimestats = null;
@@ -173,6 +175,7 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption callmonitorstats = null;
     private CLIOption miscstats = null;
     private CLIOption overviewstats = null;
+    private CLIOption memorypoolstats = null;
 
     /**
      * Option for garbage collection statistics
@@ -198,6 +201,10 @@ public class StatisticTools extends AbstractJMXTools {
         }
         if (null != parser.getOptionValue(this.runtimestats) && 0 == count) {
             System.out.print(getStats(mbc, "java.lang:type=Runtime"));
+            System.out.print(showMemoryPoolData(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.memorypoolstats) && 0 == count) {
             System.out.print(showMemoryPoolData(mbc));
             count++;
         }
@@ -562,6 +569,8 @@ public class StatisticTools extends AbstractJMXTools {
         this.callmonitorstats = setLongOpt(parser, OPT_CALLMONITOR_STATS_LONG, "shows admin.monitor Call Monitor stats", false, false);
         this.miscstats = setLongOpt(parser, OPT_MISC_STATS_LONG, "shows stats for general and threading", false, false);
         this.overviewstats = setLongOpt(parser, OPT_OVERVIEW_STATS_LONG, "shows stats for pooling and OperatingSystem", false, false);
+        this.memorypoolstats = setLongOpt(parser, OPT_MEMORYPOOL_STATS_LONG, "shows stats for memory pool usage of the Java runtime", false, false);
+
     }
 
     static String showMemoryPoolData(MBeanServerConnection con) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {

@@ -102,6 +102,8 @@ public class StatisticToolsTest extends AbstractRMITest {
 
     private int returnOverview;
 
+    private int returnMemoryPool;
+
     @Test
     public void testGetXchangeStats() {
         final StatisticTools statisticTools = new StatisticTools() {
@@ -386,5 +388,18 @@ public class StatisticToolsTest extends AbstractRMITest {
         };
         statisticTools.start(new String[] { "--overview", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnOverview);
+    }
+
+    @Test
+    public void testMemoryPoolstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnMemoryPool = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "--memorypool", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnMemoryPool);
     }
 }
