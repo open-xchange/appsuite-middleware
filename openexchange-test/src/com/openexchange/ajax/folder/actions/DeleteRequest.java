@@ -69,6 +69,8 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
     private final Date lastModified;
     private final boolean failOnError;
 
+    private Boolean hardDelete;
+
     public DeleteRequest(final API api, final String[] folderIds, final Date lastModified, final boolean failOnError) {
         super(api);
         this.folderIds = folderIds;
@@ -114,6 +116,14 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         this(api, true, folder);
     }
 
+    public void setHardDelete(Boolean hardDelete) {
+        this.hardDelete = hardDelete;
+    }
+
+    public Boolean isHardDelete() {
+        return hardDelete;
+    }
+
     @Override
     public Object getBody() {
         final JSONArray array = new JSONArray();
@@ -132,6 +142,9 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
     protected void addParameters(final List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
         params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified.getTime()));
+        if (null != hardDelete) {
+            params.add(new Parameter("hardDelete", String.valueOf(hardDelete)));
+        }
     }
 
     @Override
