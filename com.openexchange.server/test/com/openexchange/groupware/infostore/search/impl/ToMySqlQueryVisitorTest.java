@@ -99,6 +99,12 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         result = visitor.getMySqlQuery();
         assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE '%bluber\\_blah%'"));
 
+        dtz = new DescriptionTerm("bluber\\blah", false, false);
+        visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
+        visitor.visit(dtz);
+        result = visitor.getMySqlQuery();
+        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description = 'bluber\\\\blah'"));
+
     }
 
     public void testFolders() {
