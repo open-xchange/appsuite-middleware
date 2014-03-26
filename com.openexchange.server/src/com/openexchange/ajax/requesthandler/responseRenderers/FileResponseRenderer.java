@@ -845,9 +845,16 @@ public class FileResponseRenderer implements ResponseRenderer {
          */
         boolean cachingAdvised = false;
         try {
+            String fileContentType = file.getContentType();
+            if (SAVE_AS_TYPE.equals(fileContentType)) {
+                final String contentTypeByFileName = getContentTypeByFileName(file.getName());
+                if (null != contentTypeByFileName) {
+                    fileContentType = contentTypeByFileName;
+                }
+            }
             final byte[] transformed;
             try {
-                TransformedImage transformedImage = transformations.getTransformedImage(file.getContentType());
+                TransformedImage transformedImage = transformations.getTransformedImage(fileContentType);
                 int expenses = transformedImage.getTransformationExpenses();
                 if (expenses >= ImageTransformations.HIGH_EXPENSE) {
                     cachingAdvised = true;
@@ -867,7 +874,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             // Return immediately if not cacheable
             if (!cachingAdvised || null == resourceCache || !isValidEtag || !AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
-                return new FileHolder(Streams.newByteArrayInputStream(transformed), -1, file.getContentType(), file.getName());
+                return new FileHolder(Streams.newByteArrayInputStream(transformed), -1, fileContentType, file.getName());
             }
 
             // (Asynchronously) Add to cache if possible
@@ -875,7 +882,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
             final ServerSession session = request.getSession();
             final String fileName = file.getName();
-            final String contentType = file.getContentType();
+            final String contentType = fileContentType;
             final AbstractTask<Void> task = new AbstractTask<Void>() {
                 @Override
                 public Void call() {
