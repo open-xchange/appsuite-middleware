@@ -921,14 +921,17 @@ public class LoginServlet extends AJAXServlet {
      * @param session The session providing the public session cookie identifier
      * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
      * @param serverName The HTTP request's server name
+     * @return <code>true</code> if successfully added to HTTP servlet response; otherwise <code>false</code>
      */
-    public static void writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
+    public static boolean writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
             final Cookie cookie = new Cookie(getPublicSessionCookieName(req), altId);
             LoginServlet.configureCookie(cookie, secure, serverName, conf);
             resp.addCookie(cookie);
+            return true;
         }
+        return false;
     }
 
     public static void configureCookie(final Cookie cookie, final boolean secure, final String serverName, LoginConfiguration conf) {

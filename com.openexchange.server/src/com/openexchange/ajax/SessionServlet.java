@@ -682,8 +682,10 @@ public abstract class SessionServlet extends AJAXServlet {
         if (null != cookies) {
             final String cookieName = getPublicSessionCookieName(req);
             if (null == cookies.get(cookieName)) {
-                LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
-                LOG.info("Restored public session cookie for \"{}\": {} (User-Agent: {})", session.getLogin(), cookieName, HashCalculator.getUserAgent(req));
+                final boolean restored = LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
+                if (restored) {
+                    LOG.info("Restored public session cookie for \"{}\": {} (User-Agent: {})", session.getLogin(), cookieName, HashCalculator.getUserAgent(req));
+                }
             }
         }
     }
