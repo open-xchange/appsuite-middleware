@@ -332,6 +332,8 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             } else {
                 pattern = "UPPER('" + pattern + "')";
             }
+        } else {
+            pattern = '\'' + pattern + '\'';
         }
         sb.append(field);
         if (searchTerm.isSubstringSearch()) {
