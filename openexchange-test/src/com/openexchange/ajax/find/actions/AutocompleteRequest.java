@@ -123,6 +123,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
         final List<Parameter> list = new LinkedList<Parameter>();
         list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "autocomplete"));
         list.add(new Parameter("module", module));
+        list.add(new Parameter("limit", Integer.MAX_VALUE));
         return list.toArray(new Parameter[0]);
     }
 

@@ -49,7 +49,6 @@
 package com.openexchange.find;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.find.facet.ActiveFacet;
 
@@ -69,26 +68,6 @@ public class AutocompleteRequest implements Serializable {
 
     private final int limit;
 
-    /**
-     * Initializes a new {@link AutocompleteRequest}.
-     *
-     * @param prefix The prefix to autocomplete on. Must not end with a wildcard character.
-     * Must never be <code>null</code>, but may be empty.
-     */
-    public AutocompleteRequest(final String prefix) {
-        this(prefix, Collections.<ActiveFacet>emptyList());
-    }
-
-    /**
-     * Initializes a new {@link AutocompleteRequest}.
-     *
-     * @param prefix The prefix to autocomplete on. Must not end with a wildcard character.
-     * Must never be <code>null</code>, but may be empty.
-     * @param activeFacets The list of currently active facets; must not be <code>null</code>
-     */
-    public AutocompleteRequest(final String prefix, final List<ActiveFacet> activeFacets) {
-        this(prefix, activeFacets, 0);
-    }
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
