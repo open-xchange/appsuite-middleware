@@ -551,7 +551,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private boolean check(String cap, ServerSession session, CapabilitySet allCapabilities) throws OXException {
         final Map<String, List<CapabilityChecker>> checkers = getCheckers();
 
-        List<CapabilityChecker> list = checkers.get(cap);
+        List<CapabilityChecker> list = checkers.get(cap.toLowerCase());
         if (null != list && !list.isEmpty()) {
             for (CapabilityChecker checker : list) {
                 try {
