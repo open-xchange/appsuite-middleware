@@ -317,19 +317,46 @@ public class BasicMailTest extends AbstractFindTest {
             client.getValues().getUserId());
 
         contactFolder = folderManager.insertFolderOnServer(contactFolder);
-        contactManager.newAction(randomContact("Marc", contactFolder.getObjectID()));
-        contactManager.newAction(randomContact("Marcus", contactFolder.getObjectID()));
-        contactManager.newAction(randomContact("Martin", contactFolder.getObjectID()));
-        contactManager.newAction(randomContact("Malte", contactFolder.getObjectID()));
-        contactManager.newAction(randomContact("Marion", contactFolder.getObjectID()));
-        String prefix = "mar";
+        List<Contact> contacts = new LinkedList<Contact>();
+        contacts.add(contactManager.newAction(randomContact("Marc", contactFolder.getObjectID())));
+        contacts.add(contactManager.newAction(randomContact("Marcus", contactFolder.getObjectID())));
+        contacts.add(contactManager.newAction(randomContact("Martin", contactFolder.getObjectID())));
+        contacts.add(contactManager.newAction(randomContact("Marek", contactFolder.getObjectID())));
+        contacts.add(contactManager.newAction(randomContact("Marion", contactFolder.getObjectID())));
+        String prefix = "Mar";
         List<Facet> facets = autocomplete(prefix);
         Facet facet = findByType(MailFacetType.CONTACTS, facets);
         assertNotNull("Contacts facet not found", facet);
         List<FacetValue> values = facet.getValues();
+        int nValues = values.size();
         assertTrue("Missing contacts in facets", values.size() > 5);
+        findContactsInValues(contacts, values);
         FacetValue last = values.get(values.size() - 1);
         assertEquals("Prefix item is at wrong position in result set", prefix, last.getId());
+
+        facets = autocomplete(prefix, Collections.singletonList(new ActiveFacet(MailFacetType.CONTACTS, values.get(0).getId(), values.get(0).getFilters().get(0))));
+        facet = findByType(MailFacetType.CONTACTS, facets);
+        assertNotNull("Contacts facet not found", facet);
+        values = facet.getValues();
+        assertTrue("Wrong contacts in facets", values.size() == (nValues - 1));
+        last = values.get(values.size() - 1);
+        assertEquals("Prefix item is at wrong position in result set", prefix, last.getId());
+    }
+
+    private void findContactsInValues(List<Contact> contacts, List<FacetValue> values) {
+        for (Contact contact : contacts) {
+            boolean found = false;
+            String contactDN = contact.getDisplayName();
+            for (FacetValue value : values) {
+                String valueDN = value.getDisplayItem().getDefaultValue();
+                if (contactDN.equals(valueDN)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            assertTrue("Did not find contact '" + contactDN + "'", found);
+        }
     }
 
     private List<ActiveFacet> prepareFacets() {

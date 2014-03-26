@@ -188,7 +188,14 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
         for (Facet facet : facets) {
             Map<String, FacetValue> map = typeMap.get(facet.getType());
             if (map != null) {
-                results.add(new Facet(facet.getType(), new LinkedList<FacetValue>(map.values())));
+                List<FacetValue> values = new LinkedList<FacetValue>();
+                for (FacetValue value : facet.getValues()) {
+                    if (map.containsKey(value.getId())) {
+                        values.add(value);
+                    }
+                }
+
+                results.add(new Facet(facet.getType(), values));
             }
         }
     }
