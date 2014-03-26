@@ -70,7 +70,7 @@ while (<SHOWRUNTIME>)
 		if ( $_ =~ /GeneralMonitor,NumberOfIMAPConnections/) {
 		s/.*\=//; 
 		$val=$_+0;
-		print "a.value $val\n";
+		print "f.value $val\n";
 		next;
 	}
     if ( $_ =~ /Threading,ThreadCount/) {

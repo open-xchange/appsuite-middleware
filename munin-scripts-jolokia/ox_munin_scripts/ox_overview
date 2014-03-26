@@ -19,8 +19,6 @@ if ($ARGV[0] and $ARGV[0] eq "config") {
     print "graph_vlabel Number\n";
     print "nbofdbc.label NumberOfDBConnections\n";
     print "nbofdbc.draw LINE1\n";
-    print "nbofajp.label NumberOfOpenAJPSockets\n";
-    print "nbofajp.draw LINE1\n";
     print "nboffile.label OpenFileDescriptorCount\n";
     print "nboffile.draw LINE1\n";
     exit 0
@@ -56,14 +54,6 @@ $request = new JMX::Jmx4Perl::Request(READ,
 $response = $jmx->request($request);
 if ($response->is_ok()){
 	print "nbofdbc.value ",$response->value(),"\n";
-}
-
-$request = new JMX::Jmx4Perl::Request(READ,
-	"com.openexchange.monitoring:name=GeneralMonitor",
-	"NumberOfOpenAJPSockets");
-$response = $jmx->request($request);
-if ($response->is_ok()){
-	print "nbofajp.value ",$response->value(),"\n";
 }
 
 $request = new JMX::Jmx4Perl::Request(READ,
