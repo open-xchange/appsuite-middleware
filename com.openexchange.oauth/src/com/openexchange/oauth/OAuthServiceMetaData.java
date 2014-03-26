@@ -87,11 +87,11 @@ public interface OAuthServiceMetaData {
     boolean isEnabled(int userId, int contextId) throws OXException;
 
     /**
-     * Gets the API key.
+     * Use {@link #getAPIKey(Session)} and also please implement {@link #getAPIKey(Session)}
      *
-     * @depcrecated: Please use {@link #getAPIKey(Session)} and also please implement {@link #getAPIKey(Session)}
      * @return The API key
      */
+    @Deprecated
     String getAPIKey();
 
     /**
@@ -103,11 +103,10 @@ public interface OAuthServiceMetaData {
     String getAPIKey(Session session) throws OXException;
 
     /**
-     * Gets the API secret.
-     *
-     * @deprecated: Use {@link #getAPISecret(Session)} and also implement {@link #getAPISecret(Session)}
+     * Use {@link #getAPISecret(Session)} and also implement {@link #getAPISecret(Session)}
      * @return The API secret
      */
+    @Deprecated
     String getAPISecret();
 
     /**
@@ -117,13 +116,13 @@ public interface OAuthServiceMetaData {
      * @throws OXException
      */
     String getAPISecret(Session session) throws OXException;
-    
+
     /**
      * Get the consumer key (upsell)
      * @return the consumer key
      */
     String getConsumerKey();
-    
+
     /**
      * Get the consumer secret (upsell)
      * @return the consumer secret
