@@ -92,6 +92,7 @@ import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
@@ -247,10 +248,13 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     @Override
     public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final Session session) throws OXException {
         try {
+            final int contextId = session.getContextId();
+            final int userId = session.getUserId();
+
             /*
              * Get associated OAuth meta data implementation
              */
-            final OAuthServiceMetaData metaData = registry.getService(serviceMetaData, session.getUserId(), session.getContextId());
+            final OAuthServiceMetaData metaData = registry.getService(serviceMetaData, userId, contextId);
 
             // ------------------------------------------------------------------------------------------ //
 
@@ -277,10 +281,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Check for available deferrer service
              */
+            final DeferringURLService ds = Services.getService(DeferringURLService.class);
             {
-                final DeferringURLService ds = Services.getService(DeferringURLService.class);
-                if (null != ds) {
-                    final String deferredURL = ds.getDeferredURL(cbUrl);
+                if (null != ds && ds.isDeferrerURLAvailable(userId, contextId)) {
+                    final String deferredURL = ds.getDeferredURL(cbUrl, userId, contextId);
                     if (deferredURL != null) {
                         cbUrl = deferredURL;
                     }
@@ -309,7 +313,17 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Register deferrer
              */
             if (metaData.registerTokenBasedDeferrer() && null != scribeToken) {
-                callbackRegistry.add(cbUrl, scribeToken.getToken());
+                // Is only applicable if call-back URL is deferred; e.g. /ajax/defer?redirect=http:%2F%2Fmy.host.com%2Fpath...
+                if (null != ds && ds.isDeferrerURLAvailable(userId, contextId)) {
+                    if (ds.seemsDeferred(cbUrl, userId, contextId)) {
+                        callbackRegistry.add(scribeToken.getToken(), cbUrl);
+                    } else {
+                        LOG.warn("Call-back URL cannot be registered as it is not deferred: {}", Strings.abbreviate(cbUrl, 32));
+                    }
+                } else {
+                    // No chance to check
+                    callbackRegistry.add(scribeToken.getToken(), cbUrl);
+                }
             }
             /*
              * Return interaction
@@ -769,7 +783,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } else {
             final String serviceId = metaData.getId().toLowerCase(Locale.ENGLISH);
             if (serviceId.indexOf("twitter") >= 0) {
-                apiClass = TwitterApi.SSL.class;  
+                apiClass = TwitterApi.SSL.class;
             } else if (serviceId.indexOf("linkedin") >= 0) {
                 apiClass = LinkedInApi.class;
             } else if (serviceId.indexOf("google") >= 0) {

@@ -49,7 +49,7 @@
 
 package com.openexchange.http.deferrer.impl;
 
-import static com.openexchange.ajax.AJAXServlet.encodeUrl;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.java.Strings;
@@ -67,45 +67,75 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
     public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
 
     @Override
-    public String getDeferredURL(final String url) {
+    public String getDeferredURL(final String url, int userId, int contextId) {
+        return deferredURLUsing(url, getDeferrerURL(userId, contextId), userId, contextId);
+    }
+
+    @Override
+    public String deferredURLUsing(final String url, final String domain, int userId, int contextId) {
         if (url == null) {
             return null;
         }
-        String deferrerURL = getDeferrerURL();
-        if (Strings.isEmpty(deferrerURL)) {
+        if (Strings.isEmpty(domain)) {
             return url;
         }
-        deferrerURL = deferrerURL.trim();
-        if (seemsAlreadyDeferred(url, deferrerURL)) {
+        String deferrerURL = domain.trim();
+        final String path = new StringBuilder(PREFIX.get().getPrefix()).append("defer").toString();
+        if (seemsAlreadyDeferred(url, deferrerURL, path)) {
             // Already deferred
             return url;
         }
         // Return deferred URL
-        return deferrerURL + PREFIX.get().getPrefix() + "defer?redirect=" + encodeUrl(url, false, false);
+        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXServlet.encodeUrl(url, false, false)).toString();
     }
 
-    private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL) {
+    @Override
+    public boolean seemsDeferred(String url, int userId, int contextId) {
+        if (url == null) {
+            return false;
+        }
+        String deferrerURL = getDeferrerURL(userId, contextId);
+        if (Strings.isEmpty(deferrerURL)) {
+            return false;
+        }
+        deferrerURL = deferrerURL.trim();
+        final String path = new StringBuilder(PREFIX.get().getPrefix()).append("defer").toString();
+        return seemsAlreadyDeferred(url, deferrerURL, path);
+    }
+
+    private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL, final String path) {
         final String str = "://";
         final int pos1 = url.indexOf(str);
         final int pos2 = deferrerURL.indexOf(str);
         if (pos1 > 0 && pos2 > 0) {
-            return url.substring(pos1).startsWith(deferrerURL.substring(pos2));
+            final String deferrerPrefix = new StringBuilder(deferrerURL.substring(pos2)).append(path).toString();
+            return url.substring(pos1).startsWith(deferrerPrefix);
         }
-        return url.startsWith(deferrerURL);
+        final String deferrerPrefix = new StringBuilder(deferrerURL).append(path).toString();
+        return url.startsWith(deferrerPrefix);
     }
 
     /**
      * Gets the deferrer URL; e.g. "https://my.maindomain.org"
      *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The deferrer URL
      */
-    protected abstract String getDeferrerURL();
-
+    protected abstract String getDeferrerURL(int userId, int contextId);
 
     @Override
-    public String getBasicDeferrerURL() {
-    	final String deferrerURL = getDeferrerURL();
-        return deferrerURL == null ? PREFIX.get().getPrefix() + "defer" : deferrerURL + PREFIX.get().getPrefix() + "defer";
+    public boolean isDeferrerURLAvailable(int userId, int contextId) {
+        return !Strings.isEmpty(getDeferrerURL(userId, contextId));
+    }
+
+    @Override
+    public String getBasicDeferrerURL(int userId, int contextId) {
+        final String deferrerURL = getDeferrerURL(userId, contextId);
+        if (deferrerURL == null) {
+            return new StringBuilder(PREFIX.get().getPrefix()).append("defer").toString();
+        }
+        return new StringBuilder(deferrerURL).append(PREFIX.get().getPrefix()).append("defer").toString();
     }
 
 }

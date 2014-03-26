@@ -1,4 +1,8 @@
-* 2014-04-25 - thorben.betten@open-xchange.com
+* 2014-03-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31770: Retrieve deferrer URL from config-cascade look-up
+
+* 2014-03-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 31684: Prefer look-up by user identifier over look-up by object/folder identifier pair
 
