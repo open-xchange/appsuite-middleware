@@ -83,7 +83,7 @@ public interface UserServiceInterceptor {
      * Invoked after a user is created.
      *
      * @param user A reference to the user data of the created user.
-     * @param contactData A reference to the contact data created user. Possibly <code>null</code>.
+     * @param contactData A reference to the contact data of the created user. Possibly <code>null</code>.
      * @throws OXException If interception fails
      */
     void afterCreate(User user, Contact contactData) throws OXException;
@@ -103,7 +103,7 @@ public interface UserServiceInterceptor {
      * Invoked after a user is updated.
      *
      * @param user A reference to the user data of the updated user, or <code>null</code> if not affected by the update
-     * @param contactData A reference to the contact data updated user, or <code>null</code> if not affected by the update
+     * @param contactData A reference to the contact data of the updated user, or <code>null</code> if not affected by the update
      * @throws OXException If interception fails
      */
     void afterUpdate(User user, Contact contactData) throws OXException;
@@ -123,7 +123,7 @@ public interface UserServiceInterceptor {
      * Invoked after a user is deleted.
      *
      * @param user A reference to the user data of the deleted user
-     * @param contactData A reference to the contact data deleted user
+     * @param contactData A reference to the contact data of the deleted user
      * @throws OXException If interception fails
      */
     void afterDelete(User user, Contact contactData) throws OXException;
