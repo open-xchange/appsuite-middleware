@@ -2861,7 +2861,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 			}
         });
 
-        mappings.put(ContactField.FILENAME, new VarCharMapping<Contact>("filename", "Filename") {
+        mappings.put(ContactField.FILENAME, new VarCharMapping<Contact>("filename", "File name") {
 
             @Override
             public void set(Contact contact, String value) {

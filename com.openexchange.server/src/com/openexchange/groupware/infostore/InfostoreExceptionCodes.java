@@ -139,7 +139,7 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
      */
     DOCUMENT_NOT_EXIST(InfostoreExceptionCodes.DOCUMENT_NOT_EXISTS_MSG, CATEGORY_USER_INPUT, 438, InfostoreExceptionMessages.DOCUMENT_NOT_EXISTS_MSG_DISPLAY),
     /**
-     * Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s.
+     * Files attached to InfoStore items must have unique names. File name: %s. The other document with this file name is %s.
      */
     FILENAME_NOT_UNIQUE(InfostoreExceptionCodes.FILENAME_NOT_UNIQUE_MSG, CATEGORY_USER_INPUT, 441, InfostoreExceptionMessages.FILENAME_NOT_UNIQUE_MSG_DISPLAY),
     /**
@@ -274,7 +274,7 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link InfostoreExceptionCodes}.
-     * 
+     *
      * @param message
      * @param category
      * @param number
@@ -285,7 +285,7 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link InfostoreExceptionCodes}.
-     * 
+     *
      * @param message
      * @param category
      * @param number
@@ -333,7 +333,7 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

@@ -109,7 +109,7 @@ public final class CSVLibrary {
         readableTitles.put(ContactField.STATE_HOME, "State home");
         readableTitles.put(ContactField.COUNTRY_HOME, "Country home");
         readableTitles.put(ContactField.BIRTHDAY, "Birthday");
-        readableTitles.put(ContactField.MARITAL_STATUS, "Martial status");
+        readableTitles.put(ContactField.MARITAL_STATUS, "Marital status");
         readableTitles.put(ContactField.NUMBER_OF_CHILDREN, "Number of children");
         readableTitles.put(ContactField.PROFESSION, "Profession");
         readableTitles.put(ContactField.NICKNAME, "Nickname");
@@ -125,7 +125,7 @@ public final class CSVLibrary {
         readableTitles.put(ContactField.CITY_BUSINESS, "City business");
         readableTitles.put(ContactField.STATE_BUSINESS, "State business");
         readableTitles.put(ContactField.COUNTRY_BUSINESS, "Country business");
-        readableTitles.put(ContactField.NUMBER_OF_EMPLOYEE, "Number of employee");
+        readableTitles.put(ContactField.NUMBER_OF_EMPLOYEE, "Number of employees");
         readableTitles.put(ContactField.SALES_VOLUME, "Sales volume");
         readableTitles.put(ContactField.TAX_ID, "Tax id");
         readableTitles.put(ContactField.COMMERCIAL_REGISTER, "Commercial register");

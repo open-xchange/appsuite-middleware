@@ -96,15 +96,15 @@ public final class XingExceptionMessages implements LocalizableStrings {
 
     // XING user is already directly connected.
     public static final String ALREADY_CONNECTED_MSG = "XING user is already directly connected.";
-    
-    //The comment size exceeds the maximum allowed of 600 characters.
-    public static final String COMMENT_SIZE_EXCEEDED_MSG = "The comment size exceeds the maximum allowed of 600 characters.";
 
-    // The status message size exceeds the maximum allowed of 600 characters.
-    public static final String STATUS_MESSAGE_SIZE_EXCEEDED_MSG = "The status message size exceeds the maximum allowed of 420 characters.";
+    //The comment size exceeds the maximum allowed number of 600 characters.
+    public static final String COMMENT_SIZE_EXCEEDED_MSG = "The comment size exceeds the maximum allowed number of 600 characters.";
 
-    // The status message size exceeds the maximum allowed of 600 characters.
-    public static final String TEXT_MESSAGE_SIZE_EXCEEDED_MSG = "The text message size exceeds the maximum allowed of 140 characters.";
+    // The status message size exceeds the maximum allowed number of 600 characters.
+    public static final String STATUS_MESSAGE_SIZE_EXCEEDED_MSG = "The status message size exceeds the maximum allowed number of 420 characters.";
+
+    // The status message size exceeds the maximum allowed number of 600 characters.
+    public static final String TEXT_MESSAGE_SIZE_EXCEEDED_MSG = "The text message size exceeds the maximum allowed number of 140 characters.";
 
     /**
      * Initializes a new {@link XingExceptionMessages}.

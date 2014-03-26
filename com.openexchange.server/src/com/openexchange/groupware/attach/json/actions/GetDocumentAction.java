@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "module", description = "Module ID (as per Attachment object) of the attached object."),
     @Parameter(name = "id", description = "Object ID of the requested attachment."),
     @Parameter(name = "content_type", optional=true, description = "If set the responses Content-Type header is set to this value, not the attachements file mime type.")
-}, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem. Note: The Filename may be added to the customary infostore path to suggest a filename to a Save-As dialog.")
+}, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem. Note: The File name may be added to the customary infostore path to suggest a filename to a Save-As dialog.")
 public final class GetDocumentAction extends AbstractAttachmentAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetDocumentAction.class);

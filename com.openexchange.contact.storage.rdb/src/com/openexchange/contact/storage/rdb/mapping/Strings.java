@@ -71,7 +71,7 @@ public class Strings implements LocalizableStrings {
     public static final String CITY_HOME = "Town (home)";
     public static final String STATE_HOME = "State (home)";
     public static final String COUNTRY_HOME = "Country (home)";
-    public static final String MARITAL_STATUS = "Martial status";
+    public static final String MARITAL_STATUS = "Marital status";
     public static final String NUMBER_OF_CHILDREN = "Number of children";
     public static final String PROFESSION = "Profession";
     public static final String NICKNAME = "Nickname";
@@ -87,7 +87,7 @@ public class Strings implements LocalizableStrings {
     public static final String CITY_BUSINESS = "Town (business)";
     public static final String STATE_BUSINESS = "State (business)";
     public static final String COUNTRY_BUSINESS = "Country (business)";
-    public static final String NUMBER_OF_EMPLOYEE = "Number of employee";
+    public static final String NUMBER_OF_EMPLOYEE = "Number of employees";
     public static final String SALES_VOLUME = "Sales volume";
     public static final String TAX_ID = "Tax id";
     public static final String COMMERCIAL_REGISTER = "Commercial register";
@@ -156,7 +156,7 @@ public class Strings implements LocalizableStrings {
     public static final String YOMI_LAST_NAME = "Last name (yomi)";
     public static final String YOMI_COMPANY = "Company (yomi)";
     public static final String UID = "UID";
-    public static final String FILENAME = "Filename";
+    public static final String FILENAME = "File name";
     public static final String HOME_ADDRESS = "Address (home)";
     public static final String BUSINESS_ADDRESS = "Address (business)";
     public static final String OTHER_ADDRESS = "Address (other)";
