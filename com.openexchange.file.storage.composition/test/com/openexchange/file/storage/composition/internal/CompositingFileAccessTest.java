@@ -347,10 +347,9 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 //        fileAccess.expectCall("hashCode").andReturn(1); // Store it (uncomment this line if running in eclipse.
         // There is an optimization when running on jenkins, as there is no second hash needed for storing)
         fileAccess.expectCall("hashCode").andReturn(1);
-        fileAccess.expectCall("getDocuments", Arrays.asList(tuple, tuple2), Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
 
         fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(tuple, tuple2), 12L).andReturn(Arrays.asList(tuple));
+        fileAccess.expectCall("removeDocument", Arrays.asList(tuple, tuple2), 12L, false).andReturn(Arrays.asList(tuple));
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
