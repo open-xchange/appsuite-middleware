@@ -143,7 +143,7 @@ public class Bug30703Test extends AbstractAJAXSession {
     }
 
     private void setupAccount(String host, int port) throws Exception {
-        String user = "Bug30703_User";
+        String user = "Bug30703_User" + Long.toString(System.currentTimeMillis());
         mailAccountDescription = new MailAccountDescription();
         mailAccountDescription.setName("Bug30703Test_Account");
         mailAccountDescription.setPrimaryAddress(user + "@test.invalid");
