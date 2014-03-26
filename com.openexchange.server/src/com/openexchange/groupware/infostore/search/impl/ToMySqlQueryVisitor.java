@@ -109,7 +109,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     private static final String PREFIX = " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ";
 
-    private static final char[] IMMUNE = new char[] { ' ' };
+    private static final char[] IMMUNE = new char[] { ' ', '%', '_' };
     private static final char[] IMMUNE_WILDCARDS = new char[] { ' ', '%', '_', '\\' };
 
     /**
@@ -405,15 +405,14 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     private void parseStringSearchTerm(AbstractStringSearchTerm searchTerm, String field) {
         String pattern = searchTerm.getPattern();
-        final boolean hasWildCards = hasWildCards(pattern);
-        pattern = hasWildCards ? codec.encode(IMMUNE_WILDCARDS, replaceWildcards(pattern)) : codec.encode(IMMUNE, pattern);
+        final boolean useLike = (searchTerm.isSubstringSearch() || hasWildCards(pattern));
 
+        // Encode pattern
         String fieldName = new StringAllocator(DOCUMENT).append(field).toString();
-        if (searchTerm.isIgnoreCase()) {
-            fieldName = new StringAllocator("UPPER(").append(fieldName).append(')').toString();
+        if (useLike) {
+            pattern = codec.encode(IMMUNE_WILDCARDS, replaceWildcards(pattern));
             if (searchTerm.isSubstringSearch()) {
                 final StringAllocator tmp = new StringAllocator(pattern.length() + 8);
-                tmp.append("UPPER('");
                 if (!pattern.startsWith("%")) {
                     tmp.append('%');
                 }
@@ -421,31 +420,24 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
                 if (!pattern.endsWith("%")) {
                     tmp.append('%');
                 }
-                tmp.append("')");
                 pattern = tmp.toString();
-            } else {
-                pattern = "UPPER('" + pattern + "')";
             }
         } else {
-            if (searchTerm.isSubstringSearch()) {
-                final StringAllocator tmp = new StringAllocator(pattern.length() + 4);
-                tmp.append('\'');
-                if (!pattern.startsWith("%")) {
-                    tmp.append('%');
-                }
-                tmp.append(pattern);
-                if (!pattern.endsWith("%")) {
-                    tmp.append('%');
-                }
-                tmp.append('\'');
-                pattern = tmp.toString();
-            } else {
-                pattern = '\'' + pattern + '\'';
-            }
+            pattern = codec.encode(IMMUNE, pattern);
         }
 
+        // Check for case-insensitive search
+        if (searchTerm.isIgnoreCase()) {
+            fieldName = new StringAllocator("UPPER(").append(fieldName).append(')').toString();
+            pattern = new StringAllocator("UPPER('").append(pattern).append("')").toString();
+        } else {
+            // Surround with single quotes
+            pattern = new StringAllocator(pattern.length() + 2).append('\'').append(pattern).append('\'').toString();
+        }
+
+        // Append to query builder
         sb.append(fieldName);
-        if (hasWildCards || searchTerm.isSubstringSearch()) {
+        if (useLike) {
             sb.append(" LIKE ").append(pattern);
         } else {
             sb.append(" = ").append(pattern);

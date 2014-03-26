@@ -73,19 +73,31 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         String result = visitor.getMySqlQuery();
-        assertTrue("Unexpected SQL query", result.endsWith("UPPER(infostore_document.description) LIKE UPPER('%bluber blah_foo%')"));
+        assertTrue("Unexpected SQL query: " + result, result.endsWith("UPPER(infostore_document.description) LIKE UPPER('%bluber blah_foo%')"));
 
         dtz = new DescriptionTerm("bluber blah?foo", false, true);
         visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         result = visitor.getMySqlQuery();
-        assertTrue("Unexpected SQL query", result.endsWith("infostore_document.description LIKE '%bluber blah_foo%'"));
+        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE '%bluber blah_foo%'"));
 
         dtz = new DescriptionTerm("*bluber blah?foo*", false, false);
         visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         result = visitor.getMySqlQuery();
-        assertTrue("Unexpected SQL query", result.endsWith("infostore_document.description LIKE '%bluber blah_foo%'"));
+        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE '%bluber blah_foo%'"));
+
+        dtz = new DescriptionTerm("bluber_blah", false, false);
+        visitor = new ToMySqlQueryVisitor(new int[] { 119 }, 1, "SELECT field01");
+        visitor.visit(dtz);
+        result = visitor.getMySqlQuery();
+        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description = 'bluber_blah'"));
+
+        dtz = new DescriptionTerm("bluber_blah", false, true);
+        visitor = new ToMySqlQueryVisitor(new int[] { 119 }, 1, "SELECT field01");
+        visitor.visit(dtz);
+        result = visitor.getMySqlQuery();
+        assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE '%bluber\\_blah%'"));
 
     }
 
