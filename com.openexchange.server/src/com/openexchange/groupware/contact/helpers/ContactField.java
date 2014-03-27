@@ -92,10 +92,10 @@ public enum ContactField{
     STATE_HOME (509 , "field10" , "STATE_HOME" , "State home" , ContactFields.STATE_HOME, Types.VARCHAR),
     COUNTRY_HOME (510 , "field11" , "COUNTRY_HOME" , "Country home" , ContactFields.COUNTRY_HOME, Types.VARCHAR),
     MARITAL_STATUS (512 , "field12" , "MARITAL_STATUS" , "Marital status"  , ContactFields.MARITAL_STATUS, Types.VARCHAR),
-    NUMBER_OF_CHILDREN (513 , "field13" , "NUMBER_OF_CHILDREN" , "Number of children" , ContactFields.NUMBER_OF_CHILDREN, Types.VARCHAR),
+    NUMBER_OF_CHILDREN (513 , "field13" , "NUMBER_OF_CHILDREN" , "Children" , ContactFields.NUMBER_OF_CHILDREN, Types.VARCHAR),
     PROFESSION (514 , "field14" , "PROFESSION" , "Profession" , ContactFields.PROFESSION, Types.VARCHAR),
     NICKNAME (515 , "field15" , "NICKNAME" , "Nickname"  , ContactFields.NICKNAME, Types.VARCHAR),
-    SPOUSE_NAME (516 , "field16" , "SPOUSE_NAME" , "Spouse name" , ContactFields.SPOUSE_NAME, Types.VARCHAR),
+    SPOUSE_NAME (516 , "field16" , "SPOUSE_NAME" , "Spouse's name" , ContactFields.SPOUSE_NAME, Types.VARCHAR),
     NOTE (518 , "field17" , "NOTE" , "Note" , ContactFields.NOTE, Types.VARCHAR),
     COMPANY (569 , "field18" , "COMPANY" , "Company" , ContactFields.COMPANY, Types.VARCHAR),
     DEPARTMENT (519 , "field19" , "DEPARTMENT" , "Department" , ContactFields.DEPARTMENT, Types.VARCHAR),
@@ -114,8 +114,8 @@ public enum ContactField{
     BRANCHES (533 , "field32" , "BRANCHES" , "Branches"  , ContactFields.BRANCHES, Types.VARCHAR),
     BUSINESS_CATEGORY (534 , "field33" , "BUSINESS_CATEGORY" , "Business category"  , ContactFields.BUSINESS_CATEGORY, Types.VARCHAR),
     INFO (535 , "field34" , "INFO" , "Info"  , ContactFields.INFO, Types.VARCHAR),
-    MANAGER_NAME (536 , "field35" , "MANAGER_NAME" , "Manager's name" , ContactFields.MANAGER_NAME, Types.VARCHAR),
-    ASSISTANT_NAME (537 , "field36" , "ASSISTANT_NAME" , "Assistant's name"  , ContactFields.ASSISTANT_NAME, Types.VARCHAR),
+    MANAGER_NAME (536 , "field35" , "MANAGER_NAME" , "Manager" , ContactFields.MANAGER_NAME, Types.VARCHAR),
+    ASSISTANT_NAME (537 , "field36" , "ASSISTANT_NAME" , "Assistant"  , ContactFields.ASSISTANT_NAME, Types.VARCHAR),
     STREET_OTHER (538 , "field37" , "STREET_OTHER" , "Street other" , ContactFields.STREET_OTHER, Types.VARCHAR),
     POSTAL_CODE_OTHER (540 , "field38" , "POSTAL_CODE_OTHER" , "Postal code other" , ContactFields.POSTAL_CODE_OTHER, Types.VARCHAR),
     CITY_OTHER (539 , "field39" , "CITY_OTHER" , "City other" , ContactFields.CITY_OTHER, Types.VARCHAR),
@@ -126,7 +126,7 @@ public enum ContactField{
     TELEPHONE_BUSINESS2 (543 , "field44" , "TELEPHONE_BUSINESS2" , "Telephone business 2" , ContactFields.TELEPHONE_BUSINESS2, Types.VARCHAR),
     FAX_BUSINESS (544 , "field45" , "FAX_BUSINESS" , "FAX business" , ContactFields.FAX_BUSINESS, Types.VARCHAR),
     TELEPHONE_CALLBACK (545 , "field46" , "TELEPHONE_CALLBACK" , "Telephone callback" , ContactFields.TELEPHONE_CALLBACK, Types.VARCHAR),
-    TELEPHONE_CAR (546 , "field47" , "TELEPHONE_CAR" , "Telephone car" , ContactFields.TELEPHONE_CAR, Types.VARCHAR),
+    TELEPHONE_CAR (546 , "field47" , "TELEPHONE_CAR" , "Phone (car)" , ContactFields.TELEPHONE_CAR, Types.VARCHAR),
     TELEPHONE_COMPANY (547 , "field48" , "TELEPHONE_COMPANY" , "Telephone company" , ContactFields.TELEPHONE_COMPANY, Types.VARCHAR),
     TELEPHONE_HOME1 (548 , "field49" , "TELEPHONE_HOME1" , "Telephone home 1" , ContactFields.TELEPHONE_HOME1, Types.VARCHAR),
     TELEPHONE_HOME2 (549 , "field50" , "TELEPHONE_HOME2" , "Telephone home 2" , ContactFields.TELEPHONE_HOME2, Types.VARCHAR),
@@ -136,14 +136,14 @@ public enum ContactField{
     CELLULAR_TELEPHONE2 (552 , "field54" , "CELLULAR_TELEPHONE2" , "Cellular telephone 2"  , ContactFields.CELLULAR_TELEPHONE2, Types.VARCHAR),
     TELEPHONE_OTHER (553 , "field55" , "TELEPHONE_OTHER" , "Telephone other" , ContactFields.TELEPHONE_OTHER, Types.VARCHAR),
     FAX_OTHER (554 , "field56" , "FAX_OTHER" , "FAX other" , ContactFields.FAX_OTHER, Types.VARCHAR),
-    TELEPHONE_PAGER (560 , "field57" , "TELEPHONE_PAGER" , "Telephone pager" , ContactFields.TELEPHONE_PAGER, Types.VARCHAR),
+    TELEPHONE_PAGER (560 , "field57" , "TELEPHONE_PAGER" , "Pager" , ContactFields.TELEPHONE_PAGER, Types.VARCHAR),
     TELEPHONE_PRIMARY (561 , "field58" , "TELEPHONE_PRIMARY" , "Telephone primary" , ContactFields.TELEPHONE_PRIMARY, Types.VARCHAR),
     TELEPHONE_RADIO (562 , "field59" , "TELEPHONE_RADIO" , "Telephone radio" , ContactFields.TELEPHONE_RADIO, Types.VARCHAR),
-    TELEPHONE_TELEX (563 , "field60" , "TELEPHONE_TELEX" , "Telephone telex" , ContactFields.TELEPHONE_TELEX, Types.VARCHAR),
-    TELEPHONE_TTYTDD (564 , "field61" , "TELEPHONE_TTYTDD" , "Telephone TTY/TDD" , ContactFields.TELEPHONE_TTYTDD, Types.VARCHAR),
+    TELEPHONE_TELEX (563 , "field60" , "TELEPHONE_TELEX" , "Telex" , ContactFields.TELEPHONE_TELEX, Types.VARCHAR),
+    TELEPHONE_TTYTDD (564 , "field61" , "TELEPHONE_TTYTDD" , "TTY/TDD" , ContactFields.TELEPHONE_TTYTDD, Types.VARCHAR),
     INSTANT_MESSENGER1 (565 , "field62" , "INSTANT_MESSENGER1" , "Instantmessenger 1"  , ContactFields.INSTANT_MESSENGER1, Types.VARCHAR),
     INSTANT_MESSENGER2 (566 , "field63" , "INSTANT_MESSENGER2" , "Instantmessenger 2"  , ContactFields.INSTANT_MESSENGER2, Types.VARCHAR),
-    TELEPHONE_IP (567 , "field64" , "TELEPHONE_IP" , "Telephone IP"  , ContactFields.TELEPHONE_IP, Types.VARCHAR),
+    TELEPHONE_IP (567 , "field64" , "TELEPHONE_IP" , "IP phone"  , ContactFields.TELEPHONE_IP, Types.VARCHAR),
     EMAIL1 (555 , "field65" , "EMAIL1" , "Email 1" , ContactFields.EMAIL1, Types.VARCHAR),
     EMAIL2 (556 , "field66" , "EMAIL2" , "Email 2" , ContactFields.EMAIL2, Types.VARCHAR),
     EMAIL3 (557 , "field67" , "EMAIL3" , "Email 3" , ContactFields.EMAIL3, Types.VARCHAR),
@@ -219,52 +219,52 @@ public enum ContactField{
     }
 
     @Deprecated
-	public int getNumber(){
-		return columnNumber;
-	}
+    public int getNumber(){
+        return columnNumber;
+    }
 
-	/**
-	 * Gets the field name
-	 *
-	 * @return the field name
-	 */
+    /**
+     * Gets the field name
+     *
+     * @return the field name
+     */
     @Deprecated
-	public String getFieldName(){
-		return fieldName;
-	}
-
-    @Deprecated
-	public String getReadableName(){
-		return readableName;
-	}
-
-	/**
-	 * Gets the name of the corresponding database columns
-	 *
-	 * @return the database name, or <code>""</code> if there's no database column associated with this field
-	 */
-    @Deprecated
-	public String getDbName(){
-		return dbName;
-	}
+    public String getFieldName(){
+        return fieldName;
+    }
 
     @Deprecated
-	public String getAjaxName(){
-		return ajaxName;
-	}
+    public String getReadableName(){
+        return readableName;
+    }
+
+    /**
+     * Gets the name of the corresponding database columns
+     *
+     * @return the database name, or <code>""</code> if there's no database column associated with this field
+     */
+    @Deprecated
+    public String getDbName(){
+        return dbName;
+    }
 
     @Deprecated
-	public String getVCardElementName(){
-		return readableName; //TODO get real VCard element name
-	}
+    public String getAjaxName(){
+        return ajaxName;
+    }
 
     @Deprecated
-	public int getSQLType() {
+    public String getVCardElementName(){
+        return readableName; //TODO get real VCard element name
+    }
+
+    @Deprecated
+    public int getSQLType() {
         return sqlType;
     }
 
     @Deprecated
-	public static ContactField getByDBFieldName(final String dbFieldName){
+    public static ContactField getByDBFieldName(final String dbFieldName){
         if( null == dbFieldName) {
             return null;
         }
@@ -273,85 +273,85 @@ public enum ContactField{
         }
 
         for(final ContactField field: values()){
-			if(dbFieldName.equals( field.getFieldName() )){
-				return field;
-			}
-		}
-		return null;
-	}
+            if(dbFieldName.equals( field.getFieldName() )){
+                return field;
+            }
+        }
+        return null;
+    }
 
     @Deprecated
-	public static ContactField getByDisplayName(final String displayName){
-	    if( null == displayName) {
+    public static ContactField getByDisplayName(final String displayName){
+        if( null == displayName) {
             return null;
         }
-	    if( "".equals(displayName)) {
+        if( "".equals(displayName)) {
             return null;
         }
 
-		for(final ContactField field : values()){
-			if(displayName.equals( field.getReadableName() ) ){
-				return field;
-			}
-		}
-		return null;
-	}
+        for(final ContactField field : values()){
+            if(displayName.equals( field.getReadableName() ) ){
+                return field;
+            }
+        }
+        return null;
+    }
 
     @Deprecated
-	public static ContactField getByFieldName(final String fieldName){
-	       if( null == fieldName) {
+    public static ContactField getByFieldName(final String fieldName){
+           if( null == fieldName) {
             return null;
         }
-	        if( "".equals(fieldName)) {
+            if( "".equals(fieldName)) {
                 return null;
             }
 
-		for(final ContactField field : values()){
-			if(fieldName.equals( field.getDbName() ) ){
-				return field;
-			}
-		}
-		return null;
-	}
-
-    @Deprecated
-	public static ContactField getByValue(final int value){
-		for(final ContactField field: values()){
-			if(value == field.getNumber()){
-				return field;
-			}
-		}
-		return null;
-	}
-
-    @Deprecated
-	public static ContactField getByAjaxName(final String value){
-		for(final ContactField field: values()){
-			if(value.equals(field.getAjaxName())){
-				return field;
-			}
-		}
-		return null;
-	}
-
-    @Deprecated
-	public static ContactField getBySimilarity(String value){ //I call this the "d7-compatibility mode"
-		String needle = value.replaceAll("[_\\. ]", "").toLowerCase();
-		for(final ContactField field: values()){
-			List<String> haystack = Arrays.asList(new String[]{
-				field.getAjaxName().replaceAll("[_\\. ]", "").toLowerCase(),
-				field.getReadableName().replaceAll("[_\\. ]", "").toLowerCase(),
-				field.getFieldName().replaceAll("[_\\. ]", "").toLowerCase()
-			});
-			if(haystack.contains(needle)) {
+        for(final ContactField field : values()){
+            if(fieldName.equals( field.getDbName() ) ){
                 return field;
             }
-		}
-		return null;
-	}
+        }
+        return null;
+    }
 
     @Deprecated
-	public Object doSwitch(final ContactSwitcher switcher, final Object... objects) throws OXException {
+    public static ContactField getByValue(final int value){
+        for(final ContactField field: values()){
+            if(value == field.getNumber()){
+                return field;
+            }
+        }
+        return null;
+    }
+
+    @Deprecated
+    public static ContactField getByAjaxName(final String value){
+        for(final ContactField field: values()){
+            if(value.equals(field.getAjaxName())){
+                return field;
+            }
+        }
+        return null;
+    }
+
+    @Deprecated
+    public static ContactField getBySimilarity(String value){ //I call this the "d7-compatibility mode"
+        String needle = value.replaceAll("[_\\. ]", "").toLowerCase();
+        for(final ContactField field: values()){
+            List<String> haystack = Arrays.asList(new String[]{
+                field.getAjaxName().replaceAll("[_\\. ]", "").toLowerCase(),
+                field.getReadableName().replaceAll("[_\\. ]", "").toLowerCase(),
+                field.getFieldName().replaceAll("[_\\. ]", "").toLowerCase()
+            });
+            if(haystack.contains(needle)) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    @Deprecated
+    public Object doSwitch(final ContactSwitcher switcher, final Object... objects) throws OXException {
         switch(this){
         case DISPLAY_NAME : return switcher.displayname(objects);
         case SUR_NAME : return switcher.surname(objects);
