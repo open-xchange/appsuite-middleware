@@ -124,6 +124,13 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         assertFalse("Invalid SQL query", result.contains("AND OR"));
         assertTrue("Unexpected SQL query", result.endsWith("AND (infostore.folder_id = 120 AND"
             + " infostore.created_by = 1) AND infostore_document.description LIKE '%bluber blah_foo%'"));
+
+        visitor = new ToMySqlQueryVisitor(new int[0], new int[] {120}, 1, 1, "SELECT field01");
+        visitor.visit(dtz);
+        result = visitor.getMySqlQuery();
+        assertFalse("Invalid SQL query", result.contains("AND OR"));
+        assertTrue("Unexpected SQL query", result.endsWith("AND (infostore.folder_id = 120 AND"
+            + " infostore.created_by = 1) AND infostore_document.description LIKE '%bluber blah_foo%'"));
     }
 
     public void testWithoutOwnFolders() {
@@ -131,6 +138,12 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         String result = visitor.getMySqlQuery();
+        assertFalse("Invalid SQL query", result.contains("AND OR"));
+        assertTrue("Unexpected SQL query", result.endsWith("AND infostore.folder_id = 119 AND infostore_document.description LIKE '%bluber blah_foo%'"));
+
+        visitor = new ToMySqlQueryVisitor(new int[] { 119 }, new int[0], 1, 1, "SELECT field01");
+        visitor.visit(dtz);
+        result = visitor.getMySqlQuery();
         assertFalse("Invalid SQL query", result.contains("AND OR"));
         assertTrue("Unexpected SQL query", result.endsWith("AND infostore.folder_id = 119 AND infostore_document.description LIKE '%bluber blah_foo%'"));
     }
