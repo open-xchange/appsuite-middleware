@@ -103,6 +103,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`file_mimetype` varchar(255) ,"
       + "`file_md5sum` varchar(32)  ,"
       + "`file_version_comment` text,"
+      + "`meta` BLOB default NULL,"
       + "PRIMARY KEY (`cid`,`infostore_id`,`version_number`),"
       + "FOREIGN KEY (cid, infostore_id) REFERENCES infostore (cid, id)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
@@ -140,6 +141,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`file_mimetype` varchar(255) ,"
       + "`file_md5sum` varchar(32) ,"
       + "`file_version_comment` text ,"
+      + "`meta` BLOB default NULL,"
       + "PRIMARY KEY (`cid`,`infostore_id`,`version_number`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
