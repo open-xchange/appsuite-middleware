@@ -133,7 +133,7 @@ public class UploadHelper {
                 /*
                  * checksum mismatch, clean up & throw error
                  */
-                session.getStorage().deleteFile(uploadFile);
+                session.getStorage().deleteFile(uploadFile, true);
                 throw DriveExceptionCodes.UPLOADED_FILE_CHECKSUM_ERROR.create(checksum, newVersion.getName(), newVersion.getChecksum());
             }
             return uploadFile;
@@ -224,7 +224,7 @@ public class UploadHelper {
                             /*
                              * delete upload file
                              */
-                            session.getStorage().deleteFile(uploadFile);
+                            session.getStorage().deleteFile(uploadFile, true);
                             return file;
                         } else {
                             /*
