@@ -149,7 +149,9 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         if (null != ownFolderIds) {
             final int length = ownFolderIds.length;
             if (length > 0) {
-                sb.append(needOr ? " OR " : " AND ");
+                if (needOr) {
+                    sb.append(" OR ");
+                }
                 if (1 == length) {
                     sb.append("(").append(INFOSTORE).append("folder_id = ").append(ownFolderIds[0]);
                     sb.append(" AND ").append(INFOSTORE).append("created_by = ").append(userId).append(")");
