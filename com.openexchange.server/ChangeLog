@@ -1,3 +1,7 @@
+* 2014-03-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31783: Avoid time zones for administrative zones
+
 * 2014-03-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 31770: Retrieve deferrer URL from config-cascade look-up
