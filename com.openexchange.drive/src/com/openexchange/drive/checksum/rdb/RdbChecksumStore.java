@@ -272,6 +272,22 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     @Override
+    public int removeFileChecksums(FileID...fileIDs) throws OXException {
+        int deleted = 0;
+        Connection connection = databaseService.getWritable(contextID);
+        try {
+            for (FileID fileID : fileIDs) {
+                deleted += deleteFileChecksums(connection, contextID, fileID);
+            }
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backWritable(contextID, connection);
+        }
+        return deleted;
+    }
+
+    @Override
     public FileChecksum getFileChecksum(FileID fileID, String version, long sequenceNumber) throws OXException {
         Connection connection = databaseService.getReadOnly(contextID);
         try {
