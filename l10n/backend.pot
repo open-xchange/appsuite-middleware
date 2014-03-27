@@ -971,7 +971,7 @@ msgid "Marital status"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:75
-msgid "Number of children"
+msgid "Children"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:76
@@ -983,7 +983,7 @@ msgid "Nickname"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:78
-msgid "Spouse name"
+msgid "Spouse's name"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:79
@@ -1059,11 +1059,11 @@ msgid "Info"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:97
-msgid "Manager's name"
+msgid "Manager"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:98
-msgid "Assistant's name"
+msgid "Assistant"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:99
@@ -1107,7 +1107,7 @@ msgid "Telephone callback"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:109
-msgid "Telephone car"
+msgid "Phone (car)"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:110
@@ -1147,7 +1147,7 @@ msgid "FAX other"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:119
-msgid "Telephone pager"
+msgid "Pager"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:120
@@ -1159,11 +1159,11 @@ msgid "Telephone radio"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:122
-msgid "Telephone telex"
+msgid "Telex"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:123
-msgid "Telephone TTY/TDD"
+msgid "TTY/TDD"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:124
@@ -1175,7 +1175,7 @@ msgid "Instant Messenger 2"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:126
-msgid "Telephone IP"
+msgid "IP phone"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:127
