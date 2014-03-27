@@ -105,7 +105,15 @@ public class UserFeedAction extends AbstractXingAction {
         // User Fields
         optUserFields = getUserFields(req.getParameter("user_fields"));
 
-        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        final XingOAuthAccess xingOAuthAccess;
+        String token = req.getParameter("testToken");
+        String secret = req.getParameter("testSecret");
+        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+            xingOAuthAccess = getXingOAuthAccess(token, secret);
+        } else {
+            xingOAuthAccess = getXingOAuthAccess(req);
+        }
+
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
         final String xingId = xingAPI.findByEmail(address);
         if (Strings.isEmpty(xingId)) {

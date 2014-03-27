@@ -49,9 +49,15 @@
 
 package com.openexchange.ajax.xing.actions;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
+import com.openexchange.configuration.XingConfig;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractXingRequest}
@@ -64,11 +70,22 @@ public abstract class AbstractXingRequest<T extends AbstractAJAXResponse> implem
     
     protected final boolean failOnError;
 
+    protected final String token;
+
+    protected final String secret;
+
     /**
      * Initializes a new {@link AbstractXingRequest}.
      */
     public AbstractXingRequest(final boolean foe) {
         failOnError = foe;
+        try {
+            XingConfig.init();
+        } catch (final OXException ex) {
+            ex.printStackTrace();
+        }
+        token = XingConfig.getProperty("com.openexchange.xing.test.token");
+        secret = XingConfig.getProperty("com.openexchange.xing.test.secret");
     }
 
     /*
@@ -88,5 +105,24 @@ public abstract class AbstractXingRequest<T extends AbstractAJAXResponse> implem
     public Header[] getHeaders() {
         return NO_HEADER;
     }
+
+    public final Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>();
+
+        if (token != null) {
+            params.add(new URLParameter("testToken", token));
+        }
+
+        if (secret != null) {
+            params.add(new URLParameter("testSecret", secret));
+        }
+        setMoreParameters(params);
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    /**
+     * @param params
+     */
+    protected abstract void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params);
 
 }

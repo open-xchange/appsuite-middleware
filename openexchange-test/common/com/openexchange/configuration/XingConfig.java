@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,68 +47,43 @@
  *
  */
 
-package com.openexchange.ajax.xing.actions;
+package com.openexchange.configuration;
 
-import java.io.IOException;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.conf.AbstractConfig;
 
 /**
- * {@link ShareLinkRequest}
- * 
+ * {@link XingConfig}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ShareLinkRequest extends AbstractXingRequest<ShareLinkResponse> {
-    
-    private final String url;
+public class XingConfig extends AbstractConfig {
+
+    private static volatile XingConfig singleton;
+
+    @Override
+    protected String getPropertyFileName() throws OXException {
+        return "conf/xingtest.properties";
+    }
 
     /**
-     * Initializes a new {@link ShareLinkRequest}.
+     * Reads the configuration.
      * 
-     * @param foe
+     * @throws OXException if reading configuration fails.
      */
-    public ShareLinkRequest(final String url, boolean foe) {
-        super(foe);
-        this.url = url;
+    public static void init() throws OXException {
+        TestConfig.init();
+        if (null == singleton) {
+            synchronized (AJAXConfig.class) {
+                if (null == singleton) {
+                    singleton = new XingConfig();
+                    singleton.loadPropertiesInternal();
+                }
+            }
+        }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
-    @Override
-    public Method getMethod() {
-        return Method.POST;
+    public static String getProperty(final String key) {
+        return singleton.getPropertyInternal(key);
     }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public AbstractAJAXParser<? extends ShareLinkResponse> getParser() {
-        return new ShareLinkParser(failOnError);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
-     */
-    @Override
-    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "share_link"));
-        params.add(new URLParameter("url", url));
-    }
-
 }

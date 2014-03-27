@@ -55,6 +55,7 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.InvitationStats;
 import com.openexchange.xing.User;
@@ -86,7 +87,16 @@ public final class InviteRequestAction extends AbstractXingAction {
         String address = getMandatoryStringParameter(req, "email");
         address = validateMailAddress(address);
 
-        final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        String token = req.getParameter("testToken");
+        String secret = req.getParameter("testSecret");
+        final XingOAuthAccess xingOAuthAccess;
+
+        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+            xingOAuthAccess = getXingOAuthAccess(token, secret);
+        } else {
+            xingOAuthAccess = getXingOAuthAccess(req);
+        }
+
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
 
         final InvitationStats invitationStats = xingAPI.invite(Collections.<String> singletonList(address), null, null);

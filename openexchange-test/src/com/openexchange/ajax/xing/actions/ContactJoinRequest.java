@@ -86,18 +86,6 @@ public class ContactJoinRequest extends AbstractXingRequest<ContactJoinResponse>
 
     /*
      * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        List<URLParameter> params = new ArrayList<URLParameter>();
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "contact_request"));
-        params.add(new URLParameter("email", email));
-        return params.toArray(new URLParameter[params.size()]);
-    }
-
-    /*
-     * (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -112,6 +100,16 @@ public class ContactJoinRequest extends AbstractXingRequest<ContactJoinResponse>
     @Override
     public Object getBody() throws IOException, JSONException {
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
+     */
+    @Override
+    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
+        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "contact_request"));
+        params.add(new URLParameter("email", email));
     }
 
 }

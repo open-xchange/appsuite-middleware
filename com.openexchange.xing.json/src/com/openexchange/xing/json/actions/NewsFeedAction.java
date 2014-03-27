@@ -57,6 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
@@ -110,7 +111,15 @@ public class NewsFeedAction extends AbstractXingAction {
         // User Fields
         optUserFields = getUserFields(req.getParameter("user_fields"));
 
-        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        String token = req.getParameter("testToken");
+        String secret = req.getParameter("testSecret");
+        final XingOAuthAccess xingOAuthAccess;
+
+        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+            xingOAuthAccess = getXingOAuthAccess(token, secret);
+        } else {
+            xingOAuthAccess = getXingOAuthAccess(req);
+        }
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
         Map<String, Object> networkFeed = xingAPI.getNetworkFeed(xingOAuthAccess.getXingUserId(), optAggregate, optSince, optUntil, optUserFields);
         JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(networkFeed);

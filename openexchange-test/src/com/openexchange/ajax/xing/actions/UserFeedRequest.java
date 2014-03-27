@@ -50,7 +50,6 @@
 package com.openexchange.ajax.xing.actions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -94,27 +93,6 @@ public class UserFeedRequest extends AbstractXingRequest<UserFeedResponse> {
 
     /*
      * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "userfeed"));
-        params.add(new Parameter("email", email));
-        if (since > 0) {
-            params.add(new Parameter("since", since));
-        }
-        if (until > 0) {
-            params.add(new Parameter("until", until));
-        }
-        if (fields.length > 0) {
-            params.add(new Parameter("user_fields", fields));
-        }
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    /*
-     * (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -129,6 +107,25 @@ public class UserFeedRequest extends AbstractXingRequest<UserFeedResponse> {
     @Override
     public Object getBody() throws IOException, JSONException {
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
+     */
+    @Override
+    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "userfeed"));
+        params.add(new Parameter("email", email));
+        if (since > 0) {
+            params.add(new Parameter("since", since));
+        }
+        if (until > 0) {
+            params.add(new Parameter("until", until));
+        }
+        if (fields.length > 0) {
+            params.add(new Parameter("user_fields", fields));
+        }
     }
 
 }

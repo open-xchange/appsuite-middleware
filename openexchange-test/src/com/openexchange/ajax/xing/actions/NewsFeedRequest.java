@@ -70,7 +70,7 @@ public class NewsFeedRequest extends AbstractXingRequest<NewsFeedResponse> {
     private final long until;
     
     private final int[] fields;
-    
+
     /**
      * Initializes a new {@link NewsFeedRequest}.
      */
@@ -91,26 +91,6 @@ public class NewsFeedRequest extends AbstractXingRequest<NewsFeedResponse> {
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "newsfeed"));
-        params.add(new Parameter("aggregate", aggregate));
-        if (since > 0) {
-            params.add(new Parameter("since", since));
-        }
-        if (until > 0) {
-            params.add(new Parameter("until", until));
-        }
-        if (fields.length > 0) {
-            params.add(new Parameter("user_fields", fields));
-        }
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    /* (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -124,5 +104,24 @@ public class NewsFeedRequest extends AbstractXingRequest<NewsFeedResponse> {
     @Override
     public Object getBody() throws IOException, JSONException {
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
+     */
+    @Override
+    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "newsfeed"));
+        params.add(new Parameter("aggregate", aggregate));
+        if (since > 0) {
+            params.add(new Parameter("since", since));
+        }
+        if (until > 0) {
+            params.add(new Parameter("until", until));
+        }
+        if (fields.length > 0) {
+            params.add(new Parameter("user_fields", fields));
+        }
     }
 }

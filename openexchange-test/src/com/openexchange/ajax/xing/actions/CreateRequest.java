@@ -50,6 +50,7 @@
 package com.openexchange.ajax.xing.actions;
 
 import java.io.IOException;
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -96,14 +97,6 @@ public class CreateRequest extends AbstractXingRequest<CreateResponse> {
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[]{new Parameter(AJAXServlet.PARAMETER_ACTION, "create")};
-    }
-
-    /* (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -130,5 +123,14 @@ public class CreateRequest extends AbstractXingRequest<CreateResponse> {
         body.put("tandc_check", tandc);
         
         return body;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
+     */
+    @Override
+    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "create"));
     }
 }

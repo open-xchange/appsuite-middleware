@@ -90,7 +90,6 @@ public class FeedTest extends AbstractAJAXSession {
         assertNotNull(response);
         final JSONObject json = (JSONObject) response.getData();
         assertNotNull(json.getJSONArray("network_activities"));
-
     }
 
     /**

@@ -50,7 +50,6 @@
 package com.openexchange.ajax.xing.actions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -95,29 +94,6 @@ public class GetCommentsRequest extends AbstractXingRequest<GetCommentsResponse>
 
     /*
      * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "get_comments"));
-        params.add(new Parameter("activity_id", activityId));
-        if (limit > 0) {
-            params.add(new Parameter("limit", limit));
-        }
-
-        if (offset > 0) {
-            params.add(new Parameter("offset", offset));
-        }
-
-        if (user_fields.length > 0) {
-            params.add(new Parameter("user_fields", user_fields));
-        }
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    /*
-     * (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -132,6 +108,27 @@ public class GetCommentsRequest extends AbstractXingRequest<GetCommentsResponse>
     @Override
     public Object getBody() throws IOException, JSONException {
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
+     */
+    @Override
+    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "get_comments"));
+        params.add(new Parameter("activity_id", activityId));
+        if (limit > 0) {
+            params.add(new Parameter("limit", limit));
+        }
+
+        if (offset > 0) {
+            params.add(new Parameter("offset", offset));
+        }
+
+        if (user_fields.length > 0) {
+            params.add(new Parameter("user_fields", user_fields));
+        }
     }
 
 }

@@ -97,6 +97,15 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
         return xingOAuthAccess;
     }
 
+    /**
+     * @param token the token identifier
+     * @param secret the secret identifier
+     * @return The newly created XING OAuth access
+     * @throws OXException If a XING session could not be created
+     */
+    public static XingOAuthAccess accessFor(String token, String secret) throws OXException {
+        return new XingOAuthAccessImpl(token, secret);
+    }
     // ----------------------------------------------------------------------------------------------------------------------------- //
 
     /**
@@ -131,6 +140,26 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
             final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
             final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(), xingOAuthServiceMetaData.getAPISecret());
             webAuthSession = new WebAuthSession(appKeys, new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret()));
+            xingApi = new XingAPI<WebAuthSession>(webAuthSession);
+            // Get account information
+            final User accountInfo = xingApi.userInfo();
+            xingUserId = accountInfo.getId();
+            xingUserName = accountInfo.getDisplayName();
+        } catch (final XingUnlinkedException e) {
+            throw XingExceptionCodes.UNLINKED_ERROR.create();
+        } catch (final XingException e) {
+            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw XingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private XingOAuthAccessImpl(final String token, final String secret) throws OXException {
+        super();
+        try {
+            final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
+            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(), xingOAuthServiceMetaData.getAPISecret());
+            webAuthSession = new WebAuthSession(appKeys, new AccessTokenPair(token, secret));
             xingApi = new XingAPI<WebAuthSession>(webAuthSession);
             // Get account information
             final User accountInfo = xingApi.userInfo();
@@ -182,5 +211,4 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
     public String getXingUserName() {
         return xingUserName;
     }
-
 }

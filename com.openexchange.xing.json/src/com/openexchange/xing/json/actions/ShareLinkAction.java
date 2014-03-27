@@ -54,6 +54,7 @@ import java.net.URLEncoder;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -85,7 +86,15 @@ public final class ShareLinkAction extends AbstractXingAction {
             // Ignore
         }
 
-        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        String token = req.getParameter("testToken");
+        String secret = req.getParameter("testSecret");
+        final XingOAuthAccess xingOAuthAccess;
+
+        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+            xingOAuthAccess = getXingOAuthAccess(token, secret);
+        } else {
+            xingOAuthAccess = getXingOAuthAccess(req);
+        }
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
         xingAPI.shareLink(url);
 

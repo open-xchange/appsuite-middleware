@@ -52,6 +52,7 @@ package com.openexchange.xing.json.actions;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -84,7 +85,15 @@ public class RevokeContactRequestAction extends AbstractXingAction {
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
         String email = getMandatoryStringParameter(req, "email");
         email = validateMailAddress(email);
-        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        String token = req.getParameter("testToken");
+        String secret = req.getParameter("testSecret");
+        final XingOAuthAccess xingOAuthAccess;
+
+        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+            xingOAuthAccess = getXingOAuthAccess(token, secret);
+        } else {
+            xingOAuthAccess = getXingOAuthAccess(req);
+        }
         XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
         final String recipientUserId = xingAPI.findByEmail(email);
         xingAPI.revokeContactRequest(xingOAuthAccess.getXingUserId(), recipientUserId);

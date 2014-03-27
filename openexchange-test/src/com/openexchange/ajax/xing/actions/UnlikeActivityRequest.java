@@ -50,7 +50,6 @@
 package com.openexchange.ajax.xing.actions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -86,18 +85,6 @@ public class UnlikeActivityRequest extends AbstractXingRequest<UnlikeActivityRes
 
     /*
      * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        List<URLParameter> params = new ArrayList<URLParameter>();
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "unlike"));
-        params.add(new URLParameter("activity_id", activityId));
-        return params.toArray(new URLParameter[params.size()]);
-    }
-
-    /*
-     * (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -112,6 +99,16 @@ public class UnlikeActivityRequest extends AbstractXingRequest<UnlikeActivityRes
     @Override
     public Object getBody() throws IOException, JSONException {
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
+     */
+    @Override
+    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
+        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "unlike"));
+        params.add(new URLParameter("activity_id", activityId));
     }
 
 }

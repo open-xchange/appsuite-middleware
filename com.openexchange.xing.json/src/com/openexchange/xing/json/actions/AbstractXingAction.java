@@ -157,6 +157,23 @@ public abstract class AbstractXingAction implements AJAXActionService {
     }
 
     /**
+     * Gets the XING OAuth access.
+     * 
+     * @param token The token identifier
+     * @param secret The secret identifier
+     * @return The XING OAuth access
+     * @throws OXException If XING OAuth access cannot be returned
+     */
+    protected XingOAuthAccess getXingOAuthAccess(final String token, final String secret) throws OXException {
+        final XingOAuthAccessProvider provider = services.getService(XingOAuthAccessProvider.class);
+        if (null == provider) {
+            throw ServiceExceptionCode.absentService(XingOAuthAccessProvider.class);
+        }
+
+        return provider.accessFor(token, secret);
+    }
+
+    /**
      * Get an instance to the {@link XingAPI}.
      *
      * @param req The XING request
@@ -164,7 +181,15 @@ public abstract class AbstractXingAction implements AJAXActionService {
      * @throws OXException If instance cannot be returned
      */
     protected XingAPI<WebAuthSession> getXingAPI(XingRequest req) throws OXException {
-        XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        String token = req.getParameter("testToken");
+        String secret = req.getParameter("testSecret");
+        final XingOAuthAccess xingOAuthAccess;
+
+        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+            xingOAuthAccess = getXingOAuthAccess(token, secret);
+        } else {
+            xingOAuthAccess = getXingOAuthAccess(req);
+        }
         return xingOAuthAccess.getXingAPI();
     }
 

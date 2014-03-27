@@ -83,7 +83,15 @@ public final class ContactRequestAction extends AbstractXingAction {
         String address = getMandatoryStringParameter(req, "email");
         address = validateMailAddress(address);
 
-        final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        String token = req.getParameter("testToken");
+        String secret = req.getParameter("testSecret");
+        final XingOAuthAccess xingOAuthAccess;
+
+        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+            xingOAuthAccess = getXingOAuthAccess(token, secret);
+        } else {
+            xingOAuthAccess = getXingOAuthAccess(req);
+        }
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
 
         final String result = xingAPI.findByEmail(address);

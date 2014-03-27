@@ -50,12 +50,10 @@
 package com.openexchange.ajax.xing.actions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 
 /**
  * {@link ShowActivityRequest}
@@ -90,22 +88,6 @@ public class ShowActivityRequest extends AbstractXingRequest<ShowActivityRespons
 
     /*
      * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "show_activity"));
-        params.add(new URLParameter("activity_id", activityId));
-
-        if (fields != null && fields.length > 0) {
-            params.add(new Parameter("user_fields", fields));
-        }
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    /*
-     * (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -120,6 +102,20 @@ public class ShowActivityRequest extends AbstractXingRequest<ShowActivityRespons
     @Override
     public Object getBody() throws IOException, JSONException {
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
+     */
+    @Override
+    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
+        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "show_activity"));
+        params.add(new URLParameter("activity_id", activityId));
+
+        if (fields != null && fields.length > 0) {
+            params.add(new Parameter("user_fields", fields));
+        }
     }
 
 }

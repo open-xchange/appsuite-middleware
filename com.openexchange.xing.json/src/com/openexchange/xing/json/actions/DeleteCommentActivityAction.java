@@ -78,6 +78,7 @@ public class DeleteCommentActivityAction extends AbstractXingAction {
         String activityId = getMandatoryStringParameter(req, "activity_id");
         String id = getMandatoryStringParameter(req, "comment_id");
         getXingAPI(req).deleteComment(activityId, id);
+
         return new AJAXRequestResult(Boolean.TRUE, "native");
     }
 }

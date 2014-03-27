@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,68 +47,52 @@
  *
  */
 
-package com.openexchange.ajax.xing.actions;
+package com.openexchange.ajax.oauth.actions;
 
-import java.io.IOException;
-import java.util.List;
-import org.json.JSONException;
+import java.util.LinkedList;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link ShareLinkRequest}
- * 
+ * {@link InitOAuthAccountRequest}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ShareLinkRequest extends AbstractXingRequest<ShareLinkResponse> {
-    
-    private final String url;
+public class InitOAuthAccountRequest extends AbstractOAuthAccountRequest<InitOAuthAccountResponse> {
 
-    /**
-     * Initializes a new {@link ShareLinkRequest}.
-     * 
-     * @param foe
-     */
-    public ShareLinkRequest(final String url, boolean foe) {
-        super(foe);
-        this.url = url;
+    private String serviceId = null;
+
+    private String displayName = null;
+
+    private boolean failOnError = false;
+
+    public InitOAuthAccountRequest(final String serviceId, final String displayName, final boolean failOnError) {
+        this.serviceId = serviceId;
+        this.displayName = displayName;
+        this.failOnError = failOnError;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
-    public Method getMethod() {
-        return Method.POST;
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
-    public AbstractAJAXParser<? extends ShareLinkResponse> getParser() {
-        return new ShareLinkParser(failOnError);
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+        LinkedList<Parameter> params = new LinkedList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "init"));
+        params.add(new Parameter("serviceId", serviceId));
+        params.add(new Parameter("displayName", displayName));
+        return params.toArray(new Parameter[params.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
-    public Object getBody() throws IOException, JSONException {
+    public AbstractAJAXParser<? extends InitOAuthAccountResponse> getParser() {
+        return new InitOAuthAccountParser(failOnError);
+    }
+
+    @Override
+    public Object getBody() {
         return null;
     }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
-     */
-    @Override
-    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "share_link"));
-        params.add(new URLParameter("url", url));
-    }
-
 }

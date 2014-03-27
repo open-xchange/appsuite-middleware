@@ -87,18 +87,6 @@ public class DeleteCommentRequest extends AbstractXingRequest<DeleteCommentRespo
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        List<URLParameter> params = new ArrayList<URLParameter>();
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "delete_comment"));
-        params.add(new URLParameter("activity_id", activityId));
-        params.add(new URLParameter("comment_id", commentId));
-        return params.toArray(new URLParameter[params.size()]);
-    }
-
-    /* (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -114,5 +102,15 @@ public class DeleteCommentRequest extends AbstractXingRequest<DeleteCommentRespo
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
+     */
+    @Override
+    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
+        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "delete_comment"));
+        params.add(new URLParameter("activity_id", activityId));
+        params.add(new URLParameter("comment_id", commentId));
+    }
 
 }

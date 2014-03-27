@@ -52,6 +52,7 @@ package com.openexchange.xing.json.actions;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingOAuthAccess;
@@ -77,11 +78,17 @@ public final class ChangeStatusAction extends AbstractXingAction {
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
         final String message = getMandatoryStringParameter(req, "message");
-        // Get & validate email
+        
+        String token = req.getParameter("testToken");
+        String secret = req.getParameter("testSecret");
+        final XingOAuthAccess xingOAuthAccess;
 
-        final XingOAuthAccess xingOAuthAccess = getXingOAuthAccess(req);
+        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+            xingOAuthAccess = getXingOAuthAccess(token, secret);
+        } else {
+            xingOAuthAccess = getXingOAuthAccess(req);
+        }
         final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-
         xingAPI.changeStatusMessage(xingOAuthAccess.getXingUserId(), message);
 
         return new AJAXRequestResult(Boolean.TRUE, "native");

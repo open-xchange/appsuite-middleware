@@ -50,7 +50,6 @@
 package com.openexchange.ajax.xing.actions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -90,21 +89,6 @@ public class ShareActivityRequest extends AbstractXingRequest<ShareActivityRespo
 
     /*
      * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        List<URLParameter> params = new ArrayList<URLParameter>();
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "share_activity"));
-        params.add(new URLParameter("activity_id", activityId));
-        if (text != null && text.length() > 0) {
-            params.add(new URLParameter("text", text));
-        }
-        return params.toArray(new URLParameter[params.size()]);
-    }
-
-    /*
-     * (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -119,6 +103,19 @@ public class ShareActivityRequest extends AbstractXingRequest<ShareActivityRespo
     @Override
     public Object getBody() throws IOException, JSONException {
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
+     */
+    @Override
+    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
+        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "share_activity"));
+        params.add(new URLParameter("activity_id", activityId));
+        if (text != null && text.length() > 0) {
+            params.add(new URLParameter("text", text));
+        }
     }
 
 }

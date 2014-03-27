@@ -130,6 +130,11 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
                 final OAuthService oAuthService = getService(OAuthService.class);
                 return oAuthService.getDefaultAccount(API.XING, session).getId();
             }
+
+            @Override
+            public XingOAuthAccess accessFor(String token, String secret) throws OXException {
+                return XingOAuthAccessImpl.accessFor(token, secret);
+            }
         };
         providerRegistration = context.registerService(XingOAuthAccessProvider.class, provider, null);
     }
