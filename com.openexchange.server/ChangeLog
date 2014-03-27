@@ -18,6 +18,10 @@
 
  - Fix for Bug 31855: [L3] email cannot be displayed and customer gets only a MSG-0020
 
+* 2014-03-27 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31525: Removed shown_as field (ical: transparency) from emmitted ical to suppress unnecessary changes.
+
 * 2014-03-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 31582: Invalidate affected users' LIST/LSUB cache on IMAP folder changes & remotely distribute this

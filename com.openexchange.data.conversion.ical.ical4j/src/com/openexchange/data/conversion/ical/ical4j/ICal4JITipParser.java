@@ -102,17 +102,6 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
 
     @Override
     public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, Context ctx, int owner, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-//        BufferedReader in = new BufferedReader(new InputStreamReader(ical));
-//        String input;
-//        try {
-//            while ((input = in.readLine()) != null) {
-//                System.out.println(input);
-//            }
-//            in.close();
-//        } catch (IOException e1) {
-//            // TODO Auto-generated catch block
-//            e1.printStackTrace();
-//        }
         List<ITipMessage> messages = new ArrayList<ITipMessage>();
         Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();
         BufferedReader reader = null;
