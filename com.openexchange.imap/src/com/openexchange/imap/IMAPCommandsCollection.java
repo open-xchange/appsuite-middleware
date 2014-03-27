@@ -253,11 +253,17 @@ public final class IMAPCommandsCollection {
                                 found = true;
                             }
                         }
+                        if (!found) {
+                            LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} failed as test folder was not created at expected position. Thus assuming no root subfolder capability", p.getHost(), mboxName);
+                        }
                         retval = found;
                     }
                     // Delete probe folder and return
                     sb.reinitTo(0);
                     performCommand(p, sb.append("DELETE ").append(mboxName).toString());
+                    if (retval) {
+                        LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} succeeded. Thus assuming root subfolder capability", p.getHost(), mboxName);
+                    }
                     return Boolean.valueOf(retval);
                 }
                 if (response.isNO()) {
