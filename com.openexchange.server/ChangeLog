@@ -1,3 +1,7 @@
+* 2014-03-27 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31525: Removed shown_as field (ical: transparency) from emmitted ical to suppress unnecessary changes.
+
 * 2014-03-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 31783: Avoid time zones for administrative zones
