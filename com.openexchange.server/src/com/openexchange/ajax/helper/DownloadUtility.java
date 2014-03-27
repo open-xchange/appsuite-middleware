@@ -334,6 +334,12 @@ public final class DownloadUtility {
                     sz = sink.getLength();
                     in = sink.getClosingStream();
                     sink = null; // Set to null to avoid premature closing at the end of try-finally clause
+                } else {
+                    if (null != sink) {
+                        sz = sink.getLength();
+                        in = sink.getClosingStream();
+                        sink = null; // Set to null to avoid premature closing at the end of try-finally clause
+                    }
                 }
             } else if (contentType.startsWith("image/") || fileNameImpliesImage(fileName)) {
                 /*

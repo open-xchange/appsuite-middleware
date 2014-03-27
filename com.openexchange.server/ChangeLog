@@ -5,6 +5,7 @@
 * 2014-03-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 31783: Avoid time zones for administrative zones
+ - Fix for bug 31750: Fixed download for plain-text files
 
 * 2014-03-26 - thorben.betten@open-xchange.com
 
