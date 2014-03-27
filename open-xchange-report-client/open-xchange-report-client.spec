@@ -57,6 +57,8 @@ ox_update_permissions /opt/open-xchange/etc/reportclient.properties root:open-xc
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Mar 17 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-03-24
 * Thu Mar 13 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-03-13
 * Mon Mar 10 2014 Carsten Hoeger <choeger@open-xchange.com>

@@ -207,7 +207,10 @@ public class ContactHaloImpl implements ContactHalo {
             try {
                 iterator = contactService.searchContacts(session, contactSearch);
                 while (iterator.hasNext()) {
-                    contactsToMerge.add(iterator.next());
+                    Contact c = iterator.next();
+                    if (checkEmails(c, contact.getEmail1())) {
+                        contactsToMerge.add(c);
+                    }
                 }
             } finally {
                 if (null != iterator) {
@@ -223,6 +226,21 @@ public class ContactHaloImpl implements ContactHalo {
         }
         contactQuery.setContact(contact);
         return contactQuery;
+    }
+
+    private boolean checkEmails(Contact c, String email1) {
+        if (c.getEmail1() != null && c.getEmail1().equalsIgnoreCase(email1)) {
+            return true;
+        }
+        
+        if (c.getEmail2() != null && c.getEmail2().equalsIgnoreCase(email1)) {
+            return true;
+        }
+        if (c.getEmail3() != null && c.getEmail3().equalsIgnoreCase(email1)) {
+            return true;
+        }
+        
+        return false;
     }
 
     @Override

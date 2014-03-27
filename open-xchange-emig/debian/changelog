@@ -4,6 +4,12 @@ open-xchange-emig (7.6.0-0) unstable; urgency=low
 
  -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 12 Feb 2014 09:35:49 +0100
 
+open-xchange-emig (7.4.2-15) stable; urgency=low
+
+  * Build for patch 2014-03-24
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 17 Mar 2014 14:05:56 +0100
+
 open-xchange-emig (7.4.2-14) stable; urgency=low
 
   * Build for patch 2014-03-13

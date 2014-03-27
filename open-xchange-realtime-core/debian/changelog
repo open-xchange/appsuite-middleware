@@ -4,6 +4,12 @@ open-xchange-realtime-core (7.6.0-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 12 Feb 2014 09:36:26 +0100
 
+open-xchange-realtime-core (7.4.2-15) stable; urgency=low
+
+  * Build for patch 2014-03-24
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 17 Mar 2014 14:06:46 +0100
+
 open-xchange-realtime-core (7.4.2-14) stable; urgency=low
 
   * Build for patch 2014-03-13
