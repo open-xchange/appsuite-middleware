@@ -192,7 +192,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
         }
         File targetFile = null;
         if (null != action.getVersion()) {
-            File file = session.getStorage().findFileByName(path, action.getVersion().getName(), true);
+            File file = session.getStorage().getFileByName(path, action.getVersion().getName(), true);
             if (null != file && ChecksumProvider.matches(session, file, action.getVersion().getChecksum())) {
                 targetFile = file;
             }

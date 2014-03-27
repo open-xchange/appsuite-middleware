@@ -99,7 +99,7 @@ public class DownloadHelper {
                 /*
                  * get the file's input stream
                  */
-                File file = session.getStorage().findFileByName(path, fileVersion.getName(), true);
+                File file = session.getStorage().getFileByName(path, fileVersion.getName(), true);
                 if (null == file || false == ChecksumProvider.matches(session, file, fileVersion.getChecksum())) {
                     throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
                 }
