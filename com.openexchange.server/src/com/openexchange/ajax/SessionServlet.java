@@ -669,6 +669,8 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    private static final Set<String> AGENTS_WO_PUBLIC_SESSION_COOKIE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("open-xchange usm http client")));
+
     /**
      * Checks presence of public session cookie.
      *
@@ -678,13 +680,19 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param sessiondService The <code>SessiondService</code> instance
      */
     public static void checkPublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final SessiondService sessiondService) {
+        final String userAgent = HashCalculator.getUserAgent(req);
+        if (AGENTS_WO_PUBLIC_SESSION_COOKIE.contains(userAgent.toLowerCase())) {
+            return;
+        }
+
+        // Check for public session cookie
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
             final String cookieName = getPublicSessionCookieName(req);
             if (null == cookies.get(cookieName)) {
                 final boolean restored = LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
                 if (restored) {
-                    LOG.info("Restored public session cookie for \"{}\": {} (User-Agent: {})", session.getLogin(), cookieName, HashCalculator.getUserAgent(req));
+                    LOG.info("Restored public session cookie for \"{}\": {} (User-Agent: {})", session.getLogin(), cookieName, userAgent);
                 }
             }
         }
