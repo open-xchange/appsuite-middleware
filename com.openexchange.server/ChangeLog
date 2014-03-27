@@ -1,3 +1,7 @@
+* 2014-03-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30848: Properly recognize & transmit an S/MIME encrypted mail
+
 * 2014-03-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 31555: Also check standard folders' subscribed status in case SPECIAL-USE capability is supported by IMAP server

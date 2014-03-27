@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-imap
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 15
+%define        ox_release 16
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -54,6 +54,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_i
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Wed Mar 19 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-03-21
 * Mon Mar 17 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-03-24
 * Thu Mar 13 2014 Carsten Hoeger <choeger@open-xchange.com>
