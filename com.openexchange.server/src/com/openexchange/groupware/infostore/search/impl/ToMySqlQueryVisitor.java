@@ -134,16 +134,13 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     private void appendInString(final int[] allFolderIds, final int[] ownFolderIds, final StringBuilder sb) {
         boolean needOr = false;
-        if (null != allFolderIds) {
+        if (null != allFolderIds && 0 < allFolderIds.length) {
             needOr = true;
-            final int length = allFolderIds.length;
-            if (length > 0) {
-                if (1 == length) {
-                    sb.append(INFOSTORE).append("folder_id = ").append(allFolderIds[0]);
-                } else {
-                    sb.append(INFOSTORE).append("folder_id IN ");
-                    sb.append(appendFolders(allFolderIds));
-                }
+            if (1 == allFolderIds.length) {
+                sb.append(INFOSTORE).append("folder_id = ").append(allFolderIds[0]);
+            } else {
+                sb.append(INFOSTORE).append("folder_id IN ");
+                sb.append(appendFolders(allFolderIds));
             }
         }
         if (null != ownFolderIds) {
