@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,21 @@
  *
  */
 
-package com.openexchange.drive.events.apn.internal;
+package com.openexchange.drive.events.apn;
 
 
 /**
- * {@link APNAccess}
+ * {@link APNCertificateProvider}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class APNAccess {
-
-    private final String password;
-    private final Object keystore;
-    private final boolean production;
-
-    public APNAccess(Object keystore, String password, boolean production) {
-        super();
-        this.keystore = keystore;
-        this.password = password;
-        this.production = production;
-    }
+public interface APNCertificateProvider {
 
     /**
-     * Gets the password
+     * Gets the APN access containing the push certificate.
      *
-     * @return The password
+     * @return The APN access
      */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Gets the keystore
-     *
-     * @return The keystore
-     */
-    public Object getKeystore() {
-        return keystore;
-    }
-
-    /**
-     * Gets the production
-     *
-     * @return The production
-     */
-    public boolean isProduction() {
-        return production;
-    }
+    APNAccess getAccess();
 
 }

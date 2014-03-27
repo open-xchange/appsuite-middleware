@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,14 @@
  *
  */
 
-package com.openexchange.drive.events.apn.internal;
-
-import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.drive.events.apn.APNAccess;
-import com.openexchange.drive.events.apn.MacOSAPNCertificateProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
+package com.openexchange.drive.events.apn;
 
 
 /**
- * {@link MacOSDriveEventPublisher}
+ * {@link MacOSAPNCertificateProvider}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class MacOSDriveEventPublisher extends APNDriveEventPublisher {
-
-    private static final String SERIVCE_ID = "apn.macos";
-
-    /**
-     * Initializes a new {@link MacOSDriveEventPublisher}.
-     */
-    public MacOSDriveEventPublisher() {
-        super();
-    }
-
-    @Override
-    protected String getServiceID() {
-        return SERIVCE_ID;
-    }
-
-    @Override
-    protected APNAccess getAccess() throws OXException {
-        MacOSAPNCertificateProvider certificateProvider = Services.getOptionalService(MacOSAPNCertificateProvider.class);
-        if (null == certificateProvider) {
-            throw ServiceExceptionCode.absentService(MacOSAPNCertificateProvider.class);
-        }
-        APNAccess access = certificateProvider.getAccess();
-        if (null == access) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No APN access for service " + SERIVCE_ID + " available.");
-        }
-        return access;
-    }
-
+public interface MacOSAPNCertificateProvider extends APNCertificateProvider {
 
 }

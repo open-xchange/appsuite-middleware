@@ -1,3 +1,9 @@
+open-xchange-authentication-database (7.4.2-15) stable; urgency=low
+
+  * Build for patch 2014-03-24
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 17 Mar 2014 14:05:21 +0100
+
 open-xchange-authentication-database (7.4.2-14) stable; urgency=low
 
   * Build for patch 2014-03-13

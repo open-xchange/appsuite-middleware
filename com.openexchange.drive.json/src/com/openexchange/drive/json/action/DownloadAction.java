@@ -72,6 +72,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @DispatcherNotes(defaultFormat = "file")
 public class DownloadAction extends AbstractDriveAction {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DownloadAction.class);
+
     @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
         try {
@@ -121,6 +123,12 @@ public class DownloadAction extends AbstractDriveAction {
              * indicate error by setting HTTP status code
              */
             throw getHttpError(e);
+        } catch (RuntimeException e) {
+            /*
+             * indicate error by setting HTTP status code
+             */
+            LOG.error("Unexpected error performing download with parameters: {}", requestData.getParameters(), e);
+            throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_INTERNAL_SERVER_ERROR), e.getMessage());
         }
     }
 

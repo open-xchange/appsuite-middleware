@@ -1,3 +1,7 @@
+* 2014-03-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31555: Also check standard folders' subscribed status in case SPECIAL-USE capability is supported by IMAP server
+
 * 2014-03-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 31154: Necessary Ant tasks for our build system have not be available by default on Debian Squeeze but on Wheezy. Adding an
@@ -5,6 +9,7 @@
 
 * 2014-03-06 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 31391: Use dynamically registered key and certificate providers for cloud-based push notifications
  - Fix for bug 30369: Replaced equinox event admin with multithreaded implementation from apache felix project, introduced background
                       event processing for time-consuming handlers
 
@@ -26,6 +31,10 @@
  - Fix for bug 31287: Do not apply black-list on provisioning calls
  - Fix for bug 30969: Fully leverage from folder cache within folder layer, do not use a custom one in IMAP bundle
 
+* 2014-02-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31249: Be aware of infostore items without files when filtering, set appropriate HTTP status in download response
+ 
 * 2014-02-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 31264: Added cache invalidator to capabilities caches
@@ -42,6 +51,10 @@
 * 2014-02-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 30138: Ensure each probe for root subfolder capability is exclusively performed
+
+* 2014-02-19 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31199: Process multicast results from GCM
 
 * 2014-02-18 - thorben.betten@open-xchange.com
 

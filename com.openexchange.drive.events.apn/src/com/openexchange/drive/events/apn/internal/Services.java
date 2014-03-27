@@ -88,6 +88,12 @@ public final class Services {
         ref.set(serviceLookup);
     }
 
+    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+        return service;
+    }
+
     public static <S extends Object> S getService(Class<? extends S> c) {
         ServiceLookup serviceLookup = ref.get();
         S service = null == serviceLookup ? null : serviceLookup.getService(c);

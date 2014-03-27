@@ -173,7 +173,8 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
         List<Contact> contacts = new ArrayList<Contact>();
         while(result.hasNext()) {
             Contact contact = result.next();
-            if (contact.getImage1() != null) {
+            
+            if (contact.getImage1() != null && (checkEmail(contact, email))) {
                 contacts.add(contact);
             }
         }
@@ -188,6 +189,19 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
         }
         
         return null;
+    }
+
+    private boolean checkEmail(Contact c, String email) {
+        if (c.getEmail1() != null && c.getEmail1().equalsIgnoreCase(email)) {
+            return true;
+        }
+        if (c.getEmail2() != null && c.getEmail2().equalsIgnoreCase(email)) {
+            return true;
+        }
+        if (c.getEmail3() != null && c.getEmail3().equalsIgnoreCase(email)) {
+            return true;
+        }
+        return false;
     }
 
     private Contact getContact(ServerSession session, String folderId, String id) throws OXException {

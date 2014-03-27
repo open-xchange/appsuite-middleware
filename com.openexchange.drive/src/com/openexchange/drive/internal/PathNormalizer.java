@@ -91,7 +91,13 @@ public class PathNormalizer {
      * @return <code>true</code> if both paths are equal, <code>false</code>, otherwise
      */
     public static boolean equals(String path1, String path2) {
-        return null == path1 ? null == path2 : normalize(path1).equals(normalize(path2));
+        if (null == path1) {
+            return null == path2;
+        } else if (null == path2) {
+            return false;
+        } else {
+            return normalize(path1).equals(normalize(path2));
+        }
     }
 
 }
