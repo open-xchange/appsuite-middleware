@@ -801,7 +801,7 @@ public class RoundtripTest extends AbstractRMITest {
                     "Number of distribution lists is not equal.",
                     c1.getNumberOfDistributionLists(),
                     c2.getNumberOfDistributionLists());
-                assertEquals("Number of employees is not equal.", c1.getNumberOfEmployee(), c2.getNumberOfEmployee());
+                assertEquals("Employee ID is not equal.", c1.getNumberOfEmployee(), c2.getNumberOfEmployee());
                 assertEquals("Number of images is not equal.", c1.getNumberOfImages(), c2.getNumberOfImages());
                 assertEquals("Position is not equal.", c1.getPosition(), c2.getPosition());
                 assertEquals("Postal code business is not equal.", c1.getPostalCodeBusiness(), c2.getPostalCodeBusiness());

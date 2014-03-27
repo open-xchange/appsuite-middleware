@@ -125,7 +125,7 @@ public final class CSVLibrary {
         readableTitles.put(ContactField.CITY_BUSINESS, "City business");
         readableTitles.put(ContactField.STATE_BUSINESS, "State business");
         readableTitles.put(ContactField.COUNTRY_BUSINESS, "Country business");
-        readableTitles.put(ContactField.NUMBER_OF_EMPLOYEE, "Number of employees");
+        readableTitles.put(ContactField.NUMBER_OF_EMPLOYEE, "Employee ID");
         readableTitles.put(ContactField.SALES_VOLUME, "Sales volume");
         readableTitles.put(ContactField.TAX_ID, "Tax id");
         readableTitles.put(ContactField.COMMERCIAL_REGISTER, "Commercial register");

@@ -87,7 +87,7 @@ public class Strings implements LocalizableStrings {
     public static final String CITY_BUSINESS = "Town (business)";
     public static final String STATE_BUSINESS = "State (business)";
     public static final String COUNTRY_BUSINESS = "Country (business)";
-    public static final String NUMBER_OF_EMPLOYEE = "Number of employees";
+    public static final String NUMBER_OF_EMPLOYEE = "Employee ID";
     public static final String SALES_VOLUME = "Sales volume";
     public static final String TAX_ID = "Tax id";
     public static final String COMMERCIAL_REGISTER = "Commercial register";

@@ -107,7 +107,7 @@ public enum ContactField{
     CITY_BUSINESS (526 , "field25" , "CITY_BUSINESS" , "City business" , ContactFields.CITY_BUSINESS, Types.VARCHAR),
     STATE_BUSINESS (527 , "field26" , "STATE_BUSINESS" , "State business" , ContactFields.STATE_BUSINESS, Types.VARCHAR),
     COUNTRY_BUSINESS (528 , "field27" , "COUNTRY_BUSINESS" , "Country business" , ContactFields.COUNTRY_BUSINESS, Types.VARCHAR),
-    NUMBER_OF_EMPLOYEE (529 , "field28" , "NUMBER_OF_EMPLOYEE" , "Number of employees"  , ContactFields.NUMBER_OF_EMPLOYEE, Types.VARCHAR),
+    NUMBER_OF_EMPLOYEE (529 , "field28" , "NUMBER_OF_EMPLOYEE" , "Employee ID"  , ContactFields.NUMBER_OF_EMPLOYEE, Types.VARCHAR),
     SALES_VOLUME (530 , "field29" , "SALES_VOLUME" , "Sales volume"  , ContactFields.SALES_VOLUME, Types.VARCHAR),
     TAX_ID (531 , "field30" , "TAX_ID" , "Tax id"  , ContactFields.TAX_ID, Types.VARCHAR),
     COMMERCIAL_REGISTER (532 , "field31" , "COMMERCIAL_REGISTER" , "Commercial register"  , ContactFields.COMMERCIAL_REGISTER, Types.VARCHAR),
