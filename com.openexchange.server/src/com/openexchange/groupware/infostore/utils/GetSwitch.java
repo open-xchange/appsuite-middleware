@@ -60,6 +60,11 @@ public class GetSwitch implements MetadataSwitcher {
 	}
 
 	@Override
+	public Object meta() {
+	    return metadata.getMeta();
+	}
+
+	@Override
     public Object lastModified() {
 		return metadata.getLastModified();
 	}

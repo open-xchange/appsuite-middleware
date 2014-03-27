@@ -103,6 +103,17 @@ public class InfostoreTemplateUtilsTest extends TestCase {
     private final DocumentMetadata document = new DocumentMetadata(){
 
         @Override
+        public java.util.Map<String,Object> getMeta() {
+            // Nothing to do
+            return null;
+        }
+
+        @Override
+        public void setMeta(java.util.Map<String,Object> properties) {
+            // Nothing to do
+        }
+
+        @Override
         public String getCategories() {
             // Nothing to do
             return null;

@@ -729,6 +729,11 @@ public class InfostoreQueryCatalog {
         }
 
         @Override
+        public Object meta() {
+            return null;
+        }
+
+        @Override
         public Object currentVersion() {
             return null;
         }
@@ -829,6 +834,11 @@ public class InfostoreQueryCatalog {
     public static final class DelInfostoreColumnsSwitch implements MetadataSwitcher {
         @Override
         public Object categories() {
+            return null;
+        }
+
+        @Override
+        public Object meta() {
             return null;
         }
 
@@ -957,6 +967,11 @@ public class InfostoreQueryCatalog {
         }
 
         @Override
+        public Object meta() {
+            return "meta";
+        }
+
+        @Override
         public Object colorLabel() {
             return null;
         }
@@ -1077,6 +1092,11 @@ public class InfostoreQueryCatalog {
         @Override
         public Object categories() {
             return null;
+        }
+
+        @Override
+        public Object meta() {
+            return "meta";
         }
 
         @Override

@@ -1,3 +1,10 @@
+* 2014-03-27 - marc.arens@open-xchange.com
+
+ - Fix for bug 29128: Move default config to ProxyPass syntax suitable for apache 2.2 and 2.4
+ - Fix for bug 31700: Increase sync timeout to 1900 to respect com.openexchange.usm.eas.ping.max_heartbeat
+ - Fix for bug 31701: Document workaround for Apache < 2.4 and set up combined balancing proxy for usm and eas
+ - Fix for bug 31702: Document workaround for Apache < 2.4 and set up combined balancing proxy for usm and eas
+ 
 * 2014-03-27 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31525: Removed shown_as field (ical: transparency) from emmitted ical to suppress unnecessary changes.
