@@ -75,6 +75,7 @@ public class BucketInputStream extends InputStream {
             if (null != previousTokenBucket) {
                 previousTokenBucket.stop();
             }
+            previousTokenBucket.stop();
         }
         tokenBucketReference.set(tokenBucket);
     }
