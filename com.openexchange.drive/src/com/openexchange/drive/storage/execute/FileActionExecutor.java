@@ -51,9 +51,11 @@ package com.openexchange.drive.storage.execute;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
@@ -82,14 +84,15 @@ import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
 
     /**
-     * When moving to trash, this value is used as limit before a safety check is performed if they already exist in the temp folder.
+     * When removing to the temp folder, this value is used as limit before a safety check is performed if they already exist in the
+     * temp folder.
      */
-    private static final int OPTIMISTIC_MOVE_TO_TRASH_THRESHOLD = 5;
+    private static final int OPTIMISTIC_MOVE_TO_TEMP_THRESHOLD = 5;
 
     /**
-     * When moving to trash, this value is used as hard limit for the number of files - further files will be hard-deleted
+     * When removing to the temp folder, this value is used as hard limit for the number of files - further files will be hard-deleted
      */
-    private static final int MOVE_TO_TRASH_LIMIT = 20;
+    private static final int MOVE_TO_TEMP_LIMIT = 20;
 
     private final String path;
 
@@ -237,16 +240,24 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
     }
 
     private void remove(AbstractAction<FileVersion> action) throws OXException {
-        /*
-         * move to temp folder
-         */
         ServerFileVersion versionToRemove = ServerFileVersion.valueOf(action.getVersion(), path, session);
         FileChecksum fileChecksum = versionToRemove.getFileChecksum();
-        if (false == session.hasTempFolder() || DriveConstants.EMPTY_MD5.equals(fileChecksum.getChecksum())) {
-            // don't preserve empty files
-            session.getStorage().deleteFile(versionToRemove.getFile());
+        if (session.getStorage().hasTrashFolder()) {
+            /*
+             * move to trash if available
+             */
+            session.getStorage().deleteFile(versionToRemove.getFile(), false);
+            session.getChecksumStore().removeFileChecksum(fileChecksum);
+        } else if (false == session.hasTempFolder() || DriveConstants.EMPTY_MD5.equals(fileChecksum.getChecksum())) {
+            /*
+             * hard delete file if applicable
+             */
+            session.getStorage().deleteFile(versionToRemove.getFile(), true);
             session.getChecksumStore().removeFileChecksum(fileChecksum);
         } else {
+            /*
+             * try and move to temp folder using the file's checksum as filename
+             */
             File removedFile = session.getStorage().moveFile(
                 versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
             if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
@@ -257,114 +268,240 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                 session.getChecksumStore().updateFileChecksum(fileChecksum);
             } else {
                 // file already in trash, cleanup
-                session.getStorage().deleteFile(removedFile);
+                session.getStorage().deleteFile(removedFile, true);
                 session.getChecksumStore().removeFileChecksum(fileChecksum);
             }
         }
     }
 
     private void batchRemove(List<AbstractAction<FileVersion>> removeActions) throws OXException {
-        List<ServerFileVersion> versionsToDelete = new ArrayList<ServerFileVersion>();
-        List<ServerFileVersion> versionsToRemove = new ArrayList<ServerFileVersion>();
-        /*
-         * check if files should be moved to temp folder or deleted
-         */
-        Set<String> checksumsToBeRemoved = new HashSet<String>();
-        for (DriveAction<FileVersion> action : removeActions) {
-            if (false == Action.REMOVE.equals(action.getAction())) {
-                throw new IllegalArgumentException(action.getAction().toString());
-            }
-            ServerFileVersion fileVersion = ServerFileVersion.valueOf(action.getVersion(), path, session);
+        if (session.getStorage().hasTrashFolder()) {
             /*
-             * hard-delete if no temp folder available, file is empty, identical file already marked for removal, or hard limit reached
+             * move all versions to trash if available
              */
-            if (false == session.hasTempFolder() || DriveConstants.EMPTY_MD5.equals(fileVersion.getChecksum()) ||
-                MOVE_TO_TRASH_LIMIT <= versionsToRemove.size() || checksumsToBeRemoved.contains(fileVersion.getChecksum())) {
-                versionsToDelete.add(fileVersion);
-            } else {
-                versionsToRemove.add(fileVersion);
-                checksumsToBeRemoved.add(fileVersion.getChecksum());
+            Map<File, FileChecksum> filesToRemove = new HashMap<File, FileChecksum>(removeActions.size());
+            for (DriveAction<FileVersion> action : removeActions) {
+                if (false == Action.REMOVE.equals(action.getAction())) {
+                    throw new IllegalArgumentException(action.getAction().toString());
+                }
+                ServerFileVersion fileVersion = ServerFileVersion.valueOf(action.getVersion(), path, session);
+                filesToRemove.put(fileVersion.getFile(), fileVersion.getFileChecksum());
             }
-        }
-        /*
-         * check if versions already known in trash if applicable
-         */
-        if (OPTIMISTIC_MOVE_TO_TRASH_THRESHOLD < versionsToRemove.size()) {
-            FileStorageFolder tempFolder = session.getStorage().optFolder(DriveConstants.TEMP_PATH, false);
-            if (null != tempFolder) {
-                List<FileChecksum> knownChecksums = session.getChecksumStore().getFileChecksums(new FolderID(tempFolder.getId()));
-                if (null != knownChecksums && 0 < knownChecksums.size()) {
-                    Iterator<ServerFileVersion> iterator = versionsToRemove.iterator();
-                    while (iterator.hasNext()) {
-                        ServerFileVersion versionToRemove = iterator.next();
-                        boolean alreadyKnown = false;
-                        for (FileChecksum knownChecksum : knownChecksums) {
-                            if (knownChecksum.getChecksum().equals(versionToRemove.getChecksum())) {
-                                alreadyKnown = true;
-                                break;
+            List<File> notRemovedFiles = session.getStorage().deleteFiles(new ArrayList<File>(filesToRemove.keySet()), false);
+            /*
+             * remove stored checksums accordingly
+             */
+            for (File file : notRemovedFiles) {
+                filesToRemove.remove(file);
+            }
+            if (0 < filesToRemove.size()) {
+                session.getChecksumStore().removeFileChecksums(new ArrayList<FileChecksum>(filesToRemove.values()));
+            }
+        } else {
+            /*
+             * check if files should be moved to temp folder or deleted
+             */
+            List<ServerFileVersion> versionsToDelete = new ArrayList<ServerFileVersion>();
+            List<ServerFileVersion> versionsToRemove = new ArrayList<ServerFileVersion>();
+            Set<String> checksumsToBeRemoved = new HashSet<String>();
+            for (DriveAction<FileVersion> action : removeActions) {
+                if (false == Action.REMOVE.equals(action.getAction())) {
+                    throw new IllegalArgumentException(action.getAction().toString());
+                }
+                ServerFileVersion fileVersion = ServerFileVersion.valueOf(action.getVersion(), path, session);
+                /*
+                 * hard-delete if no temp folder available, file is empty, identical file already marked for removal, or hard limit reached
+                 */
+                if (false == session.hasTempFolder() || DriveConstants.EMPTY_MD5.equals(fileVersion.getChecksum()) ||
+                    MOVE_TO_TEMP_LIMIT <= versionsToRemove.size() || checksumsToBeRemoved.contains(fileVersion.getChecksum())) {
+                    versionsToDelete.add(fileVersion);
+                } else {
+                    versionsToRemove.add(fileVersion);
+                    checksumsToBeRemoved.add(fileVersion.getChecksum());
+                }
+            }
+            /*
+             * check if versions already known in trash if applicable
+             */
+            if (OPTIMISTIC_MOVE_TO_TEMP_THRESHOLD < versionsToRemove.size()) {
+                FileStorageFolder tempFolder = session.getStorage().optFolder(DriveConstants.TEMP_PATH, false);
+                if (null != tempFolder) {
+                    List<FileChecksum> knownChecksums = session.getChecksumStore().getFileChecksums(new FolderID(tempFolder.getId()));
+                    if (null != knownChecksums && 0 < knownChecksums.size()) {
+                        Iterator<ServerFileVersion> iterator = versionsToRemove.iterator();
+                        while (iterator.hasNext()) {
+                            ServerFileVersion versionToRemove = iterator.next();
+                            boolean alreadyKnown = false;
+                            for (FileChecksum knownChecksum : knownChecksums) {
+                                if (knownChecksum.getChecksum().equals(versionToRemove.getChecksum())) {
+                                    alreadyKnown = true;
+                                    break;
+                                }
                             }
-                        }
-                        if (alreadyKnown) {
-                            /*
-                             * checksum already known, do hard-delete instead
-                             */
-                            versionsToDelete.add(versionToRemove);
-                            iterator.remove();
+                            if (alreadyKnown) {
+                                /*
+                                 * checksum already known, do hard-delete instead
+                                 */
+                                versionsToDelete.add(versionToRemove);
+                                iterator.remove();
+                            }
                         }
                     }
                 }
             }
-        }
-        /*
-         * execute move-operations
-         */
-        if (0 < versionsToRemove.size()) {
-            List<FileChecksum> checksumsToUpdate = new ArrayList<FileChecksum>();
-            for (ServerFileVersion versionToRemove : versionsToRemove) {
-                FileChecksum fileChecksum = versionToRemove.getFileChecksum();
-                File removedFile = session.getStorage().moveFile(
-                    versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
-                if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
-                    // moved successfully, update checksum
-                    fileChecksum.setFileID(IDUtil.getFileID(removedFile));
-                    fileChecksum.setVersion(removedFile.getVersion());
-                    fileChecksum.setSequenceNumber(removedFile.getSequenceNumber());
-                    checksumsToUpdate.add(fileChecksum);
-                } else {
-                    // file already in trash, mark for complete removal
-                    versionsToDelete.add(new ServerFileVersion(removedFile, fileChecksum));
+            /*
+             * execute move-operations
+             */
+            if (0 < versionsToRemove.size()) {
+                List<FileChecksum> checksumsToUpdate = new ArrayList<FileChecksum>();
+                for (ServerFileVersion versionToRemove : versionsToRemove) {
+                    FileChecksum fileChecksum = versionToRemove.getFileChecksum();
+                    File removedFile = session.getStorage().moveFile(
+                        versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
+                    if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
+                        // moved successfully, update checksum
+                        fileChecksum.setFileID(IDUtil.getFileID(removedFile));
+                        fileChecksum.setVersion(removedFile.getVersion());
+                        fileChecksum.setSequenceNumber(removedFile.getSequenceNumber());
+                        checksumsToUpdate.add(fileChecksum);
+                    } else {
+                        // file already in trash, mark for complete removal
+                        versionsToDelete.add(new ServerFileVersion(removedFile, fileChecksum));
+                    }
+                }
+                /*
+                 * update checksums accordingly
+                 */
+                if (0 < checksumsToUpdate.size()) {
+                    session.getChecksumStore().updateFileChecksums(checksumsToUpdate);
                 }
             }
             /*
-             * update checksums accordingly
+             * execute delete operations
              */
-            if (0 < checksumsToUpdate.size()) {
-                session.getChecksumStore().updateFileChecksums(checksumsToUpdate);
+            if (0 < versionsToDelete.size()) {
+                List<FileChecksum> checksumsToRemove = new ArrayList<FileChecksum>();
+                List<String> ids = new ArrayList<String>();
+                long sequenceNumber = 0;
+                for (ServerFileVersion versionToDelete : versionsToDelete) {
+                    ids.add(versionToDelete.getFile().getId());
+                    sequenceNumber = Math.max(sequenceNumber, versionToDelete.getFile().getSequenceNumber());
+                    checksumsToRemove.add(versionToDelete.getFileChecksum());
+                }
+                List<String> notRemovedIDs = session.getStorage().getFileAccess().removeDocument(ids, sequenceNumber);
+                for (String notRemovedID : notRemovedIDs) {
+                    //TODO: keep those checksums?
+                }
+                /*
+                 * remove checksums accordingly
+                 */
+                if (0 < checksumsToRemove.size()) {
+                    session.getChecksumStore().removeFileChecksums(checksumsToRemove);
+                }
             }
         }
-        /*
-         * execute delete operations
-         */
-        if (0 < versionsToDelete.size()) {
-            List<FileChecksum> checksumsToRemove = new ArrayList<FileChecksum>();
-            List<String> ids = new ArrayList<String>();
-            long sequenceNumber = 0;
-            for (ServerFileVersion versionToDelete : versionsToDelete) {
-                ids.add(versionToDelete.getFile().getId());
-                sequenceNumber = Math.max(sequenceNumber, versionToDelete.getFile().getSequenceNumber());
-                checksumsToRemove.add(versionToDelete.getFileChecksum());
-            }
-            List<String> notRemovedIDs = session.getStorage().getFileAccess().removeDocument(ids, sequenceNumber);
-            for (String notRemovedID : notRemovedIDs) {
-                //TODO: keep those checksums?
-            }
-            /*
-             * remove checksums accordingly
-             */
-            if (0 < checksumsToRemove.size()) {
-                session.getChecksumStore().removeFileChecksums(checksumsToRemove);
-            }
-        }
+//
+//        List<ServerFileVersion> versionsToDelete = new ArrayList<ServerFileVersion>();
+//        List<ServerFileVersion> versionsToRemove = new ArrayList<ServerFileVersion>();
+//        /*
+//         * check if files should be moved to temp folder or deleted
+//         */
+//        Set<String> checksumsToBeRemoved = new HashSet<String>();
+//        for (DriveAction<FileVersion> action : removeActions) {
+//            if (false == Action.REMOVE.equals(action.getAction())) {
+//                throw new IllegalArgumentException(action.getAction().toString());
+//            }
+//            ServerFileVersion fileVersion = ServerFileVersion.valueOf(action.getVersion(), path, session);
+//            /*
+//             * hard-delete if no temp folder available, file is empty, identical file already marked for removal, or hard limit reached
+//             */
+//            if (false == session.hasTempFolder() || DriveConstants.EMPTY_MD5.equals(fileVersion.getChecksum()) ||
+//                MOVE_TO_TRASH_LIMIT <= versionsToRemove.size() || checksumsToBeRemoved.contains(fileVersion.getChecksum())) {
+//                versionsToDelete.add(fileVersion);
+//            } else {
+//                versionsToRemove.add(fileVersion);
+//                checksumsToBeRemoved.add(fileVersion.getChecksum());
+//            }
+//        }
+//        /*
+//         * check if versions already known in trash if applicable
+//         */
+//        if (OPTIMISTIC_MOVE_TO_TRASH_THRESHOLD < versionsToRemove.size()) {
+//            FileStorageFolder tempFolder = session.getStorage().optFolder(DriveConstants.TEMP_PATH, false);
+//            if (null != tempFolder) {
+//                List<FileChecksum> knownChecksums = session.getChecksumStore().getFileChecksums(new FolderID(tempFolder.getId()));
+//                if (null != knownChecksums && 0 < knownChecksums.size()) {
+//                    Iterator<ServerFileVersion> iterator = versionsToRemove.iterator();
+//                    while (iterator.hasNext()) {
+//                        ServerFileVersion versionToRemove = iterator.next();
+//                        boolean alreadyKnown = false;
+//                        for (FileChecksum knownChecksum : knownChecksums) {
+//                            if (knownChecksum.getChecksum().equals(versionToRemove.getChecksum())) {
+//                                alreadyKnown = true;
+//                                break;
+//                            }
+//                        }
+//                        if (alreadyKnown) {
+//                            /*
+//                             * checksum already known, do hard-delete instead
+//                             */
+//                            versionsToDelete.add(versionToRemove);
+//                            iterator.remove();
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        /*
+//         * execute move-operations
+//         */
+//        if (0 < versionsToRemove.size()) {
+//            List<FileChecksum> checksumsToUpdate = new ArrayList<FileChecksum>();
+//            for (ServerFileVersion versionToRemove : versionsToRemove) {
+//                FileChecksum fileChecksum = versionToRemove.getFileChecksum();
+//                File removedFile = session.getStorage().moveFile(
+//                    versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
+//                if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
+//                    // moved successfully, update checksum
+//                    fileChecksum.setFileID(IDUtil.getFileID(removedFile));
+//                    fileChecksum.setVersion(removedFile.getVersion());
+//                    fileChecksum.setSequenceNumber(removedFile.getSequenceNumber());
+//                    checksumsToUpdate.add(fileChecksum);
+//                } else {
+//                    // file already in trash, mark for complete removal
+//                    versionsToDelete.add(new ServerFileVersion(removedFile, fileChecksum));
+//                }
+//            }
+//            /*
+//             * update checksums accordingly
+//             */
+//            if (0 < checksumsToUpdate.size()) {
+//                session.getChecksumStore().updateFileChecksums(checksumsToUpdate);
+//            }
+//        }
+//        /*
+//         * execute delete operations
+//         */
+//        if (0 < versionsToDelete.size()) {
+//            List<FileChecksum> checksumsToRemove = new ArrayList<FileChecksum>();
+//            List<String> ids = new ArrayList<String>();
+//            long sequenceNumber = 0;
+//            for (ServerFileVersion versionToDelete : versionsToDelete) {
+//                ids.add(versionToDelete.getFile().getId());
+//                sequenceNumber = Math.max(sequenceNumber, versionToDelete.getFile().getSequenceNumber());
+//                checksumsToRemove.add(versionToDelete.getFileChecksum());
+//            }
+//            List<String> notRemovedIDs = session.getStorage().getFileAccess().removeDocument(ids, sequenceNumber);
+//            for (String notRemovedID : notRemovedIDs) {
+//                //TODO: keep those checksums?
+//            }
+//            /*
+//             * remove checksums accordingly
+//             */
+//            if (0 < checksumsToRemove.size()) {
+//                session.getChecksumStore().removeFileChecksums(checksumsToRemove);
+//            }
+//        }
     }
 
     private static boolean isFromTemp(SyncSession session, File file) throws OXException {
