@@ -345,13 +345,13 @@ public class InfostoreFile extends AbstractFile implements File {
 
     @Override
     public Map<String, Object> getMeta() {
-        return null;
+        return document.getMeta();
     }
 
 
     @Override
-    public void setMeta(Map<String, Object> properties) {
-        
+    public void setMeta(final Map<String, Object> properties) {
+       document.setMeta(properties);
     }
 
 

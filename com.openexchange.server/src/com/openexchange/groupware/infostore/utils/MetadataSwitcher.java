@@ -98,4 +98,6 @@ public interface MetadataSwitcher {
     public Object lastModifiedUTC();
 
     public Object numberOfVersions();
+
+    public Object meta();
 }

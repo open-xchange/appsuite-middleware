@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 public interface DocumentMetadata extends Serializable {
@@ -164,4 +165,9 @@ public interface DocumentMetadata extends Serializable {
     void setNumberOfVersions(int numberOfVersions);
 
     int getNumberOfVersions();
+
+    Map<String, Object> getMeta();
+
+    void setMeta(Map<String, Object> properties);
+
 }
