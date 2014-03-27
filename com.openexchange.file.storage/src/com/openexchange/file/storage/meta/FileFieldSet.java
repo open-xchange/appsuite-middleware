@@ -59,6 +59,13 @@ import com.openexchange.file.storage.AbstractFileFieldSwitcher;
  */
 public class FileFieldSet extends AbstractFileFieldSwitcher {
 
+    /**
+     * Initializes a new {@link FileFieldSet}.
+     */
+    public FileFieldSet() {
+        super();
+    }
+
     @Override
     public Object categories(final Object... args) {
         md(args).setCategories(string(1, args));
@@ -194,7 +201,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
         md(args).setVersionComment(string(1, args));
         return ret(args);
     }
-    
+
     @Override
     public Object meta(Object... args) {
         md(args).setMeta((Map<String, Object>) args[1]);
