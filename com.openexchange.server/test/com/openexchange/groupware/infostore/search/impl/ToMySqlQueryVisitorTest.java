@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.search.impl;
 
+import java.util.regex.Pattern;
 import junit.framework.TestCase;
 import com.openexchange.groupware.infostore.search.DescriptionTerm;
 
@@ -59,6 +60,8 @@ import com.openexchange.groupware.infostore.search.DescriptionTerm;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ToMySqlQueryVisitorTest extends TestCase {
+
+    private final static Pattern pattern = Pattern.compile("AND[ \t\r\n\f]*OR");
 
     /**
      * Initializes a new {@link ToMySqlQueryVisitorTest}.
@@ -121,14 +124,14 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(null, new int[] {120}, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         String result = visitor.getMySqlQuery();
-        assertFalse("Invalid SQL query", result.contains("AND OR"));
+        assertFalse("Invalid SQL query", pattern.matcher(result).matches());
         assertTrue("Unexpected SQL query", result.endsWith("AND (infostore.folder_id = 120 AND"
             + " infostore.created_by = 1) AND infostore_document.description LIKE '%bluber blah_foo%'"));
 
         visitor = new ToMySqlQueryVisitor(new int[0], new int[] {120}, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         result = visitor.getMySqlQuery();
-        assertFalse("Invalid SQL query", result.contains("AND OR"));
+        assertFalse("Invalid SQL query", pattern.matcher(result).matches());
         assertTrue("Unexpected SQL query", result.endsWith("AND (infostore.folder_id = 120 AND"
             + " infostore.created_by = 1) AND infostore_document.description LIKE '%bluber blah_foo%'"));
     }
@@ -138,13 +141,13 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         String result = visitor.getMySqlQuery();
-        assertFalse("Invalid SQL query", result.contains("AND OR"));
+        assertFalse("Invalid SQL query", pattern.matcher(result).matches());
         assertTrue("Unexpected SQL query", result.endsWith("AND infostore.folder_id = 119 AND infostore_document.description LIKE '%bluber blah_foo%'"));
 
         visitor = new ToMySqlQueryVisitor(new int[] { 119 }, new int[0], 1, 1, "SELECT field01");
         visitor.visit(dtz);
         result = visitor.getMySqlQuery();
-        assertFalse("Invalid SQL query", result.contains("AND OR"));
+        assertFalse("Invalid SQL query", pattern.matcher(result).matches());
         assertTrue("Unexpected SQL query", result.endsWith("AND infostore.folder_id = 119 AND infostore_document.description LIKE '%bluber blah_foo%'"));
     }
 
