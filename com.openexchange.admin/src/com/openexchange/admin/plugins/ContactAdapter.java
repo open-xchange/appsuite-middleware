@@ -64,10 +64,17 @@ public class ContactAdapter extends Contact {
     private static final long serialVersionUID = -1080817657555712440L;
 
     private final com.openexchange.admin.rmi.dataobjects.User delegate;
+    private final int contextId;
 
-    public ContactAdapter(com.openexchange.admin.rmi.dataobjects.User delegate) {
+    public ContactAdapter(com.openexchange.admin.rmi.dataobjects.User delegate, final int contextId) {
         super();
         this.delegate = delegate;
+        this.contextId = contextId;
+    }
+
+    @Override
+    public int getContextId() {
+        return contextId;
     }
 
     @Override
