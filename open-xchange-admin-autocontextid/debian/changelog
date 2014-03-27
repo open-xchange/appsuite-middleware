@@ -4,6 +4,12 @@ open-xchange-admin-autocontextid (7.6.0-0) unstable; urgency=low
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 12 Feb 2014 09:35:12 +0100
 
+open-xchange-admin-autocontextid (7.4.2-16) stable; urgency=low
+
+  * Build for patch 2014-03-21
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 19 Mar 2014 12:21:56 +0100
+
 open-xchange-admin-autocontextid (7.4.2-15) stable; urgency=low
 
   * Build for patch 2014-03-24
