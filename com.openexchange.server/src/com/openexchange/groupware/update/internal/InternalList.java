@@ -720,6 +720,9 @@ public final class InternalList {
 
         // +++++++++++++++++++++++++++++++++ Version 7.6.0 starts here. +++++++++++++++++++++++++++++++++
 
+        // Extends infostore document tables by "meta" JSON BLOB.
+        list.add(new com.openexchange.groupware.update.tasks.AddMetaForInfostoreDocumentTable());
+
         // TODO: DELETE -- Extends those calendar tables that carry confirmation information by "occurrence" column
         list.add(new com.openexchange.groupware.update.tasks.CalendarAddConfirmPerOccurrenceTask());
 
