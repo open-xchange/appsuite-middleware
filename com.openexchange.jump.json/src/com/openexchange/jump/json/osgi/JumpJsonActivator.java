@@ -69,7 +69,6 @@ public final class JumpJsonActivator extends AJAXModuleActivator {
      */
     public JumpJsonActivator() {
         super();
-
     }
 
     @Override
