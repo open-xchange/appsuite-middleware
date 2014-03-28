@@ -315,6 +315,8 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                         } finally {
                             Streams.close(jsonBlobStream);
                         }
+                    } else {
+                        set.setValue(null);
                     }
                 } else {
                     set.setValue(process(m, rs.getObject(column)));
