@@ -788,6 +788,10 @@ if ox_exists_property com.openexchange.server.fullPrimaryKeySupport $PFILE; then
     ox_remove_property com.openexchange.server.fullPrimaryKeySupport $PFILE
 fi
 
+# SoftwareChange_Request-1956
+ox_add_property com.openexchange.ajax.login.formatstring.login "" /opt/open-xchange/etc/login.properties
+ox_add_property com.openexchange.ajax.login.formatstring.logout "" /opt/open-xchange/etc/login.properties
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT
