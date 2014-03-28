@@ -77,9 +77,9 @@ public class FormatLocalizedStringReplacementTest {
 
     private String format = "Priority: %1$s";
 
-    private String formatTranslated = "Priorität: %1$s";
+    private String formatTranslated = "Priorit\\u00e4t: %1$s";
 
-    private String result = "Priorität: Niedrig";
+    private String result = "Priorit\\u00e4t: Niedrig";
 
     private String replacement = "Low";
 
