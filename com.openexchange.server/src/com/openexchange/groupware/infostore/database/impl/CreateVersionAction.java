@@ -73,7 +73,8 @@ public class CreateVersionAction extends AbstractDocumentListAction {
     public void perform() throws OXException {
         assureExistence();
 
-        doUpdates(getQueryCatalog().getVersionInsert(), getQueryCatalog().getWritableVersionFields(), getDocuments());
+        final InfostoreQueryCatalog queryCatalog = getQueryCatalog();
+        doUpdates(queryCatalog.getVersionInsert(), queryCatalog.getWritableVersionFields(), getDocuments());
     }
 
     @Override
