@@ -64,8 +64,8 @@ public interface CapabilityService {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param computeCapabilityFilters boolean to indicate if filters should be computed. Use <code>false</code> to retrieve all available capabilities
-     * @param allowCache <code>true</code> to allow fetching pre-calculated capabilities from cache; otherwise <code>false</code>
+     * @param computeCapabilityFilters <code>true</code> to indicate if filters should be computed. Use <code>false</code> (default) to retrieve all available capabilities
+     * @param allowCache <code>true</code> (default) to allow fetching pre-calculated capabilities from cache; otherwise <code>false</code>
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
