@@ -107,6 +107,13 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
         myConfig = jolokiaConfig;
         jolokiaConfig.start();
 
+        //2nd check, because start can be stopped by missing user / password
+        if (false == jolokiaConfig.getJolokiaStart()) {
+            LOG.info("Shutting down Bundle");
+            stopBundle();
+            return;
+        }
+        
         // Create servlet instance
         JolokiaServlet jolServlet = new JolokiaServlet(context, jolokiaConfig.getRestrictor());
         try {
@@ -155,11 +162,11 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
         if (jolokiaHttpContext == null) {
             final String user = myConfig.getUser();
             final String password = myConfig.getPassword();
-            if (user == null) {
-                jolokiaHttpContext = new JolokiaHttpContext();
-            } else {
-                jolokiaHttpContext = new JolokiaAuthenticatedHttpContext(user, password);
-            }
+            if (user.equalsIgnoreCase("")) {
+                 jolokiaHttpContext = new JolokiaHttpContext();
+             } else {
+                 jolokiaHttpContext = new JolokiaAuthenticatedHttpContext(user, password);
+             }
         }
         return jolokiaHttpContext;
     }
