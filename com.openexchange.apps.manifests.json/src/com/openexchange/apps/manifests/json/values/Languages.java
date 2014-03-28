@@ -55,10 +55,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.config.ConfigurationService;
@@ -75,7 +74,7 @@ public class Languages implements ComputedServerConfigValueService {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Languages.class);
 
-	private JSONObject allLanguages;
+	private JSONArray allLanguages;
 
 	public Languages(ServiceLookup services) {
 		super();
@@ -114,10 +113,13 @@ public class Languages implements ComputedServerConfigValueService {
 
 		keys.addAll(languageMap.keySet());
 
-		allLanguages = new JSONObject();
+		allLanguages = new JSONArray();
+		int i = 0;
 		try {
 			for(String key: keys) {
-				allLanguages.put(key, languageMap.get(key));
+			    JSONObject obj = new JSONObject();
+				obj.put(key, languageMap.get(key));
+				allLanguages.put(i++, obj);
 			}
 		} catch (JSONException x) {
 			// Doesn't happen

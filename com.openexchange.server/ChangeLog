@@ -2,6 +2,10 @@
 
  - Fix for bug 31795: Do not check capability if session is anonymous
 
+* 2014-03-28 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30835: Replaced unordered json object by an ordered json array
+
 * 2014-03-27 - marc.arens@open-xchange.com
 
  - Fix for bug 26436: Document workaround for Apache < 2.4 and set up combined balancing proxy for usm and eas
