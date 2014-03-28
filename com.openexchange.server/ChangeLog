@@ -1,6 +1,7 @@
 * 2014-03-28 - martin.schneider@open-xchange.com
 
  - Fix for bug 31795: Do not check capability if session is anonymous
+ - Fix for bug 31805: Translate task priority in notifications
 
 * 2014-03-28 - jan.bauerdick@open-xchange.com
 

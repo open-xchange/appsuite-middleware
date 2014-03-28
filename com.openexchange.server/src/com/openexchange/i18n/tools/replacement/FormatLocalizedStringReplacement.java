@@ -134,10 +134,10 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
         if (format == null) {
             return replacement;
         }
-        final String result = String.format(getStringHelper().getString(format), replacement);
+        final String result = String.format(getStringHelper().getString(format), getStringHelper().getString(replacement));
         if (changed) {
             return new StringBuilder(result.length() + PREFIX_MODIFIED.length()).append(PREFIX_MODIFIED).append(result)
-                    .toString();
+                .toString();
         }
         return result;
     }
