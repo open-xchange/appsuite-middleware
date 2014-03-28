@@ -317,6 +317,7 @@ public class StatisticTools extends AbstractJMXTools {
             count++;
         }
         if (null != parser.getOptionValue(this.overviewstats) && 0 == count) {
+            System.out.print(showGeneralMonitor(mbc));
             System.out.print(showPooling(mbc));
             System.out.print(getStats(mbc, "java.lang:type=OperatingSystem"));
             count++;
