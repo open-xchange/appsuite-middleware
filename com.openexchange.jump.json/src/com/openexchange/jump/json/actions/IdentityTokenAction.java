@@ -95,7 +95,7 @@ public final class IdentityTokenAction extends AbstractJumpAction {
         for (final EndpointHandler endpointHandler : getEndpointHandlerListing().getServiceList()) {
             final Set<String> namesOfInterest = endpointHandler.systemNamesOfInterest();
             if (isEmpty(namesOfInterest) || namesOfInterest.contains(endpoint.getSystemName())) {
-                handled = endpointHandler.handleEndpoint(token, endpoint, session);
+                handled |= endpointHandler.handleEndpoint(token, endpoint, session);
             }
         }
         if (!handled) {
