@@ -75,10 +75,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 @DispatcherNotes(noSession = true)
 public class AllAction implements AJAXActionService {
-    
+
     private final JSONArray manifests;
     private final ServiceLookup services;
-    private ServerConfigServicesLookup registry;
+    private final ServerConfigServicesLookup registry;
 
     public AllAction(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
         super();
@@ -102,7 +102,7 @@ public class AllAction implements AJAXActionService {
                 if (additionalManifests != null) {
                     for(int i = 0, size = additionalManifests.length(); i < size; i++) {
                         manifests.put(additionalManifests.get(i));
-                    }                    
+                    }
                 }
             } catch (OXException x) {
                 // TODO: Logging
@@ -112,7 +112,7 @@ public class AllAction implements AJAXActionService {
                 x.printStackTrace();
             }
         }
-        
+
         try {
             if (session.isAnonymous()) {
                 // Deliver no apps and only plugins with the namespace 'signin'
@@ -123,10 +123,7 @@ public class AllAction implements AJAXActionService {
                 }
 
             } else {
-                CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(
-                    session.getUserId(),
-                    session.getContextId(),
-                    true);
+                CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(session.getUserId(), session.getContextId(), true, true);
 
                 Map<String, Capability> capMap = new HashMap<String, Capability>(capabilities.size());
                 for (Capability capability : capabilities) {

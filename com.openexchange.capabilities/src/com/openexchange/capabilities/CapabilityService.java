@@ -64,12 +64,12 @@ public interface CapabilityService {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param computeCapabilityFilters boolean to indicate if filters should be computed. Use <code>false</code> to retrieve all available
-     *            capabilities
+     * @param computeCapabilityFilters boolean to indicate if filters should be computed. Use <code>false</code> to retrieve all available capabilities
+     * @param allowCache <code>true</code> to allow fetching pre-calculated capabilities from cache; otherwise <code>false</code>
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
-    CapabilitySet getCapabilities(int userId, int contextId, boolean computeCapabilityFilters) throws OXException;
+    CapabilitySet getCapabilities(int userId, int contextId, boolean computeCapabilityFilters, boolean allowCache) throws OXException;
 
     /**
      * Gets the capabilities associated with given session.

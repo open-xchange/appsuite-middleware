@@ -111,7 +111,7 @@ public class AllActionTest {
         // BEHAVIOUR
         Mockito.when(this.serverSession.isAnonymous()).thenReturn(false);
         Mockito.when(serviceLookup.getService(CapabilityService.class)).thenReturn(this.capabilityService);
-        Mockito.when(this.capabilityService.getCapabilities(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyBoolean())).thenReturn(
+        Mockito.when(this.capabilityService.getCapabilities(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyBoolean(), Matchers.anyBoolean())).thenReturn(
             new CapabilitySet(0));
 
         serverConfigServicesLookup = new ServerConfigServicesLookup() {

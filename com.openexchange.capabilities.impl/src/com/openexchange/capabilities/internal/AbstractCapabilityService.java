@@ -290,7 +290,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");
 
     @Override
-    public CapabilitySet getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters) throws OXException {
+    public CapabilitySet getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters, final boolean allowCache) throws OXException {
         // Initialize server session
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
 
@@ -305,7 +305,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         // ------------- Combined capabilities/permissions ------------ //
         if (!serverSession.isAnonymous()) {
             // Check cache
-            final CapabilitySet cachedCapabilitySet = optCachedCapabilitySet(userId, contextId);
+            final CapabilitySet cachedCapabilitySet = allowCache ? optCachedCapabilitySet(userId, contextId) : null;
             if (null != cachedCapabilitySet) {
                 capabilities = cachedCapabilitySet;
                 if (computeCapabilityFilters) {
@@ -535,7 +535,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     @Override
     public CapabilitySet getCapabilities(final int userId, final int contextId) throws OXException {
-        return getCapabilities(userId, contextId, false);
+        return getCapabilities(userId, contextId, false, true);
     }
 
     @Override
@@ -545,7 +545,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     @Override
     public CapabilitySet getCapabilities(final Session session, final boolean computeCapabilityFilters) throws OXException {
-        return getCapabilities(session.getUserId(), session.getContextId(), computeCapabilityFilters);
+        return getCapabilities(session.getUserId(), session.getContextId(), computeCapabilityFilters, true);
     }
 
     private boolean check(String cap, ServerSession session, CapabilitySet allCapabilities) throws OXException {

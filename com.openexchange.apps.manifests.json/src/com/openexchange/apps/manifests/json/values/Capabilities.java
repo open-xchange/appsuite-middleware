@@ -79,7 +79,7 @@ public class Capabilities implements ComputedServerConfigValueService {
     @Override
     public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
         CapabilityService capabilityService = services.getService(CapabilityService.class);
-        Set<Capability> capabilities = capabilityService.getCapabilities(session.getUserId(), session.getContextId(), true).asSet();
+        Set<Capability> capabilities = capabilityService.getCapabilities(session.getUserId(), session.getContextId(), true, true).asSet();
         serverConfig.put("capabilities", services.getService(SimpleConverter.class).convert("capability", "json", capabilities, session));
     }
 
