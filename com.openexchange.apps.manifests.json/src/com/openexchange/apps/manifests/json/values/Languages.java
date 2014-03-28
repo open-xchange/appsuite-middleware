@@ -72,69 +72,74 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Languages implements ComputedServerConfigValueService {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Languages.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Languages.class);
 
-	private JSONArray allLanguages;
+    private final JSONArray allLanguages;
 
-	public Languages(ServiceLookup services) {
-		super();
+    /**
+     * Initializes a new {@link Languages}.
+     *
+     * @param services The service look-up
+     */
+    public Languages(ServiceLookup services) {
+        super();
 
-		ConfigurationService config = services.getService(ConfigurationService.class);
-		Properties properties = config.getPropertiesInFolder("languages/appsuite");
-		final Map<String, String> languageMap = new HashMap<String, String>();
+        ConfigurationService config = services.getService(ConfigurationService.class);
+        Properties properties = config.getPropertiesInFolder("languages/appsuite");
+        final Map<String, String> languageMap = new HashMap<String, String>();
 
-		for(Object key: properties.keySet()) {
-			String propName = (String) key;
-			String languageName = properties.getProperty(propName);
+        for (Object key : properties.keySet()) {
+            String propName = (String) key;
+            String languageName = properties.getProperty(propName);
 
-			int index = propName.lastIndexOf('/');
-			if (index > 0) {
-				propName = propName.substring(index + 1);
-			}
-			languageMap.put(propName, languageName);
-		}
+            int index = propName.lastIndexOf('/');
+            if (index > 0) {
+                propName = propName.substring(index + 1);
+            }
+            languageMap.put(propName, languageName);
+        }
 
-		if (languageMap.isEmpty()) {
-			// Assume american english
-			languageMap.put("en_US", "English");
-		}
+        if (languageMap.isEmpty()) {
+            // Assume american english
+            languageMap.put("en_US", "English");
+        }
 
-		// Sort it alphabetically
-		SortedSet<String> keys = new TreeSet<String>(new Comparator<String>() {
+        // Sort it alphabetically
+        SortedSet<String> keys = new TreeSet<String>(new Comparator<String>() {
 
-			@Override
-			public int compare(String arg0, String arg1) {
-				arg0 = languageMap.get(arg0);
-				arg1 = languageMap.get(arg1);
-				return arg0.compareTo(arg1);
-			}
+            @Override
+            public int compare(String arg0, String arg1) {
+                arg0 = languageMap.get(arg0);
+                arg1 = languageMap.get(arg1);
+                return arg0.compareTo(arg1);
+            }
 
-		});
+        });
 
-		keys.addAll(languageMap.keySet());
+        keys.addAll(languageMap.keySet());
 
-		allLanguages = new JSONArray();
-		int i = 0;
-		try {
-			for(String key: keys) {
-			    JSONObject obj = new JSONObject();
-				obj.put(key, languageMap.get(key));
-				allLanguages.put(i++, obj);
-			}
-		} catch (JSONException x) {
-			// Doesn't happen
-			LOG.error("", x);
-		}
-	}
+        final JSONArray allLanguages = new JSONArray(keys.size());
+        this.allLanguages = allLanguages;
+        try {
+            int i = 0;
+            for (String key : keys) {
+                JSONObject obj = new JSONObject();
+                obj.put(key, languageMap.get(key));
+                allLanguages.put(i++, obj);
+            }
+        } catch (JSONException x) {
+            // Doesn't happen
+            LOG.error("", x);
+        }
+    }
 
-	@Override
-	public void addValue(JSONObject serverConfig, AJAXRequestData request,
-			ServerSession session) throws OXException, JSONException {
+    @Override
+    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
 
-		Object languages = serverConfig.opt("languages");
-		if (languages == null || languages.equals("all")) {
-			serverConfig.put("languages", allLanguages);
-		}
-	}
+        Object languages = serverConfig.opt("languages");
+        if (languages == null || languages.equals("all")) {
+            serverConfig.put("languages", allLanguages);
+        }
+    }
 
 }
