@@ -92,7 +92,7 @@ public enum JumpExceptionCodes implements DisplayableOXExceptionCode {
     private static final String NO_SUCH_ENDPOINT_MSG = "No such end-point: %1$s";
 
     // No such end-point handler: %1$s
-    private static final String NO_SUCH_ENDPOINT_HANDLER_MSG = "No such end-point: %1$s";
+    private static final String NO_SUCH_ENDPOINT_HANDLER_MSG = "No end-point handler for: %1$s";
 
     /**
      * The error code prefix for token-login module.

@@ -152,4 +152,21 @@ public final class EndpointImpl implements Endpoint {
         properties.remove(propName);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("EndpointImpl [");
+        if (systemName != null) {
+            builder.append("systemName=").append(systemName).append(", ");
+        }
+        if (url != null) {
+            builder.append("url=\"").append(url).append("\", ");
+        }
+        if (properties != null) {
+            builder.append("properties=").append(properties);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }
