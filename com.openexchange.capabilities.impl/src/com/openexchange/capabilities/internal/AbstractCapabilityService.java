@@ -438,7 +438,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 final Set<String> set = new HashSet<String>();
                 final Set<String> removees = new HashSet<String>();
                 // Context-sensitive
-                for (final String sCap : getContextCaps(contextId)) {
+                for (final String sCap : getContextCaps(contextId, allowCache)) {
                     if (!isEmpty(sCap)) {
                         final char firstChar = sCap.charAt(0);
                         if ('-' == firstChar) {
@@ -456,7 +456,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 }
                 // User-sensitive
                 if (userId > 0) {
-                    for (final String sCap : getUserCaps(userId, contextId)) {
+                    for (final String sCap : getUserCaps(userId, contextId, allowCache)) {
                         if (!isEmpty(sCap)) {
                             final char firstChar = sCap.charAt(0);
                             if ('-' == firstChar) {
@@ -621,11 +621,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      */
     protected abstract Map<String, List<CapabilityChecker>> getCheckers();
 
-    private Set<String> getContextCaps(final int contextId) throws OXException {
+    private Set<String> getContextCaps(final int contextId, final boolean allowCache) throws OXException {
         if (contextId <= 0) {
             return Collections.emptySet();
         }
-        final Cache cache = optContextCache();
+        final Cache cache = allowCache ? optContextCache() : null;
         if (null == cache) {
             return loadContextCaps(contextId);
         }
@@ -670,11 +670,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
     }
 
-    private Set<String> getUserCaps(final int userId, final int contextId) throws OXException {
+    private Set<String> getUserCaps(final int userId, final int contextId, final boolean allowCache) throws OXException {
         if (contextId <= 0 || userId <= 0) {
             return Collections.emptySet();
         }
-        final Cache cache = optUserCache();
+        final Cache cache = allowCache ? optUserCache() : null;
         if (null == cache) {
             return loadUserCaps(userId, contextId);
         }
