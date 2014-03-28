@@ -100,7 +100,7 @@ public class InfostoreQueryCatalog {
         Metadata.CREATED_BY_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.TITLE_LITERAL, Metadata.URL_LITERAL,
         Metadata.DESCRIPTION_LITERAL, Metadata.CATEGORIES_LITERAL, Metadata.FILENAME_LITERAL, Metadata.FILE_SIZE_LITERAL,
         Metadata.FILE_MIMETYPE_LITERAL, Metadata.FILE_MD5SUM_LITERAL, Metadata.VERSION_COMMENT_LITERAL,
-        Metadata.FILESTORE_LOCATION_LITERAL, Metadata.LAST_MODIFIED_UTC_LITERAL };
+        Metadata.FILESTORE_LOCATION_LITERAL, Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.META_LITERAL };
 
     public static final Set<Metadata> INFOSTORE_DOCUMENT_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(
         Arrays.asList(INFOSTORE_DOCUMENT_FIELDS)));

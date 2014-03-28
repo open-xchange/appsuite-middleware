@@ -343,9 +343,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
             final UpdateDocumentAction updateDocument = new UpdateDocumentAction();
             updateDocument.setContext(context);
-            updateDocument.setDocuments(Arrays.asList(document));
+            updateDocument.setDocuments(Collections.singletonList(document));
             updateDocument.setModified(Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL);
-            updateDocument.setOldDocuments(Arrays.asList(oldDocument));
+            updateDocument.setOldDocuments(Collections.singletonList(oldDocument));
             updateDocument.setProvider(this);
             updateDocument.setQueryCatalog(QUERIES);
             updateDocument.setTimestamp(oldDocument.getSequenceNumber());
@@ -354,9 +354,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
             final UpdateVersionAction updateVersion = new UpdateVersionAction();
             updateVersion.setContext(context);
-            updateVersion.setDocuments(Arrays.asList(document));
+            updateVersion.setDocuments(Collections.singletonList(document));
             updateVersion.setModified(Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL);
-            updateVersion.setOldDocuments(Arrays.asList(oldDocument));
+            updateVersion.setOldDocuments(Collections.singletonList(oldDocument));
             updateVersion.setProvider(this);
             updateVersion.setQueryCatalog(QUERIES);
             updateVersion.setTimestamp(oldDocument.getSequenceNumber());
@@ -621,7 +621,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                 final CreateDocumentAction createAction = new CreateDocumentAction();
                 createAction.setContext(context);
-                createAction.setDocuments(Arrays.asList(document));
+                createAction.setDocuments(Collections.singletonList(document));
                 createAction.setProvider(this);
                 createAction.setQueryCatalog(QUERIES);
 
@@ -637,7 +637,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                 CreateVersionAction createVersionAction = new CreateVersionAction();
                 createVersionAction.setContext(context);
-                createVersionAction.setDocuments(Arrays.asList(version0));
+                createVersionAction.setDocuments(Collections.singletonList(version0));
                 createVersionAction.setProvider(this);
                 createVersionAction.setQueryCatalog(QUERIES);
 
@@ -653,7 +653,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                     createVersionAction = new CreateVersionAction();
                     createVersionAction.setContext(context);
-                    createVersionAction.setDocuments(Arrays.asList(document));
+                    createVersionAction.setDocuments(Collections.singletonList(document));
                     createVersionAction.setProvider(this);
                     createVersionAction.setQueryCatalog(QUERIES);
 
@@ -957,8 +957,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                     final UpdateVersionAction updateVersionAction = new UpdateVersionAction();
                     updateVersionAction.setContext(context);
-                    updateVersionAction.setDocuments(Arrays.asList(document));
-                    updateVersionAction.setOldDocuments(Arrays.asList(oldDocument));
+                    updateVersionAction.setDocuments(Collections.singletonList(document));
+                    updateVersionAction.setOldDocuments(Collections.singletonList(oldDocument));
                     updateVersionAction.setProvider(this);
                     updateVersionAction.setQueryCatalog(QUERIES);
                     updateVersionAction.setModified(updatedCols.toArray(new Metadata[updatedCols.size()]));
@@ -987,7 +987,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                     final CreateVersionAction createVersionAction = new CreateVersionAction();
                     createVersionAction.setContext(context);
-                    createVersionAction.setDocuments(Arrays.asList(document));
+                    createVersionAction.setDocuments(Collections.singletonList(document));
                     createVersionAction.setProvider(this);
                     createVersionAction.setQueryCatalog(QUERIES);
 
@@ -1001,8 +1001,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 }
                 final UpdateVersionAction updateVersionAction = new UpdateVersionAction();
                 updateVersionAction.setContext(context);
-                updateVersionAction.setDocuments(Arrays.asList(document));
-                updateVersionAction.setOldDocuments(Arrays.asList(oldDocument));
+                updateVersionAction.setDocuments(Collections.singletonList(document));
+                updateVersionAction.setOldDocuments(Collections.singletonList(oldDocument));
                 updateVersionAction.setProvider(this);
                 updateVersionAction.setQueryCatalog(QUERIES);
                 updateVersionAction.setModified(modifiedCols);
@@ -1014,8 +1014,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             if (QUERIES.updateDocument(modifiedCols)) {
                 final UpdateDocumentAction updateAction = new UpdateDocumentAction();
                 updateAction.setContext(context);
-                updateAction.setDocuments(Arrays.asList(document));
-                updateAction.setOldDocuments(Arrays.asList(oldDocument));
+                updateAction.setDocuments(Collections.singletonList(document));
+                updateAction.setOldDocuments(Collections.singletonList(oldDocument));
                 updateAction.setProvider(this);
                 updateAction.setQueryCatalog(QUERIES);
                 updateAction.setModified(modifiedCols);
@@ -1527,7 +1527,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
             final UpdateVersionAction updateVersion = new UpdateVersionAction();
             updateVersion.setContext(context);
-            updateVersion.setDocuments(Arrays.asList(version0));
+            updateVersion.setDocuments(Collections.singletonList(version0));
             updateVersion.setModified(
                 Metadata.DESCRIPTION_LITERAL,
                 Metadata.TITLE_LITERAL,
@@ -1535,7 +1535,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 Metadata.LAST_MODIFIED_LITERAL,
                 Metadata.MODIFIED_BY_LITERAL,
                 Metadata.FILE_MIMETYPE_LITERAL);
-            updateVersion.setOldDocuments(Arrays.asList(oldVersion0));
+            updateVersion.setOldDocuments(Collections.singletonList(oldVersion0));
             updateVersion.setProvider(this);
             updateVersion.setQueryCatalog(QUERIES);
             updateVersion.setTimestamp(Long.MAX_VALUE);
@@ -1561,9 +1561,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
         final UpdateDocumentAction updateDocument = new UpdateDocumentAction();
         updateDocument.setContext(context);
-        updateDocument.setDocuments(Arrays.asList(update));
+        updateDocument.setDocuments(Collections.singletonList(update));
         updateDocument.setModified(updatedFields.toArray(new Metadata[updatedFields.size()]));
-        updateDocument.setOldDocuments(Arrays.asList(metadata));
+        updateDocument.setOldDocuments(Collections.singletonList(metadata));
         updateDocument.setProvider(this);
         updateDocument.setQueryCatalog(QUERIES);
         updateDocument.setTimestamp(Long.MAX_VALUE);
