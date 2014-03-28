@@ -67,6 +67,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
@@ -98,7 +99,11 @@ public class LinkedinHaloActivator extends HousekeepingActivator {
             @Override
             public boolean isEnabled(String capability, Session session) throws OXException {
                 if (PLUS_CAPABILITY.equals(capability)) {
-                    return plusChecker.hasPlusFeatures(new ServerSessionAdapter(session));
+                    final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                    if (serverSession.isAnonymous()) {
+                        return false;
+                    }
+                    return plusChecker.hasPlusFeatures(new ServerSessionAdapter(serverSession));
                 }
 
                 return true;
