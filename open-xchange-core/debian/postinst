@@ -792,6 +792,10 @@ fi
 ox_add_property com.openexchange.ajax.login.formatstring.login "" /opt/open-xchange/etc/login.properties
 ox_add_property com.openexchange.ajax.login.formatstring.logout "" /opt/open-xchange/etc/login.properties
 
+# SoftwareChange_Request-1959
+VALUE=$(ox_read_property com.openexchange.servlet.maxInactiveInterval /opt/open-xchange/etc/server.properties)
+ox_set_property com.openexchange.servlet.maxInactiveInterval "$VALUE" /opt/open-xchange/etc/server.properties
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT
