@@ -79,7 +79,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
     protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, ContextExistsException, InvalidDataException {
 
         try {
-            Boolean ret = null;;
+            Boolean ret = null;
 
             // Trigger plugin extensions
             {
