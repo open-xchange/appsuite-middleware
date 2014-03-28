@@ -112,7 +112,7 @@ public class FormatLocalizedStringReplacementTest {
     }
 
     @Test
-    public void testGetReplacement() {
+    public void testGetReplacement_replacementObjectStateFine_returnTranslatedPrioritySentence() {
         String replacedString = formatLocalizedStringReplacement.getReplacement();
         Assert.assertEquals("String not localized", result, replacedString);
     }
