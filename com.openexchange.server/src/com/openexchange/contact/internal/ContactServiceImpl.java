@@ -70,6 +70,8 @@ import com.openexchange.groupware.contact.ContactMergerator;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -357,14 +359,15 @@ public class ContactServiceImpl extends DefaultContactService {
     protected void doUpdateUser(final Session session, final String folderID, final String objectID, final Contact contact,
         final Date lastRead) throws OXException {
         int userID = session.getUserId();
-        int contextID = session.getContextId();
+        int contextId = session.getContextId();
         ContactStorage storage = Tools.getStorage(session, folderID);
+        final Context storageContext = ContextStorage.getStorageContext(contextId);
         /*
          * check supplied contact
          */
         Check.validateProperties(contact);
         if (contact.containsObjectID() && contact.getObjectID() > 0 && false == Integer.toString(contact.getObjectID()).equals(objectID)) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextId));
         }
         /*
          * check folder
@@ -372,26 +375,26 @@ public class ContactServiceImpl extends DefaultContactService {
         if (FolderObject.SYSTEM_LDAP_FOLDER_ID != parse(folderID) ||
             contact.containsParentFolderID() && 0 < contact.getParentFolderID() &&
             FolderObject.SYSTEM_LDAP_FOLDER_ID != contact.getParentFolderID()) {
-            throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(FolderObject.SYSTEM_LDAP_FOLDER_ID, contextID, userID);
+            throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(FolderObject.SYSTEM_LDAP_FOLDER_ID, contextId, userID);
         }
         /*
          * check currently stored contact
          */
         Contact storedContact = storage.get(session, folderID, objectID, ContactField.values());
-        Check.contactNotNull(storedContact, contextID, Tools.parse(objectID));
+        Check.contactNotNull(storedContact, contextId, Tools.parse(objectID));
         if (storedContact.getCreatedBy() != userID) {
-            if (storedContact.getCreatedBy() == Tools.getContext(contextID).getContextId()) {
+            if (storedContact.getCreatedBy() == Tools.getContext(contextId).getContextId()) {
                 /*
                  * take over bugfix for https://bugs.open-xchange.com/show_bug.cgi?id=19128#c9:
                  * Accepting context admin as a user's contact creator, too, and executing self-healing mechanism
                  */
                 contact.setCreatedBy(contact.getInternalUserId());
             } else {
-                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextId));
             }
         }
         Check.lastModifiedBefore(storedContact, lastRead);
-        Check.folderEquals(storedContact, folderID, contextID);
+        Check.folderEquals(storedContact, folderID, contextId);
         /*
          * check special GAB permissions
          */
@@ -402,7 +405,7 @@ public class ContactServiceImpl extends DefaultContactService {
         Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
         Check.readOnlyFields(userID, storedContact, delta);
         if (delta.containsParentFolderID()) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextId));
         }
         /*
          * prepare update
@@ -431,9 +434,9 @@ public class ContactServiceImpl extends DefaultContactService {
          * pass through to storage
          */
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
-        beforeUserUpdate(storedContact, interceptors);
+        beforeUserUpdate(storageContext, storedContact, interceptors);
         storage.update(session, folderID, objectID, delta, lastRead);
-        afterUserUpdate(updatedContact, interceptors);
+        afterUserUpdate(storageContext, updatedContact, interceptors);
         /*
          * merge back differences to supplied contact
          */
@@ -444,7 +447,7 @@ public class ContactServiceImpl extends DefaultContactService {
         for (final ContactStorage contactStorage : Tools.getStorages(session)) {
             contactStorage.updateReferences(session, storedContact, updatedContact);
         }
-        new EventClient(session).modify(storedContact, updatedContact, Tools.getFolder(contextID, folderID));
+        new EventClient(session).modify(storedContact, updatedContact, Tools.getFolder(contextId, folderID));
     }
 
     @Override
@@ -1051,15 +1054,15 @@ public class ContactServiceImpl extends DefaultContactService {
         }
     }
 
-    private void beforeUserUpdate(Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
+    private void beforeUserUpdate(Context context, Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
         for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.beforeUpdate(null, userContact);
+            interceptor.beforeUpdate(context, null, userContact);
         }
     }
 
-    private void afterUserUpdate(Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
+    private void afterUserUpdate(Context context, Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
         for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.afterUpdate(null, userContact);
+            interceptor.afterUpdate(context, null, userContact);
         }
     }
 

@@ -137,11 +137,11 @@ public final class UserServiceImpl implements UserService {
     public int createUser(final Context context, final User user) throws OXException {
         checkUser(user);
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
-        beforeCreate(user, interceptors);
+        beforeCreate(context, user, interceptors);
         int userId = UserStorage.getInstance().createUser(context, user);
         UserImpl created = new UserImpl(user);
         created.setId(userId);
-        afterCreate(created, interceptors);
+        afterCreate(context, created, interceptors);
         return userId;
     }
 
@@ -149,11 +149,11 @@ public final class UserServiceImpl implements UserService {
     public int createUser(final Connection con, final Context context, final User user) throws OXException {
         checkUser(user);
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
-        beforeCreate(user, interceptors);
+        beforeCreate(context, user, interceptors);
         int userId = UserStorage.getInstance().createUser(con, context, user);
         UserImpl created = new UserImpl(user);
         created.setId(userId);
-        afterCreate(created, interceptors);
+        afterCreate(context, created, interceptors);
         return userId;
     }
 
@@ -200,9 +200,9 @@ public final class UserServiceImpl implements UserService {
     @Override
     public void updateUser(final User user, final Context context) throws OXException {
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
-        beforeUpdate(user, interceptors);
+        beforeUpdate(context, user, interceptors);
         UserStorage.getInstance().updateUser(user, context);
-        afterUpdate(user, interceptors);
+        afterUpdate(context, user, interceptors);
     }
 
     /**
@@ -213,32 +213,32 @@ public final class UserServiceImpl implements UserService {
         return UserStorage.authenticate(user, password);
     }
 
-    private void beforeCreate(User user, List<UserServiceInterceptor> interceptors) throws OXException {
+    private void beforeCreate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
         for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.beforeCreate(user, null);
+            interceptor.beforeCreate(context, user, null);
         }
     }
 
-    private void afterCreate(User user, List<UserServiceInterceptor> interceptors) throws OXException {
+    private void afterCreate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
         for (UserServiceInterceptor interceptor : interceptors) {
             try {
-                interceptor.afterCreate(user, null);
+                interceptor.afterCreate(context, user, null);
             } catch(OXException e) {
                 LOG.error("Error while calling interceptor.", e);
             }
         }
     }
 
-    private void beforeUpdate(User user, List<UserServiceInterceptor> interceptors) throws OXException {
+    private void beforeUpdate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
         for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.beforeUpdate(user, null);
+            interceptor.beforeUpdate(context, user, null);
         }
     }
 
-    private void afterUpdate(User user, List<UserServiceInterceptor> interceptors) throws OXException {
+    private void afterUpdate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
         for (UserServiceInterceptor interceptor : interceptors) {
             try {
-                interceptor.afterUpdate(user, null);
+                interceptor.afterUpdate(context, user, null);
             } catch(OXException e) {
                 LOG.error("Error while calling interceptor.", e);
             }

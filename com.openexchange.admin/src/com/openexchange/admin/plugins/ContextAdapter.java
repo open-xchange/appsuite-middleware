@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,95 @@
  *
  */
 
-package com.openexchange.user;
+package com.openexchange.admin.plugins;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+
 
 /**
- * {@link AbstractUserServiceInterceptor}
+ * {@link ContextAdapter}
  *
- * Stub implementation of the {@link UserServiceInterceptor} interface.
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractUserServiceInterceptor implements UserServiceInterceptor {
+public class ContextAdapter implements Context {
 
-    /** The default interceptor ranking */
-    protected static final int DEFAULT_RANKING = 100;
+    private static final long serialVersionUID = -7432344176700612294L;
 
-    @Override
-    public int getRanking() {
-        return DEFAULT_RANKING;
+    private final com.openexchange.admin.rmi.dataobjects.Context rmiContext;
+
+    /**
+     * Initializes a new {@link ContextAdapter}.
+     */
+    public ContextAdapter(final com.openexchange.admin.rmi.dataobjects.Context rmiContext) {
+        super();
+        this.rmiContext = rmiContext;
     }
 
     @Override
-    public void beforeCreate(Context context, User user, Contact contactData) throws OXException {
-        // no
+    public int getContextId() {
+        final Integer id = rmiContext.getId();
+        return null == id ? 0 : id.intValue();
     }
 
     @Override
-    public void afterCreate(Context context, User user, Contact contactData) throws OXException {
-        // no
+    public String getName() {
+        return rmiContext.getName();
     }
 
     @Override
-    public void beforeUpdate(Context context, User user, Contact contactData) throws OXException {
-        // no
+    public String[] getLoginInfo() {
+        final Set<String> loginMappings = rmiContext.getLoginMappings();
+        return null == loginMappings ? null : loginMappings.toArray(new String[loginMappings.size()]);
     }
 
     @Override
-    public void afterUpdate(Context context, User user, Contact contactData) throws OXException {
-        // no
+    public int getMailadmin() {
+        return -1;
     }
 
     @Override
-    public void beforeDelete(Context context, User user, Contact contactData) throws OXException {
-        // no
+    public String[] getFileStorageAuth() {
+        return null;
     }
 
     @Override
-    public void afterDelete(Context context, User user, Contact contactData) throws OXException {
-        // no
+    public long getFileStorageQuota() {
+        return -1L;
+    }
+
+    @Override
+    public int getFilestoreId() {
+        final Integer filestoreId = rmiContext.getFilestoreId();
+        return null == filestoreId ? 0 : filestoreId.intValue();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return rmiContext.getEnabled().booleanValue();
+    }
+
+    @Override
+    public boolean isUpdating() {
+        return false;
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return false;
+    }
+
+    @Override
+    public String getFilestoreName() {
+        return rmiContext.getFilestore_name();
+    }
+
+    @Override
+    public Map<String, List<String>> getAttributes() {
+        return Collections.emptyMap();
     }
 
 }

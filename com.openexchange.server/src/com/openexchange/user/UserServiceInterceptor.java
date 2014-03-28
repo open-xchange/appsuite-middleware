@@ -51,6 +51,7 @@ package com.openexchange.user;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
 /**
@@ -61,8 +62,8 @@ import com.openexchange.groupware.ldap.User;
 public interface UserServiceInterceptor {
 
     /**
-     * Gets the ranking for this interceptor, allowing a defined execution order of multiple interceptor implementations.
-     * Execution order is highest first.
+     * Gets the ranking for this interceptor, allowing a defined execution order of multiple interceptor implementations. Execution order is
+     * highest first.
      *
      * @return The ranking
      */
@@ -73,59 +74,65 @@ public interface UserServiceInterceptor {
      * <p>
      * Note that further processing is aborted if an exception occurs during invocation.
      *
+     * @param context The context
      * @param user A reference to the user data of the user being created. Possibly <code>null</code>.
      * @param contactData A reference to the contact data of the user being created. Possibly <code>null</code>.
      * @throws OXException If interception fails
      */
-    void beforeCreate(User user, Contact contactData) throws OXException;
+    void beforeCreate(Context context, User user, Contact contactData) throws OXException;
 
     /**
      * Invoked after a user is created.
      *
+     * @param context The context
      * @param user A reference to the user data of the created user.
      * @param contactData A reference to the contact data of the created user. Possibly <code>null</code>.
      * @throws OXException If interception fails
      */
-    void afterCreate(User user, Contact contactData) throws OXException;
+    void afterCreate(Context context, User user, Contact contactData) throws OXException;
 
     /**
      * Invoked before a user is updated.
      * <p>
      * Note that further processing is aborted if an exception occurs during invocation.
      *
+     * @param context The context
      * @param user A reference to the user data of the user being updated, or <code>null</code> if not affected by the update
      * @param contactData A reference to the contact data of the user being created, or <code>null</code> if not affected by the update
      * @throws OXException If interception fails
      */
-    void beforeUpdate(User user, Contact contactData) throws OXException;
+    void beforeUpdate(Context context, User user, Contact contactData) throws OXException;
 
     /**
      * Invoked after a user is updated.
      *
+     * @param context The context
      * @param user A reference to the user data of the updated user, or <code>null</code> if not affected by the update
      * @param contactData A reference to the contact data of the updated user, or <code>null</code> if not affected by the update
      * @throws OXException If interception fails
      */
-    void afterUpdate(User user, Contact contactData) throws OXException;
+    void afterUpdate(Context context, User user, Contact contactData) throws OXException;
 
     /**
      * Invoked before a user is deleted.
      * <p>
      * Note that further processing is aborted if an exception occurs during invocation.
      *
+     * @param context The context
      * @param user A reference to the user data of the user being deleted.
      * @param contactData A reference to the contact data of the user being deleted.
      * @throws OXException If interception fails
      */
-    void beforeDelete(User user, Contact contactData) throws OXException;
+    void beforeDelete(Context context, User user, Contact contactData) throws OXException;
 
     /**
      * Invoked after a user is deleted.
      *
+     * @param context The context
      * @param user A reference to the user data of the deleted user
      * @param contactData A reference to the contact data of the deleted user
      * @throws OXException If interception fails
      */
-    void afterDelete(User user, Contact contactData) throws OXException;
+    void afterDelete(Context context, User user, Contact contactData) throws OXException;
 
 }

@@ -75,12 +75,13 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterface {
 
     @Override
     public void create(Context ctx, User user, UserModuleAccess access, Credentials cred) throws PluginException {
+        ContextAdapter contextAdapter = new ContextAdapter(ctx);
         UserAdapter userAdapter = new UserAdapter(user);
         ContactAdapter contactAdapter = new ContactAdapter(user, ctx.getId().intValue());
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         for (UserServiceInterceptor interceptor : interceptors) {
             try {
-                interceptor.afterCreate(userAdapter, contactAdapter);
+                interceptor.afterCreate(contextAdapter, userAdapter, contactAdapter);
             } catch (OXException e) {
                 throw new PluginException(e);
             }
@@ -89,13 +90,14 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterface {
 
     @Override
     public void delete(Context ctx, User[] users, Credentials cred) throws PluginException {
+        ContextAdapter contextAdapter = new ContextAdapter(ctx);
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         for (User user : users) {
             UserAdapter userAdapter = new UserAdapter(user);
             ContactAdapter contactAdapter = new ContactAdapter(user, ctx.getId().intValue());
             for (UserServiceInterceptor interceptor : interceptors) {
                 try {
-                    interceptor.beforeDelete(userAdapter, contactAdapter);
+                    interceptor.beforeDelete(contextAdapter, userAdapter, contactAdapter);
                 } catch (OXException e) {
                     throw new PluginException(e);
                 }
@@ -105,12 +107,13 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterface {
 
     @Override
     public void change(Context ctx, User user, Credentials auth) throws PluginException {
+        ContextAdapter contextAdapter = new ContextAdapter(ctx);
         UserAdapter userAdapter = new UserAdapter(user);
         ContactAdapter contactAdapter = new ContactAdapter(user, ctx.getId().intValue());
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         for (UserServiceInterceptor interceptor : interceptors) {
             try {
-                interceptor.afterUpdate(userAdapter, contactAdapter);
+                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter);
             } catch (OXException e) {
                 throw new PluginException(e);
             }
@@ -129,12 +132,13 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterface {
 
     @Override
     public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws PluginException {
+        ContextAdapter contextAdapter = new ContextAdapter(ctx);
         UserAdapter userAdapter = new UserAdapter(user);
         ContactAdapter contactAdapter = new ContactAdapter(user, ctx.getId().intValue());
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         for (UserServiceInterceptor interceptor : interceptors) {
             try {
-                interceptor.afterUpdate(userAdapter, contactAdapter);
+                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter);
             } catch (OXException e) {
                 throw new PluginException(e);
             }
@@ -143,12 +147,13 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterface {
 
     @Override
     public void changeModuleAccess(Context ctx, User user, String access_combination_name, Credentials auth) throws PluginException {
+        ContextAdapter contextAdapter = new ContextAdapter(ctx);
         UserAdapter userAdapter = new UserAdapter(user);
         ContactAdapter contactAdapter = new ContactAdapter(user, ctx.getId().intValue());
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         for (UserServiceInterceptor interceptor : interceptors) {
             try {
-                interceptor.afterUpdate(userAdapter, contactAdapter);
+                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter);
             } catch (OXException e) {
                 throw new PluginException(e);
             }
@@ -157,12 +162,13 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterface {
 
     @Override
     public void changeModuleAccess(Context ctx, User user, UserModuleAccess moduleAccess, Credentials auth) throws PluginException {
+        ContextAdapter contextAdapter = new ContextAdapter(ctx);
         UserAdapter userAdapter = new UserAdapter(user);
         ContactAdapter contactAdapter = new ContactAdapter(user, ctx.getId().intValue());
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         for (UserServiceInterceptor interceptor : interceptors) {
             try {
-                interceptor.afterUpdate(userAdapter, contactAdapter);
+                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter);
             } catch (OXException e) {
                 throw new PluginException(e);
             }
