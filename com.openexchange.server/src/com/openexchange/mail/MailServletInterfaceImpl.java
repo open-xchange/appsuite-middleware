@@ -797,10 +797,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     mergeWithSent,
                     cache,
                     null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-                    max,
-                    MailSortField.getField(sortCol),
-                    OrderDirection.getOrderDirection(order),
-                    mailFields.toArray());
+                        max,
+                        MailSortField.getField(sortCol),
+                        OrderDirection.getOrderDirection(order),
+                        mailFields.toArray());
             } catch (final OXException e) {
                 // Check for missing "THREAD=REFERENCES" capability
                 if ((2046 != e.getCode() || (!"MSG".equals(e.getPrefix()) && !"IMAP".equals(e.getPrefix()))) && !MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
@@ -1235,7 +1235,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(
                             Long.valueOf(maxPerMsg),
                             null == fileName ? "" : fileName,
-                            Long.valueOf(size));
+                                Long.valueOf(size));
                     }
                     total += size;
                     if (max > 0 && total > max) {
@@ -1768,10 +1768,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailMessage[] mails = mailAccess.getMessageStorage().searchMessages(
             fullName,
             null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-            MailSortField.getField(sortCol),
-            OrderDirection.getOrderDirection(order),
-            searchTerm,
-            FIELDS_ID_INFO);
+                MailSortField.getField(sortCol),
+                OrderDirection.getOrderDirection(order),
+                searchTerm,
+                FIELDS_ID_INFO);
         /*
          * Proceed
          */
@@ -2190,10 +2190,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailMessage[] mails = mailAccess.getMessageStorage().getThreadSortedMessages(
             fullName,
             fromToIndices == null ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-            MailSortField.getField(sortCol),
-            OrderDirection.getOrderDirection(order),
-            searchTerm,
-            FIELDS_ID_INFO);
+                MailSortField.getField(sortCol),
+                OrderDirection.getOrderDirection(order),
+                searchTerm,
+                FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {
             return SearchIteratorAdapter.<MailMessage> emptyIterator();
         }
@@ -2923,6 +2923,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (e.getMessage().indexOf("quota") != -1) {
                 throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
             }
+            LOG.warn("Mail with id {} in folder {} sent successfully, but a copy could not be placed in the sent folder.", sentMail.getMailId(), sentMail.getFolder(), e);
             throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED.create(e, new Object[0]);
         }
         if ((uidArr != null) && (uidArr[0] != null)) {
