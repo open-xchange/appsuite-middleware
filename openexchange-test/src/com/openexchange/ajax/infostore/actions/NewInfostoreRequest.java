@@ -70,18 +70,37 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
     private DocumentMetadata metadata;
     private final InputStream input;
 
+    /**
+     * Initializes a new {@link NewInfostoreRequest}.
+     */
     public NewInfostoreRequest() {
         this(null, (InputStream) null);
     }
 
+    /**
+     * Initializes a new {@link NewInfostoreRequest}.
+     *
+     * @param data The document
+     */
     public NewInfostoreRequest(DocumentMetadata data) {
         this(data, (InputStream) null);
     }
 
+    /**
+     * Initializes a new {@link NewInfostoreRequest}.
+     * @param data The document
+     * @param upload The file data
+     * @throws FileNotFoundException
+     */
     public NewInfostoreRequest(DocumentMetadata data, File upload) throws FileNotFoundException {
         this(data, new FileInputStream(upload));
     }
 
+    /**
+     * Initializes a new {@link NewInfostoreRequest}.
+     * @param data The document
+     * @param input The file data
+     */
     public NewInfostoreRequest(DocumentMetadata data, InputStream input) {
         super();
         this.metadata = data;

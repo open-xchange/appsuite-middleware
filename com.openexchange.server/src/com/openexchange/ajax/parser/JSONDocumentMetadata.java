@@ -289,7 +289,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public void setMeta(final Map<String, Object> properties) {
-        if (null == properties) {
+        if (null == properties || properties.isEmpty()) {
             jsonObject.remove(Metadata.META_LITERAL.getName());
         } else {
             try {

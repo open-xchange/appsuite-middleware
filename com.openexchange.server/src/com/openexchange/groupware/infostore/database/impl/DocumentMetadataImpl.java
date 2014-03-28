@@ -409,6 +409,10 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 
     @Override
     public void setMeta(Map<String, Object> properties) {
-        this.meta = properties;
+        if (null == properties || properties.isEmpty()) {
+            this.meta = null;
+        } else {
+            this.meta = new LinkedHashMap<String, Object>(properties);
+        }
     }
 }
