@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-03-26 15:10+0100\n"
+"PO-Revision-Date: 2014-03-28 10:58+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -1008,13 +1008,12 @@ msgid "Country (home)"
 msgstr "Land (privat)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:74
-#, fuzzy
-msgid "Martial status"
+msgid "Marital status"
 msgstr "Familienstand"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:75
-msgid "Number of children"
-msgstr "Anzahl Kinder"
+msgid "Children"
+msgstr "Kinder"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:76
 msgid "Profession"
@@ -1025,7 +1024,7 @@ msgid "Nickname"
 msgstr "Spitzname"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:78
-msgid "Spouse name"
+msgid "Spouse's name"
 msgstr "Ehepartner"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:79
@@ -1047,7 +1046,7 @@ msgstr "Position"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:83
 #, fuzzy
 msgid "Employee type"
-msgstr "Dateityp"
+msgstr "Mitarbeiter-Typ"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:84
 msgid "Room number"
@@ -1074,9 +1073,8 @@ msgid "Country (business)"
 msgstr "Land (geschäftlich)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:90
-#, fuzzy
-msgid "Number of employee"
-msgstr "Anzahl Mitarbeiter"
+msgid "Employee ID"
+msgstr "Mitarbeiter-ID"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:91
 msgid "Sales volume"
@@ -1091,9 +1089,8 @@ msgid "Commercial register"
 msgstr "Handelsregister"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:94
-#, fuzzy
 msgid "Branches"
-msgstr "Niederlassungen"
+msgstr "Branchen"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:95
 msgid "Business category"
@@ -1104,12 +1101,12 @@ msgid "Info"
 msgstr "Info"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:97
-msgid "Manager's name"
-msgstr "Name Manager"
+msgid "Manager"
+msgstr "Manager"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:98
-msgid "Assistant's name"
-msgstr "Name Assistent"
+msgid "Assistant"
+msgstr "Assistent"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:99
 msgid "Street (other)"
@@ -1152,7 +1149,7 @@ msgid "Telephone callback"
 msgstr "Telefon (Rückruf)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:109
-msgid "Telephone car"
+msgid "Phone (car)"
 msgstr "Autotelefon"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:110
@@ -1192,7 +1189,7 @@ msgid "FAX other"
 msgstr "Fax (weiteres)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:119
-msgid "Telephone pager"
+msgid "Pager"
 msgstr "Pager"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:120
@@ -1204,12 +1201,12 @@ msgid "Telephone radio"
 msgstr "Funktelefon"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:122
-msgid "Telephone telex"
+msgid "Telex"
 msgstr "Telex"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:123
-msgid "Telephone TTY/TDD"
-msgstr "TTY/TDD-Gerät"
+msgid "TTY/TDD"
+msgstr "TTY/TDD"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:124
 msgid "Instant Messenger 1"
@@ -1220,7 +1217,7 @@ msgid "Instant Messenger 2"
 msgstr "Instant Messenger 2"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:126
-msgid "Telephone IP"
+msgid "IP phone"
 msgstr "IP-Telefon"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:127
@@ -1340,17 +1337,14 @@ msgid "File as"
 msgstr "Speichern unter"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:155
-#, fuzzy
 msgid "First name (yomi)"
 msgstr "Vorname (yomi)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:156
-#, fuzzy
 msgid "Last name (yomi)"
 msgstr "Nachname (yomi)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:157
-#, fuzzy
 msgid "Company (yomi)"
 msgstr "Firma (yomi)"
 
@@ -1358,9 +1352,10 @@ msgstr "Firma (yomi)"
 msgid "UID"
 msgstr "Mitarbeiter-ID"
 
+#. Search in file name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:159
-#, fuzzy
-msgid "Filename"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:66
+msgid "File name"
 msgstr "Dateiname"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:160
@@ -2518,11 +2513,6 @@ msgstr "%1$s <i>in Adressen</i>"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:63
 msgid "%1$s <i>in drive</i>"
 msgstr "%1$s <i>in Drive</i>"
-
-#. Search in file name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:66
-msgid "File name"
-msgstr "Dateiname"
 
 #. Search in file content.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:69
@@ -4391,7 +4381,6 @@ msgstr "Ihre Sitzung ist ungültig."
 
 #. * You are no member of the GroupDispatcher: %1$s. Please join first.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:94
-#, fuzzy
 msgid "You are no member of the GroupDispatcher: %1$s. Please join first."
 msgstr ""
 "Sie sind kein Mitglied von GroupDispatcher: %1$s. Bitte treten Sie erst bei."
@@ -8721,7 +8710,7 @@ msgstr "Die E-Mail-Adresse ist ungültig"
 #. Already sent an invitation to E-Mail address
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:86
 msgid "Already sent an invitation to E-Mail address"
-msgstr ""
+msgstr "Einladung bereits an E-Mail-Adresse gesendet"
 
 #. The E-Mail address already belongs to a XING user
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:89
@@ -8743,26 +8732,25 @@ msgstr "Die E-Mail-Adresse ist keinem XING-Benutzer zugewiesen."
 msgid "XING user is already directly connected."
 msgstr "XING-Benutzer ist bereits direkt verbunden."
 
-#. The comment size exceeds the maximum allowed of 600 characters.
+#. The comment size exceeds the maximum allowed number of 600 characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:101
-#, fuzzy
-msgid "The comment size exceeds the maximum allowed of 600 characters."
+msgid "The comment size exceeds the maximum allowed number of 600 characters."
 msgstr ""
 "Der Kommentar überschreitet die maximal zulässige Anzahl von 600 Zeichen."
 
-#. The status message size exceeds the maximum allowed of 600 characters.
+#. The status message size exceeds the maximum allowed number of 600 characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:104
-#, fuzzy
-msgid "The status message size exceeds the maximum allowed of 420 characters."
+msgid ""
+"The status message size exceeds the maximum allowed number of 420 characters."
 msgstr ""
-"Der Kommentar überschreitet die maximal zulässige Anzahl von 600 Zeichen."
+"Die Statusmeldung überschreitet die maximal zulässige Anzahl von 420 Zeichen."
 
-#. The status message size exceeds the maximum allowed of 600 characters.
+#. The status message size exceeds the maximum allowed number of 600 characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:107
-#, fuzzy
-msgid "The text message size exceeds the maximum allowed of 140 characters."
+msgid ""
+"The text message size exceeds the maximum allowed number of 140 characters."
 msgstr ""
-"Der Kommentar überschreitet die maximal zulässige Anzahl von 600 Zeichen."
+"Die Textnachricht überschreitet die maximal zulässige Anzahl von 140 Zeichen."
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
@@ -10859,6 +10847,32 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:525
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Number of children"
+#~ msgstr "Anzahl Kinder"
+
+#, fuzzy
+#~ msgid "Number of employee"
+#~ msgstr "Anzahl Mitarbeiter"
+
+#~ msgid "Telephone car"
+#~ msgstr "Autotelefon"
+
+#~ msgid "Telephone pager"
+#~ msgstr "Pager"
+
+#~ msgid "Telephone telex"
+#~ msgstr "Telex"
+
+#~ msgid "Telephone TTY/TDD"
+#~ msgstr "TTY/TDD-Gerät"
+
+#~ msgid "Telephone IP"
+#~ msgstr "IP-Telefon"
+
+#, fuzzy
+#~ msgid "Filename"
+#~ msgstr "Dateiname"
 
 #~ msgid "Unknown problem: \"%1$s\"."
 #~ msgstr "Unbekanntes Problem: \"%1$s\"."
