@@ -55,10 +55,9 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.jump.EndpointHandler;
 import com.openexchange.jump.JumpService;
+import com.openexchange.jump.json.EndpointHandlerRegistry;
 import com.openexchange.jump.json.JumpRequest;
-import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -71,23 +70,23 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractJumpAction implements AJAXActionService {
 
-    private static final AtomicReference<ServiceListing<EndpointHandler>> HANDLERS_REF = new AtomicReference<ServiceListing<EndpointHandler>>();
+    private static final AtomicReference<EndpointHandlerRegistry> HANDLERS_REF = new AtomicReference<EndpointHandlerRegistry>();
 
     /**
-     * Sets the end-point handler listing.
+     * Sets the end-point handler registry.
      *
-     * @param handlers The listing
+     * @param registry The registry
      */
-    public static void setEndpointHandlerListing(ServiceListing<EndpointHandler> handlers) {
-        HANDLERS_REF.set(handlers);
+    public static void setEndpointHandlerRegistry(final EndpointHandlerRegistry registry) {
+        HANDLERS_REF.set(registry);
     }
 
     /**
-     * Gets the end-point handler listing.
+     * Gets the end-point handler registry.
      *
-     * @return handlers The listing
+     * @return The registry
      */
-    protected static ServiceListing<EndpointHandler> getEndpointHandlerListing() {
+    protected static EndpointHandlerRegistry getEndpointHandlerRegistry() {
         return HANDLERS_REF.get();
     }
 
@@ -106,7 +105,7 @@ public abstract class AbstractJumpAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
             return perform(new JumpRequest(requestData, session));
         } catch (final JSONException e) {

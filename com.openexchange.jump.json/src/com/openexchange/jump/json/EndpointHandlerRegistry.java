@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,66 +47,38 @@
  *
  */
 
-package com.openexchange.jump.json.actions;
+package com.openexchange.jump.json;
 
-import java.util.Set;
-import java.util.UUID;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.util.UUIDs;
-import com.openexchange.jump.Endpoint;
+import java.util.List;
 import com.openexchange.jump.EndpointHandler;
-import com.openexchange.jump.JumpExceptionCodes;
-import com.openexchange.jump.json.JumpRequest;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+
 
 /**
- * {@link IdentityTokenAction}
+ * {@link EndpointHandlerRegistry} - A registry for en-point handlers.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
-public final class IdentityTokenAction extends AbstractJumpAction {
+public final class EndpointHandlerRegistry {
+
+    private final RankingAwareNearRegistryServiceTracker<EndpointHandler> registry;
 
     /**
-     * Initializes a new {@link IdentityTokenAction}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link EndpointHandlerRegistry}.
      */
-    public IdentityTokenAction(final ServiceLookup services) {
-        super(services);
+    public EndpointHandlerRegistry(final RankingAwareNearRegistryServiceTracker<EndpointHandler> registry) {
+        super();
+        this.registry = registry;
     }
 
-    @Override
-    protected AJAXRequestResult perform(final JumpRequest request) throws OXException, JSONException {
-        // Require system
-        final String systemName = request.requireParameter("system");
-
-        // Look-up endpoint
-        final Endpoint endpoint = getJumpSerivce().requireEndpoint(systemName);
-
-        // Generate token
-        final UUID token = UUID.randomUUID();
-
-        final ServerSession session = request.getSession();
-        boolean handled = false;
-        for (final EndpointHandler endpointHandler : getEndpointHandlerRegistry().getHandlers()) {
-            final Set<String> namesOfInterest = endpointHandler.systemNamesOfInterest();
-            if (isEmpty(namesOfInterest) || namesOfInterest.contains(endpoint.getSystemName())) {
-                handled |= endpointHandler.handleEndpoint(token, endpoint, session);
-            }
-        }
-        if (!handled) {
-            throw JumpExceptionCodes.NO_SUCH_ENDPOINT_HANDLER.create(systemName);
-        }
-
-        return new AJAXRequestResult(new JSONObject(2).put("token", UUIDs.getUnformattedString(token)), "json");
-    }
-
-    private boolean isEmpty(final Set<String> set) {
-        return null == set || set.isEmpty();
+    /**
+     * Gets the rank-wise sorted list of known end-point handlers.
+     *
+     * @return The rank-wise sorted list
+     */
+    public List<EndpointHandler> getHandlers() {
+        return registry.getServiceList();
     }
 
 }

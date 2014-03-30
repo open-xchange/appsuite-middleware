@@ -52,6 +52,7 @@ package com.openexchange.jump.json.osgi;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.jump.EndpointHandler;
+import com.openexchange.jump.json.EndpointHandlerRegistry;
 import com.openexchange.jump.json.JumpActionFactory;
 import com.openexchange.jump.json.actions.AbstractJumpAction;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
@@ -81,7 +82,7 @@ public final class JumpJsonActivator extends AJAXModuleActivator {
         final RankingAwareNearRegistryServiceTracker<EndpointHandler> handlers = new RankingAwareNearRegistryServiceTracker<EndpointHandler>(context, EndpointHandler.class);
         rememberTracker(handlers);
         openTrackers();
-        AbstractJumpAction.setEndpointHandlerListing(handlers);
+        AbstractJumpAction.setEndpointHandlerRegistry(new EndpointHandlerRegistry(handlers));
 
         registerModule(new JumpActionFactory(this), "jump");
     }
@@ -89,7 +90,7 @@ public final class JumpJsonActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        AbstractJumpAction.setEndpointHandlerListing(null);
+        AbstractJumpAction.setEndpointHandlerRegistry(null);
     }
 
 }
