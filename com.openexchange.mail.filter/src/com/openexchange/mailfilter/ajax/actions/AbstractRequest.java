@@ -55,7 +55,7 @@ import com.openexchange.mailfilter.ajax.Action;
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
-import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
+import com.openexchange.mailfilter.services.Services;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -127,7 +127,7 @@ public abstract class AbstractRequest {
     }
 
     public Credentials getCredentials() throws OXException {
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(
+        final ConfigurationService config = Services.getService(
             ConfigurationService.class);
         final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
         final String loginName;

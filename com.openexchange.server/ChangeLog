@@ -1,6 +1,7 @@
-* 2014-03-30 - martin.schneider@open-xchange.com
+* 2014-03-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 31648: Detect Content-Type by file name if specified one is of generic nature; e.g "application/binary"
+ - Fix for bug 31005: Check every incoming JSON request payload if it contains an empty JSON array
 
 * 2014-03-28 - martin.schneider@open-xchange.com
 

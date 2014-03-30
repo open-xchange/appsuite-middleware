@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -71,6 +72,7 @@ import org.apache.jsieve.parser.generated.TokenMgrError;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -98,7 +100,7 @@ import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 import com.openexchange.mailfilter.ajax.json.AbstractObject2JSON2Object;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
-import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
+import com.openexchange.mailfilter.services.Services;
 import com.openexchange.session.Session;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -194,7 +196,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     public MailfilterAction(final Subject krbSubject) {
         super();
         this.krbSubject = krbSubject;
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(
+        final ConfigurationService config = Services.getService(
                 ConfigurationService.class);
         scriptname = config.getProperty(MailFilterProperties.Values.SCRIPT_NAME.property);
         useSIEVEResponseCodes = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.USE_SIEVE_RESPONSE_CODES.property));
@@ -279,8 +281,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     final RuleListAndNextUid rulesandid = sieveTextFilter.readScriptFromString(script);
                     final ClientRulesAndRequire clientrulesandrequire =
                         sieveTextFilter.splitClientRulesAndRequire(rulesandid.getRulelist(), null, rulesandid.isError());
-                    final String body = request.getBody();
-                    final JSONObject json = new JSONObject(body);
+                    final JSONObject json = getJsonBody(request);
 
                     final ArrayList<Rule> rules = clientrulesandrequire.getRules();
                     final RuleAndPosition deletedrule =
@@ -417,9 +418,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final ClientRulesAndRequire clientrulesandrequire =
                     sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
 
-                final String body = request.getBody();
-                final JSONObject json = new JSONObject(body);
-                final Rule newrule = CONVERTER.parse(json);
+                final Rule newrule = CONVERTER.parse(getJsonBody(request));
 
                 if (isVacationRule(newrule)) {
                     // A vacation rule...
@@ -482,6 +481,39 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                         throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
                     } catch (final IOException e) {
                         throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, EMPTY_ARGS);
+                    }
+                }
+            }
+        }
+    }
+
+    private JSONObject getJsonBody(final MailfilterRequest request) throws JSONException, OXException {
+        final JSONObject jsonObject = new JSONObject(request.getBody());
+        checkJsonValue(jsonObject, jsonObject);
+        return jsonObject;
+    }
+
+    private void checkJsonValue(final JSONValue jValue, final JSONValue parent) throws OXException {
+        if (null != jValue) {
+            if (jValue.isArray()) {
+                final JSONArray jArray = jValue.toArray();
+                final int length = jArray.length();
+                if (0 == length) {
+                    // SIEVE does not support empty arrays
+                    throw OXMailfilterExceptionCode.INVALID_SIEVE_RULE.create(parent.toString());
+                }
+                for (int i = 0; i < length; i++) {
+                    final Object object = jArray.opt(i);
+                    if (object instanceof JSONValue) {
+                        checkJsonValue((JSONValue) object, parent);
+                    }
+                }
+            } else if (jValue.isObject()) {
+                final JSONObject jObject = jValue.toObject();
+                for (final Entry<String, Object> entry : jObject.entrySet()) {
+                    final Object object = entry.getValue();
+                    if (object instanceof JSONValue) {
+                        checkJsonValue((JSONValue) object, parent);
                     }
                 }
             }
@@ -582,8 +614,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter
                         .splitClientRulesAndRequire(rules.getRulelist(),
                             null, rules.isError());
-                    final String body = request.getBody();
-                    final JSONObject json = new JSONObject(body);
+                    final JSONObject json = getJsonBody(request);
                     final Integer uniqueid = getUniqueId(json);
                     final ArrayList<Rule> clientrules = clientrulesandrequire
                         .getRules();
@@ -747,7 +778,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
     private SieveHandler connectRight(final Credentials creds) throws OXException {
         final SieveHandler sieveHandler;
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(
+        final ConfigurationService config = Services.getService(
                 ConfigurationService.class);
 
         final String logintype = config.getProperty(MailFilterProperties.Values.SIEVE_LOGIN_TYPE.property);
@@ -857,7 +888,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     }
 
     private void changeIncomingVacationRule(final Rule newrule) throws SieveException {
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
 
         if (null != vacationdomains && 0 != vacationdomains.length()) {
@@ -893,7 +924,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     }
 
     private void changeOutgoingVacationRule(final ArrayList<Rule> clientrules) throws SieveException {
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
 
         if (null != vacationdomains && 0 != vacationdomains.length()) {

@@ -50,6 +50,7 @@
 package com.openexchange.mailfilter.ajax.exceptions;
 
 import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.INVALID_REDIRECT_ADDRESS_MSG;
+import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.INVALID_SIEVE_RULE_MSG;
 import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.REJECTED_REDIRECT_ADDRESS_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -167,6 +168,10 @@ public enum OXMailfilterExceptionCode implements DisplayableOXExceptionCode {
      * The redirect address \"%1$s\" has been rejected.
      */
     REJECTED_REDIRECT_ADDRESS(REJECTED_REDIRECT_ADDRESS_MSG, REJECTED_REDIRECT_ADDRESS_MSG, CATEGORY_USER_INPUT, 24),
+    /**
+     * Invalid SIEVE rule specified. JSON request body contains an empty JSON array: %1$s
+     */
+    INVALID_SIEVE_RULE("Invalid SIEVE rule specified. JSON request body contains an empty JSON array: %1$s", INVALID_SIEVE_RULE_MSG, CATEGORY_USER_INPUT, 25),
     ;
 
     private final String message;

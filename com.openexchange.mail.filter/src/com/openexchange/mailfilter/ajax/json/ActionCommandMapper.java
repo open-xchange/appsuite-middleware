@@ -77,7 +77,7 @@ import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.RedirectActionFields
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.RejectActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.VacationActionFields;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
-import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
+import com.openexchange.mailfilter.services.Services;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
@@ -216,7 +216,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
                 throw OXMailfilterExceptionCode.INVALID_REDIRECT_ADDRESS.create(e, stringparam);
             }
             // And finally check of that forward address is allowed
-            final ConfigurationService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+            final ConfigurationService service = Services.getService(ConfigurationService.class);
             final Filter filter;
             if (null != service && (null != (filter = service.getFilterFromProperty("com.openexchange.mail.filter.redirectWhitelist"))) && !filter.accepts(stringparam)) {
                 throw OXMailfilterExceptionCode.REJECTED_REDIRECT_ADDRESS.create(stringparam);
@@ -231,7 +231,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
             throw new JSONException("The parameter " + parameter + " is missing for action command " + command.getCommandname() + ".");
         }
 
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
         final boolean useUTF7Encoding = Boolean.parseBoolean(encodingProperty);
 
@@ -334,7 +334,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
     private void createFileintoJSON(final JSONObject tmp, final ArrayList<Object> arguments, final com.openexchange.jsieve.commands.ActionCommand.Commands command, final String field) throws JSONException {
         tmp.put(GeneralFields.ID, command.getJsonname());
 
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
         final boolean useUTF7Encoding = Boolean.parseBoolean(encodingProperty);
 
