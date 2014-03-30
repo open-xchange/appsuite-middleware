@@ -19,7 +19,6 @@
  - Fix for bug 31701: Document workaround for Apache < 2.4 and set up combined balancing proxy for usm and eas
  - Fix for bug 31702: Document workaround for Apache < 2.4 and set up combined balancing proxy for usm and eas
 
- 
 * 2014-03-27 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31525: Removed shown_as field (ical: transparency) from emmitted ical to suppress unnecessary changes.
