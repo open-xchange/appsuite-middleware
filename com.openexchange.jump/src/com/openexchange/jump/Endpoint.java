@@ -66,7 +66,7 @@ public interface Endpoint {
     String getUrl();
 
     /**
-     * Gets the system name associated with this end-point
+     * Gets the system name (in lower-case) associated with this end-point
      * <p>
      * Serves as an identifier and must therefore be unique among OSGi-wise registered and/or configured (via <i>tokens.properties</i>)
      * end-points.

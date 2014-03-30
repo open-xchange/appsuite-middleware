@@ -71,7 +71,7 @@ public interface EndpointHandler {
     boolean handleEndpoint(UUID token, Endpoint endpoint, Session session);
 
     /**
-     * Gets a set containing the system names this handler is interested in.
+     * Gets a set containing the system names (in lower-case) this handler is interested in.
      *
      * @return A set of system names
      */
