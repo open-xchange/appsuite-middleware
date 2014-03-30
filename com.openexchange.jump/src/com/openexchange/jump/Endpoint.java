@@ -67,6 +67,9 @@ public interface Endpoint {
 
     /**
      * Gets the system name associated with this end-point
+     * <p>
+     * Serves as an identifier and must therefore be unique among OSGi-wise registered and/or configured (via <i>tokens.properties</i>)
+     * end-points.
      *
      * @return The system name
      */
