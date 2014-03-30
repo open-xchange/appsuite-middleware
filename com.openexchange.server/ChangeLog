@@ -1,3 +1,7 @@
+* 2014-03-30 - martin.schneider@open-xchange.com
+
+ - Fix for bug 31648: Detect Content-Type by file name if specified one is of generic nature; e.g "application/binary"
+
 * 2014-03-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 31770: Retrieve deferrer URL from config-cascade look-up

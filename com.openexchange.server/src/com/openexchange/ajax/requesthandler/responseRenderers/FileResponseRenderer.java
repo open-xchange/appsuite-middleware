@@ -844,6 +844,13 @@ public class FileResponseRenderer implements ResponseRenderer {
          */
         boolean cachingAdvised = false;
         try {
+            String fileContentType = file.getContentType();
+            if (null == fileContentType || !Strings.toLowerCase(fileContentType).startsWith("image/")) {
+                final String contentTypeByFileName = getContentTypeByFileName(file.getName());
+                if (null != contentTypeByFileName) {
+                    fileContentType = contentTypeByFileName;
+                }
+            }
             final byte[] transformed;
             try {
                 TransformedImage transformedImage = transformations.getTransformedImage(file.getContentType());
