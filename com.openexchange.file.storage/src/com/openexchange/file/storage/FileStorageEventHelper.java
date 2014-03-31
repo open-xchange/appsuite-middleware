@@ -55,7 +55,6 @@ import java.util.Hashtable;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 
 /**
@@ -237,7 +236,7 @@ public class FileStorageEventHelper {
     }
 
     public static String createDebugMessage(final String eventName, final Event event) {
-        final StringAllocator sb = new StringAllocator("Received ");
+        final StringBuilder sb = new StringBuilder("Received ");
         sb.append(eventName);
         sb.append(": ");
         sb.append(event.toString());

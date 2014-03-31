@@ -93,7 +93,6 @@ import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -269,16 +268,16 @@ public class DriveStorage {
     public List<File> deleteFiles(List<File> files, boolean hardDelete) throws OXException {
         Map<String, File> ids = new HashMap<String, File>(files.size());
         long sequenceNumber = 0;
-        StringAllocator stringAllocator = session.isTraceEnabled() ? new StringAllocator() : null;
+        StringBuilder StringBuilder = session.isTraceEnabled() ? new StringBuilder() : null;
         for (File file : files) {
             ids.put(file.getId(), file);
             sequenceNumber = Math.max(sequenceNumber, file.getSequenceNumber());
-            if (null != stringAllocator) {
-                stringAllocator.append(' ').append(combine(getPath(file.getFolderId()), file.getFileName()));
+            if (null != StringBuilder) {
+                StringBuilder.append(' ').append(combine(getPath(file.getFolderId()), file.getFileName()));
             }
         }
-        if (null != stringAllocator) {
-            session.trace(this.toString() + "rm" + (hardDelete ? " -rf " : "") + stringAllocator.toString());
+        if (null != StringBuilder) {
+            session.trace(this.toString() + "rm" + (hardDelete ? " -rf " : "") + StringBuilder.toString());
         }
         List<String> notRemoved = getFileAccess().removeDocument(new ArrayList<String>(ids.keySet()), sequenceNumber, hardDelete);
         if (null == notRemoved || 0 == notRemoved.size()) {

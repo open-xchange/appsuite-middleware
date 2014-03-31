@@ -69,7 +69,6 @@ import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.javacodegeeks.concurrent.LRUPolicy;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -305,7 +304,7 @@ public final class RateLimiter {
 
         @Override
         public String toString() {
-            final StringAllocator builder = new StringAllocator(256);
+            final StringBuilder builder = new StringBuilder(256);
             builder.append("Key [");
             if (remotePort > 0) {
                 builder.append("remotePort=").append(remotePort).append(", ");
@@ -730,7 +729,7 @@ public final class RateLimiter {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

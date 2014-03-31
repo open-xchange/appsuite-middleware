@@ -295,7 +295,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 if (length == 0) {
                     return null;
                 }
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length * 16);
+                final StringBuilder sb = new StringBuilder(length * 16);
                 sb.append(internetAddresses[0].toUnicodeString());
                 for (int i = 1; i < length; i++) {
                     sb.append(',').append(internetAddresses[i].toUnicodeString());
@@ -324,7 +324,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 if (length == 0) {
                     return null;
                 }
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length * 16);
+                final StringBuilder sb = new StringBuilder(length * 16);
                 sb.append(internetAddresses[0].toUnicodeString());
                 for (int i = 1; i < length; i++) {
                     sb.append(',').append(internetAddresses[i].toUnicodeString());
@@ -353,7 +353,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 if (length == 0) {
                     return null;
                 }
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length * 16);
+                final StringBuilder sb = new StringBuilder(length * 16);
                 sb.append(internetAddresses[0].toUnicodeString());
                 for (int i = 1; i < length; i++) {
                     sb.append(',').append(internetAddresses[i].toUnicodeString());

@@ -87,7 +87,6 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSessionCache;
@@ -268,7 +267,7 @@ public final class MimeReply {
             {
                 final String decodedSubject = MimeMessageUtility.decodeMultiEncodedHeader(rawSubject);
                 final String newSubject =
-                    decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject : new com.openexchange.java.StringAllocator().append(subjectPrefix).append(
+                    decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject : new StringBuilder().append(subjectPrefix).append(
                         decodedSubject).toString();
                 replyMsg.setSubject(newSubject, MailProperties.getInstance().getDefaultMimeCharset());
             }
@@ -355,7 +354,7 @@ public final class MimeReply {
                  */
                 final String[] userAddrs = UserStorage.getInstance().getUser(session.getUserId(), ctx).getAliases();
                 if (userAddrs != null && userAddrs.length > 0) {
-                    final com.openexchange.java.StringAllocator addrBuilder = new com.openexchange.java.StringAllocator();
+                    final StringBuilder addrBuilder = new StringBuilder();
                     addrBuilder.append(userAddrs[0]);
                     for (int i = 1; i < userAddrs.length; i++) {
                         addrBuilder.append(',').append(userAddrs[i]);
@@ -502,7 +501,7 @@ public final class MimeReply {
                     final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
                     generateReplyText(origMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, session, accountId, list);
                 }
-                final com.openexchange.java.StringAllocator replyTextBuilder = new com.openexchange.java.StringAllocator(8192 << 1);
+                final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
                 for (int i = list.size() - 1; i >= 0; i--) {
                     replyTextBuilder.append(list.get(i));
                 }
@@ -713,10 +712,10 @@ public final class MimeReply {
                 final char nextLine = '\n';
                 if (isHtml) {
                     replyPrefix =
-                        HtmlProcessing.htmlFormat(new com.openexchange.java.StringAllocator(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString());
+                        HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString());
                 } else {
                     replyPrefix =
-                        new com.openexchange.java.StringAllocator(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString();
+                        new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString();
                 }
             }
             /*-
@@ -905,7 +904,7 @@ public final class MimeReply {
                                     final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
                                     if (null == fileName) {
                                         final String ext = MimeType2ExtMap.getFileExtension(nextContentType.getBaseType());
-                                        fileName = new StringAllocator("image").append(j).append('.').append(ext).toString();
+                                        fileName = new StringBuilder("image").append(j).append('.').append(ext).toString();
                                     }
                                     final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, pc.origMail.getFolder())).id(pc.origMail.getMailId()).build();
                                     imageURL = imgSource.generateUrl(imageLocation, pc.session);
@@ -1086,7 +1085,7 @@ public final class MimeReply {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

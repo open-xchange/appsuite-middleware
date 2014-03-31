@@ -65,7 +65,6 @@ import javax.servlet.http.HttpServletRequest;
 import com.google.common.net.InternetDomainName;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -296,7 +295,7 @@ public final class Cookies {
         if (null == cookies) {
             return "";
         }
-        final StringAllocator sb = new StringAllocator(cookies.length << 4);
+        final StringBuilder sb = new StringBuilder(cookies.length << 4);
         final String sep = System.getProperty("line.separator");
         for (int i = 0; i < cookies.length; i++) {
             final Cookie cookie = cookies[i];

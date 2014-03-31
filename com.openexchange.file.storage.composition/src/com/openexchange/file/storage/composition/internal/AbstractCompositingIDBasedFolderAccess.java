@@ -79,7 +79,6 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 import com.openexchange.tx.AbstractService;
 import com.openexchange.tx.TransactionException;
@@ -476,7 +475,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
     static String dump(Event event) {
         if (null != event) {
-            return new StringAllocator().append(event.getTopic())
+            return new StringBuilder().append(event.getTopic())
                 .append(": folderId=").append(event.getProperty(FileStorageEventConstants.FOLDER_ID))
                 .append(": folderPath=").append(event.getProperty(FileStorageEventConstants.FOLDER_PATH))
                 .append(", service=").append(event.getProperty(FileStorageEventConstants.SERVICE))

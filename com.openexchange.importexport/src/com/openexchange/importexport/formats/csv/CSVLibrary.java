@@ -61,7 +61,6 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -252,7 +251,7 @@ public final class CSVLibrary {
         InputStreamReader isr = null;
         try {
             isr = new InputStreamReader(is, encoding);
-            final StringAllocator bob = new StringAllocator(8192);
+            final StringBuilder bob = new StringBuilder(8192);
             boolean isUTF8 = encoding.equalsIgnoreCase("UTF-8");
             boolean firstPartSpecialTreatment = isUTF8;
             final char[] buf = new char[512];

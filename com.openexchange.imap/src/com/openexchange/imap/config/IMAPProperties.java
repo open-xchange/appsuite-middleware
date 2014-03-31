@@ -155,7 +155,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     @Override
     protected void loadProperties0() throws OXException {
-        final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(1024);
+        final StringBuilder logBuilder = new StringBuilder(1024);
         logBuilder.append("\nLoading global IMAP properties...\n");
 
         final ConfigurationService configuration = Services.getService(ConfigurationService.class);
@@ -318,7 +318,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                         try {
                             final IMAPProtocol imapProtocol = IMAPProtocol.getInstance();
                             imapProtocol.initExtMaxCountMap();
-                            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("\tMax. Number of External Connections: ");
+                            final StringBuilder sb = new StringBuilder(128).append("\tMax. Number of External Connections: ");
                             boolean first = true;
                             for (final String desc : sa) {
                                 final int pos = desc.indexOf(':');

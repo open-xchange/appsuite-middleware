@@ -87,7 +87,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -408,7 +407,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         /*
          * Dummy headers
          */
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         final Map<String, String> headers = new HashMap<String, String>(4);
         final String encodeFN;
         try {
@@ -417,7 +416,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
         headers.put(CONTENT_TYPE, sb.append(contentType).append("; name=").append(encodeFN).toString());
-        headers.put(CONTENT_DISPOSITION, new com.openexchange.java.StringAllocator(Part.ATTACHMENT).append("; filename=").append(encodeFN).toString());
+        headers.put(CONTENT_DISPOSITION, new StringBuilder(Part.ATTACHMENT).append("; filename=").append(encodeFN).toString());
         headers.put(CONTENT_TRANSFER_ENCODING, "base64");
         /*
          * Add body part
@@ -518,7 +517,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                     throw MimeMailException.handleMessagingException(e);
                 }
             } else {
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+                final StringBuilder sb = new StringBuilder(128);
                 sb.append("Ignoring nested message.").append(
                     "Cannot handle part's content which should be a RFC822 message according to its content type: ");
                 sb.append((null == content ? "null" : content.getClass().getSimpleName()));
@@ -1117,7 +1116,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

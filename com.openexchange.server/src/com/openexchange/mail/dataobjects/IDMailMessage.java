@@ -52,7 +52,6 @@ package com.openexchange.mail.dataobjects;
 import java.io.InputStream;
 import javax.activation.DataHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link IDMailMessage} - Supports only {@link #getMailId()} and {@link #getFolder()}.
@@ -80,7 +79,7 @@ public final class IDMailMessage extends MailMessage {
 
     @Override
     public String toString() {
-        StringAllocator builder = new StringAllocator();
+        StringBuilder builder = new StringBuilder();
         builder.append("IDMailMessage [");
         final String folder = getFolder();
         if (folder != null) {

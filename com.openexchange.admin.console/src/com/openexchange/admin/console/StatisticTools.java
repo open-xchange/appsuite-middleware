@@ -76,7 +76,6 @@ import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeDataSupport;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.java.StringAllocator;
 
 /**
  * Implements the CLT showruntimestats.
@@ -658,7 +657,7 @@ public class StatisticTools extends AbstractJMXTools {
 
     static String showClusterData(MBeanServerConnection mbc) throws MalformedObjectNameException, NullPointerException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
         // general info
-        StringAllocator sb = new StringAllocator();
+        StringBuilder sb = new StringBuilder();
         for (String type : new String[] { "HazelcastInstance", "HazelcastInstance.Node",
             "HazelcastInstance.ClientEngine", "HazelcastInstance.ConnectionManager" }) {
             for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",*"), null)) {

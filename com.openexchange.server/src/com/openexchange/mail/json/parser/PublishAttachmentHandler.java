@@ -394,13 +394,13 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             // Apply text part as it is
             internalVersion.setBodyPart(textPart);
             // Generate text for attachment
-            final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(256 * links.size());
+            final StringBuilder textBuilder = new StringBuilder(256 * links.size());
             textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
             appendLinks(links, textBuilder);
             internalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
         } else {
             final String text = (String) textPart.getContent();
-            final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(text.length() + 512);
+            final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
             textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
             appendLinks(links, textBuilder);
             if (elapsedDate != null) {
@@ -434,13 +434,13 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 // Apply text part as it is
                 externalVersion.setBodyPart(textPart);
                 // Generate text for attachment
-                final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(256 * links.size());
+                final StringBuilder textBuilder = new StringBuilder(256 * links.size());
                 textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
                 appendLinks(links, textBuilder);
                 externalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
             } else {
                 final String text = (String) textPart.getContent();
-                final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(text.length() + 512);
+                final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
                 textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
                 appendLinks(links, textBuilder);
                 if (elapsedDate != null) {
@@ -700,7 +700,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     } // End of rollbackPublications()
 
-    private static void appendLinks(final List<LinkAndNamePair> links, final com.openexchange.java.StringAllocator textBuilder) {
+    private static void appendLinks(final List<LinkAndNamePair> links, final StringBuilder textBuilder) {
         for (final LinkAndNamePair pair : links) {
             final String link = pair.link;
             final char quot;
@@ -798,7 +798,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         if (protocol.endsWith("://")) {
             return protocol;
         }
-        return new com.openexchange.java.StringAllocator(protocol).append("://").toString();
+        return new StringBuilder(protocol).append("://").toString();
     }
 
     private static boolean forcedSecure(final String hostName) {

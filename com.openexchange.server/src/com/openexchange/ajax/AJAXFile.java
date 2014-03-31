@@ -220,7 +220,7 @@ public final class AJAXFile extends PermissionServlet {
             resp.setContentType(contentType.toString());
             resp.setHeader(
                 "Content-disposition",
-                new com.openexchange.java.StringAllocator(50).append("inline; filename=\"").append(fileName).append('"').toString());
+                new StringBuilder(50).append("inline; filename=\"").append(fileName).append('"').toString());
             /*
              * Write from content's input stream to response output stream
              */

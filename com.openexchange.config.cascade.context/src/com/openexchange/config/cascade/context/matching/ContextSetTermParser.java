@@ -183,7 +183,7 @@ public class ContextSetTermParser {
                 return retval;
             }
             int length = string.length();
-            com.openexchange.java.StringAllocator tagBuilder = new com.openexchange.java.StringAllocator();
+            StringBuilder tagBuilder = new StringBuilder();
             while (index < length) {
                 char ch = string.charAt(index++);
                 if (Strings.isWhitespace(ch)) {
@@ -246,7 +246,7 @@ public class ContextSetTermParser {
             return retval;
         }
 
-        private boolean finishTag(com.openexchange.java.StringAllocator tagBuilder) {
+        private boolean finishTag(StringBuilder tagBuilder) {
             if (tagBuilder.length() != 0) {
                 currentType = Terminal.TAG;
                 current = tagBuilder.toString();

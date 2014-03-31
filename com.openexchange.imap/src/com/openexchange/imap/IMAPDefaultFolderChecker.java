@@ -70,7 +70,6 @@ import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.Services;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -487,7 +486,7 @@ public class IMAPDefaultFolderChecker {
          * Check default folder
          */
         final int prefixLen = prefix.length();
-        String desiredFullName = prefixLen == 0 ? qualifiedName : new StringAllocator(prefix).append(qualifiedName).toString();
+        String desiredFullName = prefixLen == 0 ? qualifiedName : new StringBuilder(prefix).append(qualifiedName).toString();
         {
             final ListLsubEntry entry = modified.get() ? ListLsubCache.getActualLISTEntry(desiredFullName, accountId, imapStore, session) : ListLsubCache.getCachedLISTEntry(desiredFullName, accountId, imapStore, session);
             if (null != entry && entry.exists()) {

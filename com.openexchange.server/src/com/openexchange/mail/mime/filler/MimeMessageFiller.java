@@ -113,7 +113,6 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
@@ -724,7 +723,7 @@ public class MimeMessageFiller {
          */
         final String pReferences = referencedMail.getFirstHeader(MessageHeaders.HDR_REFERENCES);
         final String pInReplyTo = referencedMail.getFirstHeader(MessageHeaders.HDR_IN_REPLY_TO);
-        final com.openexchange.java.StringAllocator refBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder refBuilder = new StringBuilder();
         if (pReferences != null) {
             /*
              * The "References:" field will contain the contents of the parent's "References:" field (if any) followed by the contents of
@@ -1021,7 +1020,7 @@ public class MimeMessageFiller {
                         displayName = UserStorage.getInstance().getUser(session.getUserId(), ctx).getDisplayName();
                     }
                     final String saneDisplayName = Strings.replaceWhitespacesWith(displayName, "");
-                    fileName = MimeUtility.encodeText(new StringAllocator(saneDisplayName).append(".vcf").toString(), charset, "Q");
+                    fileName = MimeUtility.encodeText(new StringBuilder(saneDisplayName).append(".vcf").toString(), charset, "Q");
                 }
                 for (int i = 0; i < size; i++) {
                     final MailPart part = mail.getEnclosedMailPart(i);
@@ -1115,7 +1114,7 @@ public class MimeMessageFiller {
                                     final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
                                     text = wellFormedHTMLContent;
                                 } else {
-                                    final StringAllocator sb = new StringAllocator(content.length() + 512);
+                                    final StringBuilder sb = new StringBuilder(content.length() + 512);
                                     sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
                                     sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
                                     sb.append("<head>\n");
@@ -1894,7 +1893,7 @@ public class MimeMessageFiller {
              * Generate dummy file name
              */
             final List<String> exts = MimeType2ExtMap.getFileExtensions(imageProvider.getContentType().toLowerCase(Locale.ENGLISH));
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("image.");
+            final StringBuilder sb = new StringBuilder("image.");
             if (exts == null) {
                 sb.append("dat");
             } else {

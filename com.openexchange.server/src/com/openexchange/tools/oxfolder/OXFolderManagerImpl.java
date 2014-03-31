@@ -106,7 +106,6 @@ import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.preferences.ServerUserSetting;
@@ -1701,12 +1700,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             if (null == subfolderIDs || 0 == subfolderIDs.size()) {
                 whereFolderID = "=?;";
             } else {
-                StringAllocator stringAllocator = new StringAllocator(" IN (?");
+                StringBuilder StringBuilder = new StringBuilder(" IN (?");
                 for (int i = 0; i < subfolderIDs.size(); i++) {
-                    stringAllocator.append(",?");
+                    StringBuilder.append(",?");
                 }
-                stringAllocator.append(");");
-                whereFolderID = stringAllocator.toString();
+                StringBuilder.append(");");
+                whereFolderID = StringBuilder.toString();
             }
             /*
              * delete publications

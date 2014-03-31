@@ -150,7 +150,7 @@ public final class TransportProperties implements ITransportProperties {
     }
 
     private void loadProperties0() {
-        final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(1024);
+        final StringBuilder logBuilder = new StringBuilder(1024);
         logBuilder.append("\nLoading global transport properties...\n");
 
         final ConfigurationService configuration = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);

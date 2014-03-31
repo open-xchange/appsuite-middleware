@@ -150,7 +150,7 @@ public class SearchTermAdapter {
 	private String getTerm(CompositeSearchTerm term) throws OXException {
         Operation operation = term.getOperation();
         SearchTerm<?>[] terms = term.getOperands();
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < terms.length; i++) {
             String filter = getTerm(terms[i]);
             if (null != filter && 0 < filter.length()) {

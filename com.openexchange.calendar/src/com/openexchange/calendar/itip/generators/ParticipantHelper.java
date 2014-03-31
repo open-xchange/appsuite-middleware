@@ -87,9 +87,9 @@ public class ParticipantHelper {
         }
         final String comment = participant.getComment();
         if (isEmpty(comment)) {
-            return new com.openexchange.java.StringAllocator(24).append(participant.getDisplayName()).append(" (").append(sConfirmStatus).append(')').toString();
+            return new StringBuilder(24).append(participant.getDisplayName()).append(" (").append(sConfirmStatus).append(')').toString();
         }
-        return new com.openexchange.java.StringAllocator(24).append(participant.getDisplayName()).append(" (").append(sConfirmStatus).append(") (\"").append(
+        return new StringBuilder(24).append(participant.getDisplayName()).append(" (").append(sConfirmStatus).append(") (\"").append(
             comment).append("\")").toString();
     }
 

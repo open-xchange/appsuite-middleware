@@ -245,7 +245,7 @@ public final class MimeReplyTest extends TestCase {
 
             assertEquals("Unexpected number of reply texts", 1, list.size());
 
-            final com.openexchange.java.StringAllocator replyTextBuilder = new com.openexchange.java.StringAllocator(8192 << 1);
+            final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
             for (int i = list.size() - 1; i >= 0; i--) {
                 replyTextBuilder.append(list.get(i));
             }

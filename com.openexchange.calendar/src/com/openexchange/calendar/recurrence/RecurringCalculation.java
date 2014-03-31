@@ -56,7 +56,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.calendar.RecurringResults;
 import com.openexchange.calendar.Tools;
@@ -132,7 +131,7 @@ public class RecurringCalculation {
     private final boolean calc_until = false; // what the hell is this for?
 
     private final String getState() {
-        final StringAllocator builder = new StringAllocator(1024);
+        final StringBuilder builder = new StringBuilder(1024);
         builder.append("Recurring Calculation State:\n");
         builder.append("recurring_type: ").append(recurring_type).append('\n');
         builder.append("recurring_interval: ").append(recurring_interval).append('\n');

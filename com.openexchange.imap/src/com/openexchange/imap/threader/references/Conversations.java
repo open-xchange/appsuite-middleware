@@ -284,7 +284,7 @@ public final class Conversations {
                 final String command;
                 final Response[] r;
                 {
-                    com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("FETCH ");
+                    StringBuilder sb = new StringBuilder(128).append("FETCH ");
                     if (1 == messageCount) {
                         sb.append("1");
                     } else {

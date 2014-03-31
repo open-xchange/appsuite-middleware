@@ -52,7 +52,6 @@ package com.openexchange.mail.utils;
 import gnu.trove.impl.Constants;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link CP932EmojiMapping} - Emoji mapping for CP932/Shift-JIS charset.
@@ -109,7 +108,7 @@ public class CP932EmojiMapping {
             return content;
         }
         final int length = content.length();
-        final StringAllocator sb = new StringAllocator(length);
+        final StringBuilder sb = new StringBuilder(length);
         final char unknown = UNKNOWN;
         for (int i = 0; i < length; i++) {
             final char c = content.charAt(i);

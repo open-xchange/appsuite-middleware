@@ -287,7 +287,7 @@ public final class MailProperties implements IMailProperties {
     }
 
     private void loadProperties0() throws OXException {
-        final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(1024);
+        final StringBuilder logBuilder = new StringBuilder(1024);
         logBuilder.append("\nLoading global mail properties...\n");
 
         final ConfigurationService configuration = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -299,7 +299,7 @@ public final class MailProperties implements IMailProperties {
             }
             final LoginSource loginSource = LoginSource.parse(loginStr.trim());
             if (null == loginSource) {
-                throw MailConfigException.create(new com.openexchange.java.StringAllocator(256).append(
+                throw MailConfigException.create(new StringBuilder(256).append(
                     "Unknown value in property \"com.openexchange.mail.loginSource\": ").append(loginStr).toString());
             }
             this.loginSource = loginSource;
@@ -313,7 +313,7 @@ public final class MailProperties implements IMailProperties {
             }
             final PasswordSource pwSource = PasswordSource.parse(pwStr.trim());
             if (null == pwSource) {
-                throw MailConfigException.create(new com.openexchange.java.StringAllocator(256).append(
+                throw MailConfigException.create(new StringBuilder(256).append(
                     "Unknown value in property \"com.openexchange.mail.passwordSource\": ").append(pwStr).toString());
             }
             passwordSource = pwSource;
@@ -327,7 +327,7 @@ public final class MailProperties implements IMailProperties {
             }
             final ServerSource mailServerSource = ServerSource.parse(mailSrcStr.trim());
             if (null == mailServerSource) {
-                throw MailConfigException.create(new com.openexchange.java.StringAllocator(256).append(
+                throw MailConfigException.create(new StringBuilder(256).append(
                     "Unknown value in property \"com.openexchange.mail.mailServerSource\": ").append(mailSrcStr).toString());
             }
             this.mailServerSource = mailServerSource;
@@ -341,7 +341,7 @@ public final class MailProperties implements IMailProperties {
             }
             final ServerSource transportServerSource = ServerSource.parse(transSrcStr.trim());
             if (null == transportServerSource) {
-                throw MailConfigException.create(new com.openexchange.java.StringAllocator(256).append(
+                throw MailConfigException.create(new StringBuilder(256).append(
                     "Unknown value in property \"com.openexchange.mail.transportServerSource\": ").append(transSrcStr).toString());
             }
             this.transportServerSource = transportServerSource;
@@ -682,7 +682,7 @@ public final class MailProperties implements IMailProperties {
             fis = new FileInputStream(new File(propFile));
         } catch (final FileNotFoundException e) {
             throw MailConfigException.create(
-                new com.openexchange.java.StringAllocator(256).append("Properties not found at location: ").append(propFile).toString(),
+                new StringBuilder(256).append("Properties not found at location: ").append(propFile).toString(),
                 e);
         }
         try {
@@ -690,7 +690,7 @@ public final class MailProperties implements IMailProperties {
             return properties;
         } catch (final IOException e) {
             throw MailConfigException.create(
-                new com.openexchange.java.StringAllocator(256).append("I/O error while reading properties from file \"").append(propFile).append(
+                new StringBuilder(256).append("I/O error while reading properties from file \"").append(propFile).append(
                     "\": ").append(e.getMessage()).toString(),
                 e);
         } finally {
@@ -712,7 +712,7 @@ public final class MailProperties implements IMailProperties {
             return properties;
         } catch (final IOException e) {
             throw MailConfigException.create(
-                new com.openexchange.java.StringAllocator(256).append("I/O error: ").append(e.getMessage()).toString(),
+                new StringBuilder(256).append("I/O error: ").append(e.getMessage()).toString(),
                 e);
         } finally {
             Streams.close(in);

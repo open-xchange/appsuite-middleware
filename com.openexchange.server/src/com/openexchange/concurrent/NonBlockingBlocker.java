@@ -175,7 +175,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
     @Override
     public void unblock() {
         if (null == owner || Thread.currentThread() != owner) {
-            throw new IllegalMonitorStateException(new com.openexchange.java.StringAllocator(32).append("Thread ").append(Thread.currentThread().getName()).append(
+            throw new IllegalMonitorStateException(new StringBuilder(32).append("Thread ").append(Thread.currentThread().getName()).append(
                 " does not own this blocker").toString());
         }
         // Set unblocked

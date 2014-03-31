@@ -100,7 +100,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -1634,14 +1633,14 @@ public final class MimeMessageConverter {
                             ct.getSubType())));
                     } catch (final ClassCastException e) {
                         // Cast to javax.mail.Multipart failed
-                        LOG1.debug(new com.openexchange.java.StringAllocator(256).append(
+                        LOG1.debug(new StringBuilder(256).append(
                             "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
                             e.getMessage()).append(
                             ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                         mailMessage.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                     } catch (final MessagingException e) {
                         // A messaging error occurred
-                        LOG1.debug(new com.openexchange.java.StringAllocator(256).append(
+                        LOG1.debug(new StringBuilder(256).append(
                             "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
                             e.getMessage()).append(
                             ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
@@ -2765,7 +2764,7 @@ public final class MimeMessageConverter {
         }
         final String values;
         if ('\0' != delimiter && valueArr.length > 1) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(valueArr[0]);
+            final StringBuilder sb = new StringBuilder(valueArr[0]);
             for (int i = 1; i < valueArr.length; i++) {
                 sb.append(delimiter).append(valueArr[i]);
             }
@@ -2796,7 +2795,7 @@ public final class MimeMessageConverter {
         }
         final String values;
         if ('\0' != delimiter && valueArr.length > 1) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(valueArr[0]);
+            final StringBuilder sb = new StringBuilder(valueArr[0]);
             for (int i = 1; i < valueArr.length; i++) {
                 sb.append(delimiter).append(valueArr[i]);
             }
@@ -2825,7 +2824,7 @@ public final class MimeMessageConverter {
         }
         final String addresses;
         if (addressArray.length > 1) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addressArray[0]);
+            final StringBuilder sb = new StringBuilder(addressArray[0]);
             for (int i = 1; i < addressArray.length; i++) {
                 sb.append(',').append(addressArray[i]);
             }
@@ -2857,7 +2856,7 @@ public final class MimeMessageConverter {
         }
         final String addresses;
         if (addressArray.length > 1) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addressArray[0]);
+            final StringBuilder sb = new StringBuilder(addressArray[0]);
             for (int i = 1; i < addressArray.length; i++) {
                 sb.append(',').append(addressArray[i]);
             }
@@ -3004,7 +3003,7 @@ public final class MimeMessageConverter {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

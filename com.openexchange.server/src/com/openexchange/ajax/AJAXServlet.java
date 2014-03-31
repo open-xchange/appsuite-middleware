@@ -113,7 +113,6 @@ import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.monitoring.MonitoringInfo;
@@ -652,7 +651,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
         final int buflen = BUF_SIZE;
         final char[] cbuf = new char[buflen];
-        final StringAllocator builder = new StringAllocator(SB_SIZE);
+        final StringBuilder builder = new StringBuilder(SB_SIZE);
         final int maxBodySize = getMaxBodySize();
         if (maxBodySize > 0) {
             int count = 0;
@@ -683,7 +682,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         try {
             final int buflen = BUF_SIZE;
             final char[] cbuf = new char[buflen];
-            final StringAllocator builder = new StringAllocator(SB_SIZE);
+            final StringBuilder builder = new StringBuilder(SB_SIZE);
             final int maxBodySize = getMaxBodySize();
             if (maxBodySize > 0) {
                 int count = 0;
@@ -765,7 +764,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             }
             uri = decodeUrl(req.getRequestURI(), characterEncoding);
         }
-        final String path = new com.openexchange.java.StringAllocator(req.getContextPath()).append(req.getServletPath()).toString();
+        final String path = new StringBuilder(req.getContextPath()).append(req.getServletPath()).toString();
         final int pos = uri.indexOf(path);
         if (pos >= 0) {
             uri = uri.substring(pos + path.length());
@@ -903,7 +902,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     matcher = dupSlashes.matcher(retval);
                 }
             }
-            return null == prefix ? retval : new StringAllocator(prefix).append(retval).toString();
+            return null == prefix ? retval : new StringBuilder(prefix).append(retval).toString();
         } catch (final IllegalArgumentException e) {
             throw e;
         } catch (final RuntimeException e) {

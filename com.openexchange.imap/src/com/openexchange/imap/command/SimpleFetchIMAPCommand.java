@@ -214,7 +214,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
 
     @Override
     protected String getDebugInfo(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(command.length() + 64);
+        final StringBuilder sb = new StringBuilder(command.length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -246,7 +246,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -761,7 +761,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws OXException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+            final StringBuilder sb = new StringBuilder();
             sb.append(bs.type).append('/').append(bs.subtype);
             if (bs.cParams != null) {
                 sb.append(bs.cParams);

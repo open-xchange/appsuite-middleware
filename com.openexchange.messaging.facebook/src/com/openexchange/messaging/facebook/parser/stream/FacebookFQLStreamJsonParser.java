@@ -824,7 +824,7 @@ public final class FacebookFQLStreamJsonParser {
                 /*
                  * Start replacing with href
                  */
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(content.length());
+                final StringBuilder sb = new StringBuilder(content.length());
                 int lastMatch = 0;
                 do {
                     sb.append(content.substring(lastMatch, imgMatcher.start()));
@@ -846,7 +846,7 @@ public final class FacebookFQLStreamJsonParser {
         "(?:src=\"([^\"]*)\")|(?:src='([^']*)')|(?:src=[^\"']([^\\s>]*))",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static void replaceWithSrcAttribute(final String imgTag, final com.openexchange.java.StringAllocator sb) {
+    private static void replaceWithSrcAttribute(final String imgTag, final StringBuilder sb) {
         final Matcher srcMatcher = SRC_PATTERN.matcher(imgTag);
         if (srcMatcher.find()) {
             /*

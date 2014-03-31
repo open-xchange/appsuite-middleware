@@ -72,7 +72,7 @@ public final class CustomMailAccount extends AbstractMailAccount {
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+        final StringBuilder sb = new StringBuilder(128);
         sb.append(CustomMailAccount.class.getSimpleName()).append(super.toString());
         return sb.toString();
     }

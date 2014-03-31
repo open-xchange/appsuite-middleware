@@ -131,7 +131,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
             mailAccountDescription.setMailSecure(false);
             mailAccountDescription.setMailServer("localhost");
             mailAccountDescription.setPassword("");
-            mailAccountDescription.setPrimaryAddress(new com.openexchange.java.StringAllocator(32).append(login).append("@unifiedinbox.com").toString());
+            mailAccountDescription.setPrimaryAddress(new StringBuilder(32).append(login).append("@unifiedinbox.com").toString());
             mailAccountDescription.setSent("sent");
             mailAccountDescription.setSpam("spam");
             mailAccountDescription.setSpamHandler("NoSpamHandler");

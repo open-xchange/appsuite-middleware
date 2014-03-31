@@ -109,7 +109,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -1079,21 +1078,21 @@ public class OXContainerConverter {
      */
     private static Parameter getABCropRectangle(TransformedImage transformedImage) {
         Parameter parameter = new Parameter("X-ABCROP-RECTANGLE");
-        StringAllocator stringAllocator = new StringAllocator(64);
-        stringAllocator.append("ABClipRect_1&");
+        StringBuilder StringBuilder = new StringBuilder(64);
+        StringBuilder.append("ABClipRect_1&");
         int width = transformedImage.getWidth();
         int height = transformedImage.getHeight();
         if (width < height) {
-            stringAllocator.append('-').append((height - width) / 2).append("&0&").append(height).append('&').append(height);
+            StringBuilder.append('-').append((height - width) / 2).append("&0&").append(height).append('&').append(height);
         } else if (width > height) {
-            stringAllocator.append("0&-").append((width - height) / 2).append('&').append(width).append('&').append(width);
+            StringBuilder.append("0&-").append((width - height) / 2).append('&').append(width).append('&').append(width);
         } else {
-            stringAllocator.append("0&0&").append(width).append('&').append(height);
+            StringBuilder.append("0&0&").append(width).append('&').append(height);
         }
         if (null != transformedImage.getMD5()) {
-            stringAllocator.append('&').append(Base64.encode(transformedImage.getMD5()));
+            StringBuilder.append('&').append(Base64.encode(transformedImage.getMD5()));
         }
-        parameter.addValue(new ParameterValue(stringAllocator.toString()));
+        parameter.addValue(new ParameterValue(StringBuilder.toString()));
         return parameter;
     }
 

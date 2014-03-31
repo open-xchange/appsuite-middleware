@@ -102,7 +102,7 @@ public final class AJPv13ExceptiopnMessages {
     public static final String NO_EMPTY_SENT_BODY_CHUNK_MSG = "Empty SEND_BODY_CHUNK package MUST NOT be sent";
 
     // Integer value exceeds max allowed value (65535): %1$d
-    public static final String INTEGER_VALUE_TOO_BIG_MSG = new com.openexchange.java.StringAllocator("Integer value exceeds max allowed value (").append(
+    public static final String INTEGER_VALUE_TOO_BIG_MSG = new StringBuilder("Integer value exceeds max allowed value (").append(
         AJPv13Response.MAX_INT_VALUE).append("): %1$d").toString();
 
     // Invalid content-type header value: %1$s

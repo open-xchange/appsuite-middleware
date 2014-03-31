@@ -448,7 +448,7 @@ public final class MIMEStructureParser {
                 if (HEADERS_ADDRESS.contains(name)) {
                     final JSONArray jsonAddresses = (JSONArray) entry.getValue();
                     final int length = jsonAddresses.length();
-                    final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32 * length);
+                    final StringBuilder builder = new StringBuilder(32 * length);
                     final String delim = ", ";
                     for (int i = length - 1; i >= 0; i--) {
                         final JSONObject jsonAddress = jsonAddresses.getJSONObject(i);

@@ -64,7 +64,6 @@ import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
@@ -220,7 +219,7 @@ public final class ImageUtility {
                         prefix = "";
                     } else {
                         final String tmp = Strings.toLowerCase(optImageHost);
-                        prefix = tmp.startsWith("http") ? optImageHost : new StringAllocator(32).append("http://").append(optImageHost).toString();
+                        prefix = tmp.startsWith("http") ? optImageHost : new StringBuilder(32).append("http://").append(optImageHost).toString();
                         optImageHostSet = true;
                     }
                 }
@@ -262,7 +261,7 @@ public final class ImageUtility {
                         }
                     } else {
                         final String tmp = Strings.toLowerCase(optImageHost);
-                        prefix = tmp.startsWith("http") ? optImageHost : new StringAllocator(32).append("http://").append(optImageHost).toString();
+                        prefix = tmp.startsWith("http") ? optImageHost : new StringBuilder(32).append("http://").append(optImageHost).toString();
                         optImageHostSet = true;
                     }
                 }

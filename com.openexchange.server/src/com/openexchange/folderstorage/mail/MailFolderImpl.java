@@ -226,7 +226,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         this.capabilities = mailConfig.getCapabilities().getCapabilities();
         {
             final String value =
-                mailFolder.isRootFolder() ? "" : new com.openexchange.java.StringAllocator(16).append('(').append(mailFolder.getMessageCount()).append('/').append(
+                mailFolder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(mailFolder.getMessageCount()).append('/').append(
                     mailFolder.getUnreadMessageCount()).append(')').toString();
             summary = value;
         }

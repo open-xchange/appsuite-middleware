@@ -409,7 +409,7 @@ public final class DatabaseFolderConverter {
                 /*
                  * Either located below private folder or parent not visible
                  */
-                databaseFolder.setParentID(new com.openexchange.java.StringAllocator(8).append(FolderObject.SHARED_PREFIX).append(databaseFolder.getCreatedBy()).toString());
+                databaseFolder.setParentID(new StringBuilder(8).append(FolderObject.SHARED_PREFIX).append(databaseFolder.getCreatedBy()).toString());
             } else {
                 /*
                  * Parent is visible

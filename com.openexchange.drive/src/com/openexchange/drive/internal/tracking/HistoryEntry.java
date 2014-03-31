@@ -51,7 +51,6 @@ package com.openexchange.drive.internal.tracking;
 
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.sync.IntermediateSyncResult;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link HistoryEntry}
@@ -134,9 +133,9 @@ public class HistoryEntry {
         if (null == syncResult) {
             return String.valueOf(hashCode);
         } else {
-            StringAllocator stringAllocator = new StringAllocator();
-            stringAllocator.append(hashCode).append(" (").append(syncResult.toString().replace('\n', ' ').trim());
-            return stringAllocator.append(')').toString();
+            StringBuilder StringBuilder = new StringBuilder();
+            StringBuilder.append(hashCode).append(" (").append(syncResult.toString().replace('\n', ' ').trim());
+            return StringBuilder.append(')').toString();
         }
     }
 

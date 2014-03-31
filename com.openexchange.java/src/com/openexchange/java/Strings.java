@@ -94,7 +94,7 @@ public class Strings {
         if (null == objects || 0 == objects.length) {
             return "";
         }
-        final StringAllocator sb = new StringAllocator(2048);
+        final StringBuilder sb = new StringBuilder(2048);
         for (final Object object : objects) {
             sb.append(String.valueOf(object));
         }
@@ -263,7 +263,7 @@ public class Strings {
             return s;
         }
         final int length = s.length();
-        final StringAllocator sb = new StringAllocator(length << 1);
+        final StringBuilder sb = new StringBuilder(length << 1);
         for (int i = 0; i < length; i++) {
             final char c = s.charAt(i);
             if (c == '\\') {
@@ -373,7 +373,7 @@ public class Strings {
         if (size == 0) {
             return "";
         }
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(size << 4);
+        final StringBuilder builder = new StringBuilder(size << 4);
         for (final Object obj : coll) {
             if (obj == null) {
                 builder.append("null");
@@ -578,7 +578,7 @@ public class Strings {
             return null;
         }
         final int length = str.length();
-        final StringAllocator sb = new StringAllocator(length << 1);
+        final StringBuilder sb = new StringBuilder(length << 1);
         for (int i = 0; i < length; i++) {
             sb.append(' ').append(str.codePointAt(i));
         }
@@ -606,7 +606,7 @@ public class Strings {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
@@ -620,7 +620,7 @@ public class Strings {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

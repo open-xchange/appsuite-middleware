@@ -51,7 +51,6 @@ package com.openexchange.tools.images.scheduler;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.openexchange.java.StringAllocator;
 
 
 /**
@@ -82,7 +81,7 @@ import com.openexchange.java.StringAllocator;
     }
 
     private static String getThreadName(int threadNumber, String namePrefix) {
-        StringAllocator retval = new StringAllocator(namePrefix.length() + 7);
+        StringBuilder retval = new StringBuilder(namePrefix.length() + 7);
         retval.append(namePrefix);
         for (int i = threadNumber; i < 1000000; i *= 10) {
             retval.append('0');

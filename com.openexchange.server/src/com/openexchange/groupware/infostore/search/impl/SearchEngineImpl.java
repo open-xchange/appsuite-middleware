@@ -81,7 +81,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -260,7 +259,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
         }
 
-        final StringAllocator SQL_QUERY = new StringAllocator(512);
+        final StringBuilder SQL_QUERY = new StringBuilder(512);
         SQL_QUERY.append(getResultFieldsSelect(cols));
         SQL_QUERY.append(
             " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(
@@ -332,7 +331,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         }
     }
 
-    private void appendFolders(StringAllocator sqlQuery, int userID, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
+    private void appendFolders(StringBuilder sqlQuery, int userID, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
         boolean needOr = false;
 
         if (!readAllFolders.isEmpty()) {
@@ -353,7 +352,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         }
     }
 
-    private void appendLimit(StringAllocator sqlQuery, int start, int end) {
+    private void appendLimit(StringBuilder sqlQuery, int start, int end) {
         if ((start != NOT_SET) && (end != NOT_SET)) {
             if (end >= start) {
                 sqlQuery.append(" LIMIT ");
@@ -374,7 +373,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         }
     }
 
-    private void appendOrderBy(StringAllocator sqlQuery, Metadata sortedBy, int dir) {
+    private void appendOrderBy(StringBuilder sqlQuery, Metadata sortedBy, int dir) {
         if (sortedBy != null && dir != NOT_SET) {
             final String[] orderColumn = switchMetadata2DBColumns(new Metadata[] { sortedBy });
             if ((orderColumn != null) && (orderColumn[0] != null)) {
@@ -395,7 +394,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         /*
          * get matching object IDs first
          */
-        StringAllocator sqlQuery = new StringAllocator();
+        StringBuilder sqlQuery = new StringBuilder();
         sqlQuery.append("SELECT infostore.id FROM infostore WHERE infostore.cid=").append(context.getContextId());
         appendFolders(sqlQuery, user.getId(), readAllFolders, readOwnFolders);
         appendOrderBy(sqlQuery, sortedBy, dir);
@@ -423,7 +422,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         /*
          * get requested metadata in a second step
          */
-        sqlQuery = new StringAllocator();
+        sqlQuery = new StringBuilder();
         sqlQuery.append(getResultFieldsSelect(cols));
         sqlQuery.append(
             " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(

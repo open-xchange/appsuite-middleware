@@ -136,7 +136,7 @@ public class HTTP {
      */
     public static String toString(final JSONObject o) throws JSONException {
     	final Set<String>     keys = o.keySet();
-    	final org.json.helpers.StringAllocator sb = new org.json.helpers.StringAllocator();
+    	final StringBuilder sb = new StringBuilder();
         if (o.has(HEADER_STATUS_CODE) && o.has(HEADER_REASON_PHRASE)) {
             sb.append(o.getString(HEADER_HTTP_VERSION));
             sb.append(' ');

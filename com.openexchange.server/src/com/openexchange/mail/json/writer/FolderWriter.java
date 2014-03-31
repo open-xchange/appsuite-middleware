@@ -382,7 +382,7 @@ public final class FolderWriter {
                      * Put value
                      */
                     final String value =
-                        folder.isRootFolder() ? "" : new com.openexchange.java.StringAllocator(16).append('(').append(folder.getMessageCount()).append('/').append(
+                        folder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(folder.getMessageCount()).append('/').append(
                             folder.getUnreadMessageCount()).append(')').toString();
                     putter.put(FolderFields.SUMMARY, value);
                 } catch (final JSONException e) {

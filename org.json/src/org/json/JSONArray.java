@@ -453,7 +453,7 @@ public class JSONArray extends AbstractJSONValue {
      */
     public String join(final String separator) throws JSONException {
         final int len = length();
-        final org.json.helpers.StringAllocator sb = new org.json.helpers.StringAllocator(len << 4);
+        final StringBuilder sb = new StringBuilder(len << 4);
         for (int i = 0; i < len; i += 1) {
             if (i > 0) {
                 sb.append(separator);

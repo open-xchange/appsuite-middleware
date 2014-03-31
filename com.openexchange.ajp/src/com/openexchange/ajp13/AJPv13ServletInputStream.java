@@ -98,7 +98,7 @@ public final class AJPv13ServletInputStream extends ServletInputStream {
 
     private void ensureAccess() throws IOException {
         if (!Thread.currentThread().equals(owner)) {
-            throw new IOException(new com.openexchange.java.StringAllocator(128).append("Illegal access to input stream through thread \"").append(
+            throw new IOException(new StringBuilder(128).append("Illegal access to input stream through thread \"").append(
                 Thread.currentThread().getName()).append("\" but should be \"").append(owner.getName()).append('"').toString());
         }
     }

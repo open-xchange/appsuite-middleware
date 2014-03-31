@@ -863,7 +863,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(256);
+        final StringBuilder builder = new StringBuilder(256);
         builder.append("{ MailAccess [accountId=").append(accountId).append(", cached=").append(cached).append(", ");
         if (provider != null) {
             builder.append("provider=").append(provider).append(", ");

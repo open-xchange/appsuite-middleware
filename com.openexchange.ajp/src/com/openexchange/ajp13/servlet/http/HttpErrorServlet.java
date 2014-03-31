@@ -87,7 +87,7 @@ public class HttpErrorServlet extends HttpServlet {
             resp.setContentType("text/html; charset=UTF-8");
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             final PrintWriter writer = resp.getWriter();
-            writer.write(new com.openexchange.java.StringAllocator().append("<html>").append(message).append("</html>").toString());
+            writer.write(new StringBuilder().append("<html>").append(message).append("</html>").toString());
         } catch (final IOException exc) {
             LOG.error("", exc);
         }

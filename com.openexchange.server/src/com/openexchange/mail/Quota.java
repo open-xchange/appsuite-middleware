@@ -232,6 +232,6 @@ public final class Quota {
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator(32).append("Quota limit=").append(limit).append(" usage=").append(usage).toString();
+        return new StringBuilder(32).append("Quota limit=").append(limit).append(" usage=").append(usage).toString();
     }
 }

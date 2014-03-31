@@ -84,7 +84,6 @@ import com.openexchange.java.AsciiReader;
 import com.openexchange.java.AsciiWriter;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
@@ -502,7 +501,7 @@ public final class DBJSlobStorage implements JSlobStorage {
 
     private String getInString(final List<JSlobId> ids) {
         final int size = ids.size();
-        final StringAllocator sb = new StringAllocator(size << 2);
+        final StringBuilder sb = new StringBuilder(size << 2);
         sb.append('(').append('\'').append(ids.get(0).getId()).append('\'');
         for (int i = 1; i < size; i++) {
             sb.append(',').append('\'').append(ids.get(i).getId()).append('\'');

@@ -52,7 +52,6 @@ package com.openexchange.i18n.impl;
 import java.util.Locale;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.parsing.Translations;
-import com.openexchange.java.StringAllocator;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -86,7 +85,7 @@ public class TranslationsI18N implements I18nService {
 
     @Override
     public String toString() {
-        StringAllocator builder = new StringAllocator(64);
+        StringBuilder builder = new StringBuilder(64);
         builder.append('{');
         final Locale locale = getLocale();
         if (null != locale) {

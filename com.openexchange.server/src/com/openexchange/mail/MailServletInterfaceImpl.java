@@ -112,7 +112,6 @@ import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -1403,7 +1402,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 while (false == names.add(name)) {
                                     // Name already contained
                                     name = name.substring(0, reslen);
-                                    name = new StringAllocator(name).append("_(").append(count++).append(')').append(ext).toString();
+                                    name = new StringBuilder(name).append("_(").append(count++).append(')').append(ext).toString();
                                 }
                                 ZipArchiveEntry entry;
                                 int num = 1;
@@ -2490,7 +2489,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 final int parentAccountID = mailFolder.getParentAccountId();
                 if (accountId == parentAccountID) {
                     final String newParent = mailFolder.getParentFullname();
-                    final com.openexchange.java.StringAllocator newFullname = new com.openexchange.java.StringAllocator(newParent).append(mailFolder.getSeparator());
+                    final StringBuilder newFullname = new StringBuilder(newParent).append(mailFolder.getSeparator());
                     if (mailFolder.containsName()) {
                         newFullname.append(mailFolder.getName());
                     } else {

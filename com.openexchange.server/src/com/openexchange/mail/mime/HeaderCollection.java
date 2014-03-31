@@ -477,7 +477,7 @@ public class HeaderCollection implements Serializable {
      */
     public boolean containsHeader(final String name) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         return map.containsKey(HeaderName.valueOf(name));
     }
@@ -491,7 +491,7 @@ public class HeaderCollection implements Serializable {
      */
     public String[] getHeader(final String name) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         final List<String> values = map.get(HeaderName.valueOf(name));
         if (values == null) {
@@ -510,7 +510,7 @@ public class HeaderCollection implements Serializable {
      */
     public String getHeader(final String name, final String delimiter) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         final List<String> values = map.get(HeaderName.valueOf(name));
         if (values == null) {
@@ -520,7 +520,7 @@ public class HeaderCollection implements Serializable {
         if (delimiter == null || (size = values.size()) == 1) {
             return values.get(0);
         }
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(values.get(0));
+        final StringBuilder sb = new StringBuilder(values.get(0));
         for (int i = 1; i < size; i++) {
             sb.append(delimiter).append(values.get(i));
         }
@@ -537,7 +537,7 @@ public class HeaderCollection implements Serializable {
      */
     public String getHeader(final String name, final char delimiter) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         final List<String> values = map.get(HeaderName.valueOf(name));
         if (values == null) {
@@ -547,7 +547,7 @@ public class HeaderCollection implements Serializable {
         if (delimiter == '\0' || (size = values.size()) == 1) {
             return values.get(0);
         }
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(values.get(0));
+        final StringBuilder sb = new StringBuilder(values.get(0));
         for (int i = 1; i < size; i++) {
             sb.append(delimiter).append(values.get(i));
         }
@@ -562,7 +562,7 @@ public class HeaderCollection implements Serializable {
      */
     public HeaderCollection removeHeader(final String name) {
         if (isInvalid(name, true)) {
-            throw new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
+            throw new IllegalArgumentException(new StringBuilder(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
         }
         final List<String> removed = map.remove(HeaderName.valueOf(name));
         if (removed != null) {
@@ -626,7 +626,7 @@ public class HeaderCollection implements Serializable {
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(4096);
+        final StringBuilder sb = new StringBuilder(4096);
         for (final Iterator<Map.Entry<String, String>> iter = getAllHeaders(); iter.hasNext();) {
             final Map.Entry<String, String> e = iter.next();
             sb.append(e.getKey()).append(": ").append(e.getValue()).append(CRLF);
@@ -789,7 +789,7 @@ public class HeaderCollection implements Serializable {
         public void remove() {
             if (entry == null) {
                 throw new IllegalStateException(
-                    new com.openexchange.java.StringAllocator(64).append("next() method has not yet been called, or the remove()").append(
+                    new StringBuilder(64).append("next() method has not yet been called, or the remove()").append(
                         " method has already been called after the last call to the next() method.").toString());
             }
             entry.getValue().remove(--index);

@@ -61,7 +61,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.continuation.internal.ContinuationRegistryServiceImpl;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -147,7 +146,7 @@ public final class ContinuationActivator extends HousekeepingActivator {
                             final CacheService cacheService = getService(CacheService.class);
                             if (null != service && null != cacheService && service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
                                 final Cache cache = cacheService.getCache(regionName);
-                                cache.remove(new StringAllocator(16).append(session.getUserId()).append('@').append(session.getContextId()).toString());
+                                cache.remove(new StringBuilder(16).append(session.getUserId()).append('@').append(session.getContextId()).toString());
                             }
                         } catch (final Exception e) {
                             // Failed handling session

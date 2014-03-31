@@ -830,7 +830,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 } catch (final Throwable t) {
                     // 400 - Bad Request
                     {
-                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
+                        final StringBuilder sb = new StringBuilder(512);
                         sb.append("400 - Bad Request: Error preparing forward-request: ").append(t.getClass().getName());
                         sb.append(" message=").append(t.getMessage());
                         LOG.warn(sb.toString(), t);
@@ -956,7 +956,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 } catch (final Throwable t) {
                     stage = Stage.STAGE_SERVICE_ENDED;
                     ExceptionUtils.handleThrowable(t);
-                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(128).append("Error processing request: ");
+                    final StringBuilder tmp = new StringBuilder(128).append("Error processing request: ");
                     appendRequestInfo(tmp);
                     LOG.error(tmp.toString(), t);
                     // 500 - Internal Server Error
@@ -985,7 +985,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     error = true;
                 } catch (final Throwable t) {
                     ExceptionUtils.handleThrowable(t);
-                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(128).append("Error processing request: ");
+                    final StringBuilder tmp = new StringBuilder(128).append("Error processing request: ");
                     appendRequestInfo(tmp);
                     LOG.error(tmp.toString(), t);
                     error = true;
@@ -1023,7 +1023,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      *
      * @param builder The builder to append to
      */
-    protected void appendRequestInfo(final com.openexchange.java.StringAllocator builder) {
+    protected void appendRequestInfo(final StringBuilder builder) {
         builder.append("request-URI=''");
         builder.append(request.getRequestURI());
         builder.append("'', query-string=''");
@@ -1901,7 +1901,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*
          * Create a new unique id
          */
-        final com.openexchange.java.StringAllocator jsessionIDVal = new com.openexchange.java.StringAllocator(HttpSessionManagement.getNewUniqueId());
+        final StringBuilder jsessionIDVal = new StringBuilder(HttpSessionManagement.getNewUniqueId());
         final String jvmRoute = AJPv13Config.getJvmRoute();
         final String domain = getDomainValue(serverName);
         if ((jvmRoute != null) && (jvmRoute.length() > 0)) {
@@ -2433,7 +2433,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     } // End of class
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final String lineSeparator) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
         if (null == trace) {
             return;
         }

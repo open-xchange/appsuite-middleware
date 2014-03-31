@@ -64,7 +64,6 @@ import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
@@ -121,7 +120,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
             final AppKeyPair appKeys = new AppKeyPair(apiKey, apiSecret);
             final DropboxAPI<WebAuthSession> dropboxAPI =
                 new DropboxAPI<WebAuthSession>(new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX));
-            final StringAllocator authUrl = new StringAllocator(dropboxAPI.getSession().getAuthInfo().url);
+            final StringBuilder authUrl = new StringBuilder(dropboxAPI.getSession().getAuthInfo().url);
             if (!isEmpty(callbackUrl)) {
                 authUrl.append('&').append(OAuthConstants.URLPARAM_OAUTH_CALLBACK).append('=').append(urlEncode(callbackUrl)).toString();
             }

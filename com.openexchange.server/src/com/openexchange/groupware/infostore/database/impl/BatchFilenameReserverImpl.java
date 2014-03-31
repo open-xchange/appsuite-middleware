@@ -70,7 +70,6 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.database.BatchFilenameReserver;
 import com.openexchange.groupware.infostore.database.FilenameReservation;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -236,20 +235,20 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
         if (null == reservationIDs || 0 == reservationIDs.size()) {
             return 0;
         }
-        StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("DELETE FROM infostoreReservedPaths WHERE cid=? AND uuid");
+        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder.append("DELETE FROM infostoreReservedPaths WHERE cid=? AND uuid");
         if (1 == reservationIDs.size()) {
-            stringAllocator.append("=?;");
+            StringBuilder.append("=?;");
         } else {
-            stringAllocator.append(" IN (?");
+            StringBuilder.append(" IN (?");
             for (int i = 1; i < reservationIDs.size(); i++) {
-                stringAllocator.append(",?");
+                StringBuilder.append(",?");
             }
-            stringAllocator.append(");");
+            StringBuilder.append(");");
         }
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(stringAllocator.toString());
+            stmt = connection.prepareStatement(StringBuilder.toString());
             int parameterIndex = 0;
             stmt.setInt(++parameterIndex, contextID);
             for (byte[] reservationID : reservationIDs) {
@@ -265,15 +264,15 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
         if (null == reservations || 0 == reservations.size()) {
             return 0;
         }
-        StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("INSERT INTO infostoreReservedPaths (uuid,cid,folder,name) VALUES (?,?,?,?)");
+        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder.append("INSERT INTO infostoreReservedPaths (uuid,cid,folder,name) VALUES (?,?,?,?)");
         for (int i = 1; i < reservations.size(); i++) {
-            stringAllocator.append(",(?,?,?,?)");
+            StringBuilder.append(",(?,?,?,?)");
         }
-        stringAllocator.append(';');
+        StringBuilder.append(';');
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(stringAllocator.toString());
+            stmt = connection.prepareStatement(StringBuilder.toString());
             int parameterIndex = 0;
             for (BatchFilenameReservation reservation : reservations) {
                 stmt.setBytes(++parameterIndex, reservation.getReservationID());
@@ -292,30 +291,30 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
             return Collections.emptySet();
         }
         Set<String> possibleWildcards = Tools.getEnhancedWildcards(fileNames);
-        StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("SELECT DISTINCT infostore_document.filename FROM infostore JOIN infostore_document ")
+        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder.append("SELECT DISTINCT infostore_document.filename FROM infostore JOIN infostore_document ")
             .append("ON infostore.cid=infostore_document.cid AND infostore.version=infostore_document.version_number ")
             .append("AND infostore.id=infostore_document.infostore_id WHERE infostore.cid=? AND infostore.folder_id=? ")
             .append("AND (infostore_document.filename")
         ;
         if (1 == fileNames.size()) {
-            stringAllocator.append("=?");
+            StringBuilder.append("=?");
         } else {
-            stringAllocator.append(" IN (?");
+            StringBuilder.append(" IN (?");
             for (int i = 1; i < fileNames.size(); i++) {
-                stringAllocator.append(",?");
+                StringBuilder.append(",?");
             }
-            stringAllocator.append(")");
+            StringBuilder.append(")");
         }
         for (int i = 0; i < possibleWildcards.size(); i++) {
-            stringAllocator.append(" OR infostore_document.filename LIKE ?");
+            StringBuilder.append(" OR infostore_document.filename LIKE ?");
         }
-        stringAllocator.append(");");
+        StringBuilder.append(");");
         Set<String> conflictingFilenames = new HashSet<String>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = connection.prepareStatement(stringAllocator.toString());
+            stmt = connection.prepareStatement(StringBuilder.toString());
             int parameterIndex = 0;
             stmt.setInt(++parameterIndex, contextID);
             stmt.setLong(++parameterIndex, targetFolderID);

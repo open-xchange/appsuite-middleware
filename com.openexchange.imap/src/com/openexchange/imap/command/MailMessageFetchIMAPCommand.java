@@ -75,7 +75,6 @@ import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -221,7 +220,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     @Override
     protected String getDebugInfo(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(command.length() + 64);
+        final StringBuilder sb = new StringBuilder(command.length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -253,7 +252,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         if (uid) {
             sb.append("UID ");
         }
@@ -293,7 +292,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 server = server.substring(pos);
             }
             final MessagingException e =
-                new MessagingException(new com.openexchange.java.StringAllocator(32).append("Expected ").append(length).append(" FETCH responses but got ").append(
+                new MessagingException(new StringBuilder(32).append("Expected ").append(length).append(" FETCH responses but got ").append(
                     index).append(" from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(server).append(
                     "\".").toString());
             LOG.warn("", e);
@@ -1009,7 +1008,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @return The FETCH items to craft a FETCH command
      */
     public static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
-        final StringAllocator command = new StringAllocator(128);
+        final StringBuilder command = new StringBuilder(128);
         final boolean sizeIncluded;
         if (fp.contains(FetchProfile.Item.ENVELOPE)) {
             if (loadBody) {

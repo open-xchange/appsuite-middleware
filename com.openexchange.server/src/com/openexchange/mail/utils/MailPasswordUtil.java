@@ -222,7 +222,7 @@ public final class MailPasswordUtil {
                 return crypto.decrypt(encryptedPassword, key);
             } catch (final OXException ce) {
                 // CryptoServce failed, too
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("MailPasswordUtil.decrypt(): Failed to decrypt \"");
+                final StringBuilder sb = new StringBuilder(128).append("MailPasswordUtil.decrypt(): Failed to decrypt \"");
                 sb.append(encryptedPassword).append("\" with ").append(CryptoService.class.getSimpleName());
                 LOG.debug(sb.toString(), ce);
             }

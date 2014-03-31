@@ -134,7 +134,7 @@ public final class StorageUtility {
         if ((internetAddrs == null) || (internetAddrs.length == 0)) {
             return "";
         }
-        final com.openexchange.java.StringAllocator addressBuilder = new com.openexchange.java.StringAllocator(32 * internetAddrs.length);
+        final StringBuilder addressBuilder = new StringBuilder(32 * internetAddrs.length);
         addressBuilder.append(internetAddrs[0].toUnicodeString());
         for (int i = 1; i < internetAddrs.length; i++) {
             addressBuilder.append(',').append(internetAddrs[i].toUnicodeString());

@@ -70,7 +70,6 @@ import javax.security.sasl.SaslClient;
 import javax.security.sasl.SaslException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -1152,7 +1151,7 @@ public class SieveHandler {
      */
     private static String toString(final String chars, final int start, final int end) {
         final int size = end - start;
-        final StringAllocator theChars = new StringAllocator(size);
+        final StringBuilder theChars = new StringBuilder(size);
         for (int i = 0, j = start; i < size; i++) {
             theChars.append(chars.charAt(j++));
         }

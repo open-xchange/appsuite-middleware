@@ -274,7 +274,7 @@ public final class HttpSessionManagement {
      * @return The unique ID
      */
     public static String getNewUniqueId() {
-        final com.openexchange.java.StringAllocator s = new com.openexchange.java.StringAllocator(36).append(UUID.randomUUID());
+        final StringBuilder s = new StringBuilder(36).append(UUID.randomUUID());
         s.deleteCharAt(23);
         s.deleteCharAt(18);
         s.deleteCharAt(13);

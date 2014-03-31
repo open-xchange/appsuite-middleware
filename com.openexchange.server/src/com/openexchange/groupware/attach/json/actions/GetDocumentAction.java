@@ -63,7 +63,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -156,7 +155,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
                 } else {
                     // Specified Content-Type does NOT match file's real MIME type
                     // Therefore ignore it due to security reasons (see bug #25343)
-                    final StringAllocator sb = new StringAllocator(128);
+                    final StringBuilder sb = new StringBuilder(128);
                     sb.append("Denied parameter \"").append(AJAXServlet.PARAMETER_CONTENT_TYPE).append("\" due to security constraints (");
                     sb.append(contentType).append(" vs. ").append(preferredContentType).append(").");
                     LOG.warn(sb.toString());

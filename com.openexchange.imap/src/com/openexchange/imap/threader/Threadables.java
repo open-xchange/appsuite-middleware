@@ -333,7 +333,7 @@ public final class Threadables {
                 final String command;
                 final Response[] r;
                 {
-                    com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("FETCH ");
+                    StringBuilder sb = new StringBuilder(128).append("FETCH ");
                     if (1 == messageCount) {
                         sb.append("1");
                     } else {
@@ -453,7 +453,7 @@ public final class Threadables {
                 final String command;
                 final Response[] r;
                 {
-                    com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("FETCH ");
+                    StringBuilder sb = new StringBuilder(128).append("FETCH ");
                     if (1 == messageCount) {
                         sb.append("1");
                     } else {
@@ -686,12 +686,12 @@ public final class Threadables {
      * @return The resulting THREAD=REFERENCES string
      */
     public static String toThreadReferences(final Threadable threadable, final TIntSet filter) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
+        final StringBuilder sb = new StringBuilder(256);
         toThreadReferences0(threadable, filter, sb);
         return sb.toString();
     }
 
-    private static void toThreadReferences0(final Threadable threadable, final TIntSet filter, final com.openexchange.java.StringAllocator sb) {
+    private static void toThreadReferences0(final Threadable threadable, final TIntSet filter, final StringBuilder sb) {
         Threadable t = threadable;
         if (null == filter) {
             while (null != t) {

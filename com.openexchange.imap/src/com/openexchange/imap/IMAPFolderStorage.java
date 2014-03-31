@@ -112,7 +112,6 @@ import com.openexchange.imap.entity2acl.UserGroupID;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
@@ -1008,7 +1007,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             final String parentFullname = toCreate.getParentFullname();
-            final String fullName = DEFAULT_FOLDER_ID.equals(parentFullname) ? name : new com.openexchange.java.StringAllocator(parentFullname).append(toCreate.getSeparator()).append(name).toString();
+            final String fullName = DEFAULT_FOLDER_ID.equals(parentFullname) ? name : new StringBuilder(parentFullname).append(toCreate.getSeparator()).append(name).toString();
             if (getIMAPFolder(fullName).exists()) {
                 throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, fullName);
             }
@@ -1098,7 +1097,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                  */
                 final char separator = getSeparator();
                 final boolean mboxEnabled =
-                    MBoxEnabledCache.isMBoxEnabled(imapConfig, parent, new com.openexchange.java.StringAllocator(parent.getFullName()).append(separator).toString());
+                    MBoxEnabledCache.isMBoxEnabled(imapConfig, parent, new StringBuilder(parent.getFullName()).append(separator).toString());
                 if (!checkFolderNameValidity(name, separator, mboxEnabled)) {
                     throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, name, invalidCharsString(separator));
                 }
@@ -1109,7 +1108,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     createMe = getIMAPFolder(name);
                 } else {
                     createMe =
-                        (IMAPFolder) imapStore.getFolder(new com.openexchange.java.StringAllocator(parent.getFullName()).append(separator).append(name).toString());
+                        (IMAPFolder) imapStore.getFolder(new StringBuilder(parent.getFullName()).append(separator).append(name).toString());
                 }
                 /*
                  * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
@@ -1360,7 +1359,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 {
                     final IMAPFolder par = (IMAPFolder) renameMe.getParent();
                     final String parentFullName = par.getFullName();
-                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator();
+                    final StringBuilder tmp = new StringBuilder();
                     if (parentFullName.length() > 0) {
                         tmp.append(parentFullName).append(separator);
                     }
@@ -1370,7 +1369,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                      * Check for MBox
                      */
                     mboxEnabled =
-                        MBoxEnabledCache.isMBoxEnabled(imapConfig, par, new com.openexchange.java.StringAllocator(par.getFullName()).append(separator).toString());
+                        MBoxEnabledCache.isMBoxEnabled(imapConfig, par, new StringBuilder(par.getFullName()).append(separator).toString());
                 }
                 if (doesExist(renameFolder, false)) {
                     throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, renameFolder.getFullName());
@@ -1580,7 +1579,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 LOG.debug("MYRIGHTS command failed on namespace folder", e);
                             }
                         }
-                        final boolean mboxEnabled = MBoxEnabledCache.isMBoxEnabled(imapConfig, destFolder, new com.openexchange.java.StringAllocator(destFolder.getFullName()).append(separator).toString());
+                        final boolean mboxEnabled = MBoxEnabledCache.isMBoxEnabled(imapConfig, destFolder, new StringBuilder(destFolder.getFullName()).append(separator).toString());
                         if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
                             throw IMAPException.create(IMAPException.Code.INVALID_FOLDER_NAME, imapConfig, session, newName, invalidCharsString(separator));
                         }
@@ -1619,7 +1618,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     {
                         final IMAPFolder par = (IMAPFolder) moveMe.getParent();
                         final String parentFullName = par.getFullName();
-                        final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator();
+                        final StringBuilder tmp = new StringBuilder();
                         if (parentFullName.length() > 0) {
                             tmp.append(parentFullName).append(separator);
                         }
@@ -1628,7 +1627,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         /*
                          * Check for MBox
                          */
-                        mboxEnabled = MBoxEnabledCache.isMBoxEnabled(imapConfig, par, new com.openexchange.java.StringAllocator(par.getFullName()).append(separator).toString());
+                        mboxEnabled = MBoxEnabledCache.isMBoxEnabled(imapConfig, par, new StringBuilder(par.getFullName()).append(separator).toString());
                     }
                     if (doesExist(renameFolder, false)) {
                         throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, renameFolder.getFullName());
@@ -1939,7 +1938,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFolder.getFullName());
                         final String name = getNameOf(deleteMe);
                         int appendix = 1;
-                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+                        final StringBuilder sb = new StringBuilder();
                         IMAPFolder newFolder =
                             (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(getSeparator(trashFolder)).append(
                                 name).toString());
@@ -1949,7 +1948,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                              * again.
                              */
                             if (sb.length() > 0) {
-                                sb.reinitTo(0);
+                                sb.setLength(0);
                             }
                             newFolder =
                                 (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(getSeparator(trashFolder)).append(
@@ -2351,7 +2350,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (isEmpty && RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapStore.getDefaultFolder(), true, session, accountId).booleanValue()) {
                 return prefix;
             }
-            final String retvalPrefix = new com.openexchange.java.StringAllocator(isEmpty ? STR_INBOX : prefix).append(sep[0]).toString();
+            final String retvalPrefix = new StringBuilder(isEmpty ? STR_INBOX : prefix).append(sep[0]).toString();
             if (!retvalPrefix.equals(prefixByInferiors)) {
                 LOG.info("The personal namespace indicated by NAMESPACE command (\"{}\") does not match to root folder's capability: \"{}\" IS NOT \"{}\"", retvalPrefix, retvalPrefix, prefixByInferiors);
             }
@@ -2369,7 +2368,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             final char separator = defaultFolder.getSeparator();
             sep[0] = separator;
             if (!RootSubfolderCache.canCreateSubfolders(defaultFolder, true, session, accountId).booleanValue() || MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace()) {
-                return new com.openexchange.java.StringAllocator(STR_INBOX).append(separator).toString();
+                return new StringBuilder(STR_INBOX).append(separator).toString();
             }
             return "";
         } catch (final MessagingException e) {
@@ -2683,7 +2682,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         final String destFullname = destFolder.getFullName();
         final IMAPFolder newFolder;
         {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+            final StringBuilder sb = new StringBuilder();
             if (destFullname.length() > 0) {
                 sb.append(destFullname).append(getSeparator(destFolder));
             }
@@ -2891,11 +2890,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private CacheEvent newCacheEventFor(final int userId) {
-        return CacheEvent.INVALIDATE(ListLsubCache.REGION, null, new StringAllocator(16).append(userId).append('@').append(ctx.getContextId()).toString());
+        return CacheEvent.INVALIDATE(ListLsubCache.REGION, null, new StringBuilder(16).append(userId).append('@').append(ctx.getContextId()).toString());
     }
 
     private static String stripPOSTRight(final String rights) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(rights.length());
+        final StringBuilder sb = new StringBuilder(rights.length());
         final int length = rights.length();
         for (int i = 0; i < length; i++) {
             final char c = rights.charAt(i);
@@ -3019,7 +3018,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         final TIntSet invalidChars = new TIntHashSet(invalidChars());
         invalidChars.addAll(WILDCARDS);
         invalidChars.add(separator);
-        final StringAllocator sb = new StringAllocator(invalidChars.size());
+        final StringBuilder sb = new StringBuilder(invalidChars.size());
         invalidChars.forEach(new TIntProcedure() {
 
             @Override
@@ -3215,7 +3214,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private static String urlName(final String prefix, final String host, final int port, final String username, final String pw) {
         // Start with "protocol:"
-        final StringAllocator tempURL = new StringAllocator(128);
+        final StringBuilder tempURL = new StringBuilder(128);
 
         if (null != prefix) {
             tempURL.append(prefix);

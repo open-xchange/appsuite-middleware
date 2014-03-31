@@ -59,7 +59,6 @@ import java.util.regex.Pattern;
 import com.openexchange.file.storage.meta.FileComparator;
 import com.openexchange.file.storage.meta.FileFieldGet;
 import com.openexchange.file.storage.meta.FileFieldHandling;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link AbstractFile} - An abstract file.
@@ -160,7 +159,7 @@ public abstract class AbstractFile implements File {
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */
     private static String wildcardToRegex(final String wildcard) {
-        final StringAllocator s = new StringAllocator(wildcard.length());
+        final StringBuilder s = new StringBuilder(wildcard.length());
         s.append('^');
         final int len = wildcard.length();
         for (int i = 0; i < len; i++) {

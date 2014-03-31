@@ -123,7 +123,7 @@ public class AttachmentQueryCatalog {
     }
 
     public String getDelete(final String tablename, final List<AttachmentMetadata> attachments) {
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator("DELETE FROM ").append(tablename).append(" WHERE id IN (");
+        final StringBuilder builder = new StringBuilder("DELETE FROM ").append(tablename).append(" WHERE id IN (");
         for(final AttachmentMetadata m : attachments) {
             builder.append(m.getId()).append(',');
         }

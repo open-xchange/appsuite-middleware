@@ -415,7 +415,7 @@ public final class BrowserDetector {
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("User agent=").append(userAgent);
+        final StringBuilder sb = new StringBuilder(128).append("User agent=").append(userAgent);
         sb.append("\nBrowser name=").append(browserName).append(", browser version=").append(browserVersion);
         sb.append(", browser platform=").append(browserPlatform);
         return sb.toString();

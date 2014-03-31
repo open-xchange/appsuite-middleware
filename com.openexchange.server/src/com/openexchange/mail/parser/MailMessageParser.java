@@ -80,7 +80,6 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
@@ -575,7 +574,7 @@ public final class MailMessageParser {
                             if (null == method) {
                                 contentTypeStr = "text/calendar; charset=UTF-8";
                             } else {
-                                contentTypeStr = new com.openexchange.java.StringAllocator("text/calendar; method=").append(method.getValue()).append("; charset=UTF-8").toString();
+                                contentTypeStr = new StringBuilder("text/calendar; method=").append(method.getValue()).append("; charset=UTF-8").toString();
                             }
                         }
                         /*
@@ -600,7 +599,7 @@ public final class MailMessageParser {
                             final net.fortuna.ical4j.model.Component vEvent = calendar.getComponents().getComponent(net.fortuna.ical4j.model.Component.VEVENT);
                             final Property summary = vEvent.getProperties().getProperty(net.fortuna.ical4j.model.Property.SUMMARY);
                             if (summary != null) {
-                                part.setFileName(new com.openexchange.java.StringAllocator(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
+                                part.setFileName(new StringBuilder(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
                             }
                         }
                         /*
@@ -729,7 +728,7 @@ public final class MailMessageParser {
                     // Check RTF part
                     if (null != rtfPart) {
                         final MailPart convertedPart = MimeMessageConverter.convertPart(rtfPart);
-                        convertedPart.setFileName(new com.openexchange.java.StringAllocator(subject.replaceAll("\\s+", "_")).append(".rtf").toString());
+                        convertedPart.setFileName(new StringBuilder(subject.replaceAll("\\s+", "_")).append(".rtf").toString());
                         parseMailContent(convertedPart, handler, prefix, partCount++);
                     }
                     // As attachment
@@ -891,7 +890,7 @@ public final class MailMessageParser {
         String filename = rawFileName;
         if ((filename == null) || isEmptyString(filename)) {
             final List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(16).append(PREFIX).append(sequenceId).append('.');
+            final StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
                 sb.append("dat");
             } else {
@@ -932,7 +931,7 @@ public final class MailMessageParser {
         if (prefix == null) {
             return String.valueOf(partCount);
         }
-        return new com.openexchange.java.StringAllocator(prefix).append('.').append(partCount).toString();
+        return new StringBuilder(prefix).append('.').append(partCount).toString();
     }
 
     /**
@@ -1093,7 +1092,7 @@ public final class MailMessageParser {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

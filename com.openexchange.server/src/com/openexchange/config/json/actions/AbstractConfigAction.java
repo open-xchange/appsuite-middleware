@@ -142,7 +142,7 @@ public abstract class AbstractConfigAction implements AJAXActionService {
             LOG.error("Unsupported encoding", e);
             uri = req.getRequestURI();
         }
-        final String path = new com.openexchange.java.StringAllocator(req.getContextPath()).append(req.getServletPath()).toString();
+        final String path = new StringBuilder(req.getContextPath()).append(req.getServletPath()).toString();
         final int pos = uri.indexOf(path);
         if (pos != -1) {
             uri = uri.substring(pos + path.length());

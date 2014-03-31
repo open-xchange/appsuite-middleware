@@ -191,7 +191,7 @@ public final class Tools  {
         if(ldapfilter == null) {
             return "";
         }
-        final com.openexchange.java.StringAllocator sa = new com.openexchange.java.StringAllocator();
+        final StringBuilder sa = new StringBuilder();
         for (int i = 0; i < ldapfilter.length(); i++) {
             final char curChar = ldapfilter.charAt(i);
             switch (curChar) {

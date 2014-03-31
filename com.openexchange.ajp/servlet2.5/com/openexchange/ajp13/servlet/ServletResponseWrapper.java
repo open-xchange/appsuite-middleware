@@ -227,11 +227,11 @@ public class ServletResponseWrapper implements ServletResponse {
                 if (!characterEncoding.equalsIgnoreCase(m.group(2))) {
                     final StringBuilder newContentType = new StringBuilder();
                     final MatcherReplacer mr = new MatcherReplacer(m, contentType);
-                    mr.appendLiteralReplacement(newContentType, new com.openexchange.java.StringAllocator().append(m.group(1)).append(characterEncoding).toString());
+                    mr.appendLiteralReplacement(newContentType, new StringBuilder().append(m.group(1)).append(characterEncoding).toString());
                     while (m.find()) {
                         mr.appendLiteralReplacement(
                             newContentType,
-                            new com.openexchange.java.StringAllocator().append(m.group(1)).append(characterEncoding).toString());
+                            new StringBuilder().append(m.group(1)).append(characterEncoding).toString());
                     }
                     mr.appendTail(newContentType);
                     headers.put(CONTENT_TYPE, new String[] { newContentType.toString() });

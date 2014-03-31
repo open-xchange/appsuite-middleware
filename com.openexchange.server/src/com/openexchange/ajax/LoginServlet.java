@@ -107,7 +107,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
@@ -218,7 +217,7 @@ public class LoginServlet extends AJAXServlet {
      * @return The name of the public session cookie
      */
     public static String getPublicSessionCookieName(final HttpServletRequest req) {
-        return new StringAllocator(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getUserAgentHash(req)).toString();
+        return new StringBuilder(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getUserAgentHash(req)).toString();
     }
 
     // --------------------------------------------------------------------------------------- //

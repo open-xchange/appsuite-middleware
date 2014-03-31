@@ -118,7 +118,7 @@ public final class SourcedImage {
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder builder = new StringBuilder(64);
         builder.append("SourcedImage [contentType=").append(contentType).append(", transferEncoding=").append(transferEncoding).append(
             ", contentId=").append(contentId).append(", data=");
         if (data.length() <= 10) {

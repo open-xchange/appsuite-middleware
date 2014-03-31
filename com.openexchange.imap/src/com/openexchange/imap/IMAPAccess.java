@@ -92,7 +92,6 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.imap.storecache.IMAPStoreContainer;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
@@ -739,7 +738,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Special check for ACLs
              */
             if (config.isSupportsACLs()) {
-                final String key = new com.openexchange.java.StringAllocator(server).append('@').append(port).toString();
+                final String key = new StringBuilder(server).append('@').append(port).toString();
                 Boolean b = aclCapableServers.get(key);
                 if (null == b) {
                     Boolean nb;
@@ -1238,7 +1237,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             if (forceSecure || config.getIMAPProperties().isEnableTls()) {
                 try {
-                    final String serverUrl = new StringAllocator(36).append(IDNA.toASCII(config.getServer())).append(':').append(config.getPort()).toString();
+                    final String serverUrl = new StringBuilder(36).append(IDNA.toASCII(config.getServer())).append(':').append(config.getPort()).toString();
                     final Map<String, String> capabilities = IMAPCapabilityAndGreetingCache.getCapabilities(serverUrl, false, config.getIMAPProperties());
                     if (null != capabilities) {
                         if (capabilities.containsKey("STARTTLS")) {
@@ -1316,7 +1315,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     private static final int MAX_STACK_TRACE_ELEMENTS = 1000;
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final String lineSeparator, final com.openexchange.java.StringAllocator sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final String lineSeparator, final StringBuilder sb) {
         if (null == trace) {
             return;
         }

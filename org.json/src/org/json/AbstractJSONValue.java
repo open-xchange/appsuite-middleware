@@ -118,7 +118,7 @@ abstract class AbstractJSONValue implements JSONValue {
         }
         final int buflen = BUF_SIZE;
         final char[] cbuf = new char[buflen];
-        final org.json.helpers.StringAllocator sa = new org.json.helpers.StringAllocator(SB_SIZE);
+        final StringBuilder sa = new StringBuilder(SB_SIZE);
         long count = 0;
         for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
             if (maxRead > 0) {

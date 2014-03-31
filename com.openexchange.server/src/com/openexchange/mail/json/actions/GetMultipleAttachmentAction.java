@@ -68,7 +68,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -121,7 +120,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                 final String fileName;
                 {
                     final String subject = mailInterface.getMessage(folderPath, uid).getSubject();
-                    fileName = new com.openexchange.java.StringAllocator(subject).append(".zip").toString();
+                    fileName = new StringBuilder(subject).append(".zip").toString();
                 }
                 /*
                  * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
@@ -131,7 +130,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                     if (null != ajaxRequestData) {
                         if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
                             try {
-                                final StringAllocator sb = new StringAllocator(512);
+                                final StringBuilder sb = new StringBuilder(512);
                                 sb.append("attachment");
                                 DownloadUtility.appendFilenameParameter(fileName, "application/zip", ajaxRequestData.getUserAgent(), sb);
                                 ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());

@@ -168,7 +168,7 @@ public class ServiceRegistry implements ServiceLookup {
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
+        final StringBuilder sb = new StringBuilder(256);
         sb.append("Service registry:\n");
         if (services.isEmpty()) {
             sb.append("<empty>");

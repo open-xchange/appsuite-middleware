@@ -313,7 +313,7 @@ public abstract class MailMessage extends MailPart {
      * @return The color abel's string representation
      */
     public static String getColorLabelStringValue(final int cl) {
-        return new com.openexchange.java.StringAllocator(COLOR_LABEL_PREFIX).append(cl).toString();
+        return new StringBuilder(COLOR_LABEL_PREFIX).append(cl).toString();
     }
 
     private static final InternetAddress[] EMPTY_ADDRS = new InternetAddress[0];

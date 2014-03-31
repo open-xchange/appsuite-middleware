@@ -78,7 +78,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.attachment.AttachmentToken;
@@ -217,7 +216,7 @@ public class MailAttachment extends AJAXServlet {
                      * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment
                      * disposition.
                      */
-                    final StringAllocator sb = new StringAllocator(32);
+                    final StringBuilder sb = new StringBuilder(32);
                     sb.append("attachment");
                     DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                     resp.setHeader("Content-Disposition", sb.toString());
@@ -291,7 +290,7 @@ public class MailAttachment extends AJAXServlet {
                         if (full || ranges.isEmpty()) {
                             // Return full file.
                             final Range r = new Range(0L, length - 1, length);
-                            resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                            resp.setHeader("Content-Range", new StringBuilder("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
                             // Copy full range.
                             copy(attachmentInputStream, outputStream, r.start, r.length);
@@ -299,7 +298,7 @@ public class MailAttachment extends AJAXServlet {
 
                             // Return single part of file.
                             final Range r = ranges.get(0);
-                            resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                            resp.setHeader("Content-Range", new StringBuilder("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
                             resp.setHeader("Content-Length", Long.toString(r.length));
                             resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
@@ -308,16 +307,16 @@ public class MailAttachment extends AJAXServlet {
                         } else {
                             // Return multiple parts of file.
                             final String boundary = MULTIPART_BOUNDARY;
-                            resp.setContentType(new StringAllocator("multipart/byteranges; boundary=").append(boundary).toString());
+                            resp.setContentType(new StringBuilder("multipart/byteranges; boundary=").append(boundary).toString());
                             resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
                             // Copy multi part range.
                             for (final Range r : ranges) {
                                 // Add multipart boundary and header fields for every range.
                                 outputStream.println();
-                                outputStream.println(new StringAllocator("--").append(boundary).toString());
-                                outputStream.println(new StringAllocator("Content-Type: ").append(contentType).toString());
-                                outputStream.println(new StringAllocator("Content-Range: bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                                outputStream.println(new StringBuilder("--").append(boundary).toString());
+                                outputStream.println(new StringBuilder("Content-Type: ").append(contentType).toString());
+                                outputStream.println(new StringBuilder("Content-Range: bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
                                 // Copy single part range of multi part range.
                                 copy(attachmentInputStream, outputStream, r.start, r.length);
@@ -325,7 +324,7 @@ public class MailAttachment extends AJAXServlet {
 
                             // End with multipart boundary.
                             outputStream.println();
-                            outputStream.println(new StringAllocator("--").append(boundary).append("--").toString());
+                            outputStream.println(new StringBuilder("--").append(boundary).append("--").toString());
                         }
                     } else {
                         final int len = BUFLEN;
@@ -458,7 +457,7 @@ public class MailAttachment extends AJAXServlet {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

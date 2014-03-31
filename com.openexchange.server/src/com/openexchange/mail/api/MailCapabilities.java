@@ -226,7 +226,7 @@ public abstract class MailCapabilities {
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator(64).append(MailCapabilities.class.getSimpleName()).append(": hasPermissions=").append(hasPermissions()).append(
+        return new StringBuilder(64).append(MailCapabilities.class.getSimpleName()).append(": hasPermissions=").append(hasPermissions()).append(
             ", hasQuota=").append(hasQuota()).append(", hasSort=").append(hasSort()).append(", hasSubscription=").append(hasSubscription()).append(
             ", hasThreadReferences=").append(hasThreadReferences()).toString();
     }

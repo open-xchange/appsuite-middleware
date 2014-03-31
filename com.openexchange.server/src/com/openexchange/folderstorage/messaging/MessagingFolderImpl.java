@@ -178,7 +178,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
         capabilities = parseCaps(messagingFolder.getCapabilities());
         {
             final String value =
-                isRootFolder ? "" : new com.openexchange.java.StringAllocator(16).append('(').append(messagingFolder.getMessageCount()).append('/').append(
+                isRootFolder ? "" : new StringBuilder(16).append('(').append(messagingFolder.getMessageCount()).append('/').append(
                     messagingFolder.getUnreadMessageCount()).append(')').toString();
             summary = value;
         }

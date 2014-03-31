@@ -60,7 +60,6 @@ import java.util.TreeSet;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
@@ -135,7 +134,7 @@ public class HashingFileStorage extends DefaultFileStorage {
             }
             out.flush();
 
-            return new StringAllocator(filestorePath[0]).append('/').append(filestorePath[1]).toString();
+            return new StringBuilder(filestorePath[0]).append('/').append(filestorePath[1]).toString();
         } catch (final IOException e) {
             throw FileStorageCodes.IOERROR.create(e.toString());
         } finally {

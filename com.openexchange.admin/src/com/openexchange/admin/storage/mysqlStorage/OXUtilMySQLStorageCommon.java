@@ -72,7 +72,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
-import com.openexchange.java.StringAllocator;
 
 public class OXUtilMySQLStorageCommon {
 
@@ -216,7 +215,7 @@ public class OXUtilMySQLStorageCommon {
             }
         }
         if (!toCreate.isEmpty()) {
-            final StringAllocator sb = new StringAllocator(2048);
+            final StringBuilder sb = new StringBuilder(2048);
             sb.append("Unable to determine next CreateTableService to execute.\n");
             sb.append("Existing tables: ");
             for (final String existingTable : existingTables) {

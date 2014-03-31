@@ -53,7 +53,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -103,7 +102,7 @@ public final class ProviderUtility {
         } catch (final URISyntaxException e) {
             throw MailAccountExceptionCodes.URI_PARSE_FAILED.create(e, serverUrl);
         }
-        return new StringAllocator(uri.getHost()).append(':').append(uri.getPort()).toString();
+        return new StringBuilder(uri.getHost()).append(':').append(uri.getPort()).toString();
     }
 
     /**

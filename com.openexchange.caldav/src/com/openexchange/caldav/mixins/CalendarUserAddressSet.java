@@ -73,7 +73,7 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
     protected String getValue() {
         String mail = sessionHolder.getUser().getMail();
 
-        com.openexchange.java.StringAllocator addresses = new com.openexchange.java.StringAllocator();
+        StringBuilder addresses = new StringBuilder();
         addresses.append("<D:href>mailto:").append(mail).append("</D:href>");
 
         addresses.append("<D:href>/principals/users/"+sessionHolder.getUser().getLoginInfo()+"</D:href>");

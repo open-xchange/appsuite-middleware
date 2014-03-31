@@ -69,7 +69,6 @@ import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.continuation.ContinuationResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -306,7 +305,7 @@ public class DefaultDispatcher implements Dispatcher {
             if (withQueryString) {
                 final Map<String, String> parameters = requestData.getParameters();
                 if (null != parameters) {
-                    final StringAllocator sb = new StringAllocator(256);
+                    final StringBuilder sb = new StringBuilder(256);
                     sb.append('"');
                     boolean first = true;
                     for (final Entry<String, String> entry : parameters.entrySet()) {
@@ -360,7 +359,7 @@ public class DefaultDispatcher implements Dispatcher {
                     current = actionFactories.get(module);
                     final Module moduleAnnotation = current.getClass().getAnnotation(Module.class);
                     if (null == moduleAnnotation) {
-                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512).append("There is already a factory associated with module \"");
+                        final StringBuilder sb = new StringBuilder(512).append("There is already a factory associated with module \"");
                         sb.append(module).append("\": ").append(current.getClass().getName());
                         sb.append(". Therefore registration is denied for factory \"").append(factory.getClass().getName());
                         sb.append("\". Unless these two factories provide the \"").append(Module.class.getName()).append(

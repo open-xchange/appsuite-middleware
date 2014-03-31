@@ -51,7 +51,6 @@ import org.apache.cxf.staxutils.DepthXMLStreamReader;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.ws.commons.schema.XmlSchemaElement;
 import org.xml.sax.SAXParseException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.Slf4jLogger;
 
 /**
@@ -135,7 +134,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                                 final Throwable linkedException = ((javax.xml.bind.UnmarshalException) fault.getCause()).getLinkedException();
                                 if (linkedException != null && linkedException.getClass().getName().indexOf("SAXParseException") >= 0) {
                                     {
-                                        final StringAllocator sb = new StringAllocator(fault.getMessage());
+                                        final StringBuilder sb = new StringBuilder(fault.getMessage());
                                         LOG.log(Level.SEVERE, sb.toString(), fault);
                                     }
                                     final String[] info = extractUnexpectedElement(linkedException.getMessage());
@@ -377,7 +376,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         }
     }
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final String lineSeparator) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
         if (null == trace) {
             return;
         }

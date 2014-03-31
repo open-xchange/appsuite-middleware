@@ -185,7 +185,7 @@ public final class MailFolderUtility {
         }
         final int length = fullname.length();
         if (DEFAULT_FOLDER_ID.equals(fullname) || (0 == length)) {
-            return new com.openexchange.java.StringAllocator(length + 4).append(fullname).append(accountId).toString();
+            return new StringBuilder(length + 4).append(fullname).append(accountId).toString();
         }
         if (fullname.startsWith(DEFAULT_FOLDER_ID)) {
             /*
@@ -193,12 +193,12 @@ public final class MailFolderUtility {
              */
             final String tmpFullname = prepareMailFolderParam(fullname).getFullname();
             if (DEFAULT_FOLDER_ID.equals(tmpFullname)) {
-                return new com.openexchange.java.StringAllocator(length + 4).append(fullname).append(tmpFullname).toString();
+                return new StringBuilder(length + 4).append(fullname).append(tmpFullname).toString();
             }
-            return new com.openexchange.java.StringAllocator(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
+            return new StringBuilder(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
                 MailProperties.getInstance().getDefaultSeparator()).append(tmpFullname).toString();
         }
-        return new com.openexchange.java.StringAllocator(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
+        return new StringBuilder(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
             MailProperties.getInstance().getDefaultSeparator()).append(fullname).toString();
     }
 

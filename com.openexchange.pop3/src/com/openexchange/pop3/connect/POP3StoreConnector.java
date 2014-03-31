@@ -68,7 +68,6 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
@@ -369,7 +368,7 @@ public final class POP3StoreConnector {
                 // Fetch capabilities again
                 final Map<String, String> caps = pop3Store.reinitCapabilities();
                 if (!caps.isEmpty()) {
-                    final StringAllocator sb = new StringAllocator(128);
+                    final StringBuilder sb = new StringBuilder(128);
                     for (final String cap : caps.keySet()) {
                         sb.append(cap).append('\n');
                     }
@@ -387,7 +386,7 @@ public final class POP3StoreConnector {
                 // Fetch capabilities again
                 final Map<String, String> caps = pop3Store.reinitCapabilities();
                 if (!caps.isEmpty()) {
-                    final StringAllocator sb = new StringAllocator(128);
+                    final StringBuilder sb = new StringBuilder(128);
                     for (final String cap : caps.keySet()) {
                         sb.append(cap).append('\n');
                     }

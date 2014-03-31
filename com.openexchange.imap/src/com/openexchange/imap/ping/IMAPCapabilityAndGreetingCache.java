@@ -233,7 +233,7 @@ public final class IMAPCapabilityAndGreetingCache {
                 }
                 final InputStream in = s.getInputStream();
                 final OutputStream out = s.getOutputStream();
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
+                final StringBuilder sb = new StringBuilder(512);
                 /*
                  * Read IMAP server greeting on connect
                  */
@@ -253,7 +253,7 @@ public final class IMAPCapabilityAndGreetingCache {
                     }
                 }
                 final String greeting = sb.toString();
-                sb.reinitTo(0);
+                sb.setLength(0);
                 if (skipLF) {
                     /*
                      * Consume final LF
@@ -304,7 +304,7 @@ public final class IMAPCapabilityAndGreetingCache {
                         }
                     } while (nextLine);
                     final String[] lines = SPLIT.split(sb.toString());
-                    sb.reinitTo(0);
+                    sb.setLength(0);
                     for (final String line : lines) {
                         if (!line.startsWith("A10 ")) {
                             sb.append(' ').append(line);

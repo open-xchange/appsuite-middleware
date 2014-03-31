@@ -54,7 +54,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link CustomThreadFactory} - A thread factory taking a custom name prefix for created threads.
@@ -104,7 +103,7 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
     }
 
     private static String getThreadName(int threadNumber, String namePrefix) {
-        StringAllocator retval = new StringAllocator(namePrefix.length() + 7);
+        StringBuilder retval = new StringBuilder(namePrefix.length() + 7);
         retval.append(namePrefix);
         for (int i = threadNumber; i < 1000000; i *= 10) {
             retval.append('0');

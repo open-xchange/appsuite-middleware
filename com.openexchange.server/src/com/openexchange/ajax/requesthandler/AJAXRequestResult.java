@@ -673,7 +673,7 @@ public class AJAXRequestResult {
     @Override
     public String toString() {
         final Collection<OXException> thisWarnings = warnings;
-        return new com.openexchange.java.StringAllocator(34).append(super.toString()).append(" resultObject=").append(resultObject).append(", timestamp=").append(
+        return new StringBuilder(34).append(super.toString()).append(" resultObject=").append(resultObject).append(", timestamp=").append(
             timestamp).append(" warnings=").append(null == thisWarnings ? "<none>" : thisWarnings.toString()).toString();
     }
 

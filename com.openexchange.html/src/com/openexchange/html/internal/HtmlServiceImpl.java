@@ -102,7 +102,6 @@ import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
@@ -1313,7 +1312,7 @@ public final class HtmlServiceImpl implements HtmlService {
             return htmlContent;
         }
         final String lineSeparator = this.lineSeparator;
-        final StringAllocator sb = new StringAllocator(htmlContent.length() + 512);
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 512);
         if (isEmpty(htmlContent)) {
             sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">").append(lineSeparator);
             sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">").append(lineSeparator);
@@ -1807,7 +1806,7 @@ public final class HtmlServiceImpl implements HtmlService {
              */
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
             newSerializer().write(htmlNode, writer, "UTF-8");
-            final StringAllocator buffer = writer.getBuffer();
+            final StringBuilder buffer = writer.getBuffer();
             /*
              * Insert DOCTYPE if absent
              */

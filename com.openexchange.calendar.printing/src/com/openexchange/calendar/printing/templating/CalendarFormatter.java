@@ -99,7 +99,7 @@ public class CalendarFormatter {
 
 
     public String getDateSpec() {
-        com.openexchange.java.StringAllocator b = new com.openexchange.java.StringAllocator();
+        StringBuilder b = new StringBuilder();
         b.append(formatDate(appointment));
         return b.toString();
     }

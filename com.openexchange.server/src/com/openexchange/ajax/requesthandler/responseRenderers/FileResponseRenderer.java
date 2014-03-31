@@ -93,7 +93,6 @@ import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -296,7 +295,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             final String userAgent = AJAXServlet.sanitizeParam(req.getHeader("user-agent"));
             if (DOWNLOAD.equalsIgnoreCase(delivery) || (SAVE_AS_TYPE.equals(contentType) && !VIEW.equalsIgnoreCase(delivery))) {
                 // Write as a common file download: application/octet-stream
-                final StringAllocator sb = new StringAllocator(32);
+                final StringBuilder sb = new StringBuilder(32);
                 sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
                 DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                 resp.setHeader("Content-Disposition", sb.toString());
@@ -373,7 +372,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     // Force attachment download
                     resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                 } else if (delivery.equalsIgnoreCase(VIEW) && null != fileName) {
-                    final StringAllocator sb = new StringAllocator(32);
+                    final StringBuilder sb = new StringBuilder(32);
                     sb.append("inline");
                     DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                     resp.setHeader("Content-Disposition", sb.toString());
@@ -431,7 +430,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             }
                         } else {
                             // Ignore it due to security reasons (see bug #25343)
-                            final StringAllocator sb = new StringAllocator(128);
+                            final StringBuilder sb = new StringBuilder(128);
                             sb.append("Denied parameter \"").append(PARAMETER_CONTENT_TYPE);
                             sb.append("\" due to security constraints (requested \"");
                             sb.append(contentType).append("\" , but is \"").append(preferredContentType).append("\").");
@@ -530,7 +529,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     if (full || ranges.isEmpty()) {
                         // Return full file.
                         final Range r = new Range(0L, length - 1, length);
-                        resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                        resp.setHeader("Content-Range", new StringBuilder("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
                         // Copy full range.
                         copy(documentData, outputStream, r.start, r.length);
@@ -538,7 +537,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
                         // Return single part of file.
                         final Range r = ranges.get(0);
-                        resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                        resp.setHeader("Content-Range", new StringBuilder("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
                         resp.setHeader("Content-Length", Long.toString(r.length));
                         resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
@@ -547,16 +546,16 @@ public class FileResponseRenderer implements ResponseRenderer {
                     } else {
                         // Return multiple parts of file.
                         final String boundary = MULTIPART_BOUNDARY;
-                        resp.setContentType(new StringAllocator("multipart/byteranges; boundary=").append(boundary).toString());
+                        resp.setContentType(new StringBuilder("multipart/byteranges; boundary=").append(boundary).toString());
                         resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
                         // Copy multi part range.
                         for (final Range r : ranges) {
                             // Add multipart boundary and header fields for every range.
                             outputStream.println();
-                            outputStream.println(new StringAllocator("--").append(boundary).toString());
-                            outputStream.println(new StringAllocator("Content-Type: ").append(contentType).toString());
-                            outputStream.println(new StringAllocator("Content-Range: bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                            outputStream.println(new StringBuilder("--").append(boundary).toString());
+                            outputStream.println(new StringBuilder("Content-Type: ").append(contentType).toString());
+                            outputStream.println(new StringBuilder("Content-Range: bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
                             // Copy single part range of multi part range.
                             copy(documentData, outputStream, r.start, r.length);
@@ -564,7 +563,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
                         // End with multipart boundary.
                         outputStream.println();
-                        outputStream.println(new StringAllocator("--").append(boundary).append("--").toString());
+                        outputStream.println(new StringBuilder("--").append(boundary).append("--").toString());
                     }
                 } else {
                     // Check if "Range" header was sent by client although we do not know exact size/length
@@ -597,7 +596,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                                 count += read;
                             }
                             if (length != count) {
-                                final StringAllocator sb = new StringAllocator("Transferred ").append((length > count ? "less" : "more"));
+                                final StringBuilder sb = new StringBuilder("Transferred ").append((length > count ? "less" : "more"));
                                 sb.append(" bytes than signaled through \"Content-Length\" response header. File download may get paused (less) or be corrupted (more).");
                                 sb.append(" Associated file \"").append(fileName).append("\" with indicated length of ").append(length).append(", but is ").append(count);
                                 LOG.warn(sb.toString());

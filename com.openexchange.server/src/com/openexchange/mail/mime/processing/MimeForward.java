@@ -80,7 +80,6 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.CharsetDetector;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
@@ -239,7 +238,7 @@ public final class MimeForward {
                             0,
                             subjectPrefix,
                             0,
-                            subjectPrefix.length()) ? origSubject : new com.openexchange.java.StringAllocator(subjectPrefix.length() + origSubject.length()).append(
+                            subjectPrefix.length()) ? origSubject : new StringBuilder(subjectPrefix.length() + origSubject.length()).append(
                             subjectPrefix).append(origSubject).toString());
                     forwardMsg.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
                 }
@@ -584,7 +583,7 @@ public final class MimeForward {
                     if (!multipartPart.getContentType().startsWith("multipart/mixed")) {
                         return MimeProcessingUtility.readContent(part, charset);
                     }
-                    final StringAllocator sb = new StringAllocator(MimeProcessingUtility.readContent(part, charset));
+                    final StringBuilder sb = new StringBuilder(MimeProcessingUtility.readContent(part, charset));
                     for (int j = i + 1; j < count; j++) {
                         final MailPart nextPart = multipartPart.getEnclosedMailPart(j);
                         final ContentType nextContentType = nextPart.getContentType();
@@ -599,7 +598,7 @@ public final class MimeForward {
                                 final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
                                 if (null == fileName) {
                                     final String ext = MimeType2ExtMap.getFileExtension(nextContentType.getBaseType());
-                                    fileName = new StringAllocator("image").append(j).append('.').append(ext).toString();
+                                    fileName = new StringBuilder("image").append(j).append('.').append(ext).toString();
                                 }
                                 final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(origMail.getAccountId(), origMail.getFolder())).id(origMail.getMailId()).build();
                                 imageURL = imgSource.generateUrl(imageLocation, session);
@@ -638,7 +637,7 @@ public final class MimeForward {
                 if (!multipartPart.getContentType().startsWith("multipart/mixed")) {
                     return text;
                 }
-                final StringAllocator sb = new StringAllocator(text);
+                final StringBuilder sb = new StringBuilder(text);
                 for (int j = i + 1; j < count; j++) {
                     final MailPart nextPart = multipartPart.getEnclosedMailPart(j);
                     final ContentType nextContentType = nextPart.getContentType();
@@ -716,7 +715,7 @@ public final class MimeForward {
             final InternetAddress[] cc = msg.getCc();
             forwardPrefix =
                 PATTERN_CCLINE.matcher(forwardPrefix).replaceFirst(
-                    cc == null || cc.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(new com.openexchange.java.StringAllocator(64).append("\nCc: ").append(
+                    cc == null || cc.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(new StringBuilder(64).append("\nCc: ").append(
                         MimeProcessingUtility.addrs2String(cc)).toString()));
         }
         {
@@ -789,7 +788,7 @@ public final class MimeForward {
                 replaceBuffer.append("</div>");
                 return replaceBuffer.toString();
             }
-            return new com.openexchange.java.StringAllocator(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(firstSeenText).toString();
+            return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(firstSeenText).toString();
         }
         /*
          * Surround with quotes
@@ -801,7 +800,7 @@ public final class MimeForward {
             if (m.find()) {
                 mr.appendLiteralReplacement(
                     replaceBuffer,
-                    new com.openexchange.java.StringAllocator(forwardPrefix.length() + 16).append(m.group()).append(forwardPrefix).append(linebreak).append(
+                    new StringBuilder(forwardPrefix.length() + 16).append(m.group()).append(forwardPrefix).append(linebreak).append(
                         linebreak).toString());
             } else {
                 replaceBuffer.append(forwardPrefix).append(linebreak).append(linebreak);
@@ -924,7 +923,7 @@ public final class MimeForward {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

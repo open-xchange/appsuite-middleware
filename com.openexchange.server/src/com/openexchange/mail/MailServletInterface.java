@@ -131,7 +131,7 @@ public abstract class MailServletInterface implements Closeable {
             return subject;
         }
         final int len = subject.length();
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len);
+        final StringBuilder sb = new StringBuilder(len);
         char prev = '\0';
         for (int i = 0; i < len; i++) {
             final char c = subject.charAt(i);

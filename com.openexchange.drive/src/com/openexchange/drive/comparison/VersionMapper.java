@@ -59,7 +59,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.internal.PathNormalizer;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
 
@@ -225,28 +224,28 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
 
     @Override
     public String toString() {
-        StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("                                         | Original Version                 | Client Version                     | Server Version                    \n");
-        stringAllocator.append("-----------------------------------------+----------------------------------+------------------------------------+-----------------------------------\n");
+        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder.append("                                         | Original Version                 | Client Version                     | Server Version                    \n");
+        StringBuilder.append("-----------------------------------------+----------------------------------+------------------------------------+-----------------------------------\n");
         for (Entry<String, ThreeWayComparison<T>> entry : this) {
             String name = Strings.abbreviate(entry.getKey(), entry.getKey().length() + 1, 40);
             ThreeWayComparison<T> comparison = entry.getValue();
-            stringAllocator.append(name);
+            StringBuilder.append(name);
             for (int i = 0; i < 40 - name.length(); i++) {
-                stringAllocator.append(' ');
+                StringBuilder.append(' ');
             }
-            stringAllocator.append(" | ");
-            stringAllocator.append(null != comparison.getOriginalVersion() ? comparison.getOriginalVersion().getChecksum() : "                                ");
-            stringAllocator.append(" | ");
-            stringAllocator.append(null != comparison.getClientVersion() ? comparison.getClientVersion().getChecksum() : "                                ");
-            stringAllocator.append(Change.NONE == comparison.getClientChange() ? "  " : ' ' + comparison.getClientChange().toString().substring(0, 1));
-            stringAllocator.append(" | ");
-            stringAllocator.append(null != comparison.getServerVersion() ? comparison.getServerVersion().getChecksum() : "                                ");
-            stringAllocator.append(Change.NONE == comparison.getServerChange() ? "  " : ' ' + comparison.getServerChange().toString().substring(0, 1));
-            stringAllocator.append('\n');
+            StringBuilder.append(" | ");
+            StringBuilder.append(null != comparison.getOriginalVersion() ? comparison.getOriginalVersion().getChecksum() : "                                ");
+            StringBuilder.append(" | ");
+            StringBuilder.append(null != comparison.getClientVersion() ? comparison.getClientVersion().getChecksum() : "                                ");
+            StringBuilder.append(Change.NONE == comparison.getClientChange() ? "  " : ' ' + comparison.getClientChange().toString().substring(0, 1));
+            StringBuilder.append(" | ");
+            StringBuilder.append(null != comparison.getServerVersion() ? comparison.getServerVersion().getChecksum() : "                                ");
+            StringBuilder.append(Change.NONE == comparison.getServerChange() ? "  " : ' ' + comparison.getServerChange().toString().substring(0, 1));
+            StringBuilder.append('\n');
         }
-        stringAllocator.append(mappingProblems);
-        return stringAllocator.toString();
+        StringBuilder.append(mappingProblems);
+        return StringBuilder.toString();
     }
 
 }

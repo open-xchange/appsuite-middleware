@@ -55,7 +55,6 @@ import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.actions.AbstractAction;
-import com.openexchange.java.StringAllocator;
 
 
 /**
@@ -99,14 +98,14 @@ public class DefaultSyncResult<T extends DriveVersion> implements SyncResult<T>{
 
     @Override
     public String toString() {
-        StringAllocator stringAllocator = new StringAllocator();
+        StringBuilder StringBuilder = new StringBuilder();
         if (null != actionsForClient) {
-            stringAllocator.append("Actions for client:\n");
+            StringBuilder.append("Actions for client:\n");
             for (DriveAction<T> action : actionsForClient) {
-                stringAllocator.append("  ").append(action).append('\n');
+                StringBuilder.append("  ").append(action).append('\n');
             }
         }
-        return stringAllocator.toString();
+        return StringBuilder.toString();
     }
 
 }

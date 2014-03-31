@@ -393,7 +393,7 @@ public final class MailAccountDescription implements Serializable {
         try {
             return mailServerUrl = URITools.generateURI(mailSecure ? mailProtocol + 's' : mailProtocol, IDNA.toASCII(mailServer), mailPort).toString();
         } catch (final URISyntaxException e) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
+            final StringBuilder sb = new StringBuilder(32);
             sb.append(mailProtocol);
             if (mailSecure) {
                 sb.append('s');
@@ -529,7 +529,7 @@ public final class MailAccountDescription implements Serializable {
         try {
             return transportUrl = URITools.generateURI(protocol, IDNA.toASCII(transportServer), transportPort).toString();
         } catch (final URISyntaxException e) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
+            final StringBuilder sb = new StringBuilder(32);
             sb.append(transportProtocol);
             if (transportSecure) {
                 sb.append('s');

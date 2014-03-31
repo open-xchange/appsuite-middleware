@@ -103,7 +103,6 @@ import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -1373,7 +1372,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
         // Others...
         final Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
-        final FileStorageAccountAccess cached = connectedAccounts.get(new StringAllocator(serviceId).append('/').append(accountId).toString());
+        final FileStorageAccountAccess cached = connectedAccounts.get(new StringBuilder(serviceId).append('/').append(accountId).toString());
         if (cached != null) {
             return cached.getFileAccess();
         }

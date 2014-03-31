@@ -69,7 +69,7 @@ public class UUEncodedMultiPart {
 
     private final List<UUEncodedPart> uuencodeParts;
 
-    private com.openexchange.java.StringAllocator text;
+    private StringBuilder text;
 
     private int count = -1;
 
@@ -103,7 +103,7 @@ public class UUEncodedMultiPart {
         if (count >= 1) {
             final UUEncodedPart uuencodedPart = uuencodeParts.get(0);
             if (uuencodedPart.getIndexStart() != -1) {
-                text = new com.openexchange.java.StringAllocator(content.substring(0, uuencodedPart.getIndexStart()));
+                text = new StringBuilder(content.substring(0, uuencodedPart.getIndexStart()));
             }
         }
     }

@@ -114,7 +114,7 @@ public final class CustomThread extends Thread implements ThreadRenamer, OXThrea
         if (null == appendix) {
             setName(newPrefix);
         } else {
-            setName(new com.openexchange.java.StringAllocator(16).append(newPrefix).append(appendix).toString());
+            setName(new StringBuilder(16).append(newPrefix).append(appendix).toString());
         }
         changed = true;
     }

@@ -70,7 +70,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
 /**
@@ -142,7 +141,7 @@ public class ChecksumProvider {
      * @throws OXException
      */
     public static List<DirectoryChecksum> getChecksums(SyncSession session, List<String> folderIDs) throws OXException {
-        StringAllocator trace = session.isTraceEnabled() ? new StringAllocator("Directory checksums:\n") : null;
+        StringBuilder trace = session.isTraceEnabled() ? new StringBuilder("Directory checksums:\n") : null;
         List<FolderID> fids = new ArrayList<FolderID>(folderIDs.size());
         for (String folderID : folderIDs) {
             fids.add(new FolderID(folderID));
@@ -223,7 +222,7 @@ public class ChecksumProvider {
     }
 
     private static String calculateMD5(SyncSession session, FolderID folderID) throws OXException {
-        StringAllocator trace = session.isTraceEnabled() ? new StringAllocator("File checksums in folder " + folderID + ":\n") : null;
+        StringBuilder trace = session.isTraceEnabled() ? new StringBuilder("File checksums in folder " + folderID + ":\n") : null;
         String checksum;
         List<File> filesInFolder = session.getStorage().getFilesInFolder(folderID.toUniqueID());
         if (null == filesInFolder || 0 == filesInFolder.size()) {

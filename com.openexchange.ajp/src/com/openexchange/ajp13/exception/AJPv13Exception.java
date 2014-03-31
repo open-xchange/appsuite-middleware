@@ -116,7 +116,7 @@ public class AJPv13Exception extends OXException {
         /**
          * Integer value exceeds max allowed value ([MAX_INT_VALUE]): %1$d
          */
-        INTEGER_VALUE_TOO_BIG(new com.openexchange.java.StringAllocator("Integer value exceeds max allowed value (").append(AJPv13Response.MAX_INT_VALUE).append(
+        INTEGER_VALUE_TOO_BIG(new StringBuilder("Integer value exceeds max allowed value (").append(AJPv13Response.MAX_INT_VALUE).append(
             "): %1$d").toString(), Category.CATEGORY_ERROR, 10),
         /**
          * Invalid content-type header value: %1$s

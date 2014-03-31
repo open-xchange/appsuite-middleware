@@ -185,7 +185,7 @@ public final class HttpManagersInit implements Initialization {
         if ('/' == servletPath.charAt(0)) {
             return servletPath;
         }
-        return new com.openexchange.java.StringAllocator(servletPath.length() + 1).append('/').append(servletPath).toString();
+        return new StringBuilder(servletPath.length() + 1).append('/').append(servletPath).toString();
     }
 
     private static Map<Object, Object> getPropertiesFromFile(final File f) throws IOException {

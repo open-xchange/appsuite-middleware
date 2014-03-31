@@ -54,7 +54,6 @@ import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -105,7 +104,7 @@ public class ContactStringGetter implements ContactSwitcher {
         if (null == distList || 0 == distList.length) {
             return "";
         }
-        StringAllocator allocator = new StringAllocator();
+        StringBuilder allocator = new StringBuilder();
         for (DistributionListEntryObject member : distList) {
             if (null != member) {
                 if (null != member.getEmailaddress()) {

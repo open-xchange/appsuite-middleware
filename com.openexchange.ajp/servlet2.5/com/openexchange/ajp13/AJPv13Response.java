@@ -538,7 +538,7 @@ public class AJPv13Response {
         for (int i = 0; i < formattedCookies.length; i++) {
             final int hdrNameLen;
             {
-                final String hdrName = i == 0 ? STR_SET_COOKIE : new com.openexchange.java.StringAllocator(STR_SET_COOKIE.length() + 1).append(STR_SET_COOKIE).append(
+                final String hdrName = i == 0 ? STR_SET_COOKIE : new StringBuilder(STR_SET_COOKIE.length() + 1).append(STR_SET_COOKIE).append(
                     i + 1).toString();
                 /*
                  * Set-Cookie and Set-Cookie2 is encoded in AJP protocol as an integer value

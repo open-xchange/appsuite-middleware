@@ -67,7 +67,6 @@ import com.openexchange.html.internal.RegexUtility;
 import com.openexchange.html.internal.RegexUtility.GroupType;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.InterruptibleCharSequence;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBufferStringer;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
@@ -510,7 +509,7 @@ public final class CSSMatcher {
             return match;
         }
         if (isEmpty(cssPrefix)) {
-            return new StringAllocator(match).append('{').toString();
+            return new StringBuilder(match).append('{').toString();
         }
         final int length = match.length();
         // Cut off trailing '{' character

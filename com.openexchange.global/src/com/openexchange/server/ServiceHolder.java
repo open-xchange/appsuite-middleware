@@ -205,7 +205,7 @@ public abstract class ServiceHolder<S> {
 
     /** Prints given stack trace */
     static final String printStackTrace(final StackTraceElement[] trace) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
+        final StringBuilder sb = new StringBuilder(512);
         for (int i = 2; i < trace.length; i++) {
             sb.append("\tat ").append(trace[i]).append('\n');
         }

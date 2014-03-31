@@ -57,7 +57,6 @@ import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -870,7 +869,7 @@ public class UserConfiguration implements Serializable, Cloneable {
     /** ASCII-wise lower-case */
     static String toLowerCase(final CharSequence chars) {
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

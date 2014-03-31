@@ -200,7 +200,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            final com.openexchange.java.StringAllocator sql = new com.openexchange.java.StringAllocator("SELECT id FROM snippet WHERE cid=? AND (user=? OR shared>0) AND refType=").append(FS_TYPE);
+            final StringBuilder sql = new StringBuilder("SELECT id FROM snippet WHERE cid=? AND (user=? OR shared>0) AND refType=").append(FS_TYPE);
             final boolean hasTypes = (null != types) && (types.length > 0);
             if (hasTypes) {
                 sql.append(" AND (");
@@ -254,7 +254,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            final com.openexchange.java.StringAllocator sql = new com.openexchange.java.StringAllocator("SELECT id FROM snippet WHERE cid=? AND user=? AND refType=").append(FS_TYPE);
+            final StringBuilder sql = new StringBuilder("SELECT id FROM snippet WHERE cid=? AND user=? AND refType=").append(FS_TYPE);
             stmt = con.prepareStatement(sql.toString());
             int pos = 0;
             stmt.setInt(++pos, contextId);

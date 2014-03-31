@@ -27,7 +27,6 @@ package com.openexchange.java.misc;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.java.StringAllocator;
 
 public class FloatingDecimal{
     boolean     isExceptional;
@@ -1002,8 +1001,8 @@ public class FloatingDecimal{
     public void appendTo(Appendable buf) {
           char result[] = (char[])(perThreadBuffer.get());
           int i = getChars(result);
-        if (buf instanceof StringAllocator) {
-            ((StringAllocator) buf).append(result, 0, i);
+        if (buf instanceof StringBuilder) {
+            ((StringBuilder) buf).append(result, 0, i);
         } else if (buf instanceof StringBuilder) {
             ((StringBuilder) buf).append(result, 0, i);
         } else if (buf instanceof StringBuffer) {

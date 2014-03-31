@@ -78,7 +78,7 @@ public class ContactFieldOperand implements Operand<ContactField>{
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator(Type.COLUMN.getType()).append(':').append(value).toString();
+        return new StringBuilder(Type.COLUMN.getType()).append(':').append(value).toString();
     }
 
 }

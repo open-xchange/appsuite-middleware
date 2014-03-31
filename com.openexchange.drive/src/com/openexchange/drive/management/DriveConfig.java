@@ -62,7 +62,6 @@ import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.strings.TimeSpanParser;
@@ -494,8 +493,8 @@ public class DriveConfig implements Initialization {
      * @throws NumberFormatException If the supplied string is not parsable or greater then <code>Integer.MAX_VALUE</code>
      */
     private static int parseBytes(String value) throws NumberFormatException {
-        StringAllocator numberAllocator = new StringAllocator(8);
-        StringAllocator unitAllocator = new StringAllocator(4);
+        StringBuilder numberAllocator = new StringBuilder(8);
+        StringBuilder unitAllocator = new StringBuilder(4);
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
             if (Character.isDigit(c) || '.' == c || '-' == c) {

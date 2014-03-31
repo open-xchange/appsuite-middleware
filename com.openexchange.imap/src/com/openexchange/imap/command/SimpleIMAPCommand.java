@@ -104,7 +104,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
     @Override
     protected String getCommand(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(args[argsIndex].length() + 64);
+        final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
         sb.append(command);
         if (!java.util.Arrays.equals(ARGS_EMPTY, args)) {
             sb.append(args[argsIndex]);

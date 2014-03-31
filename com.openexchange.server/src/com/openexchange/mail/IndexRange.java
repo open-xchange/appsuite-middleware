@@ -137,6 +137,6 @@ public final class IndexRange {
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator(super.toString()).append(" start=").append(start).append(", end=").append(end).toString();
+        return new StringBuilder(super.toString()).append(" start=").append(start).append(", end=").append(end).toString();
     }
 }

@@ -102,7 +102,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link DriveServiceImpl}
@@ -427,7 +426,7 @@ public class DriveServiceImpl implements DriveService {
          */
         DirectoryVersionMapper mapper = new DirectoryVersionMapper(originalVersions, clientVersions, serverVersions);
         if (session.isTraceEnabled()) {
-            StringAllocator allocator = new StringAllocator("Directory versions mapped to:\n");
+            StringBuilder allocator = new StringBuilder("Directory versions mapped to:\n");
             allocator.append(mapper).append('\n');
             session.trace(allocator);
         }
@@ -449,7 +448,7 @@ public class DriveServiceImpl implements DriveService {
          */
         FileVersionMapper mapper = new FileVersionMapper(originalVersions, clientVersions, serverVersions);
         if (session.isTraceEnabled()) {
-            StringAllocator allocator = new StringAllocator("File versions in directory " + path + " mapped to:\n");
+            StringBuilder allocator = new StringBuilder("File versions in directory " + path + " mapped to:\n");
             allocator.append(mapper).append('\n');
             session.trace(allocator);
         }

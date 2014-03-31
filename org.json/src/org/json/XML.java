@@ -74,7 +74,7 @@ public class XML {
      * @return The escaped string.
      */
     public static String escape(final String string) {
-    	final org.json.helpers.StringAllocator sb = new org.json.helpers.StringAllocator();
+    	final StringBuilder sb = new StringBuilder();
     	final int len = string.length();
         for (int i = 0; i < len; i++) {
         	final char c = string.charAt(i);
@@ -307,7 +307,7 @@ public class XML {
      */
     public static String toString(final Object o, final String tagName)
             throws JSONException {
-    	final org.json.helpers.StringAllocator b = new org.json.helpers.StringAllocator();
+    	final StringBuilder b = new StringBuilder();
         int          i;
         JSONArray    ja;
         JSONObject   jo;

@@ -83,7 +83,6 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
@@ -246,7 +245,7 @@ public final class HtmlProcessing {
     }
 
     private static String getMarkerFor(final Session session) throws URISyntaxException {
-        final StringAllocator sb = new StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append(Strings.getLineSeparator());
         sb.append("<!-- ").append(new URI("ox", session.getLogin(), "open-xchange.com", 57462, null, null, null).toString()).append(" -->");
         sb.append(Strings.getLineSeparator());
@@ -354,7 +353,7 @@ public final class HtmlProcessing {
         if (!bodyMatcher.find()) {
             return replaceBodyPlain(htmlContent, cssPrefix);
         }
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(htmlContent.length() + 256);
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
         sb.append("<div id=\"").append(cssPrefix).append('"');
         {
             final String rest = bodyMatcher.group(1);
@@ -404,7 +403,7 @@ public final class HtmlProcessing {
     private static String replaceBodyPlain(final String htmlContent, final String cssPrefix) {
         final Matcher m = PATTERN_BODY.matcher(htmlContent);
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(htmlContent.length() + 256);
+        final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
         if (m.find()) {
             mr.appendLiteralReplacement(sb, "<div id=\"" + cssPrefix + "\" " + m.group(1) + '>' + m.group(2) + "</div>");
         }
@@ -717,7 +716,7 @@ public final class HtmlProcessing {
      * @return The HTML text with simple quotes replaced with block quotes
      */
     private static String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(htmlText.length());
+        final StringBuilder sb = new StringBuilder(htmlText.length());
         final String[] lines = htmlText.split(STR_SPLIT_BR);
         int levelBefore = 0;
         final int llen = lines.length - 1;
@@ -889,7 +888,7 @@ public final class HtmlProcessing {
         try {
             final Matcher imgMatcher = BACKGROUND_PATTERN.matcher(reval);
             final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, reval);
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(reval.length());
+            final StringBuilder sb = new StringBuilder(reval.length());
             if (imgMatcher.find()) {
                 final StringBuilder linkBuilder = new StringBuilder(256);
                 /*
@@ -944,7 +943,7 @@ public final class HtmlProcessing {
         try {
             final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
             final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, reval);
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(reval.length());
+            final StringBuilder sb = new StringBuilder(reval.length());
             if (imgMatcher.find()) {
                 final StringBuilder strBuffer = new StringBuilder(256);
                 final MatcherReplacer mr = new MatcherReplacer();

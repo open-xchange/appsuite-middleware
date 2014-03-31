@@ -63,7 +63,6 @@ import com.openexchange.caching.ElementAttributes;
 import com.openexchange.continuation.Continuation;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -135,7 +134,7 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
     }
 
     private String cacheKey(final Session session) {
-        return new StringAllocator(16).append(session.getUserId()).append('@').append(session.getContextId()).toString();
+        return new StringBuilder(16).append(session.getUserId()).append('@').append(session.getContextId()).toString();
     }
 
     @SuppressWarnings("unchecked")

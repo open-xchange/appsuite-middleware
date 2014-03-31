@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.actions.AbstractAction;
-import com.openexchange.java.StringAllocator;
 
 
 /**
@@ -117,20 +116,20 @@ public class IntermediateSyncResult<T extends DriveVersion> {
 
     @Override
     public String toString() {
-        StringAllocator stringAllocator = new StringAllocator();
+        StringBuilder StringBuilder = new StringBuilder();
         if (null != actionsForServer) {
-            stringAllocator.append("Actions for server:\n");
+            StringBuilder.append("Actions for server:\n");
             for (AbstractAction<T> action : actionsForServer) {
-                stringAllocator.append("  ").append(action).append('\n');
+                StringBuilder.append("  ").append(action).append('\n');
             }
         }
         if (null != actionsForClient) {
-            stringAllocator.append("Actions for client:\n");
+            StringBuilder.append("Actions for client:\n");
             for (AbstractAction<T> action : actionsForClient) {
-                stringAllocator.append("  ").append(action).append('\n');
+                StringBuilder.append("  ").append(action).append('\n');
             }
         }
-        return stringAllocator.toString();
+        return StringBuilder.toString();
     }
 
     @Override

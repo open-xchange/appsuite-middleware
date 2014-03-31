@@ -72,7 +72,6 @@ import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -192,7 +191,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
             final String name = id.substring(id.lastIndexOf('/') + 1);
             final String destPath = toPath(destFolder);
             final int pos = destPath.lastIndexOf('/');
-            final Entry entry = dropboxAPI.copy(id, pos > 0 ? new StringAllocator(destPath).append('/').append(name).toString() : name);
+            final Entry entry = dropboxAPI.copy(id, pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : name);
             return new IDTuple(entry.parentPath(), entry.path);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
@@ -214,7 +213,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
                 update.getFileName() : id.substring(id.lastIndexOf('/') + 1);
             final String destPath = toPath(destFolder);
             final int pos = destPath.lastIndexOf('/');
-            final Entry entry = dropboxAPI.move(id, pos > 0 ? new StringAllocator(destPath).append('/').append(name).toString() : name);
+            final Entry entry = dropboxAPI.move(id, pos > 0 ? new StringBuilder(destPath).append('/').append(name).toString() : name);
             return new IDTuple(entry.parentPath(), entry.path);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
@@ -259,7 +258,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
             if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
                 // Create
                 entry = dropboxAPI.putFile(
-                    new StringAllocator(file.getFolderId()).append('/').append(file.getFileName()).toString(),
+                    new StringBuilder(file.getFolderId()).append('/').append(file.getFileName()).toString(),
                     data,
                     length,
                     null,

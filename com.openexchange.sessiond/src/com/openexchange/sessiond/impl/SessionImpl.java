@@ -55,7 +55,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
@@ -486,7 +485,7 @@ public final class SessionImpl implements PutIfAbsent {
 
     @Override
     public String toString() {
-        final StringAllocator builder = new StringAllocator(128);
+        final StringBuilder builder = new StringBuilder(128);
         builder.append('{');
         builder.append("contextId=").append(contextId).append(", userId=").append(userId).append(", ");
         if (sessionId != null) {

@@ -89,7 +89,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
@@ -506,7 +505,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     private static String getAliases(final int user, final int cid, final AbstractMailAccount mailAccount) {
-        final StringAllocator sb = new StringAllocator(128);
+        final StringBuilder sb = new StringBuilder(128);
         sb.append(mailAccount.getPrimaryAddress());
         final Set<String> s = new HashSet<String>(4);
         s.add(mailAccount.getPrimaryAddress());
@@ -602,7 +601,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setLong(num++, id);
                 stmt.setLong(num++, user);
             } else {
-                StringAllocator stmtBuilder = new StringAllocator(512).append("UPDATE user_mail_account SET ");
+                StringBuilder stmtBuilder = new StringBuilder(512).append("UPDATE user_mail_account SET ");
                 int finds = 0;
                 for (final int index : indexes) {
                     final String col = INDEX_2_COL.get(index);
@@ -615,7 +614,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     // Nothing to do
                     return;
                 }
-                stmtBuilder.deleteLastChar();
+                stmtBuilder.deleteCharAt(stmtBuilder.length() - 1);
                 stmtBuilder.append(" WHERE cid=? AND id=? AND user=?");
                 stmt = con.prepareStatement(stmtBuilder.toString());
                 stmtBuilder = null;
@@ -842,7 +841,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
          * Delete referenced
          */
         final String sql =
-            new com.openexchange.java.StringAllocator(64).append("DELETE FROM ").append(tableName).append(" WHERE cid = ? AND id = ? and user = ?").toString();
+            new StringBuilder(64).append("DELETE FROM ").append(tableName).append(" WHERE cid = ? AND id = ? and user = ?").toString();
         PreparedStatement stmt = null;
         boolean retval = false;
         try {

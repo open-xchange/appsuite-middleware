@@ -51,7 +51,6 @@ package com.openexchange.tokenlogin;
 
 import java.util.Collections;
 import java.util.Map;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link DefaultTokenLoginSecret} - The default implementation for {@link TokenLoginSecret}.
@@ -104,7 +103,7 @@ public class DefaultTokenLoginSecret implements TokenLoginSecret {
 
     @Override
     public String toString() {
-        final StringAllocator builder = new StringAllocator(64);
+        final StringBuilder builder = new StringBuilder(64);
         builder.append("DefaultTokenLoginSecret [");
         if (secret != null) {
             builder.append("secret=").append(secret).append(", ");

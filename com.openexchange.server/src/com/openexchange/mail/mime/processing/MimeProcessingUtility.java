@@ -62,7 +62,6 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
@@ -336,7 +335,7 @@ public final class MimeProcessingUtility {
      * @return A comma-separated list of addresses as a {@link String}
      */
     public static String addrs2String(final InternetAddress[] addrs) {
-        final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(addrs.length << 4);
+        final StringBuilder tmp = new StringBuilder(addrs.length << 4);
         boolean first = true;
         for (int i = 0; i < addrs.length; i++) {
             final String string = addr2String(addrs[i]);
@@ -368,7 +367,7 @@ public final class MimeProcessingUtility {
             // No slash character present
             return addr.toUnicodeString();
         }
-        final StringAllocator sb = new StringAllocator(32);
+        final StringBuilder sb = new StringBuilder(32);
         final String personal = addr.getPersonal();
         if (null == personal) {
             sb.append(MimeProcessingUtility.prepareAddress(sAddress.substring(0, pos)));

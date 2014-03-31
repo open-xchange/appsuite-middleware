@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.java.StringAllocator;
 
 /**
  * This class represents a single setting.
@@ -244,7 +243,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
      */
     @Override
     public String getPath() {
-        return null == parent ? name : new StringAllocator(parent.getPath()).append(SEPARATOR).append(name).toString();
+        return null == parent ? name : new StringBuilder(parent.getPath()).append(SEPARATOR).append(name).toString();
     }
 
     /**

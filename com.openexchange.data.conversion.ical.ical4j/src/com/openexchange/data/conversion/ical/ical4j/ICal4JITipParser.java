@@ -78,7 +78,6 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link ICal4JITipParser}
@@ -180,7 +179,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

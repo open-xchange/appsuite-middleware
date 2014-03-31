@@ -82,7 +82,6 @@ import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -251,7 +250,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              */
             final MailServletInterface mailInterface = getMailInterface(req);
             if (sequenceId == null && imageContentId == null) {
-                throw MailExceptionCode.MISSING_PARAM.create(new com.openexchange.java.StringAllocator().append(PARAMETER_MAILATTCHMENT).append(" | ").append(PARAMETER_MAILCID).toString());
+                throw MailExceptionCode.MISSING_PARAM.create(new StringBuilder().append(PARAMETER_MAILATTCHMENT).append(" | ").append(PARAMETER_MAILCID).toString());
             }
             long size = -1L; /* mail system does not provide exact size */
             final MailPart mailPart;
@@ -355,7 +354,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             return mailPartFileName;
         }
         final String fileExtension = isEmpty(baseType) ? "dat" : MimeType2ExtMap.getFileExtension(baseType);
-        return new StringAllocator("file.").append(fileExtension).toString();
+        return new StringBuilder("file.").append(fileExtension).toString();
     }
 
     private AJAXRequestResult performPUT(final MailRequest req, final JSONObject bodyObject) throws OXException {
@@ -461,7 +460,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     }
 
     private String getHash(final String folderPath, final String uid, final String sequenceId) {
-        return HashUtility.getHash(new StringAllocator(32).append(folderPath).append('/').append(uid).append('/').append(sequenceId).toString(), "md5", "hex");
+        return HashUtility.getHash(new StringBuilder(32).append(folderPath).append('/').append(uid).append('/').append(sequenceId).toString(), "md5", "hex");
     }
 
 }

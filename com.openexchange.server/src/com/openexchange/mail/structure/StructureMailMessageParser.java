@@ -828,7 +828,7 @@ public final class StructureMailMessageParser {
         String filename = rawFileName;
         if ((filename == null) || isEmptyString(filename)) {
             final List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(16).append(PREFIX).append(sequenceId).append('.');
+            final StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
                 sb.append("dat");
             } else {
@@ -869,7 +869,7 @@ public final class StructureMailMessageParser {
         if (prefix == null) {
             return String.valueOf(partCount);
         }
-        return new com.openexchange.java.StringAllocator(prefix).append('.').append(partCount).toString();
+        return new StringBuilder(prefix).append('.').append(partCount).toString();
     }
 
     /**

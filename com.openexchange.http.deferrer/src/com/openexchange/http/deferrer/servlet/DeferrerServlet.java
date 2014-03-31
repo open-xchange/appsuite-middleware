@@ -67,7 +67,6 @@ import org.slf4j.Logger;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
 /**
@@ -157,7 +156,7 @@ public class DeferrerServlet extends HttpServlet {
     }
 
     private String getDeferrerPath() {
-        return new StringAllocator(DefaultDeferringURLService.PREFIX.get().getPrefix()).append("defer").toString();
+        return new StringBuilder(DefaultDeferringURLService.PREFIX.get().getPrefix()).append("defer").toString();
     }
 
     /**

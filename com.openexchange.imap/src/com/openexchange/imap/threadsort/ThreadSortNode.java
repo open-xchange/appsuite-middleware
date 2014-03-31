@@ -105,7 +105,7 @@ public class ThreadSortNode {
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator().append(msgInfo).append(' ').append(childs).toString();
+        return new StringBuilder().append(msgInfo).append(' ').append(childs).toString();
     }
 
     /**

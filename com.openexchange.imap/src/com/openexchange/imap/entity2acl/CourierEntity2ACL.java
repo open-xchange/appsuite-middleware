@@ -113,7 +113,7 @@ public class CourierEntity2ACL extends Entity2ACL {
             return null;
         }
         final String quotedDelim = Pattern.quote(String.valueOf(delim));
-        final String abstractPattern = new com.openexchange.java.StringAllocator().append(SHARED_PREFIX).append(quotedDelim).append("([\\p{L}&&[^").append(
+        final String abstractPattern = new StringBuilder().append(SHARED_PREFIX).append(quotedDelim).append("([\\p{L}&&[^").append(
             quotedDelim).append("]]+)").append(quotedDelim).append("\\p{L}+").toString();
         final Matcher m = Pattern.compile(abstractPattern, Pattern.CASE_INSENSITIVE).matcher(sharedFolderName);
         if (m.matches()) {

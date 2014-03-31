@@ -63,7 +63,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -151,7 +150,7 @@ public final class ArchiveAction extends AbstractMailAction {
                     archiveFullname = archiveName;
                     parentFullName = MailFolder.DEFAULT_FOLDER_ID;
                 } else {
-                    archiveFullname = new StringAllocator(prefix).append(archiveName).toString();
+                    archiveFullname = new StringBuilder(prefix).append(archiveName).toString();
                     parentFullName = prefix.substring(0, prefix.length() - 1);
                 }
                 // Update mail account

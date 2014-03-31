@@ -436,7 +436,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                             for (int i = 0; !found && i < subfolders.length; i++) {
                                 if (n.equals(capStorage.getFolder(FolderStorage.REAL_TREE_ID, subfolders[i].getId(), storageParameters).getName())) {
                                     found = true;
-                                    clone4Real.setName(new com.openexchange.java.StringAllocator(prefix).append('_').append(appendixCount++).toString());
+                                    clone4Real.setName(new StringBuilder(prefix).append('_').append(appendixCount++).toString());
                                 }
                             }
                             if (!found) {

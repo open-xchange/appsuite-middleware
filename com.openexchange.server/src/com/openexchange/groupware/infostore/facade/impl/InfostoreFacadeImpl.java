@@ -131,7 +131,6 @@ import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaService;
@@ -1177,13 +1176,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         if (1 == ids.length) {
             return InfostoreIterator.allDocumentsWhere("infostore.id = " + ids[0], metadata, provider, context).asList();
         }
-        StringAllocator stringAllocator = new StringAllocator("infostore.id IN (");
-        stringAllocator.append(String.valueOf(ids[0]));
+        StringBuilder StringBuilder = new StringBuilder("infostore.id IN (");
+        StringBuilder.append(String.valueOf(ids[0]));
         for (int i = 1; i < ids.length; i++) {
-            stringAllocator.append(',').append(String.valueOf(ids[i]));
+            StringBuilder.append(',').append(String.valueOf(ids[i]));
         }
-        stringAllocator.append(')');
-        return InfostoreIterator.allDocumentsWhere(stringAllocator.toString(), metadata, provider, context).asList();
+        StringBuilder.append(')');
+        return InfostoreIterator.allDocumentsWhere(StringBuilder.toString(), metadata, provider, context).asList();
     }
 
     /**

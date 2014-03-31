@@ -79,7 +79,6 @@ import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.java.ImageTypeDetector;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.xing.RESTUtility.Method;
 import com.openexchange.xing.exception.XingException;
@@ -441,7 +440,7 @@ public class XingAPI<S extends Session> {
             if (null != userFields && !userFields.isEmpty()) {
                 params.add("user_fields");
                 final Iterator<UserField> iter = userFields.iterator();
-                final StringAllocator fields = new StringAllocator(userFields.size() << 4);
+                final StringBuilder fields = new StringBuilder(userFields.size() << 4);
                 fields.append(iter.next().getFieldName());
                 while (iter.hasNext()) {
                     fields.append(',').append(iter.next().getFieldName());
@@ -567,7 +566,7 @@ public class XingAPI<S extends Session> {
             if (null != userFields && !userFields.isEmpty()) {
                 params.add("user_fields");
                 final Iterator<UserField> iter = userFields.iterator();
-                final StringAllocator fields = new StringAllocator(userFields.size() << 4);
+                final StringBuilder fields = new StringBuilder(userFields.size() << 4);
                 fields.append(iter.next().getFieldName());
                 while (iter.hasNext()) {
                     fields.append(',').append(iter.next().getFieldName());
@@ -639,7 +638,7 @@ public class XingAPI<S extends Session> {
             if (null != userFields && !userFields.isEmpty()) {
                 params.add("user_fields");
                 final Iterator<UserField> iter = userFields.iterator();
-                final StringAllocator fields = new StringAllocator(userFields.size() << 4);
+                final StringBuilder fields = new StringBuilder(userFields.size() << 4);
                 fields.append(iter.next().getFieldName());
                 while (iter.hasNext()) {
                     fields.append(',').append(iter.next().getFieldName());
@@ -746,7 +745,7 @@ public class XingAPI<S extends Session> {
             if (null != userFields && !userFields.isEmpty()) {
                 params.add("user_fields");
                 final Iterator<UserField> iter = userFields.iterator();
-                final StringAllocator fields = new StringAllocator(userFields.size() << 4);
+                final StringBuilder fields = new StringBuilder(userFields.size() << 4);
                 fields.append(iter.next().getFieldName());
                 while (iter.hasNext()) {
                     fields.append(',').append(iter.next().getFieldName());
@@ -1556,7 +1555,7 @@ public class XingAPI<S extends Session> {
         }
         final Stringer<E> str = (Stringer<E>) (null == stringer ? DEFAULT_STRINGER : stringer);
         final Iterator<E> iter = col.iterator();
-        final StringAllocator sb = new StringAllocator(col.size() << 4);
+        final StringBuilder sb = new StringBuilder(col.size() << 4);
         sb.append(str.getString(iter.next()));
         while (iter.hasNext()) {
             sb.append(',').append(str.getString(iter.next()));

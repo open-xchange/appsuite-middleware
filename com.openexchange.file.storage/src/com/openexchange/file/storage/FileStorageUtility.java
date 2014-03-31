@@ -52,7 +52,6 @@ package com.openexchange.file.storage;
 import java.net.MalformedURLException;
 import java.util.Date;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 
 
 /**
@@ -88,7 +87,7 @@ public final class FileStorageUtility {
      * @return The Etag
      */
     public static String getETagFor(final String id, final String version, Date lastModified) {
-        final StringAllocator sb = new StringAllocator("http://www.open-xchange.com/infostore");
+        final StringBuilder sb = new StringBuilder("http://www.open-xchange.com/infostore");
         if (null != id) {
             sb.append('/').append(id);
         }

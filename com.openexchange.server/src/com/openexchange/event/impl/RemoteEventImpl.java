@@ -50,7 +50,6 @@
 package com.openexchange.event.impl;
 
 import com.openexchange.event.RemoteEvent;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link RemoteEventImpl} - Implementation of {@link RemoteEvent}.
@@ -118,7 +117,7 @@ public final class RemoteEventImpl implements RemoteEvent {
 
     @Override
     public String toString() {
-        final StringAllocator builder = new StringAllocator(256);
+        final StringBuilder builder = new StringBuilder(256);
         builder.append("RemoteEventImpl [contextId=").append(contextId).append(", userId=").append(userId);
         builder.append(", module=").append(module).append(", action=").append(action).append(", folderId=").append(folderId);
         builder.append(", timestamp=").append(timestamp).append(']');

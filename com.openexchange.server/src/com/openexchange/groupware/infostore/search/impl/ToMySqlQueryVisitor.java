@@ -83,7 +83,6 @@ import com.openexchange.groupware.infostore.search.UrlTerm;
 import com.openexchange.groupware.infostore.search.VersionCommentTerm;
 import com.openexchange.groupware.infostore.search.VersionTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link ToMySqlQueryVisitor}
@@ -373,7 +372,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     private String replaceWildcards(final String pattern) {
         final int length = pattern.length();
-        final StringAllocator sb = new StringAllocator(length);
+        final StringBuilder sb = new StringBuilder(length);
 
         for (int i = 0; i < length; i++) {
             final char c = pattern.charAt(i);
@@ -407,11 +406,11 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         final boolean useLike = (searchTerm.isSubstringSearch() || hasWildCards(pattern));
 
         // Encode pattern
-        String fieldName = new StringAllocator(DOCUMENT).append(field).toString();
+        String fieldName = new StringBuilder(DOCUMENT).append(field).toString();
         if (useLike) {
             pattern = codec.encode(IMMUNE_WILDCARDS, replaceWildcards(pattern));
             if (searchTerm.isSubstringSearch()) {
-                final StringAllocator tmp = new StringAllocator(pattern.length() + 8);
+                final StringBuilder tmp = new StringBuilder(pattern.length() + 8);
                 if (!pattern.startsWith("%")) {
                     tmp.append('%');
                 }
@@ -427,11 +426,11 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
         // Check for case-insensitive search
         if (searchTerm.isIgnoreCase()) {
-            fieldName = new StringAllocator("UPPER(").append(fieldName).append(')').toString();
-            pattern = new StringAllocator("UPPER('").append(pattern).append("')").toString();
+            fieldName = new StringBuilder("UPPER(").append(fieldName).append(')').toString();
+            pattern = new StringBuilder("UPPER('").append(pattern).append("')").toString();
         } else {
             // Surround with single quotes
-            pattern = new StringAllocator(pattern.length() + 2).append('\'').append(pattern).append('\'').toString();
+            pattern = new StringBuilder(pattern.length() + 2).append('\'').append(pattern).append('\'').toString();
         }
 
         // Append to query builder

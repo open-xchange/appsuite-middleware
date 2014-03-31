@@ -71,7 +71,7 @@ public class CookieList {
     public static String toString(final JSONObject o) throws JSONException {
         boolean      b = false;
         final Set<String>     keys = o.keySet();
-        final org.json.helpers.StringAllocator sb = new org.json.helpers.StringAllocator();
+        final StringBuilder sb = new StringBuilder();
         for (String s : keys) {
             if (!o.isNull(s)) {
                 if (b) {

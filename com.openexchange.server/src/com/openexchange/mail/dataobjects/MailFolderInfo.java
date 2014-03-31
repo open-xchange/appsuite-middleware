@@ -50,7 +50,6 @@
 package com.openexchange.mail.dataobjects;
 
 import java.io.Serializable;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 
 /**
@@ -210,7 +209,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
             if (null != displayName && separator > 0) {
                 final int pos = fullname.lastIndexOf(separator);
                 if (pos > 0) {
-                    tmp = new StringAllocator(fullname.substring(0, pos)).append(displayName).toString();
+                    tmp = new StringBuilder(fullname.substring(0, pos)).append(displayName).toString();
                 } else {
                     tmp = fullname;
                 }

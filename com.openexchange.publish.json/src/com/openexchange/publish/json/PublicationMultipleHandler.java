@@ -73,7 +73,6 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
@@ -347,7 +346,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
             } else {
                 protocol = "http://";
             }
-            serverURL = new StringAllocator(protocol).append(hostname).toString();
+            serverURL = new StringBuilder(protocol).append(hostname).toString();
         } else if (serverURL != null) {
             hostname = serverURL.substring(serverURL.indexOf("://") + 3);
             if (serverURL.startsWith("https")) {
@@ -365,7 +364,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         }
 
         if (separateSubdomain != null) {
-            return new StringAllocator(protocol).append(separateSubdomain).append('.').append(hostname).toString();
+            return new StringBuilder(protocol).append(separateSubdomain).append('.').append(hostname).toString();
         }
 
         return serverURL;

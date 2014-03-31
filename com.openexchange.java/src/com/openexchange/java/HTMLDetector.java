@@ -212,7 +212,7 @@ public final class HTMLDetector {
         if (sequence == null) {
             throw new NullPointerException();
         }
-        return containsIgnoreCase(sequence, new StringAllocator(tag.length() + 2).append('<').append(tag).append('>').toString());
+        return containsIgnoreCase(sequence, new StringBuilder(tag.length() + 2).append('<').append(tag).append('>').toString());
     }
 
     /**
@@ -414,7 +414,7 @@ public final class HTMLDetector {
         if (sequence == null) {
             throw new NullPointerException();
         }
-        return containsIgnoreCase(sequence, new StringAllocator(tag.length() + 2).append('<').append(tag).append('>').toString());
+        return containsIgnoreCase(sequence, new StringBuilder(tag.length() + 2).append('<').append(tag).append('>').toString());
     }
 
     /**
@@ -440,7 +440,7 @@ public final class HTMLDetector {
         } else {
             b = sequence;
         }
-        return containsIgnoreCase(b, new StringAllocator(tag.length() + 2).append('<').append(tag).append('>').toString());
+        return containsIgnoreCase(b, new StringBuilder(tag.length() + 2).append('<').append(tag).append('>').toString());
     }
 
     /**

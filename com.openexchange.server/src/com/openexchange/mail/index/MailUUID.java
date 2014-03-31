@@ -89,7 +89,7 @@ public class MailUUID {
         this.accountId = accountId;
         this.fullName = fullName;
         this.mailId = mailId;
-        final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder tmp = new StringBuilder(64);
         tmp.append("mail/").append(contextId).append(MailPath.SEPERATOR).append(userId).append(MailPath.SEPERATOR);
         tmp.append(MailPath.getMailPath(accountId, fullName, mailId));
         mailUUID = tmp.toString();

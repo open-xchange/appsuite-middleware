@@ -59,7 +59,6 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link SQL}
@@ -115,7 +114,7 @@ public class SQL {
         if (null == uuids || 0 == uuids.length) {
             throw new IllegalArgumentException("uuids");
         }
-        StringAllocator allocator = new StringAllocator();
+        StringBuilder allocator = new StringBuilder();
         allocator.append("DELETE FROM fileChecksums WHERE cid=? AND uuid");
         if (1 == uuids.length) {
             allocator.append("=UNHEX('").append(uuids[0]).append("');");
@@ -130,7 +129,7 @@ public class SQL {
     }
 
     public static final String INSERT_FILE_CHECKSUMS_STMT(int count) {
-        StringAllocator allocator = new StringAllocator();
+        StringBuilder allocator = new StringBuilder();
         allocator.append("INSERT INTO fileChecksums (uuid,cid,folder,file,version,sequence,checksum) ");
         if (0 < count) {
             allocator.append("VALUES (UNHEX(?),?,REVERSE(?),REVERSE(?),?,?,UNHEX(?))");
@@ -191,7 +190,7 @@ public class SQL {
         if (null == folderIDs || 0 == folderIDs.length) {
             throw new IllegalArgumentException("folderIDs");
         }
-        StringAllocator allocator = new StringAllocator();
+        StringBuilder allocator = new StringBuilder();
         allocator.append("DELETE FROM fileChecksums ");
         allocator.append("WHERE cid=? AND REVERSE(folder)");
         if (1 == folderIDs.length) {
@@ -215,7 +214,7 @@ public class SQL {
         if (null == folderIDs || 0 == folderIDs.length) {
             throw new IllegalArgumentException("folderIDs");
         }
-        StringAllocator allocator = new StringAllocator();
+        StringBuilder allocator = new StringBuilder();
         allocator.append("DELETE FROM directoryChecksums ");
         allocator.append("WHERE cid=? AND REVERSE(folder)");
         if (1 == folderIDs.length) {
@@ -239,7 +238,7 @@ public class SQL {
         if (null == folderIDs || 0 == folderIDs.length) {
             throw new IllegalArgumentException("folderIDs");
         }
-        StringAllocator allocator = new StringAllocator();
+        StringBuilder allocator = new StringBuilder();
         allocator.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,LOWER(HEX(checksum)) FROM directoryChecksums ");
         allocator.append("WHERE cid=? AND REVERSE(folder)");
         if (1 == folderIDs.length) {
@@ -262,7 +261,7 @@ public class SQL {
         if (null == checksums || 0 == checksums.length) {
             throw new IllegalArgumentException("checksums");
         }
-        StringAllocator allocator = new StringAllocator();
+        StringBuilder allocator = new StringBuilder();
         allocator.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence,LOWER(HEX(checksum)) FROM fileChecksums ");
         allocator.append("WHERE cid=? AND LOWER(HEX(checksum))");
         if (1 == checksums.length) {

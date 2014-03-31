@@ -122,7 +122,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
             try {
                 final String id = entry.getKey();
                 path =
-                    new URI(entry.getKey().charAt(0) == '/' ? id : new com.openexchange.java.StringAllocator(id.length() + 1).append('/').append(id).toString()).normalize().toString();
+                    new URI(entry.getKey().charAt(0) == '/' ? id : new StringBuilder(id.length() + 1).append('/').append(id).toString()).normalize().toString();
             } catch (final URISyntaxException e) {
                 log.error("Invalid servlet path skipped: {}", entry.getKey());
                 continue;

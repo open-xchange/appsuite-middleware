@@ -59,7 +59,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link SQL}
@@ -104,7 +103,7 @@ public class SQL {
         if (null == services || 0 == services.length) {
             throw new IllegalArgumentException("services");
         }
-        StringAllocator allocator = new StringAllocator();
+        StringBuilder allocator = new StringBuilder();
         allocator.append("SELECT service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions ");
         allocator.append("WHERE cid=? AND service");
         if (1 == services.length) {

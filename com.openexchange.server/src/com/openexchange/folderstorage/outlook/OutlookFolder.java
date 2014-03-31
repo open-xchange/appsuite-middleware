@@ -120,7 +120,7 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder 
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator(32).append("{ name=").append(getName()).append(", id=").append(getID()).append('}').toString();
+        return new StringBuilder(32).append("{ name=").append(getName()).append(", id=").append(getID()).append('}').toString();
     }
 
     @Override

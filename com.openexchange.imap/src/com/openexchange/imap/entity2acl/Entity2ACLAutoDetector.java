@@ -66,7 +66,6 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
-import com.openexchange.java.StringAllocator;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -116,7 +115,7 @@ public final class Entity2ACLAutoDetector {
      * @throws OXException - if a server greeting could not be mapped to a supported IMAP server
      */
     public static Entity2ACL getEntity2ACLImpl(final IMAPConfig imapConfig) throws IOException, OXException {
-        final String key = new StringAllocator(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString();
+        final String key = new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString();
         Future<Entity2ACL> cached = map.get(key);
         if (null == cached) {
             final FutureTask<Entity2ACL> ft = new FutureTask<Entity2ACL>(new Entity2ACLCallable(key, imapConfig));

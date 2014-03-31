@@ -130,7 +130,6 @@ import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -459,7 +458,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public PreparedStatement getAllAppointments(final Context c, final Date d1, final Date d2, final String select, final Connection readcon, final int orderBy, final Order orderDir) throws OXException, SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
         sb.append(" pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = pdm.cid AND pd.cid = ");
         sb.append(c.getContextId());
@@ -531,7 +530,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getConflicts(final Context c, final java.util.Date d1, final java.util.Date d2, final java.util.Date d3, final java.util.Date d4, final Connection readcon, final String member_sql_in, final boolean free_busy_select) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         if (free_busy_select) {
             sb.append(FREE_BUSY_SELECT);
         } else {
@@ -647,7 +646,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public PreparedStatement getSharedAppointmentFolderQuery(final Context c, int id, final CalendarFolderObject cfo, final Connection readcon) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(
+        final StringBuilder sb = new StringBuilder(
             "SELECT object_id, pfid, member_uid FROM prg_dates_members WHERE cid = ? AND object_id = ? AND pfid IN (");
         for (final TIntIterator iter = cfo.getSharedFolderList().iterator(); iter.hasNext();) {
             sb.append(iter.next()).append(',');
@@ -665,7 +664,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         PreparedStatement pst = null;
         ResultSet rs = null;
         try {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(184);
+            final StringBuilder sb = new StringBuilder(184);
             sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates");
             sb.append(JOIN_PARTICIPANTS);
             sb.append(c.getContextId());
@@ -730,7 +729,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getResourceConflicts(final Context c, final java.util.Date d1, final java.util.Date d2, final java.util.Date d3, final java.util.Date d4, final Connection readcon, final String resource_sql_in) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(184);
+        final StringBuilder sb = new StringBuilder(184);
         sb.append(FREE_BUSY_SELECT);
         sb.append(JOIN_PARTICIPANTS);
         sb.append(c.getContextId());
@@ -773,7 +772,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getFreeBusy(final int uid, final Context c, final java.util.Date d1, final java.util.Date d2, final Connection readcon) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append(FREE_BUSY_SELECT);
         sb.append(JOIN_DATES);
         sb.append(c.getContextId());
@@ -795,7 +794,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getResourceFreeBusy(final int uid, final Context c, final java.util.Date d1, final java.util.Date d2, final Connection readcon) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append(FREE_BUSY_SELECT);
         sb.append(JOIN_PARTICIPANTS);
         sb.append(c.getContextId());
@@ -817,7 +816,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public PreparedStatement getActiveAppointments(final Context c, final int uid, final java.util.Date d1, final java.util.Date d2, final String select, final Connection readcon) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
         sb.append(JOIN_DATES);
         sb.append(c.getContextId());
@@ -952,7 +951,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getPublicFolderRangeSQL(final Context c, final int uid, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final Order orderDir) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
+        final StringBuilder sb = new StringBuilder(32);
         sb.append(parseSelect(select));
         sb.append(" pd ");
         sb.append(WHERE);
@@ -981,7 +980,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getPrivateFolderRangeSQL(final Context c, final int uid, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final Order orderDir) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
         sb.append(JOIN_DATES);
         sb.append(c.getContextId());
@@ -1019,7 +1018,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getSharedFolderRangeSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date d1, final java.util.Date d2, final String select, final boolean readall, final Connection readcon, final int orderBy, final Order orderDir, final boolean includePrivateAppointments) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
+        final StringBuilder sb = new StringBuilder(32);
         sb.append(parseSelect(select));
         sb.append(JOIN_DATES);
         sb.append(c.getContextId());
@@ -1055,7 +1054,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getPrivateFolderModifiedSinceSQL(final Context c, final int uid, final int groups[], final int fid, final java.util.Date since, final String select, final boolean readall, final Connection readcon, final java.util.Date d1, final java.util.Date d2) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
         sb.append(JOIN_DATES);
         sb.append(c.getContextId());
@@ -1087,7 +1086,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getSharedFolderModifiedSinceSQL(final Context c, final int uid, final int shared_folder_owner, final int groups[], final int fid, final java.util.Date since, final String select, final boolean readall, final Connection readcon, final java.util.Date d1, final java.util.Date d2, final boolean includePrivateFlag) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
+        final StringBuilder sb = new StringBuilder(32);
         sb.append(parseSelect(select));
         sb.append(JOIN_DATES);
         sb.append(c.getContextId());
@@ -1122,7 +1121,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getPublicFolderModifiedSinceSQL(final Context c, final int uid, final int groups[], final int fid, final java.util.Date since, final String select, final boolean readall, final Connection readcon, final java.util.Date d1, final java.util.Date d2) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(48);
+        final StringBuilder sb = new StringBuilder(48);
         sb.append(parseSelect(select));
         sb.append(" pd WHERE pd.cid = ");
         sb.append(c.getContextId());
@@ -1149,7 +1148,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getPrivateFolderDeletedSinceSQL(final Context c, final int uid, final int fid, final java.util.Date d1, final String select, final Connection readcon) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+        final StringBuilder sb = new StringBuilder(128);
         sb.append(parseSelect(select));
         sb.append(" pd JOIN del_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ");
         sb.append(c.getContextId());
@@ -1170,7 +1169,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getSharedFolderDeletedSinceSQL(final Context c, final int uid, final int shared_folder_owner, final int fid, final java.util.Date d1, final String select, final Connection readcon) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+        final StringBuilder sb = new StringBuilder(128);
         sb.append(parseSelect(select));
         sb.append(" pd JOIN del_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ");
         sb.append(c.getContextId());
@@ -1191,7 +1190,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final PreparedStatement getPublicFolderDeletedSinceSQL(final Context c, final int uid, final int fid, final java.util.Date d1, final String select, final Connection readcon) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(96);
+        final StringBuilder sb = new StringBuilder(96);
         sb.append(parseSelect(select));
         sb.append(" pd JOIN del_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ");
         sb.append(c.getContextId());
@@ -1208,7 +1207,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final String getObjectsByidSQL(final int oids[][], final int cid, final String select) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
         sb.append(" pd WHERE");
         sb.append(" pd.cid = ");
@@ -1221,7 +1220,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public PreparedStatement getPrivateFolderObjects(final int fid, final Context c, final Connection readcon) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append("SELECT intfield01, created_from FROM prg_dates ");
         sb.append(JOIN_DATES);
         sb.append(c.getContextId());
@@ -1236,7 +1235,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public PreparedStatement getPublicFolderObjects(final int fid, final Context c, final Connection readcon) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         sb.append("SELECT intfield01, created_from FROM prg_dates pd");
         sb.append(WHERE);
         sb.append(" pd.cid = ");
@@ -1248,7 +1247,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public boolean checkIfFolderContainsForeignObjects(final int uid, final int fid, final Context c, final Connection readcon, final int foldertype) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+        final StringBuilder sb = new StringBuilder();
         if (foldertype == FolderObject.PRIVATE) {
             sb.append("SELECT intfield01 FROM prg_dates ");
             sb.append(JOIN_DATES);
@@ -1289,7 +1288,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public boolean checkIfFolderIsEmpty(final int uid, final int fid, final Context c, final Connection readcon, final int foldertype) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
+        final StringBuilder sb = new StringBuilder();
         if (foldertype == FolderObject.PRIVATE) {
             sb.append("SELECT intfield01 FROM prg_dates ");
             sb.append(JOIN_DATES);
@@ -1366,7 +1365,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException {
         List<Object> searchParameters = new ArrayList<Object>();
         Integer contextID = Integer.valueOf(ctx.getContextId());
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
+        final StringBuilder sb = new StringBuilder(512);
         sb.append("SELECT ");
         sb.append(columns);
         sb.append(", pdm.pfid");
@@ -1670,11 +1669,11 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     private static String getPlaceholders(int length) {
-        StringAllocator stringAllocator = new StringAllocator(length * 2);
+        StringBuilder StringBuilder = new StringBuilder(length * 2);
         for (int i = 0; i < length - 1; i++) {
-            stringAllocator.append("?,");
+            StringBuilder.append("?,");
         }
-        return stringAllocator.append('?').toString();
+        return StringBuilder.append('?').toString();
     }
 
     @Override
@@ -1689,7 +1688,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final String loadAppointment(final int oid, final Context c) throws SQLException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(384);
+        final StringBuilder sb = new StringBuilder(384);
         sb.append(
             "SELECT creating_date, created_from, changing_date, changed_from, fid, pflag, timestampfield01, timestampfield02, timezone, ").append(
                 " intfield02, intfield03, field01, field02, intfield06, intfield08, field04, intfield07, field09, organizer, uid, filename, sequence, organizerId, principal, principalId, intfield04, intfield05, field06, field07, field08 FROM prg_dates  WHERE cid = ");
@@ -2208,7 +2207,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 ResultSet result = null;
                 try {
                     final String[] currentIds = com.openexchange.tools.arrays.Arrays.extract(ids, i, inLimit, String.class);
-                    final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(2048);
+                    final StringBuilder query = new StringBuilder(2048);
                     query.append("SELECT object_id, id, type, dn, ma FROM prg_date_rights WHERE cid = ").append(cid);
                     query.append(" AND object_id IN (");
                     stmt = readcon.prepareStatement(getIN(query.toString(), currentIds.length));
@@ -2314,7 +2313,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         final Statement stmt = readcon.createStatement();
         ResultSet rs = null;
         try {
-            final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(128);
+            final StringBuilder query = new StringBuilder(128);
             query.append("SELECT id, type, dn, ma FROM prg_date_rights WHERE cid=");
             query.append(cdao.getContextID());
             query.append(PARTICIPANTS_IDENTIFIER_IS);
@@ -2401,7 +2400,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 ResultSet result = null;
                 try {
                     final String[] currentIds = com.openexchange.tools.arrays.Arrays.extract(ids, i, inLimit, String.class);
-                    final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(2048);
+                    final StringBuilder query = new StringBuilder(2048);
                     query.append("SELECT object_id, member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ").append(
                         cid);
                     query.append(" AND object_id IN (");
@@ -2531,7 +2530,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         final Statement stmt = readcon.createStatement();
         ResultSet rs = null;
         try {
-            final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(140);
+            final StringBuilder query = new StringBuilder(140);
             query.append("SELECT member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ");
             query.append(cdao.getContextID());
             query.append(PARTICIPANTS_IDENTIFIER_IS);
@@ -2962,7 +2961,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 ucols[uc++] = CalendarObject.RECURRENCE_POSITION;
             }
 
-            final com.openexchange.java.StringAllocator update = new com.openexchange.java.StringAllocator();
+            final StringBuilder update = new StringBuilder();
             update.append("UPDATE prg_dates pd SET ");
             update.append(COLLECTION.getFieldName(ucols[0]));
             update.append(" = ?");
@@ -4222,7 +4221,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         final Connection con = DBPool.pickupWriteable(c);
         try {
             con.setAutoCommit(false);
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(96);
+            final StringBuilder sb = new StringBuilder(96);
             sb.append("SELECT intfield08 FROM prg_dates WHERE intfield01=");
             sb.append(oid);
             sb.append(" AND cid=");
@@ -5543,7 +5542,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 close_read = true;
             }
             al = new ArrayList<Integer>(8);
-            final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(128);
+            final StringBuilder query = new StringBuilder(128);
             query.append("select intfield01, field08 FROM prg_dates pd WHERE intfield02 = ");
             query.append(rec_id);
             query.append(" AND cid = ");
@@ -5799,7 +5798,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         @Override
         public String toString() {
-            final StringAllocator builder = new StringAllocator(48);
+            final StringBuilder builder = new StringBuilder(48);
             builder.append("PrgDatesMember [objectId=").append(objectId).append(", memberUid=").append(memberUid).append(", confirm=").append(
                 confirm).append(", ");
             if (reason != null) {
@@ -5836,7 +5835,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         @Override
         public String toString() {
-            final StringAllocator builder = new StringAllocator(48);
+            final StringBuilder builder = new StringBuilder(48);
             builder.append("PrgDatesRight [objectId=").append(objectId).append(", id=").append(id).append(", type=").append(type).append(
                 ", ");
             if (dn != null) {

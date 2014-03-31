@@ -66,7 +66,6 @@ import org.xml.sax.InputSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingContent;
@@ -326,7 +325,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
                 tmp = null;
                 final AllocatingStringWriter writer = new AllocatingStringWriter(initLen);
                 SERIALIZER.write(htmlNode, writer, "UTF-8");
-                final StringAllocator builder = writer.getAllocator();
+                final StringBuilder builder = writer.getAllocator();
                 /*
                  * Return feed
                  */

@@ -70,7 +70,6 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -173,7 +172,7 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                     while (false == names.add(name)) {
                         // Name already contained
                         name = name.substring(0, reslen);
-                        name = new StringAllocator(name).append("_(").append(count++).append(')').append(ext).toString();
+                        name = new StringBuilder(name).append("_(").append(count++).append(')').append(ext).toString();
                     }
                     ZipArchiveEntry entry;
                     int num = 1;

@@ -83,7 +83,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -196,7 +195,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
         @Override
         public String toString() {
-            final StringAllocator builder = new StringAllocator(256);
+            final StringBuilder builder = new StringBuilder(256);
             builder.append("MultipartInfo [");
             if (mpId != null) {
                 builder.append("mpId=").append(mpId).append(", ");
@@ -701,7 +700,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                             imageURL = imgSource.generateUrl(imageLocation, session);
                                         }
                                         final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
-                                        content = new StringAllocator(content).append(imgTag).toString();
+                                        content = new StringBuilder(content).append(imgTag).toString();
                                         jAttachment.put(CONTENT, content);
                                         b = false;
                                     }
@@ -766,7 +765,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 if (!"null".equals(content)) {
                                     // Append to first one
                                     final String moreContent = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded);
-                                    content = new StringAllocator(content).append(moreContent).toString();
+                                    content = new StringBuilder(content).append(moreContent).toString();
                                     jAttachment.put(CONTENT, content);
                                     return true;
                                 }
@@ -810,7 +809,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             if (!"null".equals(content)) {
                                 // Append to first one
                                 final String moreContent = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded);
-                                content = new StringAllocator(content).append(moreContent).toString();
+                                content = new StringBuilder(content).append(moreContent).toString();
                                 jAttachment.put(CONTENT, content);
                                 return true;
                             }
@@ -1068,7 +1067,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             } catch (final Exception e) {
                 final Throwable t =
                     new Throwable(
-                        new com.openexchange.java.StringAllocator("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
+                        new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
                 LOG.warn("", t);
             }
             jsonObject.put(CONTENT_TYPE, contentType);
@@ -1214,7 +1213,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     throw MimeMailException.handleMessagingException(e);
                 }
             } else {
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+                final StringBuilder sb = new StringBuilder(128);
                 sb.append("Ignoring nested message.").append(
                     "Cannot handle part's content which should be a RFC822 message according to its content type: ");
                 sb.append((null == content ? "null" : content.getClass().getSimpleName()));
@@ -1597,7 +1596,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

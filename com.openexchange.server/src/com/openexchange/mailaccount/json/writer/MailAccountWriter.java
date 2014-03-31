@@ -59,7 +59,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.storage.JSlobStorage;
@@ -368,7 +367,7 @@ public final class MailAccountWriter implements MailAccountFields {
                 // No slash character present
                 return addr.toUnicodeString();
             }
-            final StringAllocator sb = new StringAllocator(32);
+            final StringBuilder sb = new StringBuilder(32);
             final String personal = addr.getPersonal();
             if (null == personal) {
                 sb.append(prepareAddress(sAddress.substring(0, pos)));

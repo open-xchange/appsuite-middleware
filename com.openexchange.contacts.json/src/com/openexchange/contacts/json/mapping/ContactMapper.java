@@ -88,7 +88,6 @@ import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
 import com.openexchange.groupware.tools.mappings.json.TimeMapping;
 import com.openexchange.image.ImageLocation;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
@@ -3235,7 +3234,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
                 // No slash character present
                 return addr.toUnicodeString();
             }
-            final StringAllocator sb = new StringAllocator(32);
+            final StringBuilder sb = new StringBuilder(32);
             final String personal = addr.getPersonal();
             if (null == personal) {
                 sb.append(prepareAddress(sAddress.substring(0, pos)));

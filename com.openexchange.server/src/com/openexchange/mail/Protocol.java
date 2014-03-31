@@ -270,7 +270,7 @@ public class Protocol implements Component, Serializable {
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(name);
+        final StringBuilder sb = new StringBuilder(name);
         if (null != aliases) {
             for (int i = 0; i < aliases.length; i++) {
                 sb.append('_').append(aliases[i]);

@@ -57,7 +57,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
 /**
@@ -105,7 +104,7 @@ public class ResourceCaches {
      * @return The appropriate cache key
      */
     public static String generatePreviewCacheKey(final String eTag, final AJAXRequestData requestData) {
-        final StringAllocator sb = new StringAllocator(512);
+        final StringBuilder sb = new StringBuilder(512);
         sb.append(requestData.getModule());
         sb.append('-').append(requestData.getAction());
         sb.append('-').append(requestData.getSession().getContextId());
@@ -126,7 +125,7 @@ public class ResourceCaches {
         // Generate MD5 sum
         try {
             final byte[] md5Bytes = sb.toString().getBytes("UTF-8");
-            sb.setNewLength(0);
+            sb.setLength(0);
             return sb.append(eTag).append('-').append(asHex(MessageDigest.getInstance("MD5").digest(md5Bytes))).toString();
         } catch (final UnsupportedEncodingException e) {
             // Shouldn't happen

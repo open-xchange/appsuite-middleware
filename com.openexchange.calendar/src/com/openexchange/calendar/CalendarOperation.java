@@ -1265,7 +1265,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
                 if (!recColl.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id)) {
                     if (LOG.isDebugEnabled()) {
-                        final com.openexchange.java.StringAllocator colss = new com.openexchange.java.StringAllocator(cols.length << 3);
+                        final StringBuilder colss = new StringBuilder(cols.length << 3);
                         for (int a = 0; a < cols.length; a++) {
                             String fn = recColl.getFieldName(cols[a]);
                             if (fn == null) {

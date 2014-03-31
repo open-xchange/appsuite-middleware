@@ -72,7 +72,7 @@ public class Tools {
         if (classes.length < 2) {
             throw new IllegalArgumentException("At least the classes of 2 services must be given.");
         }
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("(|(");
+        final StringBuilder sb = new StringBuilder("(|(");
         for (final Class<?> clazz : classes) {
             sb.append(Constants.OBJECTCLASS);
             sb.append('=');

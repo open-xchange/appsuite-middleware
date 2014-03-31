@@ -80,7 +80,7 @@ public class SupportedCalendarComponentSet extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        StringBuilder stringBuilder = new StringBuilder();
         if (null != this.components) {
             for (String component : components) {
                 stringBuilder.append("<CAL:comp name=\"").append(component).append("\"/>");

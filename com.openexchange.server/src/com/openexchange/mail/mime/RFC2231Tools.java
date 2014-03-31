@@ -267,7 +267,7 @@ public final class RFC2231Tools {
         } else if (!Charset.isSupported(charset)) {
             return toEncode;
         }
-        final com.openexchange.java.StringAllocator retval = new com.openexchange.java.StringAllocator(toEncode.length() * 3);
+        final StringBuilder retval = new StringBuilder(toEncode.length() * 3);
         if (prepend) {
             retval.append(charset.toLowerCase(ENGLISH)).append('\'').append(
                 (language == null) || (language.length() == 0) ? "" : language).append('\'');

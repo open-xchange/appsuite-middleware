@@ -90,7 +90,7 @@ public final class Tools {
      * @return the csv-string
      */
     public static String toCSV(final int[] values) {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         if (null != values && 0 < values.length) {
             stringBuilder.append(values[0]);
             for (int i = 1; i < values.length; i++) {
@@ -109,7 +109,7 @@ public final class Tools {
      * "?,?,?,?"
      */
     public static String getParameters(final int count) {
-        final com.openexchange.java.StringAllocator parametersBuilder = new com.openexchange.java.StringAllocator(2 * count);
+        final StringBuilder parametersBuilder = new StringBuilder(2 * count);
         if (0 < count) {
             parametersBuilder.append('?');
             for (int i = 1; i < count; i++) {
@@ -141,7 +141,7 @@ public final class Tools {
      */
     public static OXException getTruncationException(Session session, Connection connection, DataTruncation e, Contact contact, Table table) throws OXException {
         String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
-        com.openexchange.java.StringAllocator stringAllocator = new com.openexchange.java.StringAllocator();
+        StringBuilder StringBuilder = new StringBuilder();
         /*
          * create truncated attributes
          */
@@ -156,10 +156,10 @@ public final class Tools {
 			    Charsets.getBytes((String) object, Charsets.UTF_8).length : 0;
 			String readableName = Translator.getInstance().translate(
 			    ServerSessionAdapter.valueOf(session).getUser().getLocale(), mapping.getReadableName(contact));
-			stringAllocator.append(readableName);
+			StringBuilder.append(readableName);
 			truncatedAttributes[i] = new MappedTruncation<Contact>(mapping, maximumSize, actualSize, readableName);
         	if (i != truncatedColumns.length - 1) {
-        		stringAllocator.append(", ");
+        		StringBuilder.append(", ");
         	}
 		}
         /*
@@ -168,10 +168,10 @@ public final class Tools {
         final OXException truncationException;
         if (truncatedAttributes.length > 0) {
             final OXException.Truncated truncated = truncatedAttributes[0];
-            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringAllocator.toString(),
+            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, StringBuilder.toString(),
             		Integer.valueOf(truncated.getMaxSize()), Integer.valueOf(truncated.getLength()));
         } else {
-            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, stringAllocator.toString(), Integer.valueOf(-1),
+            truncationException = ContactExceptionCodes.DATA_TRUNCATION.create(e, StringBuilder.toString(), Integer.valueOf(-1),
             		Integer.valueOf(-1));
         }
         for (final OXException.Truncated truncated : truncatedAttributes) {
@@ -295,7 +295,7 @@ public final class Tools {
      * @throws OXException
      */
     public static String getOrderClause(final SortOptions sortOptions) throws OXException {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             final SortOrder[] order = sortOptions.getOrder();
             if (null != order && 0 < order.length) {
@@ -318,7 +318,7 @@ public final class Tools {
      * @throws OXException
      */
     public static String getLimitClause(final SortOptions sortOptions) throws OXException {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             if (0 < sortOptions.getLimit()) {
                 stringBuilder.append("LIMIT ");
@@ -332,7 +332,7 @@ public final class Tools {
     }
 
     private static String getOrderClause(final SortOrder order, final SuperCollator collator) throws OXException {
-        final com.openexchange.java.StringAllocator stringBuilder = new com.openexchange.java.StringAllocator();
+        final StringBuilder stringBuilder = new StringBuilder();
         if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
             stringBuilder.append(Mappers.CONTACT.get(order.getBy()).getColumnLabel());
         } else {

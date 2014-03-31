@@ -262,7 +262,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32);
+        final StringBuilder builder = new StringBuilder(32);
         builder.append("LogPropertyName [");
         if (propertyName != null) {
             builder.append("propertyName=").append(propertyName).append(", ");

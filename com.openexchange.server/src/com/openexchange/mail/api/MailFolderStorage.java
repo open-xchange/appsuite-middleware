@@ -130,7 +130,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(folder.getParentFullname())) {
             newPath = newName;
         } else {
-            newPath = new com.openexchange.java.StringAllocator(folder.getParentFullname()).append(folder.getSeparator()).append(newName).toString();
+            newPath = new StringBuilder(folder.getParentFullname()).append(folder.getSeparator()).append(newName).toString();
         }
         return moveFolder(fullName, newPath);
     }

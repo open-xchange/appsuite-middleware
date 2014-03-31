@@ -75,7 +75,6 @@ import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.server.ServiceExceptionCode;
@@ -442,7 +441,7 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     private void logException(final Exception e, final LogLevel logLevel, final int statusCode) {
-        final String msg = statusCode > 0 ? new StringAllocator("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
+        final String msg = statusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
 
         if (null == logLevel) {
             LOG.error(msg, e);
@@ -519,7 +518,7 @@ public class DispatcherServlet extends SessionServlet {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);

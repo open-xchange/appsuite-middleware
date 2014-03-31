@@ -261,7 +261,7 @@ public final class MessageInfo {
 
     @Override
     public String toString() {
-        final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(16).append('{');
+        final StringBuilder builder = new StringBuilder(16).append('{');
         if (accountId >= 0) {
             builder.append(accountId).append(SEPERATOR);
         }

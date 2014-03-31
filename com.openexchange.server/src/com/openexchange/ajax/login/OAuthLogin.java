@@ -140,7 +140,7 @@ public class OAuthLogin extends AbstractLoginRequestHandler {
             }
 
             private void handleException(final Exception e, final HttpServletRequest request, final HttpServletResponse response, final boolean sendBody) throws IOException, ServletException {
-                final com.openexchange.java.StringAllocator realm = new com.openexchange.java.StringAllocator(32).append((request.isSecure()) ? "https://" : "http://");
+                final StringBuilder realm = new StringBuilder(32).append((request.isSecure()) ? "https://" : "http://");
                 realm.append(request.getLocalName());
                 OAuthServlet.handleException(response, e, realm.toString(), sendBody);
             }

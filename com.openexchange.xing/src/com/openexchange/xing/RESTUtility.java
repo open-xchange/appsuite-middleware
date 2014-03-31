@@ -89,7 +89,6 @@ import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.xing.exception.XingApiException;
 import com.openexchange.xing.exception.XingException;
@@ -620,9 +619,9 @@ public class RESTUtility {
             // We have to encode the whole line, then remove + and / encoding
             // to get a good OAuth URL.
             if (apiVersion > 0) {
-                trgt = URLEncoder.encode(new StringAllocator(16).append("/v").append(apiVersion).append(trgt).toString(), "UTF-8");
+                trgt = URLEncoder.encode(new StringBuilder(16).append("/v").append(apiVersion).append(trgt).toString(), "UTF-8");
             } else {
-                trgt = URLEncoder.encode(new StringAllocator(16).append(trgt).toString(), "UTF-8");
+                trgt = URLEncoder.encode(new StringBuilder(16).append(trgt).toString(), "UTF-8");
             }
             trgt = trgt.replace("%2F", "/");
 
@@ -636,7 +635,7 @@ public class RESTUtility {
             return null;
         }
 
-        return new StringAllocator(32).append("https://").append(host).append(":443").append(trgt).toString();
+        return new StringBuilder(32).append("https://").append(host).append(":443").append(trgt).toString();
     }
 
     /**
@@ -690,7 +689,7 @@ public class RESTUtility {
             throw new IllegalArgumentException("Params must have an even number of elements.");
         }
         try {
-            final StringAllocator result = new StringAllocator(params.length << 4);
+            final StringBuilder result = new StringBuilder(params.length << 4);
             boolean firstTime = true;
             for (int i = 0; i < params.length; i += 2) {
                 final String value = params[i + 1];

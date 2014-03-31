@@ -55,7 +55,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link MimeTypes} - Utilities & constants for MIME types.
@@ -360,7 +359,7 @@ public final class MimeTypes {
             return givenMimeType;
         }
         final String parameterList = getParameterList(givenMimeType);
-        return isEmpty(parameterList) ? contentTypeByFileName : new StringAllocator(contentTypeByFileName).append(parameterList).toString();
+        return isEmpty(parameterList) ? contentTypeByFileName : new StringBuilder(contentTypeByFileName).append(parameterList).toString();
     }
 
     private static boolean consideredAsInvalid(final String givenMimeType, final Set<String> invalids) {
@@ -391,7 +390,7 @@ public final class MimeTypes {
             return givenFileName;
         }
         final String filePrefix = getFilePrefix(givenFileName);
-        return new StringAllocator(isEmpty(filePrefix) ? "file" : filePrefix).append('.').append(fileExtension).toString();
+        return new StringBuilder(isEmpty(filePrefix) ? "file" : filePrefix).append('.').append(fileExtension).toString();
     }
 
 }

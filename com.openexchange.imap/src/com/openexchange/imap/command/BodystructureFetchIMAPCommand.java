@@ -149,7 +149,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
 
     @Override
     protected String getDebugInfo(final int argsIndex) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final StringBuilder sb = new StringBuilder(64);
         if (uid) {
             sb.append("UID ");
         }
@@ -182,7 +182,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
     @Override
     protected String getCommand(final int argsIndex) {
         final String arg = args[argsIndex];
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(arg.length() + 64);
+        final StringBuilder sb = new StringBuilder(arg.length() + 64);
         if (uid) {
             sb.append("UID ");
         }

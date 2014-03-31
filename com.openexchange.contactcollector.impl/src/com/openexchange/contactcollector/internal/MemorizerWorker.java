@@ -511,7 +511,7 @@ public final class MemorizerWorker {
         final String val = MimeUtility.unfold(value);
         final Matcher m = ENC_PATTERN.matcher(val);
         if (m.find()) {
-            final com.openexchange.java.StringAllocator sa = new com.openexchange.java.StringAllocator(val.length());
+            final StringBuilder sa = new StringBuilder(val.length());
             int lastMatch = 0;
             do {
                 sa.append(val.substring(lastMatch, m.start()));

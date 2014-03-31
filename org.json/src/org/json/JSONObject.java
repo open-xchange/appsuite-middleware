@@ -1059,7 +1059,7 @@ public class JSONObject extends AbstractJSONValue {
         int i;
         final int len = string.length();
 
-        final org.json.helpers.StringAllocator sb = new org.json.helpers.StringAllocator(len + 4);
+        final StringBuilder sb = new StringBuilder(len + 4);
         String t;
 
         sb.append('"');

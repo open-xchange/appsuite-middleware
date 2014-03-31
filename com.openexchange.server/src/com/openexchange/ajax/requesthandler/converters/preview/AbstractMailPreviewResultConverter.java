@@ -116,7 +116,7 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
          * Create appropriate file holder
          */
         fileHolder.setContentType("application/octet-stream");
-        fileHolder.setName(new com.openexchange.java.StringAllocator(mail.getSubject()).append(".eml").toString());
+        fileHolder.setName(new StringBuilder(mail.getSubject()).append(".eml").toString());
         result.setResultObject(fileHolder, "file");
         result.setParameter("__mail", mail);
         /*

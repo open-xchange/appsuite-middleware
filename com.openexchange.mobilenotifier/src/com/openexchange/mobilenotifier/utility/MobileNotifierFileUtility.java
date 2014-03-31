@@ -58,7 +58,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 
 /**
@@ -83,7 +82,7 @@ public abstract class MobileNotifierFileUtility {
         try {
             br = new BufferedReader(new FileReader(file));
 
-            StringAllocator sb = new StringAllocator(65532);
+            StringBuilder sb = new StringBuilder(65532);
             String sep = System.getProperty("line.separator");
             String line;
             while ((line = br.readLine()) != null) {

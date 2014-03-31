@@ -66,7 +66,6 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -149,7 +148,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          */
         final String callbackUrl;
         {
-            final StringBuilder callbackUrlBuilder = request.constructURL(new StringAllocator(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
+            final StringBuilder callbackUrlBuilder = request.constructURL(new StringBuilder(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
             // Append query string
             callbackUrlBuilder.append("?action=create");
             callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
@@ -215,7 +214,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         /*
          * Compose call-back URL
          */
-        final StringBuilder callbackUrlBuilder = request.constructURL(new StringAllocator(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
+        final StringBuilder callbackUrlBuilder = request.constructURL(new StringBuilder(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
         callbackUrlBuilder.append("?action=reauthorize");
         callbackUrlBuilder.append("&id=").append(account.getId());
         callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());

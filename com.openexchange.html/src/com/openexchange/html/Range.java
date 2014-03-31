@@ -83,7 +83,7 @@ public final class Range {
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator(16).append("start=").append(start).append(" end=").append(end).toString();
+        return new StringBuilder(16).append("start=").append(start).append(" end=").append(end).toString();
     }
 
 }

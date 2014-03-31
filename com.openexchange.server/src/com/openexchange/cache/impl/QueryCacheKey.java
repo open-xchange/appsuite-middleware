@@ -114,7 +114,7 @@ public class QueryCacheKey implements Serializable {
 
 	@Override
 	public String toString() {
-		return new com.openexchange.java.StringAllocator(50).append("QueryCacheKey context=").append(cid).append(" | userId=").append(userId)
+		return new StringBuilder(50).append("QueryCacheKey context=").append(cid).append(" | userId=").append(userId)
 				.append(" | module=").append(module.num).append(" | queryNum=").append(queryNum).toString();
 	}
 

@@ -52,7 +52,6 @@ package com.openexchange.http.deferrer.impl;
 import static com.openexchange.ajax.AJAXServlet.encodeUrl;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
 /**
@@ -81,13 +80,13 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
             return url;
         }
         String deferrerURL = domain.trim();
-        final String path = new StringAllocator(PREFIX.get().getPrefix()).append("defer").toString();
+        final String path = new StringBuilder(PREFIX.get().getPrefix()).append("defer").toString();
         if (seemsAlreadyDeferred(url, deferrerURL, path)) {
             // Already deferred
             return url;
         }
         // Return deferred URL
-        return new StringAllocator(deferrerURL).append(path).append("?redirect=").append(encodeUrl(url, false, false)).toString();
+        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(encodeUrl(url, false, false)).toString();
     }
 
     @Override
@@ -100,7 +99,7 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
             return false;
         }
         deferrerURL = deferrerURL.trim();
-        final String path = new StringAllocator(PREFIX.get().getPrefix()).append("defer").toString();
+        final String path = new StringBuilder(PREFIX.get().getPrefix()).append("defer").toString();
         return seemsAlreadyDeferred(url, deferrerURL, path);
     }
 
@@ -109,10 +108,10 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
         final int pos1 = url.indexOf(str);
         final int pos2 = deferrerURL.indexOf(str);
         if (pos1 > 0 && pos2 > 0) {
-            final String deferrerPrefix = new StringAllocator(deferrerURL.substring(pos2)).append(path).toString();
+            final String deferrerPrefix = new StringBuilder(deferrerURL.substring(pos2)).append(path).toString();
             return url.substring(pos1).startsWith(deferrerPrefix);
         }
-        final String deferrerPrefix = new StringAllocator(deferrerURL).append(path).toString();
+        final String deferrerPrefix = new StringBuilder(deferrerURL).append(path).toString();
         return url.startsWith(deferrerPrefix);
     }
 
@@ -134,9 +133,9 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
     public String getBasicDeferrerURL(int userId, int contextId) {
     	final String deferrerURL = getDeferrerURL(userId, contextId);
         if (deferrerURL == null) {
-            return new StringAllocator(PREFIX.get().getPrefix()).append("defer").toString();
+            return new StringBuilder(PREFIX.get().getPrefix()).append("defer").toString();
         }
-        return new StringAllocator(deferrerURL).append(PREFIX.get().getPrefix()).append("defer").toString();
+        return new StringBuilder(deferrerURL).append(PREFIX.get().getPrefix()).append("defer").toString();
     }
 
 }

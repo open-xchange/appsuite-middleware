@@ -1313,7 +1313,7 @@ public final class UserParser {
         try {
             return Integer.parseInt(tmp);
         } catch (final NumberFormatException exc) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32).append("Attribute \"");
+            final StringBuilder sb = new StringBuilder(32).append("Attribute \"");
             sb.append(name).append("\" is not a number: ").append(tmp);
             throw new JSONException(sb.toString());
         }
@@ -1339,7 +1339,7 @@ public final class UserParser {
         try {
             return new Date(Long.parseLong(tmp));
         } catch (final NumberFormatException e) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64).append("Attribute \"");
+            final StringBuilder sb = new StringBuilder(64).append("Attribute \"");
             sb.append(name).append("\" does not denote date's milliseconds since January 1, 1970, 00:00:00 GMT: ").append(tmp);
             throw new JSONException(sb.toString());
         }

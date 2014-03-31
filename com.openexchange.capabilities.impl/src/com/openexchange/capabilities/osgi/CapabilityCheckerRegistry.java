@@ -63,7 +63,6 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentList;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
@@ -227,7 +226,7 @@ public class CapabilityCheckerRegistry extends ServiceTracker<CapabilityChecker,
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

@@ -74,7 +74,6 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.api.enhanced.MailMessageStorageLong;
@@ -161,7 +160,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         if (null == imapStore || null == fullName) {
             return;
         }
-        final String key = new StringAllocator(fullName).append('@').append(imapStore.toString()).toString();
+        final String key = new StringBuilder(fullName).append('@').append(imapStore.toString()).toString();
         final FailFastError failFastError = FAIL_FAST.get(key);
         if (null == failFastError) {
             return;
@@ -214,7 +213,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             imapFolder.open(desiredMode);
         } catch (final MessagingException e) {
             if (toUpperCase(e.getMessage()).indexOf("[INUSE]") >= 0) {
-                FAIL_FAST.put(new StringAllocator(imapFolder.getFullName()).append('@').append(imapStore.toString()).toString(), new FailFastError(e));
+                FAIL_FAST.put(new StringBuilder(imapFolder.getFullName()).append('@').append(imapStore.toString()).toString(), new FailFastError(e));
             }
             throw e;
         }

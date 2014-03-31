@@ -136,7 +136,7 @@ public final class MessagingId implements SortableId {
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator(32).append("{folderId=").append(fullname).append(", ordinal=").append(ordinal).append('}').toString();
+        return new StringBuilder(32).append("{folderId=").append(fullname).append(", ordinal=").append(ordinal).append('}').toString();
     }
 
 }

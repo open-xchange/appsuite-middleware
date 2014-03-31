@@ -131,7 +131,7 @@ public final class HexUtils {
      * @param bytes Byte array representation
      */
     public static String convert(final byte bytes[]) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(bytes.length * 2);
+        final StringBuilder sb = new StringBuilder(bytes.length * 2);
         for (int i = 0; i < bytes.length; i++) {
             sb.append(convertDigit((bytes[i] >> 4)));
             sb.append(convertDigit((bytes[i] & 0x0f)));

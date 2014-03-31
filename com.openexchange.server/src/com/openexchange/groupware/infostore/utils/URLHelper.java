@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore.utils;
 
 import java.util.regex.Pattern;
-import com.openexchange.java.StringAllocator;
 
 public class URLHelper {
 
@@ -68,7 +67,7 @@ public class URLHelper {
             return null;
         }
 		if(!hasSchema(url)) {
-			return new StringAllocator(url.length() + 8).append(isMail(url) ? "mailto:" : "http://").append(url).toString();
+			return new StringBuilder(url.length() + 8).append(isMail(url) ? "mailto:" : "http://").append(url).toString();
 		}
 		return url;
 	}

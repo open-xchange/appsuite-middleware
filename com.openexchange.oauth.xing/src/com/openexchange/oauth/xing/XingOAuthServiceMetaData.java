@@ -58,7 +58,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
@@ -184,7 +183,7 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             return deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
         }
 
-        return deferredURLUsing(callbackUrl, new StringAllocator(extractProtocol(callbackUrl)).append("://").append(currentHost).toString());
+        return deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost).toString());
     }
 
     private String extractProtocol(final String url) {
@@ -200,13 +199,13 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
         }
         String deferrerURL = domain.trim();
         final DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-        final String path = new StringAllocator(prefixService.getPrefix()).append("defer").toString();
+        final String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
         if (seemsAlreadyDeferred(url, deferrerURL, path)) {
             // Already deferred
             return url;
         }
         // Return deferred URL
-        return new StringAllocator(deferrerURL).append(path).append("?redirect=").append(encodeUrl(url, false, false)).toString();
+        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(encodeUrl(url, false, false)).toString();
     }
 
     private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL, final String path) {
@@ -214,10 +213,10 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
         final int pos1 = url.indexOf(str);
         final int pos2 = deferrerURL.indexOf(str);
         if (pos1 > 0 && pos2 > 0) {
-            final String deferrerPrefix = new StringAllocator(deferrerURL.substring(pos2)).append(path).toString();
+            final String deferrerPrefix = new StringBuilder(deferrerURL.substring(pos2)).append(path).toString();
             return url.substring(pos1).startsWith(deferrerPrefix);
         }
-        final String deferrerPrefix = new StringAllocator(deferrerURL).append(path).toString();
+        final String deferrerPrefix = new StringBuilder(deferrerURL).append(path).toString();
         return url.startsWith(deferrerPrefix);
     }
 

@@ -68,7 +68,6 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -149,7 +148,7 @@ public final class DeleteAction extends AbstractFolderAction {
                 }
             }
             if (errorOccurred) {
-                final StringAllocator sb = new StringAllocator(64);
+                final StringBuilder sb = new StringBuilder(64);
                 sb.append(foldersWithError.get(0));
                 final int size = foldersWithError.size();
                 for (int i = 1; i < size; i++) {

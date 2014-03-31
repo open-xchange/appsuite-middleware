@@ -368,7 +368,7 @@ public final class IMAPSort {
 
         @Override
         public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-            final String command = new com.openexchange.java.StringAllocator("UID SORT (").append(descending ? "REVERSE " : "").append("ARRIVAL) UTF-8 ALL").toString();
+            final String command = new StringBuilder("UID SORT (").append(descending ? "REVERSE " : "").append("ARRIVAL) UTF-8 ALL").toString();
             final Response[] r = IMAPCommandsCollection.performCommand(p, command);
             final Response response = r[r.length - 1];
             final TLongList list = new TLongArrayList(256);

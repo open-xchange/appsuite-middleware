@@ -469,11 +469,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     // content = PATTERN_CRLF.matcher(content).replaceAll("");// .replaceAll("(  )+", "");
                 }
                 try {
-                    return extractPlainText(content, new com.openexchange.java.StringAllocator(type).append('/').append(subtype).toString());
+                    return extractPlainText(content, new StringBuilder(type).append('/').append(subtype).toString());
                 } catch (final OXException e) {
                     if (!subtype.startsWith("htm")) {
-                        final com.openexchange.java.StringAllocator sb =
-                            new com.openexchange.java.StringAllocator("Failed extracting plain text from \"text/").append(subtype).append("\" part:\n");
+                        final StringBuilder sb =
+                            new StringBuilder("Failed extracting plain text from \"text/").append(subtype).append("\" part:\n");
                         sb.append(" context=").append(session.getContextId());
                         sb.append(", user=").append(session.getUserId());
                         sb.append(", account=").append(accountId);
@@ -486,7 +486,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     /*
                      * Retry with sanitized HTML content
                      */
-                    return extractPlainText(Jsoup.clean(content, WHITELIST), new com.openexchange.java.StringAllocator(type).append('/').append(subtype).toString());
+                    return extractPlainText(Jsoup.clean(content, WHITELIST), new StringBuilder(type).append('/').append(subtype).toString());
                 }
             }
             if ("multipart".equals(type)) {
@@ -580,7 +580,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (prefix == null) {
             return String.valueOf(partCount);
         }
-        return new com.openexchange.java.StringAllocator(prefix).append('.').append(partCount).toString();
+        return new StringBuilder(prefix).append('.').append(partCount).toString();
     }
 
     @Override
@@ -688,7 +688,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private TLongObjectHashMap<MailMessage> fetchValidWithFallbackFor(final String fullName, final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum) throws OXException {
-        final String key = new com.openexchange.java.StringAllocator(16).append(accountId).append(".imap.fetch.modifier").toString();
+        final String key = new StringBuilder(16).append(accountId).append(".imap.fetch.modifier").toString();
         final FetchProfile fp = fetchProfile;
         int retry = 0;
         while (true) {
@@ -707,7 +707,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final Exception nextException = e.getNextException();
                 if ((nextException instanceof BadCommandException) || (nextException instanceof CommandFailedException)) {
                     if (LOG.isDebugEnabled()) {
-                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("Fetch with fetch profile failed: ");
+                        final StringBuilder sb = new StringBuilder(128).append("Fetch with fetch profile failed: ");
                         for (final Item item : fetchProfile.getItems()) {
                             sb.append(item.getClass().getSimpleName()).append(',');
                         }
@@ -734,7 +734,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * May occur while parsing invalid BODYSTRUCTURE response
                  */
                 if (LOG.isDebugEnabled()) {
-                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128).append("Fetch with fetch profile failed: ");
+                    final StringBuilder sb = new StringBuilder(128).append("Fetch with fetch profile failed: ");
                     for (final Item item : fetchProfile.getItems()) {
                         sb.append(item.getClass().getSimpleName()).append(',');
                     }
@@ -2030,7 +2030,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     /*
                      * Define sequence of valid message numbers: e.g.: 2,34,35,43,51
                      */
-                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(filter.length << 2);
+                    final StringBuilder tmp = new StringBuilder(filter.length << 2);
                     tmp.append(filter[0]);
                     for (int i = 1; i < filter.length; i++) {
                         tmp.append(',').append(filter[i]);
@@ -3015,7 +3015,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (LOG.isDebugEnabled()) {
                 final Exception next = e.getNextException();
                 if (next instanceof CommandFailedException) {
-                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(8192);
+                    final StringBuilder sb = new StringBuilder(8192);
                     sb.append("\r\nAPPEND command failed. Printing messages' headers for debugging purpose:\r\n");
                     for (int i = 0; i < mailMessages.length; i++) {
                         final MailMessage mailMessage = mailMessages[i];

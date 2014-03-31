@@ -101,7 +101,7 @@ public final class MailPath implements Cloneable, Serializable {
      * @return The mail path as {@link String}
      */
     public static String getMailPath(final int accountId, final String folder, final String mailId) {
-        return new com.openexchange.java.StringAllocator(32).append(prepareFullname(accountId, folder)).append(SEPERATOR).append(mailId).toString();
+        return new StringBuilder(32).append(prepareFullname(accountId, folder)).append(SEPERATOR).append(mailId).toString();
     }
 
     /**
