@@ -286,7 +286,7 @@ public final class IMAPStoreCache {
         /*
          * Check for a cached one
          */
-        final Key key = newKey(accountId, server, port, login);
+        final Key key = newKey(accountId, server, port, login, session.getUserId(), session.getContextId());
         /*
          * Get queue
          */
@@ -332,13 +332,14 @@ public final class IMAPStoreCache {
      * @param server The server name
      * @param port The port
      * @param login The login
+     * @param session The associated session
      * @return The container or <code>null</code>
      */
-    public IMAPStoreContainer optContainer(final int accountId, final String server, final int port, final String login) {
+    public IMAPStoreContainer optContainer(final int accountId, final String server, final int port, final String login, final Session session) {
         /*
          * Get container
          */
-        return map.get(newKey(accountId, server, port, login));
+        return map.get(newKey(accountId, server, port, login, session.getUserId(), session.getContextId()));
     }
 
     /**
@@ -381,8 +382,9 @@ public final class IMAPStoreCache {
      * @param server The host name of the IMAP server
      * @param port The port
      * @param login The login/user name
+     * @param session The associated session
      */
-    public void returnIMAPStore(final IMAPStore imapStore, final int accountId, final String server, final int port, final String login) {
+    public void returnIMAPStore(final IMAPStore imapStore, final int accountId, final String server, final int port, final String login, final Session session) {
         if (null == imapStore) {
             // Nothing to close
             return;
@@ -390,7 +392,7 @@ public final class IMAPStoreCache {
         /*
          * Get queue
          */
-        final IMAPStoreContainer container = map.get(newKey(accountId, server, port, login));
+        final IMAPStoreContainer container = map.get(newKey(accountId, server, port, login, session.getUserId(), session.getContextId()));
         if (null == container) {
             closeSafe(imapStore);
             return;
@@ -408,30 +410,36 @@ public final class IMAPStoreCache {
         }
     }
 
-    private static Key newKey(final int accountId, final String host, final int port, final String user) {
-        return new Key(accountId, host, port, user);
+    private static Key newKey(final int accountId, final String host, final int port, final String user, final int userId, final int contextId) {
+        return new Key(accountId, host, port, user, userId, contextId);
     }
 
-    private static final class Key {
+    static final class Key {
 
         private final int accountId;
         private final String host;
         private final int port;
         private final String user;
+        private final int userId;
+        private final int contextId;
         private final int hash;
 
-        protected Key(final int accountId, final String host, final int port, final String user) {
+        protected Key(final int accountId, final String host, final int port, final String user, final int userId, final int contextId) {
             super();
             this.accountId = accountId;
             this.host = host;
             this.port = port;
             this.user = user;
+            this.userId = userId;
+            this.contextId = contextId;
             final int prime = 31;
             int result = 1;
             result = prime * result + accountId;
             result = prime * result + ((host == null) ? 0 : host.hashCode());
             result = prime * result + port;
             result = prime * result + ((user == null) ? 0 : user.hashCode());
+            result = prime * result + userId;
+            result = prime * result + contextId;
             hash = result;
         }
 
@@ -453,6 +461,12 @@ public final class IMAPStoreCache {
                 return false;
             }
             if (accountId != other.accountId) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            if (contextId != other.contextId) {
                 return false;
             }
             if (host == null) {

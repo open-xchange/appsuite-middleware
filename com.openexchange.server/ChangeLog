@@ -1,6 +1,7 @@
 * 2014-03-31 - thorben.betten@open-xchange.com
  
  - Fix for bug 31816: Support SMTP server that do not support authentication capability
+ - Fix for bug 31809: Enhanced key associated with an IMAP store cache by dedicated user information
 
 * 2014-03-31 - martin.herfurth@open-xchange.com
 
