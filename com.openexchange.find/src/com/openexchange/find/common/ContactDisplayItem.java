@@ -52,6 +52,7 @@ package com.openexchange.find.common;
 import com.openexchange.find.facet.DefaultDisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -61,9 +62,12 @@ public class ContactDisplayItem extends DefaultDisplayItem {
 
     private final Contact contact;
 
+    private final String defaultValue;
+
     public ContactDisplayItem(final Contact contact) {
         super();
         this.contact = contact;
+        this.defaultValue = extractDefaultValue(contact);
     }
 
     @Override
@@ -78,7 +82,7 @@ public class ContactDisplayItem extends DefaultDisplayItem {
 
     @Override
     public String getDefaultValue() {
-        return contact.getDisplayName();
+        return defaultValue;
     }
 
     @Override
@@ -86,4 +90,36 @@ public class ContactDisplayItem extends DefaultDisplayItem {
         return "ContactDisplayItem [contact=" + contact.getDisplayName() + "(" + contact.getObjectID() + ")]";
     }
 
+    private static String extractDefaultValue(Contact contact) {
+        String defaultValue = contact.getDisplayName();
+        if (Strings.isEmpty(defaultValue)) {
+            String surName = contact.getSurName();
+            String givenName = contact.getGivenName();
+            if (Strings.isEmpty(surName)) {
+                if (!Strings.isEmpty(givenName)) {
+                    defaultValue = givenName;
+                }
+            } else {
+                if (Strings.isEmpty(givenName)) {
+                    defaultValue = surName;
+                } else {
+                    defaultValue = surName + ", " + givenName;
+                }
+            }
+        }
+        if (Strings.isEmpty(defaultValue)) {
+            defaultValue = contact.getEmail1();
+        }
+        if (Strings.isEmpty(defaultValue)) {
+            defaultValue = contact.getEmail2();
+        }
+        if (Strings.isEmpty(defaultValue)) {
+            defaultValue = contact.getEmail3();
+        }
+        if (defaultValue == null) {
+            defaultValue = "";
+        }
+
+        return defaultValue;
+    }
 }
