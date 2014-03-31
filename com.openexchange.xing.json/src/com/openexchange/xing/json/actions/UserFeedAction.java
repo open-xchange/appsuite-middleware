@@ -69,7 +69,7 @@ import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link UserFeedAction}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class UserFeedAction extends AbstractXingAction {
@@ -109,7 +109,7 @@ public class UserFeedAction extends AbstractXingAction {
         String token = req.getParameter("testToken");
         String secret = req.getParameter("testSecret");
         if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret);
+            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
         } else {
             xingOAuthAccess = getXingOAuthAccess(req);
         }

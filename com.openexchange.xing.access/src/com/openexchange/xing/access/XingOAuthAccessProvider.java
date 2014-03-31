@@ -71,13 +71,13 @@ public interface XingOAuthAccessProvider {
 
     /**
      * Gets the XING OAuth access for given XING OAuth account.
-     * 
+     *
      * @param token The identifier of the XING OAuth token
      * @param secret The identifier of the XING OAuth secret
      * @return The XING OAuth access; either newly created or fetched from underlying registry
      * @throws OXException If a XING session could not be created
      */
-    XingOAuthAccess accessFor(String token, String secret) throws OXException;
+    XingOAuthAccess accessFor(String token, String secret, Session session) throws OXException;
 
     /**
      * Gets the identifier of the default XING OAuth account.

@@ -132,8 +132,8 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
             }
 
             @Override
-            public XingOAuthAccess accessFor(String token, String secret) throws OXException {
-                return XingOAuthAccessImpl.accessFor(token, secret);
+            public XingOAuthAccess accessFor(String token, String secret, Session session) throws OXException {
+                return XingOAuthAccessImpl.accessFor(session, token, secret);
             }
         };
         providerRegistration = context.registerService(XingOAuthAccessProvider.class, provider, null);

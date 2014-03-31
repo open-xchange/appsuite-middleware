@@ -87,7 +87,7 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
                 xingOAuthAccess = registry.getAccess(accountId, session.getUserId(), session.getContextId());
                 if (null == xingOAuthAccess) {
                     // Create & connect
-                    final XingOAuthAccessImpl newInstance = new XingOAuthAccessImpl(oauthAccount);
+                    final XingOAuthAccessImpl newInstance = new XingOAuthAccessImpl(session, oauthAccount);
                     // Add to registry & return
                     registry.addAccess(newInstance, accountId, session.getUserId(), session.getContextId());
                     xingOAuthAccess = newInstance;
@@ -98,13 +98,14 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
     }
 
     /**
+     * @param session The users session
      * @param token the token identifier
      * @param secret the secret identifier
      * @return The newly created XING OAuth access
      * @throws OXException If a XING session could not be created
      */
-    public static XingOAuthAccess accessFor(String token, String secret) throws OXException {
-        return new XingOAuthAccessImpl(token, secret);
+    public static XingOAuthAccess accessFor(Session session, String token, String secret) throws OXException {
+        return new XingOAuthAccessImpl(session, token, secret);
     }
     // ----------------------------------------------------------------------------------------------------------------------------- //
 
@@ -131,14 +132,15 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
     /**
      * Initializes a new {@link XingOAuthAccessImpl}.
      *
+     * @param session The users session
      * @param oauthAccount The associated OAuth account
      * @throws OXException If connect attempt fails
      */
-    private XingOAuthAccessImpl(final OAuthAccount oauthAccount) throws OXException {
+    private XingOAuthAccessImpl(final Session session, final OAuthAccount oauthAccount) throws OXException {
         super();
         try {
             final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
-            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(), xingOAuthServiceMetaData.getAPISecret());
+            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(session), xingOAuthServiceMetaData.getAPISecret(session));
             webAuthSession = new WebAuthSession(appKeys, new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret()));
             xingApi = new XingAPI<WebAuthSession>(webAuthSession);
             // Get account information
@@ -154,11 +156,11 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
         }
     }
 
-    private XingOAuthAccessImpl(final String token, final String secret) throws OXException {
+    private XingOAuthAccessImpl(final Session session, final String token, final String secret) throws OXException {
         super();
         try {
             final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
-            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(), xingOAuthServiceMetaData.getAPISecret());
+            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(session), xingOAuthServiceMetaData.getAPISecret(session));
             webAuthSession = new WebAuthSession(appKeys, new AccessTokenPair(token, secret));
             xingApi = new XingAPI<WebAuthSession>(webAuthSession);
             // Get account information

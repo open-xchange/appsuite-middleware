@@ -88,7 +88,7 @@ public final class ContactRequestAction extends AbstractXingAction {
         final XingOAuthAccess xingOAuthAccess;
 
         if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret);
+            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
         } else {
             xingOAuthAccess = getXingOAuthAccess(req);
         }

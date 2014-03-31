@@ -63,7 +63,7 @@ import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link ChangeStatusAction}
- * 
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public final class ChangeStatusAction extends AbstractXingAction {
@@ -78,13 +78,13 @@ public final class ChangeStatusAction extends AbstractXingAction {
     @Override
     protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
         final String message = getMandatoryStringParameter(req, "message");
-        
+
         String token = req.getParameter("testToken");
         String secret = req.getParameter("testSecret");
         final XingOAuthAccess xingOAuthAccess;
 
         if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret);
+            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
         } else {
             xingOAuthAccess = getXingOAuthAccess(req);
         }

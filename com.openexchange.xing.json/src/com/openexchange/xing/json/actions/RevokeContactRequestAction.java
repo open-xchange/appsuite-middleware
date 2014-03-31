@@ -70,7 +70,7 @@ public class RevokeContactRequestAction extends AbstractXingAction {
 
     /**
      * Initializes a new {@link RevokeContactRequestAction}.
-     * 
+     *
      * @param services
      */
     public RevokeContactRequestAction(ServiceLookup services) {
@@ -90,7 +90,7 @@ public class RevokeContactRequestAction extends AbstractXingAction {
         final XingOAuthAccess xingOAuthAccess;
 
         if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret);
+            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
         } else {
             xingOAuthAccess = getXingOAuthAccess(req);
         }

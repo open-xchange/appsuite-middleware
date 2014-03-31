@@ -68,7 +68,7 @@ import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link ShowActivityAction}
- * 
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public final class ShowActivityAction extends AbstractXingAction {
@@ -91,7 +91,7 @@ public final class ShowActivityAction extends AbstractXingAction {
         final XingOAuthAccess xingOAuthAccess;
 
         if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret);
+            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
         } else {
             xingOAuthAccess = getXingOAuthAccess(req);
         }

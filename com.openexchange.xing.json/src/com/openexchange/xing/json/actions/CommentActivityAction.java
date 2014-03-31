@@ -63,7 +63,7 @@ import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link CommentActivityAction}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CommentActivityAction extends AbstractXingAction {
@@ -83,7 +83,7 @@ public class CommentActivityAction extends AbstractXingAction {
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
         String activityId = getMandatoryStringParameter(req, "activity_id");
         String text = getMandatoryStringParameter(req, "text");
-        
+
         if (text.length() > 600) {
             throw XingExceptionCodes.COMMENT_SIZE_EXCEEDED.create();
         }
@@ -93,7 +93,7 @@ public class CommentActivityAction extends AbstractXingAction {
         final XingOAuthAccess xingOAuthAccess;
 
         if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret);
+            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
         } else {
             xingOAuthAccess = getXingOAuthAccess(req);
         }

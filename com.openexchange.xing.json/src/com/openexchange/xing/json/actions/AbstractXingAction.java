@@ -65,6 +65,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.xing.UserField;
@@ -158,19 +159,20 @@ public abstract class AbstractXingAction implements AJAXActionService {
 
     /**
      * Gets the XING OAuth access.
-     * 
+     *
      * @param token The token identifier
      * @param secret The secret identifier
+     * @param session The session
      * @return The XING OAuth access
      * @throws OXException If XING OAuth access cannot be returned
      */
-    protected XingOAuthAccess getXingOAuthAccess(final String token, final String secret) throws OXException {
+    protected XingOAuthAccess getXingOAuthAccess(final String token, final String secret, final Session session) throws OXException {
         final XingOAuthAccessProvider provider = services.getService(XingOAuthAccessProvider.class);
         if (null == provider) {
             throw ServiceExceptionCode.absentService(XingOAuthAccessProvider.class);
         }
 
-        return provider.accessFor(token, secret);
+        return provider.accessFor(token, secret, session);
     }
 
     /**
@@ -186,7 +188,7 @@ public abstract class AbstractXingAction implements AJAXActionService {
         final XingOAuthAccess xingOAuthAccess;
 
         if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret);
+            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
         } else {
             xingOAuthAccess = getXingOAuthAccess(req);
         }
@@ -206,7 +208,7 @@ public abstract class AbstractXingAction implements AJAXActionService {
             if (user_fields instanceof String) {
                 String[] split = Strings.splitByComma((String) user_fields);
                 optUserFields = new ArrayList<UserField>();
-                for(String s : split) {
+                for (String s : split) {
                     try {
                         optUserFields.add(USER_FIELDS.get(Integer.parseInt(s)));
                     } catch (NumberFormatException e) {
