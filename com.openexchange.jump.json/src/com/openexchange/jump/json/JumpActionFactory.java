@@ -51,11 +51,15 @@ package com.openexchange.jump.json;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.jump.json.actions.AbstractJumpAction;
+import com.openexchange.jump.json.actions.DummyEndpointHandler;
 import com.openexchange.jump.json.actions.IdentityTokenAction;
 import com.openexchange.server.ServiceLookup;
 
@@ -72,20 +76,29 @@ public class JumpActionFactory implements AJAXActionServiceFactory {
     /**
      * Initializes a new {@link JumpActionFactory}.
      */
-    public JumpActionFactory(ServiceLookup lookup) {
+    public JumpActionFactory(final ServiceLookup lookup) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractJumpAction>(1);
+        actions = new ConcurrentHashMap<String, AbstractJumpAction>(4);
         actions.put("identityToken", new IdentityTokenAction(lookup));
+        actions.put("dummy", new DummyEndpointHandler(lookup));
     }
 
     @Override
-    public AJAXActionService createActionService(String action) {
+    public AJAXActionService createActionService(final String action) {
         return actions.get(action);
     }
 
     @Override
     public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
+        final List<AbstractJumpAction> values = new LinkedList<AbstractJumpAction>();
+
+        for (final Entry<String,AbstractJumpAction> entry : actions.entrySet()) {
+            if (!"dummy".equals(entry.getKey())) {
+                values.add(entry.getValue());
+            }
+        }
+
+        return Collections.unmodifiableCollection(values);
     }
 
 }
