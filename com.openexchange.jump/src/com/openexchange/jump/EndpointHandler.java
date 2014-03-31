@@ -73,7 +73,7 @@ public interface EndpointHandler {
     /**
      * Gets a set containing the system names (in lower-case) this handler is interested in.
      *
-     * @return A set of system names
+     * @return A set of system names; never <code>null</code> or an empty {@link Set}.
      */
     Set<String> systemNamesOfInterest();
 

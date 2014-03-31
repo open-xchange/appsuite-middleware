@@ -94,7 +94,7 @@ public final class IdentityTokenAction extends AbstractJumpAction {
         boolean handled = false;
         for (final EndpointHandler endpointHandler : getEndpointHandlerRegistry().getHandlers()) {
             final Set<String> namesOfInterest = endpointHandler.systemNamesOfInterest();
-            if (isEmpty(namesOfInterest) || namesOfInterest.contains(endpoint.getSystemName())) {
+            if (null != namesOfInterest && namesOfInterest.contains(endpoint.getSystemName())) {
                 handled |= endpointHandler.handleEndpoint(token, endpoint, session);
             }
         }
@@ -103,10 +103,6 @@ public final class IdentityTokenAction extends AbstractJumpAction {
         }
 
         return new AJAXRequestResult(new JSONObject(2).put("token", UUIDs.getUnformattedString(token)), "json");
-    }
-
-    private boolean isEmpty(final Set<String> set) {
-        return null == set || set.isEmpty();
     }
 
 }

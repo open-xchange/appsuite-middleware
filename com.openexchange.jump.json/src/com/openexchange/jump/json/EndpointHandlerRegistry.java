@@ -50,6 +50,7 @@
 package com.openexchange.jump.json;
 
 import java.util.List;
+import java.util.Set;
 import com.openexchange.jump.EndpointHandler;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
@@ -79,6 +80,22 @@ public final class EndpointHandlerRegistry {
      */
     public List<EndpointHandler> getHandlers() {
         return registry.getServiceList();
+    }
+
+    /**
+     * Checks if this registry has a handler for given system name.
+     *
+     * @param systemName The system name
+     * @return <code>true</code> if such a handler is present; otherwise <code>false</code>
+     */
+    public boolean hasHandlerFor(final String systemName) {
+        for (final EndpointHandler endpointHandler : getHandlers()) {
+            final Set<String> namesOfInterest = endpointHandler.systemNamesOfInterest();
+            if (namesOfInterest.contains(systemName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

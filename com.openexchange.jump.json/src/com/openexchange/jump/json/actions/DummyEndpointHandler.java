@@ -47,69 +47,60 @@
  *
  */
 
-package com.openexchange.jump.json.osgi;
+package com.openexchange.jump.json.actions;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
+import org.json.JSONException;
 import org.osgi.framework.BundleContext;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.documentation.annotations.Module;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.jump.Endpoint;
 import com.openexchange.jump.EndpointHandler;
-import com.openexchange.jump.json.EndpointHandlerRegistry;
-import com.openexchange.jump.json.JumpActionFactory;
-import com.openexchange.jump.json.actions.AbstractJumpAction;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.jump.json.JumpRequest;
+import com.openexchange.jump.json.osgi.JumpJsonActivator;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link JumpJsonActivator}
+ * {@link DummyEndpointHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "jump", description = "Identity token pass-over")
-public final class JumpJsonActivator extends AJAXModuleActivator {
-
-    private static final AtomicReference<BundleContext> START_BUNDLE_CONTEXT_REF = new AtomicReference<BundleContext>();
+public final class DummyEndpointHandler extends AbstractJumpAction {
 
     /**
-     * Gets the bundle context passed to this activator on bundle start-up.
+     * Initializes a new {@link DummyEndpointHandler}.
      *
-     * @return The bundle context or <code>null</code> if absent
+     * @param services
      */
-    public static BundleContext getBundleContextFromStartUp() {
-        return START_BUNDLE_CONTEXT_REF.get();
-    }
-
-    // -------------------------------------------------------------------------------------------- //
-
-    /**
-     * Initializes a new {@link JumpJsonActivator}.
-     */
-    public JumpJsonActivator() {
-        super();
+    public DummyEndpointHandler(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
+    protected AJAXRequestResult perform(final JumpRequest request) throws OXException, JSONException {
+        final BundleContext context = JumpJsonActivator.getBundleContextFromStartUp();
 
-    @Override
-    protected void startBundle() throws Exception {
-        final BundleContext context = this.context;
-        START_BUNDLE_CONTEXT_REF.set(context);
+        if (null != context && !getEndpointHandlerRegistry().hasHandlerFor("dummy")) {
+            final EndpointHandler eh = new EndpointHandler() {
 
-        final RankingAwareNearRegistryServiceTracker<EndpointHandler> handlers = new RankingAwareNearRegistryServiceTracker<EndpointHandler>(context, EndpointHandler.class);
-        rememberTracker(handlers);
-        openTrackers();
-        AbstractJumpAction.setEndpointHandlerRegistry(new EndpointHandlerRegistry(handlers));
+                @Override
+                public Set<String> systemNamesOfInterest() {
+                    return Collections.singleton("dummy");
+                }
 
-        registerModule(new JumpActionFactory(this), "jump");
-    }
+                @Override
+                public boolean handleEndpoint(final UUID token, final Endpoint endpoint, final Session session) {
+                    return true;
+                }
+            };
+            context.registerService(EndpointHandler.class, eh, null);
+        }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        AbstractJumpAction.setEndpointHandlerRegistry(null);
-        START_BUNDLE_CONTEXT_REF.set(null);
+        return new AJAXRequestResult(Boolean.TRUE, "native");
     }
 
 }
