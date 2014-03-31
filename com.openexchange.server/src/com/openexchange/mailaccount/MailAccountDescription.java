@@ -74,78 +74,43 @@ public final class MailAccountDescription implements Serializable {
     private static final long serialVersionUID = -2443656355399068302L;
 
     private int id;
-
     private String login;
-
     private String password;
-
     private String transportLogin;
-
     private String transportPassword;
-
     private String name;
-
     private String primaryAddress;
-
     private String personal;
-
     private String replyTo;
-
     private String spamHandler;
-
     private String trash;
-
     private String archive;
-
     private String sent;
-
     private String drafts;
-
     private String spam;
-
     private String confirmedSpam;
-
     private String confirmedHam;
-
     private boolean defaultFlag;
-
     private String mailServer;
-
     private int mailPort;
-
     private String mailProtocol;
-
     private boolean mailSecure;
-
     private String transportServer;
-
     private int transportPort;
-
     private String transportProtocol;
-
     private boolean transportSecure;
-
     private String mailServerUrl;
-
     private String transportUrl;
-
     private boolean unifiedINBOXEnabled;
-
     private String trashFullname;
-
     private String archiveFullname;
-
     private String sentFullname;
-
     private String draftsFullname;
-
     private String spamFullname;
-
     private String confirmedSpamFullname;
-
     private String confirmedHamFullname;
-
     private Map<String, String> properties;
+    private Map<String, String> transportProperties;
 
     /**
      * Initializes a new {@link MailAccountDescription}.
@@ -153,6 +118,7 @@ public final class MailAccountDescription implements Serializable {
     public MailAccountDescription() {
         super();
         properties = new HashMap<String, String>(4);
+        transportProperties = new HashMap<String, String>(4);
         transportPort = 25;
         mailPort = 143;
         transportProtocol = "smtp";
@@ -991,8 +957,7 @@ public final class MailAccountDescription implements Serializable {
                     break;
                 }
             }
-            this.properties = new HashMap<String, String>(properties.size());
-            this.properties.putAll(properties);
+            this.properties = new HashMap<String, String>(properties);
         }
     }
 
@@ -1010,6 +975,46 @@ public final class MailAccountDescription implements Serializable {
             replyTo = value;
         }
         properties.put(name, value);
+    }
+
+    /**
+     * Gets the transport properties
+     *
+     * @return The transport properties
+     */
+    public Map<String, String> getTransportProperties() {
+        if (transportProperties.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return new HashMap<String, String>(transportProperties);
+    }
+
+    /**
+     * Sets the transport properties
+     *
+     * @param properties The transport properties to set
+     */
+    public void setTransportProperties(final Map<String, String> transportProperties) {
+        if (null == transportProperties) {
+            this.transportProperties = new HashMap<String, String>(4);
+        } else if (transportProperties.isEmpty()) {
+            this.transportProperties = new HashMap<String, String>(4);
+        } else {
+            this.transportProperties = new HashMap<String, String>(transportProperties);
+        }
+    }
+
+    /**
+     * Adds specified name-value-pair to transport properties.
+     *
+     * @param name The transport property name
+     * @param value The transport property value
+     */
+    public void addTransportProperty(final String name, final String value) {
+        if (transportProperties.isEmpty()) {
+            transportProperties = new HashMap<String, String>(4);
+        }
+        transportProperties.put(name, value);
     }
 
     private static Object[] parseServerAndPort(final String server, final int defaultPort) {

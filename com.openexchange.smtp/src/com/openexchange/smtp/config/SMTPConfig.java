@@ -167,15 +167,18 @@ public final class SMTPConfig extends TransportConfig {
     @Override
     protected boolean doCustomParsing(MailAccount account, Session session) throws OXException {
         if (!account.isDefaultAccount()) {
-            {
-                final String transportLogin = account.getTransportLogin();
-                login = isEmpty(transportLogin) ? account.getLogin() : transportLogin;
+            final String sBool = account.getTransportProperties().get("transport_credentials");
+            if (null == sBool || !"false".equalsIgnoreCase(sBool)) {
+                {
+                    final String transportLogin = account.getTransportLogin();
+                    login = isEmpty(transportLogin) ? account.getLogin() : transportLogin;
+                }
+                {
+                    final String transportPassword = account.getTransportPassword();
+                    password = MailPasswordUtil.decrypt(isEmpty(transportPassword) ? account.getPassword() : transportPassword, session, account.getId(), login, account.getTransportServer());
+                }
+                return true;
             }
-            {
-                final String transportPassword = account.getTransportPassword();
-                password = MailPasswordUtil.decrypt(isEmpty(transportPassword) ? account.getPassword() : transportPassword, session, account.getId(), login, account.getTransportServer());
-            }
-            return true;
         }
         return false;
     }

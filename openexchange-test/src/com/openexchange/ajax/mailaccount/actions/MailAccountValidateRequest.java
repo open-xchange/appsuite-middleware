@@ -328,6 +328,16 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             public Map<String, String> getProperties() {
                 return acc.getProperties();
             }
+
+            @Override
+            public Map<String, String> getTransportProperties() {
+                return acc.getTransportProperties();
+            }
+
+            @Override
+            public void addTransportProperty(final String name, final String value) {
+                acc.addTransportProperty(name, value);
+            }
         };
     }
 }

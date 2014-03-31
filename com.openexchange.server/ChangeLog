@@ -1,4 +1,8 @@
-* 2014-03-27 - martin.herfurth@open-xchange.com
+* 2014-03-31 - thorben.betten@open-xchange.com
+ 
+ - Fix for bug 31816: Support SMTP server that do not support authentication capability
+
+* 2014-03-31 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31810: Bad conflict handling on update.
 

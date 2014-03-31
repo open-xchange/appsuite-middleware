@@ -849,10 +849,11 @@ public final class SMTPTransport extends MailTransport {
                         handlePrivilegedActionException(e);
                     }
                 } else {
-                    transport.connect(server, port, smtpConfig.getLogin(), encodedPassword);
+                    final String login = smtpConfig.getLogin();
+                    transport.connect(server, port, null == login ? "" : login, null == encodedPassword ? "" : encodedPassword);
                 }
             } else {
-                transport.connect(server, port, null, null);
+                transport.connect(server, port, "", "");
             }
         } catch (final MessagingException e) {
             if (e.getNextException() instanceof javax.net.ssl.SSLHandshakeException) {

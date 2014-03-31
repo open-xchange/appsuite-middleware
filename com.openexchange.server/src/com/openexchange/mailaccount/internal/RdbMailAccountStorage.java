@@ -382,7 +382,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             /*
              * Fill properties
              */
-            fillProperties(mailAccount, cid, user, id, con);
+            fillProperties(mailAccount, cid, user, id, false, con);
         } catch (final SQLException e) {
             if (null != stmt) {
                 final String sql = stmt.toString();
@@ -438,6 +438,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (!result.wasNull()) {
                     mailAccount.setReplyTo(replyTo);
                 }
+                /*
+                 * Fill properties
+                 */
+                fillProperties(mailAccount, cid, user, id, true, con);
             } else {
                 // throw MailAccountExceptionMessages.NOT_FOUND, I(id), I(user), I(cid));
                 mailAccount.setTransportServer((String) null);
@@ -453,11 +457,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private static void fillProperties(final AbstractMailAccount mailAccount, final int cid, final int user, final int id, final Connection con) throws SQLException {
+    private static void fillProperties(final AbstractMailAccount mailAccount, final int cid, final int user, final int id, final boolean transportProps, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT name, value FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ?");
+            final String table = transportProps ? "user_transport_account_properties" : "user_mail_account_properties";
+            stmt = con.prepareStatement("SELECT name, value FROM "+table+" WHERE cid = ? AND user = ? AND id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
@@ -475,18 +480,24 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     }
                 } while (rs.next());
                 // Add aliases, too
-                if (MailAccount.DEFAULT_ID == id) {
+                if (false == transportProps && MailAccount.DEFAULT_ID == id) {
                     properties.put("addresses", getAliases(user, cid, mailAccount));
                 }
-                mailAccount.setProperties(properties);
-            } else {
-                // Add aliases, too
-                if (MailAccount.DEFAULT_ID == id) {
-                    final Map<String, String> properties = new HashMap<String, String>(8, 1);
-                    properties.put("addresses", getAliases(user, cid, mailAccount));
-                    mailAccount.setProperties(properties);
+                if (transportProps) {
+                    mailAccount.setTransportProperties(properties);
                 } else {
-                    mailAccount.setProperties(Collections.<String, String> emptyMap());
+                    mailAccount.setProperties(properties);
+                }
+            } else {
+                if (false == transportProps) {
+                    // Add aliases, too
+                    if (MailAccount.DEFAULT_ID == id) {
+                        final Map<String, String> properties = new HashMap<String, String>(8, 1);
+                        properties.put("addresses", getAliases(user, cid, mailAccount));
+                        mailAccount.setProperties(properties);
+                    } else {
+                        mailAccount.setProperties(Collections.<String, String> emptyMap());
+                    }
                 }
             }
         } finally {
@@ -678,8 +689,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final DeleteListenerRegistry registry = DeleteListenerRegistry.getInstance();
             registry.triggerOnBeforeDeletion(id, properties, user, cid, con);
             // First delete properties
-            deleteProperties(cid, user, id, con);
-            deleteTransportProperties(cid, user, id, con);
+            deleteProperties(cid, user, id, false, con);
+            deleteProperties(cid, user, id, true, con);
             // Then delete account data
             stmt = con.prepareStatement(DELETE_MAIL_ACCOUNT);
             stmt.setLong(1, cid);
@@ -1441,21 +1452,26 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     }
                 }
 
-                final Map<String, String> properties = mailAccount.getProperties();
+                Map<String, String> properties = mailAccount.getProperties();
                 if (attributes.contains(Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL)) {
-                    updateProperty(cid, user, mailAccount.getId(), "pop3.deletewt", properties.get("pop3.deletewt"), con);
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.deletewt", properties.get("pop3.deletewt"), false, con);
                 }
                 if (attributes.contains(Attribute.POP3_EXPUNGE_ON_QUIT_LITERAL)) {
-                    updateProperty(cid, user, mailAccount.getId(), "pop3.expunge", properties.get("pop3.expunge"), con);
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.expunge", properties.get("pop3.expunge"), false, con);
                 }
                 if (attributes.contains(Attribute.POP3_REFRESH_RATE_LITERAL)) {
-                    updateProperty(cid, user, mailAccount.getId(), "pop3.refreshrate", properties.get("pop3.refreshrate"), con);
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.refreshrate", properties.get("pop3.refreshrate"), false, con);
                 }
                 if (attributes.contains(Attribute.POP3_STORAGE_LITERAL)) {
-                    updateProperty(cid, user, mailAccount.getId(), "pop3.storage", properties.get("pop3.storage"), con);
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.storage", properties.get("pop3.storage"), false, con);
                 }
                 if (attributes.contains(Attribute.POP3_PATH_LITERAL)) {
-                    updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
+                    updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), false, con);
+                }
+
+                properties = mailAccount.getTransportProperties();
+                if (attributes.contains(Attribute.TRANSPORT_CREDENTIALS_LITERAL)) {
+                    updateProperty(cid, user, mailAccount.getId(), "transport_credentials", properties.get("transport_credentials"), true, con);
                 }
             } catch (final SQLException e) {
                 if (null != stmt) {
@@ -1609,10 +1625,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private void updateProperty(final int cid, final int user, final int accountId, final String name, final String newValue, final Connection con) throws SQLException {
+    private void updateProperty(final int cid, final int user, final int accountId, final String name, final String newValue, final boolean transportProps, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
+            final String table = transportProps ? "user_transport_account_properties" : "user_mail_account_properties";
+            stmt = con.prepareStatement("DELETE FROM "+table+" WHERE cid = ? AND user = ? AND id = ? AND name = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
@@ -1622,7 +1639,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
             if (null != newValue && newValue.length() > 0) {
                 closeSQLStuff(stmt);
-                stmt = con.prepareStatement("INSERT INTO user_mail_account_properties (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)");
+                stmt = con.prepareStatement("INSERT INTO "+table+" (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)");
                 pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, user);
@@ -1636,24 +1653,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private void deleteProperties(final int cid, final int user, final int accountId, final Connection con) throws SQLException {
+    private void deleteProperties(final int cid, final int user, final int accountId, final boolean transportProps, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ?");
-            int pos = 1;
-            stmt.setInt(pos++, cid);
-            stmt.setInt(pos++, user);
-            stmt.setInt(pos++, accountId);
-            stmt.executeUpdate();
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
-    private void deleteTransportProperties(final int cid, final int user, final int accountId, final Connection con) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("DELETE FROM user_transport_account_properties WHERE cid = ? AND user = ? AND id = ?");
+            final String table = transportProps ? "user_transport_account_properties" : "user_mail_account_properties";
+            stmt = con.prepareStatement("DELETE FROM "+table+" WHERE cid = ? AND user = ? AND id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
@@ -1771,21 +1775,25 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.executeUpdate();
             }
             // Properties
-            final Map<String, String> properties = mailAccount.getProperties();
+            Map<String, String> properties = mailAccount.getProperties();
             if (properties.containsKey("pop3.deletewt")) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.deletewt", properties.get("pop3.deletewt"), con);
+                updateProperty(cid, user, mailAccount.getId(), "pop3.deletewt", properties.get("pop3.deletewt"), false, con);
             }
             if (properties.containsKey("pop3.expunge")) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.expunge", properties.get("pop3.expunge"), con);
+                updateProperty(cid, user, mailAccount.getId(), "pop3.expunge", properties.get("pop3.expunge"), false, con);
             }
             if (properties.containsKey("pop3.refreshrate")) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.refreshrate", properties.get("pop3.refreshrate"), con);
+                updateProperty(cid, user, mailAccount.getId(), "pop3.refreshrate", properties.get("pop3.refreshrate"), false, con);
             }
             if (properties.containsKey("pop3.storage")) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.storage", properties.get("pop3.storage"), con);
+                updateProperty(cid, user, mailAccount.getId(), "pop3.storage", properties.get("pop3.storage"), false, con);
             }
             if (properties.containsKey("pop3.path")) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
+                updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), false, con);
+            }
+            properties = mailAccount.getTransportProperties();
+            if (properties.containsKey("transport_credentials")) {
+                updateProperty(cid, user, mailAccount.getId(), "transport_credentials", properties.get("transport_credentials"), true, con);
             }
             con.commit();
             autocommit(con);
@@ -1984,22 +1992,28 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.executeUpdate();
             }
             // Properties
-            final Map<String, String> properties = mailAccount.getProperties();
+            Map<String, String> properties = mailAccount.getProperties();
             if (!properties.isEmpty()) {
                 if (properties.containsKey("pop3.deletewt")) {
-                    updateProperty(cid, user, id, "pop3.deletewt", properties.get("pop3.deletewt"), con);
+                    updateProperty(cid, user, id, "pop3.deletewt", properties.get("pop3.deletewt"), false, con);
                 }
                 if (properties.containsKey("pop3.expunge")) {
-                    updateProperty(cid, user, id, "pop3.expunge", properties.get("pop3.expunge"), con);
+                    updateProperty(cid, user, id, "pop3.expunge", properties.get("pop3.expunge"), false, con);
                 }
                 if (properties.containsKey("pop3.refreshrate")) {
-                    updateProperty(cid, user, id, "pop3.refreshrate", properties.get("pop3.refreshrate"), con);
+                    updateProperty(cid, user, id, "pop3.refreshrate", properties.get("pop3.refreshrate"), false, con);
                 }
                 if (properties.containsKey("pop3.storage")) {
-                    updateProperty(cid, user, id, "pop3.storage", properties.get("pop3.storage"), con);
+                    updateProperty(cid, user, id, "pop3.storage", properties.get("pop3.storage"), false, con);
                 }
                 if (properties.containsKey("pop3.path")) {
-                    updateProperty(cid, user, id, "pop3.path", properties.get("pop3.path"), con);
+                    updateProperty(cid, user, id, "pop3.path", properties.get("pop3.path"), false, con);
+                }
+            }
+            properties = mailAccount.getTransportProperties();
+            if (!properties.isEmpty()) {
+                if (properties.containsKey("transport_credentials")) {
+                    updateProperty(cid, user, id, "transport_credentials", properties.get("transport_credentials"), true, con);
                 }
             }
         } catch (final SQLException e) {

@@ -280,4 +280,9 @@ public class MailAccountGetSwitch implements AttributeSwitch {
         return account.getProperties().get("addresses");
     }
 
+    @Override
+    public Object transportCredentials() {
+        return account.getTransportProperties().get("transport_credentials");
+    }
+
 }

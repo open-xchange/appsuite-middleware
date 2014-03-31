@@ -338,4 +338,10 @@ public class SetSwitch implements AttributeSwitch {
         return null;
     }
 
+    @Override
+    public Object transportCredentials() {
+        desc.addTransportProperty("transport_credentials", (String) value);
+        return null;
+    }
+
 }

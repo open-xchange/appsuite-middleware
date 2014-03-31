@@ -76,78 +76,43 @@ public abstract class AbstractMailAccount implements MailAccount {
     private static final long serialVersionUID = -641194838598605274L;
 
     protected int id;
-
     protected String login;
-
     protected String password;
-
     protected String transportLogin;
-
     protected String transportPassword;
-
     protected String mailServer;
-
     protected int mailPort;
-
     protected String mailProtocol;
-
     protected boolean mailSecure;
-
     protected String transportServer;
-
     protected int transportPort;
-
     protected String transportProtocol;
-
     protected boolean transportSecure;
-
     protected String name;
-
     protected String primaryAddress;
-
     protected String personal;
-
     protected String replyTo;
-
     protected int userId;
-
     protected String spamHandler;
-
     protected String trash;
-
     protected String archive;
-
     protected String sent;
-
     protected String drafts;
-
     protected String spam;
-
     protected String confirmedSpam;
-
     protected String confirmedHam;
-
     protected String mailServerUrl;
-
     protected String transportServerUrl;
-
     protected boolean unifiedINBOXEnabled;
-
     protected String trashFullname;
-
     protected String archiveFullname;
-
     protected String sentFullname;
-
     protected String draftsFullname;
-
     protected String spamFullname;
-
     protected String confirmedSpamFullname;
-
     protected String confirmedHamFullname;
-
     protected Map<String, String> properties;
+    protected Map<String, String> transportProperties;
 
     /**
      * Initializes a new {@link AbstractMailAccount}.
@@ -155,6 +120,7 @@ public abstract class AbstractMailAccount implements MailAccount {
     protected AbstractMailAccount() {
         super();
         properties = new HashMap<String, String>(4);
+        transportProperties = new HashMap<String, String>(4);
         transportPort = 25;
         mailPort = 143;
         final String transportProvider = TransportProperties.getInstance().getDefaultTransportProvider();
@@ -831,6 +797,37 @@ public abstract class AbstractMailAccount implements MailAccount {
             replyTo = value;
         }
         properties.put(name, value);
+    }
+
+    @Override
+    public Map<String, String> getTransportProperties() {
+        if (transportProperties.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return new HashMap<String, String>(transportProperties);
+    }
+
+    /**
+     * Sets the transport properties
+     *
+     * @param properties The transport properties to set
+     */
+    public void setTransportProperties(final Map<String, String> transportProperties) {
+        if (null == transportProperties) {
+            this.transportProperties = new HashMap<String, String>(4);
+        } else if (transportProperties.isEmpty()) {
+            this.transportProperties = new HashMap<String, String>(4);
+        } else {
+            this.transportProperties = new HashMap<String, String>(transportProperties);
+        }
+    }
+
+    @Override
+    public void addTransportProperty(final String name, final String value) {
+        if (transportProperties.isEmpty()) {
+            transportProperties = new HashMap<String, String>(4);
+        }
+        transportProperties.put(name, value);
     }
 
     @Override

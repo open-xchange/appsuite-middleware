@@ -140,4 +140,6 @@ public interface MailAccountFields {
 
     public static final String META = "meta";
 
+    public static final String TRANSPORT_CREDENTIALS = "transport_credentials";
+
 }

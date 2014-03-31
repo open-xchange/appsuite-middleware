@@ -94,6 +94,7 @@ public class AutoconfigResultConverter implements ResultConverter {
         try {
             final JSONObject json = new JSONObject(12);
             json.put("login", autoconfig.getUsername());
+            json.put("transport_login", autoconfig.getUsername());
             json.put("mail_server", autoconfig.getMailServer());
             json.put("transport_server", autoconfig.getTransportServer());
             json.put("mail_port", autoconfig.getMailPort());

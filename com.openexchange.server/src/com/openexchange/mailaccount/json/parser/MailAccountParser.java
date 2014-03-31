@@ -298,28 +298,15 @@ public class MailAccountParser extends DataParser {
             attributes.add(Attribute.TRANSPORT_PASSWORD_LITERAL);
         }
         // Special handling for a new account
-        if (asNewAccount) {
-            if (json.hasAndNotNull("transport_credentials")) {
-                final boolean transportCredentials = json.optBoolean("transport_credentials", true);
-                if (!transportCredentials) {
-                    // JSON field "transport_credentials" explicitly set to "false"
-                    if (isEmpty(account.getTransportLogin())) {
-                        final String login = account.getLogin();
-                        if (!isEmpty(login)) {
-                            account.setTransportLogin(login);
-                            attributes.add(Attribute.TRANSPORT_LOGIN_LITERAL);
-                        }
-                    }
-                    if (isEmpty(account.getTransportPassword())) {
-                        final String pw = account.getPassword();
-                        if (!isEmpty(pw)) {
-                            account.setTransportPassword(pw);
-                            attributes.add(Attribute.TRANSPORT_PASSWORD_LITERAL);
-                        }
-                    }
-                }
+        /*
+        if (json.hasAndNotNull("transport_credentials")) {
+            final boolean transportCredentials = json.optBoolean("transport_credentials", true);
+            if (!transportCredentials) {
+                // JSON field "transport_credentials" explicitly set to "false"
+                account.addTransportProperty("transport_credentials", "false");
+                attributes.add(Attribute.TRANSPORT_CREDENTIALS_LITERAL);
             }
-        }
+        }*/
         if (json.has(MailAccountFields.NAME)) {
             account.setName(parseString(json, MailAccountFields.NAME));
             attributes.add(Attribute.NAME_LITERAL);
