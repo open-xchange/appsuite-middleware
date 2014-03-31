@@ -53,6 +53,8 @@ import java.util.Comparator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.manifests.actions.ConfigRequest;
+import com.openexchange.ajax.manifests.actions.ConfigResponse;
 
 
 /**

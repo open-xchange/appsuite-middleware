@@ -47,37 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.manifests;
+package com.openexchange.ajax.manifests.actions;
 
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link ConfigResponse}
+ * {@link ConfigRequestParser}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class ConfigResponse extends AbstractAJAXResponse {
+public class ConfigRequestParser extends AbstractAJAXParser<ConfigResponse> {
 
-    private JSONObject config;
-
-    /**
-     * Initializes a new {@link ConfigResponse}.
-     * @param response
-     */
-    public ConfigResponse(Response response) {
-        super(response);
+    protected ConfigRequestParser(boolean failOnError) {
+        super(failOnError);
     }
 
-    public JSONObject getConfig() {
-        return config;
-    }
-
-    public void setConfig(JSONObject config) {
-        this.config = config;
+    @Override
+    protected ConfigResponse createResponse(Response response) {
+        ConfigResponse retval = new ConfigResponse(response);
+        JSONObject json = (JSONObject) response.getData();
+        if (isFailOnError()) {
+            assertFalse(response.getErrorMessage(), response.hasError());
+        }
+        if (!response.hasError()) {
+            retval.setConfig(json);
+        }
+        return retval;
     }
 
 }

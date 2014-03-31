@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.manifests;
+package com.openexchange.ajax.manifests.actions;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
