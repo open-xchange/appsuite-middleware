@@ -50,9 +50,8 @@
 package com.openexchange.ajax.manifests;
 
 import java.util.Comparator;
-import java.util.Iterator;
 import org.json.JSONArray;
-import org.json.JSONObject;
+import org.json.JSONException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 
@@ -93,11 +92,11 @@ public class Bug30835Test extends AbstractAJAXSession {
         assertTrue("Response is not ordered", isOrdered(json, comp));
     }
 
-    private boolean isOrdered(JSONArray json, Comparator<JSONObject> comp) throws Exception {
+    private boolean isOrdered(JSONArray json, Comparator<JSONArray> comp) throws Exception {
         if (json.length() > 1) {
             for (int i = 1; i < json.length(); i++) {
-                JSONObject obj0 = json.getJSONObject(i - 1);
-                JSONObject obj1 = json.getJSONObject(i);
+                JSONArray obj0 = json.getJSONArray(i - 1);
+                JSONArray obj1 = json.getJSONArray(i);
                 if (comp.compare(obj0, obj1) > 0) {
                     return false;
                 }
@@ -106,24 +105,30 @@ public class Bug30835Test extends AbstractAJAXSession {
         return true;
     }
 
-    private class JSONComparator implements Comparator<JSONObject> {
+    private class JSONComparator implements Comparator<JSONArray> {
 
         @Override
-        public int compare(JSONObject o1, JSONObject o2) {
+        public int compare(JSONArray o1, JSONArray o2) {
             if (o1.isEmpty() && o2.isEmpty()) {
                 return 0;
             }
             if (o1.length() != o2.length()) {
                 return o1.length() - o2.length();
             }
-            Iterator<String> keys1 = o1.keys();
-            Iterator<String> keys2 = o2.keys();
-            while (keys1.hasNext() && keys2.hasNext()) {
-                String key1 = keys1.next();
-                String key2 = keys2.next();
-                return key1.compareTo(key2);
+
+            for (int i = 0; i < o1.length(); i++) {
+                try {
+                    String key1 = o1.getString(i);
+                    String key2 = o2.getString(i);
+                    int comp = key1.compareTo(key2);
+                    if (comp > 0) {
+                        return comp;
+                    }
+                } catch (JSONException e) {
+                    return 1;
+                }
             }
-            return 0;
+            return -1;
         }
 
     }

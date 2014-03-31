@@ -123,8 +123,9 @@ public class Languages implements ComputedServerConfigValueService {
         try {
             int i = 0;
             for (String key : keys) {
-                JSONObject obj = new JSONObject();
-                obj.put(key, languageMap.get(key));
+                JSONArray obj = new JSONArray();
+                obj.put(key);
+                obj.put(languageMap.get(key));
                 allLanguages.put(i++, obj);
             }
         } catch (JSONException x) {
