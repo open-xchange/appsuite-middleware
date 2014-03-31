@@ -1061,9 +1061,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public SearchIterator<File> search(final List<String> folderIds, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        // TODO:
-
-
         final List<FileStorageFileAccess> all = getAllFileStorageAccesses();
         final int numOfStorages = all.size();
         if (0 >= numOfStorages) {
