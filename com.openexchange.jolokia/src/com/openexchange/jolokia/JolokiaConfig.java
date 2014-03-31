@@ -159,8 +159,17 @@ public class JolokiaConfig implements Initialization {
         }
 
 
-        pConfig.put(ConfigKey.MAX_OBJECTS.getKeyValue(), configService.getProperty("com.openexchange.jolokia.maxObjects", "0"));
-        pConfig.put(ConfigKey.MAX_DEPTH.getKeyValue(), configService.getProperty("com.openexchange.jolokia.maxDepth", "0"));
+        
+        final String maxObjects = configService.getProperty("com.openexchange.jolokia.maxObjects", "0");
+        if (null != maxObjects) {
+            pConfig.put(ConfigKey.MAX_OBJECTS.getKeyValue(), maxObjects);
+        }
+        
+        final String maxDepth = configService.getProperty("com.openexchange.jolokia.maxDepth", "0");
+        if (null != maxDepth) {
+            pConfig.put(ConfigKey.MAX_DEPTH.getKeyValue(), maxDepth);
+        }
+        
 
     }
 
