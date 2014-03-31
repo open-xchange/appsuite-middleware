@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,39 @@
  *
  */
 
-package com.openexchange.jump.json;
+package com.openexchange.ajax.jump.actions;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.jump.json.actions.AbstractJumpAction;
-import com.openexchange.jump.json.actions.DummyEndpointHandlerAction;
-import com.openexchange.jump.json.actions.IdentityTokenAction;
-import com.openexchange.server.ServiceLookup;
-
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link JumpActionFactory}
+ * {@link AbstractJumpRequest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JumpActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AbstractJumpAction> actions;
+public abstract class AbstractJumpRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     /**
-     * Initializes a new {@link JumpActionFactory}.
+     * URL of the jump AJAX interface.
      */
-    public JumpActionFactory(final ServiceLookup lookup) {
+    public static final String JUMP_URL = "/ajax/jump";
+
+    /**
+     * Initializes a new {@link AbstractJumpRequest}.
+     */
+    protected AbstractJumpRequest() {
         super();
-        actions = new ConcurrentHashMap<String, AbstractJumpAction>(4);
-        actions.put("identityToken", new IdentityTokenAction(lookup));
-        actions.put("dummy", new DummyEndpointHandlerAction(lookup));
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) {
-        return actions.get(action);
+    public String getServletPath() {
+        return JUMP_URL;
     }
 
     @Override
-    public Collection<?> getSupportedServices() {
-        final List<AbstractJumpAction> values = new LinkedList<AbstractJumpAction>();
-
-        for (final Entry<String,AbstractJumpAction> entry : actions.entrySet()) {
-            if (!"dummy".equals(entry.getKey())) {
-                values.add(entry.getValue());
-            }
-        }
-
-        return Collections.unmodifiableCollection(values);
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,80 @@
  *
  */
 
-package com.openexchange.jump.json.actions;
+package com.openexchange.ajax.jump.actions;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.UUID;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONException;
-import org.osgi.framework.BundleContext;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.jump.Endpoint;
-import com.openexchange.jump.EndpointHandler;
-import com.openexchange.jump.json.JumpRequest;
-import com.openexchange.jump.json.osgi.JumpJsonActivator;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link DummyEndpointHandler}
+ * {@link IdentityTokenRequest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DummyEndpointHandler extends AbstractJumpAction {
+public class IdentityTokenRequest extends AbstractJumpRequest<IdentityTokenResponse> {
+
+    private final String systemName;
+    private final boolean failOnError;
 
     /**
-     * Initializes a new {@link DummyEndpointHandler}.
-     *
-     * @param services
+     * Initializes a new {@link IdentityTokenRequest}.
      */
-    public DummyEndpointHandler(final ServiceLookup services) {
-        super(services);
+    public IdentityTokenRequest(final String systemName) {
+        this(true, systemName);
+    }
+
+    /**
+     * Initializes a new {@link IdentityTokenRequest}.
+     */
+    public IdentityTokenRequest(final boolean failOnError, final String systemName) {
+        super();
+        this.failOnError = failOnError;
+        this.systemName = systemName;
     }
 
     @Override
-    protected AJAXRequestResult perform(final JumpRequest request) throws OXException, JSONException {
-        final BundleContext context = JumpJsonActivator.getBundleContextFromStartUp();
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
+    }
 
-        if (null != context && !getEndpointHandlerRegistry().hasHandlerFor("dummy")) {
-            final EndpointHandler eh = new EndpointHandler() {
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> list = new LinkedList<Parameter>();
+        list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "identityToken"));
+        list.add(new Parameter("system", systemName));
+        return list.toArray(new Parameter[list.size()]);
+    }
 
-                @Override
-                public Set<String> systemNamesOfInterest() {
-                    return Collections.singleton("dummy");
-                }
+    @Override
+    public AbstractAJAXParser<? extends IdentityTokenResponse> getParser() {
+        return new IdentityTokenParser(failOnError);
+    }
 
-                @Override
-                public boolean handleEndpoint(final UUID token, final Endpoint endpoint, final Session session) {
-                    return true;
-                }
-            };
-            context.registerService(EndpointHandler.class, eh, null);
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    private static class IdentityTokenParser extends AbstractAJAXParser<IdentityTokenResponse> {
+
+        /**
+         * Initializes a new {@link IdentityTokenParser}.
+         */
+        protected IdentityTokenParser(boolean failOnError) {
+            super(failOnError);
         }
 
-        return new AJAXRequestResult(Boolean.TRUE, "native");
+        @Override
+        protected IdentityTokenResponse createResponse(Response response) throws JSONException {
+            final JSONObject jObject = (JSONObject) response.getData();
+            return new IdentityTokenResponse(response, jObject.getString("token"));
+        }
     }
 
 }

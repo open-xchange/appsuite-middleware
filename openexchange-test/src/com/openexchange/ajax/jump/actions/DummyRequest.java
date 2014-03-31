@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,75 @@
  *
  */
 
-package com.openexchange.jump.json;
+package com.openexchange.ajax.jump.actions;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.jump.json.actions.AbstractJumpAction;
-import com.openexchange.jump.json.actions.DummyEndpointHandlerAction;
-import com.openexchange.jump.json.actions.IdentityTokenAction;
-import com.openexchange.server.ServiceLookup;
-
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link JumpActionFactory}
+ * {@link DummyRequest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JumpActionFactory implements AJAXActionServiceFactory {
+public class DummyRequest extends AbstractJumpRequest<DummyResponse> {
 
-    private final Map<String, AbstractJumpAction> actions;
+    private final boolean failOnError;
 
     /**
-     * Initializes a new {@link JumpActionFactory}.
+     * Initializes a new {@link DummyRequest}.
      */
-    public JumpActionFactory(final ServiceLookup lookup) {
+    public DummyRequest() {
+        this(true);
+    }
+
+    /**
+     * Initializes a new {@link DummyRequest}.
+     */
+    public DummyRequest(final boolean failOnError) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractJumpAction>(4);
-        actions.put("identityToken", new IdentityTokenAction(lookup));
-        actions.put("dummy", new DummyEndpointHandlerAction(lookup));
+        this.failOnError = failOnError;
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) {
-        return actions.get(action);
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
     }
 
     @Override
-    public Collection<?> getSupportedServices() {
-        final List<AbstractJumpAction> values = new LinkedList<AbstractJumpAction>();
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> list = new LinkedList<Parameter>();
+        list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "dummy"));
+        return list.toArray(new Parameter[list.size()]);
+    }
 
-        for (final Entry<String,AbstractJumpAction> entry : actions.entrySet()) {
-            if (!"dummy".equals(entry.getKey())) {
-                values.add(entry.getValue());
-            }
+    @Override
+    public AbstractAJAXParser<? extends DummyResponse> getParser() {
+        return new DummyParser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    private static class DummyParser extends AbstractAJAXParser<DummyResponse> {
+
+        /**
+         * Initializes a new {@link IdentityTokenParser}.
+         */
+        protected DummyParser(boolean failOnError) {
+            super(failOnError);
         }
 
-        return Collections.unmodifiableCollection(values);
+        @Override
+        protected DummyResponse createResponse(Response response) throws JSONException {
+            return new DummyResponse(response);
+        }
     }
 
 }

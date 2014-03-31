@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,58 @@
  *
  */
 
-package com.openexchange.jump.json;
+package com.openexchange.ajax.jump;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.jump.json.actions.AbstractJumpAction;
-import com.openexchange.jump.json.actions.DummyEndpointHandlerAction;
-import com.openexchange.jump.json.actions.IdentityTokenAction;
-import com.openexchange.server.ServiceLookup;
-
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import com.openexchange.ajax.jump.actions.DummyRequest;
+import com.openexchange.ajax.jump.actions.IdentityTokenRequest;
+import com.openexchange.ajax.jump.actions.IdentityTokenResponse;
 
 /**
- * {@link JumpActionFactory}
+ * {@link IdentityTokenTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JumpActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AbstractJumpAction> actions;
+public final class IdentityTokenTest extends AbstractJumpTest {
 
     /**
-     * Initializes a new {@link JumpActionFactory}.
+     * Initializes a new {@link IdentityTokenTest}.
+     *
+     * @param name
      */
-    public JumpActionFactory(final ServiceLookup lookup) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractJumpAction>(4);
-        actions.put("identityToken", new IdentityTokenAction(lookup));
-        actions.put("dummy", new DummyEndpointHandlerAction(lookup));
+    public IdentityTokenTest(final String name) {
+        super(name);
     }
 
+    @BeforeClass
     @Override
-    public AJAXActionService createActionService(final String action) {
-        return actions.get(action);
+    protected void setUp() throws Exception {
+        super.setUp();
     }
 
+    @AfterClass
     @Override
-    public Collection<?> getSupportedServices() {
-        final List<AbstractJumpAction> values = new LinkedList<AbstractJumpAction>();
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 
-        for (final Entry<String,AbstractJumpAction> entry : actions.entrySet()) {
-            if (!"dummy".equals(entry.getKey())) {
-                values.add(entry.getValue());
-            }
+    @Test
+    public void testIdentityToken() {
+        try {
+            getClient().execute(new DummyRequest());
+
+            IdentityTokenResponse identityTokenResponse = getClient().execute(new IdentityTokenRequest("dummy"));
+            String token = identityTokenResponse.getToken();
+
+            assertNotNull(token);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
         }
-
-        return Collections.unmodifiableCollection(values);
     }
 
 }

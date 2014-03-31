@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,44 @@
  *
  */
 
-package com.openexchange.jump.json;
+package com.openexchange.ajax.jump;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.jump.json.actions.AbstractJumpAction;
-import com.openexchange.jump.json.actions.DummyEndpointHandlerAction;
-import com.openexchange.jump.json.actions.IdentityTokenAction;
-import com.openexchange.server.ServiceLookup;
-
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link JumpActionFactory}
+ * {@link AbstractJumpTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JumpActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AbstractJumpAction> actions;
+public abstract class AbstractJumpTest extends AbstractAJAXSession {
 
     /**
-     * Initializes a new {@link JumpActionFactory}.
+     * Default constructor.
+     *
+     * @param name The name of the test.
      */
-    public JumpActionFactory(final ServiceLookup lookup) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractJumpAction>(4);
-        actions.put("identityToken", new IdentityTokenAction(lookup));
-        actions.put("dummy", new DummyEndpointHandlerAction(lookup));
+    protected AbstractJumpTest(final String name) {
+        super(name);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) {
-        return actions.get(action);
+    protected void setUp() throws Exception {
+        super.setUp();
     }
 
-    @Override
-    public Collection<?> getSupportedServices() {
-        final List<AbstractJumpAction> values = new LinkedList<AbstractJumpAction>();
+    /**
+     * @return User's default send address
+     */
+    protected String getSendAddress() throws OXException, IOException, JSONException {
+        return getSendAddress(getClient());
+    }
 
-        for (final Entry<String,AbstractJumpAction> entry : actions.entrySet()) {
-            if (!"dummy".equals(entry.getKey())) {
-                values.add(entry.getValue());
-            }
-        }
-
-        return Collections.unmodifiableCollection(values);
+    protected static String getSendAddress(final AJAXClient client) throws OXException, IOException, JSONException {
+        return client.getValues().getSendAddress();
     }
 
 }
