@@ -144,7 +144,7 @@ public class ConflictHandler {
         if (cdao.containsShownAs() && cdao.getShownAs() == Appointment.FREE) {
             return true;
         }
-        if (edao.getShownAs() == Appointment.FREE) {
+        if (edao != null && edao.getShownAs() == Appointment.FREE) {
             return true;
         }
         return false;
