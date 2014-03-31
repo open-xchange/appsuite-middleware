@@ -105,7 +105,7 @@ public class ConflictHandler {
 
     public CalendarDataObject[] getConflicts() throws OXException {
         final Context ctx = Tools.getContext(so);
-        if (cdao.getShownAs() == Appointment.FREE || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
+        if (isFree() || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
             return NO_CONFLICTS; // According to bug #5267 and modularisation concept
         } else if (!create && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType() && !cdao.containsShownAs()) {
             LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants and shown as are changed!");
@@ -114,7 +114,7 @@ public class ConflictHandler {
             return NO_CONFLICTS; // Past single apps should never conflict
         } else if (cdao.isSequence() && recColl.checkMillisInThePast(recColl.getMaxUntilDate(cdao).getTime())) {
             return NO_CONFLICTS; // Past series apps should never conflict
-        } else if (!create && !cdao.containsShownAs() && (cdao.getShownAs() == Appointment.FREE)) {
+        } else if (!create && !cdao.containsShownAs() && isFree()) {
             //if (cdao.getShownAs() == CalendarDataObject.FREE) {
             return NO_CONFLICTS; // According to bug #5267
             //}
@@ -138,6 +138,16 @@ public class ConflictHandler {
             return prepareResolving(true);
         }
         return NO_CONFLICTS;
+    }
+
+    private boolean isFree() {
+        if (cdao.containsShownAs() && cdao.getShownAs() == Appointment.FREE) {
+            return true;
+        }
+        if (edao.getShownAs() == Appointment.FREE) {
+            return true;
+        }
+        return false;
     }
 
     private CalendarDataObject[] prepareResolving(final boolean request_participants) throws OXException {

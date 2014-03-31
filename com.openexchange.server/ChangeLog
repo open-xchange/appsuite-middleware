@@ -1,3 +1,7 @@
+* 2014-03-27 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31810: Bad conflict handling on update.
+
 * 2014-03-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 31648: Detect Content-Type by file name if specified one is of generic nature; e.g "application/binary"
