@@ -162,10 +162,14 @@ public final class CIFSSearchVisitor implements SearchTermVisitor {
 
     /**
      * Initializes a new {@link CIFSSearchVisitor}.
+     *
+     * @param folderIds The folders to use for the search
+     * @param fields The fields to fill
+     * @param fileAccess The file access to load files with
      */
     public CIFSSearchVisitor(final List<String> folderIds, final List<Field> fields, final CIFSFileAccess fileAccess) {
         super();
-        this.folderIds = null == folderIds ? Collections.<String> emptySet() : new LinkedHashSet<String>(this.folderIds);;
+        this.folderIds = null == folderIds ? Collections.<String> emptySet() : new LinkedHashSet<String>(folderIds);;
         this.fileAccess = fileAccess;
         this.fields = fields;
     }
