@@ -384,7 +384,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     if (null == imapStoreCache) {
                         closeSafely(imapStore);
                     } else if (imapStore.isConnectedUnsafe()) {
-                        imapStoreCache.returnIMAPStore(imapStore, accountId, server, port, login);
+                        imapStoreCache.returnIMAPStore(imapStore, accountId, server, port, login, session);
                     } else {
                         // Not null AND not connected...?
                         closeSafely(imapStore);
@@ -781,7 +781,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * Clears cached IMAP connections.
      */
     protected void clearCachedConnections() {
-        final IMAPStoreContainer container = IMAPStoreCache.getInstance().optContainer(accountId, server, port, login);
+        final IMAPStoreContainer container = IMAPStoreCache.getInstance().optContainer(accountId, server, port, login, session);
         if (null != container) {
             container.clear();
         }

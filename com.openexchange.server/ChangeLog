@@ -1,3 +1,7 @@
+* 2014-03-31 - thorben.betten@open-xchange.com
+ 
+ - Fix for bug 31809: Enhanced key associated with an IMAP store cache by dedicated user information
+
 * 2014-03-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 31677: Properly do the thread-sort for subscribed POP3 accounts accessed via Unified Mail
