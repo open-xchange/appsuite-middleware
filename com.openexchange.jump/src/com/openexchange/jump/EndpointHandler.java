@@ -51,6 +51,7 @@ package com.openexchange.jump;
 
 import java.util.Set;
 import java.util.UUID;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -67,8 +68,9 @@ public interface EndpointHandler {
      * @param endpoint The targeted end-point
      * @param session The associated session
      * @return <code>true</code> if successfully handled; otherwise <code>false</code>
+     * @throws OXException If end-point could not be handled successfully
      */
-    boolean handleEndpoint(UUID token, Endpoint endpoint, Session session);
+    boolean handleEndpoint(UUID token, Endpoint endpoint, Session session) throws OXException;
 
     /**
      * Gets a set containing the system names (in lower-case) this handler is interested in.
