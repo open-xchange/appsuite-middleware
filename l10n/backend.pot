@@ -2171,7 +2171,7 @@ msgstr ""
 msgid "Missing field: %s"
 msgstr ""
 
-#. Error while reading/writing data from/to the database.
+#. The general message if an error occurred while reading or writing to the database
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:87
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:71
 msgid "Error while reading/writing data from/to the database."
@@ -6773,74 +6773,126 @@ msgstr ""
 msgid "Cannot find mail account for user \"%2$s\"."
 msgstr ""
 
-#. You do not have the appropriate permissions to delete the default mail account.
+#. Shown when a mail account that already exists should be created
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:65
+msgid "Found two mail accounts with same identifier %1$s for user %2$s."
+msgstr ""
+
+#. Shown when the requested host cannot be resolved
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
+msgid "A host could not be resolved: %1$s."
+msgstr ""
+
+#. You do not have the appropriate permissions to delete the default mail account.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:71
 msgid ""
 "You do not have the appropriate permissions to delete the default mail "
 "account."
 msgstr ""
 
 #. You do not have the appropriate permissions to update the default mail account.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:74
 msgid ""
 "You do not have the appropriate permissions to update the default mail "
 "account."
 msgstr ""
 
 #. The default mail account already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:77
 msgid "The default mail account already exists."
 msgstr ""
 
 #. The Unified Mail account already exists
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:80
 msgid "The Unified Mail account already exists."
 msgstr ""
 
 #. It is not allowed to create a new mail account for Unified Mail.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:83
 msgid "It is not allowed to create a new mail account for Unified Mail."
 msgstr ""
 
 #. Validation for Unified Mail failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:86
 msgid "Validation for Unified Mail failed."
 msgstr ""
 
 #. You do not have the appropriate permissions to create more than one mail account.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:89
 msgid ""
 "You do not have the appropriate permissions to create more than one mail "
 "account."
 msgstr ""
 
 #. A mail account with the given E-Mail address already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:92
 msgid "A mail account with the given E-Mail address already exists."
 msgstr ""
 
 #. The mail account name "%1$s" is not valid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:95
 msgid "The mail account name \"%1$s\" is not valid."
 msgstr ""
 
 #. The selected mail account name already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:98
 msgid "The selected mail account name already exists."
 msgstr ""
 
-#. Unable to connect to mail server.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:95
-msgid "Unable to connect to mail server."
+#. Shown when the transport account already exists
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:101
+msgid "Duplicate transport account for user %1$s in context %2$s."
+msgstr ""
+
+#. Shown when a connection to the mail server is not possible for the given login
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:104
+msgid ""
+"Could not connect to mail server \"%1$s\" for login %2$s. Please review your "
+"settings."
+msgstr ""
+
+#. Shown when a connection to the mail transport server is not possible for the given login
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:107
+msgid ""
+"Could not connect to transport server \"%1$s\" for login %2$s. Please review "
+"your settings."
+msgstr ""
+
+#. Shown when no SSL port was set but SSL enabled
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:110
+msgid ""
+"Default port specified for mail protocol \"%1$s\", but SSL is enabled. "
+"Please review if appropriate."
+msgstr ""
+
+#. Shown when SSL port was set but SSL not enabled
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:113
+msgid ""
+"Secure port specified for mail protocol \"%1$s\", but SSL is not enabled. "
+"Please review if appropriate."
+msgstr ""
+
+#. Shown when no SSL port was set for transport protocol but SSL enabled
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:116
+msgid ""
+"Default port specified for transport protocol \"%1$s\", but SSL is enabled. "
+"Please review if appropriate."
+msgstr ""
+
+#. Shown when SSL port was set for transport protocol but SSL not enabled
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:119
+msgid ""
+"Secure port specified for transport protocol \"%1$s\", but SSL is not "
+"enabled. Please review if appropriate."
 msgstr ""
 
 #. The given host name "%1$s" is invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:98
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:122
 msgid "The given host name \"%1$s\" is invalid."
 msgstr ""
 
 #. The given host name "%1$s" is not allowed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:125
 msgid "The given host name \"%1$s\" is not allowed."
 msgstr ""
 
@@ -7318,13 +7370,10 @@ msgstr ""
 
 #. A parsing error occurred: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:72
 msgid "A parsing error occurred: %1$s."
 msgstr ""
 
-#. Provide well-formed HTML.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:69
 msgid "Provide well-formed HTML."
 msgstr ""
 
@@ -7391,126 +7440,50 @@ msgstr ""
 msgid "Versioning not supported by XING file storage."
 msgstr ""
 
-#. Please try again later.
+#. The message displayed if the requested cannot be found.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:82
-msgid "Please try again later."
+msgid "Cannot find the requested subscription."
 msgstr ""
 
-#. A SQL Error occurred.
+#. The message displayed if the server is not able to access the 3rd party service with the given credentials.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:66
-msgid "A SQL error occurred."
+msgid "The login/password combination you entered is wrong."
 msgstr ""
 
-#. Parsing error.
+#. The message displayed if a required service (e. g. for adding a subscription) is currently not available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:69
+msgid "A required service is currently not available. Please try again later."
+msgstr ""
+
+#. The message displayed if an argument is missing. %1$s defines the missing argument.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:72
+msgid "The argument %1$s is missing."
+msgstr ""
+
+#. The message displayed if the user misses some permissions.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:75
-msgid "Parsing error."
+msgid "You do not have the appropriate permissions to complete this operation."
 msgstr ""
 
-#. Do not set a ID when saving a publication
+#. The message displayed if a non valid email address is inserted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:78
-msgid "Do not set a ID when saving a publication"
+msgid "Please specify your full E-Mail address as login name."
 msgstr ""
 
-#. Unable to save a given ID.
+#. The message displayed if a required service (e. g. for adding a subscription) is currently not available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:81
-msgid "Unable to save a given ID."
+msgid ""
+"The source the subscription belongs to is currently inactive, and cannot "
+"provide data."
 msgstr ""
 
-#. Provide a valid id.
+#. The message displayed if the user would like to access the service but does not have an OAuth account.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:84
-msgid "Provide a valid id."
-msgstr ""
-
-#. Could not find this Subscription
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:87
-msgid "Could not find this subscription"
-msgstr ""
-
-#. Check value to parse.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:90
-msgid "Check value to parse."
-msgstr ""
-
-#. Please correct the login or password and try again
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
-msgid "Please correct the login or password and try again"
-msgstr ""
-
-#. The login or password you entered was wrong
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:96
-msgid "The login or password you entered are wrong"
-msgstr ""
-
-#. Make sure, that the Service is still available, and there are no major changes on the website
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:99
-msgid ""
-"Make sure the service is still available and there are no major changes on "
-"the website."
-msgstr ""
-
-#. Service unavailable
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:102
-msgid "Service unavailable"
-msgstr ""
-
-#. Please correct the steps of this workflow so that output of one step and input of the next step match
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:105
-msgid ""
-"Please correct the steps of this workflow so that output of one step and "
-"input of the next step match"
-msgstr ""
-
-#. The steps of this crawling workflow do not fit together
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:108
-msgid "The steps of this crawling workflow do not fit together"
-msgstr ""
-
-#. Ask an administrator to check the available subscription sources
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:111
-msgid "Ask an administrator to check the available subscription sources"
-msgstr ""
-
-#. The subscription source this subscription belongs to is currently inactive, and cannot provide data.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:114
-msgid ""
-"The subscription source this subscription belongs to is currently inactive, "
-"and cannot provide data."
-msgstr ""
-
-#. Please try using this service again at a later time
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:117
-msgid "Please try using this service again at a later time"
-msgstr ""
-
-#. This service is temporarily unavailable. This may be due to a temporary outage or a permanent change on the 3rd-party-side. Please try using this service again at a later time
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:120
-msgid ""
-"This service is temporarily unavailable. This may be due to a temporary "
-"outage or a permanent change on the 3rd-party-side. Please try using this "
-"service again at a later time"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:122
-msgid "Missing argument. %1$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:124
-msgid "You do not have the permission to complete this operation."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:126
 msgid "You need to create an OAuth-account first to access this service."
 msgstr ""
 
-#. An unexpected error occurred: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:129
-msgid "An unexpected error occurred: %1$s."
-msgstr ""
-
-#. Please specify your full E-Mail address as login name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:132
-msgid "Please specify your full E-Mail address as login name."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:86
+msgid "Your account needs to be verified: %1$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
@@ -7539,6 +7512,10 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:80
 msgid "An underlying system threw an SQL exception"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:82
+msgid "Please try again later."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:84
