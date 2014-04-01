@@ -1,3 +1,7 @@
+* 2014-04-01 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug Bug 31821 - Mail is able to modify frontend skin
+
 * 2014-04-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 31217: No translation of standard folders for external accounts + prefer localized standard folder names than taking the ones

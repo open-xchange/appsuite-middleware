@@ -401,7 +401,22 @@ public final class CSSMatcher {
                         final String prefix;
                         if (cssElemsBuffer.length() > 0) {
                             modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-                            prefix = cssElemsBuffer.toString();
+                            String tmp = cssElemsBuffer.toString();
+                            Matcher matcher = PATTERN_TAG_COMMENT_LINE.matcher(tmp);
+                            if (matcher.find()) {
+                                StringBuilder helper = new StringBuilder();
+                                int b = 0;
+                                int e = 0;
+                                while (e < tmp.length()) {
+                                    b = tmp.indexOf("/*");
+                                    e = tmp.indexOf("*/");
+                                    helper.append(tmp.substring(1, b));
+                                    tmp = tmp.substring(e + 1);
+                                }
+                                prefix = prefixBlock(helper.toString(), cssPrefix);
+                            } else {
+                                prefix = cssElemsBuffer.toString();
+                            }
                         } else {
                             prefix = "";
                         }
@@ -415,6 +430,7 @@ public final class CSSMatcher {
                         cssElemsBuffer.setLength(0);
                         // Add to main builder
                         cssBld.append(prefix);
+                        System.err.println(prefix);
                         cssBld.append(block);
                         off = index;
                     }
@@ -945,5 +961,7 @@ public final class CSSMatcher {
         }
         return PATTERN_STYLE_LINE.matcher(css).find();
     }
+
+    private static final Pattern PATTERN_TAG_COMMENT_LINE = Pattern.compile("(([a-zA-Z]+((\\s*)([,]?|\\.)(\\s*)))+)(\\s*)(\\r?\\n)*(\\/\\*(.|[\\r\\n])*?\\*\\/)(\\r?\\n)*");
 
 }
