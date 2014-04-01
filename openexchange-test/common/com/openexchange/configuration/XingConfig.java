@@ -63,7 +63,7 @@ public class XingConfig extends AbstractConfig {
 
     @Override
     protected String getPropertyFileName() throws OXException {
-        return "conf/xingtest.properties";
+        return "./../openexchange-test/conf/xingtest.properties";
     }
 
     /**
