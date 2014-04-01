@@ -97,6 +97,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.copy.UnifiedInboxMessageCopier;
 import com.openexchange.unifiedinbox.dataobjects.UnifiedMailMessage;
+import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
@@ -185,7 +186,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     private MailAccount getAccount(final int accountId) throws OXException {
-        final MailAccountStorageService srv = Services.getService(MailAccountStorageService.class);
+        final MailAccountStorageService srv = UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class);
         return srv.getMailAccount(accountId, user, cid);
     }
 
