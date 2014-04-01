@@ -738,12 +738,13 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         final List<FileStorageFolder> list = new ArrayList<FileStorageFolder>();
         final String fid = checkFolderId(folderId, rootUrl);
+
         FileStorageFolder f = getFolder(fid);
-        do {
+        while (false == FileStorageFolder.ROOT_FULLNAME.equals(f.getId())) {
             list.add(f);
             f = getFolder(f.getParentId());
-        } while (!FileStorageFolder.ROOT_FULLNAME.equals(f.getParentId()));
-
+        }
+        list.add(f);
         return list.toArray(new FileStorageFolder[list.size()]);
     }
 
