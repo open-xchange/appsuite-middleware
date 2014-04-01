@@ -27,6 +27,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.continuation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.continuation.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.control"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.control.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.conversion"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.conversion.simple"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.conversion.engine"/>

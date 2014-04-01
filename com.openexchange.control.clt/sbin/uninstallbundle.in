@@ -29,7 +29,7 @@
 #   http://www.open-xchange.com/EN/developer/. The contributing author shall be
 #   given Attribution for the derivative code and a license granting use.
 #
-#    Copyright (C) 2004-2012 Open-Xchange, Inc.
+#    Copyright (C) 2004-2014 Open-Xchange, Inc.
 #    Mail: info@open-xchange.com
 #
 #
@@ -49,7 +49,9 @@
 #
 
 OXFUNCTIONS=@oxfunctions@
+OXCONFIG=@oxscriptconf@
 OXPREFIX=@prefix@
+OXBUNDLES=$OXPREFIX/bundles
 
 test -f $OXFUNCTIONS || {
 	echo "missing common shell functions file"
@@ -58,12 +60,16 @@ test -f $OXFUNCTIONS || {
 
 . $OXFUNCTIONS
 
-OXLIBDIR=$OXPREFIX/bundles
-
-CLASSPATH="-classpath $OXLIBDIR/com.openexchange.control.jar"
-
-JAVA_OPTS=""
+test -f $OXCONFIG && . $OXCONFIG
 
 ox_set_JAVA_BIN
 
-$JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.control.console.StopBundle "$@"
+test -z "$JAVA_OXCMD_OPTS" && JAVA_OXCMD_OPTS="-Xmx280M"
+
+JAVA_OPTS="${JAVA_OXCMD_OPTS} \
+-Djava.awt.headless=true \
+-Dopenexchange.propdir=$PROPERTIESDIR"
+
+CLASSPATH="-classpath @classpath@"
+
+$JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.control.console.UninstallBundle "$@"

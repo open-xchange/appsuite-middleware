@@ -128,6 +128,11 @@ public final class InstallBundle extends AbstractConsoleHandler {
     }
 
     @Override
+    protected void exit(int code) {
+        System.exit(code);
+    }
+
+    @Override
     protected String[] getParameter() {
         return DEFAULT_PARAMETER;
     }

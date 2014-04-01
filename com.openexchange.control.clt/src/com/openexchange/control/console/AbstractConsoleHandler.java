@@ -90,7 +90,7 @@ public abstract class AbstractConsoleHandler extends AbstractJMXHandler {
                 for (ValueObject valueObject : valueObjects) {
                     if (valueObject.getValue().equals("-help") || valueObject.getValue().equals("--help")) {
                         showHelp();
-                        exit();
+                        exit(0);
                     }
                 }
 
@@ -117,6 +117,10 @@ public abstract class AbstractConsoleHandler extends AbstractJMXHandler {
     protected abstract void showHelp();
 
     protected abstract void exit();
+
+    protected void exit(int code) {
+        System.exit(code);
+    }
 
     protected abstract String[] getParameter();
 

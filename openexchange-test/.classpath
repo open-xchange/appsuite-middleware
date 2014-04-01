@@ -116,5 +116,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.find.basic"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.search"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.xing"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.control.clt"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
