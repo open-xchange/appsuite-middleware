@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.control.console.internal;
+package com.openexchange.control.consoleold;
 
 /**
  * ConsoleException

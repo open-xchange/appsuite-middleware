@@ -49,10 +49,11 @@
 
 package com.openexchange.control.console;
 
-import com.openexchange.control.console.internal.ConsoleException;
 import com.openexchange.control.console.internal.ValueObject;
 import com.openexchange.control.console.internal.ValuePairObject;
 import com.openexchange.control.console.internal.ValueParser;
+import com.openexchange.control.consoleold.AbstractJMXHandler;
+import com.openexchange.control.consoleold.ConsoleException;
 
 /**
  * {@link AbstractConsoleHandler} - Abstract super class for console handlers.

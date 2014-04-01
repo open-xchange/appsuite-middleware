@@ -48,7 +48,7 @@
  */
 
 
-package com.openexchange.control.console;
+package com.openexchange.control.consoleold;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -68,7 +68,6 @@ import javax.management.remote.JMXPrincipal;
 import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
 import org.apache.commons.codec.binary.Base64;
-import com.openexchange.control.console.internal.ConsoleException;
 import com.openexchange.java.Charsets;
 
 /**
