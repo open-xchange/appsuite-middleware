@@ -53,10 +53,13 @@ import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
 import java.sql.Connection;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.Set;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -74,6 +77,17 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Tools {
+
+    private static enum Policy {
+        /**
+         * Detect standard folder name by primary account
+         */
+        BY_PRIMARY_ACCOUNT,
+        /**
+         * Detect standard folder name by user's locale
+         */
+        BY_LOCALE;
+    }
 
     /**
      * Initializes a new {@link Tools}.
@@ -228,6 +242,7 @@ public final class Tools {
         }
         StringBuilder tmp = null;
         MailAccount primaryAccount = null;
+        Locale locale = null;
         /*
          * Check full names
          */
@@ -241,8 +256,12 @@ public final class Tools {
                 }
                 String name = account.getConfirmedHam();
                 if (null == name) {
+                    locale = serverSession.getUser().getLocale();
                     primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
-                    name = getName(StorageUtility.INDEX_CONFIRMED_HAM, primaryAccount);
+                    name = getName(StorageUtility.INDEX_CONFIRMED_HAM, primaryAccount, locale, Policy.BY_LOCALE);
+
+                    mad.setConfirmedHam(name);
+                    attributes.add(Attribute.CONFIRMED_HAM_LITERAL);
                 }
                 mad.setConfirmedHamFullname((tmp = new StringBuilder(prefix)).append(name).toString());
                 attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
@@ -262,10 +281,16 @@ public final class Tools {
                 }
                 String name = account.getConfirmedSpam();
                 if (null == name) {
+                    if (null == locale) {
+                        locale = serverSession.getUser().getLocale();
+                    }
                     if (null == primaryAccount) {
                         primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
                     }
-                    name = getName(StorageUtility.INDEX_CONFIRMED_SPAM, primaryAccount);
+                    name = getName(StorageUtility.INDEX_CONFIRMED_SPAM, primaryAccount, locale, Policy.BY_LOCALE);
+
+                    mad.setConfirmedSpam(name);
+                    attributes.add(Attribute.CONFIRMED_SPAM_LITERAL);
                 }
                 mad.setConfirmedSpamFullname(tmp.append(name).toString());
                 attributes.add(Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL);
@@ -285,10 +310,16 @@ public final class Tools {
                 }
                 String name = account.getDrafts();
                 if (null == name) {
+                    if (null == locale) {
+                        locale = serverSession.getUser().getLocale();
+                    }
                     if (null == primaryAccount) {
                         primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
                     }
-                    name = getName(StorageUtility.INDEX_DRAFTS, primaryAccount);
+                    name = getName(StorageUtility.INDEX_DRAFTS, primaryAccount, locale, Policy.BY_LOCALE);
+
+                    mad.setDrafts(name);
+                    attributes.add(Attribute.DRAFTS_LITERAL);
                 }
                 if ("Drafts".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
                     name = "Draft";
@@ -313,10 +344,16 @@ public final class Tools {
                 }
                 String name = account.getSent();
                 if (null == name) {
+                    if (null == locale) {
+                        locale = serverSession.getUser().getLocale();
+                    }
                     if (null == primaryAccount) {
                         primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
                     }
-                    name = getName(StorageUtility.INDEX_SENT, primaryAccount);
+                    name = getName(StorageUtility.INDEX_SENT, primaryAccount, locale, Policy.BY_LOCALE);
+
+                    mad.setSent(name);
+                    attributes.add(Attribute.SENT_LITERAL);
                 }
                 if ("Sent Items".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
                     name = "Sent";
@@ -341,15 +378,21 @@ public final class Tools {
                 }
                 String name = account.getSpam();
                 if (null == name) {
+                    if (null == locale) {
+                        locale = serverSession.getUser().getLocale();
+                    }
                     if (null == primaryAccount) {
                         primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
                     }
-                    name = getName(StorageUtility.INDEX_SPAM, primaryAccount);
+                    name = getName(StorageUtility.INDEX_SPAM, primaryAccount, locale, Policy.BY_LOCALE);
+
+                    mad.setSpam(name);
+                    attributes.add(Attribute.SPAM_LITERAL);
                 }
                 if ("Spam".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
                     name = "Bulk Mail";
-                    mad.setDrafts(name);
-                    attributes.add(Attribute.DRAFTS_LITERAL);
+                    mad.setSpam(name);
+                    attributes.add(Attribute.SPAM_LITERAL);
                 }
                 mad.setSpamFullname(tmp.append(name).toString());
                 attributes.add(Attribute.SPAM_FULLNAME_LITERAL);
@@ -369,10 +412,16 @@ public final class Tools {
                 }
                 String name = account.getTrash();
                 if (null == name) {
+                    if (null == locale) {
+                        locale = serverSession.getUser().getLocale();
+                    }
                     if (null == primaryAccount) {
                         primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
                     }
-                    name = getName(StorageUtility.INDEX_TRASH, primaryAccount);
+                    name = getName(StorageUtility.INDEX_TRASH, primaryAccount, locale, Policy.BY_LOCALE);
+
+                    mad.setTrash(name);
+                    attributes.add(Attribute.TRASH_LITERAL);
                 }
                 mad.setTrashFullname(tmp.append(name).toString());
                 attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
@@ -422,43 +471,71 @@ public final class Tools {
         }
     }
 
-    private static String getName(final int index, final MailAccount primaryAccount) {
+    private static String getName(final int index, final MailAccount primaryAccount, final Locale locale, final Policy policy) {
         String retval;
         switch (index) {
         case StorageUtility.INDEX_DRAFTS:
-            retval = primaryAccount.getDrafts();
-            if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getDrafts();
+            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                retval = primaryAccount.getDrafts();
+                if (null == retval) {
+                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getDrafts();
+                }
+            } else {
+                retval = StringHelper.valueOf(locale).getString(MailStrings.DRAFTS);
             }
             break;
         case StorageUtility.INDEX_SENT:
-            retval = primaryAccount.getSent();
-            if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSent();
+            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                retval = primaryAccount.getSent();
+                if (null == retval) {
+                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSent();
+                }
+            } else {
+                retval = StringHelper.valueOf(locale).getString(MailStrings.SENT);
             }
             break;
         case StorageUtility.INDEX_SPAM:
-            retval = primaryAccount.getSpam();
-            if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSpam();
+            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                retval = primaryAccount.getSpam();
+                if (null == retval) {
+                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSpam();
+                }
+            } else {
+                retval = StringHelper.valueOf(locale).getString(MailStrings.SPAM);
             }
             break;
         case StorageUtility.INDEX_TRASH:
-            retval = primaryAccount.getTrash();
-            if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getTrash();
+            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                retval = primaryAccount.getTrash();
+                if (null == retval) {
+                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getTrash();
+                }
+            } else {
+                retval = StringHelper.valueOf(locale).getString(MailStrings.TRASH);
             }
             break;
         case StorageUtility.INDEX_CONFIRMED_SPAM:
-            retval = primaryAccount.getConfirmedSpam();
-            if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedSpam();
+            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                retval = primaryAccount.getConfirmedSpam();
+                if (null == retval) {
+                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedSpam();
+                }
+            } else {
+                // Special handling for confirmed-spam; see AdminUser.properties: no translation for that folder
+                retval = "confirmed-spam";
+                // retval = StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_SPAM);
             }
             break;
         case StorageUtility.INDEX_CONFIRMED_HAM:
-            retval = primaryAccount.getConfirmedHam();
-            if (null == retval) {
-                retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedHam();
+            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                retval = primaryAccount.getConfirmedHam();
+                if (null == retval) {
+                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedHam();
+                }
+            } else {
+                // Special handling for confirmed-ham; see AdminUser.properties: no translation for that folder
+                retval = "confirmed-ham";
+                // retval = StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_HAM);
             }
             break;
         default:

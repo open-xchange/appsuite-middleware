@@ -89,6 +89,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -263,32 +264,45 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
             final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
             final boolean translateDefaultFolders = (null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true));
+            final boolean isPrimaryAccount = MailAccount.DEFAULT_ID == accountId;
             if (mailFolder.containsDefaultFolderType()) {
                 switch (mailFolder.getDefaultFolderType()) {
                 case INBOX:
                     mailFolderType = MailFolderType.INBOX;
                     break;
                 case TRASH:
-                    localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH)) : (MailStrings.TRASH.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH) : folderName);
+                    if (isPrimaryAccount) {
+                        localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH)) : (MailStrings.TRASH.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH) : folderName);
+                    }
                     mailFolderType = MailFolderType.TRASH;
                     break;
                 case SENT:
-                    localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT)) : (MailStrings.SENT.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT) : folderName);
+                    if (isPrimaryAccount) {
+                        localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT)) : (MailStrings.SENT.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT) : folderName);
+                    }
                     mailFolderType = MailFolderType.SENT;
                     break;
                 case SPAM:
-                    localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM)) : (MailStrings.SPAM.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM) : folderName);
+                    if (isPrimaryAccount) {
+                        localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM)) : (MailStrings.SPAM.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM) : folderName);
+                    }
                     mailFolderType = MailFolderType.SPAM;
                     break;
                 case DRAFTS:
-                    localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS)) : (MailStrings.DRAFTS.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS) : folderName);
+                    if (isPrimaryAccount) {
+                        localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS)) : (MailStrings.DRAFTS.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS) : folderName);
+                    }
                     mailFolderType = MailFolderType.DRAFTS;
                     break;
                 case CONFIRMED_SPAM:
-                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
+                    if (isPrimaryAccount) {
+                        localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
+                    }
                     break;
                 case CONFIRMED_HAM:
-                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
+                    if (isPrimaryAccount) {
+                        localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
+                    }
                     break;
                 default:
                     // Nope
@@ -299,23 +313,35 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 } else {
                     try {
                         if (fullName.equals(fullnameProvider.getDraftsFolder())) {
-                            localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS)) : (MailStrings.DRAFTS.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS) : folderName);
+                            if (isPrimaryAccount) {
+                                localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS)) : (MailStrings.DRAFTS.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS) : folderName);
+                            }
                             mailFolderType = MailFolderType.DRAFTS;
                         } else if (fullName.equals(fullnameProvider.getINBOXFolder())) {
                             mailFolderType = MailFolderType.INBOX;
                         } else if (fullName.equals(fullnameProvider.getSentFolder())) {
-                            localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT)) : (MailStrings.SENT.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT) : folderName);
+                            if (isPrimaryAccount) {
+                                localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT)) : (MailStrings.SENT.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT) : folderName);
+                            }
                             mailFolderType = MailFolderType.SENT;
                         } else if (fullName.equals(fullnameProvider.getSpamFolder())) {
-                            localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM)) : (MailStrings.SPAM.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM) : folderName);
+                            if (isPrimaryAccount) {
+                                localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM)) : (MailStrings.SPAM.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM) : folderName);
+                            }
                             mailFolderType = MailFolderType.SPAM;
                         } else if (fullName.equals(fullnameProvider.getTrashFolder())) {
-                            localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH)) : (MailStrings.TRASH.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH) : folderName);
+                            if (isPrimaryAccount) {
+                                localizedName = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH)) : (MailStrings.TRASH.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH) : folderName);
+                            }
                             mailFolderType = MailFolderType.TRASH;
-                        } else if (fullName.equals(fullnameProvider.getConfirmedSpamFolder())) {
-                            localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
-                        } else if (fullName.equals(fullnameProvider.getConfirmedHamFolder())) {
-                            localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
+                        } else {
+                            if (isPrimaryAccount) {
+                                if (fullName.equals(fullnameProvider.getConfirmedSpamFolder())) {
+                                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
+                                } else if (fullName.equals(fullnameProvider.getConfirmedHamFolder())) {
+                                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
+                                }
+                            }
                         }
                     } catch (final OXException e) {
                         org.slf4j.LoggerFactory.getLogger(MailFolderImpl.class).error("", e);

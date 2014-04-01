@@ -50,6 +50,7 @@
 package com.openexchange.mailaccount.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.mail.utils.DefaultFolderNamesProvider.extractFullname;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
@@ -100,7 +101,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.config.IPRange;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.ProviderUtility;
@@ -1901,15 +1901,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 /*
                  * Default folder names: trash, sent, drafts, spam, confirmed_spam, confirmed_ham
                  */
-                final DefaultFolderNamesProvider defaultFolderNamesProvider = new DefaultFolderNamesProvider(id, user, cid);
                 {
-                    final String[] defaultFolderNames = defaultFolderNamesProvider.getDefaultFolderNames(mailAccount, true);
-                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_TRASH]);
-                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_SENT]);
-                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_DRAFTS]);
-                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_SPAM]);
-                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_CONFIRMED_SPAM]);
-                    setOptionalString(stmt, pos++, defaultFolderNames[StorageUtility.INDEX_CONFIRMED_HAM]);
+                    setOptionalString(stmt, pos++, mailAccount.getTrash());
+                    setOptionalString(stmt, pos++, mailAccount.getSent());
+                    setOptionalString(stmt, pos++, mailAccount.getDrafts());
+                    setOptionalString(stmt, pos++, mailAccount.getSpam());
+                    setOptionalString(stmt, pos++, mailAccount.getConfirmedSpam());
+                    setOptionalString(stmt, pos++, mailAccount.getConfirmedHam());
                 }
                 /*
                  * Spam handler
@@ -1925,13 +1923,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                  * Default folder full names
                  */
                 {
-                    final String[] defaultFolderFullnames = defaultFolderNamesProvider.getDefaultFolderFullnames(mailAccount, true);
-                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_TRASH]);
-                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_SENT]);
-                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_DRAFTS]);
-                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_SPAM]);
-                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_CONFIRMED_SPAM]);
-                    setOptionalString(stmt, pos++, defaultFolderFullnames[StorageUtility.INDEX_CONFIRMED_HAM]);
+                    setOptionalString(stmt, pos++, extractFullname(mailAccount.getTrashFullname()));
+                    setOptionalString(stmt, pos++, extractFullname(mailAccount.getSentFullname()));
+                    setOptionalString(stmt, pos++, extractFullname(mailAccount.getDraftsFullname()));
+                    setOptionalString(stmt, pos++, extractFullname(mailAccount.getSpamFullname()));
+                    setOptionalString(stmt, pos++, extractFullname(mailAccount.getConfirmedSpamFullname()));
+                    setOptionalString(stmt, pos++, extractFullname(mailAccount.getConfirmedHamFullname()));
                 }
                 /*
                  * Personal
