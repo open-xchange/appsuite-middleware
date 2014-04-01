@@ -723,20 +723,8 @@ public final class InternalList {
         // Extends infostore document tables by "meta" JSON BLOB.
         list.add(new com.openexchange.groupware.update.tasks.AddMetaForInfostoreDocumentTable());
 
-        // TODO: DELETE -- Extends those calendar tables that carry confirmation information by "occurrence" column
-        list.add(new com.openexchange.groupware.update.tasks.CalendarAddConfirmPerOccurrenceTask());
-
-        // TODO: DELETE -- Adapts the keys for those calendar tables that carry confirmation information to new "occurrence" column
-        list.add(new com.openexchange.groupware.update.tasks.CalendarAddNewPrimaryKeyForConfirmPerOccurrence());
-
         // Adds (cid,changing_date) index to calendar tables if missing
         list.add(new com.openexchange.groupware.update.tasks.CalendarAddChangingDateIndexTask());
-
-        // TODO: DELETE -- Extends those calendar tables that carry confirmation information by "occurrence" column
-        list.add(new com.openexchange.groupware.update.tasks.CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence());
-
-        // TODO: DELETE -- Adapts the keys for those calendar tables that carry confirmation information to new "occurrence" column
-        list.add(new com.openexchange.groupware.update.tasks.CalendarRevokeAddConfirmPerOccurrenceTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
