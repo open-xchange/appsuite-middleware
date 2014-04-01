@@ -248,11 +248,15 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 smbFile.createNewFile();
             }
             final long now = System.currentTimeMillis();
-            if (set.contains(Field.CREATED)) {
+            if (false == set.contains(Field.CREATED) || null == file.getCreated()) {
                 smbFile.setCreateTime(now);
+            } else {
+                smbFile.setCreateTime(file.getCreated().getTime());
             }
-            if (set.contains(Field.LAST_MODIFIED)) {
+            if (false == set.contains(Field.LAST_MODIFIED) || null == file.getLastModified()) {
                 smbFile.setLastModified(now);
+            } else {
+                smbFile.setLastModified(file.getLastModified().getTime());
             }
             smbFile.setReadWrite();
             /*
@@ -387,8 +391,16 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             sourceFile.renameTo(targetFile);
             final long now = System.currentTimeMillis();
-            targetFile.setLastModified(now);
-            targetFile.setCreateTime(now);
+            if (false == modifiedFields.contains(Field.LAST_MODIFIED) || null == update.getLastModified()) {
+                targetFile.setLastModified(now);
+            } else {
+                targetFile.setLastModified(update.getLastModified().getTime());
+            }
+            if (false == modifiedFields.contains(Field.CREATED) || null == update.getCreated()) {
+                targetFile.setCreateTime(update.getLastModified().getTime());
+            } else {
+                targetFile.setCreateTime(now);
+            }
             targetFile.setReadWrite();
             /*
              * invalidate
