@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -253,11 +254,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             } else {
                 smbFile.setCreateTime(file.getCreated().getTime());
             }
-            if (false == set.contains(Field.LAST_MODIFIED) || null == file.getLastModified()) {
-                smbFile.setLastModified(now);
-            } else {
-                smbFile.setLastModified(file.getLastModified().getTime());
-            }
+            smbFile.setLastModified(now);
             smbFile.setReadWrite();
             /*
              * Check for comment
@@ -391,21 +388,22 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             sourceFile.renameTo(targetFile);
             final long now = System.currentTimeMillis();
-            if (false == modifiedFields.contains(Field.LAST_MODIFIED) || null == update.getLastModified()) {
-                targetFile.setLastModified(now);
-            } else {
-                targetFile.setLastModified(update.getLastModified().getTime());
-            }
+            targetFile.setLastModified(now);
             if (false == modifiedFields.contains(Field.CREATED) || null == update.getCreated()) {
-                targetFile.setCreateTime(update.getLastModified().getTime());
-            } else {
                 targetFile.setCreateTime(now);
+            } else {
+                targetFile.setCreateTime(update.getLastModified().getTime());
             }
             targetFile.setReadWrite();
             /*
              * invalidate
              */
             SmbFileMapManagement.getInstance().dropFor(session);
+            /*
+             * apply new id and timestamp
+             */
+            update.setLastModified(new Date(targetFile.getLastModified()));
+            update.setId(targetFile.getName());
             /*
              * return
              */
@@ -484,9 +482,14 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 outputStream.close();
             }
             /*
-             * Set proper identifier
+             * Set proper identifier & timestamp
              */
             file.setId(newSmbFile.getName());
+            file.setLastModified(new Date(newSmbFile.getLastModified()));
+            /*
+             * Invalidate
+             */
+            SmbFileMapManagement.getInstance().dropFor(session);
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
