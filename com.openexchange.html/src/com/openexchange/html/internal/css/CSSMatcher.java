@@ -430,7 +430,6 @@ public final class CSSMatcher {
                         cssElemsBuffer.setLength(0);
                         // Add to main builder
                         cssBld.append(prefix);
-                        System.err.println(prefix);
                         cssBld.append(block);
                         off = index;
                     }
