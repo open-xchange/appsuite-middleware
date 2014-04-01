@@ -463,14 +463,20 @@ public class UploadHelper {
      * @return The found files
      * @throws OXException
      */
-    private List<File> findUploadFiles(String folderID, List<FileVersion> fileVersions) throws OXException {
+    private List<File> findUploadFiles(final String folderID, List<FileVersion> fileVersions) throws OXException {
         List<File> files = new ArrayList<File>();
-        List<Field> fields = Arrays.asList(Field.FILENAME, Field.FILE_SIZE);
-        SearchTerm<?> searchTerm = getSearchTermForUploadFiles(fileVersions);
+        final List<Field> fields = Arrays.asList(Field.FILENAME, Field.FILE_SIZE);
+        final SearchTerm<?> searchTerm = getSearchTermForUploadFiles(fileVersions);
         SearchIterator<File> searchIterator = null;
         try {
-            searchIterator = session.getStorage().getFileAccess().search(Collections.singletonList(folderID), searchTerm, fields, null,
-                SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+            searchIterator = session.getStorage().wrapInTransaction(new StorageOperation<SearchIterator<File>>() {
+
+                @Override
+                public SearchIterator<File> call() throws OXException {
+                    return session.getStorage().getFileAccess().search(Collections.singletonList(folderID), searchTerm, fields, null,
+                        SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                }
+            });
             while (searchIterator.hasNext()) {
                 File file = searchIterator.next();
                 if (null != file && null != file.getFileName()) {
