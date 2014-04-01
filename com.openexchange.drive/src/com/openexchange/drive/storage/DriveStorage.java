@@ -139,14 +139,18 @@ public class DriveStorage {
     public <T> T wrapInTransaction(StorageOperation<T> storageOperation) throws OXException {
         try {
             getFileAccess().startTransaction();
+            getFolderAccess().startTransaction();
             T t = storageOperation.call();
             getFileAccess().commit();
+            getFolderAccess().commit();
             return t;
         } catch (OXException e) {
             getFileAccess().rollback();
+            getFolderAccess().rollback();
             throw e;
         } finally {
             getFileAccess().finish();
+            getFolderAccess().finish();
         }
     }
 
@@ -252,7 +256,7 @@ public class DriveStorage {
         List<String> notRemoved = getFileAccess().removeDocument(
             Arrays.asList(new String[] { file.getId() }), file.getSequenceNumber(), hardDelete);
         if (null != notRemoved && 0 < notRemoved.size()) {
-            throw DriveExceptionCodes.FILE_NOT_FOUND.create();//TODO: exception for this
+            throw DriveExceptionCodes.FILE_NOT_FOUND.create(file.getFileName(), getPath(file.getFolderId()));//TODO: exception for this
         }
         return file;
     }
