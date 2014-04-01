@@ -122,7 +122,7 @@ public class Bug30835Test extends AbstractAJAXSession {
                 try {
                     String key1 = o1.getString(i);
                     String key2 = o2.getString(i);
-                    int comp = key1.compareTo(key2);
+                    int comp = key1.compareToIgnoreCase(key2);
                     if (comp > 0) {
                         return comp;
                     }
