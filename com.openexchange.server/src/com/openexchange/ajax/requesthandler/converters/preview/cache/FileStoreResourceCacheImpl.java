@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
+import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.QUOTA_AWARE;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,6 +64,7 @@ import com.openexchange.ajax.requesthandler.cache.AbstractResourceCache;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadata;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -111,9 +113,9 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
     /**
      * Initializes a new {@link FileStoreResourceCacheImpl}.
      */
-    public FileStoreResourceCacheImpl(final boolean quotaAware) {
-        super();
-        this.quotaAware = quotaAware;
+    public FileStoreResourceCacheImpl(final ConfigurationService configService) {
+        super(configService);
+        this.quotaAware = configService.getBoolProperty(QUOTA_AWARE, false);
     }
 
     private void batchDeleteFiles(final Collection<String> ids, final FileStorage fileStorage) {
@@ -324,19 +326,29 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
         return true;
     }
 
-    private boolean ensureUnexceededContextQuota(final Connection con, final long desiredSize, final int contextId, final long existingSize) throws OXException {
-        final ResourceCacheMetadataStore metadataStore = getMetadataStore();
-        final long[] qts = getContextQuota(contextId);
-        final long total = qts[0];
-        final long totalPerDocument = qts[1];
-        if (total > 0L || totalPerDocument > 0L) {
-            if (total <= 0L) {
-                return (totalPerDocument <= 0 || desiredSize <= totalPerDocument);
+    private boolean fitsQuotas(final long desiredSize) {
+        final long globalQuota = getGlobalQuota();
+        final long documentQuota = getDocumentQuota();
+        if (globalQuota > 0L || documentQuota > 0L) {
+            if (globalQuota <= 0L) {
+                return (documentQuota <= 0 || desiredSize <= documentQuota);
             }
 
             // Check if document's size fits into quota limits at all
-            if (desiredSize > total || desiredSize > totalPerDocument) {
+            if (desiredSize > globalQuota || desiredSize > documentQuota) {
                 return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean ensureUnexceededContextQuota(final Connection con, final long desiredSize, final int contextId, final long existingSize) throws OXException {
+        final ResourceCacheMetadataStore metadataStore = getMetadataStore();
+        final long globalQuota = getGlobalQuota();
+        if (fitsQuotas(desiredSize)) {
+            if (globalQuota <= 0) {
+                return true;
             }
 
             // Try to create space through removing oldest entries
@@ -346,7 +358,7 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
             try {
                 Databases.startTransaction(con);
                 long usedContextQuota = metadataStore.getUsedSize(con, contextId) - existingSize;
-                while (usedContextQuota + desiredSize > total) {
+                while (usedContextQuota + desiredSize > globalQuota) {
                     ResourceCacheMetadata metadata = metadataStore.removeOldest(con, contextId);
                     if (metadata == null) {
                         return false;
@@ -354,12 +366,13 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
                     toRemove.add(metadata);
                     usedContextQuota = metadataStore.getUsedSize(con, contextId) - existingSize;
-                    if (usedContextQuota <= 0 && desiredSize > total) {
+                    if (usedContextQuota <= 0 && desiredSize > globalQuota) {
                         return false;
                     }
                 }
                 con.commit();
                 commited = true;
+                return true;
             } catch (SQLException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
@@ -373,7 +386,7 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
             }
         }
 
-        return true;
+        return false;
     }
 
     private void deleteResources(int contextId, List<ResourceCacheMetadata> toRemove) throws OXException {

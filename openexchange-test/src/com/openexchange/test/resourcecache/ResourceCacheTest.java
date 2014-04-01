@@ -150,10 +150,6 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         int[] qts = loadQuotas();
         int quota = qts[0];
         int perDocument = qts[1];
-        if (current.equals(DB)) {
-            // data column in table previewData is blob, which allows for max. 65 kb.
-            perDocument = Math.min(perDocument, ((int) Math.pow(2, 16) - 2));
-        }
         int n = quota / perDocument;
         if (quota <= 0 || perDocument <= 0 || n < 1) {
             fail("test system is misconfigured. Set correct quotas in preview.properties!");

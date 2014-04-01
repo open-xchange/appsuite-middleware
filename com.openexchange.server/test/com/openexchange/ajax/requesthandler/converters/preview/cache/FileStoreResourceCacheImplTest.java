@@ -73,6 +73,7 @@ import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -112,8 +113,10 @@ public class FileStoreResourceCacheImplTest {
         DatabaseService databaseService = mock(DatabaseService.class);
         when(databaseService.getWritable(anyInt())).thenReturn(connection);
         ServerServiceRegistry.getInstance().addService(DatabaseService.class, databaseService);
+        ConfigurationService configMock = mock(ConfigurationService.class);
+        when(configMock.getProperty(anyString(), anyString())).thenReturn("-1");
 
-        FileStoreResourceCacheImpl cache = spy(new FileStoreResourceCacheImpl(false));
+        FileStoreResourceCacheImpl cache = spy(new FileStoreResourceCacheImpl(configMock));
         mockStatic(FileStoreResourceCacheImpl.class);
         FileStorage fileStorage = mock(FileStorage.class);
         String fileId = "12345";

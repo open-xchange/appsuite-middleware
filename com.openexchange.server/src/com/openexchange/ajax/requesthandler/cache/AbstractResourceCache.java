@@ -49,13 +49,21 @@
 
 package com.openexchange.ajax.requesthandler.cache;
 
+import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.DOCUMENT_QUOTA;
+import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.ENABLED;
+import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.GLOBAL_QUOTA;
+import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.PROP_FILE;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -75,9 +83,18 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractResourceCache implements ResourceCache, EventHandler {
+public abstract class AbstractResourceCache implements ResourceCache, EventHandler, Reloadable {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractResourceCache.class);
+
+    private final AtomicLong globalQuota = new AtomicLong(-1L);
+
+    private final AtomicLong documentQuota = new AtomicLong(-1L);
+
+    protected AbstractResourceCache(final ConfigurationService configService) {
+        super();
+        initQuotas(configService);
+    }
 
     @Override
     public boolean isEnabledFor(int contextId, int userId) throws OXException {
@@ -87,32 +104,8 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
             return defaultValue;
         }
         final ConfigView configView = factory.getView(userId, contextId);
-        final ComposedConfigProperty<Boolean> enabledProp = configView.property("com.openexchange.preview.cache.enabled", boolean.class);
+        final ComposedConfigProperty<Boolean> enabledProp = configView.property(ENABLED, boolean.class);
         return enabledProp.isDefined() ? enabledProp.get().booleanValue() : defaultValue;
-    }
-
-    @Override
-    public long[] getContextQuota(final int contextId) {
-        long quota = -1L;
-        long quotaPerDocument = -1L;
-
-        // TODO: Check context-wise quota values
-        final ConfigurationService confService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (null != confService) {
-            String property = confService.getProperty("com.openexchange.preview.cache.quota", "10485760").trim();
-            try {
-                quota = Long.parseLong(property);
-            } catch (final NumberFormatException e) {
-                quota = -1L;
-            }
-            property = confService.getProperty("com.openexchange.preview.cache.quotaPerDocument", "524288").trim();
-            try {
-                quotaPerDocument = Long.parseLong(property);
-            } catch (final NumberFormatException e) {
-                quotaPerDocument = -1L;
-            }
-        }
-        return new long[] { quota, quotaPerDocument };
     }
 
     @Override
@@ -139,6 +132,43 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
         }
     }
 
+    //                                                               \\
+    // ===================== Reloadable ===================== \\
+    //
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        initQuotas(configService);
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        return Collections.singletonMap(PROP_FILE, new String[] {
+            GLOBAL_QUOTA,
+            DOCUMENT_QUOTA
+        });
+    }
+
+    private void initQuotas(ConfigurationService configService) {
+        String property = configService.getProperty(GLOBAL_QUOTA, "10485760").trim();
+        try {
+            globalQuota.set(Long.parseLong(property));
+        } catch (final NumberFormatException e) {
+            globalQuota.set(-1L);
+        }
+
+        property = configService.getProperty(DOCUMENT_QUOTA, "524288").trim();
+        try {
+            documentQuota.set(Long.parseLong(property));
+        } catch (final NumberFormatException e) {
+            documentQuota.set(-1L);
+        }
+    }
+
+    //                                                               \\
+    // ===================== protected members ===================== \\
+    //                                                               \\
+
     protected ResourceCacheMetadataStore getMetadataStore() {
         return ResourceCacheMetadataStore.getInstance();
     }
@@ -152,15 +182,12 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
         return dbService;
     }
 
-    protected static ResourceCacheMetadata loadExistingEntry(ResourceCacheMetadataStore metadataStore, Connection con, int contextId, int userId, String id) throws OXException {
-        ResourceCacheMetadata existingMetadata = null;
-        try {
-            existingMetadata = metadataStore.load(con, contextId, userId, id);
-        } catch (SQLException e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        }
+    protected long getGlobalQuota() {
+        return globalQuota.get();
+    }
 
-        return existingMetadata;
+    protected long getDocumentQuota() {
+        return documentQuota.get();
     }
 
     /**
@@ -181,6 +208,17 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
             LOG.warn("Could not parse file type: " + fileType, e);
             return null;
         }
+    }
+
+    protected static ResourceCacheMetadata loadExistingEntry(ResourceCacheMetadataStore metadataStore, Connection con, int contextId, int userId, String id) throws OXException {
+        ResourceCacheMetadata existingMetadata = null;
+        try {
+            existingMetadata = metadataStore.load(con, contextId, userId, id);
+        } catch (SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        }
+
+        return existingMetadata;
     }
 
 }

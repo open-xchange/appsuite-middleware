@@ -63,6 +63,7 @@ import com.openexchange.ajax.requesthandler.cache.AbstractResourceCache;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadata;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -79,8 +80,8 @@ public final class RdbResourceCacheImpl extends AbstractResourceCache {
     /**
      * Initializes a new {@link RdbResourceCacheImpl}.
      */
-    public RdbResourceCacheImpl() {
-        super();
+    public RdbResourceCacheImpl(final ConfigurationService configService) {
+        super(configService);
     }
 
     @Override
@@ -163,9 +164,8 @@ public final class RdbResourceCacheImpl extends AbstractResourceCache {
 
     private boolean ensureUnexceededContextQuota(final Connection con, final long desiredSize, final int contextId, final long existingSize) throws OXException {
         final ResourceCacheMetadataStore metadataStore = getMetadataStore();
-        final long[] qts = getContextQuota(contextId);
-        final long total = qts[0];
-        final long totalPerDocument = qts[1];
+        final long total = getGlobalQuota();
+        final long totalPerDocument = getDocumentQuota();
         if (total > 0L || totalPerDocument > 0L) {
             if (total <= 0L) {
                 return (totalPerDocument <= 0 || desiredSize <= totalPerDocument);

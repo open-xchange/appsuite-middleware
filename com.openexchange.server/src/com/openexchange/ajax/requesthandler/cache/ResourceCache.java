@@ -82,14 +82,6 @@ public interface ResourceCache {
     boolean save(String id, CachedResource resource, int userId, int contextId) throws OXException;
 
     /**
-     * Gets the caching quota for denoted context.
-     *
-     * @param contextId The context identifier
-     * @return The context quota or <code>-1</code> if unlimited
-     */
-    long[] getContextQuota(int contextId);
-
-    /**
      * Gets the resource.
      *
      * @param id The document identifier

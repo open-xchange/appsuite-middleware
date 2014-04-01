@@ -379,11 +379,6 @@ public class FileResponseRendererTest extends TestCase {
         }
 
         @Override
-        public long[] getContextQuota(int contextId) {
-            return null;
-        }
-
-        @Override
         public CachedResource get(String id, int userId, int contextId) throws OXException {
             callsToGet++;
             return null;
