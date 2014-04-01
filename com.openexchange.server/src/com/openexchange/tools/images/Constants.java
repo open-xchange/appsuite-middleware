@@ -49,10 +49,7 @@
 
 package com.openexchange.tools.images;
 
-import java.util.Map;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.server.reloadable.GenericReloadable;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -69,22 +66,6 @@ public class Constants {
      */
     private Constants() {
         super();
-    }
-
-    static {
-        GenericReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(final ConfigurationService configService) {
-                maxHeight = null;
-                maxWidth = null;
-            }
-
-            @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
-            }
-        });
     }
 
     private static volatile Integer maxHeight;
