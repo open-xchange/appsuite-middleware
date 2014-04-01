@@ -368,6 +368,8 @@ public class IMAPDefaultFolderChecker {
             if (!indexes.isEmpty()) {
                 clearAccountFullNames(indexes.toArray());
             }
+        } else {
+            LOG.debug("Checking standard folder for account {} (user={}, context={})", Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
         // Check folders
         final AtomicBoolean modified = new AtomicBoolean(false);
