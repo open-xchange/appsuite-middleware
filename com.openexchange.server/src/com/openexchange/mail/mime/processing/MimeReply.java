@@ -229,7 +229,7 @@ public final class MimeReply {
      * @param originalMsg The referenced original message
      * @param msgref The message reference
      * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
-     * @param preferToAsRecipient <code>true</code> to prefer header 'To' as recipient; otherwise <code>false</code>
+     * @param preferToAsRecipient <code>true</code> to prefer header 'To' as recipient; otherwise <code>false</code> to prefer 'Reply-To'
      * @param session The session containing needed user data
      * @param accountId The account ID
      * @param mailSession The mail session
