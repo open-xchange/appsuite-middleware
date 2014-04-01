@@ -116,6 +116,8 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         Session session = null;
         try {
             if (!conf.isSessiondAutoLogin()) {
+                // Auto-login disabled per configuration.
+                // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
                 if (doAutoLogin(req, resp)) {
                     throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
                 }
@@ -193,9 +195,9 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                                 LOG.warn("Modules could not be added to login JSON response", cause);
                             }
                         }
-                        
+
                         performRampUp(req, session, json, ServerSessionAdapter.valueOf(session));
-                        
+
                         // Set data
                         response.setData(json);
 
@@ -267,6 +269,9 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         }
     }
 
+    /**
+     * @return a boolean value indicated if an auto login should proceed afterwards
+     */
     private boolean doAutoLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
         return loginOperation(req, resp, new LoginClosure() {
 
