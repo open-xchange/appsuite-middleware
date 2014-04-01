@@ -1,3 +1,8 @@
+* 2014-04-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31217: No translation of standard folders for external accounts + prefer localized standard folder names than taking the ones
+                      from primary account (as they might get translated)
+
 * 2014-03-31 - thorben.betten@open-xchange.com
  
  - Fix for bug 31816: Support SMTP server that do not support authentication capability
