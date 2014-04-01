@@ -49,6 +49,10 @@
 
 package com.openexchange.calendar;
 
+import static com.openexchange.time.TimeTools.D;
+import static com.openexchange.time.TimeTools.applyTimeZone;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -57,8 +61,6 @@ import org.junit.Test;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
-import static com.openexchange.time.TimeTools.*;
-import static org.junit.Assert.*;
 
 /**
  * {@link AppointmentDiffTest}
@@ -91,7 +93,7 @@ public class AppointmentDiffTest {
         original.setStartDate(D("8:00 PM"));
         update.setStartDate(D("7:00 PM"));
 
-        original.setEndDate(applyTimeZone(TimeZone.getTimeZone("CET"), D("10:00 PM")));
+        original.setEndDate(applyTimeZone(TimeZone.getTimeZone("GMT+1"), D("10:00 PM")));
         update.setEndDate(applyTimeZone(TimeZone.getTimeZone("UTC"), D("9:00 PM")));
 
 
