@@ -634,10 +634,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             String user = login;
             String proxyUser = null;
             boolean isProxyAuth = false;
-            if (proxyDelimiter != null && login.contains(proxyDelimiter)) {
-                isProxyAuth = true;
-                proxyUser = login.substring(0, login.indexOf(proxyDelimiter));
-                user = login.substring(login.indexOf(proxyDelimiter) + proxyDelimiter.length(), login.length());
+            if (proxyDelimiter != null) {
+                final int pos = login.indexOf(proxyDelimiter);
+                if (pos >= 0) {
+                    isProxyAuth = true;
+                    proxyUser = login.substring(0, pos);
+                    user = login.substring(pos + proxyDelimiter.length());
+                }
             }
             /*
              * Get properties
