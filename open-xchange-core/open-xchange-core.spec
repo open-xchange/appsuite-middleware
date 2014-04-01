@@ -955,6 +955,10 @@ ox_set_property com.openexchange.servlet.maxInactiveInterval "$VALUE" /opt/open-
 VALUE=$(ox_read_property com.openexchange.sessiond.sessionDefaultLifeTime /opt/open-xchange/etc/sessiond.properties)
 ox_set_property com.openexchange.sessiond.sessionDefaultLifeTime "$VALUE" /opt/open-xchange/etc/sessiond.properties
 
+# SoftwareChange_Request-1980
+VALUE=$(ox_read_property com.openexchange.jolokia.restrict.to.localhost /opt/open-xchange/etc/jolokia.properties)
+ox_set_property com.openexchange.jolokia.restrict.to.localhost "$VALUE" /opt/open-xchange/etc/jolokia.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
