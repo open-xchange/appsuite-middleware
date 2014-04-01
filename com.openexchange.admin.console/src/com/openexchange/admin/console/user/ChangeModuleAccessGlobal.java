@@ -113,8 +113,8 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
 
         try {
             setOptions(parser);
-            prepare(parser);
             parse(parser, args);
+            prepare(parser);
             execute();
         } catch (Exception e) {
             printErrors(null, ctxid, e, parser);

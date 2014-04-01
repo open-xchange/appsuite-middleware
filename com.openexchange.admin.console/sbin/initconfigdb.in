@@ -109,6 +109,7 @@ Example:
   $0 --configdb-pass=secret
 EOF
     echo
+    exit 0
 }
 
 TEMP=$(POSIXLY_CORRECT=true getopt -o iap:h --long "$(eval echo $LONGOPTS),help" -- "$@")
