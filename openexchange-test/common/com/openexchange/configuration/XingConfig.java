@@ -61,9 +61,14 @@ public class XingConfig extends AbstractConfig {
 
     private static volatile XingConfig singleton;
 
-    @Override
+    private static final TestConfig.Property KEY = TestConfig.Property.XING_PROPS;
+
     protected String getPropertyFileName() throws OXException {
-        return "./../openexchange-test/conf/xingtest.properties";
+        final String fileName = TestConfig.getProperty(KEY);
+        if (null == fileName) {
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY.getPropertyName());
+        }
+        return fileName;
     }
 
     /**

@@ -80,7 +80,11 @@ public class TestConfig extends AbstractConfig {
         /**
          * webdav.properties
          */
-        WEBDAV_PROPS("webdavPropertiesFile");
+        WEBDAV_PROPS("webdavPropertiesFile"),
+        /**
+         * xingtest.properties
+         */
+        XING_PROPS("xingPropertiesFile");
 
         /**
          * Name of the property in the test.properties file.
