@@ -61,7 +61,7 @@ import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.drive.FileTypeDisplayItem;
-import com.openexchange.find.drive.FilenameDisplayItem;
+import com.openexchange.find.drive.FileDisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.find.tasks.TaskStatusDisplayItem;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
@@ -150,7 +150,7 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
     }
 
     @Override
-    public void visit(FilenameDisplayItem item) {
+    public void visit(FileDisplayItem item) {
         result = item.getDefaultValue();
     }
 

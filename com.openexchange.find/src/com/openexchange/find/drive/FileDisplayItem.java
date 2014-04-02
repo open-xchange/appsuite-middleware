@@ -49,37 +49,57 @@
 
 package com.openexchange.find.drive;
 
-import com.openexchange.file.storage.File;
 import com.openexchange.find.facet.DefaultDisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 
 
 /**
- * {@link FilenameDisplayItem}
+ * {@link FileDisplayItem}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class FilenameDisplayItem extends DefaultDisplayItem {
+public class FileDisplayItem extends DefaultDisplayItem {
 
-    private final File file;
+    public static enum Type {
+
+        FILENAME("file_name"),
+
+        DESCRIPTION("file_description"),
+
+        CONTENT("file_content");
+
+        private String identifier;
+
+        private Type(String identifier) {
+            this.identifier = identifier;
+        }
+
+        public String getIdentifier() {
+            return identifier;
+        }
+    }
+
+    private final Type type;
+    private final String displayName;
 
     /**
-     * Initializes a new {@link FilenameDisplayItem}.
+     * Initializes a new {@link FileDisplayItem}.
      */
-    public FilenameDisplayItem(File file) {
+    public FileDisplayItem(Type type, String displayName) {
         super();
-        this.file = file;
+        this.type = type;
+        this.displayName = displayName;
     }
 
     @Override
     public String getDefaultValue() {
-        return file.getTitle();
+        return displayName;
     }
 
     @Override
-    public File getItem() {
-        return file;
+    public Type getItem() {
+        return type;
     }
 
     @Override

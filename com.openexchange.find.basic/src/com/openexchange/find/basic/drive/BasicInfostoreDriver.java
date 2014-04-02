@@ -64,11 +64,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.infostore.ToInfostoreTermVisitor;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.AndTerm;
-import com.openexchange.file.storage.search.DescriptionTerm;
-import com.openexchange.file.storage.search.FileNameTerm;
-import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
-import com.openexchange.file.storage.search.TitleTerm;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
@@ -77,9 +73,9 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
+import com.openexchange.find.drive.FileDisplayItem;
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.drive.FileSizeDisplayItem.Size;
@@ -269,52 +265,58 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         // List of supported facets
         final List<Facet> facets = new LinkedList<Facet>();
 
-        List<DocumentMetadata> docs = getAutocompleteFiles(session, autocompleteRequest);
-        List<FacetValue> fileNameFacet = new ArrayList<FacetValue>(docs.size());
-        List<FacetValue> fileDescriptionFacet = new ArrayList<FacetValue>(docs.size());
-        List<FacetValue> fileContentFacet = new ArrayList<FacetValue>(docs.size());
-        String fileNameId = DriveFacetType.FILE_NAME.getId();
-        String fileDescriptionId = DriveFacetType.FILE_DESCRIPTION.getId();
-        String fileContentId = DriveFacetType.FILE_CONTENT.getId();
-        for (DocumentMetadata doc : docs) {
-            Filter fileNameFilter = new Filter(Collections.singletonList(fileNameId), String.valueOf(doc.getId()));
-            Filter fileDescriptionFilter = new Filter(Collections.singletonList(fileDescriptionId), String.valueOf(doc.getId()));
-            Filter fileContentFilter = new Filter(Collections.singletonList(fileContentId), String.valueOf(doc.getId()));
-            String fileName = doc.getFileName();
-            if (null != fileName) {
-                fileNameFacet.add(new FacetValue(
-                    prepareFacetValueId(fileNameId, session.getContextId(), String.valueOf(doc.getId())),
-                    new SimpleDisplayItem(fileName, false),
-                    1,
-                    fileNameFilter));
-            }
-            String description = doc.getDescription();
-            if (null != description) {
-                fileDescriptionFacet.add(new FacetValue(prepareFacetValueId(
-                    fileDescriptionId,
-                    session.getContextId(),
-                    String.valueOf(doc.getId())), new SimpleDisplayItem(description, false), 1, fileDescriptionFilter));
-            }
-            String content = doc.getContent();
-            if (null != content) {
-                fileContentFacet.add(new FacetValue(
-                    prepareFacetValueId(fileContentId, session.getContextId(), String.valueOf(doc.getId())),
-                    new SimpleDisplayItem(content, false),
-                    1,
-                    fileContentFilter));
-            }
-        }
+//        List<FacetValue> fileNameFacet = new ArrayList<FacetValue>();
+//        List<FacetValue> fileDescriptionFacet = new ArrayList<FacetValue>();
+//        List<FacetValue> fileContentFacet = new ArrayList<FacetValue>();
+//      List<DocumentMetadata> docs = getAutocompleteFiles(session, autocompleteRequest);
+//        String fileNameId = DriveFacetType.FILE_NAME.getId();
+//        String fileDescriptionId = DriveFacetType.FILE_DESCRIPTION.getId();
+//        String fileContentId = DriveFacetType.FILE_CONTENT.getId();
+//        for (DocumentMetadata doc : docs) {
+//            Filter fileNameFilter = new Filter(Collections.singletonList(fileNameId), String.valueOf(doc.getId()));
+//            Filter fileDescriptionFilter = new Filter(Collections.singletonList(fileDescriptionId), String.valueOf(doc.getId()));
+//            Filter fileContentFilter = new Filter(Collections.singletonList(fileContentId), String.valueOf(doc.getId()));
+//            String fileName = doc.getFileName();
+//            if (null != fileName) {
+//                fileNameFacet.add(new FacetValue(
+//                    prepareFacetValueId(fileNameId, session.getContextId(), String.valueOf(doc.getId())),
+//                    new SimpleDisplayItem(fileName, false),
+//                    1,
+//                    fileNameFilter));
+//            }
+//            String description = doc.getDescription();
+//            if (null != description) {
+//                fileDescriptionFacet.add(new FacetValue(prepareFacetValueId(
+//                    fileDescriptionId,
+//                    session.getContextId(),
+//                    String.valueOf(doc.getId())), new SimpleDisplayItem(description, false), 1, fileDescriptionFilter));
+//            }
+//            String content = doc.getContent();
+//            if (null != content) {
+//                fileContentFacet.add(new FacetValue(
+//                    prepareFacetValueId(fileContentId, session.getContextId(), String.valueOf(doc.getId())),
+//                    new SimpleDisplayItem(content, false),
+//                    1,
+//                    fileContentFilter));
+//            }
+//        }
 
         // Add field factes
-        if (fileNameFacet.size() > 0) {
-            facets.add(new Facet(DriveFacetType.FILE_NAME, fileNameFacet));
-        }
-        if (fileDescriptionFacet.size() > 0) {
-            facets.add(new Facet(DriveFacetType.FILE_DESCRIPTION, fileDescriptionFacet));
-        }
-        if (fileContentFacet.size() > 0) {
-            facets.add(new Facet(DriveFacetType.FILE_CONTENT, fileContentFacet));
-        }
+        List<FacetValue> fieldFacets = new ArrayList<FacetValue>();
+        FacetValue filename = new FacetValue(FileDisplayItem.Type.FILENAME.getIdentifier(),
+            new FileDisplayItem(FileDisplayItem.Type.FILENAME, DriveStrings.FACET_FILE_NAME), FacetValue.UNKNOWN_COUNT,
+            new Filter(Collections.singletonList(Constants.FIELD_FILE_NAME), FileDisplayItem.Type.FILENAME.getIdentifier()));
+        FacetValue description = new FacetValue(FileDisplayItem.Type.DESCRIPTION.getIdentifier(),
+            new FileDisplayItem(FileDisplayItem.Type.DESCRIPTION, DriveStrings.FACET_FILE_DESCRIPTION), FacetValue.UNKNOWN_COUNT,
+            new Filter(Collections.singletonList(Constants.FIELD_FILE_DESC), FileDisplayItem.Type.DESCRIPTION.getIdentifier()));
+        FacetValue content = new FacetValue(FileDisplayItem.Type.CONTENT.getIdentifier(),
+            new FileDisplayItem(FileDisplayItem.Type.CONTENT, DriveStrings.FACET_FILE_CONTENT), FacetValue.UNKNOWN_COUNT,
+            new Filter(Collections.singletonList(Constants.FIELD_FILE_CONTENT), FileDisplayItem.Type.CONTENT.getIdentifier()));
+        fieldFacets.add(filename);
+        fieldFacets.add(description);
+        fieldFacets.add(content);
+        facets.add(new Facet(DriveFacetType.FILE_NAME, fieldFacets));
+
         // Add static file type facet
         final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
         final String fieldFileType = Constants.FIELD_FILE_TYPE;
@@ -433,46 +435,46 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         return new AndTerm(terms);
     }
 
-    private List<DocumentMetadata> getAutocompleteFiles(ServerSession session, AutocompleteRequest request) throws OXException {
-        InfostoreSearchEngine searchEngine = Services.getInfostoreSearchEngine();
-        if (null == searchEngine) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreSearchEngine.class.getName());
-        }
-
-        // Compose term
-        String prefix = request.getPrefix();
-        int limit = request.getLimit();
-        List<SearchTerm<?>> terms = new LinkedList<SearchTerm<?>>();
-        terms.add(new TitleTerm(prefix, true, true));
-        terms.add(new FileNameTerm(prefix, true, true));
-        terms.add(new DescriptionTerm(prefix, true, true));
-        SearchTerm<List<SearchTerm<?>>> orTerm = new OrTerm(terms);
-        ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
-        orTerm.visit(visitor);
-
-        // Fire search
-        SearchIterator<DocumentMetadata> it = null;
-        try {
-            it = searchEngine.search(
-                new int[0],
-                visitor.getInfstoreTerm(),
-                fields,
-                Metadata.TITLE_LITERAL,
-                0,
-                0,
-                limit,
-                session.getContext(),
-                session.getUser(),
-                session.getUserPermissionBits());
-            List<DocumentMetadata> docs = new LinkedList<DocumentMetadata>();
-            while (it.hasNext()) {
-                DocumentMetadata doc = it.next();
-                docs.add(doc);
-            }
-            return docs;
-        } finally {
-            SearchIterators.close(it);
-        }
-    }
+//    private List<DocumentMetadata> getAutocompleteFiles(ServerSession session, AutocompleteRequest request) throws OXException {
+//        InfostoreSearchEngine searchEngine = Services.getInfostoreSearchEngine();
+//        if (null == searchEngine) {
+//            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreSearchEngine.class.getName());
+//        }
+//
+//        // Compose term
+//        String prefix = request.getPrefix();
+//        int limit = request.getLimit();
+//        List<SearchTerm<?>> terms = new LinkedList<SearchTerm<?>>();
+//        terms.add(new TitleTerm(prefix, true, true));
+//        terms.add(new FileNameTerm(prefix, true, true));
+//        terms.add(new DescriptionTerm(prefix, true, true));
+//        SearchTerm<List<SearchTerm<?>>> orTerm = new OrTerm(terms);
+//        ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
+//        orTerm.visit(visitor);
+//
+//        // Fire search
+//        SearchIterator<DocumentMetadata> it = null;
+//        try {
+//            it = searchEngine.search(
+//                new int[0],
+//                visitor.getInfstoreTerm(),
+//                fields,
+//                Metadata.TITLE_LITERAL,
+//                0,
+//                0,
+//                limit,
+//                session.getContext(),
+//                session.getUser(),
+//                session.getUserPermissionBits());
+//            List<DocumentMetadata> docs = new LinkedList<DocumentMetadata>();
+//            while (it.hasNext()) {
+//                DocumentMetadata doc = it.next();
+//                docs.add(doc);
+//            }
+//            return docs;
+//        } finally {
+//            SearchIterators.close(it);
+//        }
+//    }
 
 }

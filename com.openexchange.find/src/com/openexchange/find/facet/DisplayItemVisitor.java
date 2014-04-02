@@ -60,7 +60,7 @@ import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.drive.FileTypeDisplayItem;
-import com.openexchange.find.drive.FilenameDisplayItem;
+import com.openexchange.find.drive.FileDisplayItem;
 import com.openexchange.find.tasks.TaskStatusDisplayItem;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
 
@@ -96,7 +96,7 @@ public interface DisplayItemVisitor {
 
     void visit(ContactTypeDisplayItem contactTypeDisplayItem);
 
-    void visit(FilenameDisplayItem filenameDisplayItem);
+    void visit(FileDisplayItem filenameDisplayItem);
 
     void visit(FormattableDisplayItem formattableDisplayItem);
 
