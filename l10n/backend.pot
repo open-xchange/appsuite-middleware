@@ -3240,7 +3240,13 @@ msgid "The redirect address \"%1$s\" has been rejected."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/ajax/exceptions/MailfilterExceptionMessages.java:64
-msgid "Invalid SIEVE rule specified."
+msgid "Invalid SIEVE rule specified. Please review your mail filter rules"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/ajax/exceptions/MailfilterExceptionMessages.java:66
+msgid ""
+"Please review your mail filter rules as they seem to be invalid. Response "
+"from server: \"%1$s\""
 msgstr ""
 
 #. Maximum number of messages already stored for client %1$s
