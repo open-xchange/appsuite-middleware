@@ -109,8 +109,6 @@ public class Languages implements ComputedServerConfigValueService {
 
             @Override
             public int compare(String arg0, String arg1) {
-                arg0 = languageMap.get(arg0);
-                arg1 = languageMap.get(arg1);
                 return arg0.compareToIgnoreCase(arg1);
             }
 

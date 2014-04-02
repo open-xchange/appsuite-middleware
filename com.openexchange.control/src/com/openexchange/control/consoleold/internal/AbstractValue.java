@@ -47,7 +47,8 @@
  *
  */
 
-package com.openexchange.control.console.internal;
+package com.openexchange.control.consoleold.internal;
+
 
 /**
  * {@link AbstractValue} - Abstract super class for parsed values.

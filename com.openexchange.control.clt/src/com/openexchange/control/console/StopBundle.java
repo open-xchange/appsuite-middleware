@@ -51,8 +51,8 @@ package com.openexchange.control.console;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import com.openexchange.control.console.internal.ValueObject;
-import com.openexchange.control.console.internal.ValueParser;
+import com.openexchange.control.consoleold.internal.ValueObject;
+import com.openexchange.control.consoleold.internal.ValueParser;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**

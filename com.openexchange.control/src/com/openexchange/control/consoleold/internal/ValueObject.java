@@ -47,41 +47,27 @@
  *
  */
 
-package com.openexchange.control.console.internal;
+package com.openexchange.control.consoleold.internal;
+
 
 /**
- * {@link ValuePairObject} - The class representing a name-value-pair; meaning its {@link #getType()} method returns
- * {@link AbstractValue#VALUE_PAIR}.
+ * {@link ValueObject} - The class representing a sole value; meaning its {@link #getType()} method returns {@link AbstractValue#VALUE}.
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public final class ValuePairObject extends AbstractValue {
-
-    protected String name;
+public final class ValueObject extends AbstractValue {
 
     /**
-     * Initializes a new {@link ValuePairObject}.
+     * Initializes a new {@link ValueObject}.
      *
-     * @param name The name
      * @param value The value
      */
-    ValuePairObject(final String name, final String value) {
-        super();
-        this.name = name;
+    ValueObject(final String value) {
         this.value = value;
-    }
-
-    /**
-     * Gets this value's name.
-     *
-     * @return The value's name
-     */
-    public String getName() {
-        return name;
     }
 
     @Override
     protected int getType() {
-        return VALUE_PAIR;
+        return VALUE;
     }
 }
