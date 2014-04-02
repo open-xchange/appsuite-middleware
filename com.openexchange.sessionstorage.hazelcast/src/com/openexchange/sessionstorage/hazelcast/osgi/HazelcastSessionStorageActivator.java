@@ -63,6 +63,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -89,15 +90,15 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ThreadPoolService.class, HazelcastConfigurationService.class };
+        return new Class<?>[] { ThreadPoolService.class, HazelcastConfigurationService.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.sessionstorage.hazelcast");
         Services.setServiceLookup(this);
-        final HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
-        final boolean enabled = configService.isEnabled();
+        final HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
+        final boolean enabled = hzConfigService.isEnabled();
         if (false == enabled) {
             LOG.warn("com.openexchange.sessionstorage.hazelcast will be disabled due to disabled Hazelcast services");
         } else {
@@ -106,95 +107,103 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
              */
             registerService(CustomPortableFactory.class, new PortableSessionFactory());
             /*
-             * start session storage lifecycle to hazelcast instance
+             * start session storage lifecycle to hazelcast instance, in case com.openexchange.sessionstorage.hazelcast is enabled
              */
-            final BundleContext context = this.context;
-            track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+            final boolean storageEnabled;
+            {
+                final ConfigurationService configService = getService(ConfigurationService.class);
+                final boolean defaultValue = true;
+                storageEnabled = null == configService ? defaultValue : configService.getBoolProperty("com.openexchange.sessionstorage.hazelcast.enabled", defaultValue);
+            }
+            if (storageEnabled) {
+                final BundleContext context = this.context;
+                track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
-                private volatile ServiceRegistration<SessionStorageService> sessionStorageRegistration;
-                private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
+                    private volatile ServiceRegistration<SessionStorageService> sessionStorageRegistration;
+                    private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
 
-                @Override
-                public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
-                    final HazelcastInstance hazelcastInstance = context.getService(reference);
-                    HazelcastSessionStorageService.setHazelcastInstance(hazelcastInstance);
-                    /*
-                     * create & register session storage service
-                     */
-                    String sessionsMapName = discoverSessionsMapName(hazelcastInstance.getConfig());
-                    final HazelcastSessionStorageService sessionStorageService = new HazelcastSessionStorageService(sessionsMapName);
-                    sessionStorageRegistration = context.registerService(SessionStorageService.class, sessionStorageService, null);
-                    /*
-                     * create & register event handler
-                     */
-                    final EventHandler eventHandler = new EventHandler() {
+                    @Override
+                    public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
+                        final HazelcastInstance hazelcastInstance = context.getService(reference);
+                        HazelcastSessionStorageService.setHazelcastInstance(hazelcastInstance);
+                        /*
+                         * create & register session storage service
+                         */
+                        String sessionsMapName = discoverSessionsMapName(hazelcastInstance.getConfig());
+                        final HazelcastSessionStorageService sessionStorageService = new HazelcastSessionStorageService(sessionsMapName);
+                        sessionStorageRegistration = context.registerService(SessionStorageService.class, sessionStorageService, null);
+                        /*
+                         * create & register event handler
+                         */
+                        final EventHandler eventHandler = new EventHandler() {
 
-                        @Override
-                        public void handleEvent(Event osgiEvent) {
-                            if (null != osgiEvent && SessiondEventConstants.TOPIC_TOUCH_SESSION.equals(osgiEvent.getTopic())) {
-                                final Session touchedSession = (Session)osgiEvent.getProperty(SessiondEventConstants.PROP_SESSION);
-                                if (null != touchedSession && null != touchedSession.getSessionID()) {
-                                    // Handle session-touched event asynchronously if possible
-                                    final ThreadPoolService threadPool = getService(ThreadPoolService.class);
-                                    if (null == threadPool) {
-                                        try {
-                                            sessionStorageService.touch(touchedSession.getSessionID());
-                                        } catch (final Exception e) {
-                                            LOG.warn("error handling OSGi event", e);
-                                        }
-                                    } else {
-                                        final AbstractTask<Void> task = new AbstractTask<Void>() {
-
-                                            @Override
-                                            public Void call() throws Exception {
-                                                try {
-                                                    sessionStorageService.touch(touchedSession.getSessionID());
-                                                } catch (final Exception e) {
-                                                    LOG.warn("error handling OSGi event", e);
-                                                }
-                                                return null;
+                            @Override
+                            public void handleEvent(Event osgiEvent) {
+                                if (null != osgiEvent && SessiondEventConstants.TOPIC_TOUCH_SESSION.equals(osgiEvent.getTopic())) {
+                                    final Session touchedSession = (Session)osgiEvent.getProperty(SessiondEventConstants.PROP_SESSION);
+                                    if (null != touchedSession && null != touchedSession.getSessionID()) {
+                                        // Handle session-touched event asynchronously if possible
+                                        final ThreadPoolService threadPool = getService(ThreadPoolService.class);
+                                        if (null == threadPool) {
+                                            try {
+                                                sessionStorageService.touch(touchedSession.getSessionID());
+                                            } catch (final Exception e) {
+                                                LOG.warn("error handling OSGi event", e);
                                             }
-                                        };
-                                        threadPool.submit(task, CallerRunsBehavior.<Void> getInstance());
+                                        } else {
+                                            final AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                                                @Override
+                                                public Void call() throws Exception {
+                                                    try {
+                                                        sessionStorageService.touch(touchedSession.getSessionID());
+                                                    } catch (final Exception e) {
+                                                        LOG.warn("error handling OSGi event", e);
+                                                    }
+                                                    return null;
+                                                }
+                                            };
+                                            threadPool.submit(task, CallerRunsBehavior.<Void> getInstance());
+                                        }
                                     }
                                 }
                             }
+                        };
+                        Dictionary<String, String> properties = new Hashtable<String, String>(1);
+                        properties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
+                        eventHandlerRegistration = context.registerService(EventHandler.class, eventHandler, properties);
+                        return hazelcastInstance;
+                    }
+
+                    @Override
+                    public void modifiedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
+                        // Ignore
+                    }
+
+                    @Override
+                    public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
+                        /*
+                         * remove event handler registration
+                         */
+                        ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
+                        if (null != eventHandlerRegistration) {
+                            eventHandlerRegistration.unregister();
+                            this.sessionStorageRegistration = null;
                         }
-                    };
-                    Dictionary<String, String> properties = new Hashtable<String, String>(1);
-                    properties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
-                    eventHandlerRegistration = context.registerService(EventHandler.class, eventHandler, properties);
-                    return hazelcastInstance;
-                }
-
-                @Override
-                public void modifiedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
-                    // Ignore
-                }
-
-                @Override
-                public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
-                    /*
-                     * remove event handler registration
-                     */
-                    ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
-                    if (null != eventHandlerRegistration) {
-                        eventHandlerRegistration.unregister();
-                        this.sessionStorageRegistration = null;
+                        /*
+                         * remove session storage registration
+                         */
+                        ServiceRegistration<SessionStorageService> sessionStorageRegistration = this.sessionStorageRegistration;
+                        if (null != sessionStorageRegistration) {
+                            sessionStorageRegistration.unregister();
+                            this.sessionStorageRegistration = null;
+                        }
+                        context.ungetService(reference);
+                        HazelcastSessionStorageService.setHazelcastInstance(null);
                     }
-                    /*
-                     * remove session storage registration
-                     */
-                    ServiceRegistration<SessionStorageService> sessionStorageRegistration = this.sessionStorageRegistration;
-                    if (null != sessionStorageRegistration) {
-                        sessionStorageRegistration.unregister();
-                        this.sessionStorageRegistration = null;
-                    }
-                    context.ungetService(reference);
-                    HazelcastSessionStorageService.setHazelcastInstance(null);
-                }
-            });
-            openTrackers();
+                });
+                openTrackers();
+            }
         }
     }
 
@@ -227,7 +236,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
      * @return The sessions map name
      * @throws IllegalStateException
      */
-    private static String discoverSessionsMapName(Config config) throws IllegalStateException {
+    static String discoverSessionsMapName(Config config) throws IllegalStateException {
         Map<String, MapConfig> mapConfigs = config.getMapConfigs();
         if (null != mapConfigs && 0 < mapConfigs.size()) {
             for (String mapName : mapConfigs.keySet()) {
