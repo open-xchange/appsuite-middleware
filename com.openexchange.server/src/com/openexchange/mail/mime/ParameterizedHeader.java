@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.DecoderException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
@@ -218,15 +219,25 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         }
         int length = paramHdr.length();
         if (length > 0) {
-            int lastPos = length - 1;
-            if (paramHdr.charAt(lastPos) == ';') {
-                paramHdr = paramHdr.substring(0, lastPos);
+            int pos = length - 1;
+            if (paramHdr.charAt(pos) == ';') {
+                paramHdr = paramHdr.substring(0, pos);
             }
-            lastPos = paramHdr.length() - 1;
-            if (paramHdr.charAt(0) == '{' && paramHdr.charAt(lastPos) == '}') {
-                paramHdr = paramHdr.substring(1, lastPos);
-            } else if (paramHdr.charAt(0) == '[' && paramHdr.charAt(lastPos) == ']') {
-                paramHdr = paramHdr.substring(1, lastPos);
+
+            pos = paramHdr.length() - 1;
+            if (paramHdr.charAt(0) == '{' && paramHdr.charAt(pos) == '}') {
+                paramHdr = paramHdr.substring(1, pos);
+            } else if (paramHdr.charAt(0) == '[' && paramHdr.charAt(pos) == ']') {
+                paramHdr = paramHdr.substring(1, pos);
+            }
+
+            pos = paramHdr.indexOf(';');
+            if (pos > 0) {
+                String value = paramHdr.substring(0, pos).trim();
+                value = Strings.unparenthize(value);
+                value = Strings.unquote(value);
+
+                paramHdr = new StringBuilder(value).append(paramHdr.substring(pos)).toString();
             }
         }
         return paramHdr;

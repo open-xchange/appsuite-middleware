@@ -66,7 +66,7 @@ public class ContentTypeTest extends TestCase {
         super();
     }
 
-    public void testTrucatedNameParameter() {
+    public void testTruncatedNameParameter() {
         try {
             String hdr = "application/pdf; name=The New York Times - Breaking News, World News & Multimedia.loc.pdf";
             com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
@@ -75,6 +75,19 @@ public class ContentTypeTest extends TestCase {
             assertEquals("Unexpected \"name\" parameter.", "The New York Times - Breaking News, World News & Multimedia.loc.pdf", name);
 
             assertEquals("Unexpected toString() result.", "application/pdf; name=\"The New York Times - Breaking News, World News & Multimedia.loc.pdf\"", contentType.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testWithCurlyBraces() {
+        try {
+            String hdr = "{\"application/octet-stream\"}; name=\"6N1911.pdf\"";
+            com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
+
+            System.out.println(contentType);
+
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

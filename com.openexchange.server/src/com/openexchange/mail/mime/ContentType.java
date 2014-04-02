@@ -434,9 +434,6 @@ public class ContentType extends ParameterizedHeader {
                             pt = pt.substring(1);
                         }
                     }
-                    if (pt.startsWith("{\"")) {
-                        pt = pt.substring(2);
-                    }
                     if (isInvalidToken(pt)) {
                         throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
                     }
@@ -457,9 +454,6 @@ public class ContentType extends ParameterizedHeader {
                     char lc;
                     while ((mlen = st.length() - 1) > 0 && ((lc = st.charAt(mlen)) == '"' || lc == '\'')) {
                         st = st.substring(0, mlen);
-                    }
-                    if (st.endsWith("\"}")) {
-                        st = st.substring(0, st.length() - 2);
                     }
                     if (isInvalidToken(st)) {
                         throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
