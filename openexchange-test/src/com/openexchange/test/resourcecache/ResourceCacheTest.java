@@ -51,9 +51,13 @@ package com.openexchange.test.resourcecache;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -67,6 +71,7 @@ import com.openexchange.test.resourcecache.actions.DownloadRequest;
 import com.openexchange.test.resourcecache.actions.DownloadResponse;
 import com.openexchange.test.resourcecache.actions.UploadRequest;
 import com.openexchange.test.resourcecache.actions.UploadResponse;
+import com.openexchange.test.resourcecache.actions.UsedRequest;
 
 
 /**
@@ -173,7 +178,7 @@ public class ResourceCacheTest extends AbstractAJAXSession {
             assertTrue("download was not equals upload", Arrays.equals(file, reloaded));
         }
 
-        uploadRequest = new UploadRequest();
+        uploadRequest = new UploadRequest(true);
         uploadRequest.addFile("someimage_" + n + ".jpg", "image/jpeg", new ByteArrayInputStream(file));
         uploadResponse = executeTyped(uploadRequest, current);
         assertEquals("newest resource was not added", 1, uploadResponse.getIds().size());
@@ -194,6 +199,48 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         }
 
         assertEquals("Exactly one old resource should have been deleted", 1, missing);
+    }
+
+    public void testPerformance() throws Exception {
+        current = FS;
+        final int[] qts = loadQuotas();
+        final int quota = qts[0];
+        final int perDocument = qts[1];
+        final int n = quota / perDocument;
+        final int tasks = 16;
+        ExecutorService pool = Executors.newFixedThreadPool(4);
+        List<Future<?>> futures = new ArrayList<Future<?>>(tasks);
+        for (int j = 0; j < tasks; j++) {
+            futures.add(pool.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        byte[] file = prepareFile(perDocument);
+                        UploadRequest uploadRequest = new UploadRequest();
+                        for (int i = 0; i < n; i++) {
+                            uploadRequest.addFile("someimage_" + i + ".jpg", "image/jpeg", new ByteArrayInputStream(file));
+                        }
+                        UploadResponse uploadResponse = executeTyped(uploadRequest, current);
+                        List<String> ids = uploadResponse.getIds();
+                        assertEquals("wrong number of ids", n, ids.size());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }));
+        }
+
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        Thread.sleep(2000L);
+        long used = executeTyped(new UsedRequest(), current).getUsed();
+        assertTrue("Quota exceeded", used <= quota);
     }
 
     public void testResourceExceedsQuota() throws Exception {

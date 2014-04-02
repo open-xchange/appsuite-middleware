@@ -79,6 +79,7 @@ import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.P
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -86,6 +87,8 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.timer.TimerService;
 
 
 /**
@@ -106,7 +109,7 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class };
     }
 
     @Override
@@ -141,6 +144,17 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
             }
         }
         track(ManagementService.class, new ServiceTrackerCustomizerImpl(context));
+        track(TimerService.class, new SimpleRegistryListener<TimerService>() {
+            @Override
+            public void added(ServiceReference<TimerService> ref, TimerService service) {
+                addService(TimerService.class, service);
+            }
+
+            @Override
+            public void removed(ServiceReference<TimerService> ref, TimerService service) {
+                removeService(TimerService.class);
+            }
+        });
         openTrackers();
         // Init service
         final AbstractResourceCache cache;
@@ -149,11 +163,11 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
             final ConfigurationService configurationService = getService(ConfigurationService.class);
             final String type = configurationService.getProperty(CACHE_TYPE, "FS").trim();
             if ("DB".equalsIgnoreCase(type)) {
-                final RdbResourceCacheImpl rdbPreviewCacheImpl = new RdbResourceCacheImpl(configurationService);
+                final RdbResourceCacheImpl rdbPreviewCacheImpl = new RdbResourceCacheImpl(this);
                 cache = rdbPreviewCacheImpl;
                 eventHandler = rdbPreviewCacheImpl;
             } else {
-                final FileStoreResourceCacheImpl fileStorePreviewCache = new FileStoreResourceCacheImpl(configurationService);
+                final FileStoreResourceCacheImpl fileStorePreviewCache = new FileStoreResourceCacheImpl(this);
                 cache = fileStorePreviewCache;
                 eventHandler = fileStorePreviewCache;
             }

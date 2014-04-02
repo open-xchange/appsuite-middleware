@@ -63,25 +63,25 @@ import com.openexchange.ajax.requesthandler.cache.AbstractResourceCache;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadata;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link RdbResourceCacheImpl} - The database-backed preview cache implementation for documents.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdbResourceCacheImpl extends AbstractResourceCache {
+public class RdbResourceCacheImpl extends AbstractResourceCache {
 
     /**
      * Initializes a new {@link RdbResourceCacheImpl}.
      */
-    public RdbResourceCacheImpl(final ConfigurationService configService) {
-        super(configService);
+    public RdbResourceCacheImpl(final ServiceLookup serviceLookup) {
+        super(serviceLookup);
     }
 
     @Override
@@ -122,7 +122,7 @@ public final class RdbResourceCacheImpl extends AbstractResourceCache {
             metadata.setUserId(userId);
             metadata.setResourceId(id);
             metadata.setFileName(optName);
-            metadata.setFileType(prepareFileType(optType, 32));
+            metadata.setFileType(prepareFileName(optName));
             metadata.setSize(bytes.length);
             metadata.setCreatedAt(System.currentTimeMillis());
             if (existingMetadata == null) {

@@ -49,62 +49,39 @@
 
 package com.openexchange.test.resourcecache.actions;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.framework.Header.SimpleHeader;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link UploadRequest}
+ * {@link UsedRequest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public class UploadRequest extends AbstractResourceCacheRequest<UploadResponse> {
+public class UsedRequest extends AbstractResourceCacheRequest<UsedResponse> {
 
-    private final List<FileParameter> files = new ArrayList<FileParameter>();
-
-    private final boolean waitForAlignment;
-
-    public UploadRequest() {
-        super("upload");
-        this.waitForAlignment = false;
-    }
-
-    public UploadRequest(boolean waitForAlignment) {
-        super("upload");
-        this.waitForAlignment = waitForAlignment;
-    }
-
-    public void addFile(String fileName, String mimeType, InputStream is) {
-        files.add(new FileParameter("resource_" + files.size(), fileName, is, mimeType));
+    public UsedRequest() {
+        super("used");
     }
 
     @Override
-    public Method getMethod() {
-        return Method.POST;
+    public Parser getParser() {
+        return new Parser(true);
     }
 
-    @Override
-    public Parameter[] getAdditionalParameters() {
-        Parameter[] params = new Parameter[files.size() + 1];
-        for (int i = 0; i < files.size(); i++) {
-            params[i] = files.get(i);
+    private static final class Parser extends AbstractAJAXParser<UsedResponse> {
+
+        protected Parser(boolean failOnError) {
+            super(failOnError);
         }
-        params[files.size()] = new URLParameter("waitForAlignment", Boolean.toString(waitForAlignment));
 
-        return params;
-    }
+        @Override
+        protected UsedResponse createResponse(Response response) throws JSONException {
+            return new UsedResponse(response);
+        }
 
-    @Override
-    public UploadResponseParser getParser() {
-        return new UploadResponseParser(true);
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return new Header[] { new SimpleHeader("Content-Type", "multipart/form-data") };
     }
 
 }

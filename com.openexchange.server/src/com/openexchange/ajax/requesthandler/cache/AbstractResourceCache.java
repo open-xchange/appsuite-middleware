@@ -74,8 +74,10 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.timer.TimerService;
 
 
 /**
@@ -85,15 +87,22 @@ import com.openexchange.session.Session;
  */
 public abstract class AbstractResourceCache implements ResourceCache, EventHandler, Reloadable {
 
+    protected static final int MAX_FILE_TYPE_LENGTH = 255;
+
+    protected static final int MAX_FILE_NAME_LENGTH = 767;
+
     private static final Logger LOG = LoggerFactory.getLogger(AbstractResourceCache.class);
 
     private final AtomicLong globalQuota = new AtomicLong(-1L);
 
     private final AtomicLong documentQuota = new AtomicLong(-1L);
 
-    protected AbstractResourceCache(final ConfigurationService configService) {
+    private final ServiceLookup serviceLookup;
+
+    protected AbstractResourceCache(final ServiceLookup serviceLookup) {
         super();
-        initQuotas(configService);
+        this.serviceLookup = serviceLookup;
+        initQuotas(serviceLookup.getService(ConfigurationService.class));
     }
 
     @Override
@@ -174,12 +183,25 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
     }
 
     protected DatabaseService getDBService() throws OXException {
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        final DatabaseService dbService = serviceLookup.getService(DatabaseService.class);
         if (dbService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
 
         return dbService;
+    }
+
+    protected ConfigurationService getConfigurationService() throws OXException {
+        final ConfigurationService configService = serviceLookup.getService(ConfigurationService.class);
+        if (configService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
+        }
+
+        return configService;
+    }
+
+    protected TimerService optTimerService() {
+        return serviceLookup.getService(TimerService.class);
     }
 
     protected long getGlobalQuota() {
@@ -194,26 +216,43 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
      * Prepares specified file MIME type for being put into storage.
      *
      * @param fileType The file MIME type to prepare
-     * @param maxLen The max. supported length
      * @return The prepared file MIME type or <code>null</code>
      */
-    protected String prepareFileType(final String fileType, final int maxLen) {
+    protected String prepareFileType(final String fileType) {
         if (Strings.isEmpty(fileType)) {
             return null;
         }
         try {
             final String baseType = new ContentType(fileType.trim()).getBaseType();
-            return baseType.length() > maxLen ? baseType.substring(0, maxLen) : baseType;
+            return baseType.length() > MAX_FILE_TYPE_LENGTH ? baseType.substring(0, MAX_FILE_TYPE_LENGTH) : baseType;
         } catch (final OXException e) {
             LOG.warn("Could not parse file type: " + fileType, e);
             return null;
         }
     }
 
+    /**
+     * Prepares specified file name for being put into storage.
+     *
+     * @param fileType The file name to prepare
+     * @return The prepared file name or <code>null</code>
+     */
+    protected String prepareFileName(final String fileName) {
+        if (Strings.isEmpty(fileName)) {
+            return null;
+        }
+
+        if (fileName.length() <= MAX_FILE_NAME_LENGTH) {
+            return fileName;
+        }
+
+        return fileName.substring(0, MAX_FILE_NAME_LENGTH);
+    }
+
     protected static ResourceCacheMetadata loadExistingEntry(ResourceCacheMetadataStore metadataStore, Connection con, int contextId, int userId, String id) throws OXException {
         ResourceCacheMetadata existingMetadata = null;
         try {
-            existingMetadata = metadataStore.load(con, contextId, userId, id);
+            existingMetadata = metadataStore.loadForUpdate(con, contextId, userId, id);
         } catch (SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         }

@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.database.DatabaseService;
@@ -263,6 +264,51 @@ public class ResourceCacheMetadataStore {
     }
 
     /**
+     * Loads a possible metadata record for the given (contextId, userId, resourceId) tuple and locks the according row.
+     *
+     * @param con The writable database connection. Must be in an transaction.
+     * @param contextId The context id.
+     * @param userId The user id. If the record references a globally cached resource, userId must be < 0.
+     * @param resourceId The resource id. Never <code>null</code>.
+     * @return An instance of {@link ResourceCacheMetadata} or <code>null</code>, if no record was found.
+     * @throws OXException if loading the record fails.
+     */
+    public ResourceCacheMetadata loadForUpdate(Connection con, int contextId, int userId, String resourceId) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (userId > 0) {
+                stmt = con.prepareStatement("SELECT refId, fileName, fileType, size, createdAt FROM preview WHERE cid = ? AND user = ? AND id = ? FOR UPDATE");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, resourceId);
+            } else {
+                stmt = con.prepareStatement("SELECT refId, fileName, fileType, size, createdAt FROM preview WHERE cid = ? AND id = ? FOR UPDATE");
+                stmt.setInt(1, contextId);
+                stmt.setString(2, resourceId);
+            }
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return null;
+            }
+
+            ResourceCacheMetadata metadata = new ResourceCacheMetadata();
+            metadata.setContextId(contextId);
+            metadata.setUserId(userId);
+            metadata.setResourceId(resourceId);
+            metadata.setRefId(rs.getString(1));
+            metadata.setFileName(rs.getString(2));
+            metadata.setFileType(rs.getString(3));
+            metadata.setSize(rs.getLong(4));
+            metadata.setCreatedAt(rs.getLong(5));
+
+            return metadata;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
      * Loads all filestore references for the given context.
      *
      * @param contextId The context id.
@@ -291,26 +337,6 @@ public class ResourceCacheMetadataStore {
 
         return refIds;
     }
-
-//
-//    /**
-//     * Loads a possible metadata record for the given reference id.
-//     *
-//     * @param refId The reference id. Must not be <code>null</code>!
-//     * @return An instance of {@link ResourceCacheMetadata} or <code>null</code>, if no record was found.
-//     * @throws OXException if loading the record fails.
-//     */
-//    public ResourceCacheMetadata load(String refId) throws SQLException, OXException {
-//        DatabaseService dbService = getDBService();
-//        Connection con = dbService.getReadOnly(contextId)
-//        try {
-//            return remove(con, contextId, userId, resourceId);
-//        } catch (SQLException e) {
-//            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-//        } finally {
-//            dbService.backWritable(contextId, con);
-//        }
-//    }
 
     /**
      * Convenience method to re-use an existing database connection.
@@ -605,6 +631,40 @@ public class ResourceCacheMetadataStore {
     }
 
     /**
+     * Loads preview records for the given context ordered by creation date (oldest first) and locks those entries.
+     *
+     * @param con The writable database connection in a transactional state.
+     * @param contextId The context id.
+     * @return At most 500 entries to keep performance reasonable.
+     */
+    public List<ResourceCacheMetadata> loadForCleanUp(Connection con, int contextId) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<ResourceCacheMetadata> metadatas = new LinkedList<ResourceCacheMetadata>();
+        try {
+            stmt = con.prepareStatement("SELECT user, id, size, createdAt, fileName, fileType, refId FROM preview WHERE cid = ? ORDER BY createdAt ASC LIMIT 500 FOR UPDATE");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                ResourceCacheMetadata metadata = new ResourceCacheMetadata();
+                metadata.setContextId(contextId);
+                metadata.setUserId(rs.getInt(1));
+                metadata.setResourceId(rs.getString(2));
+                metadata.setSize(rs.getLong(3));
+                metadata.setCreatedAt(rs.getLong(4));
+                metadata.setFileName(rs.getString(5));
+                metadata.setFileType(rs.getString(6));
+                metadata.setRefId(rs.getString(7));
+                metadatas.add(metadata);
+            }
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+
+        return metadatas;
+    }
+
+    /**
      * Deletes a set of records in a context for a given set of reference ids.
      *
      * @param contextId The context id.
@@ -614,6 +674,22 @@ public class ResourceCacheMetadataStore {
     public void removeByRefId(int contextId, Set<String> refIds) throws OXException {
         DatabaseService dbService = getDBService();
         Connection con = dbService.getWritable(contextId);
+        try {
+            removeByRefIds(con, contextId, refIds);
+        } catch (SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            dbService.backWritable(contextId, con);
+        }
+    }
+
+    /**
+     * Convenience method to re-use an existing database connection.
+     * @param con The writable database connection in a transactional state.
+     * @throws SQLException
+     * @see {@link ResourceCacheMetadataStore#removeByRefId(int, Set)}
+     */
+    public void removeByRefIds(Connection con, int contextId, Set<String> refIds) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND refId = ?");
@@ -623,11 +699,27 @@ public class ResourceCacheMetadataStore {
                 stmt.addBatch();
             }
             stmt.executeBatch();
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * Calculates the sum of all resource sizes based on their metadata records.
+     *
+     * @param contextId The context id.
+     * @return The sum of all sizes.
+     * @throws SQLException
+     */
+    public long getUsedSize(int contextId) throws OXException {
+        DatabaseService dbService = getDBService();
+        Connection con = dbService.getReadOnly(contextId);
+        try {
+            return getUsedSize(con, contextId);
         } catch (SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(stmt);
-            dbService.backWritable(contextId, con);
+            dbService.backReadOnly(contextId, con);
         }
     }
 

@@ -49,62 +49,32 @@
 
 package com.openexchange.test.resourcecache.actions;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.framework.Header.SimpleHeader;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.writer.ResponseWriter;
 
 
 /**
- * {@link UploadRequest}
+ * {@link UsedResponse}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public class UploadRequest extends AbstractResourceCacheRequest<UploadResponse> {
+public class UsedResponse extends AbstractAJAXResponse {
 
-    private final List<FileParameter> files = new ArrayList<FileParameter>();
-
-    private final boolean waitForAlignment;
-
-    public UploadRequest() {
-        super("upload");
-        this.waitForAlignment = false;
+    /**
+     * Initializes a new {@link UsedResponse}.
+     * @param response
+     */
+    protected UsedResponse(Response response) {
+        super(response);
     }
 
-    public UploadRequest(boolean waitForAlignment) {
-        super("upload");
-        this.waitForAlignment = waitForAlignment;
-    }
-
-    public void addFile(String fileName, String mimeType, InputStream is) {
-        files.add(new FileParameter("resource_" + files.size(), fileName, is, mimeType));
-    }
-
-    @Override
-    public Method getMethod() {
-        return Method.POST;
-    }
-
-    @Override
-    public Parameter[] getAdditionalParameters() {
-        Parameter[] params = new Parameter[files.size() + 1];
-        for (int i = 0; i < files.size(); i++) {
-            params[i] = files.get(i);
-        }
-        params[files.size()] = new URLParameter("waitForAlignment", Boolean.toString(waitForAlignment));
-
-        return params;
-    }
-
-    @Override
-    public UploadResponseParser getParser() {
-        return new UploadResponseParser(true);
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return new Header[] { new SimpleHeader("Content-Type", "multipart/form-data") };
+    public long getUsed() throws JSONException {
+        JSONObject json = ResponseWriter.getJSON(getResponse());
+        return json.getJSONObject("data").getLong("used");
     }
 
 }

@@ -76,6 +76,7 @@ import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.FileStorage;
 
@@ -112,11 +113,13 @@ public class FileStoreResourceCacheImplTest {
         when(connection.createStatement()).thenReturn(mock(Statement.class));
         DatabaseService databaseService = mock(DatabaseService.class);
         when(databaseService.getWritable(anyInt())).thenReturn(connection);
-        ServerServiceRegistry.getInstance().addService(DatabaseService.class, databaseService);
         ConfigurationService configMock = mock(ConfigurationService.class);
         when(configMock.getProperty(anyString(), anyString())).thenReturn("-1");
+        ServiceLookup serviceLookupMock = mock(ServiceLookup.class);
+        when(serviceLookupMock.getService(DatabaseService.class)).thenReturn(databaseService);
+        when(serviceLookupMock.getService(ConfigurationService.class)).thenReturn(configMock);
 
-        FileStoreResourceCacheImpl cache = spy(new FileStoreResourceCacheImpl(configMock));
+        FileStoreResourceCacheImpl cache = spy(new FileStoreResourceCacheImpl(serviceLookupMock));
         mockStatic(FileStoreResourceCacheImpl.class);
         FileStorage fileStorage = mock(FileStorage.class);
         String fileId = "12345";
@@ -133,7 +136,7 @@ public class FileStoreResourceCacheImplTest {
             Assert.assertTrue(exceptionClass.isInstance(e.getCause()));
         }
         Assert.assertTrue(exceptionThrown);
-        Mockito.verify(databaseService, Mockito.times(2)).getWritable(anyInt());
+        Mockito.verify(databaseService, Mockito.times(1)).getWritable(anyInt());
         InOrder autoCommitOrder = Mockito.inOrder(connection);
         autoCommitOrder.verify(connection).setAutoCommit(false);
         autoCommitOrder.verify(connection).setAutoCommit(true);
