@@ -362,14 +362,6 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
     }
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
-        if (!(delegatee instanceof ISimplifiedThreadStructure)) {
-            throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
-        }
-        return ((ISimplifiedThreadStructure) delegatee).getThreadSortedMessages(getRealFullname(folder), includeSent, cache, indexRange, max, sortField, order, fields);
-    }
-
-    @Override
     public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
         final MailMessage[] mails = delegatee.getUnreadMessages(getRealFullname(folder), sortField, order, fields, limit);
         for (final MailMessage mailMessage : mails) {
@@ -428,6 +420,20 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
             setFolderAndAccount(folder, mailMessage);
         }
         return mails;
+    }
+
+    @Override
+    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
+        if (!(delegatee instanceof ISimplifiedThreadStructure)) {
+            throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+        }
+        final List<List<MailMessage>> messagesList = ((ISimplifiedThreadStructure) delegatee).getThreadSortedMessages(getRealFullname(folder), includeSent, cache, indexRange, max, sortField, order, fields);
+        for (final List<MailMessage> messages : messagesList) {
+            for (final MailMessage mailMessage : messages) {
+                setFolderAndAccount(folder, mailMessage);
+            }
+        }
+        return messagesList;
     }
 
     @Override
