@@ -3,6 +3,7 @@
 
     <!-- Customizable values -->
     <property name="bundlesDir" value="bundles"/>
+    <property name="cltDir" value="cltLib"/>
     <property name="testBundlesDir" value="testBundles"/>
 
     <!-- Constants -->
@@ -25,6 +26,9 @@
             <include name="**/*.jar"/>
             <exclude name="**/xerces.jar"/>
             <exclude name="**/lib/json*.jar"/>
+        </fileset>
+        <fileset dir="${cltDir}">
+            <include name="*.jar"/>
         </fileset>
         <fileset dir="${testBundlesDir}">
             <include name="*.jar"/>
