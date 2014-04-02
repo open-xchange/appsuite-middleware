@@ -2815,13 +2815,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     LOG.warn("Missing UID information in APPENDUID response");
                 }
                 retval = new String[msgs.length];
-                final long[] uids = IMAPCommandsCollection.findMarker(hash, retval.length, imapFolder);
-                final int uLen = uids.length;
-                if (uLen == 0) {
-                    Arrays.fill(retval, null);
-                } else {
-                    for (int i = 0; i < uLen; i++) {
-                        retval[i] = Long.toString(uids[i]);
+                {
+                    final long[] uids = IMAPCommandsCollection.findMarker(hash, retval.length, imapFolder);
+                    final int uLen = uids.length;
+                    if (uLen == 0) {
+                        Arrays.fill(retval, null);
+                    } else {
+                        for (int i = 0; i < uLen; i++) {
+                            retval[i] = Long.toString(uids[i]);
+                        }
                     }
                 }
                 /*
