@@ -417,13 +417,19 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             checkAvailable(sizeHint);
         }
         long newSize = -1;
+        boolean notFoundError = false;
         try {
             newSize = fileStorage.appendToFile(is, name, offset);
             if (incUsage(newSize - offset)) {
                 throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
             }
+        } catch (final OXException e) {
+            if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                notFoundError = true;
+            }
+            throw e;
         } finally {
-            if (-1 == newSize) {
+            if (false == notFoundError && -1 == newSize) {
                 try {
                     fileStorage.setFileLength(offset, name);
                 } catch (OXException e) {
