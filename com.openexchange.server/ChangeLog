@@ -1,3 +1,7 @@
+* 2014-04-02 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 31854: NPE at POP3Store.reinitCapabilities
+
 * 2014-03-31 - thorben.betten@open-xchange.com
  
  - Fix for bug 31809: Enhanced key associated with an IMAP store cache by dedicated user information

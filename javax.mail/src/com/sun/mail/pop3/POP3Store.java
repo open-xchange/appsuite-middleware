@@ -404,6 +404,9 @@ public class POP3Store extends Store {
      * @return  Reinitialized Map of capabilities
      */
     public synchronized Map<String, String> reinitCapabilities() throws MessagingException {
+    if (port == null) {
+        return capabilities();
+    }
     try {
         port.setCapabilities(port.capa());
         capabilities = port.getCapabilities(); // save for later, may be null
