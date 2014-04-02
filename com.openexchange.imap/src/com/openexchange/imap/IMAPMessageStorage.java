@@ -2816,10 +2816,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 retval = new String[msgs.length];
                 final long[] uids = IMAPCommandsCollection.findMarker(hash, retval.length, imapFolder);
-                if (uids.length == 0) {
+                final int uLen = uids.length;
+                if (uLen == 0) {
                     Arrays.fill(retval, null);
                 } else {
-                    System.arraycopy(uids, 0, retval, 0, uids.length);
+                    for (int i = 0; i < uLen; i++) {
+                        retval[i] = Long.toString(uids[i]);
+                    }
                 }
                 /*
                  * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
