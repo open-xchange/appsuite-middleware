@@ -99,7 +99,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         } catch (final EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
         } catch (final PluginException e) {
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         }
 
         if (tool.existsContext(ctx)) {
@@ -147,7 +147,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                             ret = contextInterface.preCreate(ret, admin_user, auth);
                         } catch (PluginException e) {
                             log.error("",e);
-                            throw new StorageException(e);
+                            throw StorageException.wrapForRMI(e);
                         }
                     }
                 }

@@ -196,7 +196,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                          oxresource.change(ctx, res, auth);
                      } catch (final PluginException e) {
                          log.error("Error while calling change for plugin: {}", bundlename, e);
-                         throw new StorageException(e);
+                         throw StorageException.wrapForRMI(e);
                      }
                  }
              }
@@ -291,7 +291,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                         } catch (final StorageException e1) {
                             log.error("Error doing rollback for creating resource in database", e1);
                         }
-                        throw new StorageException(e);
+                        throw StorageException.wrapForRMI(e);
                     }
                 }
             }
@@ -356,7 +356,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                          interfacelist.add(oxresource);
                      } catch (final PluginException e) {
                          log.error("Error while calling delete for plugin: {}", bundlename, e);
-                         throw new StorageException(e);
+                         throw StorageException.wrapForRMI(e);
                      }
                  }
              }

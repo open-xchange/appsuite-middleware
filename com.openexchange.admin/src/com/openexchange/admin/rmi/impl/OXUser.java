@@ -224,10 +224,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                 oxuser.changeCapabilities(ctx, user, capsToAdd, capsToRemove, capsToDrop, auth);
                             } catch (final PluginException e) {
                                 log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                                throw new StorageException(e);
+                                throw StorageException.wrapForRMI(e);
                             } catch (final RuntimeException e) {
                                 log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                                throw new StorageException(e);
+                                throw StorageException.wrapForRMI(e);
                             }
                         }
                     }
@@ -350,10 +350,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             oxuser.change(ctx, usrdata, auth);
                         } catch (final PluginException e) {
                             log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                            throw new StorageException(e);
+                            throw StorageException.wrapForRMI(e);
                         } catch (final RuntimeException e) {
                             log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                            throw new StorageException(e);
+                            throw StorageException.wrapForRMI(e);
                         }
                     }
                 }
@@ -462,10 +462,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                 oxuser.changeModuleAccess(ctx, user, moduleAccess, auth);
                             } catch (final PluginException e) {
                                 log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                                throw new StorageException(e);
+                                throw StorageException.wrapForRMI(e);
                             } catch (final RuntimeException e) {
                                 log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                                throw new StorageException(e);
+                                throw StorageException.wrapForRMI(e);
                             }
                         }
                     }
@@ -560,10 +560,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                 oxuser.changeModuleAccess(ctx, user, access_combination_name, auth);
                             } catch (final PluginException e) {
                                 log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                                throw new StorageException(e);
+                                throw StorageException.wrapForRMI(e);
                             } catch (final RuntimeException e) {
                                 log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                                throw new StorageException(e);
+                                throw StorageException.wrapForRMI(e);
                             }
                         }
                     }
@@ -825,7 +825,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                 } catch (final StorageException e1) {
                                     log.error("Error doing rollback for creating user in database", e1);
                                 }
-                                throw new StorageException(e);
+                                throw StorageException.wrapForRMI(e);
                             } catch (final RuntimeException e) {
                                 log.error("Error while calling create for plugin: {}", bundlename, e);
                                 log.info("Now doing rollback for everything until now...");
@@ -843,7 +843,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                 } catch (final StorageException e1) {
                                     log.error("Error doing rollback for creating user in database", e1);
                                 }
-                                throw new StorageException(e);
+                                throw StorageException.wrapForRMI(e);
                             }
                         }
                     } catch (final RuntimeException e) {
@@ -863,7 +863,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         } catch (final StorageException e1) {
                             log.error("Error doing rollback for creating user in database", e1);
                         }
-                        throw new StorageException(e);
+                        throw StorageException.wrapForRMI(e);
                     }
                 }
             }

@@ -312,7 +312,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         oxgroup.change(ctx, grp, auth);
                     } catch (final PluginException e) {
                         log.error("Error while calling change for plugin: {}", bundlename, e);
-                        throw new StorageException(e);
+                        throw StorageException.wrapForRMI(e);
                     }
                 }
             }
@@ -407,7 +407,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         } catch (final StorageException e1) {
                             log.error("Error doing rollback for creating resource in database", e1);
                         }
-                        throw new StorageException(e);
+                        throw StorageException.wrapForRMI(e);
                     }
                 }
             }
@@ -525,7 +525,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         log.error(
                                 "Error while calling delete for plugin: "
                                         + bundlename, e);
-                        throw new StorageException(e);
+                        throw StorageException.wrapForRMI(e);
                     }
                 }
             }

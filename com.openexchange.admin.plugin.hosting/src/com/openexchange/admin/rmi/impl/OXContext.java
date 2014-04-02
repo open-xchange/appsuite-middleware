@@ -193,7 +193,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e;
         } catch (final PluginException e) {
             log.error("", e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 
@@ -276,7 +276,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e;
         } catch (final PluginException e) {
             log.error("", e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         }
         final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
@@ -358,7 +358,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e;
         } catch (final PluginException e) {
             log.error("", e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         }
 
         try {
@@ -469,7 +469,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                             oxContextPlugin.delete(ctx, auth);
                         } catch (final PluginException e) {
                             log.error("", e);
-                            throw new StorageException(e);
+                            throw StorageException.wrapForRMI(e);
                         }
                     }
                 }
@@ -548,7 +548,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                             oxContextPlugin.disable(ctx, auth);
                         } catch (final PluginException e) {
                             log.error("", e);
-                            throw new StorageException(e);
+                            throw StorageException.wrapForRMI(e);
                         }
                     }
                 }
@@ -619,7 +619,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                                 oxContextPlugin.disableAll(auth);
                             } catch (final PluginException e) {
                                 log.error("", e);
-                                throw new StorageException(e);
+                                throw StorageException.wrapForRMI(e);
                             }
                         }
                     }
@@ -680,7 +680,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                             oxContextPlugin.enable(ctx, auth);
                         } catch (final PluginException e) {
                             log.error("", e);
-                            throw new StorageException(e);
+                            throw StorageException.wrapForRMI(e);
                         }
                     }
                 }
@@ -723,7 +723,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                                 oxContextPlugin.enableAll(auth);
                             } catch (final PluginException e) {
                                 log.error("", e);
-                                throw new StorageException(e);
+                                throw StorageException.wrapForRMI(e);
                             }
                         }
                     }
@@ -855,7 +855,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                         }
                     } catch (final PluginException e) {
                         log.error("Error while calling method list of plugin {}", bundlename,e);
-                        throw new StorageException(e.getCause());
+                        throw StorageException.wrapForRMI(e);
                     }
                 }
             }
@@ -1166,7 +1166,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                             log.error("", e);
                         }
                         oxcox.delete(ret);
-                        throw new StorageException(e);
+                        throw StorageException.wrapForRMI(e);
                     }
                 }
             }
@@ -1255,7 +1255,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e;
         } catch (final PluginException e) {
             log.error("", e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 
@@ -1328,7 +1328,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e;
         } catch (final PluginException e) {
             log.error("", e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 
@@ -1373,7 +1373,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                             oxContextPlugin.downgrade(ctx, auth);
                         } catch (final PluginException e) {
                             log.error("", e);
-                            throw new StorageException(e);
+                            throw StorageException.wrapForRMI(e);
                         }
                     }
                 }
@@ -1429,7 +1429,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                             oxContextPlugin.getAccessCombinationName(ctx, auth);
                         } catch (final PluginException e) {
                             log.error("", e);
-                            throw new StorageException(e);
+                            throw StorageException.wrapForRMI(e);
                         }
                     }
                 }
@@ -1481,8 +1481,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                         try {
                             oxContextPlugin.getModuleAccess(ctx, auth);
                         } catch (final PluginException e) {
-                            log.error("", e);
-                            throw new StorageException(e);
+                            throw StorageException.wrapForRMI(e);
                         }
                     }
                 }
@@ -1519,7 +1518,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     addExtensionToContext(ctxs, retval, bundlename);
                 } catch (final PluginException e) {
                     log.error("Error while calling method list of plugin {}", bundlename,e);
-                    throw new StorageException(e.getCause());
+                    throw StorageException.wrapForRMI(e);
                 }
             }
         }
@@ -1557,7 +1556,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                         oxContextPlugin.getAdminId(ctx, auth);
                     } catch (final PluginException e) {
                         log.error("", e);
-                        throw new StorageException(e);
+                        throw StorageException.wrapForRMI(e);
                     }
                 }
             }
@@ -1588,7 +1587,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                         oxContextPlugin.exists(ctx, auth);
                     } catch (final PluginException e) {
                         log.error("", e);
-                        throw new StorageException(e);
+                        throw StorageException.wrapForRMI(e);
                     }
                 }
             }
