@@ -1,3 +1,7 @@
+* 2014-04-02 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 30766: Fixed copy of message uids if uidplus is missing
+
 * 2014-04-01 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 29758: Extracted CLT parts from c.o.control to new project c.o.control.clt & let CLT do help output before connecting to
