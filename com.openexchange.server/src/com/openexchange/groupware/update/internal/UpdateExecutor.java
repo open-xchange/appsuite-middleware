@@ -159,7 +159,7 @@ public final class UpdateExecutor {
                 if (success) {
                     LOG.info("Update task {} on schema {} done.", taskName, state.getSchema());
                 } else {
-                    LOG.info("Update task {} on schema {} failed.", taskName, state.getSchema());
+                    LOG.error("Update task {} on schema {} failed.", taskName, state.getSchema());
                 }
                 addExecutedTask(task.getClass().getName(), success, poolId, state.getSchema());
             }
