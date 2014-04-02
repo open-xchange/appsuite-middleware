@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.ExtendableAJAXActionServiceFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -91,7 +92,7 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
     }
 
     private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(4);
         properties.put("module", module);
         properties.put("multiple", multiple ? "true" : "false");
         /*-
@@ -113,5 +114,10 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
          *
          */
         registerService(AJAXActionServiceFactory.class, factory, properties);
+
+        if (factory instanceof ExtendableAJAXActionServiceFactory) {
+            // Register for other interface, too
+            registerService(ExtendableAJAXActionServiceFactory.class, (ExtendableAJAXActionServiceFactory) factory, null);
+        }
     }
 }
