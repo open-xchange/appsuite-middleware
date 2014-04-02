@@ -61,6 +61,8 @@ public class MailfilterExceptionMessages implements LocalizableStrings {
 
     public static final String REJECTED_REDIRECT_ADDRESS_MSG = "The redirect address \"%1$s\" has been rejected.";
 
-    public static final String INVALID_SIEVE_RULE_MSG = "Invalid SIEVE rule specified.";
+    public static final String INVALID_SIEVE_RULE_MSG = "Invalid SIEVE rule specified. Please review your mail filter rules";
+
+    public static final String INVALID_SIEVE_RULE2_MSG = "Please review your mail filter rules as they seem to be invalid. Response from server: \"%1$s\"";
 
 }

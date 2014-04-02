@@ -398,7 +398,7 @@ public class SieveHandler {
             return;
         } else if (null != actualline && actualline.startsWith("NO ")) {
             final String errorMessage = parseError(actualline).replaceAll(CRLF, "\n");
-            throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(actualline, errorMessage));
+            throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(actualline, errorMessage)).setParseError(true);
         } else {
             throw new OXSieveHandlerException("Unknown response code", sieve_host, sieve_host_port, parseSIEVEResponse(actualline, null));
         }

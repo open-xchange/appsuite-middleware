@@ -50,6 +50,7 @@
 package com.openexchange.mailfilter.ajax.exceptions;
 
 import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.INVALID_REDIRECT_ADDRESS_MSG;
+import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.INVALID_SIEVE_RULE2_MSG;
 import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.INVALID_SIEVE_RULE_MSG;
 import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.REJECTED_REDIRECT_ADDRESS_MSG;
 import com.openexchange.exception.Category;
@@ -172,6 +173,10 @@ public enum OXMailfilterExceptionCode implements DisplayableOXExceptionCode {
      * Invalid SIEVE rule specified. JSON request body contains an empty JSON array: %1$s
      */
     INVALID_SIEVE_RULE("Invalid SIEVE rule specified. JSON request body contains an empty JSON array: %1$s", INVALID_SIEVE_RULE_MSG, CATEGORY_USER_INPUT, 25),
+    /**
+     * Invalid SIEVE rule specified. Server response: %1$s
+     */
+    INVALID_SIEVE_RULE2("Invalid SIEVE rule specified. Server response: %1$s", INVALID_SIEVE_RULE2_MSG, CATEGORY_USER_INPUT, 25), // Yapp, the same error code
     ;
 
     private final String message;

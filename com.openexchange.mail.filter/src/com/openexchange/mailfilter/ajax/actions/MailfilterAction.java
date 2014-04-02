@@ -57,12 +57,14 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import org.apache.jsieve.SieveException;
@@ -489,23 +491,27 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
     private JSONObject getJsonBody(final MailfilterRequest request) throws JSONException, OXException {
         final JSONObject jsonObject = new JSONObject(request.getBody());
-        checkJsonValue(jsonObject, jsonObject);
+        checkJsonValue(jsonObject, null, jsonObject);
         return jsonObject;
     }
 
-    private void checkJsonValue(final JSONValue jValue, final JSONValue parent) throws OXException {
+    private static final Set<String> MUST_NOT_BE_EMPTY = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("values")));
+
+    private void checkJsonValue(final JSONValue jValue, final String name, final JSONValue parent) throws OXException {
         if (null != jValue) {
             if (jValue.isArray()) {
                 final JSONArray jArray = jValue.toArray();
                 final int length = jArray.length();
                 if (0 == length) {
-                    // SIEVE does not support empty arrays
-                    throw OXMailfilterExceptionCode.INVALID_SIEVE_RULE.create(parent.toString());
+                    if (null != name && MUST_NOT_BE_EMPTY.contains(name)) {
+                        // SIEVE does not support empty arrays
+                        throw OXMailfilterExceptionCode.INVALID_SIEVE_RULE.create(parent.toString());
+                    }
                 }
                 for (int i = 0; i < length; i++) {
                     final Object object = jArray.opt(i);
                     if (object instanceof JSONValue) {
-                        checkJsonValue((JSONValue) object, parent);
+                        checkJsonValue((JSONValue) object, null, parent);
                     }
                 }
             } else if (jValue.isObject()) {
@@ -513,7 +519,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 for (final Entry<String, Object> entry : jObject.entrySet()) {
                     final Object object = entry.getValue();
                     if (object instanceof JSONValue) {
-                        checkJsonValue((JSONValue) object, parent);
+                        checkJsonValue((JSONValue) object, entry.getKey(), parent);
                     }
                 }
             }
@@ -1147,14 +1153,32 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             if( null != code ) {
                 return new OXException(code.getDetailnumber(), code.getMessage(), e.getSieveHost(), Integer.valueOf(e
                     .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString()).addCategory(sieveResponse2OXCategory(code)).setPrefix("MAIL_FILTER");
-            } else {
-                return OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
-                    .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
             }
-        } else {
+
+            if (e.isParseError()) {
+                return OXMailfilterExceptionCode.INVALID_SIEVE_RULE2.create(e, saneMessage(e.getMessage()));
+            }
+
             return OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
                 .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
         }
+
+        if (e.isParseError()) {
+            return OXMailfilterExceptionCode.INVALID_SIEVE_RULE2.create(e, saneMessage(e.getMessage()));
+        }
+
+        return OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
+            .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
+    }
+
+    private static final Pattern CONTROL = Pattern.compile("[\\x00-\\x1F\\x7F]+");
+
+    private static String saneMessage(final String message) {
+        if (Strings.isEmpty(message)) {
+            return "";
+        }
+
+        return CONTROL.matcher(message).replaceAll(" ");
     }
 
     private static final class Key {
