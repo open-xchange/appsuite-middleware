@@ -545,7 +545,32 @@ public class Strings {
      * @return The un-parenthized value or <code>null</code>
      */
     public static String unparenthize(final String s) {
-        if (!isEmpty(s) && (s.startsWith("(") && s.endsWith(")"))) {
+        if (!isEmpty(s) && ((s.startsWith("(") && s.endsWith(")")) || (s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]")) )) {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
+    }
+
+    /**
+     * Removes surrounding characters from a string in case it is actually surrounded.
+     *
+     * @param s The value to be un-char'd
+     * @return The un-char'd value or <code>null</code>
+     */
+    public static String unchar(final String s, final char c) {
+        return unchar(s, c, c);
+    }
+
+    /**
+     * Removes surrounding characters from a string in case it is actually surrounded.
+     *
+     * @param s The value to be un-char'd
+     * @param start The possible starting character
+     * @param end The possible ending character
+     * @return The un-char'd value or <code>null</code>
+     */
+    public static String unchar(final String s, final char start, final char end) {
+        if (!isEmpty(s) && (s.startsWith(Character.toString(start)) && s.endsWith(Character.toString(end)))) {
             return s.substring(1, s.length() - 1);
         }
         return s;
