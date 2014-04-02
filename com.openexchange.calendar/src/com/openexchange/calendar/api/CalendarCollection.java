@@ -1327,11 +1327,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             cdao.setChangeExceptions(newChangeExcs);
         }
         fillObject(cdao, clone);
-        if (cdao.containsModifiedBy()) {
-            clone.setCreatedBy(cdao.getModifiedBy());
-        } else {
-            clone.setCreatedBy(sessionUser);
-        }
+        clone.setCreatedBy(edao.getCreatedBy());
         if (!cdao.containsUserParticipants() && checkForReconfirmation(cdao, edao)) {
             /*
              * Turn cloned appointment's confirmation information to initial

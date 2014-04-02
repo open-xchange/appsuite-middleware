@@ -262,10 +262,17 @@ public class CalendarTestManager implements TestManager {
     }
 
     public Appointment get(Appointment appointment) throws OXException {
-        GetRequest get = new GetRequest(appointment, getFailOnError());
-        GetResponse response = execute(get);
-        extractInfo(response);
-        return response.getAppointment(timezone);
+        try {
+            GetRequest get = new GetRequest(appointment, getFailOnError());
+            GetResponse response = execute(get);
+            extractInfo(response);
+            return response.getAppointment(timezone);
+        } catch (OXException e) {
+            if (failOnError) {
+                throw e;
+            }
+            return null;
+        }
     }
 
     public Appointment get(int parentFolderID, int objectID, boolean pleaseFailOnError) throws OXException {
