@@ -60,6 +60,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.ajax.mail.actions.DeleteRequest;
+import com.openexchange.ajax.mail.actions.DeleteResponse;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
@@ -75,7 +77,7 @@ import com.openexchange.exception.OXException;
 public class Bug31855Test extends AbstractMailTest {
 
     private UserValues values;
-
+    
     public Bug31855Test(final String name) {
         super(name);
     }
@@ -128,5 +130,11 @@ public class Bug31855Test extends AbstractMailTest {
         assertEquals("Incorrect number of attachments", 3, array.length());
         assertEquals("Incorrect content type of attachment 2", "application/octet-stream", array.getJSONObject(1).getString("content_type"));
         assertEquals("Incorrect content type of attachment 3", "application/octet-stream", array.getJSONObject(2).getString("content_type"));
+
+        if ((folderID != null) && (mailID != null)) {
+            DeleteRequest deleteRequest = new DeleteRequest(folderID, mailID, true);
+            DeleteResponse deleteResponse = client.execute(deleteRequest);
+            assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
+        }
     }
 }
