@@ -55,7 +55,7 @@ import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import com.openexchange.control.console.internal.ValueObject;
+import com.openexchange.control.consoleold.internal.ValueObject;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
