@@ -634,6 +634,19 @@ public class FileResponseRenderer implements ResponseRenderer {
                     LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             }
+        } catch (final OXException e) {
+            final String message = "Exception while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName);
+            LOG.error(message, e);
+            if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
+                Throwable cause = e;
+                while (cause.getCause() != null) {
+                    cause = cause.getCause();
+                }
+                final String causeMsg = cause.getMessage();
+                sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null == causeMsg ? message : causeMsg, resp);
+            } else {
+                sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
+            }
         } catch (final Exception e) {
             final String message = "Exception while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName);
             LOG.error(message, e);
