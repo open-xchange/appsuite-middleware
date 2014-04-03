@@ -75,6 +75,6 @@ public interface HazelcastResourceDirectoryMBean {
      * @return the map used for mapping full IDs to ResourceMaps.
      * @throws OXException if the map couldn't be fetched from hazelcast
      */
-    public Map<String, Map<String, Object>> getResourceMapping() throws OXException;
+    public Map<String, String> getResourceMapping() throws OXException;
 
 }

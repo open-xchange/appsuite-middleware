@@ -86,13 +86,13 @@ public abstract class Stanza implements Serializable {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Stanza.class);
 
     // recipient and sender
-    private volatile ID to;
-    private volatile ID from;
-    private volatile ID sequencePrincipal;
-    private volatile ID onBehalfOf;
+    protected volatile ID to;
+    protected volatile ID from;
+    protected volatile ID sequencePrincipal;
+    protected volatile ID onBehalfOf;
 
     // All 3 basic stanza types either have an optional or mandatory id field
-    private String id = "";
+    protected String id = "";
 
     /**
      * The error object for Presence Stanza of type error.
@@ -101,9 +101,9 @@ public abstract class Stanza implements Serializable {
 
     private String selector = "default";
 
-    private long sequenceNumber = -1;
+    protected long sequenceNumber = -1;
 
-    private String tracer;
+    protected String tracer;
 
     private final List<String> logEntries = new LinkedList<String>();
 

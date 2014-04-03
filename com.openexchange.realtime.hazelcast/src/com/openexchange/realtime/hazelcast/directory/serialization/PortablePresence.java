@@ -47,55 +47,83 @@
  *
  */
 
+package com.openexchange.realtime.hazelcast.directory.serialization;
 
-package com.openexchange.hazelcast.serialization;
+import java.io.IOException;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.PresenceState;
+import com.openexchange.realtime.packet.Presence.Type;
 
-import com.hazelcast.nio.serialization.Portable;
 
 /**
- * {@link CustomPortable}
+ * {@link PortablePresence}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.0
  */
-public interface CustomPortable extends Portable {
+public class PortablePresence extends Presence implements CustomPortable {
 
-    /**
-     * The identifier of the dynamic portable factory.<p/>
-     *
-     * Make sure to supply this identifier in the {@link #getFactoryId()} method.
-     */
-    static final int FACTORY_ID = DynamicPortableFactory.FACTORY_ID;
+    /** The unique portable class ID of the {@link PortableResource} */
+    public static final int CLASS_ID = 6;
 
-    /**
-     * Gets the ID of the dynamic portable factory.<p/>
-     *
-     * Make sure to supply {@link CustomPortable#FACTORY_ID} here.
-     *
-     * @return The factory ID.
-     */
+    public PortablePresence() {
+    }
+
+    public PortablePresence(Presence other) {
+        super(other);
+    }
+
     @Override
-    int getFactoryId();
+    public void writePortable(PortableWriter writer) throws IOException {
 
-    /**
-     * Gets the class ID of this portable implementation.<p/>
-     *
-     * Choose a not yet used arbitrary identifier <code>> 0</code> for your portable class here and ensure to return the same class ID in the
-     * corresponding {@link CustomPortableFactory#getClassId()} method.<p/>
-     *
-     * The following list gives an overview about the <b>already used</b> class IDs (add your IDs here):
-     * <ul>
-     * <li><code>  1</code>: com.openexchange.sessionstorage.hazelcast.portable.PortableSession</li>
-     * <li><code>  2</code>: com.openexchange.drive.events.ms.PortableDriveEvent</li>
-     * <li><code>  3</code>: com.openexchange.ms.internal.portable.PortableMessage</li>
-     * <li><code>  4</code>: com.openexchange.caching.events.ms.internal.PortableCacheEvent</li>
-     * <li><code>  5</code>: com.openexchange.realtime.hazelcast.directory.serialization.PortableResource</li>
-     * <li><code>  6</code>: com.openexchange.realtime.hazelcast.directory.serialization.PortablePresence</li>
-     * 
-     * </ul>
-     *
-     * @return The class ID
-     */
+        writer.writeUTF("from", getFrom().toString());
+        writer.writeUTF("type", type.name());
+        writer.writeUTF("message", message);
+        writer.writeUTF("state", state.name());
+        writer.writeByte("priority", priority);
+    }
+
     @Override
-    int getClassId();
+    public void readPortable(PortableReader reader) throws IOException {
+        from = new ID(reader.readUTF("from"));
+        String typeString = reader.readUTF("type");
+        type = getType(typeString);
+        message = reader.readUTF("message");
+        String stateString = reader.readUTF("state");
+        state = getState(stateString);
+        priority = reader.readByte("priority");
+    }
+
+    @Override
+    public int getFactoryId() {
+        return FACTORY_ID;
+    }
+
+    @Override
+    public int getClassId() {
+        return CLASS_ID;
+    }
+
+    private static Presence.Type getType(String type) {
+        for (Presence.Type t : Presence.Type.values()) {
+            if (t.name().equalsIgnoreCase(type)) {
+                return t;
+            }
+        }
+        return Type.NONE;
+    }
+
+    private static PresenceState getState(String state) {
+        for (PresenceState ps : PresenceState.values()) {
+            if (ps.name().equalsIgnoreCase(state)) {
+                return ps;
+            }
+        }
+        return PresenceState.ONLINE;
+    }
 
 }
