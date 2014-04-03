@@ -60,28 +60,29 @@ import com.openexchange.exception.OXException;
 public interface ClusterLockService {
 
     /**
-     * Acquire a cluster lock
+     * Acquire a cluster lock.
      * 
      * @param node The action that is going to be performed cluster-wise
      * @return The lock
-     * @throws OXException if the cluster is already locked
+     * @throws OXException if the cluster is already locked for that action
      */
     public Lock acquireClusterLock(String action) throws OXException;
 
     /**
-     * Release a previously acquired lock
+     * Release a cluster lock previously acquired via {@link ClusterLockService.acquireClusterLock}.
      * 
-     * @param action
+     * @param action the action that was performed cluster-wise
+     * @param lock The lock
      * @throws OXException
      */
     public void releaseClusterLock(String action, Lock lock) throws OXException;
 
     /**
-     * Acquire a periodic cluster lock
+     * Acquire a periodic cluster lock.
      * 
      * @param action
-     * @param timestamp
-     * @return
+     * @param period
+     * @return The lock
      * @throws OXException
      */
     public Lock acquirePeriodicClusterLock(String action, Long period) throws OXException;
