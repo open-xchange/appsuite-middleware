@@ -374,6 +374,9 @@ public class AdminParser extends CLIParser {
             args = extractDynamic(args);
         }
         parse(args);
+        if (getRemainingArgs().length > 0) {
+            throw new CLIUnknownOptionException(getRemainingArgs()[0]);
+        }
         if (null != this.getOptionValue(this.checkuniquenessoption)) {
             checkOptionUniqueness();
         }
