@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,78 +47,44 @@
  *
  */
 
-package com.openexchange.groupware.update.internal;
-
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.SchemaStore;
-import com.openexchange.groupware.update.SchemaUpdateState;
-import com.openexchange.groupware.update.TaskInfo;
+package com.openexchange.groupware.update;
 
 /**
- * The {@link #run()} method of this class is started in a separate thread for
- * the update process.
+ * {@link TaskInfo} - Task information.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.0
  */
-public class UpdateProcess implements Runnable {
+public final class TaskInfo {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateProcess.class);
-
-    private final int contextId;
-    private final SchemaStore schemaStore = SchemaStore.getInstance();
-    private final Queue<TaskInfo> failures;
+    private final String taskName;
+    private final String schema;
 
     /**
-     * Initializes a new {@link UpdateProcess} w/o tracing failures.
-     *
-     * @param contextId The context identifier
+     * Initializes a new {@link TaskInfo}.
      */
-    public UpdateProcess(int contextId) {
-        this(contextId, false);
-    }
-
-    /**
-     * Initializes a new {@link UpdateProcess}.
-     *
-     * @param contextId The context identifier
-     * @param traceFailures <code>true</code> to trace failures available via {@link #getFailures()}; otherwise <code>false</code>
-     */
-    public UpdateProcess(int contextId, boolean traceFailures) {
+    public TaskInfo(final String taskName, final String schema) {
         super();
-        this.contextId = contextId;
-        this.failures = traceFailures ? new ConcurrentLinkedQueue<TaskInfo>() : null;
+        this.taskName = taskName;
+        this.schema = schema;
     }
 
     /**
-     * Gets the optional failures.
+     * Gets the task name
      *
-     * @return The failures or <code>null</code>
-     * @see #UpdateProcess(int, boolean)
+     * @return The task name
      */
-    public Queue<TaskInfo> getFailures() {
-        return failures;
+    public String getTaskName() {
+        return taskName;
     }
 
     /**
-     * {@inheritDoc}
+     * Gets the schema
+     *
+     * @return The schema
      */
-    @Override
-    public void run() {
-        try {
-            // Load schema
-            SchemaUpdateState state = schemaStore.getSchema(contextId);
-            if (!UpdateTaskCollection.getInstance().needsUpdate(state)) {
-                // Already been updated before by previous thread
-                return;
-            }
-            new UpdateExecutor(state, contextId, null).execute(failures);
-        } catch (OXException e) {
-            LOG.error("", e);
-        } catch (Throwable t) {
-            LOG.error("", t);
-        }
+    public String getSchema() {
+        return schema;
     }
+
 }

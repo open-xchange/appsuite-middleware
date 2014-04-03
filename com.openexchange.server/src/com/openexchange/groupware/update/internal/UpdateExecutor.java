@@ -51,6 +51,7 @@ package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -59,6 +60,7 @@ import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
+import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -75,11 +77,8 @@ public final class UpdateExecutor {
     private static final SchemaStore store = SchemaStore.getInstance();
 
     private SchemaUpdateState state;
-
     private final int contextId;
-
     private final List<UpdateTask> tasks;
-
     private SeparatedTasks separatedTasks;
 
     public UpdateExecutor(final SchemaUpdateState state, final int contextId, final List<UpdateTask> tasks) {
@@ -89,27 +88,42 @@ public final class UpdateExecutor {
         this.tasks = tasks;
     }
 
+    /**
+     * Executes this update w/o tracing failures.
+     *
+     * @throws OXException If update fails
+     */
     public void execute() throws OXException {
+        execute(null);
+    }
+
+    /**
+     * Executes this update while storing failures in specified <code>failures</code> queue if not <code>null</code>.
+     *
+     * @param failures The optional failure queue for tracing
+     * @throws OXException If update fails
+     */
+    public void execute(final Queue<TaskInfo> failures) throws OXException {
         if (null != tasks) {
             separatedTasks = UpdateTaskCollection.getInstance().separateTasks(tasks);
             if (separatedTasks.getBlocking().size() > 0) {
-                runUpdates(true);
+                runUpdates(true, failures);
             }
             if (separatedTasks.getBackground().size() > 0) {
-                runUpdates(false);
+                runUpdates(false, failures);
             }
         } else {
             final SeparatedTasks forCheck = UpdateTaskCollection.getInstance().getFilteredAndSeparatedTasks(state);
             if (forCheck.getBlocking().size() > 0) {
-                runUpdates(true);
+                runUpdates(true, failures);
             }
             if (forCheck.getBackground().size() > 0) {
-                runUpdates(false);
+                runUpdates(false, failures);
             }
         }
     }
 
-    private void runUpdates(final boolean blocking) throws OXException {
+    private void runUpdates(final boolean blocking, final Queue<TaskInfo> failures) throws OXException {
         LOG.info("Starting {} updates on schema {}", (blocking ? "blocking" : "background"), state.getSchema());
         try {
             lockSchema(blocking);
@@ -159,6 +173,9 @@ public final class UpdateExecutor {
                 if (success) {
                     LOG.info("Update task {} on schema {} done.", taskName, state.getSchema());
                 } else {
+                    if (null != failures) {
+                        failures.offer(new TaskInfo(taskName, state.getSchema()));
+                    }
                     LOG.error("Update task {} on schema {} failed.", taskName, state.getSchema());
                 }
                 addExecutedTask(task.getClass().getName(), success, poolId, state.getSchema());
