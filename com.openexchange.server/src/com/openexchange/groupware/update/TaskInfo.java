@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,44 @@
  *
  */
 
-package com.openexchange.user;
-
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+package com.openexchange.groupware.update;
 
 /**
- * {@link AbstractUserServiceInterceptor}
+ * {@link TaskInfo} - Task information.
  *
- * Stub implementation of the {@link UserServiceInterceptor} interface.
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.0
  */
-public abstract class AbstractUserServiceInterceptor implements UserServiceInterceptor {
+public final class TaskInfo {
 
-    /** The default interceptor ranking */
-    protected static final int DEFAULT_RANKING = 100;
+    private final String taskName;
+    private final String schema;
 
-    @Override
-    public int getRanking() {
-        return DEFAULT_RANKING;
+    /**
+     * Initializes a new {@link TaskInfo}.
+     */
+    public TaskInfo(final String taskName, final String schema) {
+        super();
+        this.taskName = taskName;
+        this.schema = schema;
     }
 
-    @Override
-    public void beforeCreate(Context context, User user, Contact contactData) throws OXException {
-        // no
+    /**
+     * Gets the task name
+     *
+     * @return The task name
+     */
+    public String getTaskName() {
+        return taskName;
     }
 
-    @Override
-    public void afterCreate(Context context, User user, Contact contactData) throws OXException {
-        // no
-    }
-
-    @Override
-    public void beforeUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
-        // no
-    }
-
-    @Override
-    public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
-        // no
-    }
-
-    @Override
-    public void beforeDelete(Context context, User user, Contact contactData) throws OXException {
-        // no
-    }
-
-    @Override
-    public void afterDelete(Context context, User user, Contact contactData) throws OXException {
-        // no
+    /**
+     * Gets the schema
+     *
+     * @return The schema
+     */
+    public String getSchema() {
+        return schema;
     }
 
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.user;
 
+import java.util.Collections;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -60,6 +62,11 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface UserServiceInterceptor {
+
+    /**
+     * The constant for empty properties.
+     */
+    public static final Map<String, Object> EMPTY_PROPS = Collections.emptyMap();
 
     /**
      * Gets the ranking for this interceptor, allowing a defined execution order of multiple interceptor implementations. Execution order is
@@ -99,9 +106,11 @@ public interface UserServiceInterceptor {
      * @param context The context
      * @param user A reference to the user data of the user being updated, or <code>null</code> if not affected by the update
      * @param contactData A reference to the contact data of the user being created, or <code>null</code> if not affected by the update
+     * @param properties Arbitrary properties associated with this interception call; may be <code>null</code>
      * @throws OXException If interception fails
+     * @see #EMPTY_PROPS
      */
-    void beforeUpdate(Context context, User user, Contact contactData) throws OXException;
+    void beforeUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException;
 
     /**
      * Invoked after a user is updated.
@@ -109,9 +118,11 @@ public interface UserServiceInterceptor {
      * @param context The context
      * @param user A reference to the user data of the updated user, or <code>null</code> if not affected by the update
      * @param contactData A reference to the contact data of the updated user, or <code>null</code> if not affected by the update
+     * @param properties Arbitrary properties associated with this interception call; may be <code>null</code>
      * @throws OXException If interception fails
+     * @see #EMPTY_PROPS
      */
-    void afterUpdate(Context context, User user, Contact contactData) throws OXException;
+    void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException;
 
     /**
      * Invoked before a user is deleted.

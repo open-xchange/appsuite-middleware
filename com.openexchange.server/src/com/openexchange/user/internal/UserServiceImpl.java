@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -200,9 +201,9 @@ public final class UserServiceImpl implements UserService {
     @Override
     public void updateUser(final User user, final Context context) throws OXException {
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
-        beforeUpdate(context, user, interceptors);
+        beforeUpdate(context, user, UserServiceInterceptor.EMPTY_PROPS, interceptors);
         UserStorage.getInstance().updateUser(user, context);
-        afterUpdate(context, user, interceptors);
+        afterUpdate(context, user, UserServiceInterceptor.EMPTY_PROPS, interceptors);
     }
 
     /**
@@ -229,16 +230,16 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
-    private void beforeUpdate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
+    private void beforeUpdate(Context context, User user, Map<String, Object> properties, List<UserServiceInterceptor> interceptors) throws OXException {
         for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.beforeUpdate(context, user, null);
+            interceptor.beforeUpdate(context, user, null, properties);
         }
     }
 
-    private void afterUpdate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
+    private void afterUpdate(Context context, User user, Map<String, Object> properties, List<UserServiceInterceptor> interceptors) throws OXException {
         for (UserServiceInterceptor interceptor : interceptors) {
             try {
-                interceptor.afterUpdate(context, user, null);
+                interceptor.afterUpdate(context, user, null, properties);
             } catch(OXException e) {
                 LOG.error("Error while calling interceptor.", e);
             }
