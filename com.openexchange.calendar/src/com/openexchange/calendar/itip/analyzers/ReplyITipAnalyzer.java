@@ -165,7 +165,6 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			change.setMaster(original);
 			if (matchingException != null) {
 			    ParticipantChange participantChange = applyParticipantChange(exception, matchingException, message.getMethod(), message);
-				participantChange.setComment(message.getComment());
 
 				change = new ITipChange();
 				change.setException(true);
@@ -173,7 +172,10 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				change.setCurrentAppointment(matchingException);
 
 				change.setType(Type.UPDATE);
-				change.setParticipantChange(participantChange);
+				if (participantChange != null) {
+                    participantChange.setComment(message.getComment());
+    				change.setParticipantChange(participantChange);
+				}
 				describeReplyDiff(message, change, wrapper, session);
 
 				analysis.addChange(change);
@@ -182,7 +184,9 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			    change.setCurrentAppointment(original);
 			    change.setNewAppointment(exception);
 			    change.setType(Type.CREATE);
-			    change.setParticipantChange(participantChange);
+			    if (participantChange != null) {
+			        change.setParticipantChange(participantChange);
+			    }
 			    describeReplyDiff(message, change, wrapper, session);
 			    analysis.addChange(change);
 			    
