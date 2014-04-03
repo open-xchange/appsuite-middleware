@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 18
+%define        ox_release 17
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -66,8 +66,6 @@ done
 %config(noreplace) /opt/open-xchange/etc/mysql/*
 
 %changelog
-* Tue Apr 01 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for patch 2014-04-07
 * Mon Mar 31 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2014-03-31
 * Wed Mar 19 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
