@@ -18,7 +18,7 @@
 
 * 2014-04-02 - lars.hoogestraat@open-xchange.com
 
- - Fix for bug 30766: Fixed copy of message uids if uidplus is missing
+ - Fix for bug 30766: Fixed copying of IMAP message UIDs if UIDPLUS capability is missing
 
 * 2014-04-01 - jan.bauerdick@open-xchange.com
 
