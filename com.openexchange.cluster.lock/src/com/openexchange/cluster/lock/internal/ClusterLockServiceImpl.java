@@ -104,7 +104,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
                 }
             }
             lock = hazelcastInstance.getLock(action);
-            map.put(action, now);
+            map.putIfAbsent(action, now);
         } catch (InterruptedException e) {
             throw ClusterLockExceptionCodes.TIMEOUT.create();
         } finally {
