@@ -1056,13 +1056,13 @@ public class ContactServiceImpl extends DefaultContactService {
 
     private void beforeUserUpdate(Context context, Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
         for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.beforeUpdate(context, null, userContact);
+            interceptor.beforeUpdate(context, null, userContact, UserServiceInterceptor.EMPTY_PROPS);
         }
     }
 
     private void afterUserUpdate(Context context, Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
         for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.afterUpdate(context, null, userContact);
+            interceptor.afterUpdate(context, null, userContact, UserServiceInterceptor.EMPTY_PROPS);
         }
     }
 

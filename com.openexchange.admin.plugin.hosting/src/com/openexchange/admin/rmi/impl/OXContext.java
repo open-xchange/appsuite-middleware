@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
@@ -278,22 +277,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             log.error("", e);
             throw StorageException.wrapForRMI(e);
         }
-        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-        if (null != cacheService) {
-            try {
-                final Cache jcs = cacheService.getCache("CapabilitiesContext");
-                final Serializable key = Integer.valueOf(ctx.getId().intValue());
-                jcs.remove(key);
-            } catch (final OXException e) {
-                log.error("", e);
-            }
-            try {
-                final Cache jcs = cacheService.getCache("Capabilities");
-                jcs.invalidateGroup(ctx.getId().toString());
-            } catch (final OXException e) {
-                log.error("", e);
-            }
-        }
     }
 
     @Override
@@ -486,24 +469,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final DatabaseUpdateException e) {
             log.error("", e);
             throw e;
-        }
-
-        try {
-            final int contextID = ctx.getId().intValue();
-            ContextStorage.getInstance().invalidateContext(contextID);
-            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-            if (null != cacheService) {
-                try {
-                    Cache cache = cacheService.getCache("MailAccount");
-                    cache.clear();
-                    cache = cacheService.getCache("Capabilities");
-                    cache.invalidateGroup(ctx.getId().toString());
-                } catch (final OXException e) {
-                    log.error("", e);
-                }
-            }
-        } catch (final OXException e) {
-            log.error("Error invalidating context {} in ox context storage", ctx.getId(), e);
         }
     }
 

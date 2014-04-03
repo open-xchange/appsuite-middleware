@@ -57,6 +57,7 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -109,6 +110,8 @@ import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Assignment;
@@ -289,6 +292,29 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             } catch (final PoolException exp) {
                 LOG.error("Pool Error", exp);
             }
+        }
+
+        // Invalidate caches
+        try {
+            final int contextID = ctx.getId().intValue();
+            ContextStorage.getInstance().invalidateContext(contextID);
+            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                try {
+                    Cache cache = cacheService.getCache("MailAccount");
+                    cache.clear();
+                } catch (final Exception e) {
+                    LOG.error("", e);
+                }
+                try {
+                    Cache cache = cacheService.getCache("Capabilities");
+                    cache.invalidateGroup(ctx.getId().toString());
+                } catch (final Exception e) {
+                    LOG.error("", e);
+                }
+            }
+        } catch (final Exception e) {
+            LOG.error("Error invalidating context {} in ox context storage", ctx.getId(), e);
         }
     }
 
@@ -2277,6 +2303,25 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             con.commit(); // COMMIT
             rollback = false;
+
+            // Invalidate cache
+            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                try {
+                    final Cache jcs = cacheService.getCache("CapabilitiesContext");
+                    final Serializable key = Integer.valueOf(ctx.getId().intValue());
+                    jcs.remove(key);
+                } catch (final Exception e) {
+                    LOG.error("", e);
+                }
+                try {
+                    final Cache jcs = cacheService.getCache("Capabilities");
+                    jcs.invalidateGroup(ctx.getId().toString());
+                } catch (final Exception e) {
+                    LOG.error("", e);
+                }
+            }
+
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
