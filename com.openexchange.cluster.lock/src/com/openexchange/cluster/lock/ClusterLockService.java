@@ -62,13 +62,22 @@ public interface ClusterLockService {
     /**
      * Acquire a cluster lock
      * 
-     * @param node The action that is going to be performed cluster-wise 
+     * @param node The action that is going to be performed cluster-wise
      * @return The lock
      * @throws OXException if the cluster is already locked
      */
     public Lock acquireClusterLock(String action) throws OXException;
-    
+
     /**
+     * Release a previously acquired lock
+     * 
+     * @param action
+     * @throws OXException
+     */
+    public void releaseClusterLock(String action, Lock lock) throws OXException;
+
+    /**
+     * Acquire a periodic cluster lock
      * 
      * @param action
      * @param timestamp
