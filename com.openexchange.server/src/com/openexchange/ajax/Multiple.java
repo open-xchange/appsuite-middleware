@@ -276,7 +276,10 @@ public class Multiple extends SessionServlet {
             } finally {
                 close((MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE));
                 if (state != null) {
-                    getDispatcher().end(state);
+                    final Dispatcher dispatcher = getDispatcher();
+                    if (null != dispatcher) {
+                        dispatcher.end(state);
+                    }
                 }
             }
         }
