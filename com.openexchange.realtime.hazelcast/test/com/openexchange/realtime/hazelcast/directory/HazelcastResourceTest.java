@@ -56,7 +56,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Map;
@@ -276,7 +275,7 @@ public class HazelcastResourceTest {
     @Test
     public void testWrapWithPresence() throws OXException {
         HazelcastResource hazelcastResource = new HazelcastResource(onlinePresence, currentDate);
-        Map<String, Serializable> wrappedResource = HazelcastResourceWrapper.wrap(hazelcastResource);
+        Map<String, Object> wrappedResource = HazelcastResourceWrapper.wrap(hazelcastResource);
         HazelcastResource unwrappedResource = HazelcastResourceWrapper.unwrap(wrappedResource);
 
         assertNotNull(unwrappedResource.getPresence());
@@ -303,7 +302,7 @@ public class HazelcastResourceTest {
     @Test
     public void testWrapWithoutPresence() throws OXException {
         HazelcastResource hazelcastResource = new HazelcastResource();
-        Map<String, Serializable> wrappedResource = HazelcastResourceWrapper.wrap(hazelcastResource);
+        Map<String, Object> wrappedResource = HazelcastResourceWrapper.wrap(hazelcastResource);
         HazelcastResource unwrappedResource = HazelcastResourceWrapper.unwrap(wrappedResource);
 
         assertNull(unwrappedResource.getPresence());

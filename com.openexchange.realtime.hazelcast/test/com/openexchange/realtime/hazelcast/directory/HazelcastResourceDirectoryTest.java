@@ -52,7 +52,6 @@ package com.openexchange.realtime.hazelcast.directory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -160,13 +159,13 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     @Test
     public void testResourceEviction() throws Exception {
         final CyclicBarrier barrier = new CyclicBarrier(2);
-        final EntryListener<String, Map<String,Serializable>> listener = new EntryListener<String, Map<String,Serializable>>() {
+        final EntryListener<String, Map<String,Object>> listener = new EntryListener<String, Map<String,Object>>() {
             @Override
-            public void entryUpdated(EntryEvent<String, Map<String, Serializable>> event) {}
+            public void entryUpdated(EntryEvent<String, Map<String, Object>> event) {}
             @Override
-            public void entryRemoved(EntryEvent<String, Map<String, Serializable>> event) {}
+            public void entryRemoved(EntryEvent<String, Map<String, Object>> event) {}
             @Override
-            public void entryEvicted(EntryEvent<String, Map<String, Serializable>> event) {
+            public void entryEvicted(EntryEvent<String, Map<String, Object>> event) {
                 try {
                     barrier.await();
                 } catch (InterruptedException e) {
@@ -176,7 +175,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
                 }
             }
             @Override
-            public void entryAdded(EntryEvent<String, Map<String, Serializable>> event) {}
+            public void entryAdded(EntryEvent<String, Map<String, Object>> event) {}
         };
 
         String listenerID = getResourceMapping().addEntryListener(listener, false);
@@ -271,7 +270,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong size", 2, remove2.size());
 
         MultiMap<String,String> idMapping = getIDMapping();
-        IMap<String, Map<String, Serializable>> resources = getResourceMapping();
+        IMap<String, Map<String, Object>> resources = getResourceMapping();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
@@ -319,7 +318,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong size", 1, removed2.size());
 
         MultiMap<String,String> idMapping = getIDMapping();
-        IMap<String, Map<String, Serializable>> resources = getResourceMapping();
+        IMap<String, Map<String, Object>> resources = getResourceMapping();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
