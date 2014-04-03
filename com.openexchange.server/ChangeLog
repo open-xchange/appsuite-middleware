@@ -1,3 +1,7 @@
+* 2014-04-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31883: Ensure a non-null subject attribute to TNEF message arguments
+
 * 2014-04-03 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 30943: Throw exception on unknown options
