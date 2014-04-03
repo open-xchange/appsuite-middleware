@@ -5,7 +5,7 @@
 * 2014-04-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 31856: Changed log level for a failed update task to ERROR
- - Fix for bug 31864: Added separate property to disable Hazelcast-based session storage
+ - Fix for bug 31864: Added dedicated property to disable Hazelcast-based session storage
  - Fix for bug 31079: Display parsing error to user to let him know his input is invalid
 
 * 2014-04-02 - ioannis.chouklis@open-xchange.com
