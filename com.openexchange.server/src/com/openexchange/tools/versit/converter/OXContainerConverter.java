@@ -1145,7 +1145,7 @@ public class OXContainerConverter {
             try {
                 return imageService.transfom(imageBytes, source).scale(maxWidth, maxHeight, ScaleType.CONTAIN).getTransformedImage(formatName);
             } catch (final IllegalArgumentException e) {
-                throw AjaxExceptionCodes.BAD_REQUEST.create(e, e.getMessage());
+                throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create(e, e.getMessage());
             }
         }
 

@@ -99,7 +99,6 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.tools.images.Constants;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
@@ -824,15 +823,13 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         if (request.isSet("width") || request.isSet("height")) {
             final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
-            if (maxWidth > Constants.getMaxWidth()) {
-                throw AjaxExceptionCodes.BAD_REQUEST.create("Width " + maxWidth + " exceeds max. supported width " + Constants.getMaxWidth());
-            }
             final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
-            if (maxHeight > Constants.getMaxHeight()) {
-                throw AjaxExceptionCodes.BAD_REQUEST.create("Height " + maxHeight + " exceeds max. supported height " + Constants.getMaxHeight());
-            }
             final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
-            transformations.scale(maxWidth, maxHeight, scaleType);
+            try {
+                transformations.scale(maxWidth, maxHeight, scaleType);
+            } catch (final IllegalArgumentException e) {
+                throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create(e, e.getMessage());
+            }
         }
         // Compress by default when not delivering as download
         final Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;

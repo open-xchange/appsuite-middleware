@@ -129,6 +129,10 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      */
     BAD_REQUEST("Bad request. The server is unable to handle the request.", MESSAGE, Category.CATEGORY_ERROR, 20),
     /**
+     * Bad request. %1$s
+     */
+    BAD_REQUEST_CUSTOM("Bad request. %1$s", MESSAGE, Category.CATEGORY_ERROR, 20),
+    /**
      * Unknown AJAX action %1$s in module %2$s.
      */
     UNKNOWN_ACTION_IN_MODULE("Unknown AJAX action %1$s in module %2$s.", MESSAGE, Category.CATEGORY_ERROR, 21),
