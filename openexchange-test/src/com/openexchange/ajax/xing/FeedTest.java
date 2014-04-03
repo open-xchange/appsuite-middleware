@@ -157,14 +157,14 @@ public class FeedTest extends AbstractAJAXSession {
     }
 
     /**
-     * Test to verify that the action fetches the user activities; verify userfields
+     * Test to verify that the action fetches the user activities; verifies userfield display name
      * 
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
     public void testUserFeedWithUserFields() throws OXException, IOException, JSONException {
-        final int[] uf = { UserField.DISPLAY_NAME.ordinal(), UserField.FIRST_NAME.ordinal() };
+        final int[] uf = { UserField.DISPLAY_NAME.ordinal() };
         final UserFeedRequest request = new UserFeedRequest("dimitribronkowitsch@googlemail.com", -1, -1, uf, true);
         final UserFeedResponse response = client.execute(request);
         assertNotNull(response);
