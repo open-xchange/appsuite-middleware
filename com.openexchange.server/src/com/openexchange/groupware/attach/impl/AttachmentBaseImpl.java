@@ -60,7 +60,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -383,7 +383,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     private long fireAttached(final AttachmentMetadata m, final User user, final UserConfiguration userConfig, final Session session, final Context ctx) throws OXException {
         final FireAttachedEventAction fireAttached = new FireAttachedEventAction();
-        fireAttached.setAttachments(Arrays.asList(m));
+        fireAttached.setAttachments(Collections.singletonList(m));
         fireAttached.setSession(session);
         fireAttached.setContext(ctx);
         fireAttached.setSource(this);
@@ -779,14 +779,14 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         AbstractAttachmentAction action = null;
         if (newAttachment) {
             final CreateAttachmentAction createAction = new CreateAttachmentAction();
-            createAction.setAttachments(Arrays.asList(new AttachmentMetadata[] { attachment }));
+            createAction.setAttachments(Collections.singletonList(attachment));
             action = createAction;
         } else {
             final AttachmentMetadata oldAttachment = loadAttachment(attachment.getFolderId(), attachment.getId(), ctx);
 
             final UpdateAttachmentAction updateAction = new UpdateAttachmentAction();
-            updateAction.setAttachments(Arrays.asList(attachment));
-            updateAction.setOldAttachments(Arrays.asList(oldAttachment));
+            updateAction.setAttachments(Collections.singletonList(attachment));
+            updateAction.setOldAttachments(Collections.singletonList(oldAttachment));
             action = updateAction;
 
         }
