@@ -1,3 +1,7 @@
+* 2014-04-03 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30943: Throw exception on unknown options
+
 * 2014-04-02 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31779: Wrong created-by on change exception creation.
