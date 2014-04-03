@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.hazelcast.impl;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -142,7 +141,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
         for (Entry<ID, Resource> recipient : recipients.entrySet()) {
             ID id = recipient.getKey();
             Resource resource = recipient.getValue();
-            Serializable routingInfo = resource.getRoutingInfo();
+            Object routingInfo = resource.getRoutingInfo();
             if (routingInfo != null && Member.class.isInstance(routingInfo)) {
                 Member member = (Member) routingInfo;
                 Set<ID> ids = targets.get(member);

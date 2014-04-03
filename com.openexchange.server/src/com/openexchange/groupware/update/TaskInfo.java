@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,44 @@
  *
  */
 
-package com.openexchange.realtime.directory;
-
-import java.io.Serializable;
-import java.util.Date;
-import com.openexchange.realtime.packet.Presence;
+package com.openexchange.groupware.update;
 
 /**
- * {@link DefaultResource} {@link Resource} implementation that doesn't carry any routing information, yet. Routing information is
- * automatically added by a transport specific Resource implmentation e.g. when adding a DefaultResource to a HazelcastResourceDirectory.
+ * {@link TaskInfo} - Task information.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.0
  */
-public class DefaultResource extends AbstractResource implements Resource {
+public final class TaskInfo {
 
-    private static final long serialVersionUID = -1140736920132224444L;
+    private final String taskName;
+    private final String schema;
 
     /**
-     * Initializes a new {@link DefaultResource} without associated {@link Presence}
+     * Initializes a new {@link TaskInfo}.
      */
-    public DefaultResource() {
+    public TaskInfo(final String taskName, final String schema) {
         super();
+        this.taskName = taskName;
+        this.schema = schema;
     }
 
     /**
-     * Initializes a new {@link DefaultResource}.
+     * Gets the task name
      *
-     * @param state The presence state
-     * @param timestamp The timestamp
+     * @return The task name
      */
-    public DefaultResource(Presence presence) {
-        super(presence);
-
+    public String getTaskName() {
+        return taskName;
     }
 
     /**
-     * Initializes a new {@link DefaultResource}.
+     * Gets the schema
      *
-     * @param presence The presence state
-     * @param timestamp The timestamp
+     * @return The schema
      */
-    public DefaultResource(Presence presence, Date timestamp) {
-        super(presence, timestamp);
-    }
-
-    /*
-     * DefaultResources don't carry routing infos
-     */
-
-    @Override
-    public Serializable getRoutingInfo() {
-        return null;
-    }
-
-    @Override
-    public void setRoutingInfo(Object routingInfo) {
-        // Nothing to do
+    public String getSchema() {
+        return schema;
     }
 
 }
