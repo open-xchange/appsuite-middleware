@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,35 @@
  *
  */
 
-package com.openexchange.xing.json.actions;
+package com.openexchange.ajax.xing.actions;
 
 import org.json.JSONException;
-
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingExceptionCodes;
-import com.openexchange.xing.access.XingOAuthAccess;
-import com.openexchange.xing.exception.XingException;
-import com.openexchange.xing.json.XingRequest;
-import com.openexchange.xing.session.WebAuthSession;
-
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link RevokeContactRequestAction}
- *
+ * {@link GetUsersParser}
+ * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class RevokeContactRequestAction extends AbstractXingAction {
+public class GetUsersParser extends AbstractAJAXParser<GetUsersResponse> {
 
     /**
-     * Initializes a new {@link RevokeContactRequestAction}.
-     *
-     * @param services
+     * Initializes a new {@link GetUsersParser}.
+     * 
+     * @param failOnError
      */
-    public RevokeContactRequestAction(ServiceLookup services) {
-        super(services);
+    protected GetUsersParser(boolean failOnError) {
+        super(failOnError);
     }
 
     /*
      * (non-Javadoc)
-     * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
      */
     @Override
-    protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String email = getMandatoryStringParameter(req, "email");
-        email = validateMailAddress(email);
-        String token = req.getParameter("testToken");
-        String secret = req.getParameter("testSecret");
-        final XingOAuthAccess xingOAuthAccess;
-
-        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
-        } else {
-            xingOAuthAccess = getXingOAuthAccess(req);
-        }
-        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        final String recipientUserId = xingAPI.findByEmail(email);
-        if (Strings.isEmpty(recipientUserId)) {
-            throw XingExceptionCodes.NOT_A_MEMBER.create(email);
-        }
-
-        xingAPI.revokeContactRequest(xingOAuthAccess.getXingUserId(), recipientUserId);
-        return new AJAXRequestResult(Boolean.TRUE, "native");
+    protected GetUsersResponse createResponse(Response response) throws JSONException {
+        return new GetUsersResponse(response);
     }
+
 }

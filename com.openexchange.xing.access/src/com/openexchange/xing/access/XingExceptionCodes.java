@@ -152,6 +152,10 @@ public enum XingExceptionCodes implements DisplayableOXExceptionCode {
      * Already sent invitation to E-Mail address: %1$s
      */
     ALREADY_INVITED("Already sent invitation to E-Mail address: %1$s", Category.CATEGORY_USER_INPUT, 25, XingExceptionMessages.ALREADY_INVITED_MSG),
+    /**
+     * The mandatory field %1$s is missing in the request body.
+     */
+    MANDATORY_REQUEST_DATA_MISSING("The mandatory field %1$s is missing in the request body.", Category.CATEGORY_USER_INPUT, 26, XingExceptionMessages.MANDATORY_PARAMETER_MISSING_MSG),
     ;
 
     private final Category category;

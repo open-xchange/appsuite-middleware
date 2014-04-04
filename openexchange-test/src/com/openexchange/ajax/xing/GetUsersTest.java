@@ -47,62 +47,48 @@
  *
  */
 
-package com.openexchange.xing.json.actions;
+package com.openexchange.ajax.xing;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.xing.actions.GetUsersRequest;
+import com.openexchange.ajax.xing.actions.GetUsersResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingExceptionCodes;
-import com.openexchange.xing.access.XingOAuthAccess;
-import com.openexchange.xing.exception.XingException;
-import com.openexchange.xing.json.XingRequest;
-import com.openexchange.xing.session.WebAuthSession;
-
 
 /**
- * {@link RevokeContactRequestAction}
+ * {@link GetUsersTest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class RevokeContactRequestAction extends AbstractXingAction {
+public class GetUsersTest extends AbstractAJAXSession {
 
     /**
-     * Initializes a new {@link RevokeContactRequestAction}.
-     *
-     * @param services
+     * Initializes a new {@link GetUsersTest}.
+     * 
+     * @param name
      */
-    public RevokeContactRequestAction(ServiceLookup services) {
-        super(services);
+    public GetUsersTest(String name) {
+        super(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
+    /**
+     * Test get users action
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
      */
-    @Override
-    protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String email = getMandatoryStringParameter(req, "email");
-        email = validateMailAddress(email);
-        String token = req.getParameter("testToken");
-        String secret = req.getParameter("testSecret");
-        final XingOAuthAccess xingOAuthAccess;
-
-        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
-        } else {
-            xingOAuthAccess = getXingOAuthAccess(req);
-        }
-        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        final String recipientUserId = xingAPI.findByEmail(email);
-        if (Strings.isEmpty(recipientUserId)) {
-            throw XingExceptionCodes.NOT_A_MEMBER.create(email);
-        }
-
-        xingAPI.revokeContactRequest(xingOAuthAccess.getXingUserId(), recipientUserId);
-        return new AJAXRequestResult(Boolean.TRUE, "native");
+    public void testGetUser() throws OXException, IOException, JSONException {
+    	List<String> emails = new ArrayList<String>();
+    	emails.add("ewaldbartkowiak@googlemail.com");
+    	emails.add("annamariaoberhuber@googlemail.com");
+        final GetUsersRequest getUsersRequest = new GetUsersRequest(emails, true);
+        final GetUsersResponse getUsersResponse = client.execute(getUsersRequest);
+        assertNotNull(getUsersResponse);
     }
 }

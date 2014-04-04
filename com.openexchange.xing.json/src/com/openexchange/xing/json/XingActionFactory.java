@@ -52,6 +52,7 @@ package com.openexchange.xing.json;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
@@ -64,6 +65,7 @@ import com.openexchange.xing.json.actions.ContactRequestAction;
 import com.openexchange.xing.json.actions.CreateProfileAction;
 import com.openexchange.xing.json.actions.DeleteActivityAction;
 import com.openexchange.xing.json.actions.DeleteCommentActivityAction;
+import com.openexchange.xing.json.actions.GetUsersAction;
 import com.openexchange.xing.json.actions.GetActivityLikesAction;
 import com.openexchange.xing.json.actions.GetCommentsActivityAction;
 import com.openexchange.xing.json.actions.InviteRequestAction;
@@ -110,6 +112,7 @@ public class XingActionFactory implements AJAXActionServiceFactory {
         actions.put("show_activity", new ShowActivityAction(serviceLookup));
         actions.put("share_activity", new ShareActivityAction(serviceLookup));
         actions.put("delete_activity", new DeleteActivityAction(serviceLookup));
+        actions.put("get_users", new GetUsersAction(serviceLookup));
     }
 
     @Override

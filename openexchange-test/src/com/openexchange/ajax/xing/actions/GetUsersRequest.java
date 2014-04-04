@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,74 @@
  *
  */
 
-package com.openexchange.xing.json.actions;
+package com.openexchange.ajax.xing.actions;
+
+import java.io.IOException;
+import java.util.List;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingExceptionCodes;
-import com.openexchange.xing.access.XingOAuthAccess;
-import com.openexchange.xing.exception.XingException;
-import com.openexchange.xing.json.XingRequest;
-import com.openexchange.xing.session.WebAuthSession;
-
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link RevokeContactRequestAction}
- *
+ * {@link GetUsersRequest}
+ * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class RevokeContactRequestAction extends AbstractXingAction {
+public class GetUsersRequest extends AbstractXingRequest<GetUsersResponse> {
 
-    /**
-     * Initializes a new {@link RevokeContactRequestAction}.
-     *
-     * @param services
-     */
-    public RevokeContactRequestAction(ServiceLookup services) {
-        super(services);
-    }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
-     */
-    @Override
-    protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String email = getMandatoryStringParameter(req, "email");
-        email = validateMailAddress(email);
-        String token = req.getParameter("testToken");
-        String secret = req.getParameter("testSecret");
-        final XingOAuthAccess xingOAuthAccess;
+	private final List<String> emails;
+	private final JSONObject body;
 
-        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
-        } else {
-            xingOAuthAccess = getXingOAuthAccess(req);
-        }
-        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        final String recipientUserId = xingAPI.findByEmail(email);
-        if (Strings.isEmpty(recipientUserId)) {
-            throw XingExceptionCodes.NOT_A_MEMBER.create(email);
-        }
+	/**
+	 * Initializes a new {@link GetUsersRequest}.
+	 * 
+	 * @param foe
+	 */
+	public GetUsersRequest(final List<String> emails, boolean foe) {
+		super(foe);
+		body = new JSONObject();
+		this.emails = emails;
+	}
 
-        xingAPI.revokeContactRequest(xingOAuthAccess.getXingUserId(), recipientUserId);
-        return new AJAXRequestResult(Boolean.TRUE, "native");
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+	 */
+	@Override
+	public Method getMethod() {
+		return Method.PUT;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+	 */
+	@Override
+	public AbstractAJAXParser<? extends GetUsersResponse> getParser() {
+		return new GetUsersParser(failOnError);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+	 */
+	@Override
+	public Object getBody() throws IOException, JSONException {
+		body.put("emails", emails);
+		return body;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
+	 */
+	@Override
+	protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
+		params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "get_users"));
+
+	}
 }

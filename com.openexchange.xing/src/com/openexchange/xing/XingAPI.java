@@ -258,6 +258,7 @@ public class XingAPI<S extends Session> {
         return sb.deleteCharAt(sb.length() - 1).toString();
     }
 
+    
     /**
      * Looks up a user by specified E-Mail address.
      *
@@ -303,6 +304,48 @@ public class XingAPI<S extends Session> {
             return jUser.getString("id");
         } catch (final JSONException e) {
             throw new XingException(e);
+        } catch (final RuntimeException e) {
+            throw new XingException(e);
+        }
+    }
+    
+    /**
+     * Looks up a user and returns the attributes from xing.
+     *
+     * @param emailAddress The E-Mail address to look-up
+     * @return The associated user attributes
+     * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
+     * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code.
+     * @throws XingIOException If any network-related error occurs.
+     * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
+     */
+    public Map<String, Object> getUsers(final List<String> emailAddresses) throws XingException {
+    	if (emailAddresses == null || emailAddresses.isEmpty()) {
+            return null;
+        }
+
+        String addressParam = prepareMailAddresses(emailAddresses);
+        if (Strings.isEmpty(addressParam)) {
+            return null;
+        }
+
+        assertAuthenticated();
+        try {
+            // Add parameters limit & offset
+            final List<String> params = new ArrayList<String>(Arrays.asList(
+                "emails", addressParam));
+            // Fire request
+            final JSONObject responseInformation = (JSONObject) RESTUtility.request(
+                Method.GET,
+                session.getAPIServer(),
+                "/users/find_by_emails",
+                VERSION,
+                params.toArray(new String[0]),
+                session);
+
+            return responseInformation.asMap();
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
