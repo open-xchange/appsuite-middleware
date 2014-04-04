@@ -222,11 +222,13 @@ public class RdbTaskSearch extends TaskSearch {
         builder.append(" LEFT JOIN task_folder AS tf ON (tf.id = t.id AND tf.cid = t.cid)");
         builder.append(" LEFT JOIN prg_attachment AS a ON (t.cid = a.cid AND t.id = a.attached)");
         
-        if (searchObject.hasInternalParticipants())
+        if (searchObject.hasInternalParticipants()) {
             builder.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)");
+        }
 
-        if (searchObject.hasExternalParticipants())
+        if (searchObject.hasExternalParticipants()) {
             builder.append(" LEFT JOIN task_eparticipant AS etp ON (t.cid = etp.cid AND t.id = etp.task)");
+        }
         
         builder.append(" WHERE ");
         builder.append(" t.cid = ? AND ");
@@ -260,8 +262,9 @@ public class RdbTaskSearch extends TaskSearch {
             builder.append(" AND (");
             int i = 0;
             for(Integer s : statusFilters) {
-                if (i++ > 0)
+                if (i++ > 0) {
                     builder.append(" OR ");
+                }
                 builder.append(" t.state = ? ");
                 searchParameters.add(s);
             }
@@ -298,8 +301,9 @@ public class RdbTaskSearch extends TaskSearch {
             builder.append(" AND ( ");
             int i = 0;
             for(Integer id : searchObject.getUserIDs()) {
-                if (i++ > 0)
+                if (i++ > 0) {
                     builder.append(" AND ");
+                }
                 builder.append(" t.id IN ( SELECT tp.task FROM task_participant AS tp WHERE t.id = tp.task AND t.cid = tp.cid AND tp.user = ? )");
                 searchParameters.add(id);
             }
@@ -307,9 +311,10 @@ public class RdbTaskSearch extends TaskSearch {
                 //builder.append(" ) ");
             i = 0;
             for(String mail : searchObject.getExternalParticipants()) {
-                if (searchObject.hasInternalParticipants() || i++ > 1)
+                if (searchObject.hasInternalParticipants() || i++ >= 1) {
                     builder.append(" AND ");
-                String preparedPattern = StringCollection.prepareForSearch(mail, false, true);
+                }
+                String preparedPattern = StringCollection.prepareForSearch(mail, false, false);
                 builder.append(" etp.mail = ? ");
                 searchParameters.add(preparedPattern);
             }
@@ -317,10 +322,11 @@ public class RdbTaskSearch extends TaskSearch {
         }
         
         //set the recurrence type (mutually exclusive)
-        if (searchObject.isSingleOccurenceFilter())
+        if (searchObject.isSingleOccurenceFilter()) {
             builder.append(" AND t.recurrence_type = 0 ");
-        else if (searchObject.isSeriesFilter())
+        } else if (searchObject.isSeriesFilter()) {
             builder.append(" AND t.recurrence_type > 0 ");
+        }
         
         builder.append(SQL.getOrder(orderBy, order)).append(SQL.getLimit(searchObject.getStart(), searchObject.getSize()));
         

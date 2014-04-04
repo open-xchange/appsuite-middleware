@@ -56,8 +56,12 @@ import java.util.List;
 import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONException;
 import org.junit.Test;
+import com.openexchange.ajax.find.actions.QueryRequest;
+import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.Filter;
+import com.openexchange.find.tasks.TasksFacetType;
 
 /**
  * {@link FindTasksTests}
@@ -107,6 +111,26 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
                 facets.addAll(FindTasksTestEnvironment.getInstance().getLoActiveFacets().get(i));
         }
         return facets;
+    }
+    
+    /**
+     * Static test
+     * Test with more external participants
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    @Test
+    public void testMoreExternalParticipants() throws OXException, IOException, JSONException {
+        List<ActiveFacet> facets = new ArrayList<ActiveFacet>(2);
+        List<String> queries = new ArrayList<String>(3);
+        queries.add("olox20@premium");
+        queries.add("thorben.betten@premium");
+        queries.add("x_x_x_x_x_x_x@asdasdasda");
+        Filter filter = new Filter(Collections.singletonList("participant"), queries);
+        facets.add(new ActiveFacet(TasksFacetType.TASK_FOLDERS, "custom", new Filter(Collections.<String> emptyList(), Collections.<String> emptyList())));
+        facets.add(new ActiveFacet(TasksFacetType.TASK_PARTICIPANTS, "contact/1/464373", filter));
+        assertResults(0, facets);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
