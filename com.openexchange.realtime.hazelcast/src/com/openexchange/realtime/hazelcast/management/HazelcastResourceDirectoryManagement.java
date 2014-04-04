@@ -60,6 +60,7 @@ import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
+import com.openexchange.realtime.hazelcast.directory.serialization.PortableResource;
 
 
 /**
@@ -122,17 +123,28 @@ public class HazelcastResourceDirectoryManagement extends ManagementObject<Hazel
      * @throws OXException if the map couldn't be fetched from hazelcast
      */
     @Override
-    public Map<String, Map<String, Object>> getResourceMapping() throws OXException {
-        IMap<String,Map<String,Object>> resourceMapping = resourceDirectory.getResourceMapping();
-        Map<String,Map<String,Object>> jmxMap = new HashMap<String,Map<String,Object>>(resourceMapping.size());
-        for (Map.Entry<String, Map<String, Object>> entry : resourceMapping.entrySet()) {
+    public Map<String, String> getResourceMapping() throws OXException {
+        IMap<String, PortableResource> resourceMapping = resourceDirectory.getResourceMapping();
+//        Map<String,Map<String,Object>> jmxMap = new HashMap<String,Map<String,Object>>(resourceMapping.size());
+//        for (Map.Entry<String, Map<String, Object>> entry : resourceMapping.entrySet()) {
+//            String concreteID = entry.getKey();
+//            Map<String, Object> resourceMap = entry.getValue();
+//            Object routingInfo = resourceMap.get("routingInfo");
+//            if(routingInfo!=null) {
+//                resourceMap.put("routingInfo", routingInfo.toString());
+//            }
+//            jmxMap.put(concreteID, resourceMap);
+//        }
+        Map<String,String> jmxMap = new HashMap<String,String>(resourceMapping.size());
+        for (Map.Entry<String, PortableResource> entry : resourceMapping.entrySet()) {
             String concreteID = entry.getKey();
-            Map<String, Object> resourceMap = entry.getValue();
-            Object routingInfo = resourceMap.get("routingInfo");
-            if(routingInfo!=null) {
-                resourceMap.put("routingInfo", routingInfo.toString());
+            PortableResource resource = entry.getValue();
+            StringBuilder sb = new StringBuilder();
+            if(resource.getRoutingInfo() != null) {
+                sb.append(resource.getRoutingInfo().toString()).append(" --- ");
             }
-            jmxMap.put(concreteID, resourceMap);
+            sb.append(resource.getTimestamp().toString());
+            jmxMap.put(concreteID, sb.toString());
         }
         return jmxMap;
     }

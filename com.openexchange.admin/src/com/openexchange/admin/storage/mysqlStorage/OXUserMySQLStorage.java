@@ -399,6 +399,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             con.commit(); // COMMIT
             rollback = false;
+
+            // Invalidate cache
+            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                try {
+                    final Cache jcs = cacheService.getCache("CapabilitiesUser");
+                    jcs.removeFromGroup(user.getId(), ctx.getId().toString());
+                } catch (final OXException e) {
+                    log.error("", e);
+                }
+                try {
+                    final Cache jcs = cacheService.getCache("Capabilities");
+                    jcs.removeFromGroup(user.getId(), ctx.getId().toString());
+                } catch (final OXException e) {
+                    log.error("", e);
+                }
+            }
+
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);

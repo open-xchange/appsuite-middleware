@@ -670,18 +670,22 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     for (int i = len; b && i-- > 0;) {
                         final JSONObject jAttachment = attachments.getJSONObject(i);
                         if (jAttachment.getString(keyContentType).startsWith("text/plain")) {
-                            final String imageURL;
-                            {
-                                final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                                final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, mailPath.getFolder())).id(mailPath.getMailID()).build();
-                                imageURL = imgSource.generateUrl(imageLocation, session);
+                            try {
+                                final String imageURL;
+                                {
+                                    final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
+                                    final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, mailPath.getFolder())).id(mailPath.getMailID()).build();
+                                    imageURL = imgSource.generateUrl(imageLocation, session);
+                                }
+                                final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
+                                final String content = jAttachment.getString(keyContent);
+                                final String newContent = content + imgTag;
+                                jAttachment.put(keyContent, newContent);
+                                jAttachment.put(keySize, newContent.length());
+                                b = false;
+                            } catch (final Exception e) {
+                                LOG.error("Error while inlining image part.", e);
                             }
-                            final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
-                            final String content = jAttachment.getString(keyContent);
-                            final String newContent = content + imgTag;
-                            jAttachment.put(keyContent, newContent);
-                            jAttachment.put(keySize, newContent.length());
-                            b = false;
                         }
                     }
                     if (b) { // No suitable text/plain
@@ -692,17 +696,21 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 if (jAttachment.optString(CONTENT_TYPE, "").startsWith("text/htm") && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null))) {
                                     String content = jAttachment.optString(CONTENT, "null");
                                     if (!"null".equals(content)) {
-                                        // Append to first one
-                                        final String imageURL;
-                                        {
-                                            final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                                            final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, mailPath.getFolder())).id(mailPath.getMailID()).build();
-                                            imageURL = imgSource.generateUrl(imageLocation, session);
+                                        try {
+                                            // Append to first one
+                                            final String imageURL;
+                                            {
+                                                final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
+                                                final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, mailPath.getFolder())).id(mailPath.getMailID()).build();
+                                                imageURL = imgSource.generateUrl(imageLocation, session);
+                                            }
+                                            final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
+                                            content = new StringBuilder(content).append(imgTag).toString();
+                                            jAttachment.put(CONTENT, content);
+                                            b = false;
+                                        } catch (final Exception e) {
+                                            LOG.error("Error while inlining image part.", e);
                                         }
-                                        final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
-                                        content = new StringBuilder(content).append(imgTag).toString();
-                                        jAttachment.put(CONTENT, content);
-                                        b = false;
                                     }
                                 }
                             }

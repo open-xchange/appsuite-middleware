@@ -50,6 +50,7 @@
 package com.openexchange.admin.plugins;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -110,10 +111,11 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterface {
         ContextAdapter contextAdapter = new ContextAdapter(ctx);
         UserAdapter userAdapter = new UserAdapter(user);
         ContactAdapter contactAdapter = new ContactAdapter(user, ctx.getId().intValue());
+        Map<String, Object> props = UserServiceInterceptor.EMPTY_PROPS;
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         for (UserServiceInterceptor interceptor : interceptors) {
             try {
-                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter);
+                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter, props);
             } catch (OXException e) {
                 throw new PluginException(e);
             }
@@ -135,10 +137,11 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterface {
         ContextAdapter contextAdapter = new ContextAdapter(ctx);
         UserAdapter userAdapter = new UserAdapter(user);
         ContactAdapter contactAdapter = new ContactAdapter(user, ctx.getId().intValue());
+        Map<String, Object> props = UserServiceInterceptor.EMPTY_PROPS;
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         for (UserServiceInterceptor interceptor : interceptors) {
             try {
-                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter);
+                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter, props);
             } catch (OXException e) {
                 throw new PluginException(e);
             }
@@ -150,10 +153,11 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterface {
         ContextAdapter contextAdapter = new ContextAdapter(ctx);
         UserAdapter userAdapter = new UserAdapter(user);
         ContactAdapter contactAdapter = new ContactAdapter(user, ctx.getId().intValue());
+        Map<String, Object> props = UserServiceInterceptor.EMPTY_PROPS;
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         for (UserServiceInterceptor interceptor : interceptors) {
             try {
-                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter);
+                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter, props);
             } catch (OXException e) {
                 throw new PluginException(e);
             }
@@ -165,10 +169,11 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterface {
         ContextAdapter contextAdapter = new ContextAdapter(ctx);
         UserAdapter userAdapter = new UserAdapter(user);
         ContactAdapter contactAdapter = new ContactAdapter(user, ctx.getId().intValue());
+        Map<String, Object> props = UserServiceInterceptor.EMPTY_PROPS;
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         for (UserServiceInterceptor interceptor : interceptors) {
             try {
-                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter);
+                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter, props);
             } catch (OXException e) {
                 throw new PluginException(e);
             }

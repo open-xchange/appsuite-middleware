@@ -49,6 +49,7 @@
 
 package com.openexchange.user;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -82,12 +83,12 @@ public abstract class AbstractUserServiceInterceptor implements UserServiceInter
     }
 
     @Override
-    public void beforeUpdate(Context context, User user, Contact contactData) throws OXException {
+    public void beforeUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
         // no
     }
 
     @Override
-    public void afterUpdate(Context context, User user, Contact contactData) throws OXException {
+    public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
         // no
     }
 
