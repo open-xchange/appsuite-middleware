@@ -89,6 +89,7 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/hazelcast/
+%config(noreplace) /opt/open-xchange/etc/*
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog

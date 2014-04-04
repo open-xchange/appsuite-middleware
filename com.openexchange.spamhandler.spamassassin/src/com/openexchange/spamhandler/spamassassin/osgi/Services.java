@@ -49,29 +49,70 @@
 
 package com.openexchange.spamhandler.spamassassin.osgi;
 
-/**
- * {@link ServiceRegistry} - The service registry for Ldap.
- *
- * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- */
-public final class ServiceRegistry extends com.openexchange.osgi.ServiceRegistry {
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
-    private static final ServiceRegistry instance = new ServiceRegistry();
+/**
+ * {@link Services} - The static service lookup.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class Services {
 
     /**
-     * Gets the service registry instance.
-     *
-     * @return The service registry instance.
+     * Initializes a new {@link Services}.
      */
-    public static ServiceRegistry getInstance() {
-        return instance;
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
     /**
-     * Initializes a new {@link ServiceRegistry}.
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
      */
-    private ServiceRegistry() {
-        super(2);
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.spamhandler.spamassassin\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }
