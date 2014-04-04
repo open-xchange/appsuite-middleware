@@ -55,7 +55,7 @@ import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.spamhandler.spamassassin.exceptions.SpamhandlerSpamassassinConfigurationExceptionCode;
-import com.openexchange.spamhandler.spamassassin.osgi.ServiceRegistry;
+import com.openexchange.spamhandler.spamassassin.osgi.Services;
 import com.openexchange.spamhandler.spamassassin.osgi.SpamAssassinSpamHandlerActivator;
 
 /**
@@ -200,7 +200,7 @@ public class PropertyHandler {
     public void loadProperties() throws OXException {
         final StringBuilder logBuilder = new StringBuilder();
 
-        final ConfigurationService configuration = ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService configuration = Services.getService(ConfigurationService.class);
 
         logBuilder.append("\nLoading spamhandler spamassassin properties...\n");
 
