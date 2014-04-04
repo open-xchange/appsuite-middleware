@@ -8,6 +8,7 @@ import com.openexchange.realtime.packet.IDComponentsParserTest;
 import com.openexchange.realtime.packet.IDManagerTest;
 import com.openexchange.realtime.packet.IDTest;
 import com.openexchange.realtime.packet.PresenceTest;
+import com.openexchange.realtime.packet.StanzaTest;
 import com.openexchange.realtime.payload.FluidPayloadTreeNodeBuilderTest;
 import com.openexchange.realtime.payload.PayloadTreeNodeTest;
 import com.openexchange.realtime.payload.PayloadTreeTest;
@@ -24,7 +25,8 @@ import com.openexchange.realtime.util.StanzaSequenceGateTest;
     IDComponentsParserTest.class,
     FluidPayloadTreeNodeBuilderTest.class,
     PayloadTreeNodeTest.class,
-    PayloadTreeTest.class
+    PayloadTreeTest.class,
+    StanzaTest.class
 })
 public class UnitTests {
 

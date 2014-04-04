@@ -272,7 +272,7 @@ public class Presence extends Stanza {
      * @return The default payloads as defined in the Presence specification.
      */
     public Collection<PayloadTree> getDefaultPayloads() {
-        return filterPayloads(getDefaultsPredicate());
+        return filterPayloadTrees(getDefaultsPredicate());
     }
 
     /**
@@ -281,7 +281,7 @@ public class Presence extends Stanza {
      * @return Extension payloads that aren't defined in the Presence specification and not accessible via getters and setters.
      */
     public Collection<PayloadTree> getExtensions() {
-        return filterPayloads(getExtensionsPredicate());
+        return filterPayloadTrees(getExtensionsPredicate());
     }
 
     @Override

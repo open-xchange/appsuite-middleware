@@ -93,7 +93,7 @@ public class HistoryAction implements AJAXActionService {
         history.transformPayloads("json");
         
         JSONArray array = new JSONArray();
-        Collection<PayloadTree> payloads = history.getPayloads(new ElementPath("china", "replay"));
+        Collection<PayloadTree> payloads = history.getPayloadTrees(new ElementPath("china", "replay"));
         for (PayloadTree payloadTree : payloads) {
             array.put(payloadTree.getRoot().getData());
         }

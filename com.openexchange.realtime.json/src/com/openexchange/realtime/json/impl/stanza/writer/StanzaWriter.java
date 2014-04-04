@@ -135,7 +135,7 @@ public class StanzaWriter {
      * @throws JSONException If writing the PayloadTrees fails
      */
     private void writePayloadTrees(final Stanza stanza, final JSONObject jsonStanza) throws JSONException {
-        Collection<PayloadTree> payloadTrees = stanza.getPayloads();
+        Collection<PayloadTree> payloadTrees = stanza.getPayloadTrees();
         JSONArray payloadArray = new JSONArray();
         for (PayloadTree payloadTree : payloadTrees) {
             payloadArray.put(writePayloadTreeNode(payloadTree.getRoot()));
@@ -209,7 +209,7 @@ public class StanzaWriter {
 
     private boolean isArrayNode(PayloadTreeNode node) {
         Object data = node.getData();
-        if (data == null && node.hasChildren()) {
+        if ((data == null || JSONObject.NULL.equals(data))&& node.hasChildren()) {
             return true;
         }
         return false;

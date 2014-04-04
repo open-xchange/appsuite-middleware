@@ -109,7 +109,7 @@ public class StanzaMatcher extends BaseMatcher<Stanza> {
         }
         if (payload instanceof Matcher) {
             Matcher payloadMatcher = (Matcher) payload;
-            if (!payloadMatcher.matches(s.getPayloads())) {
+            if (!payloadMatcher.matches(s.getPayloadTrees())) {
                 return false;
             }
         } else {

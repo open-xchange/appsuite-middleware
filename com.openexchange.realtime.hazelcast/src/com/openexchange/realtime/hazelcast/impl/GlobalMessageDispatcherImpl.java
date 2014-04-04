@@ -112,8 +112,11 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
     }
 
     @Override
-    public Map<ID, OXException> send(Stanza stanza) throws OXException {
-        return send(stanza, directory.get(stanza.getTo()));
+    public void send(Stanza stanza) throws OXException {
+        Map<ID, OXException> exceptions = send(stanza, directory.get(stanza.getTo()));
+        if(!exceptions.isEmpty()) {
+            throw exceptions.values().iterator().next();
+        }
     }
 
     public ResponseChannel getChannel() {

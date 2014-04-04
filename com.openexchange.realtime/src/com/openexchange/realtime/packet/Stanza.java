@@ -70,10 +70,13 @@ import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
+import org.apache.commons.lang.Validate;
 
 /**
- * {@link Stanza} - Abstract information unit that can be send from one entity to another.
- *
+ * {@link Stanza} - Abstract information unit that can be send from one entity to another. Actual Data is held as leafs of a tree-like
+ * structure identified by an ElementPath leading to that data. A Stanza can carry multiple of those trees, each again identified by an
+ * Elementpath.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -257,7 +260,7 @@ public abstract class Stanza implements Serializable {
      */
     public Collection<ElementPath> getElementPaths() {
         Set<ElementPath> paths = new HashSet<ElementPath>();
-        for (PayloadTree tree : getPayloads()) {
+        for (PayloadTree tree : getPayloadTrees()) {
             paths.addAll(tree.getElementPaths());
         }
         return paths;
@@ -268,7 +271,7 @@ public abstract class Stanza implements Serializable {
      *
      * @return A List of PayloadTrees.
      */
-    public Collection<PayloadTree> getPayloads() {
+    public Collection<PayloadTree> getPayloadTrees() {
         ArrayList<PayloadTree> resultList = new ArrayList<PayloadTree>();
         Collection<List<PayloadTree>> values = payloads.values();
         for (List<PayloadTree> list : values) {
@@ -351,13 +354,13 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * Get a Collection of Payloads that match an ElementPath
+     * Get a Collection of Payloadtrees that match an ElementPath
      *
      * @param elementPath The Elementpath identifying the Payload
      * @return A Collection of PayloadTrees
      */
     @SuppressWarnings("unchecked")
-    public Collection<PayloadTree> getPayloads(final ElementPath elementPath) {
+    public Collection<PayloadTree> getPayloadTrees(final ElementPath elementPath) {
         List<PayloadTree> list = payloads.get(elementPath);
         if (list == null) {
             list = Collections.EMPTY_LIST;
@@ -367,19 +370,65 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * Filter the payloads based on a Predicate.
+     * Filter the payload trees based on a Predicate.
      *
      * @param predicate
      * @return Payloads matching the Predicate or an empty Collection
      */
-    public Collection<PayloadTree> filterPayloads(Predicate<PayloadTree> predicate) {
+    public Collection<PayloadTree> filterPayloadTrees(Predicate<PayloadTree> predicate) {
         Collection<PayloadTree> result = new ArrayList<PayloadTree>();
-        for (PayloadTree element : getPayloads()) {
+        for (PayloadTree element : getPayloadTrees()) {
             if (predicate.apply(element)) {
                 result.add(element);
             }
         }
         return result;
+    }
+
+    /**
+     * 
+     * @param nodePaths
+     * @return
+     */
+    public Collection<PayloadElement> filterPayloadElements(ElementPath... nodePaths) {
+        Validate.notEmpty(nodePaths, "Mandatory parameter nodePath is missing.");
+        return filterPayloadElements(getPayloadTrees(), nodePaths);
+    }
+
+    /**
+     * Filter matching PayloadElements from a PayloadTree 
+     *  
+     * @param treePath The {@link ElementPath} identifying the PayloadTree
+     * @param nodePaths The {@link ElementPath} identifying the matching PayloadElements 
+     * @return
+     */
+    public Collection<PayloadElement> filterPayloadElementsFromTree(ElementPath treePath, ElementPath... nodePaths) {
+        Validate.notNull(treePath, "Mandatory parameter treePath is missing.");
+        Validate.notEmpty(nodePaths, "Mandatory parameter nodePath is missing.");
+        return filterPayloadElements(getPayloadTrees(treePath), nodePaths);
+    }
+
+    /**
+     * Filter matching PayloadElements 
+     * @param trees
+     * @param nodePaths
+     * @return
+     */
+    private Collection<PayloadElement> filterPayloadElements(Collection<PayloadTree> trees, ElementPath... nodePaths) {
+        Set<PayloadElement> matchingElements = new HashSet<PayloadElement>();
+        if(trees.isEmpty() || nodePaths.length == 0) {
+            return matchingElements;
+        }
+        for (PayloadTree tree : trees) {
+            for (ElementPath elementPath : nodePaths) {
+                Collection<PayloadTreeNode> matchingNodes = tree.search(elementPath);
+                //PayloadTreeNodes contain the actual PayloadElements we are interested in plus tree metadata
+                for (PayloadTreeNode payloadTreeNode : matchingNodes) {
+                    matchingElements.add(payloadTreeNode.getPayloadElement());
+                }
+            }
+        }
+        return matchingElements;
     }
 
     /**
@@ -389,7 +438,7 @@ public abstract class Stanza implements Serializable {
      */
     protected Map<ElementPath, List<PayloadTree>> deepCopyPayloads() {
         HashMap<ElementPath, List<PayloadTree>> copiedPayloads = new HashMap<ElementPath, List<PayloadTree>>();
-        for (PayloadTree tree : getPayloads()) {
+        for (PayloadTree tree : getPayloadTrees()) {
             PayloadTree copiedTree = new PayloadTree(tree);
             addPayloadToMap(copiedTree, copiedPayloads);
         }
@@ -478,8 +527,8 @@ public abstract class Stanza implements Serializable {
     }
 
     public void transformPayloads(String format) throws OXException {
-        List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloads().size());
-        for (PayloadTree tree : getPayloads()) {
+        List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloadTrees().size());
+        for (PayloadTree tree : getPayloadTrees()) {
             tree = tree.toExternal(format);
             copy.add(tree);
         }
@@ -487,8 +536,8 @@ public abstract class Stanza implements Serializable {
     }
 
     public void transformPayloadsToInternal() throws OXException {
-        List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloads().size());
-        for (PayloadTree tree : getPayloads()) {
+        List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloadTrees().size());
+        for (PayloadTree tree : getPayloadTrees()) {
             tree = tree.toInternal();
             copy.add(tree);
         }

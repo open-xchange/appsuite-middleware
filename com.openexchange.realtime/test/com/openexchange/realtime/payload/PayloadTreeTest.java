@@ -157,7 +157,13 @@ public class PayloadTreeTest {
         treeWithRootNode = new PayloadTree(payloadTreeNode1);
 
         /*
-         * tree | 1 /\ 2 4 / /\ 3 5 6
+         * tree
+         * |
+         * 1
+         * /\
+         * 2 4
+         * / /\
+         * 3 5 6
          */
         filledTree = new PayloadTree(filledTreePayloadTreeNode1);
 

@@ -103,7 +103,7 @@ public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements Compo
         // Retrieve the message from the payloads
         StringBuilder message = new StringBuilder();
         // We're iterating over all messages that are constructed with the china.message element path
-        for(PayloadTree messages: stanza.getPayloads(new ElementPath("china", "message"))){
+        for(PayloadTree messages: stanza.getPayloadTrees(new ElementPath("china", "message"))){
             // Simply append all messages
             message.append(messages.getRoot().getData().toString());
         }
