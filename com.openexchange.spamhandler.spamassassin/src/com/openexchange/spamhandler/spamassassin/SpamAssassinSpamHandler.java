@@ -138,7 +138,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
 
         @Override
         public String toString() {
-            StringBuilder builder = new StringBuilder(128);
+            final StringBuilder builder = new StringBuilder(128);
             builder.append("[");
             if (hostname != null) {
                 builder.append("hostname=").append(hostname).append(", ");
@@ -273,7 +273,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         }
     }
 
-    private void copyMessagesToConfirmedHamAndInbox(final UnwrapParameter paramObject, final String[] plainIDsArr, final String confirmedHamFullname, final SpamdSettings spamdSettings, int accountId, Session session) throws OXException {
+    private void copyMessagesToConfirmedHamAndInbox(final UnwrapParameter paramObject, final String[] plainIDsArr, final String confirmedHamFullname, final SpamdSettings spamdSettings, final int accountId, final Session session) throws OXException {
         final MailAccess<?, ?> mailAccess = paramObject.getMailAccess();
         final String spamFullname = paramObject.getSpamFullname();
         if (isCreateConfirmedHam()) {
@@ -288,7 +288,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         }
     }
 
-    private MailMessage[] getNestedMailsAndHandleOthersAsPlain(final UnwrapParameter paramObject, final String confirmedHamFullname, final String[] nestedMessages, final SpamdSettings spamdSettings, int accountId, Session session) throws OXException {
+    private MailMessage[] getNestedMailsAndHandleOthersAsPlain(final UnwrapParameter paramObject, final String confirmedHamFullname, final String[] nestedMessages, final SpamdSettings spamdSettings, final int accountId, final Session session) throws OXException {
         final int nestedmessagelength = nestedMessages.length;
         final List<MailMessage> nestedMails = new ArrayList<MailMessage>(nestedmessagelength);
         final String[] exc = new String[1];
@@ -324,7 +324,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             } else {
                 // We have a special service providing login information, so we use that one...
                 try {
-                    SpamdProvider provider = spamdservice.getProvider(session);
+                    final SpamdProvider provider = spamdservice.getProvider(session);
                     spamdSettings = new SpamdSettings(provider.getHostname(), provider.getPort(), provider.getUsername());
                     LOGGER.debug("Fetched SpamAssassin configuration from SpamdService instance {} (user={}, context={}): {}", spamdservice.getClass().getSimpleName(), session.getUserId(), session.getContextId(), spamdSettings.toString());
                 } catch (final OXException e) {
@@ -345,7 +345,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
      * @param spamdsettings the settings how spamd can be reached
      * @throws OXException
      */
-    private void sendToSpamd(final String source, final boolean spam, final SpamdSettings spamdsettings, String mailId, String fullName, int accountId, Session session) throws OXException {
+    private void sendToSpamd(final String source, final boolean spam, final SpamdSettings spamdsettings, final String mailId, final String fullName, final int accountId, final Session session) throws OXException {
         try {
             // Configure service access
             final Spamc spamc = new Spamc();
@@ -359,7 +359,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
 
             // Provide message as spam/ham
             LOGGER.debug("Going to send {} message {} from folder {} in account {} to SpamAssassin service {} (user={}, context={})", spam ? "spam" : "ham", mailId, fullName, accountId, spamdsettings.getHostname(), session.getUserId(), session.getContextId());
-            SpamdResponse resp = spamc.tell(source, spam, true, true, false, false);
+            final SpamdResponse resp = spamc.tell(source, spam, true, true, false, false);
 
             // Examine response code
             final int responseCode = resp.getResponseCode();
@@ -396,7 +396,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         return new PlainAndNestedMessages(extractIDs.toArray(new String[extractIDs.size()]), plainIDs.toArray(new String[plainIDs.size()]));
     }
 
-    private void spamdMessageProcessing(final MailMessage[] mails, final SpamdSettings spamdSettings, final boolean spam, int accountId, Session session) throws OXException {
+    private void spamdMessageProcessing(final MailMessage[] mails, final SpamdSettings spamdSettings, final boolean spam, final int accountId, final Session session) throws OXException {
         for (final MailMessage mail : mails) {
             // ...then get the plaintext of the mail as spamhandler is not able to cope with our mail objects ;-) ...
             final String source = mail.getSource();
@@ -406,7 +406,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         }
     }
 
-    private void unwrap(final UnwrapParameter parameterObject, final String[] mailIDs, final SpamdSettings spamdSettings, int accountId, Session session) throws OXException {
+    private void unwrap(final UnwrapParameter parameterObject, final String[] mailIDs, final SpamdSettings spamdSettings, final int accountId, final Session session) throws OXException {
         final MailAccess<?, ?> mailAccess = parameterObject.getMailAccess();
         /*
          * Mark as ham. In contrast to mark as spam this is a very time sucking operation. In order to deal with the original messages

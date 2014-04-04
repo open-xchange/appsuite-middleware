@@ -243,7 +243,7 @@ public abstract class AbstractPerformer {
          * Check for duplicate
          */
         final Locale locale = storageParameters.getUser().getLocale();
-        final String lcName = name.toLowerCase(locale);
+        final String lcName = name.toLowerCase(locale).trim();
         for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true, true)) {
             final String localizedName = userizedFolder.getLocalizedName(locale);
             if (localizedName.toLowerCase(locale).equals(lcName) && (null == excludee || !excludee.equals(userizedFolder.getID()))) {

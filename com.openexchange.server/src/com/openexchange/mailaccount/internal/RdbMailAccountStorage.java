@@ -1221,8 +1221,27 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         }
                     }
                     checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
+
+                    // Check protocol mismatch
+                    final String newProtocol = mailAccount.getMailProtocol();
+                    if (null != newProtocol) {
+                        final String oldProtocol = storageVersion.getMailProtocol();
+                        if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
+                            throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(user), I(cid));
+                        }
+                    }
                 } else if (attributes.contains(Attribute.MAIL_URL_LITERAL)) {
                     checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
+
+                    // Check protocol mismatch
+                    final String newProtocol = mailAccount.getMailProtocol();
+                    if (null != newProtocol) {
+                        storageVersion = getMailAccount(mailAccount.getId(), user, cid, con);
+                        final String oldProtocol = storageVersion.getMailProtocol();
+                        if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
+                            throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(user), I(cid));
+                        }
+                    }
                 }
 
                 if (prepareURL(attributes, Attribute.TRANSPORT_URL_ATTRIBUTES, Attribute.TRANSPORT_URL_LITERAL)) {
@@ -1240,8 +1259,29 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         }
                     }
                     checkDuplicateTransportAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
+
+                    // Check protocol mismatch
+                    final String newProtocol = mailAccount.getTransportProtocol();
+                    if (null != newProtocol) {
+                        final String oldProtocol = storageVersion.getTransportProtocol();
+                        if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
+                            throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(user), I(cid));
+                        }
+                    }
                 } else if (attributes.contains(Attribute.TRANSPORT_URL_LITERAL)) {
                     checkDuplicateTransportAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
+
+                    // Check protocol mismatch
+                    final String newProtocol = mailAccount.getTransportProtocol();
+                    if (null != newProtocol) {
+                        if (null == storageVersion) {
+                            storageVersion = getMailAccount(mailAccount.getId(), user, cid, con);
+                        }
+                        final String oldProtocol = storageVersion.getTransportProtocol();
+                        if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
+                            throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(user), I(cid));
+                        }
+                    }
                 }
 
                 attributes.removeAll(Attribute.MAIL_URL_ATTRIBUTES);
@@ -1697,8 +1737,32 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         try {
+            // Check prerequisites
             checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
             checkDuplicateTransportAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
+            // Check protocol mismatch
+            {
+                final MailAccount storageVersion = getMailAccount(mailAccount.getId(), user, cid, con);
+                // Mail protocol
+                String newProtocol = mailAccount.getMailProtocol();
+                if (null != newProtocol) {
+                    final String oldProtocol = storageVersion.getMailProtocol();
+                    if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
+                        throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(user), I(cid));
+                    }
+                }
+
+                // Transport protocol
+                newProtocol = mailAccount.getTransportProtocol();
+                if (null != newProtocol) {
+                    final String oldProtocol = storageVersion.getTransportProtocol();
+                    if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
+                        throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(user), I(cid));
+                    }
+                }
+            }
+
+            // Update...
             con.setAutoCommit(false);
             {
                 final String encryptedPassword = encrypt(mailAccount.getPassword(), session);

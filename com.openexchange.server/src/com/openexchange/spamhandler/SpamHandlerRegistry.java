@@ -182,7 +182,7 @@ public final class SpamHandlerRegistry {
         }
         final MailProviderGetter mailProviderGetter;
         if (null == mailProvider) {
-            mailProviderGetter = new SessionMailProviderGetter(session, accountId);
+            mailProviderGetter = new SessionMailProviderGetter(mailAccount.getMailProtocol());
         } else {
             mailProviderGetter = new SimpleMailProviderGetter(mailProvider);
         }
@@ -357,19 +357,16 @@ public final class SpamHandlerRegistry {
 
     private static final class SessionMailProviderGetter implements MailProviderGetter {
 
-        private final Session session;
+        private final String protocolName;
 
-        private final int accountId;
-
-        public SessionMailProviderGetter(final Session session, final int accountId) {
+        SessionMailProviderGetter(final String protocolName) {
             super();
-            this.session = session;
-            this.accountId = accountId;
+            this.protocolName = protocolName;
         }
 
         @Override
         public MailProvider getMailProvider() throws OXException {
-            return MailProviderRegistry.getMailProviderBySession(session, accountId);
+            return MailProviderRegistry.getRealMailProvider(protocolName);
         }
     }
 
@@ -377,7 +374,7 @@ public final class SpamHandlerRegistry {
 
         private final MailProvider mailProvider;
 
-        public StaticMailProviderGetter(final MailProvider mailProvider) {
+        StaticMailProviderGetter(final MailProvider mailProvider) {
             super();
             this.mailProvider = mailProvider;
         }

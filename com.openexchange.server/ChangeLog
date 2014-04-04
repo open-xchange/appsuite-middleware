@@ -1,3 +1,12 @@
+* 2014-04-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31582: Remove leading and trailing whitespaces in duplicated folder check
+
+* 2014-04-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31782: Proper spam handler look-up if wrapping SMAL bundle is enabled
+ - Fix for bug 31906: Deny changing mail/transport protocol on mail account update operation
+
 * 2014-04-03 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31884: Avoid NPE.
@@ -164,10 +173,6 @@
  - Fix for bug 31587: Pass obtained BundleContext instance to initializing method, not the stored one to ensure working on most recent bundle/framework state
  - Fix for bug 31602 + 31603: Deal with possible absence of needed service
  - Fix for bug 31601: Ensure a session reference is present prior to performing permission checks
-
-* 2014-03-16 - thorben.betten@open-xchange.com
-
- - Fix for bug 30848: Properly recognize & transmit an S/MIME encrypted mail
 
 * 2014-03-15 - thorben.betten@open-xchange.com
 
