@@ -183,6 +183,7 @@ import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
+import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.AbstractTask;
@@ -1571,7 +1572,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Do list append
                  */
                 final List<Conversation> conversations;
-                boolean concurrent = false;
+                final boolean concurrent = false;
                 if (body || concurrent) {
                     Future<List<MailMessage>> messagesFromSentFolder = null;
                     if (mergeWithSent) {
@@ -3792,12 +3793,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Handle spam
                  */
                 {
-                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId, IMAPProvider.getInstance()).handleSpam(
-                        accountId,
-                        imapFolder.getFullName(),
-                        longs2uids(msgUIDs),
-                        move,
-                        session);
+                    final SpamHandler spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session, accountId, IMAPProvider.getInstance());
+                    spamHandler.handleSpam(accountId, imapFolder.getFullName(), longs2uids(msgUIDs), move, session);
                     /*
                      * Close and reopen to force internal message cache update
                      */
@@ -3824,7 +3821,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Handle ham.
              */
             {
-                SpamHandlerRegistry.getSpamHandlerBySession(session, accountId, IMAPProvider.getInstance()).handleHam(
+                final SpamHandler spamHandler = SpamHandlerRegistry.getSpamHandlerBySession(session, accountId, IMAPProvider.getInstance());
+                spamHandler.handleHam(
                     accountId,
                     imapFolder.getFullName(),
                     longs2uids(msgUIDs),
