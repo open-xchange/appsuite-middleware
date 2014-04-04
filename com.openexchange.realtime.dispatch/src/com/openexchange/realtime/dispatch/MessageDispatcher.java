@@ -76,8 +76,11 @@ public interface MessageDispatcher {
     
     /**
      * Delivers a stanza using the resource directory to resolve the recipients
+     * 
+     * @param stanza The Stanza to send
+     * @throws OXException when delivery fails
      */
-    public Map<ID, OXException> send(Stanza stanza) throws OXException;
+    public void send(Stanza stanza) throws OXException;
 
     /**
      * Send a message and synchronously waits for a response. The recipient is supposed to send exactly one Stanza

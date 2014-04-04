@@ -201,12 +201,26 @@ public class GroupDispatcher implements ComponentHandle {
         return false;
     }
 
+    /**
+     * Send a copy of a {@link Stanza} {@link Stanza} to all members of this group excluding a given set of users.
+     * 
+     * @param stanza The stanza to send 
+     * @param inResponseTo The stanza we are responding to
+     * @param excluded The {@link Set} of users to be excluded when sending
+     * @throws OXException
+     */
     public void relayToAll(Stanza stanza, ID... excluded) throws OXException {
         relayToAll(stanza, null, excluded);
     }
 
     /**
-     * Send a copy of the stanza to all members of this group, excluding the ones provided as the rest of the arguments.
+     * Send a copy of a {@link Stanza} as response to another {@link Stanza} to all members of this group excluding a given set of users. "As
+     * response" means we add a special tracer and the log messages of the {@link Stanza} we are responding to.
+     * 
+     * @param stanza The stanza to send
+     * @param inResponseTo The stanza we are responding to
+     * @param excluded The {@link Set} of users to be excluded when sending
+     * @throws OXException
      */
     public void relayToAll(Stanza stanza, Stanza inResponseTo, ID... excluded) throws OXException {
         MessageDispatcher dispatcher = GroupServiceRegistry.getInstance().getService(MessageDispatcher.class);
@@ -231,18 +245,33 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     /**
-     * Relay this message to all except the original sender ("from") of the stanza.
+     * Send a copy of a {@link Stanza} to all members of this group excluding the client that sent the this {@link Stanza}.
+     * 
+     * @param stanza
+     * @throws OXException
      */
     public void relayToAllExceptSender(Stanza stanza) throws OXException {
         relayToAll(stanza, stanza.getFrom());
     }
 
+    /**
+     * Send a copy of a {@link Stanza} as response to another {@link Stanza} to all members of this group excluding the client that sent
+     * this {@link Stanza}.
+     * 
+     * @param stanza The stanza to send 
+     * @param inResponseTo The stanza we are responding to
+     * @throws OXException
+     */
     public void relayToAllExceptSender(Stanza stanza, Stanza inResponseTo) throws OXException {
         relayToAll(stanza, inResponseTo, stanza.getFrom());
     }
 
     /**
-     * Relay this message just to a specific receiver
+     * Send a {@link Stanza} to just one specific recipient
+     * 
+     * @param stanza The {@link Stanza} to send
+     * @param id The {@link ID} of the recipient
+     * @throws OXException
      */
     public void relayToID(Stanza stanza, ID id) throws OXException {
         MessageDispatcher dispatcher = GroupServiceRegistry.getInstance().getService(MessageDispatcher.class);
@@ -427,8 +456,8 @@ public class GroupDispatcher implements ComponentHandle {
      * Makes a copy of the payload in the stanza and puts it into the copy
      */
     protected void copyPayload(Stanza stanza, Stanza copy) throws OXException {
-        List<PayloadTree> copyList = new ArrayList<PayloadTree>(stanza.getPayloads().size());
-        for (PayloadTree tree : stanza.getPayloads()) {
+        List<PayloadTree> copyList = new ArrayList<PayloadTree>(stanza.getPayloadTrees().size());
+        for (PayloadTree tree : stanza.getPayloadTrees()) {
             copyList.add(tree.internalClone());
         }
         copy.setPayloads(copyList);
