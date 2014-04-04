@@ -7589,9 +7589,9 @@ msgstr ""
 msgid "E-Mail address is invalid"
 msgstr ""
 
-#. Already sent an invitation to E-Mail address
+#. Already sent an invitation to E-Mail address: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:86
-msgid "Already sent an invitation to E-Mail address"
+msgid "Already sent an invitation to E-Mail address: \"%1$s\""
 msgstr ""
 
 #. The E-Mail address already belongs to a XING user
@@ -7629,6 +7629,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:107
 msgid ""
 "The text message size exceeds the maximum allowed number of 140 characters."
+msgstr ""
+
+#. The mandatory parameter \"%1$s\ is missing in the request body.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:110
+msgid "The mandatory parameter \"%1$s\" is missing in the request body"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
