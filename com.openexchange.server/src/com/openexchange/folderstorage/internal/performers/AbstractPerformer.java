@@ -239,19 +239,18 @@ public abstract class AbstractPerformer {
             return null;
         }
         /*
-         * Check for duplicate (if not real tree)
+         * Check for duplicate
          */
         final Locale locale = storageParameters.getUser().getLocale();
-        final String lcName = name.toLowerCase(locale);
-        if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
-            for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true, true)) {
-                final String localizedName = userizedFolder.getLocalizedName(locale);
-                if (localizedName.toLowerCase(locale).equals(lcName) && (null == excludee || !excludee.equals(userizedFolder.getID()))) {
-                    final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
-                    checkOpenedStorage(realStorage, openedStorages);
-                    final OXException e = FolderExceptionErrorMessage.EQUAL_NAME.create(name, realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale), treeId);
-                    return new CheckForDuplicateResult(userizedFolder.getID(), e);
-                }
+        final String lcName = name.toLowerCase(locale).trim();
+        for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true, true)) {
+            final String localizedName = userizedFolder.getLocalizedName(locale);
+            if (localizedName.toLowerCase(locale).equals(lcName) && (null == excludee || !excludee.equals(userizedFolder.getID()))) {
+                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
+                checkOpenedStorage(realStorage, openedStorages);
+                final OXException e = FolderExceptionErrorMessage.EQUAL_NAME.create(
+                    name, realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale), treeId);
+                return new CheckForDuplicateResult(userizedFolder.getID(), e);
             }
         }
         /*
