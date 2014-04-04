@@ -1,6 +1,7 @@
 * 2014-04-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 31782: Proper spam handler look-up if wrapping SMAL bundle is enabled
+ - Fix for bug 31906: Deny changing mail/transport protocol on mail account update operation
 
 * 2014-04-03 - martin.herfurth@open-xchange.com
 
