@@ -6959,6 +6959,11 @@ msgstr ""
 msgid "The given host name \"%1$s\" is not allowed."
 msgstr ""
 
+#. The protocol must not changed from %1$s to %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:128
+msgid "The protocol must not changed from %1$s to %2$s."
+msgstr ""
+
 #. *
 #. * Found resource(s) with same identifier \"%1$s\".
 #.
