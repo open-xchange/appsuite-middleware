@@ -67,6 +67,7 @@ import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.IDUtil;
 import com.openexchange.drive.internal.SyncSession;
+import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.drive.sync.IntermediateSyncResult;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -201,15 +202,21 @@ public class FileCopyOptimizer extends FileActionOptimizer {
      * @return The found file versions, each mapped to the matching checksum
      * @throws OXException
      */
-    private static Map<String, ServerFileVersion> searchMatchingFileVersions(SyncSession session, List<String> checksums) throws OXException {
+    private static Map<String, ServerFileVersion> searchMatchingFileVersions(final SyncSession session, final List<String> checksums) throws OXException {
         Map<String, ServerFileVersion> matchingFileVersions = new HashMap<String, ServerFileVersion>();
         if (0 < checksums.size()) {
             List<FileChecksum> checksumsToInsert = new ArrayList<FileChecksum>();
             SearchIterator<File> searchIterator = null;
             try {
-                searchIterator = session.getStorage().getFileAccess().search(
-                    null, getSearchTermForChecksums(checksums), DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT,
-                    FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                searchIterator = session.getStorage().wrapInTransaction(new StorageOperation<SearchIterator<File>>() {
+
+                    @Override
+                    public SearchIterator<File> call() throws OXException {
+                        return session.getStorage().getFileAccess().search(
+                            null, getSearchTermForChecksums(checksums), DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT,
+                            FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                    }
+                });
                 while (searchIterator.hasNext()) {
                     File file = searchIterator.next();
                     String md5 = file.getFileMD5Sum();
