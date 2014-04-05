@@ -1,3 +1,7 @@
+* 2014-04-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31903: Added "info tore" to necessary dependencies
+
 * 2014-04-05 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31899: Pass unique folder ID when requesting quota information  
