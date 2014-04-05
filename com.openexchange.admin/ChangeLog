@@ -1,3 +1,7 @@
+* 2014-04-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31831: Consequently parse user attributes throughout offered SOAP interfaces
+
 * 2014-01-15 - choeger@open-xchange.com
 
  - Fix for bug 30371: adding capabilities does not work when using admin

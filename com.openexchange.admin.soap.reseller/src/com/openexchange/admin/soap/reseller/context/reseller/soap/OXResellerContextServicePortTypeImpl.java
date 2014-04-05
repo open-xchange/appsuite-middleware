@@ -1122,6 +1122,12 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         if (tmp != null) {
             user.setUserfield20(tmp);
         }
+
+        SOAPStringMapMap userAttributes = soapUser.getUserAttributes();
+        if (null != userAttributes) {
+            user.setUserAttributes(soap2MapMap(userAttributes));
+        }
+
         return user;
     }
 
