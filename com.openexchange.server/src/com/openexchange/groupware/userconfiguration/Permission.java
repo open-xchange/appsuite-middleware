@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -153,6 +154,15 @@ public enum Permission {
      */
     public String getTagName() {
         return tagName;
+    }
+
+    /**
+     * Gets the capability name (the lower-case enum constant name).
+     *
+     * @return The capability name
+     */
+    public String getCapabilityName() {
+        return toLowerCase(name());
     }
 
     /**
