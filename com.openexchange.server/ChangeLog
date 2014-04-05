@@ -1,3 +1,7 @@
+* 2014-04-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31899: Pass unique folder ID when requesting quota information  
+
 * 2014-04-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 31582: Remove leading and trailing whitespaces in duplicated folder check

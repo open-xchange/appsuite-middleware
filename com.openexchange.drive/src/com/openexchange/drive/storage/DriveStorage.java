@@ -162,7 +162,7 @@ public class DriveStorage {
      * @throws OXException
      */
     public Quota[] getQuota() throws OXException {
-        return getFolderAccess().getQuotas(rootFolderID.getFolderId(), new Type[] { Type.STORAGE, Type.FILE });
+        return getFolderAccess().getQuotas(rootFolderID.toUniqueID(), new Type[] { Type.STORAGE, Type.FILE });
     }
 
     /**
