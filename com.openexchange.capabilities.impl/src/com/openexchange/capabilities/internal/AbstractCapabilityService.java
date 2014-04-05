@@ -131,7 +131,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 if (Boolean.parseBoolean(propValue)) {
                     capabilities.add(getCapability(Permission.CALDAV));
                 } else {
-                    capabilities.remove(toLowerCase(Permission.CALDAV.name()));
+                    capabilities.remove(Permission.CALDAV.getCapabilityName());
                 }
             }
         });
@@ -143,7 +143,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 if (Boolean.parseBoolean(propValue)) {
                     capabilities.add(getCapability(Permission.CARDDAV));
                 } else {
-                    capabilities.remove(toLowerCase(Permission.CARDDAV.name()));
+                    capabilities.remove(Permission.CARDDAV.getCapabilityName());
                 }
             }
         });
@@ -168,7 +168,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
         Capability capability = p2capabilities.get(permission);
         if (null == capability) {
-            final Capability newcapability = getCapability(toLowerCase(permission.name()));
+            final Capability newcapability = getCapability(permission.getCapabilityName());
             capability = p2capabilities.putIfAbsent(permission, newcapability);
             if (null == capability) {
                 capability = newcapability;
@@ -525,7 +525,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             final Map<Permission, PermissionAvailabilityService> serviceList = registry.getServiceMap();
             for (final Permission p : PermissionAvailabilityService.CONTROLLED_PERMISSIONS) {
                 if (!serviceList.containsKey(p)) {
-                    capabilitiesToFilter.remove(toLowerCase(p.name()));
+                    capabilitiesToFilter.remove(p.getCapabilityName());
                 }
             }
         } else {
