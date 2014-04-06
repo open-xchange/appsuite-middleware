@@ -324,7 +324,7 @@ public class SQL {
             return null;
         }
         try {
-            return URLEncoder.encode(value, "US-ASCII");
+            return URLEncoder.encode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
@@ -332,7 +332,7 @@ public class SQL {
 
     public static String unescape(String value) throws OXException {
         try {
-            return URLDecoder.decode(value, "US-ASCII");
+            return URLDecoder.decode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }

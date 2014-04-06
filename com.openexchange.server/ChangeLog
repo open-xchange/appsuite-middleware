@@ -1,6 +1,7 @@
 * 2014-04-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31912: Don't apply personal reminder setting for appointments in shared folders  
+ - Fix for bug 31895: Corrected file ID encoding when accessing the checksum storage   
 
 * 2014-04-05 - thorben.betten@open-xchange.com
 
