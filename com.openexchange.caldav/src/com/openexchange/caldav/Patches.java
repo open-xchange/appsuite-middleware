@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -111,6 +111,7 @@ public class Patches {
             if (null == appointment.getParticipants() || 0 == appointment.getParticipants().length) {
                 UserParticipant user = new UserParticipant(userID);
                 user.setConfirm(Appointment.ACCEPT);
+                user.setAlarmMinutes(appointment.containsAlarm() ? appointment.getAlarm() : -1);
                 appointment.setParticipants(new UserParticipant[] { user });
             } else {
                 boolean hasSomethingInternal = false;
@@ -125,6 +126,7 @@ public class Patches {
                     Participant[] participants = Arrays.copyOf(appointment.getParticipants(), 1 + appointment.getParticipants().length);
                     UserParticipant user = new UserParticipant(userID);
                     user.setConfirm(Appointment.ACCEPT);
+                    user.setAlarmMinutes(appointment.containsAlarm() ? appointment.getAlarm() : -1);
                     participants[participants.length - 1] = user;
                     appointment.setParticipants(participants);
                 }
@@ -514,15 +516,37 @@ public class Patches {
         }
 
         /**
-         * Removes the appointment's alarm property if the folder is a
-         * shared one.
+         * Adjusts the appointment's alarm property. Based on the folder type, the alarm is overridden with the configured alarm of the
+         * user in case it is a public folder and the user participates, otherwise the alarm is removed. No changes are done if the
+         * folder is a private one.
          *
-         * @param folder
-         * @param appointment
+         * @param folder The parent folder of the appointment
+         * @param appointment The appointment
          */
-        public static void removeAlarmInSharedFolder(UserizedFolder folder, Appointment appointment) {
+        public static void adjustAlarm(UserizedFolder folder, Appointment appointment) {
             if (SharedType.getInstance().equals(folder.getType())) {
-               appointment.removeAlarm();
+                /*
+                 * remove alarm, since user has the appointment in his personal folder, too
+                 */
+                appointment.removeAlarm();
+            } else if (PublicType.getInstance().equals(folder.getType())) {
+                /*
+                 * remove alarm by default
+                 */
+                appointment.removeAlarm();
+                if (null != folder.getUser() && null != appointment.getUsers()) {
+                    int userID = folder.getUser().getId();
+                    for (UserParticipant user : appointment.getUsers()) {
+                        if (userID == user.getIdentifier()) {
+                            /*
+                             * take over alarm of current user
+                             */
+                            appointment.setAlarmFlag(user.containsAlarm());
+                            appointment.setAlarm(user.getAlarmMinutes());
+                            break;
+                        }
+                    }
+                }
             }
         }
 
