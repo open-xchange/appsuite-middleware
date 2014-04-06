@@ -73,14 +73,14 @@ import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
  */
 public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXLogin.class);
+    private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXLogin.class);
 
-    private BundleContext context = null;
+    private final BundleContext context;
 
     public OXLogin(final BundleContext context) throws RemoteException, StorageException {
         super();
         this.context = context;
-        log.info("Class loaded: {}", this.getClass().getName());
+        LOGGER.info("Class loaded: {}", this.getClass().getName());
     }
 
     @Override
@@ -120,7 +120,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
                 for (final OXUserPluginInterface oxuserplugin : pluginInterfaces.getUserPlugins().getServiceList()) {
-                    log.debug("Calling getData for plugin: {}", oxuserplugin.getClass().getName());
+                    LOGGER.debug("Calling getData for plugin: {}", oxuserplugin.getClass().getName());
                     retusers = oxuserplugin.getData(ctx, retusers, auth);
                 }
             }
@@ -137,7 +137,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
                 throw new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
             }
         } catch (StorageException e) {
-            log.error("Error running updateprocess",e);
+            LOGGER.error("Error running updateprocess",e);
             throw new DatabaseUpdateException(e.toString());
         }
     }

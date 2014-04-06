@@ -100,32 +100,27 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
  */
 public class OXUser extends OXCommonImpl implements OXUserInterface {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUser.class);
+    private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXUser.class);
 
-    private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
-
-    private static final String NAME_OXCACHE = "oxcache";
+    // ------------------------------------------------------------------------------------------------ //
 
     private final OXUserStorageInterface oxu;
-
     private final BasicAuthenticator basicauth;
-
     private final AdminCache cache;
     private final PropertyHandler prop;
-
-    private BundleContext context = null;
+    private final BundleContext context;
 
     public OXUser(final BundleContext context) throws StorageException {
         super();
         this.context = context;
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
-        log.info("Class loaded: {}", this.getClass().getName());
+        LOGGER.info("Class loaded: {}", this.getClass().getName());
         basicauth = new BasicAuthenticator();
         try {
             oxu = OXUserStorageInterface.getInstance();
         } catch (final StorageException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
     }
@@ -159,22 +154,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             return oxu.getCapabilities(ctx, user);
         } catch (final StorageException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchUserException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
     }
@@ -192,7 +187,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
-        log.debug("{} - {} - {} | {} - {}", ctx, user, (null == capsToAdd ? "" : capsToAdd.toString()), (null == capsToRemove ? "" : capsToRemove.toString()), auth);
+        LOGGER.debug("{} - {} - {} | {} - {}", ctx, user, (null == capsToAdd ? "" : capsToAdd.toString()), (null == capsToRemove ? "" : capsToRemove.toString()), auth);
 
         try {
             basicauth.doAuthentication(auth, ctx);
@@ -220,13 +215,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
                         if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
                             try {
-                                log.debug("Calling changeCapabilities for plugin: {}", oxuser.getClass().getName());
+                                LOGGER.debug("Calling changeCapabilities for plugin: {}", oxuser.getClass().getName());
                                 oxuser.changeCapabilities(ctx, user, capsToAdd, capsToRemove, capsToDrop, auth);
                             } catch (final PluginException e) {
-                                log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
                                 throw StorageException.wrapForRMI(e);
                             } catch (final RuntimeException e) {
-                                log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
                                 throw StorageException.wrapForRMI(e);
                             }
                         }
@@ -235,22 +230,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
         } catch (final StorageException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchUserException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
     }
@@ -262,7 +257,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             doNullCheck(usrdata);
         } catch (final InvalidDataException e2) {
             final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
-            log.error("", invalidDataException);
+            LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
 
@@ -298,11 +293,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             }
 
-                log.debug("{} - {} - {}", ctx, usrdata, auth);
+                LOGGER.debug("{} - {} - {}", ctx, usrdata, auth);
 
             if (!tool.existsUser(ctx, userid.intValue())) {
                 final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + userid + " in context " + ctx.getId());
-                log.error("", noSuchUserException);
+                LOGGER.error("", noSuchUserException);
                 throw noSuchUserException;
             }
             if (tool.existsDisplayName(ctx, usrdata, i(usrdata.getId()))) {
@@ -313,10 +308,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             checkChangeUserData(ctx, usrdata, dbuser[0], this.prop);
 
         } catch (final InvalidDataException e1) {
-            log.error("", e1);
+            LOGGER.error("", e1);
             throw e1;
         } catch (final StorageException e1) {
-            log.error("", e1);
+            LOGGER.error("", e1);
             throw e1;
         }
 
@@ -331,13 +326,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
                     if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
                         try {
-                            log.debug("Calling change for plugin: {}", oxuser.getClass().getName());
+                            LOGGER.debug("Calling change for plugin: {}", oxuser.getClass().getName());
                             oxuser.change(ctx, usrdata, auth);
                         } catch (final PluginException e) {
-                            log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                            LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
                             throw StorageException.wrapForRMI(e);
                         } catch (final RuntimeException e) {
-                            log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                            LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
                             throw StorageException.wrapForRMI(e);
                         }
                     }
@@ -353,24 +348,24 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 try {
                     cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
                 } catch (final UnsupportedEncodingException e) {
-                    log.error("Error encrypting password for credential cache ", e);
+                    LOGGER.error("Error encrypting password for credential cache ", e);
                     throw new StorageException(e);
                 }
             } else if ("{SHA}".equalsIgnoreCase(mech)) {
                 try {
                     cauth.setPassword(SHACrypt.makeSHAPasswd(usrdata.getPassword()));
                 } catch (final NoSuchAlgorithmException e) {
-                    log.error("Error encrypting password for credential cache ", e);
+                    LOGGER.error("Error encrypting password for credential cache ", e);
                     throw new StorageException(e);
                 } catch (final UnsupportedEncodingException e) {
-                    log.error("Error encrypting password for credential cache ", e);
+                    LOGGER.error("Error encrypting password for credential cache ", e);
                     throw new StorageException(e);
                 }
             } else if ("{BCRYPT}".equalsIgnoreCase(mech)) {
                 try {
                     cauth.setPassword(BCrypt.hashpw(usrdata.getPassword(), BCrypt.gensalt()));
                 } catch (final RuntimeException e) {
-                    log.error("Error encrypting password for credential cache ", e);
+                    LOGGER.error("Error encrypting password for credential cache ", e);
                     throw new StorageException(e);
                 }
             }
@@ -399,7 +394,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 jcs.remove(cacheService.newCacheKey(ctx.getId().intValue(), String.valueOf(0), userid.toString()));
                 jcs.invalidateGroup(ctx.getId().toString());
             } catch (final OXException e) {
-                log.error("", e);
+                LOGGER.error("", e);
             }
         }
     }
@@ -411,11 +406,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             doNullCheck(user,moduleAccess);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("User or UserModuleAccess is null");
-            log.error("", invalidDataException);
+            LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
 
-            log.debug("{} - {} - {} - {}", ctx, user, moduleAccess, auth);
+            LOGGER.debug("{} - {} - {} - {}", ctx, user, moduleAccess, auth);
 
         try {
             basicauth.doAuthentication(auth, ctx);
@@ -443,13 +438,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
                         if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
                             try {
-                                log.debug("Calling changeModuleAccess for plugin: {}", oxuser.getClass().getName());
+                                LOGGER.debug("Calling changeModuleAccess for plugin: {}", oxuser.getClass().getName());
                                 oxuser.changeModuleAccess(ctx, user, moduleAccess, auth);
                             } catch (final PluginException e) {
-                                log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
                                 throw StorageException.wrapForRMI(e);
                             } catch (final RuntimeException e) {
-                                log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
                                 throw StorageException.wrapForRMI(e);
                             }
                         }
@@ -457,22 +452,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             }
         } catch (final StorageException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchUserException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
 
@@ -480,7 +475,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
         } catch (final OXException e) {
-            log.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(),e);
+            LOGGER.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(),e);
         }
         // END OF JCS
     }
@@ -497,11 +492,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("User or UserModuleAccess is null");
-            log.error("", invalidDataException);
+            LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
 
-        log.debug("{} - {} - {} - {}", ctx, user, access_combination_name, auth);
+        LOGGER.debug("{} - {} - {} - {}", ctx, user, access_combination_name, auth);
 
         try {
             basicauth.doAuthentication(auth, ctx);
@@ -541,13 +536,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
                         if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
                             try {
-                                log.debug("Calling changeModuleAccess for plugin: {}", oxuser.getClass().getName());
+                                LOGGER.debug("Calling changeModuleAccess for plugin: {}", oxuser.getClass().getName());
                                 oxuser.changeModuleAccess(ctx, user, access_combination_name, auth);
                             } catch (final PluginException e) {
-                                log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
                                 throw StorageException.wrapForRMI(e);
                             } catch (final RuntimeException e) {
-                                log.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                                LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
                                 throw StorageException.wrapForRMI(e);
                             }
                         }
@@ -555,22 +550,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             }
         } catch (final StorageException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchUserException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
 
@@ -578,7 +573,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
         } catch (final OXException e) {
-            log.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(),e);
+            LOGGER.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(),e);
         }
         final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
@@ -600,11 +595,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(),
                                 new ContextImpl(ctx.getId().intValue()));
                     } catch (final OXException e) {
-                        log.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(), e);
+                        LOGGER.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(), e);
                     }
                 }
             } catch (final OXException e) {
-                log.error("", e);
+                LOGGER.error("", e);
             }
         }
         // END OF JCS
@@ -627,11 +622,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new InvalidDataException("Invalid access combination name");
             }
         } catch (final InvalidDataException e3) {
-            log.error("One of the given arguments for create is null", e3);
+            LOGGER.error("One of the given arguments for create is null", e3);
             throw e3;
         }
 
-        log.debug("{} - {} - {} - {}", ctx, usrdata, access_combination_name, auth);
+        LOGGER.debug("{} - {} - {} - {}", ctx, usrdata, access_combination_name, auth);
 
         basicauth.doAuthentication(auth, ctx);
 
@@ -666,11 +661,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             doNullCheck(usrdata);
         } catch (final InvalidDataException e3) {
-            log.error("One of the given arguments for create is null", e3);
+            LOGGER.error("One of the given arguments for create is null", e3);
             throw e3;
         }
 
-            log.debug("{} - {} - {}", ctx, usrdata, auth);
+            LOGGER.debug("{} - {} - {}", ctx, usrdata, auth);
 
         basicauth.doAuthentication(auth, ctx);
 
@@ -719,11 +714,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             doNullCheck(usr,access);
         } catch (final InvalidDataException e3) {
-            log.error("One of the given arguments for create is null", e3);
+            LOGGER.error("One of the given arguments for create is null", e3);
             throw e3;
         }
 
-            log.debug("{} - {} - {} - {}", ctx, usr, access, auth);
+            LOGGER.debug("{} - {} - {} - {}", ctx, usr, access, auth);
 
         try {
             basicauth.doAuthentication(auth,ctx);
@@ -739,10 +734,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // validate email adresss
             tool.primaryMailExists(ctx, usr.getPrimaryEmail());
         } catch (final InvalidDataException e2) {
-            log.error("", e2);
+            LOGGER.error("", e2);
             throw e2;
         } catch (final EnforceableDataObjectException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw new InvalidDataException(e.getMessage());
         }
 
@@ -790,63 +785,63 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         final boolean canHandleContextAdmin = oxuser.canHandleContextAdmin();
                         if (canHandleContextAdmin || (!canHandleContextAdmin && !tool.isContextAdmin(ctx, usr.getId().intValue()))) {
                             try {
-                                log.debug("Calling create for plugin: {}", bundlename);
+                                LOGGER.debug("Calling create for plugin: {}", bundlename);
                                 oxuser.create(ctx, usr, access, auth);
                                 interfacelist.add(oxuser);
                             } catch (final PluginException e) {
-                                log.error("Error while calling create for plugin: {}", bundlename, e);
-                                log.info("Now doing rollback for everything until now...");
+                                LOGGER.error("Error while calling create for plugin: {}", bundlename, e);
+                                LOGGER.info("Now doing rollback for everything until now...");
                                 for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                                     try {
                                         oxuserinterface.delete(ctx, new User[] { usr }, auth);
                                     } catch (final PluginException e1) {
-                                        log.error("Error doing rollback for plugin: {}", bundlename, e1);
+                                        LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
                                     } catch (final RuntimeException e1) {
-                                        log.error("Error doing rollback for plugin: {}", bundlename, e1);
+                                        LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
                                     }
                                 }
                                 try {
                                     oxu.delete(ctx, usr);
                                 } catch (final StorageException e1) {
-                                    log.error("Error doing rollback for creating user in database", e1);
+                                    LOGGER.error("Error doing rollback for creating user in database", e1);
                                 }
                                 throw StorageException.wrapForRMI(e);
                             } catch (final RuntimeException e) {
-                                log.error("Error while calling create for plugin: {}", bundlename, e);
-                                log.info("Now doing rollback for everything until now...");
+                                LOGGER.error("Error while calling create for plugin: {}", bundlename, e);
+                                LOGGER.info("Now doing rollback for everything until now...");
                                 for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                                     try {
                                         oxuserinterface.delete(ctx, new User[] { usr }, auth);
                                     } catch (final PluginException e1) {
-                                        log.error("Error doing rollback for plugin: {}", bundlename, e1);
+                                        LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
                                     } catch (final RuntimeException e1) {
-                                        log.error("Error doing rollback for plugin: {}", bundlename, e1);
+                                        LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
                                     }
                                 }
                                 try {
                                     oxu.delete(ctx, usr);
                                 } catch (final StorageException e1) {
-                                    log.error("Error doing rollback for creating user in database", e1);
+                                    LOGGER.error("Error doing rollback for creating user in database", e1);
                                 }
                                 throw StorageException.wrapForRMI(e);
                             }
                         }
                     } catch (final RuntimeException e) {
-                        log.error("Error while calling canHandleContextAdmin for plugin: {}", bundlename, e);
-                        log.info("Now doing rollback for everything until now...");
+                        LOGGER.error("Error while calling canHandleContextAdmin for plugin: {}", bundlename, e);
+                        LOGGER.info("Now doing rollback for everything until now...");
                         for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                             try {
                                 oxuserinterface.delete(ctx, new User[] { usr }, auth);
                             } catch (final PluginException e1) {
-                                log.error("Error doing rollback for plugin: {}", bundlename, e1);
+                                LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
                             } catch (final RuntimeException e1) {
-                                log.error("Error doing rollback for plugin: {}", bundlename, e1);
+                                LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
                             }
                         }
                         try {
                             oxu.delete(ctx, usr);
                         } catch (final StorageException e1) {
-                            log.error("Error doing rollback for creating user in database", e1);
+                            LOGGER.error("Error doing rollback for creating user in database", e1);
                         }
                         throw StorageException.wrapForRMI(e);
                     }
@@ -871,7 +866,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 cacheKey = cacheService.newCacheKey(ctx.getId().intValue(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
                 folderCache.remove(cacheKey);
             } catch (final OXException e) {
-                log.error("", e);
+                LOGGER.error("", e);
             }
         }
 
@@ -891,19 +886,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             doNullCheck((Object[])users);
         } catch (final InvalidDataException e1) {
-            log.error("One of the given arguments for delete is null", e1);
+            LOGGER.error("One of the given arguments for delete is null", e1);
             throw e1;
         }
 
         if (users.length == 0) {
             final InvalidDataException e = new InvalidDataException("User array is empty");
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
 
         basicauth.doAuthentication(auth,ctx);
 
-            log.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
+            LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
         checkContextAndSchema(ctx);
 
         try {
@@ -915,7 +910,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // FIXME: Change function from int to user object
             if (!tool.existsUser(ctx, users)) {
                 final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user(s) " + getUserIdArrayFromUsersAsString(users) + " in context " + ctx.getId());
-                log.error("No such user(s) {} in context {}", Arrays.toString(users), ctx.getId(), noSuchUserException);
+                LOGGER.error("No such user(s) {} in context {}", Arrays.toString(users), ctx.getId(), noSuchUserException);
                 throw noSuchUserException;
             }
             final Set<Integer> dubCheck = new HashSet<Integer>();
@@ -929,10 +924,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             }
         } catch (final InvalidDataException e1) {
-            log.error("", e1);
+            LOGGER.error("", e1);
             throw e1;
         } catch (final StorageException e1) {
-            log.error("", e1);
+            LOGGER.error("", e1);
             throw e1;
         }
 
@@ -953,14 +948,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (!oxuser.canHandleContextAdmin()) {
                         retusers = removeContextAdmin(ctx, retusers);
                         if (retusers.length > 0) {
-                            log.debug("Calling delete for plugin: {}", oxuser.getClass().getName());
+                            LOGGER.debug("Calling delete for plugin: {}", oxuser.getClass().getName());
                             final Exception exception = callDeleteForPlugin(ctx, auth, retusers, interfacelist, oxuser.getClass().getName(), oxuser);
                             if (null != exception) {
                                 exceptionlist.add(exception);
                             }
                         }
                     } else {
-                        log.debug("Calling delete for plugin: {}", oxuser.getClass().getName());
+                        LOGGER.debug("Calling delete for plugin: {}", oxuser.getClass().getName());
                         final Exception exception = callDeleteForPlugin(ctx, auth, retusers, interfacelist, oxuser.getClass().getName(), oxuser);
                         if (null != exception) {
                             exceptionlist.add(exception);
@@ -1011,11 +1006,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(),
                                 new ContextImpl(ctx.getId().intValue()));
                     } catch (final OXException e) {
-                        log.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(), e);
+                        LOGGER.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(), e);
                     }
                 }
             } catch (final OXException e) {
-                log.error("", e);
+                LOGGER.error("", e);
             }
         }
         // END OF JCS
@@ -1041,7 +1036,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             doNullCheck((Object[]) users);
         } catch (final InvalidDataException e1) {
-            log.error("One of the given arguments for getData is null", e1);
+            LOGGER.error("One of the given arguments for getData is null", e1);
             throw e1;
         }
         try {
@@ -1050,10 +1045,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new InvalidDataException();
             }
         } catch (final InvalidDataException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
-        log.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
+        LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
         try {
             // enable check who wants to get data if authentication is enabled
             if (!cache.contextAuthenticationDisabled()) {
@@ -1080,16 +1075,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             if (username != null) {
                                 final int check_user_id = tool.getUserIDByUsername(ctx, username);
                                 if (check_user_id != auth_user_id) {
-                                    log.debug("user[0].getId() does not match id from Credentials.getLogin()");
+                                    LOGGER.debug("user[0].getId() does not match id from Credentials.getLogin()");
                                     throw invalidCredentialsException;
                                 }
                             } else {
-                                log.debug("Cannot resolv user[0]`s internal id because the username is not set!");
+                                LOGGER.debug("Cannot resolv user[0]`s internal id because the username is not set!");
                                 throw new InvalidDataException("Username and userid missing.");
                             }
                         }
                     } else {
-                        log.error("User sent {} users to get data for. Only context admin is allowed to do that", Integer.valueOf(users.length), invalidCredentialsException);
+                        LOGGER.error("User sent {} users to get data for. Only context admin is allowed to do that", Integer.valueOf(users.length), invalidCredentialsException);
                         throw invalidCredentialsException;
                         // one user cannot edit more than his own data
                     }
@@ -1126,10 +1121,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             }
         } catch (final InvalidDataException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw(e);
         } catch (final InvalidCredentialsException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw(e);
         }
 
@@ -1140,13 +1135,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
                 for (final OXUserPluginInterface oxuserplugin : pluginInterfaces.getUserPlugins().getServiceList()) {
-                    log.debug("Calling getData for plugin: {}", oxuserplugin.getClass().getName());
+                    LOGGER.debug("Calling getData for plugin: {}", oxuserplugin.getClass().getName());
                     retusers = oxuserplugin.getData(ctx, retusers, auth);
                 }
             }
         }
 
-        log.debug(Arrays.toString(retusers));
+        LOGGER.debug(Arrays.toString(retusers));
         return retusers;
     }
 
@@ -1166,10 +1161,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             doNullCheck(user);
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("User object is null");
-            log.error("", invalidDataException);
+            LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
-            log.debug("{} - {} - {}", ctx, user, auth);
+            LOGGER.debug("{} - {} - {}", ctx, user, auth);
         try {
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
@@ -1184,22 +1179,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             return oxu.getModuleAccess(ctx, user_id);
         } catch (final StorageException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchUserException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
     }
@@ -1212,10 +1207,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             doNullCheck(user);
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("User object is null");
-            log.error("", invalidDataException);
+            LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
-            log.debug("{} - {} - {}", ctx, user, auth);
+            LOGGER.debug("{} - {} - {}", ctx, user, auth);
         try {
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
@@ -1232,22 +1227,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             return cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, user_id));
         } catch (final StorageException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchUserException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
 
@@ -1260,11 +1255,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             doNullCheck(ctx,search_pattern);
         } catch (final InvalidDataException e1) {
-            log.error("One of the given arguments for list is null", e1);
+            LOGGER.error("One of the given arguments for list is null", e1);
             throw e1;
         }
 
-            log.debug("{} - {}", ctx, auth);
+            LOGGER.debug("{} - {}", ctx, auth);
 
         basicauth.doAuthentication(auth,ctx);
 
@@ -1281,11 +1276,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             doNullCheck(ctx,search_pattern);
         } catch (final InvalidDataException e1) {
-            log.error("One of the given arguments for list is null", e1);
+            LOGGER.error("One of the given arguments for list is null", e1);
             throw e1;
         }
 
-            log.debug("{} - {}", ctx, auth);
+            LOGGER.debug("{} - {}", ctx, auth);
 
         basicauth.doAuthentication(auth,ctx);
 
@@ -1303,15 +1298,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     private Exception callDeleteForPlugin(final Context ctx, final Credentials auth, final User[] retusers, final ArrayList<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
         try {
-            log.debug("Calling delete for plugin: {}", bundlename);
+            LOGGER.debug("Calling delete for plugin: {}", bundlename);
             oxuser.delete(ctx, retusers, auth);
             interfacelist.add(oxuser);
             return null;
         } catch (final PluginException e) {
-            log.error("Error while calling delete for plugin: {}", bundlename, e);
+            LOGGER.error("Error while calling delete for plugin: {}", bundlename, e);
             return e;
         } catch (final RuntimeException e) {
-            log.error("Error while calling delete for plugin: {}", bundlename, e);
+            LOGGER.error("Error while calling delete for plugin: {}", bundlename, e);
             return e;
         }
     }
@@ -1490,7 +1485,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             doNullCheck(addAccess, removeAccess);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Some parameters are null");
-            log.error("", invalidDataException);
+            LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
         try {
@@ -1498,16 +1493,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             checkForGABRestriction(removeAccess);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("\"GlobalAddressBookDisabled\" can not be changed with this method.");
-            log.error("", invalidDataException);
+            LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
 
-        log.debug("{} - {} - {} - {}", filter, addAccess, removeAccess, auth);
+        LOGGER.debug("{} - {} - {} - {}", filter, addAccess, removeAccess, auth);
 
         try {
             basicauth.doAuthentication(auth);
         } catch (final InvalidCredentialsException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
 
@@ -1526,12 +1521,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         final int addBits = getPermissionBits(addAccess);
         final int removeBits = getPermissionBits(removeAccess);
-            log.debug("Adding {} removing {} to filter {}", addBits, removeBits, filter);
+            LOGGER.debug("Adding {} removing {} to filter {}", addBits, removeBits, filter);
 
         try {
             tool.changeAccessCombination(permissionBits, addBits, removeBits);
         } catch (final StorageException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
 
@@ -1556,14 +1551,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             doNullCheck(user);
         } catch (final InvalidDataException e2) {
             final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
-            log.error("", invalidDataException);
+            LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
 
         try {
             basicauth.doAuthentication(auth, ctx);
         } catch (final InvalidCredentialsException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
 
@@ -1580,16 +1575,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new InvalidDataException("Neither id nor name is set in supplied user object");
             }
         } catch (final InvalidCredentialsException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
     }

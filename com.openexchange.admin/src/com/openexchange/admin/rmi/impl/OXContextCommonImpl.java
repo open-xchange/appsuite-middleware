@@ -68,13 +68,15 @@ import com.openexchange.admin.tools.GenericChecks;
 
 public abstract class OXContextCommonImpl extends OXCommonImpl {
 
-    protected BundleContext context;
+    private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXContextCommonImpl.class);
 
-    public OXContextCommonImpl() throws StorageException {
+    /** The bundle context */
+    protected final BundleContext context;
+
+    protected OXContextCommonImpl(final BundleContext context) throws StorageException {
         super();
+        this.context = context;
     }
-
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextCommonImpl.class);
 
     protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, ContextExistsException, InvalidDataException {
 
@@ -128,13 +130,13 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             doNullCheck(ctx,admin_user);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context or user not correct");
-            log.error("", invalidDataException);
+            LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        log.debug("{} - {}", ctx, admin_user);
+        LOGGER.debug("{} - {}", ctx, admin_user);
 
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -146,7 +148,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                         try {
                             ret = contextInterface.preCreate(ret, admin_user, auth);
                         } catch (PluginException e) {
-                            log.error("",e);
+                            LOGGER.error("",e);
                             throw StorageException.wrapForRMI(e);
                         }
                     }
@@ -176,13 +178,13 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
 
             return retval;
         } catch (final ContextExistsException e) {
-            log.error("",e);
+            LOGGER.error("",e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         } catch (StorageException e) {
-            log.error("", e);
+            LOGGER.error("", e);
             // Eliminate nested root cause exceptions. These are mostly unknown to clients.
             throw new StorageException(e.getMessage());
         }
