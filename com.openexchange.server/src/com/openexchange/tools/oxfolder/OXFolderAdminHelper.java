@@ -99,7 +99,7 @@ import com.openexchange.tools.sql.DBUtils;
 public final class OXFolderAdminHelper {
 
     /** Enable once we're ready */
-    static final boolean CREATE_INFOSTORE_TRASH = false;
+    static final boolean CREATE_INFOSTORE_TRASH = true;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderAdminHelper.class);
 
