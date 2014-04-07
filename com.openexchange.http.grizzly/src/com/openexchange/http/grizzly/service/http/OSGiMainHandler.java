@@ -430,29 +430,31 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * @throws NamespaceException If <code>alias</code> has been registered.
      */
     private void validateAlias4RegOk(String alias) throws NamespaceException {
-        if (!alias.startsWith("/")) {
-            // have to start with "/"
-            String msg = new StringBuilder(64).append("Invalid alias '").append(alias).append("', have to start with '/'.").toString();
-            LOG.warn(msg);
-            throw new NamespaceException(msg);
-        }
-        if (alias.length() > 1 && alias.endsWith("/")) {
-            // if longer than "/", should not end with "/"
-            String msg = new StringBuilder(64).append("Alias '").append(alias).append("' can't end with '/' with exception to alias '/'.").toString();
-            LOG.warn(msg);
-            throw new NamespaceException(msg);
-        }
-        if (alias.length() > 1 && alias.endsWith("*")) {
-            // if longer than "/", wildcards/mappings aren't supported
-            String msg = new StringBuilder(64).append("Alias '").append(alias).append(
-                "' can't end with '*'. Wildcards/mappings aren't supported.").toString();
-            LOG.warn(msg);
-            throw new NamespaceException(msg);
-        }
-        if (OSGiCleanMapper.containsAlias(alias)) {
-            String msg = "Alias: '" + alias + "', already registered";
-            LOG.warn(msg);
-            throw new NamespaceException(msg);
+        if (null != alias) {
+            if (!alias.startsWith("/")) {
+                // have to start with "/"
+                String msg = new StringBuilder(64).append("Invalid alias '").append(alias).append("', have to start with '/'.").toString();
+                LOG.warn(msg);
+                throw new NamespaceException(msg);
+            }
+            if (alias.length() > 1 && alias.endsWith("/")) {
+                // if longer than "/", should not end with "/"
+                String msg = new StringBuilder(64).append("Alias '").append(alias).append("' can't end with '/' with exception to alias '/'.").toString();
+                LOG.warn(msg);
+                throw new NamespaceException(msg);
+            }
+            if (alias.length() > 1 && alias.endsWith("*")) {
+                // if longer than "/", wildcards/mappings aren't supported
+                String msg = new StringBuilder(64).append("Alias '").append(alias).append(
+                    "' can't end with '*'. Wildcards/mappings aren't supported.").toString();
+                LOG.warn(msg);
+                throw new NamespaceException(msg);
+            }
+            if (OSGiCleanMapper.containsAlias(alias)) {
+                String msg = "Alias: '" + alias + "', already registered";
+                LOG.warn(msg);
+                throw new NamespaceException(msg);
+            }
         }
     }
 

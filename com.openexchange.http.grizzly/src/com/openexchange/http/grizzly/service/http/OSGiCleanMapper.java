@@ -174,7 +174,7 @@ class OSGiCleanMapper {
      * @return <code>true</code> if alias has been registered, else <code>false</code>.
      */
     public static boolean containsAlias(String alias) {
-        return aliasTree.contains(alias);
+        return null == alias ? false : aliasTree.contains(alias);
     }
 
     /**
@@ -319,6 +319,9 @@ class OSGiCleanMapper {
     }
 
     private static boolean registerAliasHandler(String alias, HttpHandler httpHandler) {
+        if (null == alias || null == httpHandler) {
+            return false;
+        }
         boolean wasNew = aliasTree.add(alias);
         if (wasNew) {
             registrations.put(alias, httpHandler);
