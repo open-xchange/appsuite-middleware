@@ -66,7 +66,7 @@ import com.openexchange.startup.SignalStartedService;
 public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStartedService, SignalStartedService> {
 
     private final BundleContext context;
-    private final OXHttpServer grizzly;
+    private OXHttpServer grizzly;
     private final GrizzlyConfig grizzlyConfig;
 
     /**
@@ -81,17 +81,20 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
 
     @Override
     public SignalStartedService addingService(final ServiceReference<SignalStartedService> reference) {
-        final SignalStartedService service = context.getService(reference);
-
-        final Logger logger = org.slf4j.LoggerFactory.getLogger(StartUpTracker.class);
-        try {
-            grizzly.startListeners();
-            logger.info("Registered Grizzly HttpNetworkListener on host: {} and port: {}", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
-        } catch (final Exception e) {
-            logger.error(" ---=== /!\\ ===--- Network listeners could not be started! ---=== /!\\ ===--- ", e);
+        synchronized (grizzlyConfig) {
+            final SignalStartedService service = context.getService(reference);
+            final OXHttpServer grizzly = this.grizzly;
+            if (null != grizzly) {
+                final Logger logger = org.slf4j.LoggerFactory.getLogger(StartUpTracker.class);
+                try {
+                    grizzly.startListeners();
+                    logger.info("Registered Grizzly HttpNetworkListener on host: {} and port: {}", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
+                } catch (final Exception e) {
+                    logger.error(" ---=== /!\\ ===--- Network listeners could not be started! ---=== /!\\ ===--- ", e);
+                }
+            }
+            return service;
         }
-
-        return service;
     }
 
     @Override
@@ -101,7 +104,20 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
 
     @Override
     public void removedService(final ServiceReference<SignalStartedService> reference, final SignalStartedService service) {
-        context.ungetService(reference);
+        synchronized (grizzlyConfig) {
+            final OXHttpServer grizzly = this.grizzly;
+            if (null != grizzly) {
+                final Logger logger = org.slf4j.LoggerFactory.getLogger(StartUpTracker.class);
+                logger.info("Stopping Grizzly...");
+
+                grizzly.stop();
+                this.grizzly = null;
+
+                logger.info("Grizzly stopped.");
+            }
+
+            context.ungetService(reference);
+        }
     }
 
 }

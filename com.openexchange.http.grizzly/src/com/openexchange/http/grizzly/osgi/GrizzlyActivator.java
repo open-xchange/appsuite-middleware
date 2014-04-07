@@ -83,8 +83,6 @@ import com.openexchange.timer.TimerService;
  */
 public class GrizzlyActivator extends HousekeepingActivator {
 
-    private volatile OXHttpServer grizzly;
-
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { ConfigurationService.class, RequestWatcherService.class, ThreadPoolService.class, TimerService.class };
@@ -119,7 +117,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
              * create, configure and start server
              */
             final OXHttpServer grizzly = new OXHttpServer();
-            this.grizzly = grizzly;
 
             ServerConfiguration serverConfiguration = grizzly.getServerConfiguration();
             serverConfiguration.setMaxRequestParameters(grizzlyConfig.getMaxRequestParameters());
@@ -201,14 +198,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
         Services.setServiceLookup(null);
 
         log.info("Unregistering services.");
-        cleanUp();
-
-        log.info("Stopping Grizzly.");
-        final OXHttpServer grizzly = this.grizzly;
-        if (null != grizzly) {
-            grizzly.stop();
-            this.grizzly = null;
-        }
+        super.stopBundle();
     }
 
     /**
