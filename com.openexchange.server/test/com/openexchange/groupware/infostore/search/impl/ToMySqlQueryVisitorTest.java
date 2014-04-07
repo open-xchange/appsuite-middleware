@@ -53,6 +53,7 @@ import java.util.regex.Pattern;
 import junit.framework.TestCase;
 import com.openexchange.groupware.infostore.search.DescriptionTerm;
 import com.openexchange.groupware.infostore.search.FileNameTerm;
+import com.openexchange.groupware.infostore.utils.Metadata;
 
 
 /**
@@ -164,7 +165,7 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         assertTrue("Unexpected SQL query", result.endsWith("AND infostore.folder_id = 119 AND infostore_document.description LIKE '%bluber blah_foo%'"));
     }
 
-    private String EXPECTED = "SELECT field01 FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = 1 AND infostore.folder_id = 119 OR (infostore.folder_id = 120 AND infostore.created_by = 1) AND UPPER(infostore_document.filename) LIKE UPPER('%test123%') LIMIT 0,5";
+    private String EXPECTED1 = "SELECT field01 FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = 1 AND infostore.folder_id = 119 OR (infostore.folder_id = 120 AND infostore.created_by = 1) AND UPPER(infostore_document.filename) LIKE UPPER('%test123%') LIMIT 0,5";
     public void testWithLimit() {
         FileNameTerm term = new FileNameTerm("test123");
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(new int[] { 119 }, new int[] { 120 }, 1, 1, "SELECT field01", 0, 5);
@@ -172,7 +173,18 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         String result = visitor.getMySqlQuery();
         assertFalse("Invalid SQL query", PATTERN1.matcher(result).matches());
         assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
-        assertTrue("Unexpected SQL query", result.equals(EXPECTED));
+        assertTrue("Unexpected SQL query", result.equals(EXPECTED1));
+    }
+
+    private final String EXPECTED2 = "SELECT field01 FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = 1 AND infostore.folder_id = 119 OR (infostore.folder_id = 120 AND infostore.created_by = 1) AND UPPER(infostore_document.filename) LIKE UPPER('%test123%') ORDER BY last_modified ASC LIMIT 0,5";
+    public void testWithLimitAndOrder() {
+        FileNameTerm term = new FileNameTerm("test123");
+        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(new int[] { 119 }, new int[] { 120 }, 1, 1, "SELECT field01", Metadata.LAST_MODIFIED_LITERAL, SearchEngineImpl.ASC, 0, 5);
+        visitor.visit(term);
+        String result = visitor.getMySqlQuery();
+        assertFalse("Invalid SQL query", PATTERN1.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertTrue("Unexpected SQL query", result.equals(EXPECTED2));
     }
 
 }
