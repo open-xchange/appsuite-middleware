@@ -1,3 +1,9 @@
+open-xchange-emig-mock (7.4.2-17) stable; urgency=low
+
+  * Build for patch 2014-03-31
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 31 Mar 2014 10:22:31 +0200
+
 open-xchange-emig-mock (7.4.2-16) stable; urgency=low
 
   * Build for patch 2014-03-21
