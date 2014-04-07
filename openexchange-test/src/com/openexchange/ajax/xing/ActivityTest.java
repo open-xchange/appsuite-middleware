@@ -90,7 +90,7 @@ public class ActivityTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link ActivityTest}.
-     * 
+     *
      * @param name
      */
     public ActivityTest(String name) {
@@ -99,7 +99,7 @@ public class ActivityTest extends AbstractAJAXSession {
 
     /**
      * Test like an activity
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -122,7 +122,7 @@ public class ActivityTest extends AbstractAJAXSession {
 
     /**
      * Tests to create, show and delete an activity stream
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -131,13 +131,13 @@ public class ActivityTest extends AbstractAJAXSession {
         final ChangeStatusRequest createRequest = new ChangeStatusRequest("My new status", true);
         final ChangeStatusResponse createResponse = client.execute(createRequest);
         assertNotNull(createResponse);
-        deleteActivity();
+        deleteActivity(false);
     }
 
 
     /**
      * Tests the show activity action with user fields
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -153,7 +153,7 @@ public class ActivityTest extends AbstractAJAXSession {
 
     /**
      * Tests the show activity action
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -168,13 +168,24 @@ public class ActivityTest extends AbstractAJAXSession {
 
     /**
      * Tests the delete activity action
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
     private void deleteActivity() throws OXException, IOException, JSONException {
-        JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
+        deleteActivity(true);
+    }
+
+    /**
+     * Tests the delete activity action
+     *
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    private void deleteActivity(boolean failOnError) throws OXException, IOException, JSONException {
+        JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], failOnError)).getData();
         String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
         final DeleteActivityRequest request = new DeleteActivityRequest(activityId, true);
         final DeleteActivityResponse response = client.execute(request);
@@ -183,7 +194,7 @@ public class ActivityTest extends AbstractAJAXSession {
 
     /**
      * Test to share a link on activity stream; also delete this activity
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -193,27 +204,35 @@ public class ActivityTest extends AbstractAJAXSession {
         final ShareLinkResponse response = client.execute(request);
         assertNotNull(response);
         assertTrue((Boolean) response.getData());
-        deleteActivity();
+        deleteActivity(false);
     }
 
     /**
      * Test to share an activity; also delete this activity
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
     public void testShareActivityAndDelete() throws OXException, IOException, JSONException {
         final String activityId = getActivityIdContainingPermission("SHARE");
-        final ShareActivityRequest request = new ShareActivityRequest(activityId, "My shared activity", true);
+        final ShareActivityRequest request = new ShareActivityRequest(activityId, "My shared activity", false);
         final ShareActivityResponse response = client.execute(request);
         assertNotNull(response);
-        deleteActivity();
+
+        if (response.hasError()) {
+            final OXException exc = response.getException();
+            if (!"XING".equals(exc.getPrefix()) || 2 != exc.getCode()) {
+                fail(exc.getMessage());
+            }
+        }
+
+        deleteActivity(false);
     }
 
     /**
      * Tests the action to create, delete an get comment on an activity
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -239,7 +258,7 @@ public class ActivityTest extends AbstractAJAXSession {
 
     /**
      * Gets an activityId which contains the needed possible actions.
-     * 
+     *
      * @param permission the permission which should be present. Possible permissions are COMMENT, LIKE, SHARE or IGNORE
      * @return an activity id containing the permission
      * @throws OXException
