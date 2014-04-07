@@ -71,6 +71,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.Resolved;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.webdav.URLCache;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.webdav.protocol.WebdavPath;
 
@@ -220,7 +221,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                     int folderid = 0;
                     while(rs.next()) {
                         final String fname = rs.getString(2);
-                        if(fname.equals(component)) {
+                        if (Strings.equalsNormalizedIgnoreCase(fname, component)) {
                             if( found ) {
                                 final OXException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(session.getContextId()));
                                 LOG.warn(e.toString(), e);

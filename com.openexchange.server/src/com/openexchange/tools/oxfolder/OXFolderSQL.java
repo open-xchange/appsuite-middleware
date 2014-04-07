@@ -86,6 +86,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -534,8 +535,9 @@ public final class OXFolderSQL {
     private static final String SQL_LOOKUPFOLDER = "SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
 
     /**
-     * Returns an {@link TIntList} of folders whose name and module matches the given parameters in the given parent folder.
-     * @param folderId
+     * Returns an {@link TIntList} of folders whose name (ignoring case) and module matches the given parameters in the given parent
+     * folder.
+     *
      * @param parent The parent folder whose subfolders shall be looked up
      * @param folderName The folder name to look for
      * @param module The folder module
@@ -565,7 +567,7 @@ public final class OXFolderSQL {
             while (rs.next()) {
                 final int fuid = rs.getInt(1);
                 final String fname = rs.getString(2);
-                if (folderName.equals(fname)) {
+                if (Strings.equalsNormalizedIgnoreCase(folderName, fname)) {
                     folderList.add(fuid);
                 }
             }
@@ -586,7 +588,7 @@ public final class OXFolderSQL {
     }
 
     /**
-     * Checks for a duplicate folder in parental folder. A folder is treated as a duplicate if name and module are equal.
+     * Checks for a duplicate folder in parental folder. A folder is treated as a duplicate if name and module are equal, ignoring case.
      *
      * @param folderId The ID of the folder whose is equal to given folder name (used on update). Set this parameter to <code>-1</code> to
      *            ignore.
@@ -628,7 +630,7 @@ public final class OXFolderSQL {
             while (rs.next()) {
                 final int fuid = rs.getInt(1);
                 final String fname = rs.getString(2);
-                if (folderName.equals(fname)) {
+                if (Strings.equalsNormalizedIgnoreCase(folderName, fname)) {
                     return fuid;
                 }
             }

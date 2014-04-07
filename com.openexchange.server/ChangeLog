@@ -8,6 +8,7 @@
 
 * 2014-04-07 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 31935: Check for potential case- and unicode-normalization conflicts when storing folders
  - Fix for bug 31685: Added displayable exception message for IFO-1700
   
 * 2014-04-06 - tobias.friedrich@open-xchange.com
