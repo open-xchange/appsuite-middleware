@@ -118,6 +118,10 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     // New file versions can't be saved with an offset.
     public static final String NO_OFFSET_FOR_NEW_VERSIONS_MSG_DISPLAY = "New file versions can't be saved with an offset.";
 
+    // This folder is a virtual folder that cannot contain documents. Please choose another folder.
+    public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG_DISPLAY = "This folder is a virtual folder that cannot contain documents. Please choose another folder.";
+
+
     private InfostoreExceptionMessages() {
         super();
     }
