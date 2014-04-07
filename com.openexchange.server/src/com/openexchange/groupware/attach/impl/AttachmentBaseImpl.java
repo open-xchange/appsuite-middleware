@@ -60,7 +60,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -240,13 +242,66 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         contextHolder.set(ctx);
         final AttachmentField[] cols = addCreationDateAsNeeded(columns);
 
-        final StringBuilder select = new StringBuilder("SELECT ");
-        QUERIES.appendColumnList(select, cols);
+        final StringBuilder select = new StringBuilder("SELECT  ");
+        
+        int pos = Arrays.binarySearch(cols, AttachmentField.FOLDER_ID_LITERAL, new Comparator<AttachmentField>() {
+            public int compare(AttachmentField o1, AttachmentField o2) {
+                if (o1.getId() < o2.getId()) {
+                    return -1;
+                } else if (o1.getId() == o2.getId()) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            }
+        });
+        final String join;
+        if (pos >= 0) {
+            QUERIES.appendColumnListWithPrefix(select, Arrays.copyOfRange(cols, 0, pos, AttachmentField[].class), "pa");
+            
+            final String folderField;
+            switch (moduleId) {
+            case 1:
+                join = " LEFT JOIN prg_dates AS aux ON (pa.cid = aux.cid AND pa.attached = aux.intfield01)";
+                folderField = "aux.fid";
+                break;
+            case 4:
+                join = " LEFT JOIN task_folder AS aux ON (pa.cid = aux.cid AND pa.attached = aux.id)";
+                folderField = "aux.folder";
+                break;
+            case 7:
+                join = " LEFT JOIN prg_contacts AS aux ON (pa.cid = aux.cid AND pa.attached = aux.intfield01)";
+                folderField = "aux.fid";
+                break;
+            case 137:
+                join = " LEFT JOIN infostore AS aux ON (pa.cid = aux.cid AND pa.attached = aux.id)";
+                folderField = "aux.fid";
+                break;
+            default:
+                join = "";
+                folderField = "";
+                break;
+            }
+            if (pos > 0) {
+                select.append(",");
+            }
+            select.append(folderField);
+            if (pos < cols.length) {
+                select.append(",");
+            }
+            QUERIES.appendColumnListWithPrefix(select, Arrays.copyOfRange(cols, pos + 1, cols.length, AttachmentField[].class), "pa");
+        } else {
+            QUERIES.appendColumnListWithPrefix(select, cols, "pa");
+            join = "";
+        }
 
-        select.append(" FROM prg_attachment WHERE module = ? and attached = ? and cid = ? ");
+        select.append(" FROM prg_attachment AS pa ");
+        select.append(join);
+        select.append(" WHERE pa.module = ? and pa.attached = ? and pa.cid = ? ");
+
         if (sort != null) {
             select.append(" ORDER BY ");
-            select.append(sort.getName());
+            select.append("pa.").append(sort.getName());
             if (order == DESC) {
                 select.append(" DESC");
             } else {
@@ -380,6 +435,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         copy[i] = AttachmentField.CREATION_DATE_LITERAL;
         return copy;
     }
+    
+    //private AttachmentField[] cleanse
 
     private long fireAttached(final AttachmentMetadata m, final User user, final UserConfiguration userConfig, final Session session, final Context ctx) throws OXException {
         final FireAttachedEventAction fireAttached = new FireAttachedEventAction();

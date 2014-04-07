@@ -1,3 +1,7 @@
+* 2014-07-07 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 26544: Get all attachments sorted by ID fails
+
 * 2014-04-07 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31685: Added displayable exception message for IFO-1700
