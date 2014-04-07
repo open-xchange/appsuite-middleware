@@ -177,7 +177,7 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * This folder is a virtual folder. It cannot contain documents.
      */
-    NO_DOCUMENTS_IN_VIRTUAL_FOLDER(InfostoreExceptionCodes.NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, CATEGORY_USER_INPUT, 1700),
+    NO_DOCUMENTS_IN_VIRTUAL_FOLDER(InfostoreExceptionCodes.NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, CATEGORY_USER_INPUT, 1700, InfostoreExceptionMessages.NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG_DISPLAY),
     /**
      * Validation failed: %1$s
      */
