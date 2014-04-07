@@ -72,6 +72,7 @@ import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
 import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.startup.SignalStartedService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
@@ -111,7 +112,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 }
             });
 
-            GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
+            final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
             grizzlyConfig.start();
 
             /*
@@ -174,7 +175,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             grizzly.addListener(networkListener);
             grizzly.start();
-            log.info("Registered Grizzly HttpNetworkListener on host: {} and port: {}", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
+            log.info("Prepared Grizzly HttpNetworkListener on host: {} and port: {}, but not yet started...", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
 
             /*
              * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
@@ -185,6 +186,9 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             registerService(Reloadable.class, grizzlyConfig);
 
+            // Finally start listeners if server start-up is completed
+            track(SignalStartedService.class, new StartUpTracker(grizzly, grizzlyConfig, context));
+            openTrackers();
         } catch (final Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
         }
