@@ -3978,6 +3978,13 @@ msgid ""
 "files of all users in this context."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:72
+msgid ""
+"Quota exceeded for attachments. Quota limit: %2$s. Quota used: %1$s. Please "
+"delete some attachments in order to create new ones. Please note: The quota "
+"refers to all attachments of all users in this context."
+msgstr ""
+
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
 msgid "Could not send stanza to resource. Resource was offline: %1$s"
