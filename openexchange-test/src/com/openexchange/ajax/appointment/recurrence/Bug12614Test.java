@@ -129,13 +129,15 @@ public final class Bug12614Test extends AbstractAJAXSession {
     }
 
     public void testDeleteException() throws Throwable {
-        final DeleteRequest request = new DeleteRequest(exception.getObjectID(),
-            exception.getParentFolderID(), exception.getLastModified(), false);
+        final DeleteRequest request = new DeleteRequest(
+            exception.getObjectID(),
+            exception.getParentFolderID(),
+            exception.getLastModified(),
+            false);
         final CommonDeleteResponse response = secretary.execute(request);
         final OXException e = response.getException();
         final String cause = e == null ? "" : e.toString();
-        assertFalse("Secretary is not able to delete a change exception in a "
-            + "shared folder: " + cause, response.hasError());
+        assertFalse("Secretary is not able to delete a change exception in a " + "shared folder: " + cause, response.hasError());
     }
 
     private void bossSharesPrivateFolder() throws OXException, IOException,

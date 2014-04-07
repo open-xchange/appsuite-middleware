@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,70 @@
  *
  */
 
-package com.openexchange.xing.json.actions;
+package com.openexchange.ajax.xing.actions;
+
+import java.io.IOException;
+import java.util.List;
 
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.xing.XingAPI;
-import com.openexchange.xing.access.XingExceptionCodes;
-import com.openexchange.xing.access.XingOAuthAccess;
-import com.openexchange.xing.exception.XingException;
-import com.openexchange.xing.json.XingRequest;
-import com.openexchange.xing.session.WebAuthSession;
 
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link ShareActivityAction}
- *
+ * {@link FindByMailRequest}
+ * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public final class ShareActivityAction extends AbstractXingAction {
+public class FindByMailRequest extends AbstractXingRequest<FindByMailResponse> {
+
+
+	private final String email;
 
 	/**
-	 * Initializes a new {@link ShareActivityAction}.
+	 * Initializes a new {@link FindByMailRequest}.
+	 * 
+	 * @param foe
 	 */
-	public ShareActivityAction(final ServiceLookup services) {
-		super(services);
+	public FindByMailRequest(final String email, boolean foe) {
+		super(foe);
+		this.email = email;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+	 */
 	@Override
-	protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-		final String activityId = getMandatoryStringParameter(req, "activity_id");
-
-		final String text = req.getParameter("text");
-		if (text != null) {
-			if (text.length() > 140) {
-				throw XingExceptionCodes.TEXT_MESSAGE_SIZE_EXCEEDED.create();
-			}
-		}
-		String token = req.getParameter("testToken");
-		String secret = req.getParameter("testSecret");
-		final XingOAuthAccess xingOAuthAccess;
-		{
-			if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-				xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
-			} else {
-				xingOAuthAccess = getXingOAuthAccess(req);
-			}
-		}
-		XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-		xingAPI.shareActivity(activityId, text);
-
-		return new AJAXRequestResult(Boolean.TRUE, "native");
+	public Method getMethod() {
+		return Method.GET;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+	 */
+	@Override
+	public AbstractAJAXParser<? extends FindByMailResponse> getParser() {
+		return new FindByMailParser(failOnError);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+	 */
+	@Override
+	public Object getBody() throws IOException, JSONException {
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
+	 */
+	@Override
+	protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
+		params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "find_by_mail"));
+		params.add(new URLParameter("email", email));
+	}
 }

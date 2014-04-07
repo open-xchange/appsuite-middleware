@@ -68,39 +68,40 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public class CommentActivityAction extends AbstractXingAction {
 
-    /**
-     * Initializes a new {@link CommentActivityAction}.
-     */
-    public CommentActivityAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
-    }
+	/**
+	 * Initializes a new {@link CommentActivityAction}.
+	 */
+	public CommentActivityAction(ServiceLookup serviceLookup) {
+		super(serviceLookup);
+	}
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
-     */
-    @Override
-    protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String activityId = getMandatoryStringParameter(req, "activity_id");
-        String text = getMandatoryStringParameter(req, "text");
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
+	 */
+	@Override
+	protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
+		String activityId = getMandatoryStringParameter(req, "activity_id");
+		String text = getMandatoryStringParameter(req, "text");
 
-        if (text.length() > 600) {
-            throw XingExceptionCodes.COMMENT_SIZE_EXCEEDED.create();
-        }
+		if (text.length() > 600) {
+			throw XingExceptionCodes.COMMENT_SIZE_EXCEEDED.create();
+		}
 
-        String token = req.getParameter("testToken");
-        String secret = req.getParameter("testSecret");
-        final XingOAuthAccess xingOAuthAccess;
+		String token = req.getParameter("testToken");
+		String secret = req.getParameter("testSecret");
+		final XingOAuthAccess xingOAuthAccess;
+		{
+			if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+				xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
+			} else {
+				xingOAuthAccess = getXingOAuthAccess(req);
+			}
+		}
 
-        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
-        } else {
-            xingOAuthAccess = getXingOAuthAccess(req);
-        }
+		XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+		xingAPI.commentActivity(activityId, text);
 
-        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        xingAPI.commentActivity(activityId, text);
-
-        return new AJAXRequestResult(Boolean.TRUE, "native");
-    }
+		return new AJAXRequestResult(Boolean.TRUE, "native");
+	}
 }

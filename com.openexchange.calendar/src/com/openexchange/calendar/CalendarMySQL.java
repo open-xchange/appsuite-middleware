@@ -5092,7 +5092,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         readcon = DBPool.pickup(ctx);
                         close_read = true;
                     }
-                    if (((foldertype == FolderObject.PRIVATE || foldertype == FolderObject.SHARED) && uid == owner) || checkIfUserIstheOnlyParticipant(
+                    if (((foldertype == FolderObject.PRIVATE && uid == owner || foldertype == FolderObject.SHARED && uid != owner)) || checkIfUserIstheOnlyParticipant(
                         cid,
                         oid,
                         readcon)) {

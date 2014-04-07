@@ -446,11 +446,11 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
         properties.put(FileStorageEventConstants.SESSION, session);
         properties.put(FileStorageEventConstants.ACCOUNT_ID, folderID.getAccountId());
         properties.put(FileStorageEventConstants.SERVICE, folderID.getService());
-        properties.put(FileStorageEventConstants.FOLDER_ID, folderID.getFolderId());
+        properties.put(FileStorageEventConstants.FOLDER_ID, folderID.toUniqueID());
         if (null != path) {
             String[] parentFolderIDs = new String[path.length];
             for (int i = 0; i < path.length; i++) {
-                parentFolderIDs[i] = path[i].getId();
+                parentFolderIDs[i] = new FolderID(folderID.getService(), folderID.getAccountId(), path[i].getId()).toUniqueID();
             }
             properties.put(FileStorageEventConstants.FOLDER_PATH, parentFolderIDs);
         }

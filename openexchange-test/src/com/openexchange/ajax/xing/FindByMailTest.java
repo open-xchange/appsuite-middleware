@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,63 @@
  *
  */
 
-package com.openexchange.ajax.xing.actions;
+package com.openexchange.ajax.xing;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.xing.actions.FindByMailRequest;
+import com.openexchange.ajax.xing.actions.FindByMailResponse;
+import com.openexchange.ajax.xing.actions.FindByMailsRequest;
+import com.openexchange.ajax.xing.actions.FindByMailsResponse;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link GetUsersParser}
- * 
+ * {@link FindByMailTest}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetUsersParser extends AbstractAJAXParser<GetUsersResponse> {
+public class FindByMailTest extends AbstractAJAXSession {
 
     /**
-     * Initializes a new {@link GetUsersParser}.
+     * Initializes a new {@link FindByMailTest}.
      * 
-     * @param failOnError
+     * @param name
      */
-    protected GetUsersParser(boolean failOnError) {
-        super(failOnError);
+    public FindByMailTest(String name) {
+        super(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+    /**
+     * Test find_by_mails action
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
      */
-    @Override
-    protected GetUsersResponse createResponse(Response response) throws JSONException {
-        return new GetUsersResponse(response);
+    public void testFindByMails() throws OXException, IOException, JSONException {
+    	List<String> emails = new ArrayList<String>();
+    	emails.add("ewaldbartkowiak@googlemail.com");
+    	emails.add("annamariaoberhuber@googlemail.com");
+        final FindByMailsRequest findByMailsRequest = new FindByMailsRequest(emails, true);
+        final FindByMailsResponse findByMailsResponse = client.execute(findByMailsRequest);
+        assertNotNull(findByMailsResponse);
     }
-
+    
+    /**
+     * Test find_by_mail action
+     * 
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    public void testFindByMail() throws OXException, IOException, JSONException {
+        final FindByMailRequest findByMailRequest = new FindByMailRequest("ewaldbartkowiak@googlemail.com", true);
+        final FindByMailResponse findByMailResponse = client.execute(findByMailRequest);
+        assertNotNull(findByMailResponse);
+    }
 }

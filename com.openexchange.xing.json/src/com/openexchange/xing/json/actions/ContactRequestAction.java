@@ -70,45 +70,46 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public final class ContactRequestAction extends AbstractXingAction {
 
-    /**
-     * Initializes a new {@link ContactRequestAction}.
-     */
-    public ContactRequestAction(final ServiceLookup services) {
-        super(services);
-    }
+	/**
+	 * Initializes a new {@link ContactRequestAction}.
+	 */
+	public ContactRequestAction(final ServiceLookup services) {
+		super(services);
+	}
 
-    @Override
-    protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        // Get & validate E-Mail address
-        String address = getMandatoryStringParameter(req, "email");
-        address = validateMailAddress(address);
+	@Override
+	protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
+		// Get & validate E-Mail address
+		String address = getMandatoryStringParameter(req, "email");
+		address = validateMailAddress(address);
 
-        String token = req.getParameter("testToken");
-        String secret = req.getParameter("testSecret");
-        final XingOAuthAccess xingOAuthAccess;
+		String token = req.getParameter("testToken");
+		String secret = req.getParameter("testSecret");
+		final XingOAuthAccess xingOAuthAccess;
+		{
+			if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+				xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
+			} else {
+				xingOAuthAccess = getXingOAuthAccess(req);
+			}
+		}
+		final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
 
-        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
-        } else {
-            xingOAuthAccess = getXingOAuthAccess(req);
-        }
-        final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+		final String result = xingAPI.findByEmail(address);
 
-        final String result = xingAPI.findByEmail(address);
+		if (Strings.isEmpty(result)) {
+			// Already connected
+			throw XingExceptionCodes.NOT_A_MEMBER.create(address);
+		}
 
-        if (Strings.isEmpty(result)) {
-            // Already connected
-            throw XingExceptionCodes.NOT_A_MEMBER.create(address);
-        }
+		Path shortestPath = xingAPI.getShortestPath(xingOAuthAccess.getXingUserId(), result);
+		if (shortestPath != null && shortestPath.isDirectConnection()) {
+			throw XingExceptionCodes.ALREADY_CONNECTED.create(address);
+		}
 
-        Path shortestPath = xingAPI.getShortestPath(xingOAuthAccess.getXingUserId(), result);
-        if (shortestPath != null && shortestPath.isDirectConnection()) {
-            throw XingExceptionCodes.ALREADY_CONNECTED.create(address);
-        }
+		xingAPI.initiateContactRequest(result, null);
 
-        xingAPI.initiateContactRequest(result, null);
-
-        return new AJAXRequestResult(Boolean.TRUE, "native");
-    }
+		return new AJAXRequestResult(Boolean.TRUE, "native");
+	}
 
 }

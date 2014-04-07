@@ -68,7 +68,7 @@ public class XINGTestSuite extends TestSuite {
         suite.addTestSuite(FeedTest.class);
         suite.addTestSuite(ActivityTest.class);
         suite.addTestSuite(ContactRequestTest.class);
-        suite.addTestSuite(GetUsersTest.class);
+        suite.addTestSuite(FindByMailTest.class);
         return suite;
     }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.xing;
+package com.openexchange.logback.extensions;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import ch.qos.logback.classic.PatternLayout;
+import ch.qos.logback.core.spi.ContextAwareBase;
+import ch.qos.logback.core.spi.PropertyDefiner;
 
-import org.json.JSONException;
-
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.xing.actions.GetUsersRequest;
-import com.openexchange.ajax.xing.actions.GetUsersResponse;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link GetUsersTest}
- *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * Ensures to have the {@link ExtendedPatternLayoutEncoder} with its additional layouts gets initialized. This is required if no other
+ * appender with PatterLayout is initialized within the logback config (logback.xml).<br>
+ * <br>
+ * Hint: this does not overwrite configurations made within com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.0
  */
-public class GetUsersTest extends AbstractAJAXSession {
+public class SyslogPatternLayoutActivator extends ContextAwareBase implements PropertyDefiner {
 
     /**
-     * Initializes a new {@link GetUsersTest}.
-     * 
-     * @param name
+     * Initializes a new {@link SyslogPatternLayoutActivator}.
      */
-    public GetUsersTest(String name) {
-        super(name);
+    public SyslogPatternLayoutActivator() {
+        super();
+
+        addPatternLayouts();
     }
 
     /**
-     * Test get users action
-     * 
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
+     * Adds pattern layouts if currently not available in defaultConverterMap
      */
-    public void testGetUser() throws OXException, IOException, JSONException {
-    	List<String> emails = new ArrayList<String>();
-    	emails.add("ewaldbartkowiak@googlemail.com");
-    	emails.add("annamariaoberhuber@googlemail.com");
-        final GetUsersRequest getUsersRequest = new GetUsersRequest(emails, true);
-        final GetUsersResponse getUsersResponse = client.execute(getUsersRequest);
-        assertNotNull(getUsersResponse);
+    private void addPatternLayouts() {
+        if (!PatternLayout.defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.LMDC)) {
+            PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.LMDC, LineMDCConverter.class.getName());
+        }
+        if (!PatternLayout.defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.EREPLACE)) {
+            PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.EREPLACE, ExtendedReplacingCompositeConverter.class.getName());
+        }
+        if (!PatternLayout.defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.TID)) {
+            PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.TID, ThreadIdConverter.class.getName());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getPropertyValue() {
+        // Nothing to do
+        return null;
     }
 }

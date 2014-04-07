@@ -54,7 +54,7 @@ import static com.openexchange.file.storage.FileStorageEventConstants.FOLDER_ID;
 import static com.openexchange.file.storage.FileStorageEventConstants.FOLDER_PATH;
 import static com.openexchange.file.storage.FileStorageEventConstants.PARENT_FOLDER_ID;
 import static com.openexchange.file.storage.FileStorageEventConstants.SESSION;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -68,9 +68,7 @@ import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageEventHelper;
-import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
@@ -194,8 +192,6 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
                  * extract properties
                  */
                 Session session = (Session)event.getProperty(SESSION);
-                String serviceID = (String)event.getProperty(FileStorageEventConstants.SERVICE);
-                String accountID = (String)event.getProperty(FileStorageEventConstants.ACCOUNT_ID);
                 Integer contextID = Integer.valueOf(session.getContextId());
                 String folderID = (String)(event.containsProperty(PARENT_FOLDER_ID) ?
                     event.getProperty(PARENT_FOLDER_ID) : event.getProperty(FOLDER_ID));
@@ -214,15 +210,10 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
                 /*
                  * add to buffer
                  */
-                String uniqueID = new FolderID(serviceID, accountID, folderID).toUniqueID();
                 if (null != folderPath) {
-                    List<String> uniquePath = new ArrayList<String>(folderPath.length);
-                    for (String relativeID : folderPath) {
-                        uniquePath.add(new FolderID(serviceID, accountID, relativeID).toUniqueID());
-                    }
-                    buffer.add(session, uniqueID, uniquePath);
+                    buffer.add(session, folderID, Arrays.asList(folderPath));
                 } else {
-                    buffer.add(session, uniqueID);
+                    buffer.add(session, folderID);
                 }
                 return null;
             }
