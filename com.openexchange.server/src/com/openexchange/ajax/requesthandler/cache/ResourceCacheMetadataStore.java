@@ -207,7 +207,7 @@ public class ResourceCacheMetadataStore {
      * Loads a possible metadata record for the given (contextId, userId, resourceId) tuple.
      *
      * @param contextId The context id.
-     * @param userId The user id. If the record references a globally cached resource, userId must be < 0.
+     * @param userId The user id. If the record references a globally cached resource, userId must be <= 0.
      * @param resourceId The resource id. Never <code>null</code>.
      * @return An instance of {@link ResourceCacheMetadata} or <code>null</code>, if no record was found.
      * @throws OXException if loading the record fails.
@@ -268,7 +268,7 @@ public class ResourceCacheMetadataStore {
      *
      * @param con The writable database connection. Must be in an transaction.
      * @param contextId The context id.
-     * @param userId The user id. If the record references a globally cached resource, userId must be < 0.
+     * @param userId The user id. If the record references a globally cached resource, userId must be <= 0.
      * @param resourceId The resource id. Never <code>null</code>.
      * @return An instance of {@link ResourceCacheMetadata} or <code>null</code>, if no record was found.
      * @throws OXException if loading the record fails.
@@ -303,6 +303,43 @@ public class ResourceCacheMetadataStore {
             metadata.setCreatedAt(rs.getLong(5));
 
             return metadata;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
+     * Checks if an entry does already exist for the given (contextId, userId, resourceId) tuple.
+     *
+     * @param con The database connection.
+     * @param contextId The context id.
+     * @param userId The user id. If the record references a globally cached resource, userId must be <= 0.
+     * @param resourceId The resource id. Never <code>null</code>.
+     * @return An instance of {@link ResourceCacheMetadata} or <code>null</code>, if no record was found.
+     * @throws OXException if loading the record fails.
+     */
+    public boolean exists(Connection con, int contextId, int userId, String resourceId) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (userId > 0) {
+                stmt = con.prepareStatement("SELECT COUNT(*) FROM preview WHERE cid = ? AND user = ? AND id = ?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, resourceId);
+            } else {
+                stmt = con.prepareStatement("SELECT COUNT(*) FROM preview WHERE cid = ? AND id = ?");
+                stmt.setInt(1, contextId);
+                stmt.setString(2, resourceId);
+            }
+
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                return count == 0 ? false : true;
+            }
+
+            return false;
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
@@ -374,7 +411,7 @@ public class ResourceCacheMetadataStore {
      * Removes a metadata record for the given (contextId, userId, resourceId) tuple.
      *
      * @param contextId The context id.
-     * @param userId The user id. If the record references a globally cached resource, userId must be < 0.
+     * @param userId The user id. If the record references a globally cached resource, userId must be <= 0.
      * @param resourceId The resource id. Never <code>null</code>.
      * @return <code>true</code> if at least one record was deleted. Otherwise <code>false</code>.
      * @throws OXException if deleting the record fails.
@@ -419,7 +456,7 @@ public class ResourceCacheMetadataStore {
     /**
      * Removes all metadata records for a given (contextId, userId, resourceIdPrefix) tuple.
      * All records are deleted where the parameter resourceIdPrefix is a valid prefix of their resource id.
-     * If userId < 0, all records for the given context are deleted.
+     * If userId <= 0, all records for the given context are deleted.
      *
      * @param contextId The context id.
      * @param userId The user id.
@@ -508,7 +545,7 @@ public class ResourceCacheMetadataStore {
     }
 
     /**
-     * Removes all metadata records for a given (contextId, userId) tuple. If userId < 0, all records for the given
+     * Removes all metadata records for a given (contextId, userId) tuple. If userId <= 0, all records for the given
      * context are deleted.
      *
      * @param contextId The context id.

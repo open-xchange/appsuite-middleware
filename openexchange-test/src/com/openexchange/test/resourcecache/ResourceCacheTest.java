@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -63,6 +64,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.test.resourcecache.actions.AbstractResourceCacheRequest;
 import com.openexchange.test.resourcecache.actions.ConfigurationRequest;
 import com.openexchange.test.resourcecache.actions.ConfigurationResponse;
@@ -256,6 +258,43 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         uploadRequest.addFile("someimage.jpg", "image/jpeg", new ByteArrayInputStream(file));
         UploadResponse uploadResponse = executeTyped(uploadRequest, current);
         assertEquals("resource should not have been cached", 0, uploadResponse.getIds().size());
+    }
+
+    public void testUpdateFS() throws Exception {
+        current = FS;
+        String id = UUIDs.getUnformattedString(UUID.randomUUID());
+        byte file[] = prepareFile(1024);
+        UploadRequest uploadRequest = new UploadRequest();
+        uploadRequest.setResourceId(id);
+        uploadRequest.addFile("someimage.jpg", "image/jpeg", new ByteArrayInputStream(file));
+        UploadResponse uploadResponse = executeTyped(uploadRequest, current);
+        List<String> ids = uploadResponse.getIds();
+        assertEquals("wrong number of ids", 1, ids.size());
+
+        DownloadRequest downloadRequest = new DownloadRequest(ids.get(0));
+        DownloadResponse downloadResponse = executeTyped(downloadRequest, current);
+        byte[] reloaded = downloadResponse.getBytes();
+        assertTrue("download was not equals upload", Arrays.equals(file, reloaded));
+
+        // Now update the file and check it again
+        file = prepareFile(1024);
+        uploadRequest = new UploadRequest();
+        uploadRequest.addFile("someimage.jpg", "image/jpeg", new ByteArrayInputStream(file));
+        uploadRequest.setResourceId(id);
+        uploadResponse = executeTyped(uploadRequest, current);
+        List<String> newIds = uploadResponse.getIds();
+        assertEquals("wrong number of ids", 1, newIds.size());
+        assertEquals("id has changed", ids.get(0), newIds.get(0));
+
+        downloadRequest = new DownloadRequest(ids.get(0));
+        downloadResponse = executeTyped(downloadRequest, current);
+        reloaded = downloadResponse.getBytes();
+        assertTrue("download was not equals upload", Arrays.equals(file, reloaded));
+
+        DeleteRequest deleteRequest = new DeleteRequest(ids.get(0));
+        executeTyped(deleteRequest, current);
+        downloadResponse = executeTyped(downloadRequest, current);
+        assertNull("resource was not deleted", downloadResponse.getBytes());
     }
 
     private int[] loadQuotas() throws Exception {
