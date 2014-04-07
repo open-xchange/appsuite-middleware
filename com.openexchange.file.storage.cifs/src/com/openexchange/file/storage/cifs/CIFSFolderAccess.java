@@ -222,6 +222,12 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             }
         }
         /*
+         * Use display name of account for root folder
+         */
+        if (FileStorageFolder.ROOT_FULLNAME.equals(cifsFolder.getId())) {
+            cifsFolder.setName(account.getDisplayName());
+        }
+        /*
          * TODO: Set capabilities
          */
         return cifsFolder;
