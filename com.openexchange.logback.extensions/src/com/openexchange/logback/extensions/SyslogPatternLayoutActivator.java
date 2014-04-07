@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,39 +50,51 @@
 package com.openexchange.logback.extensions;
 
 import ch.qos.logback.classic.PatternLayout;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.core.spi.ContextAwareBase;
+import ch.qos.logback.core.spi.PropertyDefiner;
 
 
 /**
- * {@link ExtendedPatternLayoutEncoder} - Puts additional converters to <code>PatternLayout</code>'s default converter mapping.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Ensures to have the {@link ExtendedPatternLayoutEncoder} with its additional layouts gets initialized. This is required if no other
+ * appender with PatterLayout is initialized within the logback config (logback.xml).<br>
+ * <br>
+ * Hint: this does not overwrite configurations made within com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.0
  */
-public class ExtendedPatternLayoutEncoder extends PatternLayoutEncoder {
+public class SyslogPatternLayoutActivator extends ContextAwareBase implements PropertyDefiner {
 
     /**
-     * Key for lmdc
+     * Initializes a new {@link SyslogPatternLayoutActivator}.
      */
-    public static final String LMDC = "lmdc";
-
-    /**
-     * Key for ereplace
-     */
-    public static final String EREPLACE = "ereplace";
-
-    /**
-     * Key for tid
-     */
-    public static final String TID = "tid";
-
-    /**
-     * Initializes a new {@link ExtendedPatternLayoutEncoder}.
-     */
-    public ExtendedPatternLayoutEncoder() {
+    public SyslogPatternLayoutActivator() {
         super();
-        PatternLayout.defaultConverterMap.put(LMDC, LineMDCConverter.class.getName());
-        PatternLayout.defaultConverterMap.put(EREPLACE, ExtendedReplacingCompositeConverter.class.getName());
-        PatternLayout.defaultConverterMap.put(TID, ThreadIdConverter.class.getName());
+
+        addPatternLayouts();
     }
 
+    /**
+     * Adds pattern layouts if currently not available in defaultConverterMap
+     */
+    private void addPatternLayouts() {
+        if (!PatternLayout.defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.LMDC)) {
+            PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.LMDC, LineMDCConverter.class.getName());
+        }
+        if (!PatternLayout.defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.EREPLACE)) {
+            PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.EREPLACE, ExtendedReplacingCompositeConverter.class.getName());
+        }
+        if (!PatternLayout.defaultConverterMap.containsKey(ExtendedPatternLayoutEncoder.TID)) {
+            PatternLayout.defaultConverterMap.put(ExtendedPatternLayoutEncoder.TID, ThreadIdConverter.class.getName());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getPropertyValue() {
+        // Nothing to do
+        return null;
+    }
 }
