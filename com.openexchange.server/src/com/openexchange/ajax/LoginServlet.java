@@ -88,6 +88,7 @@ import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.ajax.login.OAuthLogin;
+import com.openexchange.ajax.login.RampUp;
 import com.openexchange.ajax.login.RedeemToken;
 import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.login.Tokens;
@@ -635,6 +636,7 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_AUTOLOGIN, new AutoLogin(conf, RAMP_UP));
         handlerMap.put(ACTION_OAUTH, new OAuthLogin(conf, RAMP_UP));
         handlerMap.put(ACTION_LOGIN, new Login(conf, RAMP_UP));
+        handlerMap.put(ACTION_RAMPUP, new RampUp(RAMP_UP));
     }
 
     @Override

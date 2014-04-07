@@ -249,6 +249,9 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
     }
 
     protected void performRampUp(final HttpServletRequest req, final Session session, final JSONObject json, ServerSession serverSession) throws OXException, IOException, JSONException {
+        if (req.getParameter("rampUp") != null && "false".equals(req.getParameter("rampUp"))) {
+            return;
+        }
         if (rampUp != null) {
             for (LoginRampUpService rampUpService : rampUp) {
                 if (rampUpService.contributesTo(session.getClient())) {
