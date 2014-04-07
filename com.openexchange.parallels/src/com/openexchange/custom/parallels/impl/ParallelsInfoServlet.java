@@ -66,7 +66,7 @@ import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.custom.parallels.osgi.ParallelsServiceRegistry;
+import com.openexchange.custom.parallels.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -206,7 +206,7 @@ public final class ParallelsInfoServlet extends PermissionServlet {
     private String getBrandingHostFromLoginMappings(final Context ctx) throws OXException {
 
         final String[] login_mappings = ctx.getLoginInfo();
-        final ConfigurationService configservice = ParallelsServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
+        final ConfigurationService configservice = Services.getService(ConfigurationService.class);
 
         String branded_host = null;
 

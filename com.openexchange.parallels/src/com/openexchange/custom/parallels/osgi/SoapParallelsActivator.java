@@ -3,6 +3,7 @@ package com.openexchange.custom.parallels.osgi;
 
 import java.rmi.Remote;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -19,7 +20,6 @@ import com.openexchange.custom.parallels.soap.OXServerServicePortTypeImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
 
@@ -37,43 +37,26 @@ public class SoapParallelsActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-        ParallelsServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-        ParallelsServiceRegistry.getServiceRegistry().removeService(clazz);
-
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         // try to load all the needed services like config service and hostnameservice
-        {
-            final ServiceRegistry registry = ParallelsServiceRegistry.getServiceRegistry();
-            registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (final Class<?> classe : classes) {
-                final Object service = getService(classe);
-                if (null != service) {
-                    registry.addService(classe, service);
-                }
-            }
-        }
+        Services.setServiceLookup(this);
 
         // register the http info/sso servlet
         LOG.debug("Trying to register POA info servlet");
-        rememberTracker(new HTTPServletRegistration(
-            context,
-            new com.openexchange.custom.parallels.impl.ParallelsInfoServlet(),
-            getFromConfig(ParallelsOptions.PROPERTY_SSO_INFO_SERVLET)));
-        rememberTracker(new HTTPServletRegistration(
-            context,
-            new com.openexchange.custom.parallels.impl.ParallelsOpenApiServlet(),
-            getFromConfig(ParallelsOptions.PROPERTY_OPENAPI_SERVLET)));
+        {
+            String alias = getFromConfig(ParallelsOptions.PROPERTY_SSO_INFO_SERVLET);
+            if (null == alias) {
+                throw new BundleException("Missing property \"" + ParallelsOptions.PROPERTY_SSO_INFO_SERVLET + "\".");
+            }
+            rememberTracker(new HTTPServletRegistration(context, new com.openexchange.custom.parallels.impl.ParallelsInfoServlet(), alias));
+        }
+        {
+            String alias = getFromConfig(ParallelsOptions.PROPERTY_OPENAPI_SERVLET);
+            if (null == alias) {
+                throw new BundleException("Missing property \"" + ParallelsOptions.PROPERTY_SSO_INFO_SERVLET + "\".");
+            }
+            rememberTracker(new HTTPServletRegistration(context, new com.openexchange.custom.parallels.impl.ParallelsOpenApiServlet(), alias));
+        }
         final BundleContext context = this.context;
         final ServiceTrackerCustomizer<Remote, Remote> trackerCustomizer = new ServiceTrackerCustomizer<Remote, Remote>() {
 
@@ -120,15 +103,11 @@ public class SoapParallelsActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        cleanUp();
-        ParallelsServiceRegistry.getServiceRegistry().clearRegistry();
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
     private String getFromConfig(final String key) throws OXException {
-        final ConfigurationService configservice = ParallelsServiceRegistry.getServiceRegistry().getService(
-            ConfigurationService.class,
-            true);
-        return configservice.getProperty(key);
+        return getService(ConfigurationService.class).getProperty(key);
     }
-
 }
