@@ -21,9 +21,9 @@ import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.json.XingRequest;
 import com.openexchange.xing.session.WebAuthSession;
 
-public class GetUsersAction extends AbstractXingAction {
+public class FindByMailsRequestAction extends AbstractXingAction {
 
-	public GetUsersAction(ServiceLookup services) {
+	public FindByMailsRequestAction(ServiceLookup services) {
 		super(services);
 	}
 
@@ -66,7 +66,7 @@ public class GetUsersAction extends AbstractXingAction {
 		}
 
 		XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-		Map<String, Object> xingUser = xingAPI.getUsers(emails);
+		Map<String, Object> xingUser = xingAPI.findByEmailsGetXingAttributes(emails);
 		final JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(xingUser);
 
 		return new AJAXRequestResult(result);

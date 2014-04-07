@@ -310,7 +310,7 @@ public class XingAPI<S extends Session> {
     }
     
     /**
-     * Looks up a user and returns the attributes from xing.
+     * Looks up a user and returns all attributes from XING.
      *
      * @param emailAddress The E-Mail address to look-up
      * @return The associated user attributes
@@ -321,7 +321,7 @@ public class XingAPI<S extends Session> {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    public Map<String, Object> getUsers(final List<String> emailAddresses) throws XingException {
+    public Map<String, Object> findByEmailsGetXingAttributes(final List<String> emailAddresses) throws XingException {
     	if (emailAddresses == null || emailAddresses.isEmpty()) {
             return null;
         }
