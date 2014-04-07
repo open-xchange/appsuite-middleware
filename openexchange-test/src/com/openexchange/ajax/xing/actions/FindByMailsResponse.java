@@ -49,80 +49,23 @@
 
 package com.openexchange.ajax.xing.actions;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link NewsFeedRequest}
- *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * {@link FindByMailsResponse}
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class NewsFeedRequest extends AbstractXingRequest<NewsFeedResponse> {
-    
-    private final boolean aggregate;
-    
-    private final long since;
-    
-    private final long until;
-    
-    private final int[] fields;
+public class FindByMailsResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link NewsFeedRequest}.
+     * Initializes a new {@link FindByMailsResponse}.
+     * 
+     * @param response
      */
-    public NewsFeedRequest(final boolean aggregate, final long since, final long until, final int[] fields, final boolean foe) {
-        super(foe);
-        this.aggregate = aggregate;
-        this.since = since;
-        this.until = until;
-        this.fields = fields;
+    protected FindByMailsResponse(Response response) {
+        super(response);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public AbstractAJAXParser<? extends NewsFeedResponse> getParser() {
-        return new NewsFeedParser(failOnError);
-    }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
-     */
-    @Override
-    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "newsfeed"));
-        params.add(new Parameter("aggregate", aggregate));
-        if (since > 0) {
-            params.add(new Parameter("since", since));
-        }
-        if (until > 0) {
-            params.add(new Parameter("until", until));
-        }
-        if (fields.length > 0) {
-            params.add(new Parameter("user_fields", fields));
-        }
-    }
 }

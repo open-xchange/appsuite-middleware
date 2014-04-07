@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,74 @@
  *
  */
 
-package com.openexchange.ajax.xing;
+package com.openexchange.ajax.xing.actions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.xing.actions.GetUsersRequest;
-import com.openexchange.ajax.xing.actions.GetUsersResponse;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link GetUsersTest}
- *
+ * {@link FindByMailsRequest}
+ * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetUsersTest extends AbstractAJAXSession {
+public class FindByMailsRequest extends AbstractXingRequest<FindByMailsResponse> {
 
-    /**
-     * Initializes a new {@link GetUsersTest}.
-     * 
-     * @param name
-     */
-    public GetUsersTest(String name) {
-        super(name);
-    }
 
-    /**
-     * Test get users action
-     * 
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
-     */
-    public void testGetUser() throws OXException, IOException, JSONException {
-    	List<String> emails = new ArrayList<String>();
-    	emails.add("ewaldbartkowiak@googlemail.com");
-    	emails.add("annamariaoberhuber@googlemail.com");
-        final GetUsersRequest getUsersRequest = new GetUsersRequest(emails, true);
-        final GetUsersResponse getUsersResponse = client.execute(getUsersRequest);
-        assertNotNull(getUsersResponse);
-    }
+	private final List<String> emails;
+	private final JSONObject body;
+
+	/**
+	 * Initializes a new {@link FindByMailsRequest}.
+	 * 
+	 * @param foe
+	 */
+	public FindByMailsRequest(final List<String> emails, boolean foe) {
+		super(foe);
+		body = new JSONObject();
+		this.emails = emails;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+	 */
+	@Override
+	public Method getMethod() {
+		return Method.PUT;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+	 */
+	@Override
+	public AbstractAJAXParser<? extends FindByMailsResponse> getParser() {
+		return new FindByMailsParser(failOnError);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+	 */
+	@Override
+	public Object getBody() throws IOException, JSONException {
+		body.put("emails", emails);
+		return body;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
+	 */
+	@Override
+	protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
+		params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "find_by_mails"));
+
+	}
 }

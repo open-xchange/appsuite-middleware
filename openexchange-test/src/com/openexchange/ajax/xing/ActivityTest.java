@@ -248,12 +248,14 @@ public class ActivityTest extends AbstractAJAXSession {
         final GetCommentsRequest getRequest = new GetCommentsRequest(activityId, -1, -1, new int[0], true);
         final GetCommentsResponse getResponse = client.execute(getRequest);
         assertNotNull(getResponse);
-        // Begin delete comment
-        String commentId = json.getJSONArray("network_activities").getJSONObject(0).getJSONObject("comments").getJSONArray(
-            "latest_comments").getJSONObject(0).getString("id");
-        final DeleteCommentRequest deleteRequest = new DeleteCommentRequest(activityId, commentId, true);
-        final DeleteCommentResponse deleteResponse = client.execute(deleteRequest);
-        assertNotNull(deleteResponse);
+        // Begin delete comment - only delete if comments are available
+        if(json.getJSONArray("network_activities").getJSONObject(0).getJSONObject("comments").getInt("amount") > 0) {
+        	String commentId = json.getJSONArray("network_activities").getJSONObject(0).getJSONObject("comments").getJSONArray(
+        			"latest_comments").getJSONObject(0).getString("id");
+        	final DeleteCommentRequest deleteRequest = new DeleteCommentRequest(activityId, commentId, false);
+        	final DeleteCommentResponse deleteResponse = client.execute(deleteRequest);
+        	assertNotNull(deleteResponse);
+        }
     }
 
     /**

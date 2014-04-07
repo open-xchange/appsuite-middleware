@@ -49,72 +49,33 @@
 
 package com.openexchange.ajax.xing.actions;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link GetUsersRequest}
+ * {@link FindByMailsParser}
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetUsersRequest extends AbstractXingRequest<GetUsersResponse> {
+public class FindByMailsParser extends AbstractAJAXParser<FindByMailsResponse> {
 
+    /**
+     * Initializes a new {@link FindByMailsParser}.
+     * 
+     * @param failOnError
+     */
+    protected FindByMailsParser(boolean failOnError) {
+        super(failOnError);
+    }
 
-	private final List<String> emails;
-	private final JSONObject body;
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
+    @Override
+    protected FindByMailsResponse createResponse(Response response) throws JSONException {
+        return new FindByMailsResponse(response);
+    }
 
-	/**
-	 * Initializes a new {@link GetUsersRequest}.
-	 * 
-	 * @param foe
-	 */
-	public GetUsersRequest(final List<String> emails, boolean foe) {
-		super(foe);
-		body = new JSONObject();
-		this.emails = emails;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	@Override
-	public Method getMethod() {
-		return Method.PUT;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	@Override
-	public AbstractAJAXParser<? extends GetUsersResponse> getParser() {
-		return new GetUsersParser(failOnError);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	@Override
-	public Object getBody() throws IOException, JSONException {
-		body.put("emails", emails);
-		return body;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
-	 */
-	@Override
-	protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
-		params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "get_users"));
-
-	}
 }

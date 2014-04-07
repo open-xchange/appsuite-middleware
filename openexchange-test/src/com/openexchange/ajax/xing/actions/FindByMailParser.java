@@ -49,23 +49,33 @@
 
 package com.openexchange.ajax.xing.actions;
 
+import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link GetUsersResponse}
+ * {@link FindByMailParser}
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetUsersResponse extends AbstractAJAXResponse {
+public class FindByMailParser extends AbstractAJAXParser<FindByMailResponse> {
 
     /**
-     * Initializes a new {@link GetUsersResponse}.
+     * Initializes a new {@link FindByMailParser}.
      * 
-     * @param response
+     * @param failOnError
      */
-    protected GetUsersResponse(Response response) {
-        super(response);
+    protected FindByMailParser(boolean failOnError) {
+        super(failOnError);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
+    @Override
+    protected FindByMailResponse createResponse(Response response) throws JSONException {
+        return new FindByMailResponse(response);
     }
 
 }
