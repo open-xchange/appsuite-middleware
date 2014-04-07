@@ -80,6 +80,7 @@ public class AnotherCreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         expected.setLastModified(new Date());
         final Map<String, Object> meta = new LinkedHashMap<String, Object>(2);
         meta.put("customField0012", "value0012");
+        meta.put("customField0013", Integer.valueOf(2));
         expected.setMeta(meta);
 
         infoMgr.newAction(expected);
@@ -91,9 +92,13 @@ public class AnotherCreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         final Map<String, Object> actualMeta = actual.getMeta();
         assertTrue("Meta not available, but should", actualMeta != meta && !actualMeta.isEmpty());
 
-        final Object actualValue = actualMeta.get("customField0012");
+        Object actualValue = actualMeta.get("customField0012");
         assertNotNull("Unexpected meta value", actualValue);
         assertEquals("Unexpected meta value", "value0012", actualValue.toString());
+
+        actualValue = actualMeta.get("customField0013");
+        assertNotNull("Unexpected meta value", actualValue);
+        assertEquals("Unexpected meta value", "2", actualValue.toString());
 
         infoMgr.deleteAction(expected);
         assertFalse("Deleting an entry should work", infoMgr.getLastResponse().hasError());

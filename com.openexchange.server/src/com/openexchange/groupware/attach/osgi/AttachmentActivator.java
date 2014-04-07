@@ -51,6 +51,7 @@ package com.openexchange.groupware.attach.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.attach.json.AttachmentActionFactory;
+import com.openexchange.quota.QuotaService;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
@@ -71,6 +72,9 @@ public final class AttachmentActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        track(QuotaService.class, new QuotaServiceCustomizer(context));
+        openTrackers();
+
         registerModule(new AttachmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "attachment");
     }
 }

@@ -68,7 +68,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.activation.FileTypeMap;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
@@ -91,6 +94,14 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaType;
+import com.openexchange.quota.Resource;
+import com.openexchange.quota.ResourceDescription;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -104,6 +115,19 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
 public class AttachmentBaseImpl extends DBService implements AttachmentBase {
+
+    private static final AtomicReference<QuotaService> QUOTA_SERVICE_REF = new AtomicReference<QuotaService>();
+
+    /**
+     * Sets {@link QuotaService} reference to given instance.
+     *
+     * @param quotaService The {@link QuotaService} instance or <code>null</code>
+     */
+    public static void setQuotaService(QuotaService quotaService) {
+        QUOTA_SERVICE_REF.set(quotaService);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------- //
 
     public static enum FetchMode {
         PREFETCH, CLOSE_LATER, CLOSE_IMMEDIATELY
@@ -142,6 +166,21 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         contextHolder.set(ctx);
         final boolean newAttachment = attachment.getId() == NEW || attachment.getId() == 0;
 
+        if (newAttachment) {
+            // Check if over quota
+            final QuotaService quotaService = QUOTA_SERVICE_REF.get();
+            if (null != quotaService) {
+                final Quota quota = quotaService.getQuotaFor(Resource.ATTACHMENT, ResourceDescription.getEmptyResourceDescription(), session);
+                final long amount = quota.getQuota(QuotaType.AMOUNT);
+                if (amount > 0) {
+                    final long numberOfAttachments = countAttachmentsInContext(ctx.getContextId());
+                    if (numberOfAttachments + 1 > amount) {
+                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_ATTACHMENTS.create(Long.valueOf(numberOfAttachments), Long.valueOf(amount));
+                    }
+                }
+            }
+        }
+
         initDefaultFields(attachment, ctx, user);
         if (!newAttachment && data != null) {
             final List<String> remove = getFiles(new int[] { attachment.getId() }, ctx);
@@ -158,11 +197,10 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 throw AttachmentExceptionCodes.SAVE_FAILED.create(e);
             }
         } else {
-            if (!newAttachment) {
-                fileId = findFileId(attachment.getId(), ctx);
-            } else {
+            if (newAttachment) {
                 throw AttachmentExceptionCodes.FILE_MISSING.create();
             }
+            fileId = findFileId(attachment.getId(), ctx);
         }
         attachment.setFileId(fileId);
         return save(attachment, newAttachment, session, ctx, user, userConfig);
@@ -243,8 +281,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         final AttachmentField[] cols = addCreationDateAsNeeded(columns);
 
         final StringBuilder select = new StringBuilder("SELECT  ");
-        
+
         int pos = Arrays.binarySearch(cols, AttachmentField.FOLDER_ID_LITERAL, new Comparator<AttachmentField>() {
+            @Override
             public int compare(AttachmentField o1, AttachmentField o2) {
                 if (o1.getId() < o2.getId()) {
                     return -1;
@@ -258,7 +297,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         final String join;
         if (pos >= 0) {
             QUERIES.appendColumnListWithPrefix(select, Arrays.copyOfRange(cols, 0, pos, AttachmentField[].class), "pa");
-            
+
             final String folderField;
             switch (moduleId) {
             case 1:
@@ -435,7 +474,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         copy[i] = AttachmentField.CREATION_DATE_LITERAL;
         return copy;
     }
-    
+
     //private AttachmentField[] cleanse
 
     private long fireAttached(final AttachmentMetadata m, final User user, final UserConfiguration userConfig, final Session session, final Context ctx) throws OXException {
@@ -858,6 +897,28 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             return fireAttached(attachment, user, userConfig, session, ctx);
         }
         return System.currentTimeMillis();
+    }
+
+    private long countAttachmentsInContext(final int contextId) throws OXException {
+        final DatabaseService databaseService = ServerServiceRegistry.getServize(DatabaseService.class);
+        if (null == databaseService) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
+
+        final Connection con = databaseService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT count(id) FROM prg_attachment WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getLong(1) : 0;
+        } catch (final SQLException e) {
+            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
     }
 
     private void checkCharacters(final AttachmentMetadata attachment) throws OXException {

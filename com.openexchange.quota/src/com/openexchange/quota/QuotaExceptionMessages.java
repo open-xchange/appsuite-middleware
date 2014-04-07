@@ -69,6 +69,8 @@ public final class QuotaExceptionMessages implements LocalizableStrings {
 
     public static final String QUOTA_EXCEEDED_FILES_MSG = "Quota exceeded for files. Quota limit: %2$s. Quota used: %1$s. Please delete some files in order to create new ones. Please note: The quota refers to all files of all users in this context.";
 
+    public static final String QUOTA_EXCEEDED_ATTACHMENTS_MSG = "Quota exceeded for attachments. Quota limit: %2$s. Quota used: %1$s. Please delete some attachments in order to create new ones. Please note: The quota refers to all attachments of all users in this context.";
+
     /**
      * Initializes a new {@link QuotaExceptionMessages}.
      */

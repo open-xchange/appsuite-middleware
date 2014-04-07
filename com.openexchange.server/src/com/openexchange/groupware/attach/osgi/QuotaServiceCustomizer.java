@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,48 @@
  *
  */
 
-package com.openexchange.quota;
+package com.openexchange.groupware.attach.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
+import com.openexchange.quota.QuotaService;
 
 /**
- * {@link Resource} - Denotes an Open-Xchange resource that might have a quota restriction.
+ * {@link QuotaServiceCustomizer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum Resource {
+public final class QuotaServiceCustomizer implements ServiceTrackerCustomizer<QuotaService, QuotaService> {
+
+    private final BundleContext context;
 
     /**
-     * The quota resource for tasks.
-     */
-    TASK("task"),
-    /**
-     * The quota resource for appointments.
-     */
-    CALENDAR("calendar"),
-    /**
-     * The quota resource for contact.
-     */
-    CONTACT("contact"),
-    /**
-     * The quota resource for infostore files.
-     */
-    INFOSTORE_FILES("infostore"),
-    /**
-     * The quota resource for attachments of PIM objects.
-     */
-    ATTACHMENT("attachment"),
-
-    ;
-
-    private final String identifier;
-
-    private Resource(final String identifier) {
-        this.identifier = identifier;
-    }
-
-    /**
-     * Gets the identifier
+     * Initializes a new {@link QuotaServiceCustomizer}.
      *
-     * @return The identifier
+     * @param context The bundle context
      */
-    public String getIdentifier() {
-        return identifier;
+    public QuotaServiceCustomizer(final BundleContext context) {
+        super();
+        this.context = context;
     }
 
-    /**
-     * Gets currently known identifiers.
-     *
-     * @return The currently known identifiers
-     */
-    public static String[] allIdentifiers() {
-        final Resource[] values = Resource.values();
-        final int length = values.length;
-        final String[] ret = new String[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = values[i].getIdentifier();
-        }
-        return ret;
+    @Override
+    public QuotaService addingService(final ServiceReference<QuotaService> reference) {
+        final QuotaService quotaService = context.getService(reference);
+        AttachmentBaseImpl.setQuotaService(quotaService);
+        return quotaService;
     }
 
+    @Override
+    public void modifiedService(final ServiceReference<QuotaService> reference, final QuotaService quotaService) {
+        // Nothing to do.
+    }
+
+    @Override
+    public void removedService(final ServiceReference<QuotaService> reference, final QuotaService quotaService) {
+        AttachmentBaseImpl.setQuotaService(null);
+        context.ungetService(reference);
+    }
 }

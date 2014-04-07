@@ -90,6 +90,10 @@ public enum QuotaExceptionCodes implements DisplayableOXExceptionCode {
      * Quota exceeded for files. Quota used: %1$s. Quota limit: %2$s.
      */
     QUOTA_EXCEEDED_FILES("Quota exceeded for files. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_FILES_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
+    /**
+     * Quota exceeded for attachments. Quota used: %1$s. Quota limit: %2$s.
+     */
+    QUOTA_EXCEEDED_ATTACHMENTS("Quota exceeded for attachments. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_ATTACHMENTS_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
 
     ;
 

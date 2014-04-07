@@ -1,3 +1,7 @@
+* 2014-04-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31929: Support quota for attachments of PIM objects
+
 * 2014-07-07 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 26544: Get all attachments sorted by ID fails
