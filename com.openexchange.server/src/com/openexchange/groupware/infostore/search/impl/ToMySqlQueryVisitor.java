@@ -102,6 +102,10 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     private final int userId;
 
+    private final int start;
+
+    private final int end;
+
     private static final String INFOSTORE = "infostore.";
 
     private static final String DOCUMENT = "infostore_document.";
@@ -119,14 +123,24 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         this(allFolderIds, ownFolderIds, contextId, userId, cols, null, SearchEngineImpl.NOT_SET);
     }
 
+    public ToMySqlQueryVisitor(final int[] allFolderIds, final int[] ownFolderIds, final int contextId, final int userId, final String cols, final int start, final int end) {
+        this(allFolderIds, ownFolderIds, contextId, userId, cols, null, SearchEngineImpl.NOT_SET, start, end);
+    }
+
     public ToMySqlQueryVisitor(final int[] allFolderIds, final int[] ownFolderIds, final int contextId, final int userId, final String cols, final Metadata sortedBy, final int dir) {
+        this(allFolderIds, ownFolderIds, contextId, userId, cols, sortedBy, dir, -1, -1);
+    }
+
+    public ToMySqlQueryVisitor(final int[] allFolderIds, final int[] ownFolderIds, final int contextId, final int userId, final String cols, final Metadata sortedBy, final int dir, final int start, final int end) {
         super();
         this.sb = new StringBuilder(8192);
         this.codec = new MySQLCodec(Mode.STANDARD);
         this.sortedBy = sortedBy;
         this.dir = dir;
         this.userId = userId;
-        sb.append(cols).append(" ");
+        this.start = start;
+        this.end = end;
+        sb.append(cols);
         sb.append(PREFIX).append(contextId).append(" AND ");
         appendInString(allFolderIds, ownFolderIds, sb);
     }
@@ -180,6 +194,9 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             } else if (dir == SearchEngineImpl.DESC) {
                 sb.append(" DESC");
             }
+        }
+        if (start > -1 && end > -1 && start < end) {
+            sb.append(" LIMIT ").append(start).append(",").append(end);
         }
         return sb.toString();
     }

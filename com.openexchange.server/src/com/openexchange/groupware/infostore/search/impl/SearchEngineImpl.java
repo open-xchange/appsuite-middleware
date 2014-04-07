@@ -166,7 +166,9 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             user.getId(),
             getResultFieldsSelect(cols),
             sortedBy,
-            dir);
+            dir,
+            start,
+            end);
         searchTerm.visit(visitor);
         String sqlQuery = visitor.getMySqlQuery();
 
