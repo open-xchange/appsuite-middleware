@@ -4,6 +4,12 @@ open-xchange-emig-mock (7.6.0-0) unstable; urgency=low
 
  -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 12 Feb 2014 09:35:51 +0100
 
+open-xchange-emig-mock (7.4.2-17) stable; urgency=low
+
+  * Build for patch 2014-03-31
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 31 Mar 2014 10:22:31 +0200
+
 open-xchange-emig-mock (7.4.2-16) stable; urgency=low
 
   * Build for patch 2014-03-21

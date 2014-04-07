@@ -51,6 +51,8 @@ GLOBIGNORE='*'
 /opt/open-xchange/sbin/*
 
 %changelog
+* Mon Mar 31 2014 Karsten Will <karsten.will@open-xchange.com>
+Build for patch 2014-03-31
 * Wed Mar 19 2014 Karsten Will <karsten.will@open-xchange.com>
 Build for patch 2014-03-21
 * Mon Mar 17 2014 Karsten Will <karsten.will@open-xchange.com>
