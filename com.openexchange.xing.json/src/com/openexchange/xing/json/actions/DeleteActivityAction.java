@@ -68,29 +68,30 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public final class DeleteActivityAction extends AbstractXingAction {
 
-    /**
-     * Initializes a new {@link DeleteActivityAction}.
-     */
-    public DeleteActivityAction(final ServiceLookup services) {
-        super(services);
-    }
+	/**
+	 * Initializes a new {@link DeleteActivityAction}.
+	 */
+	public DeleteActivityAction(final ServiceLookup services) {
+		super(services);
+	}
 
-    @Override
-    protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        final String activityId = getMandatoryStringParameter(req, "activity_id");
+	@Override
+	protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
+		final String activityId = getMandatoryStringParameter(req, "activity_id");
 
-        String token = req.getParameter("testToken");
-        String secret = req.getParameter("testSecret");
-        final XingOAuthAccess xingOAuthAccess;
-
-        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
-        } else {
-            xingOAuthAccess = getXingOAuthAccess(req);
-        }
-        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        xingAPI.deleteActivity(activityId);
-        return new AJAXRequestResult(Boolean.TRUE, "native");
-    }
+		String token = req.getParameter("testToken");
+		String secret = req.getParameter("testSecret");
+		final XingOAuthAccess xingOAuthAccess;
+		{
+			if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+				xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
+			} else {
+				xingOAuthAccess = getXingOAuthAccess(req);
+			}
+		}
+		XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+		xingAPI.deleteActivity(activityId);
+		return new AJAXRequestResult(Boolean.TRUE, "native");
+	}
 
 }

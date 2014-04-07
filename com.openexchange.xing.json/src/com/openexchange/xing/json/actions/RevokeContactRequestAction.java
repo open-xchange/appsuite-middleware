@@ -70,39 +70,40 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public class RevokeContactRequestAction extends AbstractXingAction {
 
-    /**
-     * Initializes a new {@link RevokeContactRequestAction}.
-     *
-     * @param services
-     */
-    public RevokeContactRequestAction(ServiceLookup services) {
-        super(services);
-    }
+	/**
+	 * Initializes a new {@link RevokeContactRequestAction}.
+	 *
+	 * @param services
+	 */
+	public RevokeContactRequestAction(ServiceLookup services) {
+		super(services);
+	}
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
-     */
-    @Override
-    protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        String email = getMandatoryStringParameter(req, "email");
-        email = validateMailAddress(email);
-        String token = req.getParameter("testToken");
-        String secret = req.getParameter("testSecret");
-        final XingOAuthAccess xingOAuthAccess;
+	/*
+	 * (non-Javadoc)
+	 * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
+	 */
+	@Override
+	protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
+		String email = getMandatoryStringParameter(req, "email");
+		email = validateMailAddress(email);
+		String token = req.getParameter("testToken");
+		String secret = req.getParameter("testSecret");
+		final XingOAuthAccess xingOAuthAccess;
+		{
+			if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+				xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
+			} else {
+				xingOAuthAccess = getXingOAuthAccess(req);
+			}
+		}
+		XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+		final String recipientUserId = xingAPI.findByEmail(email);
+		if (Strings.isEmpty(recipientUserId)) {
+			throw XingExceptionCodes.NOT_A_MEMBER.create(email);
+		}
 
-        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
-        } else {
-            xingOAuthAccess = getXingOAuthAccess(req);
-        }
-        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        final String recipientUserId = xingAPI.findByEmail(email);
-        if (Strings.isEmpty(recipientUserId)) {
-            throw XingExceptionCodes.NOT_A_MEMBER.create(email);
-        }
-
-        xingAPI.revokeContactRequest(xingOAuthAccess.getXingUserId(), recipientUserId);
-        return new AJAXRequestResult(Boolean.TRUE, "native");
-    }
+		xingAPI.revokeContactRequest(xingOAuthAccess.getXingUserId(), recipientUserId);
+		return new AJAXRequestResult(Boolean.TRUE, "native");
+	}
 }

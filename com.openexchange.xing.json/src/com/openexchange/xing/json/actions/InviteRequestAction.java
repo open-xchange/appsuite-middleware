@@ -74,59 +74,59 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public final class InviteRequestAction extends AbstractXingAction {
 
-    /**
-     * Initializes a new {@link InviteRequestAction}.
-     */
-    public InviteRequestAction(final ServiceLookup services) {
-        super(services);
-    }
+	/**
+	 * Initializes a new {@link InviteRequestAction}.
+	 */
+	public InviteRequestAction(final ServiceLookup services) {
+		super(services);
+	}
 
-    @Override
-    protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        // Get & validate E-Mail address
-        String address = getMandatoryStringParameter(req, "email");
-        address = validateMailAddress(address);
+	@Override
+	protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
+		// Get & validate E-Mail address
+		String address = getMandatoryStringParameter(req, "email");
+		address = validateMailAddress(address);
 
-        String token = req.getParameter("testToken");
-        String secret = req.getParameter("testSecret");
-        final XingOAuthAccess xingOAuthAccess;
+		String token = req.getParameter("testToken");
+		String secret = req.getParameter("testSecret");
+		final XingOAuthAccess xingOAuthAccess;
+		{
+			if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+				xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
+			} else {
+				xingOAuthAccess = getXingOAuthAccess(req);
+			}
+		}
 
-        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
-        } else {
-            xingOAuthAccess = getXingOAuthAccess(req);
-        }
+		final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+		final InvitationStats invitationStats = xingAPI.invite(Collections.<String> singletonList(address), null, null);
 
-        final XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+		if (invitationStats.getInvitationsSent() > 0) {
+			return new AJAXRequestResult(Boolean.TRUE, "native");
+		}
 
-        final InvitationStats invitationStats = xingAPI.invite(Collections.<String> singletonList(address), null, null);
+		final List<String> alreadyInvited = invitationStats.getAlreadyInvited();
+		if (null != alreadyInvited && new HashSet<String>(alreadyInvited).contains(address)) {
+			throw XingExceptionCodes.ALREADY_INVITED.create(address);
+		}
 
-        if (invitationStats.getInvitationsSent() > 0) {
-            return new AJAXRequestResult(Boolean.TRUE, "native");
-        }
+		final List<String> invalidAddresses = invitationStats.getInvalidAddresses();
+		if (null != invalidAddresses && new HashSet<String>(invalidAddresses).contains(address)) {
+			throw XingExceptionCodes.INVALID_EMAIL_ADDRESS.create(address);
+		}
 
-        final List<String> alreadyInvited = invitationStats.getAlreadyInvited();
-        if (null != alreadyInvited && new HashSet<String>(alreadyInvited).contains(address)) {
-            throw XingExceptionCodes.ALREADY_INVITED.create(address);
-        }
+		final String xingId = xingAPI.findByEmail(address);
 
-        final List<String> invalidAddresses = invitationStats.getInvalidAddresses();
-        if (null != invalidAddresses && new HashSet<String>(invalidAddresses).contains(address)) {
-            throw XingExceptionCodes.INVALID_EMAIL_ADDRESS.create(address);
-        }
+		final List<User> alreadyMember = invitationStats.getAlreadyMember();
+		if (null != alreadyMember) {
+			for (final User member : alreadyMember) {
+				if (member.getId().equals(xingId)) {
+					throw XingExceptionCodes.ALREADY_MEMBER.create(address);
+				}
+			}
+		}
 
-        final String xingId = xingAPI.findByEmail(address);
-
-        final List<User> alreadyMember = invitationStats.getAlreadyMember();
-        if (null != alreadyMember) {
-            for (final User member : alreadyMember) {
-                if (member.getId().equals(xingId)) {
-                    throw XingExceptionCodes.ALREADY_MEMBER.create(address);
-                }
-            }
-        }
-
-        throw XingExceptionCodes.INVITATION_FAILED.create();
-    }
+		throw XingExceptionCodes.INVITATION_FAILED.create();
+	}
 
 }

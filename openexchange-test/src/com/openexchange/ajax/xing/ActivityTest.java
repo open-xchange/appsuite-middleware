@@ -71,7 +71,6 @@ import com.openexchange.ajax.xing.actions.GetLikesRequest;
 import com.openexchange.ajax.xing.actions.GetLikesResponse;
 import com.openexchange.ajax.xing.actions.LikeActivityRequest;
 import com.openexchange.ajax.xing.actions.LikeActivityResponse;
-import com.openexchange.ajax.xing.actions.NewsFeedRequest;
 import com.openexchange.ajax.xing.actions.ShareActivityRequest;
 import com.openexchange.ajax.xing.actions.ShareActivityResponse;
 import com.openexchange.ajax.xing.actions.ShareLinkRequest;
@@ -282,8 +281,8 @@ public class ActivityTest extends AbstractAJAXSession {
         boolean found = false;
         for (int i = 0; i < networkActivities.length(); i++) {
             JSONObject activity = (JSONObject) networkActivities.get(i);
-            assertTrue(activity.hasAndNotNull("ids"));
-            assertTrue(activity.hasAndNotNull("possible_actions"));
+            assertTrue("Attribute \"ids\" not found", activity.hasAndNotNull("ids"));
+            assertTrue("Attribute \"possible_actions\" not found", activity.hasAndNotNull("possible_actions"));
             JSONArray possibleActionsJSON = activity.getJSONArray("possible_actions");
             for (int j = 0; j < possibleActionsJSON.length(); j++) {
                 String possibleActionObj = (String) possibleActionsJSON.get(j);

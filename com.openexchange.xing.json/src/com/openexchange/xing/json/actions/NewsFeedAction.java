@@ -74,57 +74,58 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public class NewsFeedAction extends AbstractXingAction {
 
-    /**
-     * Initializes a new {@link NewsFeedAction}.
-     */
-    public NewsFeedAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
-    }
+	/**
+	 * Initializes a new {@link NewsFeedAction}.
+	 */
+	public NewsFeedAction(ServiceLookup serviceLookup) {
+		super(serviceLookup);
+	}
 
-    @Override
-    protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        boolean optAggregate = true;
-        Date optSince = null;
-        Date optUntil = null;
-        Collection<UserField> optUserFields = null;
+	@Override
+	protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
+		boolean optAggregate = true;
+		Date optSince = null;
+		Date optUntil = null;
+		Collection<UserField> optUserFields = null;
 
-        // Aggregate
-        String aggregate = req.getParameter("aggregate");
-        if (aggregate != null) {
-            optAggregate = Boolean.parseBoolean(aggregate);
-        }
+		// Aggregate
+		String aggregate = req.getParameter("aggregate");
+		if (aggregate != null) {
+			optAggregate = Boolean.parseBoolean(aggregate);
+		}
 
-        // Since/Until
-        String since = req.getParameter("since");
-        String until = req.getParameter("until");
+		// Since/Until
+		String since = req.getParameter("since");
+		String until = req.getParameter("until");
 
-        if (since != null && until != null) {
-            throw XingExceptionCodes.MUTUALLY_EXCLUSIVE.create();
-        }
+		if (since != null && until != null) {
+			throw XingExceptionCodes.MUTUALLY_EXCLUSIVE.create();
+		}
 
-        if (since != null) {
-            optSince = new Date(Long.parseLong(since));
-        } else if (until != null) {
-            optUntil = new Date(Long.parseLong(until));
-        }
+		if (since != null) {
+			optSince = new Date(Long.parseLong(since));
+		} else if (until != null) {
+			optUntil = new Date(Long.parseLong(until));
+		}
 
-        // User Fields
-        optUserFields = getUserFields(req.getParameter("user_fields"));
+		// User Fields
+		optUserFields = getUserFields(req.getParameter("user_fields"));
 
-        String token = req.getParameter("testToken");
-        String secret = req.getParameter("testSecret");
-        final XingOAuthAccess xingOAuthAccess;
+		String token = req.getParameter("testToken");
+		String secret = req.getParameter("testSecret");
+		final XingOAuthAccess xingOAuthAccess;
+		{
+			if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+				xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
+			} else {
+				xingOAuthAccess = getXingOAuthAccess(req);
+			}
+		}
+		XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+		Map<String, Object> networkFeed = xingAPI.getNetworkFeed(xingOAuthAccess.getXingUserId(), optAggregate, optSince, optUntil, optUserFields);
+		JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(networkFeed);
 
-        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
-        } else {
-            xingOAuthAccess = getXingOAuthAccess(req);
-        }
-        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        Map<String, Object> networkFeed = xingAPI.getNetworkFeed(xingOAuthAccess.getXingUserId(), optAggregate, optSince, optUntil, optUserFields);
-        JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(networkFeed);
-
-        return new AJAXRequestResult(result);
-    }
+		return new AJAXRequestResult(result);
+	}
 
 }
