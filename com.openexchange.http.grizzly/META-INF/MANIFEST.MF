@@ -63,5 +63,8 @@ Bundle-ClassPath: .,
  lib/grizzly-rcm-2.2.22-SNAPSHOT.jar,
  lib/grizzly-websockets-2.2.22-SNAPSHOT.jar
 Export-Package: com.openexchange.http.grizzly.service.comet,
+ org.glassfish.grizzly,
  org.glassfish.grizzly.comet,
- org.glassfish.grizzly.http.server
+ org.glassfish.grizzly.http.server,
+ org.glassfish.grizzly.websockets,
+ org.glassfish.grizzly.websockets.frametypes
