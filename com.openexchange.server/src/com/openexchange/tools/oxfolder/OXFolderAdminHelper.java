@@ -98,9 +98,6 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OXFolderAdminHelper {
 
-    /** Enable once we're ready */
-    static final boolean CREATE_INFOSTORE_TRASH = true;
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderAdminHelper.class);
 
     private static final boolean ADMIN_EDITABLE = false;
@@ -1558,17 +1555,16 @@ public final class OXFolderAdminHelper {
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
             LOG.info("User's default INFOSTORE folder successfully created");
-            if (CREATE_INFOSTORE_TRASH) {
-                /*
-                 * Insert default infostore trash folder
-                 */
-                fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
-                fo.setType(FolderObject.TRASH);
-                fo.setFolderName(defaultInfostoreTrashName);
-                newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
-                OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-                LOG.info("User's default INFOSTORE trash folder successfully created");
-            }
+            /*
+             * Insert default infostore trash folder
+             */
+            fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+            fo.setType(FolderObject.TRASH);
+            fo.setFolderName(defaultInfostoreTrashName);
+            newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            LOG.info("User's default INFOSTORE trash folder successfully created");
+
             LOG.info("All user default folders were successfully created");
             /*
              * TODO: Set standard special folders (projects, ...) located beneath system user folder

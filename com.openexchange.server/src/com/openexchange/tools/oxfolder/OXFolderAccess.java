@@ -477,9 +477,6 @@ public class OXFolderAccess {
                         getUserName(userId, ctx),
                         Integer.valueOf(ctx.getContextId()));
                 }
-                if (FolderObject.TRASH == type && false == OXFolderAdminHelper.CREATE_INFOSTORE_TRASH) {
-                    return null;
-                }
                 /*
                  * Re-Create default infostore / infostore trash folder
                  */
