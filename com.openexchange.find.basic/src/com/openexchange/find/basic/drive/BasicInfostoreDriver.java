@@ -269,25 +269,21 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         // List of supported facets
         final List<Facet> facets = new LinkedList<Facet>();
 
-        // Add field factes
-        FieldFacet filenameFacet = new FieldFacet(
-            DriveFacetType.FILE_NAME,
-            new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix),
-            Field.FILENAME.getName(),
-            prefix);
-        FieldFacet descriptionFacet = new FieldFacet(
-            DriveFacetType.FILE_DESCRIPTION,
-            new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix),
-            Field.DESCRIPTION.getName(),
-            prefix);
-        FieldFacet contentFacet = new FieldFacet(DriveFacetType.FILE_CONTENT,
-            new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix),
-            Field.CONTENT.getName(),
-            prefix);
-        facets.add(filenameFacet);
-        facets.add(descriptionFacet);
-        facets.add(contentFacet);
-
+        if (!prefix.isEmpty()) {
+            // Add field factes
+            FieldFacet filenameFacet = new FieldFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(
+                DriveStrings.SEARCH_IN_FILE_NAME,
+                prefix), Field.FILENAME.getName(), prefix);
+            FieldFacet descriptionFacet = new FieldFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(
+                DriveStrings.SEARCH_IN_FILE_DESC,
+                prefix), Field.DESCRIPTION.getName(), prefix);
+            FieldFacet contentFacet = new FieldFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(
+                DriveStrings.SEARCH_IN_FILE_CONTENT,
+                prefix), Field.CONTENT.getName(), prefix);
+            facets.add(filenameFacet);
+            facets.add(descriptionFacet);
+            facets.add(contentFacet);
+        }
         // Add static file type facet
         final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
         final String fieldFileType = Constants.FIELD_FILE_TYPE;

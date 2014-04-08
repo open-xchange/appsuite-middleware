@@ -64,10 +64,10 @@ public enum DriveFacetType implements FacetType {
 
     CONTACTS(DriveStrings.FACET_CONTACTS),
     FOLDERS(DriveStrings.FACET_FOLDERS),
-    FILE_NAME(DriveStrings.FACET_FILE_NAME),
+    FILE_NAME(null),
     FILE_TYPE(DriveStrings.FACET_FILE_TYPE),
-    FILE_DESCRIPTION(DriveStrings.FACET_FILE_DESCRIPTION),
-    FILE_CONTENT(DriveStrings.FACET_FILE_CONTENT),
+    FILE_DESCRIPTION(null),
+    FILE_CONTENT(null),
     FILE_SIZE(DriveStrings.FACET_FILE_SIZE),
     FOLDER_TYPE(DriveStrings.FACET_FOLDER_TYPE)
     ;
