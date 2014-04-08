@@ -339,26 +339,26 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         // Add static file size facet
         List<FacetValue> fileSize = new ArrayList<FacetValue>(5);
         String fieldFileSize = Constants.FIELD_FILE_SIZE;
-        fileSize.add(new FacetValue(
-            FileSizeDisplayItem.Size.MB1.getSize(),
-            new FileSizeDisplayItem(DriveStrings.FACET_FILE_SIZE, Size.MB1),
-            FacetValue.UNKNOWN_COUNT,
-            new Filter(Collections.singletonList(fieldFileSize), FileSizeDisplayItem.Size.MB1.getSize())));
+        fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB1.getSize(), new FileSizeDisplayItem(
+            Size.MB1.getSize(),
+            Size.MB1), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldFileSize),
+                FileSizeDisplayItem.Size.MB1.getSize())));
         fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB10.getSize(), new FileSizeDisplayItem(
-            DriveStrings.FACET_FILE_SIZE,
+            Size.MB10.getSize(),
             Size.MB10), FacetValue.UNKNOWN_COUNT, new Filter(
             Collections.singletonList(fieldFileSize),
             FileSizeDisplayItem.Size.MB10.getSize())));
         fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB100.getSize(), new FileSizeDisplayItem(
-            DriveStrings.FACET_FILE_SIZE,
+            Size.MB100.getSize(),
             Size.MB100), FacetValue.UNKNOWN_COUNT, new Filter(
             Collections.singletonList(fieldFileSize),
             FileSizeDisplayItem.Size.MB100.getSize())));
-        fileSize.add(new FacetValue(
-            FileSizeDisplayItem.Size.GB1.getSize(),
-            new FileSizeDisplayItem(DriveStrings.FACET_FILE_SIZE, Size.GB1),
-            FacetValue.UNKNOWN_COUNT,
-            new Filter(Collections.singletonList(fieldFileSize), FileSizeDisplayItem.Size.GB1.getSize())));
+        fileSize.add(new FacetValue(FileSizeDisplayItem.Size.GB1.getSize(), new FileSizeDisplayItem(
+            Size.GB1.getSize(),
+            Size.GB1), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldFileSize),
+                FileSizeDisplayItem.Size.GB1.getSize())));
         Facet fileSizeFacet = new Facet(DriveFacetType.FILE_SIZE, fileSize);
         facets.add(fileSizeFacet);
 
@@ -401,47 +401,5 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         }
         return new AndTerm(terms);
     }
-
-//    private List<DocumentMetadata> getAutocompleteFiles(ServerSession session, AutocompleteRequest request) throws OXException {
-//        InfostoreSearchEngine searchEngine = Services.getInfostoreSearchEngine();
-//        if (null == searchEngine) {
-//            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreSearchEngine.class.getName());
-//        }
-//
-//        // Compose term
-//        String prefix = request.getPrefix();
-//        int limit = request.getLimit();
-//        List<SearchTerm<?>> terms = new LinkedList<SearchTerm<?>>();
-//        terms.add(new TitleTerm(prefix, true, true));
-//        terms.add(new FileNameTerm(prefix, true, true));
-//        terms.add(new DescriptionTerm(prefix, true, true));
-//        SearchTerm<List<SearchTerm<?>>> orTerm = new OrTerm(terms);
-//        ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
-//        orTerm.visit(visitor);
-//
-//        // Fire search
-//        SearchIterator<DocumentMetadata> it = null;
-//        try {
-//            it = searchEngine.search(
-//                new int[0],
-//                visitor.getInfstoreTerm(),
-//                fields,
-//                Metadata.TITLE_LITERAL,
-//                0,
-//                0,
-//                limit,
-//                session.getContext(),
-//                session.getUser(),
-//                session.getUserPermissionBits());
-//            List<DocumentMetadata> docs = new LinkedList<DocumentMetadata>();
-//            while (it.hasNext()) {
-//                DocumentMetadata doc = it.next();
-//                docs.add(doc);
-//            }
-//            return docs;
-//        } finally {
-//            SearchIterators.close(it);
-//        }
-//    }
 
 }
