@@ -91,7 +91,7 @@ public class OXExceptionFactory {
     }
 
     private static boolean recEquals(final String prefix, final int code, final OXException e) {
-        if (prefix.equals(e.getPrefix()) && e.getCode() == code) {
+        if (e.getCode() == code && prefix.equals(e.getPrefix())) {
             return true;
         }
         final Throwable cause = e.getCause();
