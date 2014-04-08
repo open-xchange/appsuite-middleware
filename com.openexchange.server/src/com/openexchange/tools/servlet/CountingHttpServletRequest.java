@@ -65,7 +65,6 @@ import javax.servlet.http.HttpSession;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.Parameterizable;
-import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.CountingInputStream;
 
@@ -414,19 +413,6 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     @Override
     public boolean isRequestedSessionIdFromUrl() {
         return servletRequest.isRequestedSessionIdFromUrl();
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /** ASCII-wise to lower-case */

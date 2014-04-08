@@ -75,23 +75,10 @@ public final class Utils {
      */
     public static final String encodeUrl(final String s) {
         try {
-            return isEmpty(s) ? s : URL_CODEC.encode(s);
+            return com.openexchange.java.Strings.isEmpty(s) ? s : URL_CODEC.encode(s);
         } catch (final EncoderException e) {
             return s;
         }
-    }
-
-    /** Checks for an empty string */
-    public static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /**

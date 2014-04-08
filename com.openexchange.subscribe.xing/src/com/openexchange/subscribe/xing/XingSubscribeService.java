@@ -366,7 +366,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
             if (subscription.getSecret() != null) {
                 displayName = getXingOAuthAccount(subscription.getSession()).getDisplayName();
             }
-            if (isEmpty(displayName)) {
+            if (com.openexchange.java.Strings.isEmpty(displayName)) {
                 subscription.setDisplayName("XING");
             } else {
                 subscription.setDisplayName(displayName);
@@ -570,17 +570,4 @@ public class XingSubscribeService extends AbstractSubscribeService {
     protected boolean isNotNull(final String s) {
         return null != s && !"null".equals(s);
     }
-
-    private boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

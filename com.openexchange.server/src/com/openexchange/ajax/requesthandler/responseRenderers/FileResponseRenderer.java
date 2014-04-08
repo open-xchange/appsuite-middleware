@@ -295,7 +295,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             if (DOWNLOAD.equalsIgnoreCase(delivery) || (SAVE_AS_TYPE.equals(contentType) && !VIEW.equalsIgnoreCase(delivery))) {
                 // Write as a common file download: application/octet-stream
                 final StringBuilder sb = new StringBuilder(32);
-                sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
+                sb.append(com.openexchange.java.Strings.isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
                 DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                 resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(SAVE_AS_TYPE);
@@ -352,7 +352,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                  * Set headers...
                  */
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
-                    if (isEmpty(contentDisposition)) {
+                    if (com.openexchange.java.Strings.isEmpty(contentDisposition)) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     } else {
                         if (contentDisposition.indexOf(';') >= 0) {
@@ -612,9 +612,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                 final String lmsg = toLowerCase(e.getMessage());
                 if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                     // Assume client-initiated connection closure
-                    LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to client while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                 sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", resp);
@@ -629,13 +629,13 @@ public class FileResponseRenderer implements ResponseRenderer {
                      * For the next write attempt by us, the peer's TCP stack will issue an RST,
                      * which results in this exception and message at the sender.
                      */
-                    LOG.debug("Client dropped connection while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.debug("Client dropped connection while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to client while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             }
         } catch (final OXException e) {
-            final String message = "Exception while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName);
+            final String message = "Exception while trying to output file" + (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName);
             LOG.error(message, e);
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
                 Throwable cause = e;
@@ -648,7 +648,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
             }
         } catch (final Exception e) {
-            final String message = "Exception while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName);
+            final String message = "Exception while trying to output file" + (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName);
             LOG.error(message, e);
             sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
         } finally {
@@ -761,7 +761,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         // Get eTag from result that provides the IFileHolder
         final String eTag = result.getHeader("ETag");
-        final boolean isValidEtag = !isEmpty(eTag);
+        final boolean isValidEtag = !com.openexchange.java.Strings.isEmpty(eTag);
         if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
             final CachedResource cachedResource = resourceCache.get(cacheKey, 0, request.getSession().getContextId());
@@ -1003,18 +1003,6 @@ public class FileResponseRenderer implements ResponseRenderer {
         return builder.toString();
     }
 
-    private boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     /**
      * Removes single or double quotes from a string if its quoted.
      *
@@ -1022,14 +1010,14 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @return The unquoted value or <code>null</code>
      */
     private String unquote(final String s) {
-        if (!isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
+        if (!com.openexchange.java.Strings.isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
             return s.substring(1, s.length() - 1);
         }
         return s;
     }
 
     private String getPrimaryType(final String contentType) {
-        if (isEmpty(contentType)) {
+        if (com.openexchange.java.Strings.isEmpty(contentType)) {
             return contentType;
         }
         final int pos = contentType.indexOf('/');
@@ -1110,7 +1098,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private boolean hasNoFileItem(final IFileHolder file) {
         final String fileMIMEType = file.getContentType();
-        return ((isEmpty(fileMIMEType) || SAVE_AS_TYPE.equals(fileMIMEType)) && isEmpty(file.getName()) && (file.getLength() <= 0L));
+        return ((com.openexchange.java.Strings.isEmpty(fileMIMEType) || SAVE_AS_TYPE.equals(fileMIMEType)) && com.openexchange.java.Strings.isEmpty(file.getName()) && (file.getLength() <= 0L));
     }
 
     private static final class Range {
@@ -1229,7 +1217,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
             }
         }
-       return write2Disk(file, "brokenimage-", suffix);
+        return write2Disk(file, "brokenimage-", suffix);
     }
 
     private File write2Disk(final IFileHolder file, final String prefix, final String suffix) throws IOException, OXException, FileNotFoundException {

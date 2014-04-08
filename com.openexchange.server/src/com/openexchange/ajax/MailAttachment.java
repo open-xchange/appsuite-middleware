@@ -338,9 +338,9 @@ public class MailAttachment extends AJAXServlet {
                     final String lmsg = toLowerCase(e.getMessage());
                     if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                         // Assume client-initiated connection closure
-                        LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                        LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                     } else {
-                        LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                        LOG.warn("Lost connection to client while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                     }
                 } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Message not found.");
@@ -354,9 +354,9 @@ public class MailAttachment extends AJAXServlet {
                          * For the next write attempt by us, the peer's TCP stack will issue an RST,
                          * which results in this exception and message at the sender.
                          */
-                        LOG.debug("Client dropped connection while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                        LOG.debug("Client dropped connection while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                     } else {
-                        LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                        LOG.warn("Lost connection to client while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
                     }
                 }
             } finally {
@@ -436,19 +436,6 @@ public class MailAttachment extends AJAXServlet {
     protected void doPost(final HttpServletRequest req, final HttpServletResponse res) throws ServletException, IOException {
         res.setContentType("text/html; charset=UTF-8");
         res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /** ASCII-wise to lower-case */

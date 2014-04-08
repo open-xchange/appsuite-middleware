@@ -190,7 +190,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
             return;
         }
         for (final String line : text.split("\r?\n")) {
-            if (!isEmpty(line) && '#' != line.charAt(0)) {
+            if (!com.openexchange.java.Strings.isEmpty(line) && '#' != line.charAt(0)) {
                 for (final String value : line.split(" *, *")) {
                     processValue(value);
                 }
@@ -199,7 +199,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
     }
 
     private void processValue(final String value) {
-        if (isEmpty(value)) {
+        if (com.openexchange.java.Strings.isEmpty(value)) {
             return;
         }
         String val = value.trim();
@@ -212,23 +212,10 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
                 return;
             }
             val = val.substring(1, mlen);
-            if (isEmpty(val)) {
+            if (com.openexchange.java.Strings.isEmpty(val)) {
                 return;
             }
         }
         i18nNames.put(val, val);
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

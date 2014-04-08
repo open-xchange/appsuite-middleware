@@ -55,7 +55,6 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
 import com.openexchange.secret.SecretExceptionCodes;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
@@ -98,7 +97,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
     @Override
     public String isSecretWorking(final ServerSession session) throws OXException {
         final String secret = secretService.getSecret(session);
-        if (isEmpty(secret)) {
+        if (com.openexchange.java.Strings.isEmpty(secret)) {
             throw SecretExceptionCodes.EMPTY_SECRET.create();
         }
 
@@ -153,19 +152,6 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
     @Override
     public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
         userService.setAttribute(PROPERTY, null, session.getUserId(), session.getContext());
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     @Override

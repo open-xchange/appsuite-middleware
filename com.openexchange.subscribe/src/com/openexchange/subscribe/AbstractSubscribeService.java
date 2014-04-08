@@ -181,7 +181,6 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     public void modifyIncoming(final Subscription subscription) throws OXException {
         Object accountIDObject = subscription.getConfiguration().get("account");
-        Integer accountId = null;
         if (JSONObject.NULL == accountIDObject) {
             throw SubscriptionErrorMessage.NO_OAUTH_ACCOUNT_GIVEN.create();
         }
@@ -280,7 +279,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 boolean save = false;
                 for (final String passwordField : passwordFields) {
                     final String password = (String) configuration.get(passwordField);
-                    if (!isEmpty(password)) {
+                    if (!com.openexchange.java.Strings.isEmpty(password)) {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, newSecret);
@@ -319,7 +318,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 boolean save = false;
                 for (final String passwordField : passwordFields) {
                     final String password = (String) configuration.get(passwordField);
-                    if (!isEmpty(password)) {
+                    if (!com.openexchange.java.Strings.isEmpty(password)) {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, secret);
@@ -357,7 +356,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 final Map<String, Object> configuration = subscription.getConfiguration();
                 for (final String passwordField : passwordFields) {
                     final String password = (String) configuration.get(passwordField);
-                    if (!isEmpty(password)) {
+                    if (!com.openexchange.java.Strings.isEmpty(password)) {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, secret);
@@ -432,17 +431,5 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         final UserPermissionBits userPerm = USER_PERMISSIONS.get().getUserPermissionBits(userId, ctx);
 
         return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userPerm);
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 }

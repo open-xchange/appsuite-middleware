@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.api;
 
-import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
@@ -120,7 +119,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
     @Override
     public String renameFolder(final String fullName, final String newName) throws OXException {
         final MailFolder folder = getFolder(fullName);
-        if (isEmpty(newName)) {
+        if (com.openexchange.java.Strings.isEmpty(newName)) {
             throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
         }
         if (newName.indexOf(folder.getSeparator()) != -1) {

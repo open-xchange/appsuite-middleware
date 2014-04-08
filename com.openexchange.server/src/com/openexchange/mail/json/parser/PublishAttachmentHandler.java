@@ -172,7 +172,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                         MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(
                             Long.valueOf(uploadQuotaPerFile),
                             null == fileName ? "" : fileName,
-                            Long.valueOf(size));
+                                Long.valueOf(size));
                     LOG.debug("Per-file quota ({}) exceeded. Message is going to be sent with links to publishing infostore folder.", getSize(uploadQuotaPerFile, 2, false, true),
                         e);
                 }
@@ -239,7 +239,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
          */
         publisher = target.getPublicationService();
         try {
-        	warnings.add(MailExceptionCode.USED_PUBLISHING_FEATURE.create());
+            warnings.add(MailExceptionCode.USED_PUBLISHING_FEATURE.create());
             return generateComposedMails0(source, publications, folderId, target, publisher, ctx);
         } catch (final OXException e) {
             /*
@@ -273,7 +273,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
              * Add to list
              */
             linkBuilder.setLength(0);
-            linkBuilder.append(isEmpty(protocol) ? (forcedSecure(hostName) ? "https://" : "http://") : saneProtocol(protocol)).append(hostName).append(path);
+            linkBuilder.append(com.openexchange.java.Strings.isEmpty(protocol) ? (forcedSecure(hostName) ? "https://" : "http://") : saneProtocol(protocol)).append(hostName).append(path);
             links.add(new LinkAndNamePair(attachment.getFileName(), linkBuilder.toString()));
         }
         /*
@@ -805,17 +805,4 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         return (configurationService != null && configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false) && !Cookies.isLocalLan(hostName));
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

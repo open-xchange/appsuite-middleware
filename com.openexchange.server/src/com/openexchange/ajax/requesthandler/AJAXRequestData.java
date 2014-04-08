@@ -743,7 +743,7 @@ public class AJAXRequestData {
             throw new NullPointerException("name is null");
         }
         final String value = params.get(name);
-        if (isEmpty(value)) {
+        if (com.openexchange.java.Strings.isEmpty(value)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
         return value;
@@ -1015,7 +1015,7 @@ public class AJAXRequestData {
      * @param value The header value
      */
     public void setHeader(final @Nullable String header, final @Nullable String value) {
-        if (!isEmpty(header)) {
+        if (!com.openexchange.java.Strings.isEmpty(header)) {
             if (null == value) {
                 headers.remove(header);
             } else {
@@ -1393,19 +1393,6 @@ public class AJAXRequestData {
      */
     public Map<String, Object> getProperties() {
         return Collections.unmodifiableMap(properties);
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /**

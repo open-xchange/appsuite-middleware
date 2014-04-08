@@ -77,7 +77,7 @@ public final class SnippetUtils {
      * @return The sanitized content
      */
     public static String sanitizeContent(final String content) {
-        if (isEmpty(content) || !HTMLDetector.containsHTMLTags(content, true)) {
+        if (com.openexchange.java.Strings.isEmpty(content) || !HTMLDetector.containsHTMLTags(content, true)) {
             return content;
         }
         final HtmlService service = Services.getService(HtmlService.class);
@@ -93,18 +93,4 @@ public final class SnippetUtils {
             return content;
         }
     }
-
-    /** Check for an empty string */
-    public static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

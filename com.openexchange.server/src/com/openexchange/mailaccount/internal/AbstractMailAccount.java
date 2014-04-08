@@ -181,7 +181,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     @Override
     public String getReplyTo() {
-        if (isEmpty(replyTo)) {
+        if (com.openexchange.java.Strings.isEmpty(replyTo)) {
             return properties.get("replyto");
         }
         return replyTo;
@@ -273,7 +273,7 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setReplyTo(final String replyTo) {
         this.replyTo = replyTo;
-        if (isEmpty(replyTo)) {
+        if (com.openexchange.java.Strings.isEmpty(replyTo)) {
             properties.remove("replyto");
         } else {
             properties.put("replyto", replyTo);
@@ -486,7 +486,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         if (null != mailServerUrl) {
             return mailServerUrl;
         }
-        if (isEmpty(mailServer)) {
+        if (com.openexchange.java.Strings.isEmpty(mailServer)) {
             return null;
         }
         final String protocol = mailSecure ? mailProtocol + 's' : mailProtocol;
@@ -579,7 +579,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         if (null != transportServerUrl) {
             return transportServerUrl;
         }
-        if (isEmpty(transportServer)) {
+        if (com.openexchange.java.Strings.isEmpty(transportServer)) {
             return null;
         }
         final String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
@@ -838,17 +838,4 @@ public abstract class AbstractMailAccount implements MailAccount {
         sb.append("\nmail-server=").append(generateMailServerURL()).append(" transport-server=").append(generateTransportServerURL());
         return sb.toString();
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

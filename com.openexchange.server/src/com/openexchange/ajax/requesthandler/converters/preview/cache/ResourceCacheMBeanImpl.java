@@ -167,7 +167,7 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
             }
 
             final Set<String> invalidsSet = new HashSet<String>(Arrays.asList("application/force-download", "application/x-download", "application/$suffix"));
-            if (!isEmpty(invalids)) {
+            if (!com.openexchange.java.Strings.isEmpty(invalids)) {
                 for (final String invalid : invalids.split(" *, *")) {
                     invalidsSet.add(toLowerCase(invalid.trim()));
                 }
@@ -276,9 +276,9 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
             final List<Tuple> tuples = new LinkedList<Tuple>();
             do {
                 String fileName = rs.getString(4);
-                if (!isEmpty(fileName)) {
+                if (!com.openexchange.java.Strings.isEmpty(fileName)) {
                     String mimeType = rs.getString(3);
-                    if (!isEmpty(mimeType)) {
+                    if (!com.openexchange.java.Strings.isEmpty(mimeType)) {
                         final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
                         if (invalidsSet.contains(toLowerCase(mimeType)) || (!defaultMimeType.equals(contentTypeByFileName) && !equalPrimaryTypes(mimeType, contentTypeByFileName))) {
                             tuples.add(new Tuple(contentTypeByFileName, rs));
@@ -320,19 +320,6 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
         }
     }
 
-    /** Check for an empty string */
-    private boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     /** ASCII-wise to lower-case */
     private String toLowerCase(final CharSequence chars) {
         if (null == chars) {
@@ -348,7 +335,7 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
     }
 
     private String getPrimaryType(final String contentType) {
-        if (isEmpty(contentType)) {
+        if (com.openexchange.java.Strings.isEmpty(contentType)) {
             return contentType;
         }
         final int pos = contentType.indexOf('/');
