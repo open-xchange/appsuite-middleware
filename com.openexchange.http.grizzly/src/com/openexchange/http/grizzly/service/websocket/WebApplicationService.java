@@ -53,12 +53,12 @@ import java.util.Dictionary;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 
 /**
- * {@link WebSocketService} - The Web Socket service to register/unregister Web Socket Applications.
+ * {@link WebApplicationService} - The Web Socket service to register/unregister Web Socket Applications.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
-public interface WebSocketService {
+public interface WebApplicationService {
 
     /**
      * Registers a <code>WebSocketApplication</code> to a specific context path and URL pattern.
