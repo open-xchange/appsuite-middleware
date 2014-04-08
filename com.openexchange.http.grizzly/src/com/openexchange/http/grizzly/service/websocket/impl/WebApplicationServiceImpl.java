@@ -70,12 +70,12 @@ public final class WebApplicationServiceImpl implements WebApplicationService {
     }
 
     @Override
-    public void registerWebApplication(final String contextPath, final String urlPattern, final WebSocketApplication app, final Dictionary<String, Object> initParams) {
+    public void registerWebSocketApplication(final String contextPath, final String urlPattern, final WebSocketApplication app, final Dictionary<String, Object> initParams) {
         WebSocketEngine.getEngine().register(contextPath, urlPattern, app);
     }
 
     @Override
-    public void unregisterWebApplication(final WebSocketApplication app) {
+    public void unregisterWebSocketApplication(final WebSocketApplication app) {
         WebSocketEngine.getEngine().unregister(app);
     }
 

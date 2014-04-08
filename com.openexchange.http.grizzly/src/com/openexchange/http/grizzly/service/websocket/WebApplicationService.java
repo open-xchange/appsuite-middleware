@@ -53,7 +53,7 @@ import java.util.Dictionary;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 
 /**
- * {@link WebApplicationService} - The Web Socket service to register/unregister Web Socket Applications.
+ * {@link WebApplicationService} - The service to register/unregister Web Socket Applications.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
@@ -95,7 +95,7 @@ public interface WebApplicationService {
      * @param app The Web Socket application
      * @throws java.lang.IllegalArgumentException if any of the arguments are invalid
      */
-    void registerWebApplication(String contextPath, String urlPattern, WebSocketApplication app, Dictionary<String, Object> initParams);
+    void registerWebSocketApplication(String contextPath, String urlPattern, WebSocketApplication app, Dictionary<String, Object> initParams);
 
     /**
      * Unregisters a previous registration done by <code>registerWebApplication</code> method.
@@ -103,6 +103,6 @@ public interface WebApplicationService {
      * @param app The application to unregister
      * @throws java.lang.IllegalArgumentException If there is no such registration
      */
-    void unregisterWebApplication(WebSocketApplication app);
+    void unregisterWebSocketApplication(WebSocketApplication app);
 
 }
