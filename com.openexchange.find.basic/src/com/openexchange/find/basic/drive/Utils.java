@@ -104,7 +104,13 @@ public final class Utils {
             return null;
         }
 
-        if (Constants.FIELD_FILE_NAME.equals(field)) {
+        if ("global".equals(field)) {
+            final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(3);
+            terms.add(new FileNameTerm(query));
+            terms.add(new TitleTerm(query, true, true));
+            terms.add(new DescriptionTerm(query, true, true));
+            return new OrTerm(terms);
+        } else if (Constants.FIELD_FILE_NAME.equals(field)) {
             final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(2);
             terms.add(new FileNameTerm(query));
             terms.add(new TitleTerm(query, true, true));
