@@ -221,7 +221,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                     int folderid = 0;
                     while(rs.next()) {
                         final String fname = rs.getString(2);
-                        if (Strings.equalsNormalizedIgnoreCase(fname, component)) {
+                        if(fname.equals(component)) {
                             if( found ) {
                                 final OXException e = InfostoreExceptionCodes.DUPLICATE_SUBFOLDER.create(I(parentId), component, I(session.getContextId()));
                                 LOG.warn(e.toString(), e);
