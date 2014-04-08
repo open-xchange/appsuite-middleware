@@ -64,10 +64,10 @@ public enum DriveFacetType implements FacetType {
 
     CONTACTS(DriveStrings.FACET_CONTACTS),
     FOLDERS(DriveStrings.FACET_FOLDERS),
-    FILE_NAME(null),
+    FILE_NAME(null, true),
     FILE_TYPE(DriveStrings.FACET_FILE_TYPE),
-    FILE_DESCRIPTION(null),
-    FILE_CONTENT(null),
+    FILE_DESCRIPTION(null, true),
+    FILE_CONTENT(null, true),
     FILE_SIZE(DriveStrings.FACET_FILE_SIZE),
     FOLDER_TYPE(DriveStrings.FACET_FOLDER_TYPE)
     ;
@@ -79,11 +79,17 @@ public enum DriveFacetType implements FacetType {
         }
     }
 
-
     private final String displayName;
 
-    private DriveFacetType(final String displayName) {
+    private final boolean fieldFacet;
+
+    private DriveFacetType(final String displayName, final boolean fieldFacet) {
         this.displayName = displayName;
+        this.fieldFacet = fieldFacet;
+    }
+
+    private DriveFacetType(final String displayName) {
+        this(displayName, false);
     }
 
     @Override
@@ -98,7 +104,7 @@ public enum DriveFacetType implements FacetType {
 
     @Override
     public boolean isFieldFacet() {
-        return false;
+        return fieldFacet;
     }
 
     @Override
@@ -114,7 +120,6 @@ public enum DriveFacetType implements FacetType {
         if (Strings.isEmpty(id)) {
             return null;
         }
-
         return typesById.get(id);
     }
 
