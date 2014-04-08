@@ -67,10 +67,10 @@ public class ConfigDiffCLT {
 
     private static final Options options = new Options();
     static {
-        options.addOption(OptionBuilder.withLongOpt("original").hasArgs(1).withDescription("The original configuration folder provided by OX"). isRequired(true).create("o"));
-        options.addOption(OptionBuilder.withLongOpt("installed").hasArgs(1).withDescription("The installed configuration folder"). isRequired(true).create("i"));
+        options.addOption(OptionBuilder.withLongOpt("original").hasArgs(1).withDescription("The original configuration folder provided by OX").isRequired(true).create("o"));
+        options.addOption(OptionBuilder.withLongOpt("installed").hasArgs(1).withDescription("The installed configuration folder").isRequired(true).create("i"));
         options.addOption(OptionBuilder.withLongOpt("file").hasArgs(1).withDescription("Export diff to file").isRequired(false).create("f"));
-        options.addOption(OptionBuilder.withLongOpt("help").hasArg(false).withDescription("Print usage"). isRequired(false).create("h"));
+        options.addOption(OptionBuilder.withLongOpt("help").hasArg(false).withDescription("Print usage").isRequired(false).create("h"));
     }
 
     /**
@@ -104,7 +104,7 @@ public class ConfigDiffCLT {
             printUsage(-1);
         }
     }
-    
+
     /**
      * Execute diff
      * 
@@ -114,7 +114,7 @@ public class ConfigDiffCLT {
      */
     private static void executeDiff(String original, String installed, String file) {
         if (file == null) {
-            //do not export diff to file
+            // do not export diff to file
         } else {
             // execute diff and display to default output
         }
