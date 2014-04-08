@@ -47,51 +47,62 @@
  *
  */
 
-package com.openexchange.http.ws;
+package com.openexchange.http.grizzly.service.websocket;
+
+import java.util.Dictionary;
+import org.glassfish.grizzly.websockets.WebSocketApplication;
 
 /**
- * {@link WebSocketApplicationException} - Defines a general exception a Web Application can throw when it encounters difficulty.
+ * {@link WebSocketService} - The Web Socket service to register/unregister Web Socket Applications.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
-public class WebSocketApplicationException extends Exception {
-
-    private static final long serialVersionUID = 1273437483684880112L;
+public interface WebSocketService {
 
     /**
-     * Initializes a new {@link WebSocketApplicationException}.
-     */
-    public WebSocketApplicationException() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link WebSocketApplicationException}.
+     * Registers a <code>WebSocketApplication</code> to a specific context path and URL pattern.
+     * <p>
+     * If you wish to associate this application with the root context, use an empty string for the <code>contextPath</code> argument.
      *
-     * @param message
-     * @param cause
+     * <pre>
+     * Examples:
+     * // WS application will be invoked:
+     * // ws://localhost:8080/echo
+     * // WS application will not be invoked:
+     * // ws://localhost:8080/foo/echo
+     * // ws://localhost:8080/echo/some/path
+     * register(&quot;&quot;, &quot;/echo&quot;, webSocketApplication);
+     *
+     * // WS application will be invoked:
+     * // ws://localhost:8080/echo
+     * // ws://localhost:8080/echo/some/path
+     * // WS application will not be invoked:
+     * // ws://localhost:8080/foo/echo
+     * register(&quot;&quot;, &quot;/echo/*&quot;, webSocketApplication);
+     *
+     * // WS application will be invoked:
+     * // ws://localhost:8080/context/echo
+     *
+     * // WS application will not be invoked:
+     * // ws://localhost:8080/echo
+     * // ws://localhost:8080/context/some/path
+     * register(&quot;/context&quot;, &quot;/echo&quot;, webSocketApplication);
+     * </pre>
+     *
+     * @param contextPath The context path (per servlet rules)
+     * @param urlPattern The URL pattern (per servlet rules)
+     * @param app The Web Socket application
+     * @throws java.lang.IllegalArgumentException if any of the arguments are invalid
      */
-    public WebSocketApplicationException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
+    void registerWebApplication(String contextPath, String urlPattern, WebSocketApplication app, Dictionary<String, Object> initParams);
 
     /**
-     * Initializes a new {@link WebSocketApplicationException}.
+     * Unregisters a previous registration done by <code>registerWebApplication</code> method.
      *
-     * @param message
+     * @param app The application to unregister
+     * @throws java.lang.IllegalArgumentException If there is no such registration
      */
-    public WebSocketApplicationException(final String message) {
-        super(message);
-    }
-
-    /**
-     * Initializes a new {@link WebSocketApplicationException}.
-     *
-     * @param cause
-     */
-    public WebSocketApplicationException(final Throwable cause) {
-        super(cause);
-    }
+    void unregisterWebApplication(WebSocketApplication app);
 
 }
