@@ -51,7 +51,7 @@ package com.openexchange.http.ws;
 
 
 /**
- * {@link WebSocketService} - The Web Socket service to register/unregister Web Sokcet Applications.
+ * {@link WebSocketService} - The Web Socket service to register/unregister Web Socket Applications.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
