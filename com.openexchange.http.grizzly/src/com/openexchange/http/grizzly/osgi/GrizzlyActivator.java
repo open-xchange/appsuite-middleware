@@ -69,6 +69,8 @@ import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.service.comet.CometContextService;
 import com.openexchange.http.grizzly.service.comet.impl.CometContextServiceImpl;
 import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
+import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
+import com.openexchange.http.grizzly.service.websocket.impl.WebApplicationServiceImpl;
 import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -161,6 +163,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             if (grizzlyConfig.isWebsocketsEnabled()) {
                 networkListener.registerAddOn(new WebSocketAddOn());
+                registerService(WebApplicationService.class, new WebApplicationServiceImpl());
                 log.info("Enabled WebSockets for Grizzly server.");
             }
 
