@@ -286,7 +286,7 @@ public final class Delete {
         }
 
         if (success) {
-            LOGGER.debug("{} {}folder {} from virtual tree {} (user={}, context={})", (backup ? "Backup'ed" : "Deleted"), (global ? "global " : ""), folderId, tree, user, cid);
+            LOGGER.debug("{} {}folder {} from virtual tree {} (user={}, context={})", (backup ? "Backup'ed" : "Deleted"), (global ? "global " : ""), folderId, tree, user, cid, new Throwable("Debug throwable"));
         }
 
         return success;
