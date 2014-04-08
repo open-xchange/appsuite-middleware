@@ -316,8 +316,10 @@ public final class MailMessageParser {
         } catch (final OXException e) {
             if (MailExceptionCode.INVALID_MULTIPART_CONTENT.equals(e)) {
                 // Strange multipart...
+                final String mailId = mail.getMailId();
+                final String folder = mail.getFolder();
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Invalid multipart detected ''{}'':{}{}", e.getMessage(), System.getProperty("line.separator"), mail.getSource());
+                    LOG.debug("Invalid multipart detected ''{}'' ({}-{}-{}):{}{}", e.getMessage(),  null == mailId ? "" : mailId, null == folder ? "" : folder, mail.getAccountId(), System.getProperty("line.separator"), mail.getSource());
                 }
             }
             throw e;
