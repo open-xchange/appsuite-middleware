@@ -51,11 +51,11 @@ package com.openexchange.http.ws;
 
 
 /**
- * {@link WebApplication} - Represents a Web Application.
+ * {@link WebSocketApplication} - Represents a Web Application.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
-public interface WebApplication {
+public interface WebSocketApplication {
 
 }

@@ -50,47 +50,47 @@
 package com.openexchange.http.ws;
 
 /**
- * {@link WebApplicationException} - Defines a general exception a Web Application can throw when it encounters difficulty.
+ * {@link WebSocketApplicationException} - Defines a general exception a Web Application can throw when it encounters difficulty.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
-public class WebApplicationException extends Exception {
+public class WebSocketApplicationException extends Exception {
 
     private static final long serialVersionUID = 1273437483684880112L;
 
     /**
-     * Initializes a new {@link WebApplicationException}.
+     * Initializes a new {@link WebSocketApplicationException}.
      */
-    public WebApplicationException() {
+    public WebSocketApplicationException() {
         super();
     }
 
     /**
-     * Initializes a new {@link WebApplicationException}.
+     * Initializes a new {@link WebSocketApplicationException}.
      *
      * @param message
      * @param cause
      */
-    public WebApplicationException(final String message, final Throwable cause) {
+    public WebSocketApplicationException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * Initializes a new {@link WebApplicationException}.
+     * Initializes a new {@link WebSocketApplicationException}.
      *
      * @param message
      */
-    public WebApplicationException(final String message) {
+    public WebSocketApplicationException(final String message) {
         super(message);
     }
 
     /**
-     * Initializes a new {@link WebApplicationException}.
+     * Initializes a new {@link WebSocketApplicationException}.
      *
      * @param cause
      */
-    public WebApplicationException(final Throwable cause) {
+    public WebSocketApplicationException(final Throwable cause) {
         super(cause);
     }
 

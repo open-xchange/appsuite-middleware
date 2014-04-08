@@ -50,7 +50,6 @@
 package com.openexchange.http.ws;
 
 import java.util.Dictionary;
-import org.osgi.service.http.NamespaceException;
 
 /**
  * {@link WebSocketService} - The Web Socket service to register/unregister Web Socket Applications.
@@ -61,36 +60,49 @@ import org.osgi.service.http.NamespaceException;
 public interface WebSocketService {
 
     /**
-     * Registers a Web Application into the URI namespace.
+     * Registers a <code>WebSocketApplication</code> to a specific context path and URL pattern.
      * <p>
-     * The alias is the name in the URI namespace of the Web Socket Service at which the registration will be mapped.
-     * <p>
-     * An alias must begin with slash ('/') and must not end with slash ('/'), with the exception that an alias of the form &quot;/&quot; is
-     * used to denote the root alias. See the specification text for details on how HTTP requests are mapped to Web Application
-     * registrations.
-     * <p>
-     * The Web Socket Service will call the application's <code>init</code> method before returning.
+     * If you wish to associate this application with the root context, use an empty string for the <code>contextPath</code> argument.
      *
-     * @param alias The name in the URI namespace at which the Web Application is registered
-     * @param servlet The Web Application object to register
-     * @param initParams The initialization arguments for the Web Application or <code>null</code> if there are none. This argument is used
-     *            by the servlet's <code>ServletConfig</code> object.
-     * @throws NamespaceException if the registration fails because the alias is already in use.
-     * @throws WebApplicationException if the application's <code>init</code> method throws an exception, or the given application object
-     *             has already been registered at a different alias.
+     * <pre>
+     * Examples:
+     * // WS application will be invoked:
+     * // ws://localhost:8080/echo
+     * // WS application will not be invoked:
+     * // ws://localhost:8080/foo/echo
+     * // ws://localhost:8080/echo/some/path
+     * register(&quot;&quot;, &quot;/echo&quot;, webSocketApplication);
+     *
+     * // WS application will be invoked:
+     * // ws://localhost:8080/echo
+     * // ws://localhost:8080/echo/some/path
+     * // WS application will not be invoked:
+     * // ws://localhost:8080/foo/echo
+     * register(&quot;&quot;, &quot;/echo/*&quot;, webSocketApplication);
+     *
+     * // WS application will be invoked:
+     * // ws://localhost:8080/context/echo
+     *
+     * // WS application will not be invoked:
+     * // ws://localhost:8080/echo
+     * // ws://localhost:8080/context/some/path
+     * register(&quot;/context&quot;, &quot;/echo&quot;, webSocketApplication);
+     * </pre>
+     *
+     * @param contextPath The context path (per servlet rules)
+     * @param urlPattern The URL pattern (per servlet rules)
+     * @param app The Web Socket application
+     * @throws WebSocketApplicationException If registration fails
      * @throws java.lang.IllegalArgumentException if any of the arguments are invalid
      */
-    public void registerWebApplication(String alias, WebApplication servlet, Dictionary<String, Object> initParams) throws WebApplicationException, NamespaceException;
+    void registerWebApplication(String contextPath, String urlPattern, WebSocketApplication app, Dictionary<String, Object> initParams) throws WebSocketApplicationException;
 
     /**
      * Unregisters a previous registration done by <code>registerWebApplication</code> method.
-     * <p>
-     * After this call, the registered alias in the URI name-space will no longer be available.
      *
-     * @param alias The name in the URI name-space of the registration to unregister
-     * @throws java.lang.IllegalArgumentException if there is no registration for the alias or the calling bundle was not the bundle which
-     *             registered the alias.
+     * @param app The application to unregister
+     * @throws java.lang.IllegalArgumentException If there is no such registration
      */
-    public void unregisterWebApplication(String alias);
+    void unregisterWebApplication(WebSocketApplication app);
 
 }
