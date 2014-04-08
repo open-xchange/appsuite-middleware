@@ -47,62 +47,36 @@
  *
  */
 
-package com.openexchange.http.grizzly.service.websocket;
+package com.openexchange.http.grizzly.service.websocket.impl;
 
 import java.util.Dictionary;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
+import org.glassfish.grizzly.websockets.WebSocketEngine;
+import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 
 /**
- * {@link WebSocketService} - The Web Socket service to register/unregister Web Socket Applications.
+ * {@link WebApplicationServiceImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
-public interface WebSocketService {
+public final class WebApplicationServiceImpl implements WebApplicationService {
 
     /**
-     * Registers a <code>WebSocketApplication</code> to a specific context path and URL pattern.
-     * <p>
-     * If you wish to associate this application with the root context, use an empty string for the <code>contextPath</code> argument.
-     *
-     * <pre>
-     * Examples:
-     * // WS application will be invoked:
-     * // ws://localhost:8080/echo
-     * // WS application will not be invoked:
-     * // ws://localhost:8080/foo/echo
-     * // ws://localhost:8080/echo/some/path
-     * register(&quot;&quot;, &quot;/echo&quot;, webSocketApplication);
-     *
-     * // WS application will be invoked:
-     * // ws://localhost:8080/echo
-     * // ws://localhost:8080/echo/some/path
-     * // WS application will not be invoked:
-     * // ws://localhost:8080/foo/echo
-     * register(&quot;&quot;, &quot;/echo/*&quot;, webSocketApplication);
-     *
-     * // WS application will be invoked:
-     * // ws://localhost:8080/context/echo
-     *
-     * // WS application will not be invoked:
-     * // ws://localhost:8080/echo
-     * // ws://localhost:8080/context/some/path
-     * register(&quot;/context&quot;, &quot;/echo&quot;, webSocketApplication);
-     * </pre>
-     *
-     * @param contextPath The context path (per servlet rules)
-     * @param urlPattern The URL pattern (per servlet rules)
-     * @param app The Web Socket application
-     * @throws java.lang.IllegalArgumentException if any of the arguments are invalid
+     * Initializes a new {@link WebApplicationServiceImpl}.
      */
-    void registerWebApplication(String contextPath, String urlPattern, WebSocketApplication app, Dictionary<String, Object> initParams);
+    public WebApplicationServiceImpl() {
+        super();
+    }
 
-    /**
-     * Unregisters a previous registration done by <code>registerWebApplication</code> method.
-     *
-     * @param app The application to unregister
-     * @throws java.lang.IllegalArgumentException If there is no such registration
-     */
-    void unregisterWebApplication(WebSocketApplication app);
+    @Override
+    public void registerWebSocketApplication(final String contextPath, final String urlPattern, final WebSocketApplication app, final Dictionary<String, Object> initParams) {
+        WebSocketEngine.getEngine().register(contextPath, urlPattern, app);
+    }
+
+    @Override
+    public void unregisterWebSocketApplication(final WebSocketApplication app) {
+        WebSocketEngine.getEngine().unregister(app);
+    }
 
 }

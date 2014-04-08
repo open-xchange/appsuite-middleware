@@ -62,7 +62,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
  */
 public class MailAccountInsertResponse extends AbstractAJAXResponse {
 
-    private int id;
+    private Integer id;
 
     /**
      * Initializes a new {@link MailAccountInsertResponse}.
@@ -73,12 +73,14 @@ public class MailAccountInsertResponse extends AbstractAJAXResponse {
     }
 
     public void fillObject(MailAccountDescription mailAccountDescription) {
-
-        mailAccountDescription.setId(id);
+        final Integer id = this.id;
+        if (null != id) {
+            mailAccountDescription.setId(id.intValue());
+        }
     }
 
     public void setId(int id) {
-        this.id = id;
+        this.id = Integer.valueOf(id);
     }
 
 }
