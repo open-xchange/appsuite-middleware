@@ -53,7 +53,6 @@ import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.find.FindTestSuite;
-import com.openexchange.ajax.manifests.ManifestsTestSuite;
 
 /**
  * Test suite for all AJAX interface tests.
@@ -123,7 +122,8 @@ public final class InterfaceTests {
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.oauth.OAuthTests.class));
         tests.addTestSuite(com.openexchange.test.resourcecache.ResourceCacheTest.class);
         tests.addTest(FindTestSuite.suite());
-        tests.addTest(ManifestsTestSuite.suite());
+        // Needs to be disabled as associated test suite requires a frontend package, which is currently not available
+        // tests.addTest(ManifestsTestSuite.suite());
         return tests;
     }
 }
