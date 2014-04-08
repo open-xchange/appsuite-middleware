@@ -67,8 +67,8 @@ public class ConfigDiffCLT {
 
     private static final Options options = new Options();
     static {
-        options.addOption(OptionBuilder.withLongOpt("source").hasArgs(1).withDescription("The source folder"). isRequired(true).create("s"));
-        options.addOption(OptionBuilder.withLongOpt("destination").hasArgs(1).withDescription("The destination folder"). isRequired(true).create("d"));
+        options.addOption(OptionBuilder.withLongOpt("original").hasArgs(1).withDescription("The original configuration folder provided by OX"). isRequired(true).create("o"));
+        options.addOption(OptionBuilder.withLongOpt("installed").hasArgs(1).withDescription("The installed configuration folder"). isRequired(true).create("i"));
         options.addOption(OptionBuilder.withLongOpt("file").hasArgs(1).withDescription("Export diff to file").isRequired(false).create("f"));
         options.addOption(OptionBuilder.withLongOpt("help").hasArg(false).withDescription("Print usage"). isRequired(false).create("h"));
     }
@@ -80,22 +80,22 @@ public class ConfigDiffCLT {
      */
     public static void main(String[] args) {
         CommandLineParser parser = new PosixParser();
-        final String sourceFolder;
-        final String destinationFolder;
+        final String originalFolder;
+        final String installedFolder;
         final String file;
         try {
             CommandLine cl = parser.parse(options, args);
             if (cl.hasOption("h")) {
                 printUsage(0);
-            } else if (cl.hasOption("s") && cl.hasOption("d")) {
-                sourceFolder = cl.getOptionValue("s");
-                destinationFolder = cl.getOptionValue("d");
+            } else if (cl.hasOption("o") && cl.hasOption("i")) {
+                originalFolder = cl.getOptionValue("o");
+                installedFolder = cl.getOptionValue("i");
                 if (cl.hasOption("f")) {
                     file = cl.getOptionValue("f");
                 } else {
                     file = null;
                 }
-                executeDiff(sourceFolder, destinationFolder, file);
+                executeDiff(originalFolder, installedFolder, file);
             } else {
                 printUsage(-1);
             }
@@ -108,11 +108,11 @@ public class ConfigDiffCLT {
     /**
      * Execute diff
      * 
-     * @param source folder
-     * @param destination folder
+     * @param original folder
+     * @param installed folder
      * @param file optional file to store the diff
      */
-    private static void executeDiff(String source, String destination, String file) {
+    private static void executeDiff(String original, String installed, String file) {
         if (file == null) {
             //do not export diff to file
         } else {
