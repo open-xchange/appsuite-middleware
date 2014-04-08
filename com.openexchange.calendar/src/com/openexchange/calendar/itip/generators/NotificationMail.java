@@ -284,7 +284,7 @@ public class NotificationMail {
 		return attachmentUpdate;
 	}
 
-    public boolean shouldBeSent() {
+    public boolean _shouldBeSent() {
     	if (endsInPast(appointment)) {
     		return false;
     	}
@@ -330,11 +330,49 @@ public class NotificationMail {
         if (!getRecipient().getConfiguration().interestedInChanges()) {
             return false;
         }
-        LOG.debug("10: User: {}, {} {}", recipient.getEmail(), getRecipient().getConfiguration().interestedInStateChanges(), isAboutStateChangesOnly());
-        if (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly()) {
+        LOG.debug("10: User: {}, {} {}", recipient.getEmail(), getRecipient().getConfiguration().interestedInStateChanges(), isAboutStateChangesOnly(true));
+        if (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly(true)) {
             return false;
         }
         LOG.debug("11: User: {}", recipient.getEmail());
+        return true;
+    }
+
+    public boolean shouldBeSent() {
+        if (endsInPast(appointment)) {
+            return false;
+        }
+        if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
+            return true;
+        }
+        if (appointment != null && appointment.containsNotification() && !appointment.getNotification()) {
+            return false;
+        }
+        if (appointment != null && stateType.equals(Type.NEW) && endsInPast(appointment)) {
+            return false;
+        }
+        if (appointment != null && original != null && stateType.equals(Type.MODIFIED)
+                                && isNotWorthUpdateNotification(original, appointment)) {
+            return false;
+        }
+        if (appointment != null && stateType.equals(Type.DELETED)) {
+            return false;
+        }
+        if (! anInterestingFieldChanged()) {
+            return false;
+        }
+        if (stateType == Type.MODIFIED && onlyPseudoChangesOnParticipants()) {
+            return false;
+        }
+        if (getRecipient().getConfiguration().sendITIP() && itipMessage != null) {
+            return true;
+        }
+        if (!getRecipient().getConfiguration().interestedInChanges()) {
+            return false;
+        }
+        if (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly(true)) {
+            return false;
+        }
         return true;
     }
 
@@ -438,7 +476,6 @@ public class NotificationMail {
 	private static final Set<String> FIELDS_TO_REPORT = new HashSet<String>(Arrays.asList(
 			AppointmentFields.LOCATION,
 			AppointmentFields.FULL_TIME,
-			AppointmentFields.SHOW_AS,
 			AppointmentFields.TIMEZONE,
 			AppointmentFields.RECURRENCE_START,
 			AppointmentFields.TITLE,
@@ -470,20 +507,29 @@ public class NotificationMail {
     	return getDiff().anyFieldChangedOf(FIELDS_TO_REPORT);
     }
 
-	public boolean isAboutStateChangesOnly() {
+	public boolean isAboutStateChangesOnly(boolean log) {
         if (getDiff() == null) {
+            if (log) {
+                LOG.debug("12: User: {}", recipient.getEmail());
+            }
             return false;
         }
 
         if (isAttachmentUpdate()) {
+            if (log) {
+                LOG.debug("13: User: {}", recipient.getEmail());
+            }
         	return false;
         }
 
+        if (log) {
+            LOG.debug("14: User: {} {}", recipient.getEmail(), diff.getDifferingFieldNames());
+        }
         return diff.isAboutStateChangesOnly();
     }
 
 	public boolean isAboutActorsStateChangeOnly() {
-    	if (!isAboutStateChangesOnly()) {
+    	if (!isAboutStateChangesOnly(false)) {
     		return false;
     	}
 		return diff.isAboutCertainParticipantsStateChangeOnly(actor.getIdentifier()+"");
@@ -497,7 +543,7 @@ public class NotificationMail {
 	}
 
     private boolean isAboutRecipientsStateChangeOnly() {
-    	if (!isAboutStateChangesOnly()) {
+    	if (!isAboutStateChangesOnly(false)) {
     		return false;
     	}
 		return diff.isAboutCertainParticipantsStateChangeOnly(recipient.getEmail());

@@ -146,7 +146,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         Appointment.NOTIFICATION,
         Appointment.RECURRENCE_TYPE,
         Appointment.CATEGORIES,
-        Appointment.SEQUENCE
+        Appointment.SEQUENCE,
+        Appointment.SHOWN_AS
     };
 
     private final List<NotificationParticipant> resources;
