@@ -89,6 +89,7 @@ public enum Module {
             modulesByName.put(module.getIdentifier(), module);
         }
         modulesByName.put("infostore", DRIVE);
+        modulesByName.put("files", DRIVE);
     }
 
     private final String identifier;
