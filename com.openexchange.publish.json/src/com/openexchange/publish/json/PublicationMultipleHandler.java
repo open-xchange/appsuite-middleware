@@ -324,6 +324,10 @@ public class PublicationMultipleHandler implements MultipleHandler {
         final Context context = session.getContext();
         final Publication publication = loadPublication(id, context, target);
 
+        if (null == publication) {
+            throw PublicationErrorMessage.PUBLICATION_NOT_FOUND_EXCEPTION.create();
+        }
+
         String sTimeZone = request.optString("timezone");
         TimeZone tz = null;
         if (sTimeZone != null) {
