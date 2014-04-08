@@ -5,3 +5,4 @@ Bundle-SymbolicName: com.openexchange.http.ws
 Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.osgi.service.http

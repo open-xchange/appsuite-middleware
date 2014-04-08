@@ -49,48 +49,13 @@
 
 package com.openexchange.http.ws;
 
-import java.util.Dictionary;
-import org.osgi.service.http.NamespaceException;
 
 /**
- * {@link WebSocketService} - The Web Socket service to register/unregister Web Socket Applications.
+ * {@link WebApplication} - Represents a Web Application.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
-public interface WebSocketService {
-
-    /**
-     * Registers a Web Application into the URI namespace.
-     * <p>
-     * The alias is the name in the URI namespace of the Web Socket Service at which the registration will be mapped.
-     * <p>
-     * An alias must begin with slash ('/') and must not end with slash ('/'), with the exception that an alias of the form &quot;/&quot; is
-     * used to denote the root alias. See the specification text for details on how HTTP requests are mapped to Web Application
-     * registrations.
-     * <p>
-     * The Web Socket Service will call the application's <code>init</code> method before returning.
-     *
-     * @param alias The name in the URI namespace at which the Web Application is registered
-     * @param servlet The Web Application object to register
-     * @param initParams The initialization arguments for the Web Application or <code>null</code> if there are none. This argument is used
-     *            by the servlet's <code>ServletConfig</code> object.
-     * @throws NamespaceException if the registration fails because the alias is already in use.
-     * @throws WebApplicationException if the application's <code>init</code> method throws an exception, or the given application object
-     *             has already been registered at a different alias.
-     * @throws java.lang.IllegalArgumentException if any of the arguments are invalid
-     */
-    public void registerWebApplication(String alias, WebApplication servlet, Dictionary<String, Object> initParams) throws WebApplicationException, NamespaceException;
-
-    /**
-     * Unregisters a previous registration done by <code>registerWebApplication</code> method.
-     * <p>
-     * After this call, the registered alias in the URI name-space will no longer be available.
-     *
-     * @param alias The name in the URI name-space of the registration to unregister
-     * @throws java.lang.IllegalArgumentException if there is no registration for the alias or the calling bundle was not the bundle which
-     *             registered the alias.
-     */
-    public void unregisterWebApplication(String alias);
+public interface WebApplication {
 
 }
