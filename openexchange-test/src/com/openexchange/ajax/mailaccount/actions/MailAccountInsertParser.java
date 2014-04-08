@@ -71,7 +71,9 @@ public class MailAccountInsertParser extends AbstractAJAXParser<MailAccountInser
     protected MailAccountInsertResponse createResponse(final Response response) throws JSONException {
         final MailAccountInsertResponse resp = new MailAccountInsertResponse(response);
         final JSONObject account = (JSONObject) response.getData();
-        resp.setId(account.getInt("id"));
+        if (null != account) {
+            resp.setId(account.getInt("id"));
+        }
         return resp;
     }
 
