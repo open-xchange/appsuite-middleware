@@ -627,7 +627,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 throw e;
             }
             // throw new PushException(e);
-            if ("ACC".equalsIgnoreCase(e.getPrefix()) && MailAccountExceptionCodes.NOT_FOUND.getNumber() == e.getCode()) {
+            if (MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
                 /*
                  * Missing mail account; drop listener
                  */
