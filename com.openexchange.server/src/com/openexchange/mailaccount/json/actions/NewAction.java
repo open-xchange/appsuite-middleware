@@ -179,17 +179,13 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 rollback = true;
                 id = storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session, wcon);
                 // Check full names after successful creation
-                final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), cid, wcon);
-                for (final MailAccount mailAccount : accounts) {
-                    if (mailAccount.getId() == id) {
-                        newAccount = mailAccount;
-                        break;
-                    }
+                newAccount = storageService.getMailAccount(id, session.getUserId(), cid, wcon);
+
+                if (null == newAccount) {
+                    throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
                 }
 
-                if (null != newAccount) {
-                    newAccount = checkFullNames(newAccount, storageService, session, wcon);
-                }
+                newAccount = checkFullNames(newAccount, storageService, session, wcon);
 
                 wcon.commit();
                 rollback = false;
@@ -214,17 +210,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             }
         }
 
-        final JSONObject jsonAccount;
-        if (null == newAccount) {
-            final MailAccount loadedMailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
-            if (null == loadedMailAccount) {
-                throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
-            }
-            jsonAccount = MailAccountWriter.write(checkFullNames(loadedMailAccount, storageService, session));
-        } else {
-            jsonAccount = MailAccountWriter.write(newAccount);
-        }
-
+        final JSONObject jsonAccount = MailAccountWriter.write(newAccount);
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);
     }
 

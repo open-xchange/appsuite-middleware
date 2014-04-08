@@ -247,14 +247,33 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return accounts;
     }
 
+    public MailAccount getMailAccount(final int id, final int user, final int cid, final Connection con) throws OXException {
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.getMailAccount(id, user, cid, con);
+        }
+
+        final CacheKey key = newCacheKey(cacheService, id, user, cid);
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        final Object object = cache.get(key);
+        if (object instanceof MailAccount) {
+            return (MailAccount) object;
+        }
+
+        final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
+        cache.put(key, mailAccount, false);
+        return mailAccount;
+    }
+
     private MailAccount getMailAccount0(final int id, final int user, final int cid, final Connection con) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
-            return delegate.getMailAccount(id, user, cid);
+            return delegate.getMailAccount(id, user, cid, con);
         }
         final CacheKey key = newCacheKey(cacheService, id, user, cid);
         final Cache cache = cacheService.getCache(REGION_NAME);
-        if (cache.get(key) == null) {
+        final Object object = cache.get(key);
+        if (object == null) {
             /*
              * Not contained in cache. Load with specified connection
              */
@@ -264,11 +283,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         /*
          * Return mail account
          */
-        final Object object = cache.get(key);
         if (object instanceof MailAccount) {
             return (MailAccount) object;
         }
-        final MailAccount mailAccount = delegate.getMailAccount(id, user, cid);
+        final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
         cache.put(key, mailAccount, false);
         return mailAccount;
     }

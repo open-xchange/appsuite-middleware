@@ -112,6 +112,19 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public MailAccount getMailAccount(int id, int user, int cid, Connection con) throws OXException {
+        try {
+            return storageService.getMailAccount(id, user, cid, con);
+        } catch (final OXException e) {
+            if (!isURIError(e)) {
+                throw e;
+            }
+            Sanitizer.sanitize(user, cid, storageService);
+            return storageService.getMailAccount(id, user, cid, con);
+        }
+    }
+
+    @Override
     public MailAccount[] getUserMailAccounts(final int user, final int cid) throws OXException {
         try {
             return storageService.getUserMailAccounts(user, cid);
