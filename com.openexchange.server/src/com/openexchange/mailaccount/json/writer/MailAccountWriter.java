@@ -143,6 +143,9 @@ public final class MailAccountWriter implements MailAccountFields {
      * @throws JSONException If writing JSON fails
      */
     public static JSONObject write(final MailAccount account, final boolean hideDetailsForDefaultAccount) throws JSONException {
+        if (null == account) {
+            return null;
+        }
         final int accountId = account.getId();
         final boolean hideForDefault = MailAccount.DEFAULT_ID == accountId && hideDetailsForDefaultAccount;
         final JSONObject json;
