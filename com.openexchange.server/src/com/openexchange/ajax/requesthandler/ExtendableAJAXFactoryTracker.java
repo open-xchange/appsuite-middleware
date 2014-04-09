@@ -55,7 +55,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * {@link ExtendableAJAXFactoryTracker}
+ * {@link ExtendableAJAXFactoryTracker} - A general-purpose tracker for {@link ExtendableAJAXActionServiceFactory} instances providing
+ * customizable call-back through {@link #onFactoryAvailable(ExtendableAJAXActionServiceFactory)}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
@@ -96,7 +97,9 @@ public class ExtendableAJAXFactoryTracker extends ServiceTracker<ExtendableAJAXA
      * Invoked when tracked factory is available; likely to add custom actions.
      * <p>
      * Example:
+     *
      * <pre>
+     *
      * protected void onFactoryAvailable(ExtendableAJAXActionServiceFactory serviceFactory) {
      *     serviceFactory.addAction(new MyCustomAction());
      * }
