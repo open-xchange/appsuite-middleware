@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
+ * @see ExtendableAJAXFactoryTracker
  */
 public interface ExtendableAJAXActionServiceFactory extends AJAXActionServiceFactory {
 
