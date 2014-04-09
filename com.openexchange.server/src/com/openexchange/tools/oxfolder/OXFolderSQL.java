@@ -1966,7 +1966,7 @@ public final class OXFolderSQL {
         }
     }
 
-    private static final String SQL_SEL_PERMS = "SELECT ot.fuid, ot.type FROM " + TMPL_PERM_TABLE + " AS op JOIN " + TMPL_FOLDER_TABLE + " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE op.permission_id IN " + TMPL_IDS + " GROUP BY ot.fuid";
+    private static final String SQL_SEL_PERMS = "SELECT ot.fuid, ot.type, ot.module, ot.default_flag FROM " + TMPL_PERM_TABLE + " AS op JOIN " + TMPL_FOLDER_TABLE + " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE op.permission_id IN " + TMPL_IDS + " GROUP BY ot.fuid";
 
     /**
      * Deletes all permissions assigned to context's mail admin from given permission table.
@@ -2012,7 +2012,9 @@ public final class OXFolderSQL {
             while (rs.next()) {
                 final int fuid = rs.getInt(1);
                 final int type = rs.getInt(2);
-                if (isMailAdmin || markForDeletion(type)) {
+                final int module = rs.getInt(3);
+                final boolean defaultFlag = rs.getInt(4) > 0;
+                if (isMailAdmin || markForDeletion(type, module, defaultFlag)) {
                     deletePerms.add(fuid);
                 } else {
                     reassignPerms.add(fuid);
@@ -2351,7 +2353,7 @@ public final class OXFolderSQL {
         handleEntityFolders(entity, Integer.valueOf(mailAdmin), lastModified, folderTable, permTable, readConArg, writeConArg, ctx);
     }
 
-    private static final String SQL_SEL_FOLDERS = "SELECT ot.fuid, ot.type FROM #FOLDER# AS ot WHERE ot.cid = ? AND ot.created_from = ?";
+    private static final String SQL_SEL_FOLDERS = "SELECT ot.fuid, ot.type, ot.module, ot.default_flag FROM #FOLDER# AS ot WHERE ot.cid = ? AND ot.created_from = ?";
 
     private static final String SQL_SEL_FOLDERS2 = "SELECT ot.fuid FROM #FOLDER# AS ot WHERE ot.cid = ? AND ot.changed_from = ?";
 
@@ -2375,7 +2377,9 @@ public final class OXFolderSQL {
             while (rs.next()) {
                 final int fuid = rs.getInt(1);
                 final int type = rs.getInt(2);
-                if (isMailAdmin || markForDeletion(type)) {
+                final int module = rs.getInt(3);
+                final boolean defaultFlag = rs.getInt(4) > 0;
+                if (isMailAdmin || markForDeletion(type, module, defaultFlag)) {
                     deleteFolders.add(fuid);
                 } else {
                     reassignFolders.add(fuid);
@@ -2653,11 +2657,20 @@ public final class OXFolderSQL {
     /**
      * @return <code>true</code> if folder type is set to private, <code>false</code> otherwise
      */
-    private static boolean markForDeletion(final int type) {
-        return (type == FolderObject.PRIVATE); // || (type ==
-        // FolderObject.PUBLIC && module
-        // == FolderObject.INFOSTORE &&
-        // defaultFlag);
+    private static boolean markForDeletion(final int type, int module, boolean defaultFlag) {
+        return isPrivate(type) || isPersonalInfoStoreFolder(type, module, defaultFlag) || isTrashInfoStoreFolder(type, module, defaultFlag);
+    }
+
+    private static boolean isTrashInfoStoreFolder(final int type, int module, boolean defaultFlag) {
+        return (type == FolderObject.TRASH) && (module == FolderObject.INFOSTORE) && defaultFlag;
+    }
+
+    private static boolean isPersonalInfoStoreFolder(final int type, int module, boolean defaultFlag) {
+        return (type == FolderObject.PUBLIC) && (module == FolderObject.INFOSTORE) && defaultFlag;
+    }
+
+    private static boolean isPrivate(final int type) {
+        return type == FolderObject.PRIVATE;
     }
 
     private static int executeUpdate(final PreparedStatement stmt) throws SQLException {

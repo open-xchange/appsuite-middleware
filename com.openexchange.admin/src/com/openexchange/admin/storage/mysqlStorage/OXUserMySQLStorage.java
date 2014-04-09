@@ -2459,31 +2459,34 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     throw new StorageException(e);
                 }
                 condition.resetTransactionRollbackException();
+                boolean rollback = false;
                 try {
                     DBUtils.startTransaction(con);
+                    rollback = true;
                     delete(ctx, users, con);
                     for (final User user : users) {
                         log.info("User {} deleted!", user.getId());
                     }
                     con.commit();
+                    rollback = false;
                 } catch (final StorageException st) {
-                    DBUtils.rollback(con);
                     final SQLException sqle = DBUtils.extractSqlException(st);
                     if (!condition.isFailedTransactionRollback(sqle)) {
                         log.error("Storage Error", st);
                         throw st;
                     }
                 } catch (final SQLException sql) {
-                    DBUtils.rollback(con);
                     if (!condition.isFailedTransactionRollback(sql)) {
                         log.error("SQL Error", sql);
                         throw new StorageException(sql.toString(), sql);
                     }
                 } catch (final RuntimeException e) {
                     log.error("", e);
-                    DBUtils.rollback(con);
                     throw e;
                 } finally {
+                    if (rollback) {
+                        DBUtils.rollback(con);
+                    }
                     DBUtils.autocommit(con);
                     try {
                         cache.pushConnectionForContextNoTimeout(ctx.getId().intValue(), con);
