@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,22 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.attach;
+package com.openexchange.ajax.attach.actions;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * Test suite for all attachment tests.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link GetDocumentResponse}
+ * 
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({ SimpleAttachmentTest.class, TaskAttachmentTest.class, Bug24876Test.class, Bug26544Test.class, Bug30701Test.class })
-public final class AttachmentTests {
+public class GetDocumentResponse extends AbstractAJAXResponse {
+    
+    private final int contentLength;
 
-    private AttachmentTests() {
-        super();
+    /**
+     * Initializes a new {@link GetDocumentResponse}.
+     * 
+     * @param response
+     */
+    public GetDocumentResponse(Response response, int cl) {
+        super(response);
+        contentLength = cl;
+    }
+
+    /**
+     * Gets the contentLength
+     *
+     * @return The contentLength
+     */
+    public int getContentLength() {
+        return contentLength;
     }
 }

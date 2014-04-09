@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,22 +47,73 @@
  *
  */
 
-package com.openexchange.ajax.attach;
+package com.openexchange.ajax.attach.actions;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.io.IOException;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * Test suite for all attachment tests.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link GetDocumentParser}
+ * 
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({ SimpleAttachmentTest.class, TaskAttachmentTest.class, Bug24876Test.class, Bug26544Test.class, Bug30701Test.class })
-public final class AttachmentTests {
-
-    private AttachmentTests() {
-        super();
+public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
+    
+    private int contentLength; 
+    
+    /**
+     * Initializes a new {@link GetDocumentParser}.
+     */
+    public GetDocumentParser(boolean failOnError) {
+        super(failOnError);
     }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#parse(java.lang.String)
+     */
+    @Override
+    public GetDocumentResponse parse(final String body) throws JSONException {
+        final boolean isJSON = body.startsWith("{");
+        if (isJSON) {
+            return super.parse(body);
+        } else {
+            JSONObject json = new JSONObject();
+            json.put("document", body);
+            return super.parse(json.toString());
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#checkResponse(org.apache.http.HttpResponse)
+     */
+    @Override
+    public String checkResponse(HttpResponse response) throws ParseException, IOException {
+        Header[] headers = response.getAllHeaders();
+        for (Header h : headers) {
+            if (h.getName().equals("Content-Length")) {
+                contentLength = Integer.parseInt(h.getValue());
+                break;
+            }
+        }
+        return super.checkResponse(response);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
+    @Override
+    protected GetDocumentResponse createResponse(Response response) throws JSONException {
+        GetDocumentResponse r = new GetDocumentResponse(response, contentLength);
+        return r;
+    }
+
 }
