@@ -799,7 +799,7 @@ public final class MimeReply {
         final ContentType partContentType = new ContentType();
         final boolean htmlPreferred = pc.usm.isDisplayHtmlInlineContent();
         boolean found = false;
-        if (htmlPreferred && mpContentType.startsWithAny(MimeTypes.MIME_MULTIPART_ALTERNATIVE, MimeTypes.MIME_MULTIPART_RELATED) && count >= 2) {
+        if (htmlPreferred && count >= 2 && mpContentType.startsWithAny(MimeTypes.MIME_MULTIPART_ALTERNATIVE, MimeTypes.MIME_MULTIPART_RELATED)) {
             /*
              * Prefer HTML content within multipart/alternative part
              */
@@ -814,7 +814,7 @@ public final class MimeReply {
             /*
              * Get any text content
              */
-            found = getTextContent(htmlPreferred, !htmlPreferred, multipartPart, count, partContentType, accountId, pc);
+            found = getTextContent(false, !htmlPreferred, multipartPart, count, partContentType, accountId, pc);
             if (!found) {
                 /*
                  * No HTML part found, retry with any text part
@@ -960,6 +960,8 @@ public final class MimeReply {
                         if (nextContentType.startsWith(TEXT) && (avoidHTML ? !nextContentType.startsWith(TEXT_HTM) : true) && MimeProcessingUtility.isInline(nextPart, nextContentType) && !MimeProcessingUtility.isSpecial(nextContentType.getBaseType())) {
                             String text = MimeProcessingUtility.handleInlineTextPart(nextPart, nextContentType, pc.usm.isDisplayHtmlInlineContent());
                             pc.textBuilder.append(text);
+                        } else if (nextContentType.startsWith(MULTIPART)) {
+                            gatherAllTextContents(nextPart, nextContentType, accountId, pc);
                         }
                     }
                     return true;

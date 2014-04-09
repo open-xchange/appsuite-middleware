@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,7 +51,9 @@ package com.openexchange.mail.autoconfig.sources;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.Autoconfig;
@@ -76,23 +78,36 @@ public class Guess extends AbstractConfigSource {
     @Override
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) {
         Autoconfig config = new Autoconfig();
-        boolean imapSuccess = fillProtocol(URIDefaults.IMAP, emailLocalPart, emailDomain, password, config);
+
+        final Map<String, Object> properties = new HashMap<String, Object>(2);
+        boolean imapSuccess = fillProtocol(URIDefaults.IMAP, emailLocalPart, emailDomain, password, config, properties);
         boolean generalSuccess = imapSuccess;
         if (!imapSuccess) {
-            generalSuccess = fillProtocol(URIDefaults.POP3, emailLocalPart, emailDomain, password, config) || generalSuccess;
+            generalSuccess = fillProtocol(URIDefaults.POP3, emailLocalPart, emailDomain, password, config, properties) || generalSuccess;
         }
-        generalSuccess = fillProtocol(URIDefaults.SMTP, emailLocalPart, emailDomain, password, config) || generalSuccess;
+
+        boolean preGeneralSuccess = generalSuccess;
+        generalSuccess = fillProtocol(URIDefaults.SMTP, emailLocalPart, emailDomain, password, config, properties) || generalSuccess;
+
+        if (properties.containsKey("smtp.auth-supported")) {
+            final Boolean smtpAuthSupported = (Boolean) properties.get("smtp.auth-supported");
+            if (!smtpAuthSupported.booleanValue() && !preGeneralSuccess) {
+                // Neither IMAP nor POP3 reachable, but SMTP works as it does not support authentication
+                // Therefore return null
+                return null;
+            }
+        }
 
         return generalSuccess ? config : null;
     }
 
-    private boolean fillProtocol(URIDefaults protocol, String emailLocalPart, String emailDomain, String password, Autoconfig config) {
+    private boolean fillProtocol(URIDefaults protocol, String emailLocalPart, String emailDomain, String password, Autoconfig config, Map<String, Object> properties) {
         Object[] guessedHost = guessHost(protocol, emailDomain);
         if (guessedHost != null) {
             String host = (String) guessedHost[0];
             boolean secure = (Boolean) guessedHost[1];
             Integer port = (Integer) guessedHost[2];
-            String login = guessLogin(protocol, host, port, secure, emailLocalPart, emailDomain, password);
+            String login = guessLogin(protocol, host, port.intValue(), secure, emailLocalPart, emailDomain, password, properties);
             if (login == null) {
                 return false;
             }
@@ -114,7 +129,7 @@ public class Guess extends AbstractConfigSource {
         return false;
     }
 
-    private String guessLogin(URIDefaults protocol, String host, int port, boolean secure, String emailLocalPart, String emailDomain, String password) {
+    private String guessLogin(URIDefaults protocol, String host, int port, boolean secure, String emailLocalPart, String emailDomain, String password, Map<String, Object> properties) {
         List<String> logins = Arrays.asList(emailLocalPart, emailLocalPart+"@"+emailDomain);
 
         for (String login : logins) {
@@ -127,7 +142,7 @@ public class Guess extends AbstractConfigSource {
                     return login;
                 }
             } else if (protocol == URIDefaults.SMTP) {
-                if (MailValidator.validateSmtp(host, port, secure, login, password)) {
+                if (MailValidator.validateSmtp(host, port, secure, login, password, properties)) {
                     return login;
                 }
             }

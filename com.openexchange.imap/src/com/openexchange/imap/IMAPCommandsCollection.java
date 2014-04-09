@@ -231,7 +231,8 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final String mboxName = prepareStringArgument(new StringAllocator("probe").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString());
+                final String fname = new StringAllocator("probe").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
+                final String mboxName = prepareStringArgument(fname);
                 LOG.debug("Trying to probe IMAP server {} for root subfolder capability with mbox name: {}", p.getHost(), mboxName);
                 /*
                  * Perform command: CREATE
@@ -240,9 +241,30 @@ public final class IMAPCommandsCollection {
                 final Response[] r = performCommand(p, sb.append("CREATE ").append(mboxName).toString());
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
+                    // Well, CREATE command succeeded. Is folder really on root level...?
+                    sb.reinitTo(0);
+                    boolean retval = true;
+                    // Query the folder
+                    final ListInfo[] li = p.list("", sb.append("*").append(mboxName).append("*").toString());
+                    if (li != null) {
+                        boolean found = false;
+                        for (int i = 0; !found && i < li.length; i++) {
+                            if (fname.equals(li[i].name)) {
+                                found = true;
+                            }
+                        }
+                        if (!found) {
+                            LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} failed as test folder was not created at expected position. Thus assuming no root subfolder capability", p.getHost(), mboxName);
+                        }
+                        retval = found;
+                    }
+                    // Delete probe folder and return
                     sb.reinitTo(0);
                     performCommand(p, sb.append("DELETE ").append(mboxName).toString());
-                    return Boolean.TRUE;
+                    if (retval) {
+                        LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} succeeded. Thus assuming root subfolder capability", p.getHost(), mboxName);
+                    }
+                    return Boolean.valueOf(retval);
                 }
                 if (response.isNO()) {
                     final String rest = response.getRest();
@@ -1526,8 +1548,29 @@ public final class IMAPCommandsCollection {
 
     private final static String TEMPL_STORE_FLAGS = "STORE %s %sFLAGS (%s)";
 
-    private static final String ALL_COLOR_LABELS =
-        "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
+    private static final Object ALL_COLOR_LABELS = "$cl_0 $cl_1 $cl_2 $cl_3 $cl_4 $cl_5 $cl_6 $cl_7 $cl_8 $cl_9 $cl_10" + " cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
+
+    /**
+     * Clears an sets only known colors in user defined IMAP flag
+     * <p>
+     * All known color labels:
+     * <code>$cl_0&nbsp;$cl_1&nbsp;$cl_2&nbsp;$cl_3&nbsp;$cl_4&nbsp;$cl_5&nbsp;$cl_6&nbsp;$cl_7&nbsp;$cl_8&nbsp;$cl_9&nbsp;$cl_10</code>
+     * <code>cl_0&nbsp;cl_1&nbsp;cl_2&nbsp;cl_3&nbsp;cl_4&nbsp;cl_5&nbsp;cl_6&nbsp;cl_7&nbsp;cl_8&nbsp;cl_9&nbsp;cl_10</code>
+     *
+     * @param imapFolder - the imap folder
+     * @param msgUIDs - the message UIDs
+     * @param colorLabelFlag - the color id
+     * @return <code>true</code> if color could be set successfully; otherwise <code>false</code>
+     * @throws MessagingException - if an error occurs in underlying protocol
+     */
+    public static void clearAndSetColorLabelSafely(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException, OXException {
+        // Only set colors allowed in ALL_COLOR_LABELS
+        if (!MailMessage.isValidColorLabel(colorLabelFlag)) {
+            throw IMAPException.create(IMAPException.Code.FLAG_FAILED, colorLabelFlag, "Unknown color label.");
+        }
+        clearAllColorLabels(imapFolder, msgUIDs);
+        setColorLabel(imapFolder, msgUIDs, colorLabelFlag);
+    }
 
     /**
      * Clears all set color label (which are stored as user flags) from messages which correspond to given UIDs.

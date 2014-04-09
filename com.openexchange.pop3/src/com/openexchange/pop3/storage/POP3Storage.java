@@ -97,6 +97,8 @@ public interface POP3Storage {
     /**
      * Synchronizes this storage with actual POP3 account.
      * <p>
+     * Throws an <b><code>AlreadyLockedException</code></b> if another thread currently performs a sync attempt.
+     * <p>
      * Tries to establish a connection to actual POP3 account, invokes {@link POP3StorageConnectCounter#incrementCounter()
      * incrementCounter()}, fetches all contained messages, synchronizes them with the ones hold in this storage, and finally invokes
      * {@link POP3StorageConnectCounter#decrementCounter() decrementCounter()}.
@@ -104,6 +106,7 @@ public interface POP3Storage {
      * @param expunge Whether to expunge messages from actual POP3 account after their retrieval
      * @param lastAccessed The last-accessed time stamp or <code>null</code> in case of first access
      * @throws OXException If synchronizing messages fails
+     * @throws AlreadyLockedException If another thread currently performs a sync attempt
      */
     public void syncMessages(boolean expunge, Long lastAccessed) throws OXException;
 

@@ -55,9 +55,11 @@ import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
 
@@ -73,7 +75,8 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "columns", description = "The requested fields."),
     @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
     @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
-    @Parameter(name = "collation", description = "(preliminary, since 6.20) - allows you to specify a collation to sort the contacts by. As of 6.20, only supports \"gbk\" and \"gb2312\", not needed for other languages. Parameter sort should be set for this to work.")
+    @Parameter(name = "collation", description = "(preliminary, since 6.20) - allows you to specify a collation to sort the contacts by. As of 6.20, only supports \"gbk\" and \"gb2312\", not needed for other languages. Parameter sort should be set for this to work."),
+    @Parameter(name = "admin", optional=true, type=Type.BOOLEAN, description = "(preliminary, since 7.4.2) - whether to include the contact representing the admin in the result or not. Defaults to \"true\".")
 }, requestBody = "An Object as described in Search Filter.",
 responseDescription = "An array with contact data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public class AdvancedSearchAction extends ContactAction {
@@ -88,9 +91,12 @@ public class AdvancedSearchAction extends ContactAction {
 
     @Override
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
+        boolean excludeAdmin = request.isExcludeAdmin();
+        int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
+        ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = addContacts(contacts, getContactService().searchContacts(
-            request.getSession(), request.getSearchFilter(), request.getFields(), request.getSortOptions()));
+            request.getSession(), request.getSearchFilter(), fields, request.getSortOptions()), excludedAdminID);
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }

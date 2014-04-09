@@ -65,6 +65,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
+import javax.mail.MessagingException;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -82,7 +83,10 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.threader.Conversation;
+import com.openexchange.mail.threader.Conversations;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -93,6 +97,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.copy.UnifiedInboxMessageCopier;
 import com.openexchange.unifiedinbox.dataobjects.UnifiedMailMessage;
+import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
@@ -178,6 +183,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
         }
         return accounts;
+    }
+
+    private MailAccount getAccount(final int accountId) throws OXException {
+        final MailAccountStorageService srv = UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class);
+        return srv.getMailAccount(accountId, user, cid);
     }
 
     @Override
@@ -628,7 +638,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             mailAccess.connect();
             // Get account's messages
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            if (messageStorage instanceof ISimplifiedThreadStructure) {
+            if ((messageStorage instanceof ISimplifiedThreadStructure)) {
                 try {
                     return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields);
                 } catch (final OXException e) {
@@ -639,92 +649,145 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 }
             }
             /*-
-             * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.
+             * --------------------------------------------------------------------------------------------------------------------------
              *
-             * 2. Whenever level equals 0, a new thread starts (new array)
+             * Manually do thread-sort
              *
-             * 3. Add all objects (id, folder_id, received_date) to that list until level !== 0.
-             *
-             * 4. Order by received_date (ignore the internal level structure), so that the newest mails show up first.
-             *
-             * 5. Generate the real list of all threads. This must be again ordered by received_date, so that the most recent threads show up
-             *    first. id and folder_id refer to the most recent mail.
+             * Sort by references
              */
-            MailMessage[] msgArr;
-            try {
-                final int allSort = MailSortField.RECEIVED_DATE.getField();
-                final int allOrder = OrderDirection.DESC.getOrder();
-                msgArr = messageStorage.getThreadSortedMessages(fullName, indexRange, sortField, order, null, mailFields);
-            } catch (final OXException e) {
-                msgArr = messageStorage.getAllMessages(fullName, indexRange, sortField, order, mailFields);
-            }
-            List<List<MailMessage>> list = new LinkedList<List<MailMessage>>();
-            List<MailMessage> current = new LinkedList<MailMessage>();
-            // Here we go
-            final int size = msgArr.length;
-            for (int i = 0; i < size; i++) {
-                final MailMessage mail = msgArr[i];
-                final int threadLevel = mail.getThreadLevel();
-                if (0 == threadLevel) {
-                    list.add(current);
-                    current = new LinkedList<MailMessage>();
-                }
-                current.add(mail);
-            }
-            list.add(current);
-            /*
-             * Sort empty ones
-             */
-            for (final Iterator<List<MailMessage>> iterator = list.iterator(); iterator.hasNext();) {
-                final List<MailMessage> mails = iterator.next();
-                if (null == mails || mails.isEmpty()) {
-                    iterator.remove();
-                } else {
-                    Collections.sort(mails, COMPARATOR);
-                }
-            }
-            /*
-             * Sort root elements
-             */
-            final boolean descending = OrderDirection.DESC.equals(order);
-            MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
-            if (null == effectiveSortField) {
-                effectiveSortField = MailSortField.RECEIVED_DATE;
-            }
-            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
-            final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
+            final String realFullName = fa.getFullname();
+            final boolean mergeWithSent = includeSent && !mailAccess.getFolderStorage().getSentFolder().equals(realFullName);
+            final Future<List<MailMessage>> messagesFromSentFolder;
+            if (mergeWithSent) {
+                final String sentFolder = mailAccess.getFolderStorage().getSentFolder();
+                messagesFromSentFolder = ThreadPools.getThreadPool().submit(new AbstractTask<List<MailMessage>>() {
 
-                @Override
-                public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
-                    return comparator.compare(o1.get(0), o2.get(0));
+                    @Override
+                    public List<MailMessage> call() throws Exception {
+                        return Conversations.messagesFor(sentFolder, (int) max, new MailFields(mailFields), messageStorage);
+                    }
+                });
+            } else {
+                messagesFromSentFolder = null;
+            }
+            // For actual folder
+            final List<Conversation> conversations = Conversations.conversationsFor(realFullName, (int) max, new MailFields(mailFields), messageStorage);
+            // Retrieve from sent folder
+            if (null != messagesFromSentFolder) {
+                final List<MailMessage> sentMessages = getFrom(messagesFromSentFolder);
+                for (final Conversation conversation : conversations) {
+                    for (final MailMessage sentMessage : sentMessages) {
+                        if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                            conversation.addMessage(sentMessage);
+                        }
+                    }
                 }
-            };
-            Collections.sort(list, listComparator);
+            }
+            // Fold it
+            Conversations.fold(conversations);
+            // Comparator
+            final MailMessageComparator threadComparator = COMPARATOR;
+            // Sort
+            List<List<MailMessage>> list = new ArrayList<List<MailMessage>>(conversations.size());
+            for (final Conversation conversation : conversations) {
+                list.add(conversation.getMessages(threadComparator));
+            }
+            // Sort root elements
+            {
+                final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
+                final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
+                Collections.sort(list, listComparator);
+            }
+            // Check for index range
             if (null != indexRange) {
                 final int fromIndex = indexRange.start;
                 int toIndex = indexRange.end;
-                final int lsize = list.size();
-                if ((fromIndex) > lsize) {
-                    /*
-                     * Return empty iterator if start is out of range
-                     */
+                final int size = list.size();
+                if ((fromIndex) > size) {
+                    // Return empty iterator if start is out of range
                     return Collections.emptyList();
                 }
-                /*
-                 * Reset end index if out of range
-                 */
-                if (toIndex >= lsize) {
-                    toIndex = lsize;
+                // Reset end index if out of range
+                if (toIndex >= size) {
+                    toIndex = size;
                 }
                 list = list.subList(fromIndex, toIndex);
             }
             /*
-             * Finally return
+             * Apply account identifier
              */
+            setAccountInfo2(list, getAccount(fa.getAccountId()));
+            // Return list
             return list;
         } finally {
             closeSafe(mailAccess);
         }
+    }
+
+    private static <T> T getFrom(final Future<T> f) throws OXException {
+        if (null == f) {
+            return null;
+        }
+        try {
+            return f.get();
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt(); // Keep interrupted state
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof MessagingException) {
+                throw MimeMailException.handleMessagingException((MessagingException) cause);
+            }
+            throw ThreadPools.launderThrowable(e, OXException.class);
+        }
+
+    }
+
+    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final Locale locale) {
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
+        final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
+
+            @Override
+            public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
+                int result = comparator.compare(o1.get(0), o2.get(0));
+                if ((0 != result) || (MailSortField.RECEIVED_DATE != sortField)) {
+                    return result;
+                }
+                // Zero as comparison result AND primarily sorted by received-date
+                final MailMessage msg1 = o1.get(0);
+                final MailMessage msg2 = o2.get(0);
+                final String inReplyTo1 = msg1.getInReplyTo();
+                final String inReplyTo2 = msg2.getInReplyTo();
+                if (null == inReplyTo1) {
+                    result = null == inReplyTo2 ? 0 : -1;
+                } else {
+                    result = null == inReplyTo2 ? 1 : 0;
+                }
+                return 0 == result ? new MailMessageComparator(MailSortField.SENT_DATE, OrderDirection.DESC.equals(order), null).compare(msg1, msg2) : result;
+            }
+        };
+        return listComparator;
+    }
+
+    /**
+     * Sets account ID and name in given instances of {@link MailMessage}.
+     *
+     * @param mailMessages The {@link MailMessage} instances
+     * @return The given instances of {@link MailMessage} each with account ID and name set
+     * @throws OXException If mail account cannot be obtained
+     */
+    private <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(final W col, final MailAccount account) throws OXException {
+        final String name = account.getName();
+        final int id = account.getId();
+        for (final C mailMessages : col) {
+            for (final MailMessage mailMessage : mailMessages) {
+                if (null != mailMessage) {
+                    mailMessage.setAccountId(id);
+                    mailMessage.setAccountName(name);
+                }
+            }
+        }
+        return col;
     }
 
     @Override

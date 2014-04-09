@@ -100,4 +100,10 @@ public interface IPOP3Properties extends IMailProperties {
      */
     public int getPOP3BlockSize();
 
+    /**
+     * Gets supported SSL protocols
+     * @return Supported SSL protocols
+     */
+    public String getSSLProtocols();
+
 }

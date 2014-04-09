@@ -1,72 +1,39 @@
-* 2014-03-16 - thorben.betten@open-xchange.com
+* 2014-04-02 - ioannis.chouklis@open-xchange.com
 
- - Fix for bug 30848: Properly recognize & transmit an S/MIME encrypted mail
+ - Fix for bug 31854: NPE at POP3Store.reinitCapabilities
 
-* 2014-03-13 - thorben.betten@open-xchange.com
+* 2014-03-31 - thorben.betten@open-xchange.com
+ 
+ - Fix for bug 31809: Enhanced key associated with an IMAP store cache by dedicated user information
 
- - Fix for bug 31555: Also check standard folders' subscribed status in case SPECIAL-USE capability is supported by IMAP server
+* 2014-03-23 - thorben.betten@open-xchange.com
 
-* 2014-03-07 - marcus.klein@open-xchange.com
+ - Fix for bug 31677: Properly do the thread-sort for subscribed POP3 accounts accessed via Unified Mail
+ - Fix for bug 31714: Set upper limits for width/height parameter on image transformation request
 
- - Fix for bug 31154: Necessary Ant tasks for our build system have not be available by default on Debian Squeeze but on Wheezy. Adding an
-   additional JAR to the build call on Debian Squeeze systems when using CDBS for building.
+* 2014-03-20 - thorben.betten@open-xchange.com
 
-* 2014-03-06 - tobias.friedrich@open-xchange.com
+ - Fix for bug 31657: Drop "webmail" capability for context administrator if "com.openexchange.mail.adminMailLoginEnabled" is set to "false"
 
- - Fix for bug 31391: Use dynamically registered key and certificate providers for cloud-based push notifications
- - Fix for bug 30369: Replaced equinox event admin with multithreaded implementation from apache felix project, introduced background
-                      event processing for time-consuming handlers
+* 2014-03-19 - thorben.betten@open-xchange.com
 
-* 2014-03-03 - dennis.sieben@open-xchange.com
+ - Fix for bug 31644: Properly collect available text parts on reply if original message contains multipart/alternative appendix
 
- - Fix for bug 31329: Multi-line calculation has now also been added for PGP_ENCRYPT commands
+* 2014-03-17 - thorben.betten@open-xchange.com
 
-* 2014-02-28 - marcus.klein@open-xchange.com
+ - Fix for bug 31587: Pass obtained BundleContext instance to initializing method, not the stored one to ensure working on most recent bundle/framework state
 
- - Fix for bug 23141: Remember parsed uploaded and temporarily stored files even if too much form fields are sent in the upload.
+* 2014-03-10 - thorben.betten@open-xchange.com
 
-* 2014-02-25 - martin.herfurth@open-xchange.com
+ - Fix for bug 31304: Suppress warning if "pop3.refreshrate" property is missing. Silently use fall-back value
 
- - Fix for bug 31191: Fixed erroneous permission check.
+* 2024-03-07 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 31448: [L3] Backend mistakes IMAP with SMTP password entries by updating external mail account credentials 
 
 * 2014-02-25 - thorben.betten@open-xchange.com
 
- - Fix for bug 31252: Put error arguments into "error_params" field for compatibility reasons
- - Fix for bug 31287: Do not apply black-list on provisioning calls
- - Fix for bug 30969: Fully leverage from folder cache within folder layer, do not use a custom one in IMAP bundle
-
-* 2014-02-24 - tobias.friedrich@open-xchange.com
-
- - Fix for bug 31249: Be aware of infostore items without files when filtering, set appropriate HTTP status in download response
- 
-* 2014-02-24 - thorben.betten@open-xchange.com
-
- - Fix for bug 31264: Added cache invalidator to capabilities caches
- - Fix for bug 31152: Do not throw EmiG-specific error codes, but just mark as non-EmiG capable
-
-* 2014-02-24 - marcus.klein@open-xchange.com
-
- - Fix for bug 31238: Use the same properties map for the general login method of the LoginPerformer and the AuthenticationService.
-
-* 2014-02-21 - marcus.klein@open-xchange.com
-
- - Fix for bug 30761: Do not occupy a database connection without using it.
-
-* 2014-02-20 - thorben.betten@open-xchange.com
-
- - Fix for bug 30138: Ensure each probe for root subfolder capability is exclusively performed
-
-* 2014-02-19 - tobias.friedrich@open-xchange.com
-
- - Fix for bug 31199: Process multicast results from GCM
-
-* 2014-02-18 - thorben.betten@open-xchange.com
-
- - Fix for bug 31086: Ignore failed attempt to save non-existent setting
-
-* 2014-02-18 - martin.herfurth@open-xchange.com
-
- - Fix for bug 31185: Avoid Autoconfig cache from storing personal data.
+ - Fix for bug 31222: Signal support for SSLv3 protocol on secure connect to POP3 server
 
 * 2014-02-17 - thorben.betten@open-xchange.com
 

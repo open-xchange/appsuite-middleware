@@ -168,4 +168,14 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         }
     }
 
+    @Override
+    public String getSSLProtocols() {
+        final String tmp = properties.get("com.openexchange.pop3.ssl.protocols");
+        if (null == tmp) {
+            return POP3Properties.getInstance().getSSLProtocols();
+        }
+
+        return tmp.trim();
+    }
+
 }

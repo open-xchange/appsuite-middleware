@@ -49,15 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.update.Tools;
 
 
 /**
@@ -66,9 +59,6 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class DateExternalDropForeignKeyUpdateTask extends UpdateTaskAdapter {
-    
-    private static final String PRG_DATES = "prg_dates";
-    private static final String DATE_EXTERNAL = "dateExternal"; 
 
     /**
      * Initializes a new {@link DateExternalDropForeignKeyUpdateTask}.
@@ -77,38 +67,14 @@ public class DateExternalDropForeignKeyUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        Connection con = Database.getNoTimeout(cid, true);
-        try {
-            con.setAutoCommit(false);
-            String foreignKey = Tools.existsForeignKey(con, PRG_DATES, new String[] {"cid", "intfield01"}, DATE_EXTERNAL, new String[] {"cid", "objectId"});
-            if (null != foreignKey && !foreignKey.equals("")) {
-                Tools.dropForeignKey(con, DATE_EXTERNAL, foreignKey);
-            }
-            con.commit();
-        } catch (SQLException e) {
-            DBUtils.rollback(con);
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            DBUtils.rollback(con);
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } finally {
-            DBUtils.autocommit(con);
-            Database.backNoTimeout(cid, true, con);
-        }
+    public void perform(PerformParameters params) {
+        // nothing to do
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { EnlargeCalendarUid.class.getName() };
     }
 
 }
