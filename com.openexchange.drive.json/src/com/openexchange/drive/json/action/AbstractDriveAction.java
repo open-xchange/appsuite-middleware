@@ -247,9 +247,8 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         if (Strings.isEmpty(hostName)) {
             hostName = "localhost";
         }
-        return requestData.getHostname();
+        return hostName;
     }
-
 
     /**
      * Enables an unlimited body size by setting the maximum body size in the underlying {@link CountingHttpServletRequest} to

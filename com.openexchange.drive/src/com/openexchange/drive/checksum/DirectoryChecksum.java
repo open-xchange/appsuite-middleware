@@ -60,6 +60,7 @@ import com.openexchange.file.storage.composition.FolderID;
 public class DirectoryChecksum extends StoredChecksum {
 
     protected FolderID folderID;
+    protected int userID;
 
     /**
      * Initializes a new {@link DirectoryChecksum}.
@@ -68,8 +69,17 @@ public class DirectoryChecksum extends StoredChecksum {
         super();
     }
 
-    public DirectoryChecksum(FolderID folderID, long sequenceNumber, String checksum) {
+    /**
+     * Initializes a new {@link DirectoryChecksum}.
+     *
+     * @param userID The user ID
+     * @param folderID The folder ID
+     * @param sequenceNumber The sequence number
+     * @param checksum The checksum
+     */
+    public DirectoryChecksum(int userID, FolderID folderID, long sequenceNumber, String checksum) {
         super();
+        this.userID = userID;
         this.folderID = folderID;
         this.sequenceNumber = sequenceNumber;
         this.checksum = checksum;
@@ -91,6 +101,24 @@ public class DirectoryChecksum extends StoredChecksum {
      */
     public void setFolderID(FolderID folderID) {
         this.folderID = folderID;
+    }
+
+    /**
+     * Gets the userID
+     *
+     * @return The userID
+     */
+    public int getUserID() {
+        return userID;
+    }
+
+    /**
+     * Sets the userID
+     *
+     * @param userID The userID to set
+     */
+    public void setUserID(int userID) {
+        this.userID = userID;
     }
 
     @Override

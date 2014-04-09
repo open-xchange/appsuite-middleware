@@ -162,7 +162,7 @@ public class DriveStorage {
      * @throws OXException
      */
     public Quota[] getQuota() throws OXException {
-        return getFolderAccess().getQuotas(rootFolderID.getFolderId(), new Type[] { Type.STORAGE, Type.FILE });
+        return getFolderAccess().getQuotas(rootFolderID.toUniqueID(), new Type[] { Type.STORAGE, Type.FILE });
     }
 
     /**
@@ -728,7 +728,7 @@ public class DriveStorage {
      */
     public FileStorageFolder getTrashFolder() throws OXException {
         if (null == trashFolder) {
-            return getFolderAccess().getTrashFolder();
+            return getFolderAccess().getTrashFolder(rootFolderID.toUniqueID());
         }
         return trashFolder;
     }
@@ -749,6 +749,13 @@ public class DriveStorage {
         return folder;
     }
 
+    /**
+     * Gets all folders in the storage recursively. The "temp" folder, as well as the trash folder including all subfolders are ignored
+     * implicitly.
+     *
+     * @return The folders, each one mapped to its corresponsing relative path
+     * @throws OXException
+     */
     public Map<String, FileStorageFolder> getFolders() throws OXException {
         Map<String, FileStorageFolder> folders = new HashMap<String, FileStorageFolder>();
         FileStorageFolder rootFolder = getRootFolder();
@@ -830,8 +837,8 @@ public class DriveStorage {
             FileStorageFolder folder = getFolderAccess().getFolder(currentFolderID);
             folders.addFirst(folder);
             currentFolderID = folder.getParentId();
-        } while (null != currentFolderID && false == "0".equals(currentFolderID) && false == rootFolderID.getFolderId().equals(currentFolderID));
-        if (0 < folders.size() && rootFolderID.getFolderId().equals(folders.getFirst().getParentId())) {
+        } while (null != currentFolderID && false == "0".equals(currentFolderID) && false == rootFolderID.toUniqueID().equals(currentFolderID));
+        if (0 < folders.size() && rootFolderID.toUniqueID().equals(folders.getFirst().getParentId())) {
             StringBuilder pathBuilder = new StringBuilder();
             for (int i = 0; i < folders.size(); i++) {
                 FileStorageFolder folder = folders.get(i);
@@ -844,12 +851,22 @@ public class DriveStorage {
         }
     }
 
+    /**
+     * Adds all found subfolders of the supplied parent folder recursively. The "temp" folder, as well as the trash folder including all
+     * subfolders are ignored implicitly.
+     *
+     * @param folders The map to add the subfolders
+     * @param parent The parent folder
+     * @param path The path of the parent folder
+     * @throws OXException
+     */
     private void addSubfolders(Map<String, FileStorageFolder> folders, FileStorageFolder parent, String path) throws OXException {
+        String trashFolderID = hasTrashFolder() && null != getTrashFolder() ? getTrashFolder().getId() : null;
         FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(parent.getId(), false);
         for (FileStorageFolder subfolder : subfolders) {
             String subPath = path + PathNormalizer.normalize(subfolder.getName());
             knownFolders.remember(subPath, subfolder);
-            if (false == TEMP_PATH.equals(subPath)) {
+            if (false == TEMP_PATH.equals(subPath) && (null == trashFolderID || false == trashFolderID.equals(subfolder.getId()))) {
                 folders.put(subPath, subfolder);
                 addSubfolders(folders, subfolder, subPath + PATH_SEPARATOR);
             }

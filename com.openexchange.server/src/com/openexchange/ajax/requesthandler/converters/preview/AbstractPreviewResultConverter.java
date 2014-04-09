@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import static com.openexchange.java.Charsets.toAsciiBytes;
 import static com.openexchange.java.Charsets.toAsciiString;
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -354,14 +355,14 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      */
     protected static String getContentType(final IFileHolder fileHolder, final ContentTypeChecker checker) {
         String contentType = fileHolder.getContentType();
-        if (Strings.isEmpty(contentType)) {
+        if (isEmpty(contentType)) {
             // Determine Content-Type by file name
             return MimeType2ExtMap.getContentType(fileHolder.getName());
         }
         // Cut to base type & sanitize
         contentType = sanitizeContentType(getLowerCaseBaseType(contentType));
         contentType = MimeTypes.checkedMimeType(contentType, fileHolder.getName(), INVALIDS);
-        if (INVALIDS.contains(contentType) || (null != checker && !checker.isValid(contentType))) {
+        if (isEmpty(contentType) || INVALIDS.contains(contentType) || (null != checker && !checker.isValid(contentType))) {
             // Determine Content-Type by file name
             contentType = MimeType2ExtMap.getContentType(fileHolder.getName());
         }

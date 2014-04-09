@@ -84,7 +84,7 @@ public class AllParser extends AbstractAJAXParser<AllResponse> {
             metadata.setFilename(json.getString(3));
             metadata.setFilesize(json.getLong(4));
             metadata.setFileMIMEType(json.getString(5));
-            metadata.setRtfFlag(json.getBoolean(6));
+            metadata.setRtfFlag(Boolean.parseBoolean(json.getString(6)));
             attachments.add(metadata);
         }
         res.setAttachments(attachments);

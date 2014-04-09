@@ -74,7 +74,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
  */
 public abstract class OXCommonImpl {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXCommonImpl.class);
+    private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXCommonImpl.class);
 
     protected final OXToolStorageInterface tool;
 
@@ -85,7 +85,7 @@ public abstract class OXCommonImpl {
     protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
         if (null == ctx || null == ctx.getId()) {
             final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");
-            log.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
     }
@@ -158,7 +158,7 @@ public abstract class OXCommonImpl {
         }
         if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
             final DatabaseUpdateException e = new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
-            log.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             throw e;
         }
     }

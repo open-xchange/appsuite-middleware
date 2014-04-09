@@ -166,22 +166,27 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // List of supported facets
         final List<Facet> facets = new LinkedList<Facet>();
 
-        // Add field factes
-        {
-            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix), Constants.FIELD_FILE_NAME, prefix);
-            facets.add(fileNameFacet);
+        if (!prefix.isEmpty()) {
+            // Add field factes
+            {
+                final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(
+                    DriveStrings.SEARCH_IN_FILE_NAME,
+                    prefix), Constants.FIELD_FILE_NAME, prefix);
+                facets.add(fileNameFacet);
+            }
+            {
+                final Facet fileDescFacet = new FieldFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(
+                    DriveStrings.SEARCH_IN_FILE_DESC,
+                    prefix), Constants.FIELD_FILE_DESC, prefix);
+                facets.add(fileDescFacet);
+            }
+            {
+                final Facet fileContentFacet = new FieldFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(
+                    DriveStrings.SEARCH_IN_FILE_CONTENT,
+                    prefix), Constants.FIELD_FILE_CONTENT, prefix);
+                facets.add(fileContentFacet);
+            }
         }
-
-        {
-            final Facet fileDescFacet = new FieldFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix), Constants.FIELD_FILE_DESC, prefix);
-            facets.add(fileDescFacet);
-        }
-
-        {
-            final Facet fileContentFacet = new FieldFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix), Constants.FIELD_FILE_CONTENT, prefix);
-            facets.add(fileContentFacet);
-        }
-
         // Add static file type facet
         {
             final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);

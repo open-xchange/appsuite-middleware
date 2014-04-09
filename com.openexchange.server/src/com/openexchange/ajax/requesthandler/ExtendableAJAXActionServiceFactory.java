@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 
 
@@ -57,6 +58,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
+ * @see ExtendableAJAXFactoryTracker
  */
 public interface ExtendableAJAXActionServiceFactory extends AJAXActionServiceFactory {
 
@@ -65,7 +67,7 @@ public interface ExtendableAJAXActionServiceFactory extends AJAXActionServiceFac
      *
      * @return The module identifier
      */
-    String getModule();
+    @NonNull String getModule();
 
     /**
      * Adds specified action to this factory.
@@ -73,6 +75,6 @@ public interface ExtendableAJAXActionServiceFactory extends AJAXActionServiceFac
      * @param action The new action to add
      * @throws OXException If action cannot be added
      */
-    void addAction(AJAXActionService action) throws OXException;
+    void addAction(@NonNull AJAXActionService action) throws OXException;
 
 }

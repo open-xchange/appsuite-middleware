@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
@@ -73,9 +74,9 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
-import com.openexchange.find.drive.FileDisplayItem;
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.drive.FileSizeDisplayItem.Size;
@@ -83,6 +84,7 @@ import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
 import com.openexchange.groupware.container.FolderObject;
@@ -262,61 +264,26 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
     @Override
     protected AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
 
+        String prefix = autocompleteRequest.getPrefix();
+
         // List of supported facets
         final List<Facet> facets = new LinkedList<Facet>();
 
-//        List<FacetValue> fileNameFacet = new ArrayList<FacetValue>();
-//        List<FacetValue> fileDescriptionFacet = new ArrayList<FacetValue>();
-//        List<FacetValue> fileContentFacet = new ArrayList<FacetValue>();
-//      List<DocumentMetadata> docs = getAutocompleteFiles(session, autocompleteRequest);
-//        String fileNameId = DriveFacetType.FILE_NAME.getId();
-//        String fileDescriptionId = DriveFacetType.FILE_DESCRIPTION.getId();
-//        String fileContentId = DriveFacetType.FILE_CONTENT.getId();
-//        for (DocumentMetadata doc : docs) {
-//            Filter fileNameFilter = new Filter(Collections.singletonList(fileNameId), String.valueOf(doc.getId()));
-//            Filter fileDescriptionFilter = new Filter(Collections.singletonList(fileDescriptionId), String.valueOf(doc.getId()));
-//            Filter fileContentFilter = new Filter(Collections.singletonList(fileContentId), String.valueOf(doc.getId()));
-//            String fileName = doc.getFileName();
-//            if (null != fileName) {
-//                fileNameFacet.add(new FacetValue(
-//                    prepareFacetValueId(fileNameId, session.getContextId(), String.valueOf(doc.getId())),
-//                    new SimpleDisplayItem(fileName, false),
-//                    1,
-//                    fileNameFilter));
-//            }
-//            String description = doc.getDescription();
-//            if (null != description) {
-//                fileDescriptionFacet.add(new FacetValue(prepareFacetValueId(
-//                    fileDescriptionId,
-//                    session.getContextId(),
-//                    String.valueOf(doc.getId())), new SimpleDisplayItem(description, false), 1, fileDescriptionFilter));
-//            }
-//            String content = doc.getContent();
-//            if (null != content) {
-//                fileContentFacet.add(new FacetValue(
-//                    prepareFacetValueId(fileContentId, session.getContextId(), String.valueOf(doc.getId())),
-//                    new SimpleDisplayItem(content, false),
-//                    1,
-//                    fileContentFilter));
-//            }
-//        }
-
-        // Add field factes
-        List<FacetValue> fieldFacets = new ArrayList<FacetValue>();
-        FacetValue filename = new FacetValue(FileDisplayItem.Type.FILENAME.getIdentifier(),
-            new FileDisplayItem(FileDisplayItem.Type.FILENAME, DriveStrings.FACET_FILE_NAME), FacetValue.UNKNOWN_COUNT,
-            new Filter(Collections.singletonList(Constants.FIELD_FILE_NAME), FileDisplayItem.Type.FILENAME.getIdentifier()));
-        FacetValue description = new FacetValue(FileDisplayItem.Type.DESCRIPTION.getIdentifier(),
-            new FileDisplayItem(FileDisplayItem.Type.DESCRIPTION, DriveStrings.FACET_FILE_DESCRIPTION), FacetValue.UNKNOWN_COUNT,
-            new Filter(Collections.singletonList(Constants.FIELD_FILE_DESC), FileDisplayItem.Type.DESCRIPTION.getIdentifier()));
-        FacetValue content = new FacetValue(FileDisplayItem.Type.CONTENT.getIdentifier(),
-            new FileDisplayItem(FileDisplayItem.Type.CONTENT, DriveStrings.FACET_FILE_CONTENT), FacetValue.UNKNOWN_COUNT,
-            new Filter(Collections.singletonList(Constants.FIELD_FILE_CONTENT), FileDisplayItem.Type.CONTENT.getIdentifier()));
-        fieldFacets.add(filename);
-        fieldFacets.add(description);
-        fieldFacets.add(content);
-        facets.add(new Facet(DriveFacetType.FILE_NAME, fieldFacets));
-
+        if (!prefix.isEmpty()) {
+            // Add field factes
+            FieldFacet filenameFacet = new FieldFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(
+                DriveStrings.SEARCH_IN_FILE_NAME,
+                prefix), Field.FILENAME.getName(), prefix);
+            FieldFacet descriptionFacet = new FieldFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(
+                DriveStrings.SEARCH_IN_FILE_DESC,
+                prefix), Field.DESCRIPTION.getName(), prefix);
+            FieldFacet contentFacet = new FieldFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(
+                DriveStrings.SEARCH_IN_FILE_CONTENT,
+                prefix), Field.CONTENT.getName(), prefix);
+            facets.add(filenameFacet);
+            facets.add(descriptionFacet);
+            facets.add(contentFacet);
+        }
         // Add static file type facet
         final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
         final String fieldFileType = Constants.FIELD_FILE_TYPE;
@@ -372,26 +339,26 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         // Add static file size facet
         List<FacetValue> fileSize = new ArrayList<FacetValue>(5);
         String fieldFileSize = Constants.FIELD_FILE_SIZE;
-        fileSize.add(new FacetValue(
-            FileSizeDisplayItem.Size.MB1.getSize(),
-            new FileSizeDisplayItem(DriveStrings.FACET_FILE_SIZE, Size.MB1),
-            FacetValue.UNKNOWN_COUNT,
-            new Filter(Collections.singletonList(fieldFileSize), FileSizeDisplayItem.Size.MB1.getSize())));
+        fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB1.getSize(), new FileSizeDisplayItem(
+            Size.MB1.getSize(),
+            Size.MB1), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldFileSize),
+                FileSizeDisplayItem.Size.MB1.getSize())));
         fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB10.getSize(), new FileSizeDisplayItem(
-            DriveStrings.FACET_FILE_SIZE,
+            Size.MB10.getSize(),
             Size.MB10), FacetValue.UNKNOWN_COUNT, new Filter(
             Collections.singletonList(fieldFileSize),
             FileSizeDisplayItem.Size.MB10.getSize())));
         fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB100.getSize(), new FileSizeDisplayItem(
-            DriveStrings.FACET_FILE_SIZE,
+            Size.MB100.getSize(),
             Size.MB100), FacetValue.UNKNOWN_COUNT, new Filter(
             Collections.singletonList(fieldFileSize),
             FileSizeDisplayItem.Size.MB100.getSize())));
-        fileSize.add(new FacetValue(
-            FileSizeDisplayItem.Size.GB1.getSize(),
-            new FileSizeDisplayItem(DriveStrings.FACET_FILE_SIZE, Size.GB1),
-            FacetValue.UNKNOWN_COUNT,
-            new Filter(Collections.singletonList(fieldFileSize), FileSizeDisplayItem.Size.GB1.getSize())));
+        fileSize.add(new FacetValue(FileSizeDisplayItem.Size.GB1.getSize(), new FileSizeDisplayItem(
+            Size.GB1.getSize(),
+            Size.GB1), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldFileSize),
+                FileSizeDisplayItem.Size.GB1.getSize())));
         Facet fileSizeFacet = new Facet(DriveFacetType.FILE_SIZE, fileSize);
         facets.add(fileSizeFacet);
 
@@ -434,47 +401,5 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         }
         return new AndTerm(terms);
     }
-
-//    private List<DocumentMetadata> getAutocompleteFiles(ServerSession session, AutocompleteRequest request) throws OXException {
-//        InfostoreSearchEngine searchEngine = Services.getInfostoreSearchEngine();
-//        if (null == searchEngine) {
-//            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreSearchEngine.class.getName());
-//        }
-//
-//        // Compose term
-//        String prefix = request.getPrefix();
-//        int limit = request.getLimit();
-//        List<SearchTerm<?>> terms = new LinkedList<SearchTerm<?>>();
-//        terms.add(new TitleTerm(prefix, true, true));
-//        terms.add(new FileNameTerm(prefix, true, true));
-//        terms.add(new DescriptionTerm(prefix, true, true));
-//        SearchTerm<List<SearchTerm<?>>> orTerm = new OrTerm(terms);
-//        ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
-//        orTerm.visit(visitor);
-//
-//        // Fire search
-//        SearchIterator<DocumentMetadata> it = null;
-//        try {
-//            it = searchEngine.search(
-//                new int[0],
-//                visitor.getInfstoreTerm(),
-//                fields,
-//                Metadata.TITLE_LITERAL,
-//                0,
-//                0,
-//                limit,
-//                session.getContext(),
-//                session.getUser(),
-//                session.getUserPermissionBits());
-//            List<DocumentMetadata> docs = new LinkedList<DocumentMetadata>();
-//            while (it.hasNext()) {
-//                DocumentMetadata doc = it.next();
-//                docs.add(doc);
-//            }
-//            return docs;
-//        } finally {
-//            SearchIterators.close(it);
-//        }
-//    }
 
 }

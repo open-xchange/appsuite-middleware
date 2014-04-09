@@ -51,9 +51,11 @@ package com.openexchange.ajax.xing;
 
 import java.io.IOException;
 import java.util.UUID;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.xing.actions.ChangeStatusRequest;
 import com.openexchange.ajax.xing.actions.ChangeStatusResponse;
@@ -69,7 +71,6 @@ import com.openexchange.ajax.xing.actions.GetLikesRequest;
 import com.openexchange.ajax.xing.actions.GetLikesResponse;
 import com.openexchange.ajax.xing.actions.LikeActivityRequest;
 import com.openexchange.ajax.xing.actions.LikeActivityResponse;
-import com.openexchange.ajax.xing.actions.NewsFeedRequest;
 import com.openexchange.ajax.xing.actions.ShareActivityRequest;
 import com.openexchange.ajax.xing.actions.ShareActivityResponse;
 import com.openexchange.ajax.xing.actions.ShareLinkRequest;
@@ -78,6 +79,7 @@ import com.openexchange.ajax.xing.actions.ShowActivityRequest;
 import com.openexchange.ajax.xing.actions.ShowActivityResponse;
 import com.openexchange.ajax.xing.actions.UnlikeActivityRequest;
 import com.openexchange.ajax.xing.actions.UnlikeActivityResponse;
+import com.openexchange.ajax.xing.actions.UserFeedRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.xing.UserField;
 
@@ -88,9 +90,11 @@ import com.openexchange.xing.UserField;
  */
 public class ActivityTest extends AbstractAJAXSession {
 
+	private final String XING_OWNER = "dimitribronkowitsch@googlemail.com";
+	
     /**
      * Initializes a new {@link ActivityTest}.
-     * 
+     *
      * @param name
      */
     public ActivityTest(String name) {
@@ -99,7 +103,7 @@ public class ActivityTest extends AbstractAJAXSession {
 
     /**
      * Test like an activity
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -122,7 +126,7 @@ public class ActivityTest extends AbstractAJAXSession {
 
     /**
      * Tests to create, show and delete an activity stream
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -131,19 +135,19 @@ public class ActivityTest extends AbstractAJAXSession {
         final ChangeStatusRequest createRequest = new ChangeStatusRequest("My new status", true);
         final ChangeStatusResponse createResponse = client.execute(createRequest);
         assertNotNull(createResponse);
-        deleteActivity();
+        deleteActivity(false);
     }
 
 
     /**
      * Tests the show activity action with user fields
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
     public void testShowActivityWithUserFields() throws OXException, IOException, JSONException {
-        JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
+        JSONObject json = (JSONObject) client.execute(new UserFeedRequest(XING_OWNER, -1, -1, new int[0], true)).getData();
         String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
         final int[] uf = { UserField.FIRST_NAME.ordinal(), UserField.LAST_NAME.ordinal(), UserField.DISPLAY_NAME.ordinal() };
         final ShowActivityRequest request = new ShowActivityRequest(activityId, uf, true);
@@ -153,13 +157,13 @@ public class ActivityTest extends AbstractAJAXSession {
 
     /**
      * Tests the show activity action
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
     public void testShowActivity() throws OXException, IOException, JSONException {
-        JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
+        JSONObject json = (JSONObject) client.execute(new UserFeedRequest(XING_OWNER, -1, -1, new int[0], true)).getData();
         String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
         final ShowActivityRequest request = new ShowActivityRequest(activityId, new int[0], true);
         final ShowActivityResponse response = client.execute(request);
@@ -168,13 +172,24 @@ public class ActivityTest extends AbstractAJAXSession {
 
     /**
      * Tests the delete activity action
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
     private void deleteActivity() throws OXException, IOException, JSONException {
-        JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
+        deleteActivity(true);
+    }
+
+    /**
+     * Tests the delete activity action
+     *
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    private void deleteActivity(boolean failOnError) throws OXException, IOException, JSONException {
+        JSONObject json = (JSONObject) client.execute(new UserFeedRequest(XING_OWNER, -1, -1, new int[0], true)).getData();
         String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
         final DeleteActivityRequest request = new DeleteActivityRequest(activityId, true);
         final DeleteActivityResponse response = client.execute(request);
@@ -183,7 +198,7 @@ public class ActivityTest extends AbstractAJAXSession {
 
     /**
      * Test to share a link on activity stream; also delete this activity
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -193,27 +208,35 @@ public class ActivityTest extends AbstractAJAXSession {
         final ShareLinkResponse response = client.execute(request);
         assertNotNull(response);
         assertTrue((Boolean) response.getData());
-        deleteActivity();
+        deleteActivity(false);
     }
 
     /**
      * Test to share an activity; also delete this activity
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
      */
     public void testShareActivityAndDelete() throws OXException, IOException, JSONException {
         final String activityId = getActivityIdContainingPermission("SHARE");
-        final ShareActivityRequest request = new ShareActivityRequest(activityId, "My shared activity", true);
+        final ShareActivityRequest request = new ShareActivityRequest(activityId, "My shared activity", false);
         final ShareActivityResponse response = client.execute(request);
         assertNotNull(response);
-        deleteActivity();
+
+        if (response.hasError()) {
+            final OXException exc = response.getException();
+            if (!"XING".equals(exc.getPrefix()) || 2 != exc.getCode()) {
+                fail(exc.getMessage());
+            }
+        }
+
+        deleteActivity(false);
     }
 
     /**
      * Tests the action to create, delete an get comment on an activity
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -225,21 +248,24 @@ public class ActivityTest extends AbstractAJAXSession {
         final CommentActivityResponse createResponse = client.execute(createRequest);
         assertNotNull(createResponse);
         // Begin get comment
-        JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
+        JSONObject json = (JSONObject) client.execute(new UserFeedRequest(XING_OWNER, -1, -1, new int[0], true)).getData();
         final GetCommentsRequest getRequest = new GetCommentsRequest(activityId, -1, -1, new int[0], true);
         final GetCommentsResponse getResponse = client.execute(getRequest);
         assertNotNull(getResponse);
-        // Begin delete comment
-        String commentId = json.getJSONArray("network_activities").getJSONObject(0).getJSONObject("comments").getJSONArray(
-            "latest_comments").getJSONObject(0).getString("id");
-        final DeleteCommentRequest deleteRequest = new DeleteCommentRequest(activityId, commentId, true);
-        final DeleteCommentResponse deleteResponse = client.execute(deleteRequest);
-        assertNotNull(deleteResponse);
+        // Begin delete comment - only delete if comments are available
+        int commentAmount =json.getJSONArray("network_activities").getJSONObject(0).getJSONObject("comments").getInt("amount");
+        if(commentAmount > 0) {
+        	String commentId = json.getJSONArray("network_activities").getJSONObject(0).getJSONObject("comments").getJSONArray(
+        			"latest_comments").getJSONObject(0).getString("id");
+        	final DeleteCommentRequest deleteRequest = new DeleteCommentRequest(activityId, commentId, false);
+        	final DeleteCommentResponse deleteResponse = client.execute(deleteRequest);
+        	assertNotNull(deleteResponse);
+        }
     }
 
     /**
      * Gets an activityId which contains the needed possible actions.
-     * 
+     *
      * @param permission the permission which should be present. Possible permissions are COMMENT, LIKE, SHARE or IGNORE
      * @return an activity id containing the permission
      * @throws OXException
@@ -247,7 +273,7 @@ public class ActivityTest extends AbstractAJAXSession {
      * @throws JSONException
      */
     private String getActivityIdContainingPermission(final String permission) throws OXException, IOException, JSONException {
-        JSONObject json = (JSONObject) client.execute(new NewsFeedRequest(false, -1, -1, new int[0], true)).getData();
+        JSONObject json = (JSONObject) client.execute(new UserFeedRequest(XING_OWNER, -1, -1, new int[0], true)).getData();
         JSONArray networkActivities = json.getJSONArray("network_activities");
         assertNotNull(networkActivities);
 
@@ -255,8 +281,8 @@ public class ActivityTest extends AbstractAJAXSession {
         boolean found = false;
         for (int i = 0; i < networkActivities.length(); i++) {
             JSONObject activity = (JSONObject) networkActivities.get(i);
-            assertTrue(activity.hasAndNotNull("ids"));
-            assertTrue(activity.hasAndNotNull("possible_actions"));
+            assertTrue("Attribute \"ids\" not found", activity.hasAndNotNull("ids"));
+            assertTrue("Attribute \"possible_actions\" not found", activity.hasAndNotNull("possible_actions"));
             JSONArray possibleActionsJSON = activity.getJSONArray("possible_actions");
             for (int j = 0; j < possibleActionsJSON.length(); j++) {
                 String possibleActionObj = (String) possibleActionsJSON.get(j);

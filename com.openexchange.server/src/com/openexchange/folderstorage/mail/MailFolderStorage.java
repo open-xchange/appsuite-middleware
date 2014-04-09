@@ -476,8 +476,7 @@ public final class MailFolderStorage implements FolderStorage {
                     final MailPermission[] parentPermissions = parent.getPermissions();
                     final List<MailPermission> mailPermissions = new ArrayList<MailPermission>();
                     final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
-                    for (int i = 0; i < parentPermissions.length; i++) {
-                        final MailPermission parentPerm = parentPermissions[i];
+                    for (final MailPermission parentPerm : parentPermissions) {
                         final MailPermission mailPerm = provider.createNewMailPermission(session, accountId);
                         mailPerm.setEntity(parentPerm.getEntity());
                         mailPerm.setAllPermission(
@@ -561,8 +560,8 @@ public final class MailFolderStorage implements FolderStorage {
 
                 if (doIt) {
                     final MailFolder[] subf = mailAccess.getFolderStorage().getSubfolders(fullname, true);
-                    for (int i = 0; i < subf.length; i++) {
-                        final String subFullname = subf[i].getFullname();
+                    for (MailFolder element : subf) {
+                        final String subFullname = element.getFullname();
                         mailAccess.getFolderStorage().deleteFolder(subFullname, true);
                         postEvent(accountId, subFullname, false, true, storageParameters);
                     }
@@ -1283,7 +1282,7 @@ public final class MailFolderStorage implements FolderStorage {
                                     child.setName(StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_HAM));
                                 }
                             }
-                         }
+                        }
                     }
                 }
             }
@@ -1917,7 +1916,7 @@ public final class MailFolderStorage implements FolderStorage {
     private final static String INVALID = "<>"; // "()<>;\".[]";
 
     private static void checkFolderName(final String name) throws OXException {
-        if (isEmpty(name)) {
+        if (com.openexchange.java.Strings.isEmpty(name)) {
             throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
         }
         final int length = name.length();
@@ -1927,17 +1926,4 @@ public final class MailFolderStorage implements FolderStorage {
             }
         }
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

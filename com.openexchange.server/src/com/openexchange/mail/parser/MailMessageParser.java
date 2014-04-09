@@ -312,11 +312,17 @@ public final class MailMessageParser {
         } catch (final IOException e) {
             final String mailId = mail.getMailId();
             final String folder = mail.getFolder();
-            throw
-                MailExceptionCode.UNREADBALE_PART_CONTENT.create(
-                e,
-                null == mailId ? "" : mailId,
-                null == folder ? "" : folder);
+            throw MailExceptionCode.UNREADBALE_PART_CONTENT.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
+        } catch (final OXException e) {
+            if (MailExceptionCode.INVALID_MULTIPART_CONTENT.equals(e)) {
+                // Strange multipart...
+                final String mailId = mail.getMailId();
+                final String folder = mail.getFolder();
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Invalid multipart detected ''{}'' ({}-{}-{}):{}{}", e.getMessage(),  null == mailId ? "" : mailId, null == folder ? "" : folder, mail.getAccountId(), System.getProperty("line.separator"), mail.getSource());
+                }
+            }
+            throw e;
         } finally {
             LogProperties.removeProperty(LogProperties.Name.MAIL_ACCOUNT_ID);
             LogProperties.removeProperty(LogProperties.Name.MAIL_MAIL_ID);

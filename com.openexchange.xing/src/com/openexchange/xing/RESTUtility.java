@@ -120,7 +120,7 @@ public class RESTUtility {
     public static enum Method {
         GET, POST, PUT, DELETE;
     }
-    
+
     /**
      * Creates and sends a basic request to the XING API, without building the url, parses the response as JSON, and returns the result.
      * 
@@ -142,7 +142,7 @@ public class RESTUtility {
             }
             req = put;
         }
-            break;
+        break;
         case POST: {
             final HttpPost post = new HttpPost(url);
             if (null != requestInformation) {
@@ -150,7 +150,7 @@ public class RESTUtility {
             }
             req = post;
         }
-            break;
+        break;
         case GET:
             req = new HttpGet(url);
             break;
@@ -353,23 +353,23 @@ public class RESTUtility {
         final HttpRequestBase req;
         switch (method) {
         case PUT:
-            {
-                final HttpPut put = new HttpPut(buildURL(host, apiVersion, path, params));
-                if (null != requestInformation) {
-                    put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
-                }
-                req = put;
+        {
+            final HttpPut put = new HttpPut(buildURL(host, apiVersion, path, params));
+            if (null != requestInformation) {
+                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
             }
-            break;
+            req = put;
+        }
+        break;
         case POST:
-            {
-                final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
-                if (null != requestInformation) {
-                    post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), requestInformation.toString().length(), ContentType.APPLICATION_JSON));
-                }
-                req = post;
+        {
+            final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
+            if (null != requestInformation) {
+                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), requestInformation.toString().length(), ContentType.APPLICATION_JSON));
             }
-            break;
+            req = post;
+        }
+        break;
         case GET:
             req = new HttpGet(buildURL(host, apiVersion, path, params));
             break;
@@ -715,22 +715,9 @@ public class RESTUtility {
      */
     public static final String encodeUrl(String s) {
         try {
-            return isEmpty(s) ? s : URL_CODEC.encode(s);
+            return com.openexchange.java.Strings.isEmpty(s) ? s : URL_CODEC.encode(s);
         } catch (EncoderException e) {
             return s;
         }
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

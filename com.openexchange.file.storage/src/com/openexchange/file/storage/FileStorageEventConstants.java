@@ -81,12 +81,25 @@ public class FileStorageEventConstants {
 
     public static final String ACCOUNT_ID = "accountId";
 
+    /**
+     * The folder ID in it's absolute/unique form, i.e. containing the service/account information.
+     */
     public static final String FOLDER_ID = "folderId";
 
+    /**
+     * The parent folder ID in it's absolute/unique form, i.e. containing the service/account information.
+     */
     public static final String PARENT_FOLDER_ID = "parentFolderId";
 
+    /**
+     * The path to the default folder in an array of folder IDs in their absolute/unique form, i.e. all containing the service/account
+     * information.
+     */
     public static final String FOLDER_PATH = "folderPath";
 
+    /**
+     * The object ID in it's absolute/unique form, i.e. containing the service/account information.
+     */
     public static final String OBJECT_ID = "objectId";
 
     public static final String FILE_NAME = "fileName";

@@ -52,6 +52,7 @@ package com.openexchange.xing.json;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
@@ -64,8 +65,10 @@ import com.openexchange.xing.json.actions.ContactRequestAction;
 import com.openexchange.xing.json.actions.CreateProfileAction;
 import com.openexchange.xing.json.actions.DeleteActivityAction;
 import com.openexchange.xing.json.actions.DeleteCommentActivityAction;
+import com.openexchange.xing.json.actions.FindByMailRequestAction;
 import com.openexchange.xing.json.actions.GetActivityLikesAction;
 import com.openexchange.xing.json.actions.GetCommentsActivityAction;
+import com.openexchange.xing.json.actions.FindByMailsRequestAction;
 import com.openexchange.xing.json.actions.InviteRequestAction;
 import com.openexchange.xing.json.actions.LikeActivityAction;
 import com.openexchange.xing.json.actions.NewsFeedAction;
@@ -92,7 +95,7 @@ public class XingActionFactory implements AJAXActionServiceFactory {
      */
     public XingActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractXingAction>(16);
+        actions = new ConcurrentHashMap<String, AbstractXingAction>(24);
         actions.put("invite", new InviteRequestAction(serviceLookup));
         actions.put("contact_request", new ContactRequestAction(serviceLookup));
         actions.put("revoke_contact_request", new RevokeContactRequestAction(serviceLookup));
@@ -110,6 +113,8 @@ public class XingActionFactory implements AJAXActionServiceFactory {
         actions.put("show_activity", new ShowActivityAction(serviceLookup));
         actions.put("share_activity", new ShareActivityAction(serviceLookup));
         actions.put("delete_activity", new DeleteActivityAction(serviceLookup));
+        actions.put("find_by_mail", new FindByMailRequestAction(serviceLookup));
+        actions.put("find_by_mails", new FindByMailsRequestAction(serviceLookup));
     }
 
     @Override

@@ -49,7 +49,6 @@
 
 package com.openexchange.mailaccount;
 
-import static com.openexchange.java.Strings.isWhitespace;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -186,7 +185,7 @@ public final class MailAccountDescription implements Serializable {
      * @return The reply-to address
      */
     public String getReplyTo() {
-        if (isEmpty(replyTo)) {
+        if (com.openexchange.java.Strings.isEmpty(replyTo)) {
             return properties.get("replyto");
         }
         return replyTo;
@@ -387,7 +386,7 @@ public final class MailAccountDescription implements Serializable {
         if (null != mailServerUrl) {
             return mailServerUrl;
         }
-        if (isEmpty(mailServer)) {
+        if (com.openexchange.java.Strings.isEmpty(mailServer)) {
             return null;
         }
         try {
@@ -522,7 +521,7 @@ public final class MailAccountDescription implements Serializable {
         if (null != transportUrl) {
             return transportUrl;
         }
-        if (isEmpty(transportServer)) {
+        if (com.openexchange.java.Strings.isEmpty(transportServer)) {
             return null;
         }
         final String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
@@ -574,7 +573,7 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setReplyTo(final String replyTo) {
         this.replyTo = replyTo;
-        if (isEmpty(replyTo)) {
+        if (com.openexchange.java.Strings.isEmpty(replyTo)) {
             properties.remove("replyto");
         } else {
             properties.put("replyto", replyTo);
@@ -1031,17 +1030,4 @@ public final class MailAccountDescription implements Serializable {
         }
         return new Object[] { server.subSequence(0, pos), Integer.valueOf(port) };
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

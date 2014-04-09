@@ -101,7 +101,7 @@ public final class Cookies {
      * @return <code>true</code> if considered as part of local LAN; otherwise <code>false</code>
      */
     public static boolean isLocalLan(final String serverName) {
-        if (isEmpty(serverName)) {
+        if (com.openexchange.java.Strings.isEmpty(serverName)) {
             return false;
         }
         return LOCALS.contains(serverName.toLowerCase(Locale.US));
@@ -273,18 +273,6 @@ public final class Cookies {
         }
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     /**
      * Pretty-prints given cookies.
      *
@@ -344,8 +332,7 @@ public final class Cookies {
         }
         final int length = cookies.length;
         m = new LinkedHashMap<String, Cookie>(length);
-        for (int i = 0; i < cookies.length; i++) {
-            final Cookie cookie = cookies[i];
+        for (final Cookie cookie : cookies) {
             m.put(cookie.getName(), cookie);
         }
         req.setAttribute("__cookie.map", m);
@@ -4732,6 +4719,6 @@ public final class Cookies {
         "yt",
         "ng",
         "pm"
-    )));
+        )));
 
 }

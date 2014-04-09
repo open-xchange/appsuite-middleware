@@ -172,8 +172,10 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         final DatabaseService dbService = getDBService();
         if (fitsQuotas(bytes.length)) {
-            // If the resource fits the quotas we store it even if we exceed the quota when storing it.
-            // Removing old cache entries is done asynchronously in the finally block.
+            /*
+             * If the resource fits the quotas we store it even if we exceed the quota when storing it.
+             * Removing old cache entries is done asynchronously in the finally block.
+             */
             final String refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
             final ResourceCacheMetadata newMetadata = new ResourceCacheMetadata();
             newMetadata.setContextId(contextId);
@@ -190,12 +192,23 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             boolean committed = false;
             boolean triggerAlignment = false;
             try {
+                /*
+                 * We have to deal with high concurrency here. Selecting an entry with FOR UPDATE leads to
+                 * a gap lock and causes deadlocks between insertion requests. Therefore we use a double-check
+                 * idiom here. Only if an entry exists we lock it with 'FOR UPDATE'. Updates on existing entries
+                 * should happen rarely and are mostly performed asynchronous so performance should not be a
+                 * big problem.
+                 */
                 Databases.startTransaction(con);
-                existingMetadata = loadExistingEntry(metadataStore, con, contextId, userId, id);
-                if (existingMetadata == null) {
-                    metadataStore.store(con, newMetadata);
+                if (entryExists(metadataStore, con, contextId, userId, id)) {
+                    existingMetadata = loadExistingEntryForUpdate(metadataStore, con, contextId, userId, id);
+                    if (existingMetadata == null) {
+                        metadataStore.store(con, newMetadata);
+                    } else {
+                        metadataStore.update(con, newMetadata);
+                    }
                 } else {
-                    metadataStore.update(con, newMetadata);
+                    metadataStore.store(con, newMetadata);
                 }
 
                 long globalQuota = getGlobalQuota();

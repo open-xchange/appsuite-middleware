@@ -193,7 +193,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * Start conversion
              */
-            return new CIFSFile(fid, id, session.getUserId()).parseSmbFile(smbFile);
+            return new CIFSFile(fid, id, session.getUserId()).parseSmbFile(smbFile, rootUrl);
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
@@ -732,7 +732,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             }
             final List<File> files = new ArrayList<File>(subFiles.length);
             for (final SmbFile subFile : subFiles) {
-                files.add(new CIFSFile(fid, subFile.getName(), session.getUserId()).parseSmbFile(subFile, fields));
+                files.add(new CIFSFile(fid, subFile.getName(), session.getUserId()).parseSmbFile(subFile, fields, rootUrl));
             }
             /*
              * Return list
@@ -797,7 +797,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                      */
                     throw CIFSExceptionCodes.NOT_A_FILE.create(uri);
                 }
-                files.add(new CIFSFile(fid, id.getId(), session.getUserId()).parseSmbFile(smbFile, fields));
+                files.add(new CIFSFile(fid, id.getId(), session.getUserId()).parseSmbFile(smbFile, fields, rootUrl));
             }
             /*
              * Return
@@ -876,7 +876,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 if (subFile.isDirectory()) {
                     recursiveSearchFile(searchTerm, subFile.getPath(), fields, results);
                 } else {
-                    final CIFSFile file = new CIFSFile(folderId, subFile.getName(), session.getUserId()).parseSmbFile(subFile, fields);
+                    final CIFSFile file = new CIFSFile(folderId, subFile.getName(), session.getUserId()).parseSmbFile(subFile, fields, rootUrl);
                     if (searchTerm.matches(file)) {
                         results.add(file);
                     }
@@ -1015,7 +1015,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 if (subFile.isDirectory()) {
                     recursiveSearchFile(pattern, subFile.getPath(), fields, results);
                 } else {
-                    final CIFSFile file = new CIFSFile(folderId, subFile.getName(), session.getUserId()).parseSmbFile(subFile, fields);
+                    final CIFSFile file = new CIFSFile(folderId, subFile.getName(), session.getUserId()).parseSmbFile(subFile, fields, rootUrl);
                     if (file.matches(pattern)) {
                         results.add(file);
                     }

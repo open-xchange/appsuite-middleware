@@ -50,6 +50,7 @@
 package com.openexchange.groupware.attach.impl;
 
 import java.util.List;
+import com.google.common.base.Strings;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
@@ -145,8 +146,13 @@ public class AttachmentQueryCatalog {
     }
 
     public void appendColumnList(final StringBuilder select, final AttachmentField[] columns) {
+        appendColumnListWithPrefix(select, columns, null);
+    }
+    
+    public void appendColumnListWithPrefix(final StringBuilder select, final AttachmentField[] columns, String prefix) {
+        prefix = Strings.isNullOrEmpty(prefix) ? "" : prefix + ".";
         for(final AttachmentField field : columns ) {
-            select.append(field.getName());
+            select.append(prefix).append(field);
             select.append(',');
         }
         select.setLength(select.length()-1);

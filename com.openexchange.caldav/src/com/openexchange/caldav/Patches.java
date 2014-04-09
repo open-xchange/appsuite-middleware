@@ -517,14 +517,19 @@ public class Patches {
 
         /**
          * Adjusts the appointment's alarm property. Based on the folder type, the alarm is overridden with the configured alarm of the
-         * user in case it is a shared or public folder and the user participates, otherwise the alarm is removed. No changes are done
-         * if the folder is a private one.
+         * user in case it is a public folder and the user participates, otherwise the alarm is removed. No changes are done if the
+         * folder is a private one.
          *
          * @param folder The parent folder of the appointment
          * @param appointment The appointment
          */
         public static void adjustAlarm(UserizedFolder folder, Appointment appointment) {
-            if (PublicType.getInstance().equals(folder.getType()) || SharedType.getInstance().equals(folder.getType())) {
+            if (SharedType.getInstance().equals(folder.getType())) {
+                /*
+                 * remove alarm, since user has the appointment in his personal folder, too
+                 */
+                appointment.removeAlarm();
+            } else if (PublicType.getInstance().equals(folder.getType())) {
                 /*
                  * remove alarm by default
                  */

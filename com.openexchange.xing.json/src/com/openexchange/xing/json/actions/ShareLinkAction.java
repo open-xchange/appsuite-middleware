@@ -70,35 +70,36 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public final class ShareLinkAction extends AbstractXingAction {
 
-    /**
-     * Initializes a new {@link ShareLinkAction}.
-     */
-    public ShareLinkAction(final ServiceLookup services) {
-        super(services);
-    }
+	/**
+	 * Initializes a new {@link ShareLinkAction}.
+	 */
+	public ShareLinkAction(final ServiceLookup services) {
+		super(services);
+	}
 
-    @Override
-    protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-        String url = getMandatoryStringParameter(req, "url");
-        try {
-            url = URLEncoder.encode(url, "ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            // Ignore
-        }
+	@Override
+	protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
+		String url = getMandatoryStringParameter(req, "url");
+		try {
+			url = URLEncoder.encode(url, "ISO-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			// Ignore
+		}
 
-        String token = req.getParameter("testToken");
-        String secret = req.getParameter("testSecret");
-        final XingOAuthAccess xingOAuthAccess;
+		String token = req.getParameter("testToken");
+		String secret = req.getParameter("testSecret");
+		final XingOAuthAccess xingOAuthAccess;
+		{
+			if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+				xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
+			} else {
+				xingOAuthAccess = getXingOAuthAccess(req);
+			}
+		}
+		XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+		xingAPI.shareLink(url);
 
-        if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-            xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
-        } else {
-            xingOAuthAccess = getXingOAuthAccess(req);
-        }
-        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        xingAPI.shareLink(url);
-
-        return new AJAXRequestResult(Boolean.TRUE, "native");
-    }
+		return new AJAXRequestResult(Boolean.TRUE, "native");
+	}
 
 }

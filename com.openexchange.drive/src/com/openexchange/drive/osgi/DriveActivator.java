@@ -60,6 +60,8 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.checksum.events.ChecksumEventListener;
+import com.openexchange.drive.checksum.events.DelayedChecksumEventListener;
+import com.openexchange.drive.checksum.rdb.DirectoryChecksumsAddUserColumnTask;
 import com.openexchange.drive.checksum.rdb.DriveCreateTableService;
 import com.openexchange.drive.checksum.rdb.DriveCreateTableTask;
 import com.openexchange.drive.checksum.rdb.DriveDeleteListener;
@@ -115,20 +117,23 @@ public class DriveActivator extends HousekeepingActivator {
          */
         registerService(DriveService.class, new ThrottlingDriveService(new DriveServiceImpl()));
         registerService(CreateTableService.class, new DriveCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveCreateTableTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
+            new DriveCreateTableTask(), new DirectoryChecksumsAddUserColumnTask()));
         registerService(DeleteListener.class, new DriveDeleteListener());
         /*
          * register event handler
          */
         Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, ChecksumEventListener.getHandledTopics());
-        registerService(EventHandler.class, new ChecksumEventListener(), serviceProperties);
+        registerService(EventHandler.class, DelayedChecksumEventListener.getInstance(), serviceProperties);
+        DelayedChecksumEventListener.getInstance().start();
     }
 
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: \"com.openexchange.drive\"");
         BucketInputStream.setTokenBucket(null);
+        DelayedChecksumEventListener.getInstance().stop();
         DriveConfig.getInstance().stop();
         DriveServiceLookup.set(null);
         super.stopBundle();

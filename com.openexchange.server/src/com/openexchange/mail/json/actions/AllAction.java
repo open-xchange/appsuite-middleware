@@ -247,9 +247,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     fromToIndices = new int[] {start,end};
                 }
             }
-            final boolean unseen = req.optBool("unseen");
+            final boolean ignoreSeen = req.optBool("unseen");
             final boolean ignoreDeleted = !req.optBool("deleted", true);
-            final boolean filterApplied = (unseen || ignoreDeleted);
+            final boolean filterApplied = (ignoreSeen || ignoreDeleted);
             if (filterApplied) {
                 // Ensure flags is contained in provided columns
                 final int fieldFlags = MailListField.FLAGS.getField();
@@ -298,7 +298,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
-                        if (null != mm && (!unseen || !mm.isSeen()) && (!ignoreDeleted || !mm.isDeleted())) {
+                        if (!discardMail(mm, ignoreSeen, ignoreDeleted)) {
                             if (!mm.containsAccountId()) {
                                 mm.setAccountId(mailInterface.getAccountID());
                             }
@@ -314,7 +314,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mm = it.next();
-                        if (null != mm && (!unseen || !mm.isSeen()) && (!ignoreDeleted || !mm.isDeleted())) {
+                        if (!discardMail(mm, ignoreSeen, ignoreDeleted)) {
                             if (!mm.containsAccountId()) {
                                 mm.setAccountId(mailInterface.getAccountID());
                             }

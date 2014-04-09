@@ -83,7 +83,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -840,7 +839,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     /*
                      * Check if HTML is empty or has an empty body section
                      */
-                    if ((isEmpty(htmlContent) || (htmlContent.length() < 1024 && hasNoImage(htmlContent) && isEmpty(html2text(htmlContent)))) && plainText != null) {
+                    if ((com.openexchange.java.Strings.isEmpty(htmlContent) || (htmlContent.length() < 1024 && hasNoImage(htmlContent) && com.openexchange.java.Strings.isEmpty(html2text(htmlContent)))) && plainText != null) {
                         /*
                          * No text present
                          */
@@ -1021,7 +1020,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
                 }
             } else {
-                final String content = isEmpty(plainTextContentArg) ? "" : HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
+                final String content = com.openexchange.java.Strings.isEmpty(plainTextContentArg) ? "" : HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
                 final JSONObject textObject = asPlainText(id, contentType.getBaseType(), content);
                 if (includePlainText) {
                     textObject.put("plain_text", plainTextContentArg);
@@ -1583,19 +1582,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     private boolean hasNoImage(final String htmlContent) {
         return null == htmlContent || (toLowerCase(htmlContent).indexOf("<img ") < 0);
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /** ASCII-wise to lower-case */

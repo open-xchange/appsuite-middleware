@@ -126,6 +126,29 @@ public class TestServlet extends HttpServlet {
         }
         page.append("</p><p>The content: ").append(saneScriptTags(this.getBody(req)));
         page.append("</p></body>\n</html>");
+
+        /*boolean found = false;
+        {
+            Cookie[] cookies = req.getCookies();
+            if (null != cookies) {
+                for (int i = cookies.length; !found && i-- > 0;) {
+                    Cookie cookie = cookies[i];
+                    if ("check-me".equals(cookie.getName())) {
+                        found = true;
+                        System.out.println("Cookie found!");
+                    }
+                }
+            }
+        }
+
+        if (!found) {
+            Cookie cookie = new Cookie("check-me", "foobariscool");
+            cookie.setPath("/");
+            cookie.setMaxAge(10);
+            resp.addCookie(cookie);
+            System.out.println("Cookie added!");
+        }*/
+
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         resp.setContentLength(output.length);

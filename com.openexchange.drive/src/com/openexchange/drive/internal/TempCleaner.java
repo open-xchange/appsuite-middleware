@@ -215,7 +215,7 @@ public class TempCleaner implements Runnable {
             }
             if (deleteAll) {
                 LOG.debug("Detected all folders ({}) and files ({}) in temp folder being outdated, removing '.drive' folder completely.", foldersToDelete.size(), filesToDelete.size());
-                String folderID = folderAccess.deleteFolder(tempFolder.getId());
+                String folderID = folderAccess.deleteFolder(tempFolder.getId(), true);
                 checksumStore.removeFileChecksumsInFolder(new FolderID(folderID));
                 for (FileStorageFolder folder : foldersToDelete) {
                     FolderID id = new FolderID(folder.getId());
@@ -226,7 +226,7 @@ public class TempCleaner implements Runnable {
                 LOG.debug("Detected {} folder(s) and {} file(s) in temp folder being outdated, cleaning up.", foldersToDelete.size(), filesToDelete.size());
                 for (FileStorageFolder folder : foldersToDelete) {
                     FolderID id = new FolderID(folder.getId());
-                    folderAccess.deleteFolder(folder.getId());
+                    folderAccess.deleteFolder(folder.getId(), true);
                     checksumStore.removeFileChecksumsInFolder(id);
                     checksumStore.removeDirectoryChecksum(id);
                 }
@@ -237,7 +237,7 @@ public class TempCleaner implements Runnable {
                         ids.add(file.getId());
                         sequenceNumber = Math.max(sequenceNumber, file.getSequenceNumber());
                     }
-                    List<String> notDeleted = fileAccess.removeDocument(ids, sequenceNumber);
+                    List<String> notDeleted = fileAccess.removeDocument(ids, sequenceNumber, true);
                     for (File file : filesToDelete) {
                         if (null != notDeleted && notDeleted.contains(file.getId())) {
                             continue;

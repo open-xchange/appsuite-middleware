@@ -1113,8 +1113,8 @@ public abstract class MailMessage extends MailPart {
             this.userFlags = new HashSet<HeaderName>();
             b_userFlags = true;
         }
-        for (int i = 0; i < userFlags.length; i++) {
-            this.userFlags.add(HeaderName.valueOf(userFlags[i]));
+        for (String userFlag : userFlags) {
+            this.userFlags.add(HeaderName.valueOf(userFlag));
         }
     }
 
@@ -1666,17 +1666,4 @@ public abstract class MailMessage extends MailPart {
      * @param unreadMessages The number of unread messages
      */
     public abstract void setUnreadMessages(int unreadMessages);
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

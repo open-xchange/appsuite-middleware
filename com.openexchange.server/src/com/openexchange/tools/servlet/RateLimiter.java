@@ -177,7 +177,7 @@ public final class RateLimiter {
                         return Collections.emptyList();
                     }
                     final String sProviders = service.getProperty("com.openexchange.servlet.maxRateKeyPartProviders");
-                    if (isEmpty(sProviders)) {
+                    if (com.openexchange.java.Strings.isEmpty(sProviders)) {
                         tmp = Collections.emptyList();
                     } else {
                         final List<KeyPartProvider> list = new LinkedList<KeyPartProvider>();
@@ -585,14 +585,14 @@ public final class RateLimiter {
                         final String defaultValue = "\"Open-Xchange .NET HTTP Client*\", \"Open-Xchange USM HTTP Client*\", \"Jakarta Commons-HttpClient*\"";
                         sProviders = service.getProperty("com.openexchange.servlet.maxRateLenientClients", defaultValue);
                     }
-                    if (isEmpty(sProviders)) {
+                    if (com.openexchange.java.Strings.isEmpty(sProviders)) {
                         tmp = Collections.emptyList();
                     } else {
                         final List<UserAgentChecker> list = new LinkedList<UserAgentChecker>();
                         final List<String> startsWiths = new LinkedList<String>();
                         for (final String sChecker : Strings.splitByComma(sProviders)) {
                             String s = unquote(sChecker);
-                            if (!isEmpty(s)) {
+                            if (!com.openexchange.java.Strings.isEmpty(s)) {
                                 s = s.trim();
                                 if (isStartsWith(s)) {
                                     // Starts-with
@@ -645,13 +645,13 @@ public final class RateLimiter {
                         final String defaultValue = "rt, system";
                         sModules = service.getProperty("com.openexchange.servlet.maxRateLenientModules", defaultValue);
                     }
-                    if (isEmpty(sModules)) {
+                    if (com.openexchange.java.Strings.isEmpty(sModules)) {
                         tmp = Collections.emptyList();
                     } else {
                         final Set<String> set = new LinkedHashSet<String>();
                         for (final String sModule : Strings.splitByComma(sModules)) {
                             String s = unquote(sModule);
-                            if (!isEmpty(s)) {
+                            if (!com.openexchange.java.Strings.isEmpty(s)) {
                                 s = toLowerCase(s.trim());
                                 set.add(s);
                             }
@@ -710,19 +710,6 @@ public final class RateLimiter {
         return (s.toString());
     }
 
-    /** Check for an empty string */
-    static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     /** ASCII-wise to lower-case */
     static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
@@ -756,7 +743,7 @@ public final class RateLimiter {
 
     /** Removes single or double quotes from a string if its quoted. */
     private static String unquote(final String s) {
-        if (!isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
+        if (!com.openexchange.java.Strings.isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
             return s.substring(1, s.length() - 1);
         }
         return s;

@@ -369,8 +369,8 @@ public final class MessageParser {
             TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(
                 session.getUserId(),
                 ContextStorage.getStorageContext(session.getContextId())).getTimeZone()),
-            session,
-            accountId);
+                session,
+                accountId);
     }
 
     /**
@@ -784,19 +784,19 @@ public final class MessageParser {
             final JSONObject attachment = attachmentArray.getJSONObject(i);
             final String seqId =
                 attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
-            if (seqId == null || seqId.startsWith(FILE_PREFIX, 0)) {
+                if (seqId == null || seqId.startsWith(FILE_PREFIX, 0)) {
+                    /*
+                     * A file reference
+                     */
+                    continue NextAttachment;
+                }
                 /*
-                 * A file reference
+                 * If MSGREF is defined in attachment itself, the MSGREF's mail is meant to be attached and not a nested attachment
                  */
-                continue NextAttachment;
-            }
-            /*
-             * If MSGREF is defined in attachment itself, the MSGREF's mail is meant to be attached and not a nested attachment
-             */
-            if (!attachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
-                final Object cid = attachment.opt(MailJSONField.CID.getKey());
-                groupedSeqIDs.put(seqId, null == cid ? "" : cid.toString());
-            }
+                if (!attachment.hasAndNotNull(MailJSONField.MSGREF.getKey())) {
+                    final Object cid = attachment.opt(MailJSONField.CID.getKey());
+                    groupedSeqIDs.put(seqId, null == cid ? "" : cid.toString());
+                }
         }
         /*
          * Now load them by message reference
@@ -1006,7 +1006,7 @@ public final class MessageParser {
     }
 
     private static InternetAddress getEmailAddress(final String addrStr) {
-        if (isEmpty(addrStr)) {
+        if (com.openexchange.java.Strings.isEmpty(addrStr)) {
             return null;
         }
         try {
@@ -1050,19 +1050,6 @@ public final class MessageParser {
             return new MailPath(arg.getAccountId(), arg.getFullname(), msgref.getMailID());
         }
         return msgref;
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /** ASCII-wise to lower-case */

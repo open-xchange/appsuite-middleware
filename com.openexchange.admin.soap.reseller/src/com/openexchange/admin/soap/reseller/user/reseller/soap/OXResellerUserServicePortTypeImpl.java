@@ -33,6 +33,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPStringMapMap;
 import com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAccess;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -1344,6 +1345,12 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         if (tmp != null) {
             user.setUserfield20(tmp);
         }
+
+        SOAPStringMapMap userAttributes = soapUser.getUserAttributes();
+        if (null != userAttributes) {
+            user.setUserAttributes(soap2MapMap(userAttributes));
+        }
+
         return user;
     }
 

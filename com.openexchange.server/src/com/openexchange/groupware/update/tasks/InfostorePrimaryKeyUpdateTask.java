@@ -89,8 +89,7 @@ public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
             if (null != foreignKey && !foreignKey.equals("")) {
                 Tools.dropForeignKey(con, INFOSTORE_DOCUMENT, foreignKey);
             }
-
-            if (!Tools.existsPrimaryKey(con, INFOSTORE, new String[] { "cid", "id", "folder_id" })) {
+            if (Tools.hasPrimaryKey(con, INFOSTORE)) {
                 Tools.dropPrimaryKey(con, INFOSTORE);
                 Tools.createPrimaryKey(con, INFOSTORE, new String[] { "cid", "id", "folder_id" });
             }

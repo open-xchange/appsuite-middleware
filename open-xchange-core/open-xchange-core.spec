@@ -867,7 +867,6 @@ EOF
         cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
         rm -f /opt/open-xchange/etc/logback.xml.new $TMPFILE
     fi
-
 fi
 rm -f /opt/open-xchange/etc/file-logging.properties
 if [ -e /opt/open-xchange/etc/log4j.xml ]; then
@@ -998,6 +997,10 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Thu Apr 03 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-04-07
+* Mon Mar 31 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-03-31
 * Wed Mar 19 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-03-21
 * Mon Mar 17 2014 Marcus Klein <marcus.klein@open-xchange.com>

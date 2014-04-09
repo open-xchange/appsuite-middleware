@@ -82,8 +82,8 @@ public final class XingExceptionMessages implements LocalizableStrings {
     // E-Mail address is invalid
     public static final String INVALID_EMAIL_ADDRESS_MSG = "E-Mail address is invalid";
 
-    // Already sent an invitation to E-Mail address
-    public static final String ALREADY_INVITED_MSG = "Already sent an invitation to E-Mail address";
+    // Already sent an invitation to E-Mail address: \"%1$s\"
+    public static final String ALREADY_INVITED_MSG = "Already sent an invitation to E-Mail address: \"%1$s\"";
 
     // The E-Mail address already belongs to a XING user
     public static final String ALREADY_MEMBER_MSG = "The E-Mail address already belongs to a XING user";
@@ -105,6 +105,9 @@ public final class XingExceptionMessages implements LocalizableStrings {
 
     // The status message size exceeds the maximum allowed number of 600 characters.
     public static final String TEXT_MESSAGE_SIZE_EXCEEDED_MSG = "The text message size exceeds the maximum allowed number of 140 characters.";
+
+    // The mandatory parameter \"%1$s\ is missing in the request body.
+    public static final String MANDATORY_PARAMETER_MISSING_MSG = "The mandatory parameter \"%1$s\" is missing in the request body";
 
     /**
      * Initializes a new {@link XingExceptionMessages}.

@@ -430,6 +430,11 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * @throws NamespaceException If <code>alias</code> has been registered.
      */
     private void validateAlias4RegOk(String alias) throws NamespaceException {
+        if (null == alias) {
+            String msg = "Alias must not be null";
+            LOG.warn(msg);
+            throw new NamespaceException(msg);
+        }
         if (!alias.startsWith("/")) {
             // have to start with "/"
             String msg = new StringBuilder(64).append("Invalid alias '").append(alias).append("', have to start with '/'.").toString();

@@ -68,16 +68,16 @@ public final class Constants {
     }
 
     /** The field for file name */
-    public static final String FIELD_FILE_NAME = "file_name";
+    public static final String FIELD_FILE_NAME = "filename";
 
     /** The field for file description */
-    public static final String FIELD_FILE_DESC = "file_description";
+    public static final String FIELD_FILE_DESC = "description";
 
     /** The field for file content */
-    public static final String FIELD_FILE_CONTENT = "file_content";
+    public static final String FIELD_FILE_CONTENT = "content";
 
     /** The field for file MIME type */
-    public static final String FIELD_FILE_TYPE = "file_type";
+    public static final String FIELD_FILE_TYPE = "file_mimetype";
 
     /** The field for file size */
     public static final String FIELD_FILE_SIZE = "file_size";

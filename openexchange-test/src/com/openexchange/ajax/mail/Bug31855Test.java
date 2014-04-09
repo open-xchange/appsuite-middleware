@@ -78,6 +78,8 @@ public class Bug31855Test extends AbstractMailTest {
 
     private UserValues values;
     
+    String[][] fmid;
+    
     public Bug31855Test(final String name) {
         super(name);
     }
@@ -90,6 +92,8 @@ public class Bug31855Test extends AbstractMailTest {
 
     @Override
     protected void tearDown() throws Exception {
+        DeleteRequest req = new DeleteRequest(fmid);
+        client.execute(req);
         super.tearDown();
     }
 
@@ -109,6 +113,7 @@ public class Bug31855Test extends AbstractMailTest {
         final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
         final ImportMailResponse importResp = client.execute(importMailRequest);
         JSONArray json = (JSONArray) importResp.getData();
+        fmid = importResp.getIds();
 
         int err = 0;
         for (int i = 0; i < json.length(); i++) {

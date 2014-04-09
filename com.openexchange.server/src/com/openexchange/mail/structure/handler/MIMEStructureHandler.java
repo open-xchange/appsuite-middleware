@@ -868,7 +868,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                     }
                     for (final InternetAddress internetAddress : internetAddresses) {
                         final String address = IDNA.toIDN(internetAddress.getAddress());
-                        if (!isEmpty(address)) {
+                        if (!com.openexchange.java.Strings.isEmpty(address)) {
                             final JSONObject addressJsonObject = new JSONObject();
                             final String personal = internetAddress.getPersonal();
                             if (null != personal) {
@@ -1078,18 +1078,6 @@ public final class MIMEStructureHandler implements StructureHandler {
     private static interface InputStreamProvider {
 
         InputStream getInputStream() throws IOException;
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static boolean isVCalendar(final String baseContentType) {

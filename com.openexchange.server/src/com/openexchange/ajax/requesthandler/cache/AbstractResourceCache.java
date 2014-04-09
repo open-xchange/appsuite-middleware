@@ -252,6 +252,25 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
     protected static ResourceCacheMetadata loadExistingEntry(ResourceCacheMetadataStore metadataStore, Connection con, int contextId, int userId, String id) throws OXException {
         ResourceCacheMetadata existingMetadata = null;
         try {
+            existingMetadata = metadataStore.load(con, contextId, userId, id);
+        } catch (SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        }
+
+        return existingMetadata;
+    }
+
+    protected static boolean entryExists(ResourceCacheMetadataStore metadataStore, Connection con, int contextId, int userId, String id) throws OXException {
+        try {
+            return metadataStore.exists(con, contextId, userId, id);
+        } catch (SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        }
+    }
+
+    protected static ResourceCacheMetadata loadExistingEntryForUpdate(ResourceCacheMetadataStore metadataStore, Connection con, int contextId, int userId, String id) throws OXException {
+        ResourceCacheMetadata existingMetadata = null;
+        try {
             existingMetadata = metadataStore.loadForUpdate(con, contextId, userId, id);
         } catch (SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());

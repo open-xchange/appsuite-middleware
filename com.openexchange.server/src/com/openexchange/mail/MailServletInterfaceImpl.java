@@ -1396,7 +1396,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                  */
                                 final String subject = mails[i].getSubject();
                                 final String ext = ".eml";
-                                String name = (isEmpty(subject) ? "mail" + (i+1) : saneForFileName(subject)) + ext;
+                                String name = (com.openexchange.java.Strings.isEmpty(subject) ? "mail" + (i + 1) : saneForFileName(subject)) + ext;
                                 final int reslen = name.lastIndexOf('.');
                                 int count = 1;
                                 while (false == names.add(name)) {
@@ -1470,18 +1470,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             }
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     @Override
@@ -2632,7 +2620,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private final static String INVALID = "<>"; // "()<>@,;:\\\".[]";
 
     private static void checkFolderName(final String name) throws OXException {
-        if (isEmpty(name)) {
+        if (com.openexchange.java.Strings.isEmpty(name)) {
             throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
         }
         final int length = name.length();

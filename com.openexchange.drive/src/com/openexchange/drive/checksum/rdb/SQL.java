@@ -88,6 +88,7 @@ public class SQL {
         return "CREATE TABLE directoryChecksums (" +
             "uuid BINARY(16) NOT NULL," +
             "cid INT4 UNSIGNED NOT NULL," +
+            "user INT4 UNSIGNED," +
             "folder VARCHAR(512) NOT NULL," +
             "sequence BIGINT(20) NOT NULL," +
             "checksum BINARY(16) NOT NULL," +
@@ -166,8 +167,8 @@ public class SQL {
         "WHERE cid=? AND checksum=UNHEX(?);";
 
     public static final String INSERT_DIRECTORY_CHECKSUM_STMT =
-        "INSERT INTO directoryChecksums (uuid,cid,folder,sequence,checksum) " +
-        "VALUES (UNHEX(?),?,REVERSE(?),?,UNHEX(?));";
+        "INSERT INTO directoryChecksums (uuid,cid,user,folder,sequence,checksum) " +
+        "VALUES (UNHEX(?),?,?,REVERSE(?),?,UNHEX(?));";
 
     public static final String UPDATE_DIRECTORY_CHECKSUM_STMT =
         "UPDATE directoryChecksums SET folder=REVERSE(?),sequence=?,checksum=UNHEX(?) " +
@@ -231,7 +232,7 @@ public class SQL {
 
     /**
      * SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,checksum FROM directoryChecksums
-     * WHERE cid=? AND REVERSE(folder) IN (...);"
+     * WHERE cid=? AND user=? AND REVERSE(folder) IN (...);"
      * @throws OXException
      */
     public static final String SELECT_DIRECTORY_CHECKSUMS_STMT(FolderID[] folderIDs) throws OXException {
@@ -240,7 +241,7 @@ public class SQL {
         }
         StringBuilder allocator = new StringBuilder();
         allocator.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,LOWER(HEX(checksum)) FROM directoryChecksums ");
-        allocator.append("WHERE cid=? AND REVERSE(folder)");
+        allocator.append("WHERE cid=? AND user=? AND REVERSE(folder)");
         if (1 == folderIDs.length) {
             allocator.append("='").append(escapeFolder(folderIDs[0])).append("';");
         } else {
@@ -324,7 +325,7 @@ public class SQL {
             return null;
         }
         try {
-            return URLEncoder.encode(value, "US-ASCII");
+            return URLEncoder.encode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
@@ -332,7 +333,7 @@ public class SQL {
 
     public static String unescape(String value) throws OXException {
         try {
-            return URLDecoder.decode(value, "US-ASCII");
+            return URLDecoder.decode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }

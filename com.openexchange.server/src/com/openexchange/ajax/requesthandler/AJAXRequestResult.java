@@ -94,27 +94,27 @@ public class AJAXRequestResult {
     public static final AJAXRequestResult EMPTY_REQUEST_RESULT = new AJAXRequestResult() {
 
         @Override
-        public void setResultObject(final Object resultObject) {
+        public void setResultObject(final @Nullable Object resultObject) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
         @Override
-        public void setResultObject(final Object object, final String format) {
+        public void setResultObject(final @Nullable Object object, final @Nullable String format) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
         @Override
-        public void setFormat(final String format) {
+        public void setFormat(final @Nullable String format) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
         @Override
-        public void setTimestamp(final Date timestamp) {
+        public void setTimestamp(final @Nullable Date timestamp) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
         @Override
-        public void setHeader(final String header, final String value) {
+        public void setHeader(final String header, final @Nullable String value) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
@@ -129,22 +129,22 @@ public class AJAXRequestResult {
         }
 
         @Override
-        public AJAXRequestResult setType(final ResultType resultType) {
+        public @NonNull AJAXRequestResult setType(final ResultType resultType) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
         @Override
-        public AJAXRequestResult addWarnings(final java.util.Collection<OXException> warnings) {
+        public @NonNull AJAXRequestResult addWarnings(final @Nullable java.util.Collection<OXException> warnings) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
         @Override
-        public void setParameter(final String name, final Object value) {
+        public void setParameter(final String name, final @Nullable Object value) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         };
 
         @Override
-        public void setResponseProperty(final String name, final Object value) {
+        public void setResponseProperty(final String name, final @Nullable Object value) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         };
 

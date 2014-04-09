@@ -146,6 +146,7 @@ public class ChecksumProvider {
         for (String folderID : folderIDs) {
             fids.add(new FolderID(folderID));
         }
+        int userID = session.getServerSession().getUserId();
         List<DirectoryChecksum> checksums;
         if (false == session.getStorage().supportsFolderSequenceNumbers()) {
             if (null != trace) {
@@ -154,7 +155,7 @@ public class ChecksumProvider {
             checksums = calculateDirectoryChecksums(session, fids);
         } else {
             checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
-            List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(fids);
+            List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(userID, fids);
             List<DirectoryChecksum> updatedChecksums = new ArrayList<DirectoryChecksum>();
             List<DirectoryChecksum> newChecksums = new ArrayList<DirectoryChecksum>();
             Map<String, Long> sequenceNumbers = session.getStorage().getSequenceNumbers(folderIDs);
@@ -179,7 +180,7 @@ public class ChecksumProvider {
                         }
                     }
                 } else {
-                    directoryChecksum = new DirectoryChecksum(folderID, sequenceNumber, calculateMD5(session, folderID));
+                    directoryChecksum = new DirectoryChecksum(userID, folderID, sequenceNumber, calculateMD5(session, folderID));
                     if (null != trace) {
                         trace.append(" Newly calculated: ").append(directoryChecksum).append('\n');
                     }
@@ -216,7 +217,7 @@ public class ChecksumProvider {
     private static List<DirectoryChecksum> calculateDirectoryChecksums(SyncSession session, List<FolderID> folderIDs) throws OXException {
         List<DirectoryChecksum> checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
         for (FolderID folderID : folderIDs) {
-            checksums.add(new DirectoryChecksum(folderID, -1, calculateMD5(session, folderID)));
+            checksums.add(new DirectoryChecksum(session.getServerSession().getUserId(), folderID, -1, calculateMD5(session, folderID)));
         }
         return checksums;
     }

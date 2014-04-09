@@ -396,7 +396,8 @@ public class ConfirmationTest extends CalDAVTest {
         calendar.setTime(appointment.getStartDate());
         calendar.add(Calendar.DAY_OF_YEAR, 5);
         Date exceptionStartDate = calendar.getTime();
-        getManager().confirm(appointment, Appointment.ACCEPT, "ok", 5);
+        appointment.setParentFolderID(getManager().getPrivateFolder());
+        getManager().confirm(appointment, Appointment.ACCEPT, "ok", 6);
         /*
          * verify appointment on server
          */
@@ -437,6 +438,7 @@ public class ConfirmationTest extends CalDAVTest {
         eTags = super.syncCollection(syncToken).getETagsStatusOK();
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         calendarData = super.calendarMultiget(eTags.keySet());
+        iCalResource = assertContains(uid, calendarData);
         assertEquals("no exception found in iCal", 2, iCalResource.getVEvents().size());
         Component seriesVEvent;
         Component exceptionVEvent;

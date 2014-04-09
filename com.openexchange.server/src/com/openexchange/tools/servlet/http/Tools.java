@@ -510,7 +510,7 @@ public final class Tools {
             return defaultLocale;
         }
         String header = request.getHeader(NAME_ACCEPT_LANGUAGE);
-        if (isEmpty(header)) {
+        if (com.openexchange.java.Strings.isEmpty(header)) {
             return defaultLocale;
         }
         int pos = header.indexOf(';');
@@ -596,18 +596,6 @@ public final class Tools {
 
     private static com.openexchange.authentication.Cookie getCookie(final Cookie cookie) {
         return new AuthCookie(cookie);
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static String toLowerCase(final CharSequence chars) {

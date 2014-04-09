@@ -19,6 +19,13 @@
     If this listener will be deleted, ox backend will add it programmatically.
     -->
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
+    
+    <!-- 
+    Adds the required PatternLayouts if not yet done by another Open-Xchange PatternLayoutEncoder. This is 
+    especially required when using SYSLOG appender. If you remove this definition and no PatternLayout can be 
+    found a PARSER_ERROR will be thrown within the log.
+    -->
+    <define name="syslogPatternLayoutActivator" class="com.openexchange.logback.extensions.SyslogPatternLayoutActivator" />
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/var/log/open-xchange/open-xchange.log.0</file>

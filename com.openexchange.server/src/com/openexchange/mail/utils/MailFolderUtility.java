@@ -202,24 +202,6 @@ public final class MailFolderUtility {
             MailProperties.getInstance().getDefaultSeparator()).append(fullname).toString();
     }
 
-    /**
-     * Tests if specified string is empty; either <code>null</code>, zero length, or only consists of white space characters.
-     *
-     * @param str The string to test
-     * @return <code>true</code> if specified string is empty; otherwise <code>false</code>.
-     */
-    public static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     private static final Pattern P_FOLDER;
     static {
         final StringBuilder sb = new StringBuilder(64);

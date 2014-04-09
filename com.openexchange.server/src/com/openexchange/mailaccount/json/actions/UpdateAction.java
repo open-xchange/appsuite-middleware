@@ -220,13 +220,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                 }
 
                 // Reload
-                final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), contextId, wcon);
-                for (final MailAccount mailAccount : accounts) {
-                    if (mailAccount.getId() == id) {
-                        updatedAccount = mailAccount;
-                        break;
-                    }
-                }
+                updatedAccount = storageService.getMailAccount(id, session.getUserId(), contextId, wcon);
 
                 // Any standard folders changed?
                 if ((null != updatedAccount) && (fieldsToUpdate.removeAll(DEFAULT))) {

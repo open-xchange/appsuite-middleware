@@ -57,6 +57,8 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.UnsupportedCharsetException;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -681,6 +683,43 @@ public class Strings {
             throw new IllegalArgumentException("Illegal pattern syntax");
         }
         return trimmedSplits;
+    }
+
+
+    /**
+     * Gets a value indicating whether the supplied strings are equal, using their {@link Form#NFC} normalization from, i.e. canonical
+     * decomposition, followed by canonical composition.
+     *
+     * @param s1 The first string
+     * @param s2 The second string
+     * @return <code>true</code> if the normalized forms of the strings are equal, <code>false</code>, otherwise
+     */
+    public static boolean equalsNormalized(String s1, String s2) {
+        if (null == s1) {
+            return null == s2;
+        }
+        if (null == s2) {
+            return false;
+        }
+        return Normalizer.normalize(s1, Form.NFC).equals(Normalizer.normalize(s2, Form.NFC));
+    }
+
+    /**
+     * Gets a value indicating whether the supplied strings are equal ignoring case, using their {@link Form#NFC} normalization from,
+     * i.e. canonical decomposition, followed by canonical composition.
+     *
+     * @param s1 The first string
+     * @param s2 The second string
+     * @return <code>true</code> if the normalized forms of the strings are equal ignoring case, <code>false</code>, otherwise
+     */
+    public static boolean equalsNormalizedIgnoreCase(String s1, String s2) {
+        if (null == s1) {
+            return null == s2;
+        }
+        if (null == s2) {
+            return false;
+        }
+        return Normalizer.normalize(s1, Form.NFC).equalsIgnoreCase(Normalizer.normalize(s2, Form.NFC));
     }
 
 }

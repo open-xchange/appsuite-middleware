@@ -880,6 +880,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return getMailAccount(MailAccount.DEFAULT_ID, user, cid);
     }
 
+    @Override
     public MailAccount getMailAccount(final int id, final int user, final int cid, final Connection con) throws OXException {
         if (null == con) {
             return getMailAccount(id, user, cid);
@@ -1074,20 +1075,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session, final boolean changePrimary) throws OXException {
         final Connection con = Database.get(cid, true);
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
             updateMailAccount(mailAccount, attributes, user, cid, session, con, changePrimary);
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            rollback(con);
-            throw e;
-        } catch (final Exception e) {
-            rollback(con);
+        } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
             Database.back(cid, true, con);
         }
@@ -1725,7 +1727,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final Session session) throws OXException {
-        if (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) {
+        updateAndReturnMailAccount(mailAccount, user, cid, session);
+    }
+
+    public MailAccount updateAndReturnMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final Session session) throws OXException {
+        final int accountId = mailAccount.getId();
+        if (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == accountId) {
             throw MailAccountExceptionCodes.NO_DEFAULT_UPDATE.create(I(user), I(cid));
         }
         // Check name
@@ -1736,13 +1743,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         dropPOP3StorageFolders(user, cid);
         final Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
+        boolean rollback = false;
         try {
             // Check prerequisites
-            checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
-            checkDuplicateTransportAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
+            checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {accountId}), user, cid, con);
+            checkDuplicateTransportAccount(mailAccount, new TIntHashSet(new int[] {accountId}), user, cid, con);
             // Check protocol mismatch
             {
-                final MailAccount storageVersion = getMailAccount(mailAccount.getId(), user, cid, con);
+                final MailAccount storageVersion = getMailAccount(accountId, user, cid, con);
                 // Mail protocol
                 String newProtocol = mailAccount.getMailProtocol();
                 if (null != newProtocol) {
@@ -1764,6 +1772,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
             // Update...
             con.setAutoCommit(false);
+            rollback = true;
             {
                 final String encryptedPassword = encrypt(mailAccount.getPassword(), session);
                 stmt = con.prepareStatement(UPDATE_MAIL_ACCOUNT);
@@ -1805,7 +1814,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     stmt.setString(pos++, replyTo);
                 }
                 stmt.setLong(pos++, cid);
-                stmt.setLong(pos++, mailAccount.getId());
+                stmt.setLong(pos++, accountId);
                 stmt.setLong(pos++, user);
                 stmt.executeUpdate();
             }
@@ -1833,33 +1842,37 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     stmt.setString(pos++, replyTo);
                 }
                 stmt.setLong(pos++, cid);
-                stmt.setLong(pos++, mailAccount.getId());
+                stmt.setLong(pos++, accountId);
                 stmt.setLong(pos++, user);
                 stmt.executeUpdate();
             }
             // Properties
             Map<String, String> properties = mailAccount.getProperties();
             if (properties.containsKey("pop3.deletewt")) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.deletewt", properties.get("pop3.deletewt"), false, con);
+                updateProperty(cid, user, accountId, "pop3.deletewt", properties.get("pop3.deletewt"), false, con);
             }
             if (properties.containsKey("pop3.expunge")) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.expunge", properties.get("pop3.expunge"), false, con);
+                updateProperty(cid, user, accountId, "pop3.expunge", properties.get("pop3.expunge"), false, con);
             }
             if (properties.containsKey("pop3.refreshrate")) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.refreshrate", properties.get("pop3.refreshrate"), false, con);
+                updateProperty(cid, user, accountId, "pop3.refreshrate", properties.get("pop3.refreshrate"), false, con);
             }
             if (properties.containsKey("pop3.storage")) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.storage", properties.get("pop3.storage"), false, con);
+                updateProperty(cid, user, accountId, "pop3.storage", properties.get("pop3.storage"), false, con);
             }
             if (properties.containsKey("pop3.path")) {
-                updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), false, con);
+                updateProperty(cid, user, accountId, "pop3.path", properties.get("pop3.path"), false, con);
             }
             properties = mailAccount.getTransportProperties();
             if (properties.containsKey("transport_credentials")) {
-                updateProperty(cid, user, mailAccount.getId(), "transport_credentials", properties.get("transport_credentials"), true, con);
+                updateProperty(cid, user, accountId, "transport_credentials", properties.get("transport_credentials"), true, con);
             }
+
+            final MailAccount retval = getMailAccount(accountId, user, cid, con);
+
             con.commit();
-            autocommit(con);
+            rollback = false;
+
             /*
              * Automatically check Unified Mail existence
              */
@@ -1869,16 +1882,16 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     management.createUnifiedINBOX(user, cid, con);
                 }
             }
+
+            return retval;
         } catch (final SQLException e) {
-            rollback(con);
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            rollback(con);
-            throw e;
-        } catch (final Exception e) {
-            rollback(con);
+        } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             closeSQLStuff(null, stmt);
             autocommit(con);
             Database.back(cid, true, con);
@@ -2829,15 +2842,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
+        return com.openexchange.java.Strings.isEmpty(string);
     }
 
     /**

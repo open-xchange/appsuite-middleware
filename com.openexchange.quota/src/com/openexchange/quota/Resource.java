@@ -73,6 +73,10 @@ public enum Resource {
      * The quota resource for infostore files.
      */
     INFOSTORE_FILES("infostore"),
+    /**
+     * The quota resource for attachments of PIM objects.
+     */
+    ATTACHMENT("attachment"),
 
     ;
 
@@ -93,7 +97,7 @@ public enum Resource {
 
     /**
      * Gets currently known identifiers.
-     * 
+     *
      * @return The currently known identifiers
      */
     public static String[] allIdentifiers() {

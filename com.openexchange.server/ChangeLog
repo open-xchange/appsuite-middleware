@@ -1,3 +1,37 @@
+* 2014-04-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31968: Drop personal infostore folders on user deletion
+
+* 2014-04-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31929: Support quota for attachments of PIM objects
+
+* 2014-07-07 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 26544: Get all attachments sorted by ID fails
+
+* 2014-04-07 - martin.schneider@open-xchange.com
+
+ - Fix for bug 31797: Initialize PatternLayout for LMDC manually if just the SyslogAppender is configured
+
+* 2014-04-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31935: Check for potential case- and unicode-normalization conflicts when storing folders
+ - Fix for bug 31685: Added displayable exception message for IFO-1700
+  
+* 2014-04-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31912: Don't apply personal reminder setting for appointments in shared folders  
+ - Fix for bug 31895: Corrected file ID encoding when accessing the checksum storage   
+
+* 2014-04-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31903: Added "infostore" to necessary dependencies
+
+* 2014-04-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31899: Pass unique folder ID when requesting quota information  
+
 * 2014-04-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 31582: Remove leading and trailing whitespaces in duplicated folder check
@@ -32,6 +66,7 @@
 * 2014-04-02 - ioannis.chouklis@open-xchange.com
 
  - Fix for Bug 31855: [L3] email cannot be displayed and customer gets only a MSG-0020
+ - Fix for bug 31854: NPE at POP3Store.reinitCapabilities
 
 * 2014-04-02 - jan.bauerdick@open-xchange.com
 
@@ -232,7 +267,7 @@
 
 * 2024-03-07 - ioannis.chouklis@open-xchange.com
 
-- Fix for bug 31448: [L3] Backend mistakes IMAP with SMTP password entries by updating external mail account credentials 
+ - Fix for bug 31448: [L3] Backend mistakes IMAP with SMTP password entries by updating external mail account credentials 
 
 * 2014-03-07 - marcus.klein@open-xchange.com
 

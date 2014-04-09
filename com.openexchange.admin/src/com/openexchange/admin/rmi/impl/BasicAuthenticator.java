@@ -70,11 +70,10 @@ public class BasicAuthenticator extends OXCommonImpl {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicAuthenticator.class);
 
-    private OXAuthStorageInterface sqlAuth = null;
-    private OXAuthStorageInterface fileAuth = null;
-    private AdminCache cache = null;
-
-    private BundleContext context = null;
+    private final OXAuthStorageInterface sqlAuth;
+    private final OXAuthStorageInterface fileAuth;
+    private final AdminCache cache;
+    private final BundleContext context;
 
     /**
      * Use this constructor when additional bundles should be able to
@@ -92,6 +91,7 @@ public class BasicAuthenticator extends OXCommonImpl {
      * @throws StorageException  */
     public BasicAuthenticator() throws StorageException {
         super();
+        this.context = null;
         sqlAuth  = OXAuthStorageInterface.getInstanceSQL();
         fileAuth = OXAuthStorageInterface.getInstanceFile();
         cache = ClientAdminThread.cache;
