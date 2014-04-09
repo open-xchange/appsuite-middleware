@@ -139,7 +139,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                 }
 
                 private void logRequestRegistryEntry(final RequestRegistryEntry entry, final StringBuilder logBuilder) {
-                    final Throwable trace = new Throwable();
+                    final Throwable trace = new FastThrowable();
                     {
                         final StackTraceElement[] stackTrace = entry.getStackTrace();
                         if (dontLog(stackTrace)) {
@@ -228,6 +228,20 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
             return requestWatcherTask.cancel();
         }
         return true;
+    }
+
+    // ----------------------------------------------------------------------------- //
+
+    static final class FastThrowable extends Throwable {
+
+        FastThrowable() {
+            super();
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
     }
 
 }
