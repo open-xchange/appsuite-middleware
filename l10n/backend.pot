@@ -2042,6 +2042,13 @@ msgstr ""
 msgid "Invalid URL \"%1$s\". Please correct the value and try again."
 msgstr ""
 
+#. The allowed quota is reached. Please delete some items in order to store new ones.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:82
+msgid ""
+"The allowed quota is reached. Please delete some items in order to store new "
+"ones."
+msgstr ""
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -4510,6 +4517,13 @@ msgstr ""
 msgid ""
 "An external participant with the E-Mail address %1$s is already included. "
 "Please remove participant duplicate and retry."
+msgstr ""
+
+#. *
+#. * Moving a recurring appointment to another folder is not supported.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:213
+msgid "Moving a recurring appointment to another folder is not supported."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
