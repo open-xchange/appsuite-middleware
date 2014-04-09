@@ -52,6 +52,7 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -325,6 +326,27 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong status code", 404, resp.getStatus());
     }
 
+    public void testXSSVuln_Bug26244() throws IOException {
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+        
+        final File file = new File(TEST_DATA_DIR, "xss_utf16.html");
+        final InputStream is = new FileInputStream(file);
+        final byte[] bytes = IOUtils.toByteArray(is);
+        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+        fileHolder.setName(file.getName());
+        
+        final AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        req.setParameter("content_type", "text/html; charset=UTF-16");
+        req.setParameter("content_disposition", "inline");
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        final String expectedCT = "text/html";
+        assertEquals("Wrong Content-Type", expectedCT, resp.getContentType());
+    }
 
     public void testChunkRead() {
         try {
