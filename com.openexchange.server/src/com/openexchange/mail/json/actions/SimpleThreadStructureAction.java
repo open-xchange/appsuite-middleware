@@ -276,9 +276,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             }
             final long max = req.getMax();
             final boolean includeSent = req.optBool("includeSent", false);
-            final boolean unseen = req.optBool("unseen", false);
+            final boolean ignoreSeen = req.optBool("unseen", false);
             final boolean ignoreDeleted = !req.optBool("deleted", true);
-            if (unseen || ignoreDeleted) {
+            if (ignoreSeen || ignoreDeleted) {
                 // Ensure flags is contained in provided columns
                 final int fieldFlags = MailListField.FLAGS.getField();
                 boolean found = false;
@@ -310,7 +310,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
              */
             final long start = System.currentTimeMillis();
             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-            if (!unseen && !ignoreDeleted) {
+            if (!ignoreSeen && !ignoreDeleted) {
                 final List<List<MailMessage>> mails =
                     mailInterface.getAllSimpleThreadStructuredMessages(
                         folderId,
@@ -340,15 +340,15 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 foundUnseen = false;
                 for (final Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext();) {
                     final MailMessage message = tmp.next();
-                    if (null == message || (ignoreDeleted && message.isDeleted())) {
-                        // Ignore mail marked for deletion
+                    if (discardMail(message, false, ignoreDeleted)) {
+                        // Ignore mail
                         tmp.remove();
                     } else {
                         // Check if unseen
                         foundUnseen |= !message.isSeen();
                     }
                 }
-                if (unseen && !foundUnseen) {
+                if (ignoreSeen && !foundUnseen) {
                     iterator.remove();
                 }
             }
