@@ -60,27 +60,89 @@ import com.openexchange.file.storage.composition.FolderID;
  */
 public interface DirectoryChecksumStore {
 
-    DirectoryChecksum insertDirectoryChecksum(FolderID folderID, long sequenceNumber, String checksum) throws OXException;
-
-    List<DirectoryChecksum> insertDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException;
-
+    /**
+     * Inserts the supplied directory checksum into the store.
+     *
+     * @param directoryChecksum The checksum to insert
+     * @return The checksum
+     * @throws OXException
+     */
     DirectoryChecksum insertDirectoryChecksum(DirectoryChecksum directoryChecksum) throws OXException;
 
+    /**
+     * Inserts the supplied directory checksums into the store.
+     *
+     * @param directoryChecksums The checksums to insert
+     * @return The checksums
+     * @throws OXException
+     */
+    List<DirectoryChecksum> insertDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException;
 
+    /**
+     * Updates the supplied directory checksum.
+     *
+     * @param directoryChecksum The checksum to update
+     * @return The checksum
+     * @throws OXException
+     */
     DirectoryChecksum updateDirectoryChecksum(DirectoryChecksum directoryChecksum) throws OXException;
 
+    /**
+     * Updates the supplied directory checksums.
+     *
+     * @param directoryChecksums The checksums to update
+     * @return The checksums
+     * @throws OXException
+     */
     List<DirectoryChecksum> updateDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException;
 
+    /**
+     * Updates the folder ID to another one in all stored directory checksums.
+     *
+     * @param folderID The folder ID to update
+     * @param newFolderID The new folder ID
+     * @return <code>true</code> if at least one checksum was updated, <code>false</code>, otherwise
+     * @throws OXException
+     */
     boolean updateDirectoryChecksumFolder(FolderID folderID, FolderID newFolderID) throws OXException;
 
+    /**
+     * Removes all directory checksums of a folder.
+     *
+     * @param folderID The folder ID to remove the checksum for
+     * @return <code>true</code> if at least one checksum was removed, <code>false</code>, otherwise
+     * @throws OXException
+     */
     boolean removeDirectoryChecksum(FolderID folderID) throws OXException;
 
+    /**
+     * Removes all directory checksums of multiple folders.
+     *
+     * @param folderIDs The folder IDs to remove the checksums for
+     * @return <code>true</code> if at least one checksum was removed, <code>false</code>, otherwise
+     * @throws OXException
+     */
     int removeDirectoryChecksums(List<FolderID> folderIDs) throws OXException;
 
+    /**
+     * Gets the directory checksum of a folder.
+     *
+     * @param userID The user ID
+     * @param folderID The folder ID to get the checksum for
+     * @return The checksum, or <code>null</code> if not found
+     * @throws OXException
+     */
+    DirectoryChecksum getDirectoryChecksum(int userID, FolderID folderID) throws OXException;
 
-    DirectoryChecksum getDirectoryChecksum(FolderID folderID) throws OXException;
-
-    List<DirectoryChecksum> getDirectoryChecksums(List<FolderID> folderIDs) throws OXException;
+    /**
+     * Gets the directory checksums of multiple folders.
+     *
+     * @param userID The user ID
+     * @param folderIDs The folder IDs to get the checksum for
+     * @return The found checksums
+     * @throws OXException
+     */
+    List<DirectoryChecksum> getDirectoryChecksums(int userID, List<FolderID> folderIDs) throws OXException;
 
 }
 

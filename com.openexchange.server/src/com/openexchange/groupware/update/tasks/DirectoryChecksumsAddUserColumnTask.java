@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,83 +47,55 @@
  *
  */
 
-package com.openexchange.drive.checksum;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.file.storage.composition.FolderID;
-
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DirectoryChecksum}
+ * {@link DirectoryChecksumsAddUserColumnTask}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryChecksum extends StoredChecksum {
+public class DirectoryChecksumsAddUserColumnTask extends UpdateTaskAdapter {
 
-    protected FolderID folderID;
-    protected int userID;
-
-    /**
-     * Initializes a new {@link DirectoryChecksum}.
-     */
-    public DirectoryChecksum() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link DirectoryChecksum}.
-     *
-     * @param userID The user ID
-     * @param folderID The folder ID
-     * @param sequenceNumber The sequence number
-     * @param checksum The checksum
-     */
-    public DirectoryChecksum(int userID, FolderID folderID, long sequenceNumber, String checksum) {
-        super();
-        this.userID = userID;
-        this.folderID = folderID;
-        this.sequenceNumber = sequenceNumber;
-        this.checksum = checksum;
-    }
-
-    /**
-     * Gets the folderID
-     *
-     * @return The folderID
-     */
-    public FolderID getFolderID() {
-        return folderID;
-    }
-
-    /**
-     * Sets the folderID
-     *
-     * @param folderID The folderID to set
-     */
-    public void setFolderID(FolderID folderID) {
-        this.folderID = folderID;
-    }
-
-    /**
-     * Gets the userID
-     *
-     * @return The userID
-     */
-    public int getUserID() {
-        return userID;
-    }
-
-    /**
-     * Sets the userID
-     *
-     * @param userID The userID to set
-     */
-    public void setUserID(int userID) {
-        this.userID = userID;
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
     }
 
     @Override
-    public String toString() {
-        return getFolderID() + " | " + getChecksum() + " | " + getSequenceNumber();
+    public void perform(PerformParameters params) throws OXException {
+        int contextID = params.getContextId();
+        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection connnection = dbService.getForUpdateTask(contextID);
+        Column userColumn = new Column("user", "INT(10) UNSIGNED NOT NULL");
+        try {
+            connnection.setAutoCommit(false);
+            Tools.checkAndAddColumns(connnection, "prg_dates", userColumn);
+            Tools.checkAndAddColumns(connnection, "del_dates", userColumn);
+            connnection.commit();
+        } catch (SQLException e) {
+            rollback(connnection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(connnection);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(connnection);
+            Database.backNoTimeout(contextID, true, connnection);
+        }
     }
 
 }
