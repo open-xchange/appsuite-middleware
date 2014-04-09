@@ -182,6 +182,12 @@ public interface IIMAPProperties extends IMailProperties {
     public boolean allowFolderCaches();
 
     /**
+     * Gets supported SSL protocols
+     * @return Supported SSL protocols
+     */
+    public String getSSLProtocols();
+
+    /**
      * Gets the map holding IMAP servers with new ACL Extension.
      *
      * @return The map holding IMAP servers with new ACL Extension

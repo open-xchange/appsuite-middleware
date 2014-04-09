@@ -52,11 +52,13 @@ package com.openexchange.mail.dataobjects;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -244,6 +246,11 @@ public abstract class MailMessage extends MailPart {
     public static final int COLOR_LABEL_NONE = 0;
 
     /**
+     * The <code>string</code> with all valid color flags whitespace seperated
+     */
+    private static final Set<String> ALL_COLOR_LABELS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("$cl_0", "$cl_1", "$cl_2", "$cl_3", "$cl_4", "$cl_5", "$cl_6", "$cl_7", "$cl_8", "$cl_9", "$cl_10", "cl_0", "cl_1", "cl_2", "cl_3", "cl_4", "cl_5", "cl_6", "cl_7", "cl_8", "cl_9", "cl_10")));
+
+    /**
      * Determines the corresponding <code>int</code> value of a given color label's string representation.
      * <p>
      * A color label's string representation matches the pattern:<br>
@@ -274,6 +281,16 @@ public abstract class MailMessage extends MailPart {
      */
     public static boolean isColorLabel(final String cl) {
         return (cl != null && (cl.startsWith(MailMessage.COLOR_LABEL_PREFIX) || cl.startsWith(MailMessage.COLOR_LABEL_PREFIX_OLD)));
+    }
+
+    /**
+     * Tests if specified string contains a valid color label
+     *
+     * @param cl The string to check
+     * @return <code>true</code> if specified string is a valid color label; otherwise <code>false</code>
+     */
+    public static boolean isValidColorLabel(final String cl) {
+        return ALL_COLOR_LABELS.contains(cl);
     }
 
     /**

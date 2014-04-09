@@ -148,7 +148,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     @Override
     public void subscribe(final Subscription subscription) throws OXException {
-    	checkCreate(subscription);
+        checkCreate(subscription);
         modifyIncoming(subscription);
         STORAGE.get().rememberSubscription(subscription);
         modifyOutgoing(subscription);
@@ -156,8 +156,8 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     @Override
     public void unsubscribe(final Subscription subscription) throws OXException {
-    	checkDelete(loadSubscription(subscription.getContext(), subscription.getId(), null));
-    	STORAGE.get().forgetSubscription(subscription);
+        checkDelete(loadSubscription(subscription.getContext(), subscription.getId(), null));
+        STORAGE.get().forgetSubscription(subscription);
     }
 
     @Override
@@ -173,11 +173,11 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     public void modifyIncoming(final Subscription subscription) throws OXException {
-    	Object accountIDObject = subscription.getConfiguration().get("account");
+        Object accountIDObject = subscription.getConfiguration().get("account");
         Integer accountId = null;
         if (JSONObject.NULL == accountIDObject) {
-        	throw new OXException(90111, SubscriptionErrorStrings.NO_OAUTH_ACCOUNT_GIVEN);
-    	}
+            throw SubscriptionErrorMessage.NO_OAUTH_ACCOUNT_GIVEN.create();
+        }
     }
 
     public void modifyOutgoing(final Subscription subscription) throws OXException {
@@ -348,7 +348,6 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         for (final Subscription subscription : allSubscriptions) {
             if (id.equals(getSubscriptionSourceId(subscription))) {
                 final Map<String, Object> configuration = subscription.getConfiguration();
-                boolean save = false;
                 for (final String passwordField : passwordFields) {
                     final String password = (String) configuration.get(passwordField);
                     if (!isEmpty(password)) {
@@ -387,33 +386,33 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     // Permission Checks
 
     public void checkCreate(final Subscription subscription) throws OXException {
-    	if (canWrite(subscription)) {
-    		return;
-    	}
-    	throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
+        if (canWrite(subscription)) {
+            return;
+        }
+        throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
     public void checkUpdate(final Subscription subscription) throws OXException {
-    	if (subscription.getSession().getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
-    		return;
-    	}
-    	throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
+        if (subscription.getSession().getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
+            return;
+        }
+        throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
 
     public void checkDelete(final Subscription subscription) throws OXException {
-    	if (subscription.getSession().getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
-    		return;
-    	}
-    	throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
+        if (subscription.getSession().getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
+            return;
+        }
+        throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
 
     private boolean canWrite(final Subscription subscription) throws OXException {
-    	final OCLPermission permission = loadFolderPermission(subscription);
-    	return permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION ||  ( permission.getFolderPermission() >= OCLPermission.CREATE_OBJECTS_IN_FOLDER && permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS);
+        final OCLPermission permission = loadFolderPermission(subscription);
+        return permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION ||  ( permission.getFolderPermission() >= OCLPermission.CREATE_OBJECTS_IN_FOLDER && permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS);
     }
 
     private boolean isFolderAdmin(final Subscription subscription) throws OXException {
-    	final OCLPermission permission = loadFolderPermission(subscription);
-    	return  permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION;
+        final OCLPermission permission = loadFolderPermission(subscription);
+        return  permission.isFolderAdmin() || permission.getFolderPermission() >= OCLPermission.ADMIN_PERMISSION;
     }
 
     private OCLPermission loadFolderPermission(final Subscription subscription) throws OXException {

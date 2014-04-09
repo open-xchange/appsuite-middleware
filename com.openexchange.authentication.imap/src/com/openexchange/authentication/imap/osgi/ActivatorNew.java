@@ -49,25 +49,21 @@
 
 package com.openexchange.authentication.imap.osgi;
 
-import static com.openexchange.authentication.imap.osgi.ImapAuthServiceRegistry.getServiceRegistry;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.imap.impl.IMAPAuthentication;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.DeferredActivator;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
-public class ActivatorNew extends DeferredActivator {
+public class ActivatorNew extends HousekeepingActivator {
 
     private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ActivatorNew.class);
 
-    private ServiceRegistration<AuthenticationService> registration;
-
-    // private ServiceRegistration serviceRegistration;
-
+    /**
+     * Initializes a new {@link ActivatorNew}.
+     */
     public ActivatorNew() {
         super();
     }
@@ -78,46 +74,9 @@ public class ActivatorNew extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-
-        getServiceRegistry().addService(clazz, getService(clazz));
-        // wenn alle services da und nicht authservice published, dann authservice publishen
-        if (registration == null) {
-            registration = context.registerService(AuthenticationService.class, new IMAPAuthentication(), null);
-        }
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-        getServiceRegistry().removeService(clazz);
-        // wenn authservice gepublished, dann publish wegnehmen
-        if (registration != null) {
-            registration.unregister();
-            registration = null;
-        }
-    }
-
-    @Override
     protected void startBundle() throws Exception {
-
         try {
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (int i = 0; i < classes.length; i++) {
-                    final Object service = getService(classes[i]);
-                    if (null != service) {
-                        registry.addService(classes[i], service);
-                    }
-                }
-            }
-            if (registration == null) {
-                // authservice publishen
-                registration = context.registerService(AuthenticationService.class, new IMAPAuthentication(), null);
-            }
+            registerService(AuthenticationService.class, new IMAPAuthentication(this), null);
         } catch (final Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -125,19 +84,4 @@ public class ActivatorNew extends DeferredActivator {
 
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            // wenn authservice gepublished, dann publish wegnehmen
-            if (registration != null) {
-                registration.unregister();
-                registration = null;
-            }
-
-            getServiceRegistry().clearRegistry();
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
-    }
 }

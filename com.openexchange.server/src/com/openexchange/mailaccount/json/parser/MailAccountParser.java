@@ -49,6 +49,8 @@
 
 package com.openexchange.mailaccount.json.parser;
 
+import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.Strings.toLowerCase;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.Collection;
@@ -62,12 +64,16 @@ import org.json.JSONObject;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mailaccount.Attribute;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -144,7 +150,7 @@ public class MailAccountParser extends DataParser {
      * @throws OXException If parsing fails
      */
     public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings) throws OXException {
-        return parse(account, json, warnings, false);
+        return parse(account, json, warnings, false, null);
     }
 
     /**
@@ -154,18 +160,19 @@ public class MailAccountParser extends DataParser {
      * @param json A JSON object containing a reminder.
      * @param warnings A collection to add possible warnings to
      * @param asNewAccount <code>true</code> to parse in fashion of a new account; otherwise <code>false</code>
+     * @param session The associated session; may be <code>null</code>
      * @throws OXException If parsing fails.
      * @throws OXException If parsing fails
      */
-    public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings, final boolean asNewAccount) throws OXException {
+    public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings, final boolean asNewAccount, final Session session) throws OXException {
         try {
-            return parseElementAccount(account, json, warnings, asNewAccount);
+            return parseElementAccount(account, json, warnings, asNewAccount, session);
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json.toString());
         }
     }
 
-    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings, final boolean asNewAccount) throws JSONException, OXException {
+    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings, final boolean asNewAccount, final Session session) throws JSONException, OXException {
         final Set<Attribute> attributes = new HashSet<Attribute>();
         if (json.has(MailAccountFields.ID)) {
             account.setId(parseInt(json, MailAccountFields.ID));
@@ -182,6 +189,35 @@ public class MailAccountParser extends DataParser {
         // Expect URL or separate fields for protocol, server, port, and secure
         if (json.hasAndNotNull(MailAccountFields.MAIL_URL)) {
             account.parseMailServerURL(parseString(json, MailAccountFields.MAIL_URL).trim());
+
+            if (json.hasAndNotNull(MailAccountFields.MAIL_PORT)) {
+                final int mailPort = json.optInt(MailAccountFields.MAIL_PORT, -1);
+                if (mailPort > 0 && mailPort != account.getMailPort()) {
+                    account.setMailPort(mailPort);
+                }
+            }
+
+            if (json.hasAndNotNull(MailAccountFields.MAIL_PROTOCOL)) {
+                final String mailProtocol = json.optString(MailAccountFields.MAIL_PROTOCOL, null);
+                if (!Strings.isEmpty(mailProtocol) && !mailProtocol.equals(account.getMailProtocol())) {
+                    account.setMailProtocol(mailProtocol);
+                }
+            }
+
+            if (json.hasAndNotNull(MailAccountFields.MAIL_SERVER)) {
+                final String mailServer = json.optString(MailAccountFields.MAIL_SERVER, null);
+                if (!Strings.isEmpty(mailServer) && !mailServer.equals(account.getMailServer())) {
+                    account.setMailServer(mailServer);
+                }
+            }
+
+            if (json.hasAndNotNull(MailAccountFields.MAIL_SECURE)) {
+                final boolean mailSecure = json.optBoolean(MailAccountFields.MAIL_SECURE, account.isMailSecure());
+                if (mailSecure != account.isMailSecure()) {
+                    account.setMailSecure(mailSecure);
+                }
+            }
+
             attributes.add(Attribute.MAIL_URL_LITERAL);
             attributes.addAll(Attribute.MAIL_URL_ATTRIBUTES);
         } else {
@@ -202,9 +238,37 @@ public class MailAccountParser extends DataParser {
         }
         if (json.hasAndNotNull(MailAccountFields.TRANSPORT_URL)) {
             account.parseTransportServerURL(parseString(json, MailAccountFields.TRANSPORT_URL).trim());
+
+            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_PORT)) {
+                final int transportPort = json.optInt(MailAccountFields.TRANSPORT_PORT, -1);
+                if (transportPort > 0 && transportPort != account.getTransportPort()) {
+                    account.setTransportPort(transportPort);
+                }
+            }
+
+            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_PROTOCOL)) {
+                final String transportProtocol = json.optString(MailAccountFields.TRANSPORT_PROTOCOL, null);
+                if (!Strings.isEmpty(transportProtocol) && !transportProtocol.equals(account.getTransportProtocol())) {
+                    account.setTransportProtocol(transportProtocol);
+                }
+            }
+
+            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_SERVER)) {
+                final String transportServer = json.optString(MailAccountFields.TRANSPORT_SERVER, null);
+                if (!Strings.isEmpty(transportServer) && !transportServer.equals(account.getTransportServer())) {
+                    account.setTransportServer(transportServer);
+                }
+            }
+
+            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_SECURE)) {
+                final boolean transportSecure = json.optBoolean(MailAccountFields.TRANSPORT_SECURE, account.isTransportSecure());
+                if (transportSecure != account.isTransportSecure()) {
+                    account.setTransportSecure(transportSecure);
+                }
+            }
+
             attributes.add(Attribute.TRANSPORT_URL_LITERAL);
             attributes.addAll(Attribute.TRANSPORT_URL_ATTRIBUTES);
-
         } else {
             final SetSwitch setSwitch = new SetSwitch(account);
             for (final Attribute attribute : Attribute.TRANSPORT_URL_ATTRIBUTES) {
@@ -281,51 +345,110 @@ public class MailAccountParser extends DataParser {
             attributes.add(Attribute.SPAM_HANDLER_LITERAL);
         }
         // Folder names
+        MailAccount defaultAccount = null;
         if (json.has(MailAccountFields.TRASH)) {
             final String string = parseString(json, MailAccountFields.TRASH);
             account.setTrash(null == string ? string : string.trim());
             attributes.add(Attribute.TRASH_LITERAL);
-        } else if (asNewAccount) {
-            account.setTrash(MailStrings.TRASH);
-            attributes.add(Attribute.TRASH_LITERAL);
+        } else if (asNewAccount && !json.has(MailAccountFields.TRASH_FULLNAME)) {
+            defaultAccount = loadDefaultAccount(session);
+            if (null == defaultAccount) {
+                account.setTrash(MailStrings.TRASH);
+                attributes.add(Attribute.TRASH_LITERAL);
+            } else {
+                String name = defaultAccount.getTrash();
+                if (isEmpty(name)) {
+                    name = MailStrings.TRASH;
+                }
+                account.setTrash(name);
+                attributes.add(Attribute.TRASH_LITERAL);
+            }
         }
         if (json.has(MailAccountFields.ARCHIVE)) {
             final String string = parseString(json, MailAccountFields.ARCHIVE);
             account.setTrash(null == string ? string : string.trim());
             attributes.add(Attribute.ARCHIVE_LITERAL);
-        } else if (asNewAccount) {
-            account.setArchive(MailStrings.ARCHIVE);
-            attributes.add(Attribute.ARCHIVE_LITERAL);
+        } else if (asNewAccount && !json.has(MailAccountFields.ARCHIVE_FULLNAME)) {
+            if (null == defaultAccount) {
+                defaultAccount = loadDefaultAccount(session);
+            }
+            if (null == defaultAccount) {
+                account.setArchive(MailStrings.ARCHIVE);
+                attributes.add(Attribute.ARCHIVE_LITERAL);
+            } else {
+                String name = defaultAccount.getArchive();
+                if (isEmpty(name)) {
+                    name = MailStrings.ARCHIVE;
+                }
+                account.setArchive(name);
+                attributes.add(Attribute.ARCHIVE_LITERAL);
+            }
         }
         if (json.has(MailAccountFields.SENT)) {
             final String string = parseString(json, MailAccountFields.SENT);
             account.setSent(null == string ? string : string.trim());
             attributes.add(Attribute.SENT_LITERAL);
-        } else if (asNewAccount) {
-            account.setSent(MailStrings.SENT_ALT);
-            attributes.add(Attribute.SENT_LITERAL);
+        } else if (asNewAccount && !json.has(MailAccountFields.SENT_FULLNAME)) {
+            if (null == defaultAccount) {
+                defaultAccount = loadDefaultAccount(session);
+            }
+            if (null == defaultAccount) {
+                account.setSent(MailStrings.SENT_ALT);
+                attributes.add(Attribute.SENT_LITERAL);
+            } else {
+                String name = defaultAccount.getSent();
+                if (isEmpty(name)) {
+                    name = MailStrings.SENT_ALT;
+                }
+                account.setSent(name);
+                attributes.add(Attribute.SENT_LITERAL);
+            }
         }
         if (json.has(MailAccountFields.DRAFTS)) {
             final String string = parseString(json, MailAccountFields.DRAFTS);
             account.setDrafts(null == string ? string : string.trim());
             attributes.add(Attribute.DRAFTS_LITERAL);
-        } else if (asNewAccount) {
-            account.setDrafts(MailStrings.DRAFTS);
-            attributes.add(Attribute.DRAFTS_LITERAL);
+        } else if (asNewAccount && !json.has(MailAccountFields.DRAFTS_FULLNAME)) {
+            if (null == defaultAccount) {
+                defaultAccount = loadDefaultAccount(session);
+            }
+            if (null == defaultAccount) {
+                account.setDrafts(MailStrings.DRAFTS);
+                attributes.add(Attribute.DRAFTS_LITERAL);
+            } else {
+                String name = defaultAccount.getDrafts();
+                if (isEmpty(name)) {
+                    name = MailStrings.DRAFTS;
+                }
+                account.setDrafts(name);
+                attributes.add(Attribute.DRAFTS_LITERAL);
+            }
         }
         if (json.has(MailAccountFields.SPAM)) {
             final String string = parseString(json, MailAccountFields.SPAM);
             account.setSpam(null == string ? string : string.trim());
             attributes.add(Attribute.SPAM_LITERAL);
-        } else if (asNewAccount) {
-            account.setSpam(MailStrings.SPAM);
-            attributes.add(Attribute.SPAM_LITERAL);
+        } else if (asNewAccount && !json.has(MailAccountFields.SPAM_FULLNAME)) {
+            if (null == defaultAccount) {
+                defaultAccount = loadDefaultAccount(session);
+            }
+            if (null == defaultAccount) {
+                account.setSpam(MailStrings.SPAM);
+                attributes.add(Attribute.SPAM_LITERAL);
+            } else {
+                String name = defaultAccount.getSpam();
+                if (isEmpty(name)) {
+                    name = MailStrings.SPAM;
+                }
+                account.setSpam(name);
+                attributes.add(Attribute.SPAM_LITERAL);
+            }
         }
         if (json.has(MailAccountFields.CONFIRMED_SPAM)) {
             final String string = parseString(json, MailAccountFields.CONFIRMED_SPAM);
             account.setConfirmedSpam(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_SPAM_LITERAL);
-        } else if (asNewAccount) {
+        } else if (asNewAccount && !json.has(MailAccountFields.CONFIRMED_SPAM_FULLNAME)) {
             account.setConfirmedSpam(MailStrings.CONFIRMED_SPAM_ALT);
             attributes.add(Attribute.CONFIRMED_SPAM_LITERAL);
         }
@@ -333,7 +456,7 @@ public class MailAccountParser extends DataParser {
             final String string = parseString(json, MailAccountFields.CONFIRMED_HAM);
             account.setConfirmedHam(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_HAM_LITERAL);
-        } else if (asNewAccount) {
+        } else if (asNewAccount && !json.has(MailAccountFields.CONFIRMED_HAM_FULLNAME)) {
             account.setConfirmedHam(MailStrings.CONFIRMED_HAM_ALT);
             attributes.add(Attribute.CONFIRMED_HAM_LITERAL);
         }
@@ -453,31 +576,16 @@ public class MailAccountParser extends DataParser {
         }
     }
 
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
+    private static MailAccount loadDefaultAccount(final Session session) {
+        if (null == session) {
             return null;
         }
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        try {
+            final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            return null == mass ? null : mass.getDefaultMailAccount(session.getUserId(), session.getContextId());
+        } catch (final Exception e) {
+            return null;
         }
-        return builder.toString();
     }
 
 }

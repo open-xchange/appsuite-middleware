@@ -55,7 +55,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -69,13 +69,19 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobId;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
@@ -113,7 +119,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
         final List<OXException> warnings = new LinkedList<OXException>();
-        MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings, true);
+        final Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings, true, session);
 
         checkNeededFields(accountDescription);
 
@@ -133,19 +139,31 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         final MailAccountStorageService storageService =
             ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-        {
-            // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
-            final boolean pop3 = accountDescription.getMailProtocol().toLowerCase(Locale.ENGLISH).startsWith("pop3");
-            if (!pop3) {
-                session.setParameter("mail-account.validate.type", "create");
-                try {
-                    if (!ValidateAction.actionValidateBoolean(accountDescription, session, false, warnings).booleanValue()) {
-                        final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
-                        warning.setCategory(Category.CATEGORY_WARNING);
-                        warnings.add(0, warning);
-                    }
-                } finally {
-                    session.setParameter("mail-account.validate.type", null);
+        // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
+        final boolean pop3 = Strings.toLowerCase(accountDescription.getMailProtocol()).startsWith("pop3");
+        if (!pop3) {
+            session.setParameter("mail-account.validate.type", "create");
+            try {
+                if (!ValidateAction.actionValidateBoolean(accountDescription, session, false, warnings).booleanValue()) {
+                    final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
+                    warning.setCategory(Category.CATEGORY_WARNING);
+                    warnings.add(0, warning);
+                }
+            } finally {
+                session.setParameter("mail-account.validate.type", null);
+            }
+        }
+
+        // Check standard folder names against full names
+        if (!pop3) {
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            try {
+                mailAccess = getMailAccess(accountDescription, session, warnings);
+                mailAccess.connect(false);
+                Tools.checkNames(accountDescription, fieldsToUpdate, mailAccess.getFolderStorage().getFolder("INBOX").getSeparator());
+            } finally {
+                if (null != mailAccess) {
+                    mailAccess.close(false);
                 }
             }
         }

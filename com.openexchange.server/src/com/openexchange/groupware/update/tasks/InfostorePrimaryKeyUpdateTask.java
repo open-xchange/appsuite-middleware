@@ -66,8 +66,9 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
-    
+
     private static final String INFOSTORE = "infostore";
+    private static final String INFOSTORE_DOCUMENT = "infostore_document";
 
     /**
      * Initializes a new {@link InfostorePrimaryKeyUpdateTask}.
@@ -76,15 +77,18 @@ public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
         Connection con = Database.getNoTimeout(cid, true);
         try {
             con.setAutoCommit(false);
+
+            // Drop foreign key
+            String foreignKey = Tools.existsForeignKey(con, "infostore", new String[] {"cid", "id"}, INFOSTORE_DOCUMENT, new String[] {"cid", "infostore_id"});
+            if (null != foreignKey && !foreignKey.equals("")) {
+                Tools.dropForeignKey(con, INFOSTORE_DOCUMENT, foreignKey);
+            }
             if (Tools.hasPrimaryKey(con, INFOSTORE)) {
                 Tools.dropPrimaryKey(con, INFOSTORE);
             }
@@ -102,12 +106,9 @@ public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.InfostoreDocumentDropForeignKeyUpdateTask" };
+        return new String[] { InfostoreDocumentDropForeignKeyUpdateTask.class.getName() };
     }
 
 }

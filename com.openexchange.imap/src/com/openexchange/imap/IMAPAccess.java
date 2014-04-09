@@ -384,7 +384,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     if (null == imapStoreCache) {
                         closeSafely(imapStore);
                     } else if (imapStore.isConnectedUnsafe()) {
-                        imapStoreCache.returnIMAPStore(imapStore, accountId, server, port, login);
+                        imapStoreCache.returnIMAPStore(imapStore, accountId, server, port, login, session);
                     } else {
                         // Not null AND not connected...?
                         closeSafely(imapStore);
@@ -781,7 +781,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * Clears cached IMAP connections.
      */
     protected void clearCachedConnections() {
-        final IMAPStoreContainer container = IMAPStoreCache.getInstance().optContainer(accountId, server, port, login);
+        final IMAPStoreContainer container = IMAPStoreCache.getInstance().optContainer(accountId, server, port, login, session);
         if (null != container) {
             container.clear();
         }
@@ -1217,7 +1217,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Specify SSL protocols
              */
-            imapProps.put("mail.imap.ssl.protocols", "SSLv3 TLSv1");
+            imapProps.put("mail.imap.ssl.protocols", config.getIMAPProperties().getSSLProtocols());
         } else {
             /*
              * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
@@ -1248,7 +1248,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Specify SSL protocols
              */
-            imapProps.put("mail.imap.ssl.protocols", "SSLv3 TLSv1");
+            imapProps.put("mail.imap.ssl.protocols", config.getIMAPProperties().getSSLProtocols());
             // imapProps.put("mail.imap.ssl.enable", "true");
             /*
              * Needed for JavaMail >= 1.4

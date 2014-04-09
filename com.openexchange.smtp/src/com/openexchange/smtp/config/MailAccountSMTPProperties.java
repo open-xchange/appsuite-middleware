@@ -171,4 +171,14 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         return retval;
     }
 
+    @Override
+    public String getSSLProtocols() {
+        final String tmp = properties.get("com.openexchange.smtp.ssl.protocols");
+        if (null == tmp) {
+            return SMTPProperties.getInstance().getSSLProtocols();
+        }
+
+        return tmp.trim();
+    }
+
 }

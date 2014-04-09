@@ -65,6 +65,7 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
+import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -83,7 +84,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailAccountPOP3MessageStorage implements IMailMessageStorage, IMailMessageStorageMimeSupport {
+public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure, IMailMessageStorage, IMailMessageStorageMimeSupport {
 
     private final IMailMessageStorage delegatee;
     private final MailAccountPOP3Storage storage;
@@ -419,6 +420,20 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage, IMail
             setFolderAndAccount(folder, mailMessage);
         }
         return mails;
+    }
+
+    @Override
+    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
+        if (!(delegatee instanceof ISimplifiedThreadStructure)) {
+            throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+        }
+        final List<List<MailMessage>> messagesList = ((ISimplifiedThreadStructure) delegatee).getThreadSortedMessages(getRealFullname(folder), includeSent, cache, indexRange, max, sortField, order, fields);
+        for (final List<MailMessage> messages : messagesList) {
+            for (final MailMessage mailMessage : messages) {
+                setFolderAndAccount(folder, mailMessage);
+            }
+        }
+        return messagesList;
     }
 
     @Override

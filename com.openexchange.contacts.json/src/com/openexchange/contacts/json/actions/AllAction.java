@@ -92,31 +92,18 @@ public class AllAction extends ContactAction {
 
     @Override
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
-        List<Contact> contacts = new ArrayList<Contact>();
-        Date lastModified = new Date(0);
-        SearchIterator<Contact> searchIterator = null;
         boolean excludeAdmin = request.isExcludeAdmin();
-        int adminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
+        int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
         ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();
-//        List<String> folderIDs = null != request.optFolderID() ? Arrays.asList(new String[] { request.optFolderID() }) : null;
-        try {
-            if (null == request.optFolderID()) {
-                searchIterator = getContactService().getAllContacts(request.getSession(), fields, request.getSortOptions());
-            } else {
-                searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), fields,
-                    request.getSortOptions());
-            }
-            while (searchIterator.hasNext()) {
-                Contact contact = searchIterator.next();
-                if (excludeAdmin && contact.getInternalUserId() == adminID) {
-                	continue;
-                }
-                lastModified = getLatestModified(lastModified, contact);
-                contacts.add(contact);
-            }
-        } finally {
-        	close(searchIterator);
+        SearchIterator<Contact> searchIterator;
+        if (null == request.optFolderID()) {
+            searchIterator = getContactService().getAllContacts(request.getSession(), fields, request.getSortOptions());
+        } else {
+            searchIterator = getContactService().getAllContacts(request.getSession(), request.getFolderID(), fields,
+                request.getSortOptions());
         }
+        List<Contact> contacts = new ArrayList<Contact>();
+        Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
