@@ -59,8 +59,6 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -101,8 +99,6 @@ import com.openexchange.tools.session.ServerSession;
     responseDescription = "A JSON object representing the inserted mail account. See mail account data.")
 public final class NewAction extends AbstractMailAccountAction implements MailAccountFields {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NewAction.class);
-
     public static final String ACTION = AJAXServlet.ACTION_NEW;
 
     /**
@@ -122,7 +118,6 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         }
 
         final JSONObject jAccount = jData.toObject();
-        LOG.trace("Trying to create mail account: {}", jAccount);
         final MailAccountDescription accountDescription = new MailAccountDescription();
         final List<OXException> warnings = new LinkedList<OXException>();
         final Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jAccount, warnings, true, session);
@@ -217,7 +212,6 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         }
 
         final JSONObject jsonAccount = MailAccountWriter.write(newAccount);
-        LOG.trace("Mail account was created. Returning {}", jsonAccount);
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);
     }
 
