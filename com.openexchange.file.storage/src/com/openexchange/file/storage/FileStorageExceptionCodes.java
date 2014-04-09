@@ -183,6 +183,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * Invalid folder identifier: %1$s
      */
     INVALID_FOLDER_IDENTIFIER("Invalid folder identifier: %1$s", Category.CATEGORY_ERROR, 31, FileStorageExceptionMessages.FOLDER_NOT_EXISTS_MSG),
+    /**
+     * The allowed quota is reached. Please delete some items in order to store new ones.
+     */
+    QUOTA_REACHED("The allowed Quota is reached", Category.CATEGORY_CAPACITY, 32, FileStorageExceptionMessages.QUOTA_REACHED_MSG),
 
     ;
 

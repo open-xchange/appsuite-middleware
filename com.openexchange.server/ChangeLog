@@ -1,3 +1,7 @@
+* 2014-04-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31966: Check for quota exceptions from external storages, too 
+
 * 2014-04-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 31968: Drop personal infostore folders on user deletion
