@@ -441,25 +441,13 @@ public final class Tools {
                 final Connection wcon = databaseService.getWritable(contextId);
                 try {
                     storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, wcon, false);
-                    final MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId, wcon);
-                    for (final MailAccount macc : accounts) {
-                        if (macc.getId() == accountId) {
-                            return macc;
-                        }
-                    }
-                    return null;
+                    return storageService.getMailAccount(accountId, userId, contextId, con);
                 } finally {
                     databaseService.backWritable(contextId, wcon);
                 }
             }
             storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, con, false);
-            final MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId, con);
-            for (final MailAccount macc : accounts) {
-                if (macc.getId() == accountId) {
-                    return macc;
-                }
-            }
-            return null;
+            return storageService.getMailAccount(accountId, userId, contextId, con);
         } catch (final OXException e) {
             /*
              * Checking full names failed
