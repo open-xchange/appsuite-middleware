@@ -431,7 +431,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Move of recurring appointments is not supported
      */
-    RECURRING_FOLDER_MOVE(OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE_MSG, 93, Category.CATEGORY_USER_INPUT),
+    RECURRING_FOLDER_MOVE(OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE_MSG, OXCalendarExceptionMessage.RECURRING_FOLDER_MOVE_MSG, 93, Category.CATEGORY_USER_INPUT),
     /**
      * In order to accomplish the search, %1$d or more characters are required.
      */
