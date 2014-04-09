@@ -62,6 +62,7 @@
 * 2014-04-02 - ioannis.chouklis@open-xchange.com
 
  - Fix for Bug 31855: [L3] email cannot be displayed and customer gets only a MSG-0020
+ - Fix for bug 31854: NPE at POP3Store.reinitCapabilities
 
 * 2014-04-02 - jan.bauerdick@open-xchange.com
 
@@ -262,7 +263,7 @@
 
 * 2024-03-07 - ioannis.chouklis@open-xchange.com
 
-- Fix for bug 31448: [L3] Backend mistakes IMAP with SMTP password entries by updating external mail account credentials 
+ - Fix for bug 31448: [L3] Backend mistakes IMAP with SMTP password entries by updating external mail account credentials 
 
 * 2014-03-07 - marcus.klein@open-xchange.com
 

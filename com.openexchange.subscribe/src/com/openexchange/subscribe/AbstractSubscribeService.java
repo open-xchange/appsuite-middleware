@@ -181,6 +181,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     public void modifyIncoming(final Subscription subscription) throws OXException {
         Object accountIDObject = subscription.getConfiguration().get("account");
+        Integer accountId = null;
         if (JSONObject.NULL == accountIDObject) {
             throw SubscriptionErrorMessage.NO_OAUTH_ACCOUNT_GIVEN.create();
         }

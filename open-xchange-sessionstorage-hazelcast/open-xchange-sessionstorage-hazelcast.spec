@@ -93,6 +93,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
+* Thu Apr 03 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-04-07
 * Mon Mar 31 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-03-31
 * Wed Mar 19 2014 Marcus Klein <marcus.klein@open-xchange.com>

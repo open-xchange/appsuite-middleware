@@ -71,6 +71,8 @@ done
 %doc ./com.openexchange.admin.reseller/ChangeLog
 
 %changelog
+* Thu Apr 03 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2014-04-07
 * Mon Mar 31 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2014-03-31
 * Wed Mar 19 2014 Jan Bauerdick <jan.bauerdick@open-xchange.com>
