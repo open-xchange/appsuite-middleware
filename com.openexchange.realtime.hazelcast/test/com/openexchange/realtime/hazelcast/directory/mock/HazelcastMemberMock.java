@@ -148,172 +148,96 @@ public class HazelcastMemberMock implements Member {
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#getSocketAddress()
-     */
-    @Override
     public InetSocketAddress getSocketAddress() {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#getAttributes()
-     */
-    @Override
     public Map<String, Object> getAttributes() {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#getStringAttribute(java.lang.String)
-     */
-    @Override
     public String getStringAttribute(String key) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#setStringAttribute(java.lang.String, java.lang.String)
-     */
-    @Override
     public void setStringAttribute(String key, String value) {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#getBooleanAttribute(java.lang.String)
-     */
-    @Override
     public Boolean getBooleanAttribute(String key) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#setBooleanAttribute(java.lang.String, boolean)
-     */
-    @Override
     public void setBooleanAttribute(String key, boolean value) {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#getByteAttribute(java.lang.String)
-     */
-    @Override
     public Byte getByteAttribute(String key) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#setByteAttribute(java.lang.String, byte)
-     */
-    @Override
     public void setByteAttribute(String key, byte value) {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#getShortAttribute(java.lang.String)
-     */
-    @Override
     public Short getShortAttribute(String key) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#setShortAttribute(java.lang.String, short)
-     */
-    @Override
     public void setShortAttribute(String key, short value) {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#getIntAttribute(java.lang.String)
-     */
-    @Override
     public Integer getIntAttribute(String key) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#setIntAttribute(java.lang.String, int)
-     */
-    @Override
     public void setIntAttribute(String key, int value) {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#getLongAttribute(java.lang.String)
-     */
-    @Override
     public Long getLongAttribute(String key) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#setLongAttribute(java.lang.String, long)
-     */
-    @Override
     public void setLongAttribute(String key, long value) {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#getFloatAttribute(java.lang.String)
-     */
-    @Override
     public Float getFloatAttribute(String key) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#setFloatAttribute(java.lang.String, float)
-     */
-    @Override
     public void setFloatAttribute(String key, float value) {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#getDoubleAttribute(java.lang.String)
-     */
-    @Override
     public Double getDoubleAttribute(String key) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#setDoubleAttribute(java.lang.String, double)
-     */
-    @Override
     public void setDoubleAttribute(String key, double value) {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.core.Member#removeAttribute(java.lang.String)
-     */
-    @Override
     public void removeAttribute(String key) {
         // TODO Auto-generated method stub
 
