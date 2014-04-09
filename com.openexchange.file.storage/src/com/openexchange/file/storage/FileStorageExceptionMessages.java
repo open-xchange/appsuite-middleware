@@ -78,6 +78,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // Invalid URL \"%1$s\". Please correct the value and try again.
     public static final String INVALID_URL_MSG = "Invalid URL \"%1$s\". Please correct the value and try again.";
 
+    // The allowed quota is reached. Please delete some items in order to store new ones.
+    public static final String QUOTA_REACHED_MSG = "The allowed quota is reached. Please delete some items in order to store new ones.";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

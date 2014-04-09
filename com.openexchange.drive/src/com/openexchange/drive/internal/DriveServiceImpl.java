@@ -100,6 +100,7 @@ import com.openexchange.drive.sync.optimize.OptimizingFileSynchronizer;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
 
@@ -301,8 +302,10 @@ public class DriveServiceImpl implements DriveService {
         try {
             createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength, created, modified);
         } catch (OXException e) {
-            LOG.warn("Got exception during upload ({})\nSession: {}, path: {}, original version: {}, new version: {}, offset: {}, total length: {}",e.getMessage(),driveSession,path,originalVersion,newVersion,offset,totalLength);
-            if ("FLS-0024".equals(e.getErrorCode())) {
+            LOG.warn("Got exception during upload ({})\nSession: {}, path: {}, original version: {}, new version: {}, offset: {}, total length: {}",
+                e.getMessage(), driveSession, path, originalVersion, newVersion, offset, totalLength);
+            if ("FLS-0024".equals(e.getErrorCode()) || FileStorageExceptionCodes.QUOTA_REACHED.equals(e) ||
+                "SMARTDRIVEFILE_STORAGE-0008".equals(e.getErrorCode())) {
                 /*
                  * quota reached
                  */
