@@ -47,24 +47,27 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.drive.checksum.rdb;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
+import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
  * {@link DirectoryChecksumsAddUserColumnTask}
+ *
+ * Deletes all existing directory checksums and adds the column <code>user INT4 UNSIGNED</code> afterwards.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -72,29 +75,53 @@ public class DirectoryChecksumsAddUserColumnTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { DriveCreateTableTask.class.getName() };
     }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
         int contextID = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection connnection = dbService.getForUpdateTask(contextID);
-        Column userColumn = new Column("user", "INT(10) UNSIGNED NOT NULL");
+        DatabaseService dbService = DriveServiceLookup.getService(DatabaseService.class);
+        Connection connection = dbService.getForUpdateTask(contextID);
+        boolean committed = false;
+        Column userColumn = new Column("user", "INT4 UNSIGNED");
         try {
-            connnection.setAutoCommit(false);
-            Tools.checkAndAddColumns(connnection, "prg_dates", userColumn);
-            Tools.checkAndAddColumns(connnection, "del_dates", userColumn);
-            connnection.commit();
+            connection.setAutoCommit(false);
+            if (false == Tools.columnExists(connection, "directoryChecksums", userColumn.getName())) {
+                deleteDirectoryChecksums(connection);
+                Tools.addColumns(connection, "directoryChecksums", userColumn);
+                connection.commit();
+                committed = true;
+            }
         } catch (SQLException e) {
-            rollback(connnection);
+            rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connnection);
+            rollback(connection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(connnection);
-            Database.backNoTimeout(contextID, true, connnection);
+            autocommit(connection);
+            if (committed) {
+                dbService.backForUpdateTask(contextID, connection);
+            } else {
+                dbService.backForUpdateTaskAfterReading(contextID, connection);
+            }
+        }
+    }
+
+    /**
+     * Deletes all entries from the <code>directoryChecksums</code> table.
+     *
+     * @param connection The connection
+     * @throws SQLException
+     */
+    private static void deleteDirectoryChecksums(Connection connection) throws SQLException {
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            stmt.execute("DELETE FROM directoryChecksums;");
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 
