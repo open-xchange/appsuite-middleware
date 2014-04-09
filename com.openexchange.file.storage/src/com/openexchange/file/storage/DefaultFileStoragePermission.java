@@ -65,7 +65,6 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
     public static DefaultFileStoragePermission newInstance() {
         final DefaultFileStoragePermission retval = new DefaultFileStoragePermission();
         retval.setMaxPermissions();
-        retval.setGroup(true);
         return retval;
     }
 
