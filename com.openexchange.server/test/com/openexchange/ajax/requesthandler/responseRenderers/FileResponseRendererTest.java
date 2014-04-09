@@ -284,6 +284,47 @@ public class FileResponseRendererTest extends TestCase {
         }
     }
 
+    public void test404_Bug26848() {
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+
+        // test with null file
+        AJAXRequestData requestData = new AJAXRequestData();
+        AJAXRequestResult result = new AJAXRequestResult();
+        SimHttpServletRequest req = new SimHttpServletRequest();
+        SimHttpServletResponse resp = new SimHttpServletResponse();
+        ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.write(requestData, result, req, resp);
+        assertEquals("Wrong status code", 404, resp.getStatus());
+
+        // test with empty filename
+        final byte[] bytes = new byte[0];
+        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+        fileHolder.setContentType("application/octet-stream");
+        fileHolder.setDelivery("download");
+        fileHolder.setDisposition("attachment");
+        fileHolder.setName("");
+        
+        resp = new SimHttpServletResponse();
+        servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+
+        result = new AJAXRequestResult(fileHolder, "file");
+        fileResponseRenderer.write(requestData, result, req, resp);
+        assertEquals("Wrong status code", 404, resp.getStatus());
+
+        // test with empty content type and empty filename
+        fileHolder.setContentType("");
+        
+        resp = new SimHttpServletResponse();
+        servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+
+        result = new AJAXRequestResult(fileHolder, "file");
+        fileResponseRenderer.write(requestData, result, req, resp);
+        assertEquals("Wrong status code", 404, resp.getStatus());
+    }
+
 
     public void testChunkRead() {
         try {
