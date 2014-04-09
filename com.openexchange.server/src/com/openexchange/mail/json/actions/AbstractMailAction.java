@@ -220,6 +220,30 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     protected abstract AJAXRequestResult perform(MailRequest req) throws OXException, JSONException;
 
     /**
+     * Checks whether specified mail should be discarded according to filter flags
+     *
+     * @param m The mail to check
+     * @param ignoreSeen <code>true</code> to ignore \Seen ones; otherwise <code>false</code>
+     * @param ignoreDeleted <code>true</code> to ignore \Deleted ones that are \Seen; otherwise <code>false</code>
+     * @return <code>true</code> if mail should be discarded according to filter flags; otherwise <code>false</code>
+     */
+    protected static boolean discardMail(final MailMessage m, final boolean ignoreSeen, final boolean ignoreDeleted) {
+        if (null == m) {
+            return true;
+        }
+        if (ignoreSeen && m.isSeen()) {
+            // Discard \Seen mails
+            return true;
+        }
+        if (ignoreDeleted && m.isDeleted() && m.isSeen()) {
+            // Discard \Seen mails that are \Deleted
+            return true;
+        }
+        // Do not discard
+        return false;
+    }
+
+    /**
      * Triggers the contact collector for specified mail's addresses.
      *
      * @param session The session

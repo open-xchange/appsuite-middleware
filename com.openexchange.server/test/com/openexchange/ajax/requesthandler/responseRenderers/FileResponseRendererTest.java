@@ -50,12 +50,16 @@
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
 import javax.servlet.sim.ByteArrayServletOutputStream;
 import junit.framework.TestCase;
+import org.apache.commons.io.IOUtils;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -82,6 +86,8 @@ import com.openexchange.tools.strings.StringParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FileResponseRendererTest extends TestCase {
+
+    private final String TEST_DATA_DIR = "testconf/"; 
 
     /**
      * Initializes a new {@link FileResponseRendererTest}.
@@ -137,6 +143,147 @@ public class FileResponseRendererTest extends TestCase {
             fail(e.getMessage());
         }
     }
+
+    public void testContentLengthMailAttachments_Bug26926() {
+        try {            
+            final File file = new File(TEST_DATA_DIR, "OX6-User-Guide-German-v6.22.2.pdf");
+            final InputStream is = new FileInputStream(file);
+            final byte[] bytes = IOUtils.toByteArray(is);
+            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+            {
+                fileHolder.setContentType("application/pdf");
+                fileHolder.setDelivery("download");
+                fileHolder.setDisposition("attachment");
+                fileHolder.setName(file.getName());
+            }
+            final AJAXRequestData requestData = new AJAXRequestData();
+            requestData.setSession(new SimServerSession(1, 1));
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            final SimHttpServletRequest req = new SimHttpServletRequest();
+            final SimHttpServletResponse resp = new SimHttpServletResponse();
+            {
+                final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+                resp.setOutputStream(servletOutputStream);
+            }
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+            fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+            System.out.println("break");
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+    
+    public void testZeroByteTransformation_Bug28429() {
+        try {            
+            final File file = new File(TEST_DATA_DIR, "28429.jpg");
+            final InputStream is = new FileInputStream(file);
+            final byte[] bytes = IOUtils.toByteArray(is);
+            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+            {
+                fileHolder.setContentType("image/jpeg");
+                fileHolder.setDelivery("view");
+                fileHolder.setDisposition("inline");
+                fileHolder.setName(file.getName());
+            }
+            final AJAXRequestData requestData = new AJAXRequestData();
+            {
+                requestData.setSession(new SimServerSession(1, 1));
+                requestData.putParameter("width", "10");
+                requestData.putParameter("height", "10");
+            }
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            final SimHttpServletRequest req = new SimHttpServletRequest();
+            final SimHttpServletResponse resp = new SimHttpServletResponse();
+            {
+                final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+                resp.setOutputStream(servletOutputStream);
+            }
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+            fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
+            fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+            assertFalse("Got an error status: " + resp.getStatus(), resp.getStatus() >= 400);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+    
+    public void testContentTypeByFileName_Bug31648() {
+        try {            
+            final File file = new File(TEST_DATA_DIR, "VM1161.PNG");
+            final InputStream is = new FileInputStream(file);
+            final byte[] bytes = IOUtils.toByteArray(is);
+            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+            {
+                fileHolder.setContentType("application/binary");
+                fileHolder.setDelivery("view");
+                fileHolder.setDisposition("inline");
+                fileHolder.setName(file.getName());
+            }
+            final AJAXRequestData requestData = new AJAXRequestData();
+            {
+                requestData.setSession(new SimServerSession(1, 1));
+                requestData.putParameter("width", "10");
+                requestData.putParameter("height", "10");
+            }
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            final SimHttpServletRequest req = new SimHttpServletRequest();
+            final SimHttpServletResponse resp = new SimHttpServletResponse();
+            final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+            resp.setOutputStream(servletOutputStream);
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+            fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
+            fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+            final String expectedContentType = "image/png";
+            final String currentContentType = resp.getContentType();
+            assertEquals("Unexpected content-type.", expectedContentType, currentContentType);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+    
+    public void testRangeHeader_Bug27394() {
+        try {            
+            final File file = new File(TEST_DATA_DIR, "OX6-User-Guide-German-v6.22.2.pdf");
+            final InputStream is = new FileInputStream(file);
+            final byte[] bytes = IOUtils.toByteArray(is);
+            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+            {
+                fileHolder.setContentType("application/pdf");
+                fileHolder.setDelivery("view");
+                fileHolder.setDisposition("inline");
+                fileHolder.setName(file.getName());
+            }
+            final AJAXRequestData requestData = new AJAXRequestData(); 
+            {
+                requestData.setSession(new SimServerSession(1, 1));
+                requestData.putParameter("width", "10");
+                requestData.putParameter("height", "10");
+            }
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            final SimHttpServletRequest req = new SimHttpServletRequest();
+            {
+                req.setHeader("Range", "bytes=0-50");
+            }
+            final SimHttpServletResponse resp = new SimHttpServletResponse();
+            final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+            resp.setOutputStream(servletOutputStream);
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+            fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
+            fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+            System.out.println("break");
+            assertTrue("HTTP header \"accept-ranges\" is missing", resp.containsHeader("accept-ranges"));
+            assertTrue("HTTP header \"content-range\" is missing", resp.containsHeader("content-range"));
+            assertEquals("bytes", resp.getHeaders().get("accept-ranges"));
+            assertEquals("bytes 0-50/3852226", resp.getHeaders().get("content-range"));
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
 
     public void testChunkRead() {
         try {
@@ -279,7 +426,6 @@ public class FileResponseRendererTest extends TestCase {
         requestData.putParameter("height", "10");
         requestData.putParameter("cache", "false");
         final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-        result.setHeader("ETag", "1323jjlksldfsdkfms");
         final SimHttpServletRequest req = new SimHttpServletRequest();
         final SimHttpServletResponse resp = new SimHttpServletResponse();
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
@@ -337,9 +483,9 @@ public class FileResponseRendererTest extends TestCase {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
         fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
         final AJAXRequestData requestData = new AJAXRequestData();
-        requestData.setSession(new SimServerSession(1, 1));
         requestData.putParameter("width", "10");
         requestData.putParameter("height", "10");
+        requestData.setSession(new SimServerSession(1, 1));
         final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         result.setHeader("ETag", "1323jjlksldfsdkfms");
         final SimHttpServletRequest req = new SimHttpServletRequest();
