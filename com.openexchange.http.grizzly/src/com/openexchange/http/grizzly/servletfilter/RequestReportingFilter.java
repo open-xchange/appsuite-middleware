@@ -64,6 +64,7 @@ import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
+import com.openexchange.log.LogProperties;
 
 /**
  * {@link RequestReportingFilter} - Add incoming requests to the RequestWatcherService so we can track and interrupt long running requests.
@@ -118,7 +119,7 @@ public class RequestReportingFilter implements Filter {
                     LOG.debug("{} is not available. Unable to watch this request.", RequestWatcherService.class.getSimpleName());
                     chain.doFilter(httpServletRequest, httpServletResponse);
                 } else {
-                    final RequestRegistryEntry requestRegistryEntry = requestWatcher.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread());
+                    final RequestRegistryEntry requestRegistryEntry = requestWatcher.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread(), LogProperties.getPropertyMap());
                     try {
                         // Proceed processing
                         chain.doFilter(request, response);

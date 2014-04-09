@@ -6,6 +6,7 @@
 
  - Fix for bug 31968: Drop personal infostore folders on user deletion
  - Fix for bug 31978: Added proper i18n error display message for error code APP-0093
+ - Fix for bug 31962: Fixed request watcher runs
 
 * 2014-04-07 - thorben.betten@open-xchange.com
 

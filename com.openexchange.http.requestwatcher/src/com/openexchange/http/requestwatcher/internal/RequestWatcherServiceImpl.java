@@ -153,7 +153,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     {
                         // Sort the properties for readability
                         Map<String, String> sorted = new TreeMap<String, String>();
-                        for (Entry<String, String> propertyEntry : LogProperties.getPropertyMap().entrySet()) {
+                        for (Entry<String, String> propertyEntry : entry.getPropertyMap().entrySet()) {
                             String propertyName = propertyEntry.getKey();
                             String value = propertyEntry.getValue();
                             if (null != value) {
@@ -210,8 +210,8 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
     }
 
     @Override
-    public RequestRegistryEntry registerRequest(final HttpServletRequest request, final HttpServletResponse response, final Thread thread) {
-        final RequestRegistryEntry registryEntry = new RequestRegistryEntry(NUMBER.incrementAndGet(), request, response, thread);
+    public RequestRegistryEntry registerRequest(final HttpServletRequest request, final HttpServletResponse response, final Thread thread, final Map<String, String> propertyMap) {
+        final RequestRegistryEntry registryEntry = new RequestRegistryEntry(NUMBER.incrementAndGet(), request, response, thread, propertyMap);
         requestRegistry.add(registryEntry);
         return registryEntry;
     }
@@ -235,7 +235,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
     static final class FastThrowable extends Throwable {
 
         FastThrowable() {
-            super();
+            super("tracked request");
         }
 
         @Override
