@@ -602,20 +602,6 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                 throw CIFSExceptionCodes.UPDATE_DENIED.create(fid);
             }
             /*
-             * New URI
-             */
-            final String newUri;
-            {
-                final URI uri = new URI(fid, false);
-                String path = uri.getPath();
-                if (path.endsWith(SLASH)) {
-                    path = path.substring(0, path.length() - 1);
-                }
-                final int pos = path.lastIndexOf('/');
-                uri.setPath(pos > 0 ? new StringBuilder(path.substring(0, pos)).append('/').append(newName).toString() : newName);
-                newUri = checkFolderId(uri.toString());
-            }
-            /*
              * Check validity
              */
             final SmbFile renameMe = getSmbFile(fid);
@@ -625,6 +611,10 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             if (!renameMe.isDirectory()) {
                 throw CIFSExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
+            /*
+             * New URI
+             */
+            String newUri = checkFolderId(checkFolderId(renameMe.getParent()) + newName);
             final SmbFile dest = getSmbFile(newUri);
             /*
              * Perform rename
