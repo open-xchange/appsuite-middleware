@@ -197,6 +197,10 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
 
         @Override
         public void onComplete(final FilterChainContext context) {
+            stopPing();
+        }
+
+        public void stopPing() {
             synchronized (sync) {
                 pingCount.set(-1);
             }
@@ -324,7 +328,9 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                     if (pingInitiated) {
                         final WatchInfo watchInfo = pingMap.remove(ctx);
                         if (null != watchInfo) {
+                            watchInfo.stopPing();
                             watchInfo.timerTask.cancel(false);
+                            ctx.removeCompletionListener(watchInfo);
                             // Canceled timer task gets purged by CustomThreadPoolExecutorTimerService.PurgeRunnable
                         }
                     }
