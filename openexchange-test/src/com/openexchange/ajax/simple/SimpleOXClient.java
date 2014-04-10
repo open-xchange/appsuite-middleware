@@ -51,16 +51,21 @@ package com.openexchange.ajax.simple;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
@@ -138,15 +143,20 @@ public class SimpleOXClient {
         String url = BASE+"/"+module;
 
         if(params.containsKey("body")) {
+            EntityEnclosingMethod entityMethod;
             String body = JSONCoercion.coerceToJSON(params.remove("body")).toString();
-            PutMethod putMethod = new PutMethod(url);
+            if("getWithBody".equals(action)) {
+                entityMethod = new GetWithBody(url);
+            } else {
+                entityMethod = new PutMethod(url);
+            }
             try {
-                putMethod.setRequestEntity(new StringRequestEntity(body, "text/javascript", "UTF-8"));
+                entityMethod.setRequestEntity(new StringRequestEntity(body, "text/javascript", "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 // Doesn't happen
                 e.printStackTrace();
             }
-            method = putMethod;
+            method = entityMethod;
         } else {
             method = new GetMethod(url);
         }
