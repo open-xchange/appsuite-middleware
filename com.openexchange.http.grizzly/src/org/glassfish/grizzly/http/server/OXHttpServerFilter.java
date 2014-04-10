@@ -442,7 +442,6 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                                     outputBuffer.flush();
                                 }
                                 pingIssued = true;
-                                pingIssued = true;
                             }
                             if (false == pingIssued) {
                                 pingCount.set(maxPingCount);
