@@ -642,6 +642,9 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 
 
 			while(iter.hasNext()) {
+                if (FolderObject.TRASH == folder.getType()) {
+                    continue; // skip trash folder
+                }
 				final FolderObject folder = iter.next();
 				final WebdavPath newUrl = getUrl().dup().append(getFolderName(folder));
                 children.add(new FolderCollection(newUrl, factory, folder));
