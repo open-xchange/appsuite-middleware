@@ -105,6 +105,7 @@ import org.glassfish.grizzly.Grizzly;
 import org.glassfish.grizzly.ReadHandler;
 import org.glassfish.grizzly.attributes.Attribute;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
+import org.glassfish.grizzly.filterchain.FilterChainContext.CompletionListener;
 import org.glassfish.grizzly.filterchain.NextAction;
 import org.glassfish.grizzly.http.HttpContent;
 import org.glassfish.grizzly.http.HttpPacket;
@@ -179,15 +180,26 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         }
     }
 
-    private static final class WatchInfo {
+    private static final class WatchInfo implements CompletionListener {
 
         final ScheduledTimerTask timerTask;
         final Response handlerResponse;
+        private final AtomicInteger pingCount;
+        private final Object sync;
 
-        WatchInfo(ScheduledTimerTask timerTask, Response handlerResponse) {
+        WatchInfo(ScheduledTimerTask timerTask, Response handlerResponse, AtomicInteger pingCount, Object sync) {
             super();
             this.timerTask = timerTask;
             this.handlerResponse = handlerResponse;
+            this.pingCount = pingCount;
+            this.sync = sync;
+        }
+
+        @Override
+        public void onComplete(final FilterChainContext context) {
+            synchronized (sync) {
+                pingCount.set(-1);
+            }
         }
 
     }
@@ -373,7 +385,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                 final Runnable r = new Runnable() {
 
                     @Override
-                    public void run() {
+                    public synchronized void run() {
                         try {
                             final WatchInfo watchInfo = cm.get(ctx);
                             boolean pingIssued = false;
@@ -454,7 +466,9 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
 
                 final ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(r, pingDelay, pingDelay);
                 ref.set(timerTask);
-                cm.put(ctx, new WatchInfo(timerTask, handlerResponse));
+                final WatchInfo watchInfo = new WatchInfo(timerTask, handlerResponse, pingCount, r);
+                cm.put(ctx, watchInfo);
+                ctx.addCompletionListener(watchInfo);
             }
         };
 
