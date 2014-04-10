@@ -258,17 +258,23 @@ public final class MimeReply {
             /*
              * Set headers of reply message
              */
-            final String subjectPrefix = PREFIX_RE;
-            String subjectHdrValue = MimeMessageUtility.checkNonAscii(origMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
-            if (subjectHdrValue == null) {
-                subjectHdrValue = "";
-            }
-            final String rawSubject = unfold(subjectHdrValue);
             {
+                final String rawSubject;
+                {
+                    final String subjectHdrValue = MimeMessageUtility.checkNonAscii(origMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
+                    if (subjectHdrValue == null) {
+                        rawSubject = "";
+                    } else {
+                        rawSubject = unfold(subjectHdrValue);
+                    }
+                }
                 final String decodedSubject = MimeMessageUtility.decodeMultiEncodedHeader(rawSubject);
-                final String newSubject =
-                    decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject : new StringBuilder().append(subjectPrefix).append(
-                        decodedSubject).toString();
+                final String newSubject;
+                if (decodedSubject.regionMatches(true, 0, PREFIX_RE, 0, 4)) {
+                    newSubject = decodedSubject;
+                } else {
+                    newSubject = new StringBuilder().append(PREFIX_RE).append(decodedSubject).toString();
+                }
                 replyMsg.setSubject(newSubject, MailProperties.getInstance().getDefaultMimeCharset());
             }
             /*
