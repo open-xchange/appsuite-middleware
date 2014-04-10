@@ -2,6 +2,7 @@
 
  - Fix for bug 31828: Honor possible surrogate pairs when splitting a string during mail-safe conversion
  - Fix for bug 31987: Extended infostore document tables by the (`cid`, `file_md5sum`) index
+ - Fix for bug 31826: Keep unicode representation for special HTML entities
 
 * 2014-04-09 - tobias.friedrich@open-xchange.com
 
