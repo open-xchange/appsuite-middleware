@@ -49,6 +49,7 @@
 
 package com.openexchange.find.basic.calendar;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -196,6 +197,24 @@ public class AppointmentSearchBuilder {
     public AppointmentSearchBuilder applyQueries(List<String> queries) throws OXException {
         for (String query : queries) {
             applyQuery(query);
+        }
+        return this;
+    }
+
+    /**
+     * Applies a specific folder ID to the search.
+     *
+     * @param folderID The folder ID to apply, or <code>null</code> if not specified
+     * @return The builder
+     * @throws OXException
+     */
+    public AppointmentSearchBuilder applyFolder(String folderID) throws OXException {
+        if (null != folderID) {
+            try {
+                appointmentSearch.setFolderIDs(Collections.singleton(Integer.valueOf(folderID)));
+            } catch (NumberFormatException e) {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, folderID, CommonFacetType.FOLDER.getId());
+            }
         }
         return this;
     }
