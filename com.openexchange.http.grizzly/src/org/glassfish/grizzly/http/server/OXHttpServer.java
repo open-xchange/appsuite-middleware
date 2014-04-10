@@ -689,6 +689,9 @@ public class OXHttpServer extends HttpServer {
                 builder.add(new ResourceAllocationFilter());
             }
 
+            httpServerFilter.setAllowPayloadForUndefinedHttpMethods(
+                serverConfig.isAllowPayloadForUndefinedHttpMethods());
+
             httpServerFilter.getMonitoringConfig().addProbes(
                     serverConfig.getMonitoringConfig().getHttpConfig().getProbes());
             builder.add(httpServerFilter);
