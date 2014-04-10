@@ -121,6 +121,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             ServerConfiguration serverConfiguration = grizzly.getServerConfiguration();
             serverConfiguration.setMaxRequestParameters(grizzlyConfig.getMaxRequestParameters());
+            serverConfiguration.setAllowPayloadForUndefinedHttpMethods(true);
 
             final NetworkListener networkListener = new NetworkListener("http-listener", grizzlyConfig.getHttpHost(), grizzlyConfig.getHttpPort());
 
