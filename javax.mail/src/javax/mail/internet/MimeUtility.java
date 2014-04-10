@@ -778,7 +778,7 @@ public class MimeUtility {
 	    // If the length is greater than 'avail', split 'string'
 	    // into two and recurse.
 	    int splitPos = size/2;
-	    if (Character.isSurrogatePair(string.charAt(splitPos-1), string.charAt(splitPos))) {
+	    if (splitPos < size && Character.isSurrogatePair(string.charAt(splitPos-1), string.charAt(splitPos))) {
             splitPos++;
         }
 	    // Split at detected position
