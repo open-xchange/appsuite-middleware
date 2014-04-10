@@ -110,31 +110,35 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                  */
                 @Override
                 public void run() {
-                    final boolean debugEnabled = LOG.isDebugEnabled();
-                    final Iterator<RequestRegistryEntry> descendingEntryIterator = requestRegistry.descendingIterator();
-                    final StringBuilder sb = new StringBuilder(256);
-                    boolean stillOldRequestsLeft = true;
-                    while (stillOldRequestsLeft && descendingEntryIterator.hasNext()) {
-                        if (debugEnabled) {
-                            sb.setLength(0);
-                            for (final RequestRegistryEntry entry : requestRegistry) {
-                                sb.append(lineSeparator).append("RegisteredThreads:").append(lineSeparator).append("    age: ").append(entry.getAge()).append(" ms").append(
-                                    ", thread: ").append(entry.getThreadInfo());
+                    try {
+                        final boolean debugEnabled = LOG.isDebugEnabled();
+                        final Iterator<RequestRegistryEntry> descendingEntryIterator = requestRegistry.descendingIterator();
+                        final StringBuilder sb = new StringBuilder(256);
+                        boolean stillOldRequestsLeft = true;
+                        while (stillOldRequestsLeft && descendingEntryIterator.hasNext()) {
+                            if (debugEnabled) {
+                                sb.setLength(0);
+                                for (final RequestRegistryEntry entry : requestRegistry) {
+                                    sb.append(lineSeparator).append("RegisteredThreads:").append(lineSeparator).append("    age: ").append(entry.getAge()).append(" ms").append(
+                                        ", thread: ").append(entry.getThreadInfo());
+                                }
+                                final String entries = sb.toString();
+                                if (!entries.isEmpty()) {
+                                    LOG.debug(sb.toString());
+                                }
                             }
-                            final String entries = sb.toString();
-                            if (!entries.isEmpty()) {
-                                LOG.debug(sb.toString());
+                            final RequestRegistryEntry requestRegistryEntry = descendingEntryIterator.next();
+                            if (requestRegistryEntry.getAge() > requestMaxAge) {
+                                sb.setLength(0);
+                                logRequestRegistryEntry(requestRegistryEntry, sb);
+                                // Don't remove
+                                // requestRegistry.remove(requestRegistryEntry);
+                            } else {
+                                stillOldRequestsLeft = false;
                             }
                         }
-                        final RequestRegistryEntry requestRegistryEntry = descendingEntryIterator.next();
-                        if (requestRegistryEntry.getAge() > requestMaxAge) {
-                            sb.setLength(0);
-                            logRequestRegistryEntry(requestRegistryEntry, sb);
-                            // Don't remove
-                            // requestRegistry.remove(requestRegistryEntry);
-                        } else {
-                            stillOldRequestsLeft = false;
-                        }
+                    } catch (final Exception e) {
+                        LOG.error("Request watcher run failed", e);
                     }
                 }
 
