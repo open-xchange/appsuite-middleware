@@ -777,9 +777,14 @@ public class MimeUtility {
 	if ((len > avail) && ((size = string.length()) > 1)) { 
 	    // If the length is greater than 'avail', split 'string'
 	    // into two and recurse.
-	    doEncode(string.substring(0, size/2), b64, jcharset, 
+	    int splitPos = size/2;
+	    if (Character.isSurrogatePair(string.charAt(splitPos-1), string.charAt(splitPos))) {
+            splitPos++;
+        }
+	    // Split at detected position
+	    doEncode(string.substring(0, splitPos), b64, jcharset, 
 		     avail, prefix, first, encodingWord, buf);
-	    doEncode(string.substring(size/2, size), b64, jcharset,
+	    doEncode(string.substring(splitPos, size), b64, jcharset,
 		     avail, prefix, false, encodingWord, buf);
 	} else {
 	    // length <= than 'avail'. Encode the given string

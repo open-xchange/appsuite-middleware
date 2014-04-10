@@ -49,12 +49,14 @@
 
 package com.openexchange.find.basic.tasks;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
@@ -74,13 +76,13 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class TaskSearchObjectBuilder {
-    
+
     private final TaskSearchObject searchObject;
-    
+
     private final ServerSession session;
-    
+
     private enum SupportedFields {title, description, status, folder_type, type, participant, attachment};
-    
+
     /**
      * Initializes a new {@link TaskSearchBuilder}.
      */
@@ -89,21 +91,21 @@ public class TaskSearchObjectBuilder {
         session = ss;
         searchObject = new TaskSearchObject();
     }
-    
+
     /**
      * Build the {@link TaskSearchObject}
-     * 
+     *
      * @return the {@link TaskSearchObject}
      */
     public TaskSearchObject build() {
         return searchObject;
     }
-    
+
     /**
      * Add the specified {@link Filter}s to the search object
      * @param filters
      * @return
-     * @throws OXException if the provided {@Filter} contains an unsupported field (@see {@link SupportedFields}). 
+     * @throws OXException if the provided {@Filter} contains an unsupported field (@see {@link SupportedFields}).
      */
     public TaskSearchObjectBuilder addFilters(List<Filter> filters) throws OXException {
         for(Filter f : filters) {
@@ -111,9 +113,9 @@ public class TaskSearchObjectBuilder {
         }
         return this;
     }
-    
+
     /**
-     * Add a {@link Filter} to the search object 
+     * Add a {@link Filter} to the search object
      * @param filter
      * @return
      * @throws OXException if the provided {@link Filter} either contains an unsupported field (@see {@link SupportedFields})
@@ -129,7 +131,7 @@ public class TaskSearchObjectBuilder {
             } catch (NullPointerException e) {
                 throw FindExceptionCode.NULL_FIELD.create(f);
             }
-            
+
             switch(sf) {
                 case title:
                     addTitleFilters(filter.getQueries());
@@ -158,7 +160,7 @@ public class TaskSearchObjectBuilder {
         }
         return this;
     }
-    
+
     /**
      * Add the specified queries to the search object
      * @param queries
@@ -170,7 +172,25 @@ public class TaskSearchObjectBuilder {
         }
         return this;
     }
-    
+
+    /**
+     * Applies a specific folder ID to the search.
+     *
+     * @param folderID The folder ID to apply, or <code>null</code> if not specified
+     * @return The builder
+     * @throws OXException
+     */
+    public TaskSearchObjectBuilder applyFolder(String folderID) throws OXException {
+        if (null != folderID) {
+            try {
+                searchObject.setFolders(Collections.singletonList(Integer.valueOf(folderID)));
+            } catch (NumberFormatException e) {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, folderID, CommonFacetType.FOLDER.getId());
+            }
+        }
+        return this;
+    }
+
     /**
      * Add a query to the search object
      * @param query
@@ -184,10 +204,10 @@ public class TaskSearchObjectBuilder {
         searchObject.setQueries(queries);
         return this;
     }
-    
+
     /**
      * Append the title queries to the search object.
-     * 
+     *
      * @param filters
      */
     private void addTitleFilters(List<String> filters) {
@@ -199,10 +219,10 @@ public class TaskSearchObjectBuilder {
         }
         searchObject.setTitles(tf);
     }
-    
+
     /**
      * Append the description queries to the search object.
-     * 
+     *
      * @param filters
      */
     private void addDescriptionFilters(List<String> filters) {
@@ -214,7 +234,7 @@ public class TaskSearchObjectBuilder {
         }
         searchObject.setNotes(df);
     }
-    
+
     /**
      * Add the status filter
      * @param filters
@@ -232,9 +252,9 @@ public class TaskSearchObjectBuilder {
         }
         searchObject.setStateFilters(sf);
     }
-    
+
     /**
-     * Prefetch all relevant folder ids, according to the specified filters  
+     * Prefetch all relevant folder ids, according to the specified filters
      * @param filters
      * @throws OXException
      */
@@ -258,7 +278,7 @@ public class TaskSearchObjectBuilder {
             }
         }
     }
-    
+
     /**
      * Add the attachment filters
      * @param filters
@@ -272,7 +292,7 @@ public class TaskSearchObjectBuilder {
         }
         searchObject.setAttachmentNames(af);
     }
-    
+
     /**
      * Set the recurrence type filter
      * @param filters
@@ -288,17 +308,17 @@ public class TaskSearchObjectBuilder {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(r, "type");
         }
     }
-    
+
     private void addParticipantFilters(List<String> filters) throws OXException {
         Set<Integer> intP = searchObject.getUserIDs();
         Set<String> extP = searchObject.getExternalParticipants();
-        
+
         if (intP == null)
             intP = new HashSet<Integer>();
-        
+
         if (extP == null)
             extP = new HashSet<String>();
-        
+
         for(String f : filters) {
             if (f.matches("\\d+")) {
                 intP.add(Integer.parseInt(f));
@@ -306,17 +326,17 @@ public class TaskSearchObjectBuilder {
                 extP.add(f);
             }
         }
-        
+
         searchObject.setUserIDs(intP);
         searchObject.setExternalParticipants(extP);
-        
+
         searchObject.setHasInternalParticipants(intP.size() > 0);
         searchObject.setHasExternalParticipants(extP.size() > 0);
     }
-    
+
     /**
      * Wrap query with wildcards
-     * 
+     *
      * @param query
      * @return
      */

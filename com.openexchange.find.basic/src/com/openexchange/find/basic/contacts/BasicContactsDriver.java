@@ -155,6 +155,16 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             }
         }
         /*
+         * restrict to specific folder if set
+         */
+        String folderID = searchRequest.getFolderId();
+        if (null != folderID) {
+            SingleSearchTerm folderIdTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+            folderIdTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+            folderIdTerm.addOperand(new ConstantOperand<String>(folderID));
+            searchTerm.addSearchTerm(folderIdTerm);
+        }
+        /*
          * combine with addressbook queries
          */
         for (String query : searchRequest.getQueries()) {
