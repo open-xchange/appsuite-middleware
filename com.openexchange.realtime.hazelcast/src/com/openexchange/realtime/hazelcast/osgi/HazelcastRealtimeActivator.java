@@ -55,7 +55,6 @@ import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -71,8 +70,6 @@ import com.openexchange.realtime.handle.StanzaStorage;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.cleanup.GlobalRealtimeCleanupImpl;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
-import com.openexchange.realtime.hazelcast.directory.serialization.PortablePresenceFactory;
-import com.openexchange.realtime.hazelcast.directory.serialization.PortableResourceFactory;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.hazelcast.impl.HazelcastStanzaStorage;
 import com.openexchange.realtime.hazelcast.management.ManagementHouseKeeper;
@@ -105,6 +102,20 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         HazelcastInstance hazelcastInstance = getService(HazelcastInstance.class);
         HazelcastAccess.setHazelcastInstance(hazelcastInstance);
         
+        // either track Hazelcast for HazelcasAccess or get it via Services each time
+        track(HazelcastInstance.class, new SimpleRegistryListener<HazelcastInstance>() {
+
+            @Override
+            public void added(final ServiceReference<HazelcastInstance> ref, final HazelcastInstance hazelcastInstance) {
+                HazelcastAccess.setHazelcastInstance(hazelcastInstance);
+            }
+
+            @Override
+            public void removed(final ServiceReference<HazelcastInstance> ref, final HazelcastInstance hazelcastInstance) {
+                HazelcastAccess.setHazelcastInstance(null);
+            }
+        });
+        
         Config config = hazelcastInstance.getConfig();
         String id_map = discoverMapName(config, "rtIDMapping-");
         String resource_map = discoverMapName(config, "rtResourceDirectory-");
@@ -112,9 +123,6 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
             String msg = "Distributed directory maps couldn't be found in hazelcast configuration";
             throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
         }
-        registerService(CustomPortableFactory.class, new PortablePresenceFactory());
-        registerService(CustomPortableFactory.class, new PortableResourceFactory());
-        
         final HazelcastResourceDirectory directory = new HazelcastResourceDirectory(id_map, resource_map);
         managementHouseKeeper.addManagementObject(directory.getManagementObject());
         

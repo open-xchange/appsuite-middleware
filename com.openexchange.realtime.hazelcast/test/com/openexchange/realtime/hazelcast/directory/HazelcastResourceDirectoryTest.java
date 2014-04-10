@@ -55,6 +55,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -70,9 +71,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
-import com.hazelcast.config.SerializationConfig;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.Hazelcast;
@@ -80,14 +79,9 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
-import com.openexchange.realtime.hazelcast.directory.mock.MockDynamicPortableFactory;
-import com.openexchange.realtime.hazelcast.directory.serialization.PortablePresenceFactory;
-import com.openexchange.realtime.hazelcast.directory.serialization.PortableResource;
-import com.openexchange.realtime.hazelcast.directory.serialization.PortableResourceFactory;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDManager;
 import com.openexchange.realtime.packet.Presence;
@@ -124,23 +118,13 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        Config hazelcastConfig = new Config();
-        hazelcastConfig.setProperty("hazelcast.logging.type", "slf4j");
-
-        MapConfig mapConfig = new MapConfig(RESOURCE_MAP_NAME);
-        mapConfig.setMaxIdleSeconds(1);
-        hazelcastConfig.addMapConfig(mapConfig);
-
-        DynamicPortableFactory dynamicFactory = new MockDynamicPortableFactory(new PortableResourceFactory(), new PortablePresenceFactory());
-        SerializationConfig serializationConfig = hazelcastConfig.getSerializationConfig();
-        serializationConfig.addPortableFactory(DynamicPortableFactory.FACTORY_ID, dynamicFactory);
-
-        HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(hazelcastConfig);
+        HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance();
         HazelcastAccess.setHazelcastInstance(hazelcast);
-
+        MapConfig config = new MapConfig(RESOURCE_MAP_NAME);
+        config.setMaxIdleSeconds(1);
+        hazelcast.getConfig().addMapConfig(config);
         executorService = Executors.newFixedThreadPool(25);
         random = new Random();
-        
     }
 
     @AfterClass
@@ -175,13 +159,13 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     @Test
     public void testResourceEviction() throws Exception {
         final CyclicBarrier barrier = new CyclicBarrier(2);
-        final EntryListener<String, PortableResource> listener = new EntryListener<String, PortableResource>() {
+        final EntryListener<String, Map<String,Object>> listener = new EntryListener<String, Map<String,Object>>() {
             @Override
-            public void entryUpdated(EntryEvent<String, PortableResource> event) {}
+            public void entryUpdated(EntryEvent<String, Map<String, Object>> event) {}
             @Override
-            public void entryRemoved(EntryEvent<String, PortableResource> event) {}
+            public void entryRemoved(EntryEvent<String, Map<String, Object>> event) {}
             @Override
-            public void entryEvicted(EntryEvent<String, PortableResource> event) {
+            public void entryEvicted(EntryEvent<String, Map<String, Object>> event) {
                 try {
                     barrier.await();
                 } catch (InterruptedException e) {
@@ -191,7 +175,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
                 }
             }
             @Override
-            public void entryAdded(EntryEvent<String, PortableResource> event) {}
+            public void entryAdded(EntryEvent<String, Map<String, Object>> event) {}
         };
 
         String listenerID = getResourceMapping().addEntryListener(listener, false);
@@ -286,7 +270,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong size", 2, remove2.size());
 
         MultiMap<String,String> idMapping = getIDMapping();
-        IMap<String, PortableResource> resources = getResourceMapping();
+        IMap<String, Map<String, Object>> resources = getResourceMapping();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
@@ -334,7 +318,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong size", 1, removed2.size());
 
         MultiMap<String,String> idMapping = getIDMapping();
-        IMap<String, PortableResource> resources = getResourceMapping();
+        IMap<String, Map<String, Object>> resources = getResourceMapping();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }

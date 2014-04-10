@@ -175,23 +175,23 @@ public class Presence extends Stanza {
     /**
      * Optional attribute. The default of none means the client is available.
      */
-    protected Type type = Type.NONE;
+    private Type type = Type.NONE;
 
     /**
      * Empty message as default. Clients may set a different message.
      */
-    protected String message = "";
+    private String message = "";
 
     /**
      * Signal Availability by choosing ONLINE as default. Clients may set different states.
      */
-    protected PresenceState state = PresenceState.ONLINE;
+    private PresenceState state = PresenceState.ONLINE;
 
     /**
      * The server should deliver messages to the highest-priority available resource or decide on metrics like most recent connect,
      * activity, PresenceState if several resources with the same priority are connected.
      */
-    protected byte priority = 0;
+    private byte priority = 0;
 
     /**
      * Gets the type of Presence Stanza
