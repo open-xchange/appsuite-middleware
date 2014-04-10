@@ -91,7 +91,7 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * The default sort order used to get pre-sorted results when retrieving contacts for auto-completion.
      */
     private static final SortOrder[] SORT_ORDER = new SortOrder[] {
-        new SortOrder(ContactField.FOLDER_ID, Order.ASCENDING), new SortOrder(ContactField.USE_COUNT, Order.DESCENDING)
+        new SortOrder(ContactField.USE_COUNT, Order.DESCENDING), new SortOrder(ContactField.FOLDER_ID, Order.ASCENDING)
     };
 
     /**
