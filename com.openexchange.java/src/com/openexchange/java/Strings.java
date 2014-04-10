@@ -659,9 +659,9 @@ public class Strings {
      * Takes a String of separated values, splits it at the separator, trims the split values and returns them as List.
      *
      * @param input String of separated values
-     * @param separator the seperator as regular expression used to split the input around this separator
+     * @param separator the separator as regular expression used to split the input around this separator
      * @return the split and trimmed input as List or an empty list
-     * @throws IllegalArgumentException if input or the seperator are missing or if the separator isn't a valid pattern
+     * @throws IllegalArgumentException if input or the separator are missing or if the separator isn't a valid pattern
      */
     public static List<String> splitAndTrim(String input, String separator) {
         if (input == null) {
