@@ -84,6 +84,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -95,11 +96,11 @@ import com.openexchange.tools.session.ServerSession;
  * @since 7.6.0
  */
 public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver {
-    
+
     //private final static int TASKS_FIELDS[] = {DataObject.OBJECT_ID, DataObject.CREATED_BY, Task.TITLE, Task.STATUS, Task.NOTE};
-    
-    private final static int TASKS_FIELDS[] = new int[] { Task.FOLDER_ID, Task.OBJECT_ID, Task.LAST_MODIFIED, Task.CREATED_BY, Task.CREATION_DATE, 
-                                                        Task.RECURRENCE_TYPE, Task.PERCENT_COMPLETED, Task.PRIVATE_FLAG, Task.TITLE, Task.PRIORITY, 
+
+    private final static int TASKS_FIELDS[] = new int[] { Task.FOLDER_ID, Task.OBJECT_ID, Task.LAST_MODIFIED, Task.CREATED_BY, Task.CREATION_DATE,
+                                                        Task.RECURRENCE_TYPE, Task.PERCENT_COMPLETED, Task.PRIVATE_FLAG, Task.TITLE, Task.PRIORITY,
                                                         Task.START_DATE, Task.END_DATE, Task.COLOR_LABEL, Task.STATUS, Task.NOTE };
 
     /**
@@ -132,10 +133,11 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
     @Override
     public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
         TaskSearchObjectBuilder builder = new TaskSearchObjectBuilder(session);
-        TaskSearchObject searchObject = builder.addFilters(searchRequest.getFilters()).addQueries(searchRequest.getQueries()).build();
+        TaskSearchObject searchObject = builder.addFilters(searchRequest.getFilters()).addQueries(searchRequest.getQueries())
+            .applyFolder(searchRequest.getFolderId()).build();
         searchObject.setStart(searchRequest.getStart());
         searchObject.setSize(searchRequest.getSize());
-        
+
         final TasksSQLInterface tasksSQL = new TasksSQLImpl(session);
         SearchIterator<Task> si = tasksSQL.findTask(searchObject, Task.TITLE, Order.ASCENDING, TASKS_FIELDS);
         List<Document> documents = new ArrayList<Document>();
@@ -161,12 +163,14 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         String prefix = autocompleteRequest.getPrefix();
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<Facet> facets = new ArrayList<Facet>();
-        
+
         //add field facets
-        facets.add(new FieldFacet(TasksFacetType.TASK_TITLE, new FormattableDisplayItem(TasksStrings.FACET_TASK_TITLE, prefix), Constants.FIELD_TITLE, prefix));
-        facets.add(new FieldFacet(TasksFacetType.TASK_DESCRIPTION, new FormattableDisplayItem(TasksStrings.FACET_TASK_DESCRIPTION,  prefix), Constants.FIELD_DESCRIPTION, prefix));
-        facets.add(new FieldFacet(TasksFacetType.TASK_ATTACHMENT_NAME, new FormattableDisplayItem(TasksStrings.FACET_TASK_ATTACHMENT_NAME,  prefix), Constants.FIELD_ATTACHMENT_NAME, prefix));
-        
+        if (false == Strings.isEmpty(prefix)) {
+            facets.add(new FieldFacet(TasksFacetType.TASK_TITLE, new FormattableDisplayItem(TasksStrings.FACET_TASK_TITLE, prefix), Constants.FIELD_TITLE, prefix));
+            facets.add(new FieldFacet(TasksFacetType.TASK_DESCRIPTION, new FormattableDisplayItem(TasksStrings.FACET_TASK_DESCRIPTION,  prefix), Constants.FIELD_DESCRIPTION, prefix));
+            facets.add(new FieldFacet(TasksFacetType.TASK_ATTACHMENT_NAME, new FormattableDisplayItem(TasksStrings.FACET_TASK_ATTACHMENT_NAME,  prefix), Constants.FIELD_ATTACHMENT_NAME, prefix));
+        }
+
         //add participant facets
         List<FacetValue> participants = new ArrayList<FacetValue>(contacts.size());
         for(Contact c : contacts) {
@@ -178,7 +182,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
             participants.add(buildParticipantFacet(prefix, new SimpleDisplayItem(prefix), Collections.singletonList(prefix)));
         if (!participants.isEmpty())
             facets.add(new Facet(TasksFacetType.TASK_PARTICIPANTS, participants));
-        
+
         //add status facets
         final List<FacetValue> statusFacets = new ArrayList<FacetValue>(5);
         addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.NOT_STARTED, TasksStrings.TASK_STATUS_NOT_STARTED);
@@ -187,23 +191,23 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.WAITING, TasksStrings.TASK_STATUS_WAITING);
         addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.DEFERRED, TasksStrings.TASK_STATUS_DEFERRED);
         facets.add(new Facet(TasksFacetType.TASK_STATUS, statusFacets));
-        
+
         //add folder type facets
         List<FacetValue> folderFacets = new ArrayList<FacetValue>(3);
         addFolderFacet(folderFacets, FolderTypeDisplayItem.Type.PRIVATE, CommonStrings.FOLDER_TYPE_PRIVATE);
         addFolderFacet(folderFacets, FolderTypeDisplayItem.Type.PUBLIC, CommonStrings.FOLDER_TYPE_PUBLIC);
         addFolderFacet(folderFacets, FolderTypeDisplayItem.Type.SHARED, CommonStrings.FOLDER_TYPE_SHARED);
         facets.add(new Facet(CommonFacetType.FOLDER_TYPE, folderFacets));
-        
+
         //add type facets
         final List<FacetValue> typeFacets = new ArrayList<FacetValue>(5);
         addTypeFacet(typeFacets, TaskTypeDisplayItem.Type.SINGLE_TASK, TasksStrings.TASK_TYPE_SINGLE_TASK);
         addTypeFacet(typeFacets, TaskTypeDisplayItem.Type.SERIES, TasksStrings.TASK_TYPE_SERIES);
         facets.add(new Facet(TasksFacetType.TASK_TYPE, typeFacets));
-        
+
         return new AutocompleteResult(facets);
     }
-    
+
     /**
      * Build a participant facet
      * @param valueId
@@ -216,7 +220,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
                                         Collections.singletonList(
                                             new Filter(Constants.FIELD_PARTICIPANT, TasksStrings.FACET_TASK_PARTICIPANTS, Constants.PARTICIPANTS, queries)));
     }
-    
+
     /**
      * Add a status facet
      * @param statusFacets
@@ -224,11 +228,11 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
      * @param status
      */
     private static final void addStatusFacet(List<FacetValue> statusFacets, TaskStatusDisplayItem.Type type, String status) {
-        statusFacets.add(new FacetValue(type.getIdentifier(), 
-                            new TaskStatusDisplayItem(status,type), FacetValue.UNKNOWN_COUNT, 
+        statusFacets.add(new FacetValue(type.getIdentifier(),
+                            new TaskStatusDisplayItem(status,type), FacetValue.UNKNOWN_COUNT,
                             new Filter(Collections.singletonList(FIELD_STATUS),type.getIdentifier())));
     }
-    
+
     /**
      * Add a folder facet
      * @param folderFacets
@@ -238,7 +242,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
     private static final void addFolderFacet(List<FacetValue> folderFacets, FolderTypeDisplayItem.Type type, String folderType) {
         folderFacets.add(new FacetValue(type.getIdentifier(), new FolderTypeDisplayItem(folderType, type), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(Constants.FIELD_FOLDER_TYPE), type.getIdentifier())));
     }
-    
+
     /**
      * Add task type facet
      * @param typeFacets
@@ -246,13 +250,13 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
      * @param taskType
      */
     private static final void addTypeFacet(List<FacetValue> typeFacets, TaskTypeDisplayItem.Type type, String taskType) {
-        typeFacets.add(new FacetValue(type.getIdentifier(), 
-                            new TaskTypeDisplayItem(taskType,type), 
-                            FacetValue.UNKNOWN_COUNT, 
+        typeFacets.add(new FacetValue(type.getIdentifier(),
+                            new TaskTypeDisplayItem(taskType,type),
+                            FacetValue.UNKNOWN_COUNT,
                             new Filter(Collections.singletonList(FIELD_TYPE),type.getIdentifier())));
     }
-    
-    //TODO: maybe move a level higher in the class hierarchy? 
+
+    //TODO: maybe move a level higher in the class hierarchy?
     private static List<String> extractMailAddessesFrom(final Contact contact) {
         List<String> addrs = new ArrayList<String>(3);
         String mailAddress = contact.getEmail1();
