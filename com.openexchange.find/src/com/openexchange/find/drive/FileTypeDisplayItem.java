@@ -68,7 +68,7 @@ public class FileTypeDisplayItem implements DisplayItem {
         /**
          * Image types.
          */
-        IMAGES("images"),
+        IMAGES("image"),
         /**
          * Audio types.
          */
@@ -80,7 +80,7 @@ public class FileTypeDisplayItem implements DisplayItem {
         /**
          * Document files.
          */
-        DOCUMENTS("documents"),
+        DOCUMENTS("text"),
         /**
          * Other file types.
          */

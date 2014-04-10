@@ -148,7 +148,10 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private void appendInString(final int[] allFolderIds, final int[] ownFolderIds, final StringBuilder sb) {
         boolean needOr = false;
         if (null != allFolderIds && 0 < allFolderIds.length) {
-            needOr = true;
+            if (null != ownFolderIds && ownFolderIds.length > 0) {
+                needOr = true;
+                sb.append("(");
+            }
             if (1 == allFolderIds.length) {
                 sb.append(INFOSTORE).append("folder_id = ").append(allFolderIds[0]);
             } else {
@@ -169,6 +172,9 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
                     sb.append("(").append(INFOSTORE).append("folder_id IN ");
                     sb.append(appendFolders(ownFolderIds));
                     sb.append(" AND ").append(INFOSTORE).append("created_by = ").append(userId).append(")");
+                }
+                if (needOr) {
+                    sb.append(")");
                 }
             }
         }
