@@ -69,38 +69,39 @@ import com.openexchange.mail.MailJSONField;
 
 /**
  * {@link Bug30903Test}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Bug30903Test extends AbstractMailTest {
-    
+
     private static String mail = "Message-Id: <blah@non-existent.com>\n" +
                                         "X-Mailer: AppSuite 7.6.0 \n" +
                                         "Date: Tue, 08 Apr 2014 13:37:00 +0100\n" +
-                                        "From: #ADDR#\n" + 
+                                        "From: #ADDR#\n" +
                                         "To: #ADDR#\n" +
                                         "Subject: Bug30903\n" +
                                         "Mime-Version: 1.0\n" +
                                         "Content-Type: text/plain; charset=\"UTF-8\"\n" +
                                         "\n" +
                                         "Testing";
-    
-    private String fmids[][] = new String[2][2];
-    
+
+    private final String fmids[][] = new String[2][2];
+
     /**
      * Initializes a new {@link Bug30903Test}.
-     * 
+     *
      * @param name
      */
     public Bug30903Test(String name) {
         super(name);
     }
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
     }
-    
+
+    @Override
     public void tearDown() throws Exception {
         DeleteRequest delReq = new DeleteRequest(fmids, true);
         client.execute(delReq);
@@ -109,7 +110,7 @@ public class Bug30903Test extends AbstractMailTest {
 
     /**
      * Store a draft mail in 'Drafts' folder and send afterwards
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -117,20 +118,20 @@ public class Bug30903Test extends AbstractMailTest {
     public void testDeleteDraft() throws OXException, IOException, JSONException {
         UserValues values = client.getValues();
         //Save draft
-        NewMailRequest newMailReq = new NewMailRequest(values.getDraftsFolder(), 
-                                mail.replaceAll("#ADDR#", values.getSendAddress()), 
+        NewMailRequest newMailReq = new NewMailRequest(values.getDraftsFolder(),
+                                mail.replaceAll("#ADDR#", values.getSendAddress()),
                                 MailFlag.DRAFT.getValue());
         NewMailResponse newMailResp = client.execute(newMailReq);
         assertNotNull(newMailResp);
         String draftID = newMailResp.getId();
         fmids[0][0] = values.getDraftsFolder();
         fmids[0][1] = draftID;
-        
+
         //Get draft
         GetRequest getReq = new GetRequest(values.getDraftsFolder(), draftID);
         GetResponse getResp = client.execute(getReq);
         assertNotNull(getResp);
-        
+
         //Edit draft
         JSONObject data = (JSONObject) getResp.getData();
         String msgref = data.getString("msgref");
@@ -141,7 +142,7 @@ public class Bug30903Test extends AbstractMailTest {
         jsonMail.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
         jsonMail.put(MailJSONField.SUBJECT.getKey(), "Bug30903");
         jsonMail.put(MailJSONField.PRIORITY.getKey(), "3");
-        jsonMail.put("sendtype", 4);
+        jsonMail.put("sendtype", 3);
         //jsonMail.put("deleteDraftOnTransport", true);
         jsonMail.put(MailJSONField.MSGREF.getKey(), msgref);
         final JSONObject jAttachment = new JSONObject(2);
@@ -150,13 +151,13 @@ public class Bug30903Test extends AbstractMailTest {
         final JSONArray jAttachments = new JSONArray(1);
         jAttachments.put(jAttachment);
         jsonMail.put(MailJSONField.ATTACHMENTS.getKey(), jAttachments);
-        
+
         //Send mail
         SendRequest sendRequest = new SendRequest(jsonMail.toString());
         SendResponse sendResponse = client.execute(sendRequest);
         assertNotNull(sendResponse);
         fmids[1] = sendResponse.getFolderAndID();
-        
+
         //Verify 'Drafts' folder
         AllRequest allReq = new AllRequest(values.getDraftsFolder(), COLUMNS_FOLDER_ID, 0, Order.ASCENDING, true);
         AllResponse allResp = client.execute(allReq);

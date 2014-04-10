@@ -215,13 +215,14 @@ public class TempCleaner implements Runnable {
             }
             if (deleteAll) {
                 LOG.debug("Detected all folders ({}) and files ({}) in temp folder being outdated, removing '.drive' folder completely.", foldersToDelete.size(), filesToDelete.size());
-                String folderID = folderAccess.deleteFolder(tempFolder.getId(), true);
-                checksumStore.removeFileChecksumsInFolder(new FolderID(folderID));
+                List<FolderID> folderIDs = new ArrayList<FolderID>(1 + foldersToDelete.size());
+                folderIDs.add(new FolderID(tempFolder.getId()));
                 for (FileStorageFolder folder : foldersToDelete) {
-                    FolderID id = new FolderID(folder.getId());
-                    checksumStore.removeFileChecksumsInFolder(id);
-                    checksumStore.removeDirectoryChecksum(id);
+                    folderIDs.add(new FolderID(folder.getId()));
                 }
+                folderAccess.deleteFolder(tempFolder.getId(), true);
+                checksumStore.removeFileChecksumsInFolders(folderIDs);
+                checksumStore.removeDirectoryChecksums(folderIDs);
             } else if (0 < foldersToDelete.size() || 0 < filesToDelete.size()) {
                 LOG.debug("Detected {} folder(s) and {} file(s) in temp folder being outdated, cleaning up.", foldersToDelete.size(), filesToDelete.size());
                 for (FileStorageFolder folder : foldersToDelete) {
