@@ -205,7 +205,8 @@ public class DriveServiceImpl implements DriveService {
              * return actions for client
              */
             if (driveSession.isTraceEnabled()) {
-                driveSession.trace("syncFolders completed after " + (System.currentTimeMillis() - start) + "ms.");
+                driveSession.trace("syncFolders with " + syncResult.length() + " resulting action(s) completed after "
+                    + (System.currentTimeMillis() - start) + "ms.");
             }
             return new DefaultSyncResult<DirectoryVersion>(syncResult.getActionsForClient(), driveSession.getDiagnosticsLog());
         }
@@ -252,7 +253,8 @@ public class DriveServiceImpl implements DriveService {
              * return actions for client
              */
             if (driveSession.isTraceEnabled()) {
-                driveSession.trace("syncFiles completed after " + (System.currentTimeMillis() - start) + "ms.");
+                driveSession.trace("syncFiles with " + syncResult.length() + " resulting action(s) completed after "
+                    + (System.currentTimeMillis() - start) + "ms.");
             }
             return new DefaultSyncResult<FileVersion>(syncResult.getActionsForClient(), driveSession.getDiagnosticsLog());
         }
