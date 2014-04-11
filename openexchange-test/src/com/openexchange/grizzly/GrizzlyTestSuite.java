@@ -63,6 +63,7 @@ public class GrizzlyTestSuite {
     public static Test suite() {
         final TestSuite suite = new TestSuite("com.openexchange.grizzly.GrizzlyTestSuite");
         suite.addTestSuite(ProcessingTest.class);
+        suite.addTestSuite(GetWithBodyTest.class);
         return suite;
     }
 
