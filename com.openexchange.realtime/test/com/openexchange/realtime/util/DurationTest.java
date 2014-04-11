@@ -47,70 +47,54 @@
  *
  */
 
-package com.openexchange.realtime.json.protocol;
+package com.openexchange.realtime.util;
 
-import java.util.List;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
+import static org.junit.Assert.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static com.openexchange.realtime.util.Duration.*;
+import org.junit.Before;
+import org.junit.Test;
+
 
 /**
- * {@link RTClientState} - The {@link RTClientState} encapsulates the state of a connected client by keeping track of the sequenced and
- * unsequenced Stanzas that still have to be delivered to the client.
+ * {@link DurationTest}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.x.y
  */
-public interface RTClientState {
+public class DurationTest {
 
     /**
-     * Called when the client sent an acknowledgement for a stanza
-     * @param sequenceNumber
+     * @throws java.lang.Exception
      */
-    public abstract void acknowledgementReceived(long sequenceNumber);
+    @Before
+    public void setUp() throws Exception {
+    }
 
-    /**
-     * Enqueues a stanza. If it contains a sequence number, it is enqueued in the resendBuffer, otherwise in the nonsequenceStanzas
-     * @param stanza
-     */
-    public abstract void enqueue(Stanza stanza);
-
-    /**
-     * Retrieves a list of stanzas that are still to be transmitted to the client
-     * @return
-     */
-    public abstract List<Stanza> getStanzasToSend();
-
-    /**
-     * A purge run removes all unsequenced stanzas from the state and increases the TTL counter of sequenced stanzas.
-     */
-    public abstract void purge();
-
-    public abstract ID getId();
-
-    public abstract void lock();
-
-    public abstract void unlock();
-
-    /**
-     * Touch sets the last-seen timestamp for this state entry
-     */
-    public abstract void touch();
-
-    /**
-     * Retrieves the timestamp for when this user was last seen in milliseconds
-     */
-    public abstract long getLastSeen();
-
-    /**
-     * Checks whether this state should be considered timed out relative to the given timestamp
-     * @param timestamp - The timestamp to check the timeout status for
-     * @return true if the timestamp is more than thirty minutes ahead of the lastSeen timestamp, false otherwise
-     */
-    public abstract boolean isTimedOut(long timestamp);
-
-    /**
-     * Resets the state by clearing out sequenced and unsequenced stanzas. This is needed when a client wants to trigger a reset e.g. via
-     * resetting the sequence number in use.
-     */
-    public abstract void reset();
+    @Test
+    public void test() {
+        Duration dur = Duration.roundDownTo(1, SECONDS);
+        assertEquals(NONE, dur);
+        dur = Duration.roundDownTo(9, SECONDS);
+        assertEquals(NONE, dur);
+        dur = Duration.roundDownTo(10, SECONDS);
+        assertEquals(TEN_SECONDS, dur);
+        dur = Duration.roundDownTo(11, SECONDS);
+        assertEquals(TEN_SECONDS, dur);
+        dur = Duration.roundDownTo(19, SECONDS);
+        assertEquals(TEN_SECONDS, dur);
+        dur = Duration.roundDownTo(20, SECONDS);
+        assertEquals(TEN_SECONDS, dur);
+        dur = Duration.roundDownTo(29, SECONDS);
+        assertEquals(TEN_SECONDS, dur);
+        dur = Duration.roundDownTo(30, SECONDS);
+        assertEquals(THIRTY_SECONDS, dur);
+        dur = Duration.roundDownTo(29, MINUTES);
+        assertEquals(TWENTYFIVE_MINUTES, dur);
+        dur = Duration.roundDownTo(31, MINUTES);
+        assertEquals(THIRTY_MINUTES, dur);
+    }
 
 }

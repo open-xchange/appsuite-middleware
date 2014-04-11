@@ -47,70 +47,34 @@
  *
  */
 
-package com.openexchange.realtime.json.protocol;
+package com.openexchange.realtime.group;
 
-import java.util.List;
+import java.util.Set;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.Duration;
+
 
 /**
- * {@link RTClientState} - The {@link RTClientState} encapsulates the state of a connected client by keeping track of the sequenced and
- * unsequenced Stanzas that still have to be delivered to the client.
+ * {@link GroupManagerService}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.0
  */
-public interface RTClientState {
+public interface GroupManagerService {
 
     /**
-     * Called when the client sent an acknowledgement for a stanza
-     * @param sequenceNumber
+     * Get the Groups that a given client is a member of.
+     * @param id The client {@link ID}
+     * @return The Groups that a given client is a member of.
      */
-    public abstract void acknowledgementReceived(long sequenceNumber);
+    Set<ID> getGroups(ID id);
 
     /**
-     * Enqueues a stanza. If it contains a sequence number, it is enqueued in the resendBuffer, otherwise in the nonsequenceStanzas
-     * @param stanza
+     * Set the duration of inactivity for a given client. The GroupManagerService will inform all Groups the client had joined previously
+     * about the inactivity of the client.
+     * 
+     * @param id The client {@link ID}
+     * @param duration The {@link Duration} of inactivity
      */
-    public abstract void enqueue(Stanza stanza);
-
-    /**
-     * Retrieves a list of stanzas that are still to be transmitted to the client
-     * @return
-     */
-    public abstract List<Stanza> getStanzasToSend();
-
-    /**
-     * A purge run removes all unsequenced stanzas from the state and increases the TTL counter of sequenced stanzas.
-     */
-    public abstract void purge();
-
-    public abstract ID getId();
-
-    public abstract void lock();
-
-    public abstract void unlock();
-
-    /**
-     * Touch sets the last-seen timestamp for this state entry
-     */
-    public abstract void touch();
-
-    /**
-     * Retrieves the timestamp for when this user was last seen in milliseconds
-     */
-    public abstract long getLastSeen();
-
-    /**
-     * Checks whether this state should be considered timed out relative to the given timestamp
-     * @param timestamp - The timestamp to check the timeout status for
-     * @return true if the timestamp is more than thirty minutes ahead of the lastSeen timestamp, false otherwise
-     */
-    public abstract boolean isTimedOut(long timestamp);
-
-    /**
-     * Resets the state by clearing out sequenced and unsequenced stanzas. This is needed when a client wants to trigger a reset e.g. via
-     * resetting the sequence number in use.
-     */
-    public abstract void reset();
-
+    void setInactivity(ID id, Duration duration);
 }

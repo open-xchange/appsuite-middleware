@@ -49,14 +49,18 @@
 
 package com.openexchange.realtime.json.impl;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import com.openexchange.realtime.group.GroupManagerService;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.util.Duration;
 
 /**
  * The {@link StateManager} manages the state of connected clients.
@@ -119,7 +123,13 @@ public class StateManager implements RealtimeJanitor {
      */
     public void timeOutStaleStates(long timestamp) {
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
-            if (state.isTimedOut(timestamp)) {
+            ID client = state.getId();
+            long stateLastSeenMillis = state.getLastSeen();
+            Duration  inactivity = Duration.roundDownTo(System.currentTimeMillis() - stateLastSeenMillis, MILLISECONDS);
+            LOG.info("Client {} is inactive since {} seconds", client, inactivity.getValueInS());
+            GroupManagerService groupManager = JSONServiceRegistry.getInstance().getService(GroupManagerService.class);
+            groupManager.setInactivity(client, inactivity);
+            if (Duration.THIRTY_MINUTES.equals(inactivity)) {
                 /*
                  * The client timed out: if he'd be still active and was just rerouted to another backend the cleanup would have already
                  * happened during enrol on the other node. As we reached this code there was no cleanup yet and we still have to do
@@ -135,6 +145,23 @@ public class StateManager implements RealtimeJanitor {
                     LOG.error("Triggering refresh of ID: {} failed.", state.getId(), e);
                 }
             }
+            
+//            if (state.isTimedOut(timestamp)) {
+//                /*
+//                 * The client timed out: if he'd be still active and was just rerouted to another backend the cleanup would have already
+//                 * happened during enrol on the other node. As we reached this code there was no cleanup yet and we still have to do
+//                 * it cluster-wide.
+//                 */
+//                LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
+//                GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
+//                globalRealtimeCleanup.cleanForId(state.getId());
+//            } else {
+//                try {
+//                    state.getId().trigger(ID.Events.REFRESH, this);
+//                } catch (Exception e) {
+//                    LOG.error("Triggering refresh of ID: {} failed.", state.getId(), e);
+//                }
+//            }
         }
     }
 
