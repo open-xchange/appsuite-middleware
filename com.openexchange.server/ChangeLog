@@ -1,3 +1,7 @@
+* 2014-04-10 - marc.arens@open-xchange.com
+
+ - Fix for bug 31942: Fix for unconsumed request remainders and configure that we want to accept payloads for methods where a payload is currently undefined but not forbidden.
+ 
 * 2014-04-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31912: Don't apply personal reminder setting for appointments in shared folders  
