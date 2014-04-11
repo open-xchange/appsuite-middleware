@@ -57,7 +57,7 @@ public class DropBoxScenarioTest extends TestCase{
 		TestWebdavFactoryBuilder.setUp();
 
 		final ContextStorage ctxstor = ContextStorage.getInstance();
-        final int contextId = ctxstor.getContextId("defaultcontext");
+        final int contextId = ctxstor.getContextId(ctxName);
         ctx = ctxstor.getContext(contextId);
 
         factory = (InfostoreWebdavFactory) TestWebdavFactoryBuilder.buildFactory();
@@ -159,7 +159,7 @@ public class DropBoxScenarioTest extends TestCase{
 		perm.setFolderAdmin(false);
 		perm.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
 		perm.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
-		perm.setWriteObjectPermission(OCLPermission.NO_PERMISSIONS);
+		perm.setWriteObjectPermission(OCLPermission.WRITE_OWN_OBJECTS); // after SCR-1997, "write own" is required, too
 		perm.setDeleteObjectPermission(OCLPermission.NO_PERMISSIONS);
 		perm.setGroupPermission(true);
 		perms.add(perm);

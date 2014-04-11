@@ -723,6 +723,9 @@ public final class InternalList {
         // Extends infostore document tables by "meta" JSON BLOB.
         list.add(new com.openexchange.groupware.update.tasks.AddMetaForInfostoreDocumentTable());
 
+        // Extends infostore document tables by the (`cid`, `file_md5sum`) index.
+        list.add(new com.openexchange.groupware.update.tasks.AddMD5SumIndexForInfostoreDocumentTable());
+
         // Adds (cid,changing_date) index to calendar tables if missing
         list.add(new com.openexchange.groupware.update.tasks.CalendarAddChangingDateIndexTask());
 

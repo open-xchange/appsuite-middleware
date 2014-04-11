@@ -49,34 +49,64 @@
 
 package com.openexchange.ajax.contact;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.Date;
+import java.util.List;
+import org.json.JSONArray;
+import com.openexchange.ajax.contact.action.SearchByBirthdayRequest;
+import com.openexchange.ajax.framework.CommonSearchResponse;
+import com.openexchange.groupware.container.Contact;
 
-public final class ContactBugTestSuite extends TestSuite {
+/**
+ * {@link Bug31993Test}
+ *
+ * The sorting of the displayed birthdays in the birthday-widget seems to be wrong.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class Bug31993Test extends AbstractManagedContactTest {
 
-    private ContactBugTestSuite() {
-        super();
+    public Bug31993Test(String name) {
+        super(name);
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(Bug4409Test.class);
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug12716Test.class);
-        tests.addTestSuite(Bug13931Test.class);
-        tests.addTestSuite(Bug13960Test.class);
-        tests.addTestSuite(Bug15317Test.class);
-        tests.addTestSuite(Bug15315Test.class);
-        tests.addTestSuite(Bug15937Test.class);
-        tests.addTestSuite(Bug16515Test.class);
-        tests.addTestSuite(Bug16618Test.class);
-        tests.addTestSuite(Bug17513Test.class);
-        tests.addTestSuite(Bug13915FileAsViaJSON.class);
-        tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
-        tests.addTestSuite(Bug19827Test.class);
-        tests.addTestSuite(Bug25300Test.class);
-        tests.addTestSuite(Bug28185Test.class);
-        tests.addTestSuite(Bug31993Test.class);
-        return tests;
+	@Override
+	public void setUp() throws Exception {
+	    super.setUp();
+	}
+
+    public void testSortOrder() throws Exception {
+    	/*
+    	 * create contacts
+    	 */
+        Contact contact1 = super.generateContact("Mike");
+        contact1.setBirthday(D("1969-04-11 00:00:00"));
+        contact1 = manager.newAction(contact1);
+        Contact contact2 = super.generateContact("Frank");
+        contact2.setBirthday(D("1980-04-10 00:00:00"));
+        contact2 = manager.newAction(contact2);
+        Contact contact3 = super.generateContact("Oliver");
+        contact3.setBirthday(D("1988-04-11 00:00:00"));
+        contact3 = manager.newAction(contact3);
+    	/*
+    	 * search birthdays
+    	 */
+        String parentFolderID = String.valueOf(contact1.getParentFolderID());
+        int[] columns = { Contact.OBJECT_ID, Contact.SUR_NAME, Contact.BIRTHDAY, Contact.FOLDER_ID };
+        SearchByBirthdayRequest request;
+        CommonSearchResponse response;
+        List<Contact> contacts;
+
+        request = new SearchByBirthdayRequest(new Date(1397088000000L), new Date(1404345600000L), parentFolderID, columns, true);
+        response = client.execute(request);
+        contacts = manager.transform((JSONArray) response.getResponse().getData(), columns);
+        assertNotNull(contacts);
+        assertEquals("wrong number of results", 3, contacts.size());
+
+        assertEquals("Contact order wrong", contact2.getSurName(), contacts.get(0).getSurName());
+        assertEquals("Contact order wrong", contact1.getSurName(), contacts.get(1).getSurName());
+        assertEquals("Contact order wrong", contact3.getSurName(), contacts.get(2).getSurName());
+
     }
+
 }

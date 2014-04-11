@@ -325,22 +325,33 @@ public class RequestTools {
                 } else if (null == date2) {
                     return -1;
                 } else {
-                    final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                     calendar.setTime(date1);
-                    final int dayOfYear1 = calendar.get(Calendar.DAY_OF_YEAR);
+                    int month1 = calendar.get(Calendar.MONTH);
+                    int dayOfMonth1 = calendar.get(Calendar.DAY_OF_MONTH);
+                    int year1 = calendar.get(Calendar.YEAR);
                     calendar.setTime(date2);
-                    final int dayOfYear2 = calendar.get(Calendar.DAY_OF_YEAR);
+                    int month2 = calendar.get(Calendar.MONTH);
+                    int dayOfMonth2 = calendar.get(Calendar.DAY_OF_MONTH);
+                    int year2 = calendar.get(Calendar.YEAR);
                     calendar.setTime(reference);
-                    final int dayOfYearReference = calendar.get(Calendar.DAY_OF_YEAR);
-                    if (dayOfYear1 == dayOfYear2) {
-                        return 0;
-                    } else if (dayOfYear1 >= dayOfYearReference && dayOfYear2 >= dayOfYearReference) {
+                    int monthReference = calendar.get(Calendar.MONTH);
+                    int dayOfMonthReference = calendar.get(Calendar.DAY_OF_MONTH);
+                    if (month1 == month2 && dayOfMonth1 == dayOfMonth2) {
+                        // same month/date, compare years
+                        return Integer.valueOf(year1).compareTo(Integer.valueOf(year2));
+                    } else if ((month1 >= monthReference || month1 == monthReference && dayOfMonth1 >= dayOfMonthReference) &&
+                        (month2 >= monthReference || month2 == monthReference && dayOfMonth2 >= dayOfMonthReference)) {
                         // both after reference date, use default comparison
-                        return Integer.valueOf(dayOfYear1).compareTo(Integer.valueOf(dayOfYear2));
-                    } else if (dayOfYear1 < dayOfYearReference && dayOfYear2 < dayOfYearReference) {
+                        int monthResult = Integer.valueOf(month1).compareTo(Integer.valueOf(month2));
+                        return 0 != monthResult ? monthResult : Integer.valueOf(dayOfMonth1).compareTo(Integer.valueOf(dayOfMonth2));
+                    } else if ((month1 < monthReference || month1 == monthReference && dayOfMonth1 < dayOfMonthReference) &&
+                        (month2 < monthReference || month2 == monthReference && dayOfMonth2 < dayOfMonthReference)) {
                         // both before reference date, use default comparison
-                        return Integer.valueOf(dayOfYear1).compareTo(Integer.valueOf(dayOfYear2));
-                    } else if (dayOfYear1 >= dayOfYearReference && dayOfYear2 < dayOfYearReference) {
+                        int monthResult = Integer.valueOf(month1).compareTo(Integer.valueOf(month2));
+                        return 0 != monthResult ? monthResult : Integer.valueOf(dayOfMonth1).compareTo(Integer.valueOf(dayOfMonth2));
+                    } else if ((month1 >= monthReference || month1 == monthReference && dayOfMonth1 >= dayOfMonthReference) &&
+                        (month2 < monthReference || month2 == monthReference && dayOfMonth2 < dayOfMonthReference)) {
                         // first is next
                         return -1;
                     } else {

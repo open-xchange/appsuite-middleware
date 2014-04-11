@@ -102,11 +102,6 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     @Override
-    public FileChecksum insertFileChecksum(FileID fileID, String version, long sequenceNumber, String checksum) throws OXException {
-        return insertFileChecksum(new FileChecksum(fileID, version, sequenceNumber, checksum));
-    }
-
-    @Override
     public FileChecksum insertFileChecksum(FileChecksum fileChecksum) throws OXException {
         if (null != fileChecksum.getUuid()) {
             throw new IllegalArgumentException("New file checksums must not contain an UUID");

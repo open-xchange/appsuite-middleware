@@ -176,8 +176,8 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
             metadata.setVersionComment(session.getStorage().getVersionComment());
             InputStream data = new UnsynchronizedByteArrayInputStream(new byte[0]);
             File createdFile = session.getStorage().createFile(path, action.getNewVersion().getName(), metadata, data);
-            FileChecksum insertedFileChecksum = session.getChecksumStore().insertFileChecksum(IDUtil.getFileID(createdFile), createdFile.getVersion(),
-                createdFile.getSequenceNumber(), DriveConstants.EMPTY_MD5);
+            FileChecksum insertedFileChecksum = session.getChecksumStore().insertFileChecksum(new FileChecksum(
+                IDUtil.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), DriveConstants.EMPTY_MD5));
             action.setResultingVersion(new ServerFileVersion(createdFile, insertedFileChecksum));
             return;
         }
@@ -228,8 +228,8 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
             try {
                 File copiedFile = null != targetFile ? session.getStorage().copyFile(sourceFile, targetFile) :
                     session.getStorage().copyFile(sourceFile, action.getNewVersion().getName(), path);
-                FileChecksum insertedFileChecksum = session.getChecksumStore().insertFileChecksum(IDUtil.getFileID(copiedFile), copiedFile.getVersion(),
-                    copiedFile.getSequenceNumber(), sourceVersion.getChecksum());
+                FileChecksum insertedFileChecksum = session.getChecksumStore().insertFileChecksum(new FileChecksum(
+                    IDUtil.getFileID(copiedFile), copiedFile.getVersion(), copiedFile.getSequenceNumber(), sourceVersion.getChecksum()));
                 action.setResultingVersion(new ServerFileVersion(copiedFile, insertedFileChecksum));
             } catch (OXException e) {
                 if ("FLS-0017".equals(e.getErrorCode())) {

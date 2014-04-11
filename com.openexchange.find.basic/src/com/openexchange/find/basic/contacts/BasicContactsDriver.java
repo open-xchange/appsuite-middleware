@@ -182,13 +182,18 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * search
          */
+        boolean excludeAdmin = false; //TODO: get from request
         List<Document> contactDocuments = new ArrayList<Document>();
         SortOptions sortOptions = new SortOptions(searchRequest.getStart(), searchRequest.getSize());
+        int excludedAdminID = excludeAdmin ? session.getContext().getMailadmin() : -1;
         SearchIterator<Contact> searchIterator = null;
         try {
             searchIterator = Services.getContactService().searchContacts(session, searchTerm, CONTACT_FIELDS, sortOptions);
             while (searchIterator.hasNext()) {
-                contactDocuments.add(new ContactsDocument(searchIterator.next()));
+                Contact contact = searchIterator.next();
+                if (excludedAdminID != contact.getInternalUserId()) {
+                    contactDocuments.add(new ContactsDocument(contact));
+                }
             }
         } finally {
             SearchIterators.close(searchIterator);

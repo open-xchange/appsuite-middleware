@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-04-07 11:39+0100\n"
+"PO-Revision-Date: 2014-04-11 11:01+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -1044,7 +1044,6 @@ msgid "Position"
 msgstr "Position"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:83
-#, fuzzy
 msgid "Employee type"
 msgstr "Mitarbeiter-Typ"
 
@@ -1642,16 +1641,6 @@ msgstr ""
 msgid "Uploaded with %1$s (%2$s)"
 msgstr "Hochgeladen mit %1$s (%2$s)"
 
-#. The E-Mail address is invalid %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.emig/src/com/openexchange/emig/EmigExceptionMessages.java:71
-msgid "The E-Mail address is invalid: \"%1$s\"."
-msgstr "Die E-Mail-Adresse ist ungültig: \"%1$s\"."
-
-#. The user identifier is invalid: "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.emig/src/com/openexchange/emig/EmigExceptionMessages.java:74
-msgid "The user identifier is invalid: \"%1$s\"."
-msgstr "Die Benutzer-ID ist ungültig: \"%1$s\"."
-
 #. A CIFS/SMB error occurred.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:63
 msgid "A CIFS/SMB error occurred."
@@ -2157,6 +2146,15 @@ msgid "Invalid URL \"%1$s\". Please correct the value and try again."
 msgstr ""
 "Ungültige URL \"%1$s\". Bitte korrigieren Sie die Eingabe und versuchen Sie "
 "es erneut."
+
+#. The allowed quota is reached. Please delete some items in order to store new ones.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:82
+msgid ""
+"The allowed quota is reached. Please delete some items in order to store new "
+"ones."
+msgstr ""
+"Die zulässige Quota wurde überschritten. Bitte löschen Sie einige Objekte, "
+"um neue speichern zu können."
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -4320,6 +4318,16 @@ msgstr ""
 "löschen Sie einige Dateien, um Platz für neue zu schaffen. Bitte beachten: "
 "Die Quota bezieht sich auf alle Dateien aller Benutzer in diesem Kontext."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:72
+msgid ""
+"Quota exceeded for attachments. Quota limit: %2$s. Quota used: %1$s. Please "
+"delete some attachments in order to create new ones. Please note: The quota "
+"refers to all attachments of all users in this context."
+msgstr ""
+"Quota für Anlagen überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitte "
+"löschen Sie einige Anlagen, um neue anlegen zu können. Bitte beachten: Die "
+"Quota bezieht sich auf alle Anlagen aller Benutzer in diesem Kontext."
+
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
 msgid "Could not send stanza to resource. Resource was offline: %1$s"
@@ -4925,6 +4933,13 @@ msgstr ""
 "Ein externer Teilnehmer mit der E-Mail-Adresse %1$s ist bereits vorhanden. "
 "Bitte entfernen Sie das Duplikat und versuchen Sie es erneut."
 
+#. *
+#. * Moving a recurring appointment to another folder is not supported.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:213
+msgid "Moving a recurring appointment to another folder is not supported."
+msgstr "Ein Serientermin darf nicht in einen anderen Ordner verschoben werden."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address."
 msgstr "Ungültige E-Mail-Adresse."
@@ -5168,7 +5183,6 @@ msgid "Public infostore"
 msgstr "Öffentlicher InfoStore"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:82
-#, fuzzy
 msgid "Trash infostore"
 msgstr "Gelöschte Dateien"
 
@@ -10868,6 +10882,12 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The E-Mail address is invalid: \"%1$s\"."
+#~ msgstr "Die E-Mail-Adresse ist ungültig: \"%1$s\"."
+
+#~ msgid "The user identifier is invalid: \"%1$s\"."
+#~ msgstr "Die Benutzer-ID ist ungültig: \"%1$s\"."
 
 #~ msgid "Asia/Khandyga"
 #~ msgstr "Asien/Khandyga"

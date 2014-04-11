@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,23 +49,57 @@
 
 package com.openexchange.html;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.html.internal.Bug27708Test;
-import com.openexchange.html.internal.css.Bug30114Test;
-import com.openexchange.html.internal.css.CSSMatcherTest;
+import java.util.Map;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link Bug31826Test}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({ Bug26237Test.class, Bug26611Test.class, Bug27335Test.class, Bug27708Test.class, CSSMatcherTest.class, Bug30114Test.class, Bug31826Test.class, ConformHtmlTest.class })
-public class UnitTests {
+public class Bug31826Test {
 
-    private UnitTests() {
+    private HtmlService service;
+
+    public Bug31826Test() {
         super();
+    }
+
+    @Before
+    public void setUp() {
+        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked")
+        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+
+        htmlEntityMap.put("apos", Character.valueOf('\''));
+
+        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
+    }
+
+    @After
+    public void tearDown() {
+        service = null;
+    }
+
+    @Test
+    public void testKeepUnicode() {
+        String content = "dfg &hearts;&diams;&spades;&clubs;&copy;&reg;&trade; dfg";
+        String test = service.sanitize(content, null, true, null, null);
+
+        Assert.assertEquals("Unexpected retur value.", "<body>\ndfg \u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 dfg\n</body>", test);
+
+
+        content = "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 <>";
+        test = service.htmlFormat(content, true, "--==--");
+
+        Assert.assertEquals("Unexpected retur value.", "\u2665\u2666\u2660\u2663\u00a9\u00ae\u2122 &lt;&gt;", test);
     }
 }

@@ -62,41 +62,153 @@ import com.openexchange.file.storage.composition.FolderID;
  */
 public interface FileChecksumStore {
 
-
-    FileChecksum insertFileChecksum(FileID fileID, String version, long sequenceNumber, String checksum) throws OXException;
-
+    /**
+     * Inserts the supplied file checksum into the store.
+     *
+     * @param fileChecksum The checksum to insert
+     * @return The checksum
+     * @throws OXException
+     */
     FileChecksum insertFileChecksum(FileChecksum fileChecksum) throws OXException;
 
+    /**
+     * Inserts the supplied file checksums into the store.
+     *
+     * @param fileChecksums The checksums to insert
+     * @return The checksums
+     * @throws OXException
+     */
     List<FileChecksum> insertFileChecksums(List<FileChecksum> fileChecksums) throws OXException;
 
-
+    /**
+     * Updates the supplied file checksum.
+     *
+     * @param fileChecksum The checksum to update
+     * @return The checksum
+     * @throws OXException
+     */
     FileChecksum updateFileChecksum(FileChecksum fileChecksum) throws OXException;
 
+    /**
+     * Updates the supplied file checksums.
+     *
+     * @param fileChecksums The checksums to update
+     * @return The checksums
+     * @throws OXException
+     */
     List<FileChecksum> updateFileChecksums(List<FileChecksum> fileChecksums) throws OXException;
 
+    /**
+     * Updates the folder ID to another one in all matching stored file checksums.
+     *
+     * @param folderID The folder ID to update
+     * @param newFolderID The new folder ID
+     * @return The number of updated checksums
+     * @throws OXException
+     */
     int updateFileChecksumFolders(FolderID folderID, FolderID newFolderID) throws OXException;
 
-
+    /**
+     * Removes the supplied file checksum.
+     *
+     * @param fileChecksum The checksum to remove
+     * @return <code>true</code> if a checksum was removed, <code>false</code>, otherwise
+     * @throws OXException
+     */
     boolean removeFileChecksum(FileChecksum fileChecksum) throws OXException;
 
+    /**
+     * Removes the file checksum matching the supplied parameters.
+     *
+     * @param fileID The file ID of the checksum to remove
+     * @param version The version of the checksum to remove
+     * @param sequenceNumber The sequence number of the checksum to remove
+     * @return <code>true</code> if a checksum was removed, <code>false</code>, otherwise
+     * @throws OXException
+     */
     boolean removeFileChecksum(FileID fileID, String version, long sequenceNumber) throws OXException;
 
+    /**
+     * Removes the supplied file checksums.
+     *
+     * @param fileChecksums The checksums to remove
+     * @return The number of removed checksums
+     * @throws OXException
+     */
     int removeFileChecksums(List<FileChecksum> fileChecksums) throws OXException;
 
+    /**
+     * Removes all file checksums matching the supplied folder ID.
+     *
+     * @param folderID The folder ID of the checksums to remove
+     * @return The number of removed checksums
+     * @throws OXException
+     */
     int removeFileChecksumsInFolder(FolderID folderID) throws OXException;
 
+    /**
+     * Removes all file checksums matching one of the supplied folder IDs.
+     *
+     * @param folderIDs The folder IDs of the checksums to remove
+     * @return The number of removed checksums
+     * @throws OXException
+     */
     int removeFileChecksumsInFolders(List<FolderID> folderIDs) throws OXException;
 
+    /**
+     * Removes all file checksums matching the supplied file ID.
+     *
+     * @param fileID The file ID of the checksums to remove
+     * @return The number of removed checksums
+     * @throws OXException
+     */
     int removeFileChecksums(FileID fileID) throws OXException;
 
+    /**
+     * Removes all file checksums matching one of the supplied file IDs.
+     *
+     * @param fileIDs The file IDs of the checksums to remove
+     * @return The number of removed checksums
+     * @throws OXException
+     */
     int removeFileChecksums(FileID...fileIDs) throws OXException;
 
+    /**
+     * Gets a file checksum.
+     *
+     * @param fileID The file ID
+     * @param version the version
+     * @param sequenceNumber The sequence number
+     * @return The file checksum, or <code>null</code> if not found
+     * @throws OXException
+     */
     FileChecksum getFileChecksum(FileID fileID, String version, long sequenceNumber) throws OXException;
 
+    /**
+     * Gets all file checksums in a folder.
+     *
+     * @param folderID The folder ID of the checksums to get
+     * @return The file checksums
+     * @throws OXException
+     */
     List<FileChecksum> getFileChecksums(FolderID folderID) throws OXException;
 
+    /**
+     * Gets all file checksums matching the supplied checksum
+     *
+     * @param checksum The checksum to lookup
+     * @return The file checksums
+     * @throws OXException
+     */
     List<FileChecksum> getMatchingFileChecksums(String checksum) throws OXException;
 
+    /**
+     * Gets all file checksums matching the supplied checksums
+     *
+     * @param checksum The checksums to lookup
+     * @return The file checksums
+     * @throws OXException
+     */
     Map<String, List<FileChecksum>> getMatchingFileChecksums(List<String> checksums) throws OXException;
 
 }

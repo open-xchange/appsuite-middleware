@@ -105,7 +105,8 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`file_version_comment` text,"
       + "`meta` BLOB default NULL,"
       + "PRIMARY KEY (`cid`,`infostore_id`,`version_number`),"
-      + "FOREIGN KEY (cid, infostore_id) REFERENCES infostore (cid, id)"
+      + "FOREIGN KEY (cid, infostore_id) REFERENCES infostore (cid, id),"
+      + "INDEX `md5sum` (`cid`, `file_md5sum`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     private static final String createDelInfostoreTable = "CREATE TABLE `del_infostore` ("
@@ -142,7 +143,8 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`file_md5sum` varchar(32) ,"
       + "`file_version_comment` text ,"
       + "`meta` BLOB default NULL,"
-      + "PRIMARY KEY (`cid`,`infostore_id`,`version_number`)"
+      + "PRIMARY KEY (`cid`,`infostore_id`,`version_number`),"
+      + "INDEX `md5sum` (`cid`, `file_md5sum`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     private static final String createInfostorePropertyTable = "CREATE TABLE `infostore_property` ("
