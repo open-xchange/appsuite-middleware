@@ -53,8 +53,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveConstants;
@@ -105,7 +107,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
          * for client UPLOADs, check if file already known on server
          */
         List<AbstractAction<FileVersion>> uploadActions = new ArrayList<AbstractAction<FileVersion>>();
-        List<String> checksums = new ArrayList<String>();
+        Set<String> checksums = new HashSet<String>();
         for (AbstractAction<FileVersion> clientAction : result.getActionsForClient()) {
             if (Action.UPLOAD == clientAction.getAction()) {
                 checksums.add(clientAction.getNewVersion().getChecksum());
@@ -152,7 +154,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
         return null;
     }
 
-    private Map<String, ServerFileVersion> findByChecksum(SyncSession session, List<String> checksums) {
+    private Map<String, ServerFileVersion> findByChecksum(SyncSession session, Set<String> checksums) {
         if (null == checksums || 0 == checksums.size()) {
             return Collections.emptyMap();
         }
