@@ -1,3 +1,7 @@
+* 2014-04-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31993: Don't rely on "day of year" comparison in leap years 
+
 * 2014-04-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29950: Require "write own objects" permissions when creating files via WebDAV 
