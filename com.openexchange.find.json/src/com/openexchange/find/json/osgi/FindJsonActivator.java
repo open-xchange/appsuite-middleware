@@ -49,13 +49,21 @@
 
 package com.openexchange.find.json.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.exception.OXException;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindActionFactory;
 import com.openexchange.find.json.converters.AutocompleteResultJSONConverter;
 import com.openexchange.find.json.converters.SearchResultJSONConverter;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  *
@@ -70,7 +78,7 @@ public class FindJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SearchService.class };
+        return new Class<?>[] { SearchService.class, CapabilityService.class };
     }
 
     @Override
@@ -86,6 +94,29 @@ public class FindJsonActivator extends AJAXModuleActivator {
         registerService(ResultConverter.class, new AutocompleteResultJSONConverter(translator));
         registerService(ResultConverter.class, new SearchResultJSONConverter(translator, converterRegistry));
         registerModule(new FindActionFactory(this), MODULE_PATH);
+
+        final String sCapability = "search";
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+        registerService(CapabilityChecker.class, new CapabilityChecker() {
+            @Override
+            public boolean isEnabled(String capability, Session ses) throws OXException {
+                if (sCapability.equals(capability)) {
+                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
+                    if (session.isAnonymous()) {
+                        return false;
+                    }
+
+                    // TODO: Perform permission check here
+                    return true;
+                }
+
+                return true;
+            }
+        }, properties);
+
+
+        getService(CapabilityService.class).declareCapability(sCapability);
     }
 
 }
