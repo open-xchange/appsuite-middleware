@@ -66,6 +66,13 @@ import static com.openexchange.java.util.NativeBuilders.*;
 @ROOT("/utilities/mailResolver")
 public class MailMappingService extends OXRESTService<MailResolver> {
     
+    /**
+     * GET /rest/utilities/mailResolver/resolve/[mail1];[mail2]
+     * 
+     * Tries to resolve the given mail addresses to context and user IDs.
+     * Returns an Object with the mail addresses as keys and objects with the keys "user" (for the userId) and "context" (for the contextId) as values.
+     * If a mail address is unknown, the corresponding key will be missing in the response.
+     */
     @GET("/resolve/:mail")
     public Object resolve(String mail) throws OXException {
         String[] mails = mail.split(";");
