@@ -82,6 +82,8 @@ import org.apache.commons.lang.Validate;
  */
 public abstract class Stanza implements Serializable {
 
+    public static final String DEFAULT_SELECTOR = "default";
+    
     public static final ElementPath ERROR_PATH = new ElementPath("error");
 
     private static final long serialVersionUID = 1L;
@@ -102,7 +104,7 @@ public abstract class Stanza implements Serializable {
      */
     protected RealtimeException error = null;
 
-    private String selector = "default";
+    private String selector = DEFAULT_SELECTOR;
 
     private long sequenceNumber = -1;
 
