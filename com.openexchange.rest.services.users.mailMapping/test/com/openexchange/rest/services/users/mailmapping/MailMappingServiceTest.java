@@ -52,9 +52,14 @@ package com.openexchange.rest.services.users.mailmapping;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.mailmapping.ResolvedMail;
+import com.openexchange.server.MockingServiceLookup;
+import com.openexchange.user.UserService;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -68,15 +73,40 @@ public class MailMappingServiceTest {
     
     private MailMappingService service = null;
     private MailResolver resolver = null;
+    private MockingServiceLookup services = null;
     
     @Before
-    public void setup() {
+    public void setup() throws OXException {
         service = new MailMappingService();
         resolver = mock(MailResolver.class);
+        services = new MockingServiceLookup();
         
         service.setContext(resolver);
+        service.setServices(services);
+        
+        mockContext();
     }
     
+    private void mockContext() throws OXException {
+        ContextService contexts = services.mock(ContextService.class);
+        
+        Context ctx = mock(Context.class);
+        when(contexts.getContext(42)).thenReturn(ctx);
+    
+        User charlie = mock(User.class);
+        when(charlie.getPreferredLanguage()).thenReturn("en_US");
+        when(charlie.getDisplayName()).thenReturn("Charlie");
+        
+        User linus = mock(User.class);
+        when(linus.getPreferredLanguage()).thenReturn("de_DE");
+        when(linus.getPreferredLanguage()).thenReturn("Linus");
+        
+        UserService users = services.mock(UserService.class);
+        when(users.getUser(12, ctx)).thenReturn(charlie);
+        when(users.getUser(13, ctx)).thenReturn(linus);
+        
+    }
+
     @Test
     public void testResolveMail() throws OXException {
         when(resolver.resolve("charlie@test.invalid")).thenReturn(new ResolvedMail(12, 42));
@@ -84,9 +114,13 @@ public class MailMappingServiceTest {
         Map<String, Object> resolved = (Map<String, Object>) service.resolve("charlie@test.invalid");
         assertEquals(1, resolved.size());
         
-        Map<String, Object> resolveEntry = (Map<String, Object>) resolved.get("charlie@test.invalid");
-        assertEquals(12, resolveEntry.get("user"));
-        assertEquals(42, resolveEntry.get("context"));
+        Map<String, Object> resolvedEntry = (Map<String, Object>) resolved.get("charlie@test.invalid");
+        assertEquals(12, resolvedEntry.get("uid"));
+        assertEquals(42, resolvedEntry.get("cid"));
+        
+        Map<String, String> user = (Map<String, String>) resolvedEntry.get("user");
+        assertEquals("en_US", user.get("language"));
+        assertEquals("Charlie", user.get("displayName"));
         
     }
     
@@ -99,12 +133,12 @@ public class MailMappingServiceTest {
         assertEquals(2, resolved.size());
         
         Map<String, Object> charlie = (Map<String, Object>) resolved.get("charlie@test.invalid");
-        assertEquals(12, charlie.get("user"));
-        assertEquals(42, charlie.get("context"));
+        assertEquals(12, charlie.get("uid"));
+        assertEquals(42, charlie.get("cid"));
 
         Map<String, Object> linus = (Map<String, Object>) resolved.get("linus@test.invalid");
-        assertEquals(13, linus.get("user"));
-        assertEquals(42, linus.get("context"));
+        assertEquals(13, linus.get("uid"));
+        assertEquals(42, linus.get("cid"));
 
     }
     
