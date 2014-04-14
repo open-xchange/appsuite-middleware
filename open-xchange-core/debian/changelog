@@ -1,3 +1,9 @@
+open-xchange-core (7.6.0-1) stable; urgency=low
+
+  * First release candidate for 7.6.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 11 Apr 2014 16:19:54 +0200
+
 open-xchange-core (7.6.0-0) unstable; urgency=low
 
   * prepare for 7.6.0

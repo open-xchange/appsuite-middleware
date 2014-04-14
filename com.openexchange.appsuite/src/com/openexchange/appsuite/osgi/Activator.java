@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.NearRegistryServiceTracker;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -72,7 +73,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, ConfigurationService.class, DispatcherPrefixService.class, Dispatcher.class };
+        return new Class<?>[] { HttpService.class, ConfigurationService.class, DispatcherPrefixService.class, Dispatcher.class, ThreadPoolService.class };
     }
 
     @Override

@@ -468,7 +468,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     /*
                      * Determine folder type by examining parent folder
                      */
-                    createMe.setType(getFolderType(createMe.getParentFolderID(), storageParameters.getContext(), con));
+                    createMe.setType(getFolderType(
+                        createMe.getModule(), createMe.getParentFolderID(), storageParameters.getContext(), con));
                 } else {
                     createMe.setType(getTypeByFolderType(t));
                 }
@@ -577,7 +578,18 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
-    private static int getFolderType(final int parentId, final Context ctx, final Connection con) throws OXException, OXException {
+    /**
+     * Determines the target folder type for new folders below a parent folder.
+     *
+     * @param module The module identifier of the new folder
+     * @param parentId The ID of the parent folder
+     * @param ctx The context
+     * @param con A readable database connection
+     * @return The folder type
+     * @throws OXException
+     * @throws OXException
+     */
+    private static int getFolderType(int module, final int parentId, final Context ctx, final Connection con) throws OXException, OXException {
         int type = -1;
         int pid = parentId;
         /*
@@ -592,6 +604,14 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             type = FolderObject.PUBLIC;
         } else {
             type = getFolderAccess(ctx, con).getFolderType(pid);
+            /*
+             * Folders below trash will have the module's default type
+             */
+            if (FolderObject.TRASH == type) {
+                if (FolderObject.INFOSTORE == module) {
+                    type = FolderObject.PUBLIC;
+                }
+            }
         }
         return type;
     }
