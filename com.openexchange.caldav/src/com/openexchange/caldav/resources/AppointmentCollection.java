@@ -296,7 +296,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
 
     private CalendarDataObject patch(CalendarDataObject appointment) throws OXException {
         if (null != appointment) {
-            Patches.Outgoing.removeAlarmInSharedFolder(getFolder(), appointment);
+            Patches.Outgoing.adjustAlarm(getFolder(), appointment);
             Patches.Outgoing.resolveGroupParticipants(appointment);
             Patches.Outgoing.setOrganizerInformation(factory, appointment);
             Patches.Outgoing.setOrganizersParticipantStatus(appointment);
