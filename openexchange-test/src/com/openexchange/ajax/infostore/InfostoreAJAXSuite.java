@@ -5,6 +5,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.infostore.test.AnotherCreateAndDeleteInfostoreTest;
 import com.openexchange.ajax.infostore.test.Bug27722Test;
+import com.openexchange.ajax.infostore.test.Bug32004Test;
 import com.openexchange.ajax.infostore.test.CreateAndDeleteInfostoreTest;
 import com.openexchange.ajax.infostore.test.InfostoreObjectCountTest;
 import com.openexchange.ajax.infostore.test.TrashTest;
@@ -36,6 +37,7 @@ public class InfostoreAJAXSuite extends TestSuite {
         tests.addTestSuite(ZipDocumentsTest.class);
         tests.addTestSuite(Bug27722Test.class);
         tests.addTestSuite(TrashTest.class);
+        tests.addTestSuite(Bug32004Test.class);
 
         return tests;
     }
