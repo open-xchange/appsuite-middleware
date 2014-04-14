@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Configuration REST API
+Bundle-SymbolicName: com.openexchange.rest.services.configuration
+Bundle-Version: 7.6.0
+Bundle-Activator: com.openexchange.rest.services.configuration.osgi.ConfigRESTServiceActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.config.cascade,
+ com.openexchange.exception,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.rest.services,
+ com.openexchange.rest.services.annotations,
+ com.openexchange.rest.services.osgiservice,
+ com.openexchange.server,
+ org.json,
+ org.osgi.framework;version="1.3.0"
