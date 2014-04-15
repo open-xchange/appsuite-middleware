@@ -149,10 +149,8 @@ public final class MimeType2ExtMap {
                     final boolean debugEnabled = LOG.isDebugEnabled();
                     {
                         final String homeDir = System.getProperty("user.home");
-                        System.out.println("userHome: " + homeDir);
                         if (homeDir != null) {
                             final File file = new File(sb.append(homeDir).append(File.separatorChar).append(".mime.types").toString());
-                            System.out.println("Path: " + file.getAbsolutePath() + "\n");
                             if (file.exists()) {
                                 if (debugEnabled) {
                                     sb.setLength(0);
@@ -164,13 +162,11 @@ public final class MimeType2ExtMap {
                     }
                     {
                         final String javaHome = System.getProperty("java.home");
-                        System.out.println("HomeDir: " + javaHome);
                         if (javaHome != null) {
                             sb.setLength(0);
                             final File file =
                                 new File(sb.append(javaHome).append(File.separatorChar).append("lib").append(File.separator).append(
                                     "mime.types").toString());
-                            System.out.println("Path: " + file.getAbsolutePath() + "\n");
                             if (file.exists()) {
                                 if (debugEnabled) {
                                     sb.setLength(0);
@@ -183,7 +179,6 @@ public final class MimeType2ExtMap {
                     {
                         for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mime.types"); e.hasMoreElements();) {
                             final URL url = e.nextElement();
-                            System.out.println("URL: " + url + "\n");
                             if (debugEnabled) {
                                 sb.setLength(0);
                                 LOG.debug(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
@@ -194,7 +189,6 @@ public final class MimeType2ExtMap {
                     {
                         for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mimetypes.default"); e.hasMoreElements();) {
                             final URL url = e.nextElement();
-                            System.out.println("URL: " + url + "\n");
                             if (debugEnabled) {
                                 sb.setLength(0);
                                 LOG.debug(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
@@ -207,7 +201,6 @@ public final class MimeType2ExtMap {
                         if ((mimeTypesFileName != null) && ((mimeTypesFileName = mimeTypesFileName.trim()).length() > 0)) {
                             final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                             final File file = service.getFileByName(mimeTypesFileName);
-                            System.out.println("Path: " + file.getAbsolutePath() + "\n");
                             if (file.exists()) {
                                 if (debugEnabled) {
                                     sb.setLength(0);
@@ -250,7 +243,6 @@ public final class MimeType2ExtMap {
             return MIME_APPL_OCTET;
         }
         final String fn = Strings.unquote(fileName);
-        System.out.println("Mimetype2ExtMap: " + fileName);
         final int pos = fn.lastIndexOf('.');
         if (pos < 0) {
             return MIME_APPL_OCTET;
