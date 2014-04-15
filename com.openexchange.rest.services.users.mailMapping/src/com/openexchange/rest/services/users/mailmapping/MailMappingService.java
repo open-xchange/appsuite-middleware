@@ -49,13 +49,17 @@
 
 package com.openexchange.rest.services.users.mailmapping;
 
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.util.NativeBuilders.MapBuilder;
 import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.mailmapping.ResolvedMail;
 import com.openexchange.rest.services.OXRESTService;
 import com.openexchange.rest.services.annotations.GET;
 import com.openexchange.rest.services.annotations.ROOT;
+import com.openexchange.user.UserService;
 import static com.openexchange.java.util.NativeBuilders.*;
 
 /**
@@ -66,6 +70,13 @@ import static com.openexchange.java.util.NativeBuilders.*;
 @ROOT("/utilities/mailResolver")
 public class MailMappingService extends OXRESTService<MailResolver> {
     
+    /**
+     * GET /rest/utilities/mailResolver/resolve/[mail1];[mail2]
+     * 
+     * Tries to resolve the given mail addresses to context and user IDs.
+     * Returns an Object with the mail addresses as keys and objects with the keys "user" (for the userId) and "context" (for the contextId) as values.
+     * If a mail address is unknown, the corresponding key will be missing in the response.
+     */
     @GET("/resolve/:mail")
     public Object resolve(String mail) throws OXException {
         String[] mails = mail.split(";");
@@ -76,11 +87,19 @@ public class MailMappingService extends OXRESTService<MailResolver> {
             if (resolved == null) {
                 continue;
             }
+            ContextService contexts = services.getService(ContextService.class);
+            Context ctx = contexts.getContext(resolved.getContextID());
+            User user = services.getService(UserService.class).getUser(resolved.getUserID(), ctx);
+            
             result.put(
                 m,
                 map()
-                    .put("user", resolved.getUserID())
-                    .put("context", resolved.getContextID())
+                    .put("uid", resolved.getUserID())
+                    .put("cid", resolved.getContextID())
+                    .put("user", map()
+                        .put("language", user.getPreferredLanguage())
+                        .put("displayName", user.getDisplayName())
+                        .build())
                     .build()
             );
         }

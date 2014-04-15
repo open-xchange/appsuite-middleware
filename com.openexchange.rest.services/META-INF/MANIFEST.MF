@@ -16,11 +16,8 @@ Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.tools.session,
  javax.servlet,
  javax.servlet.http,
- javax.ws.rs,
- javax.ws.rs.core,
- javax.ws.rs.ext,
  org.json,
- org.osgi.framework;version="1.3.0",
+ org.osgi.framework,
  org.osgi.service.http,
  org.slf4j
 Bundle-ClassPath: .
