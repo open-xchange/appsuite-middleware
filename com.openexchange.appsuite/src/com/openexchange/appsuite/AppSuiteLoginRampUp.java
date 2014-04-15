@@ -243,9 +243,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
                 }
             }
             return (JSONObject) JSONCoercion.coerceToJSON(rampUp);
-        } catch (JSONException e) {
-            return new JSONObject();
-        } catch (InterruptedException e) {
+        } catch (Throwable t) {
             return new JSONObject();
         }
     }
