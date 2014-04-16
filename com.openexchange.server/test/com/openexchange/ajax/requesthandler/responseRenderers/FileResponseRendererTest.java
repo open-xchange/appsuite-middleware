@@ -144,7 +144,7 @@ public class FileResponseRendererTest extends TestCase {
     }
 
     public void testContentLengthMailAttachments_Bug26926() {
-        try {            
+        try {
             final File file = new File(TEST_DATA_DIR, "OX6-User-Guide-German-v6.22.2.pdf");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
@@ -172,9 +172,9 @@ public class FileResponseRendererTest extends TestCase {
             fail(e.getMessage());
         }
     }
-    
+
     public void testZeroByteTransformation_Bug28429() {
-        try {            
+        try {
             final File file = new File(TEST_DATA_DIR, "28429.jpg");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
@@ -207,9 +207,9 @@ public class FileResponseRendererTest extends TestCase {
             fail(e.getMessage());
         }
     }
-    
+
     public void testContentTypeByFileName_Bug31648() {
-        try {            
+        try {
             final File file = new File(TEST_DATA_DIR, "VM1161.PNG");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
@@ -242,9 +242,9 @@ public class FileResponseRendererTest extends TestCase {
             fail(e.getMessage());
         }
     }
-    
+
     public void testRangeHeader_Bug27394() {
-        try {            
+        try {
             final File file = new File(TEST_DATA_DIR, "OX6-User-Guide-German-v6.22.2.pdf");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);

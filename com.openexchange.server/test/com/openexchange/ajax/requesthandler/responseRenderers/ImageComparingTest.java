@@ -136,7 +136,6 @@ public class ImageComparingTest extends TestCase {
                 fileHolder.setName(fileInput.getName());
                 fileHolder.setDelivery("view");
                 fileHolder.setDisposition("inline");
-                fileHolder.setName(fileInput.getName());
             }
             final AJAXRequestData requestData = new AJAXRequestData();
             {
@@ -158,8 +157,6 @@ public class ImageComparingTest extends TestCase {
             final byte[] bytesCurrent = servletOutputStream.toByteArray();
 
             // Converts byte streams to buffered images
-            InputStream inOriginal = new FileInputStream(fileExpected);
-            BufferedImage originalImage = ImageIO.read(inOriginal);
             InputStream inExpected = new FileInputStream(fileExpected);
             BufferedImage expectedImage = ImageIO.read(inExpected);
             InputStream inAfter = new ByteArrayInputStream(bytesCurrent);
@@ -168,7 +165,7 @@ public class ImageComparingTest extends TestCase {
             // TODO: detection if image is rotated
 
 
-            //Histogram
+            // histogram check
             float expectedHistogram = ImageComparingTools.meanHistogramRGBValue(expectedImage);
             float currentHistogram = ImageComparingTools.meanHistogramRGBValue(currentImage);
             assertEquals("Image histogram differs ", expectedHistogram, currentHistogram);
@@ -176,5 +173,63 @@ public class ImageComparingTest extends TestCase {
             e.printStackTrace();
             fail(e.getMessage());
         }
+    }
+
+    public void testTransformationOfAlphaChannelPicture_Bug28163() {
+        try {
+            final File fileInput = new File(TEST_DATA_DIR, "28163.jpg");
+
+            final FileHolder fileHolder = new FileHolder(fileInput);
+            {
+                fileHolder.setContentType("image/png");
+                fileHolder.setName(fileInput.getName());
+                fileHolder.setDelivery("view");
+                fileHolder.setDisposition("inline");
+            }
+            final AJAXRequestData requestData = new AJAXRequestData();
+            {
+                requestData.setSession(new SimServerSession(1, 1));
+                requestData.putParameter("cache", "false");
+                requestData.putParameter("delivery", "view");
+            }
+
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            final SimHttpServletRequest req = new SimHttpServletRequest();
+            final SimHttpServletResponse resp = new SimHttpServletResponse();
+            requestData.setHttpServletResponse(resp);
+            ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+            resp.setOutputStream(servletOutputStream);
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+            fileResponseRenderer.setScaler(new JavaImageTransformationService());
+            fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+            final byte[] bytesCurrent = servletOutputStream.toByteArray();
+
+            // Converts byte streams to buffered images
+            InputStream inOriginal = new FileInputStream(fileInput);
+            BufferedImage originalImage = ImageIO.read(inOriginal);
+            InputStream inAfter = new ByteArrayInputStream(bytesCurrent);
+            BufferedImage currentImage = ImageIO.read(inAfter);
+
+            float expectedHistogramValue = ImageComparingTools.meanHistogramRGBValue(originalImage);
+            float currentHistogramValue = ImageComparingTools.meanHistogramRGBValue(currentImage);
+
+            // histogram should not differ too much +- 0,5
+            assertValueInRange(currentHistogramValue, expectedHistogramValue - 0.5f, expectedHistogramValue + 0.5f);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Asserts that a value is in range between rangeMin and rangeMax
+     * 
+     * @param value the value to be tested
+     * @param rangeMin the absolute minimum range
+     * @param rangeMax the absolute maximum range
+     */
+    private void assertValueInRange(float value, float rangeMin, float rangeMax) {
+        boolean inRange = (rangeMin <= value && value <= rangeMax);
+        assertTrue("Range differs too much. Expect values between: " + rangeMin + " and " + rangeMax + "--> Got: " + value, inRange);
     }
 }

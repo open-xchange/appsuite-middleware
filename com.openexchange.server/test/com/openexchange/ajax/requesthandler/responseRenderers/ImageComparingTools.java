@@ -51,7 +51,6 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import com.drew.imaging.ImageProcessingException;
 
 
 /**
@@ -62,10 +61,13 @@ import com.drew.imaging.ImageProcessingException;
  */
 public class ImageComparingTools {
 
-    public static float meanHistogramRGBValue(BufferedImage image) throws ImageProcessingException {
-        if ((image.getWidth() == 0 || image.getHeight() == 0) || image == null) {
-
-        }
+    /**
+     * Returns the mean value of the RGB histogram of an image
+     * 
+     * @param image the image
+     * @return rounded average to second decimal place of RGB histogram
+     */
+    public static float meanHistogramRGBValue(BufferedImage image) {
         int[] hValue = new int[256];
         // fill zero matrix
         for (int i = 0; i < hValue.length; i++) {
@@ -87,8 +89,7 @@ public class ImageComparingTools {
         for (int colorPos = 0; colorPos < hValue.length; colorPos++) {
             average += (hValue[colorPos] * colorPos) / 3.0f;
         }
-        // calculates the average
         average = average / (image.getWidth() * image.getHeight());
-        return average;
+        return Math.round(average * 100.0f) / 100.0f;
     }
 }
