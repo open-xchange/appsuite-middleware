@@ -331,7 +331,7 @@ public class FindRequest {
         }
 
         try {
-            Module module = getModule();
+            Module module = requireModule();
             List<ActiveFacet> facets = new ArrayList<ActiveFacet>(jFacets.length());
             for (int i = 0; i < jFacets.length(); i++) {
                 JSONObject jFacet = jFacets.getJSONObject(i);

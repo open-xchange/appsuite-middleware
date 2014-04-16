@@ -47,62 +47,40 @@
  *
  */
 
-package com.openexchange.ajax.find;
+package com.openexchange.ajax.find.common;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.find.common.Bug32060Test;
-import com.openexchange.ajax.find.drive.BasicDriveTest;
-import com.openexchange.ajax.find.mail.BasicMailTest;
-import com.openexchange.ajax.find.tasks.FindTasksAutocompleteTests;
-import com.openexchange.ajax.find.tasks.FindTasksQueryTests;
-import com.openexchange.ajax.find.tasks.FindTasksTestEnvironment;
-import com.openexchange.ajax.find.tasks.FindTasksTestsFilterCombinations;
+import com.openexchange.ajax.find.AbstractFindTest;
+import com.openexchange.ajax.find.actions.AutocompleteRequest;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link FindTestSuite}
+ * {@link Bug32060Test}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * NPE at FindRequest.facetTypeFor
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class FindTestSuite {
+public class Bug32060Test extends AbstractFindTest {
 
     /**
-     * Initializes a new {@link FindTestSuite}.
+     * Initializes a new {@link Bug32060Test}.
+     *
+     * @param name The test name
      */
-    private FindTestSuite() {
-        super();
+    public Bug32060Test(String name) {
+        super(name);
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.find.FindTestSuite");
-        tests.addTestSuite(com.openexchange.ajax.find.calendar.QueryTest.class);
-        //disable AutoCompleteTest for now
-        //tests.addTestSuite(com.openexchange.ajax.find.calendar.AutocompleteTest.class);
-        tests.addTestSuite(com.openexchange.ajax.find.contacts.QueryTest.class);
-        //disable AutoCompleteTest for now
-        //tests.addTestSuite(com.openexchange.ajax.find.contacts.AutocompleteTest.class);
-        tests.addTestSuite(BasicMailTest.class);
-        tests.addTestSuite(BasicDriveTest.class);
-        tests.addTestSuite(FindTasksTestsFilterCombinations.class);
-        tests.addTestSuite(FindTasksQueryTests.class);
-        tests.addTestSuite(FindTasksAutocompleteTests.class);
-        tests.addTestSuite(Bug32060Test.class);
-
-
-        TestSetup setup = new TestSetup(tests) {
-            @Override
-            protected void setUp() {
-                FindTasksTestEnvironment.getInstance().init();
-            }
-            @Override
-            protected void tearDown() throws Exception {
-                FindTasksTestEnvironment.getInstance().cleanup();
-            }
-        };
-
-        return setup;
+    public void testUnknownModule() throws Exception {
+        OXException expectedException = null;
+        try {
+            client.execute(new AutocompleteRequest("", "ox-messenger"));
+        } catch (OXException e) {
+            expectedException = e;
+        }
+        assertNotNull("got no exception", expectedException);
+        assertEquals("SVL-0010", expectedException.getErrorCode());
     }
+
 }

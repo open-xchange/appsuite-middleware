@@ -142,7 +142,7 @@ public class Bug30903Test extends AbstractMailTest {
         jsonMail.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
         jsonMail.put(MailJSONField.SUBJECT.getKey(), "Bug30903");
         jsonMail.put(MailJSONField.PRIORITY.getKey(), "3");
-        jsonMail.put("sendtype", 3);
+        jsonMail.put("sendtype", 6);
         //jsonMail.put("deleteDraftOnTransport", true);
         jsonMail.put(MailJSONField.MSGREF.getKey(), msgref);
         final JSONObject jAttachment = new JSONObject(2);

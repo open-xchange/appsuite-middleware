@@ -1,3 +1,7 @@
+* 2014-04-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32060: Require valid module in autocomplete request 
+
 * 2014-04-14 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32004: Use default type for folders below infostore trash 

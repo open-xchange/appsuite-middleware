@@ -239,13 +239,11 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
             for (Future<Void> future : futures) {
                 try {
                     future.get();
-                } catch (ExecutionException e) {
+                } catch (Throwable t) {
                 }
             }
             return (JSONObject) JSONCoercion.coerceToJSON(rampUp);
-        } catch (JSONException e) {
-            return new JSONObject();
-        } catch (InterruptedException e) {
+        } catch (Throwable t) {
             return new JSONObject();
         }
     }
