@@ -2,6 +2,10 @@
 
  - Fix for bug 31918: Set more reasonable max-age for images held in Browser cache
 
+* 2014-04-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32076: Process images of imported contacts in a serialized way
+  
 * 2014-04-10 - marc.arens@open-xchange.com
 
  - Fix for bug 31942: Fix for unconsumed request remainders and configure that we want to accept payloads for methods where a payload is currently undefined but not forbidden.

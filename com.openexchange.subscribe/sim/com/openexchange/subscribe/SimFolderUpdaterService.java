@@ -54,6 +54,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 
 /**
@@ -77,8 +79,8 @@ public class SimFolderUpdaterService implements FolderUpdaterService<Object> {
     }
 
     @Override
-    public void save(final Collection data, final TargetFolderDefinition target) throws OXException {
-        this.data = data;
+    public void save(final SearchIterator<Object> data, final TargetFolderDefinition target) throws OXException {
+        this.data = SearchIteratorAdapter.toList(data);
         this.target = target;
     }
 

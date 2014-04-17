@@ -50,9 +50,11 @@
 package com.openexchange.subscribe;
 
 import java.util.Arrays;
+import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.subscribe.internal.SimFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
 
 
 /**
@@ -74,7 +76,8 @@ public class StrategyFolderUpdaterTest extends TestCase {
     }
 
     public void testMerging() throws Exception {
-        updater.save(Arrays.asList("aaaab", "baaaa", "new"), null);
+        List<String> list = Arrays.asList("aaaab", "baaaa", "new");
+        updater.save(new SearchIteratorDelegator<String>(list), null);
         assertTrue("Expected update to aaaac", simStrategy.wasUpdated("aaaac", "aaaab"));
         assertTrue("Expected creation of 'new'", simStrategy.wasCreated("new"));
     }

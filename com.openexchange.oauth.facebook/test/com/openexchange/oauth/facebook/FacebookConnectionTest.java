@@ -66,11 +66,12 @@ import org.scribe.oauth.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.facebook.osgi.Activator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 
 /**
  * Only for local tests. Do not add to automation!
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class FacebookConnectionTest  extends TestCase {
@@ -187,7 +188,7 @@ public class FacebookConnectionTest  extends TestCase {
     }
 
     public void testUsageOfExistingAccount() throws OXException{
-        final List<Contact> contacts = facebook.getContacts(null,1,1,1);
+        final List<Contact> contacts = SearchIteratorAdapter.toList(facebook.getContacts(null,1,1,1));
         for (final Contact contact : contacts){
             System.out.println(contact.getGivenName() + " " + contact.getSurName());
             System.out.println(contact.getBirthday());

@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SimSubscribeService implements SubscribeService {
+public class SimSubscribeService extends AbstractSubscribeService {
 
     private SubscriptionSource source;
 
@@ -177,11 +177,11 @@ public class SimSubscribeService implements SubscribeService {
 
     @Override
     public void touch(Context ctx, int subscriptionId) throws OXException {
-        
+
     }
 
     @Override
     public void removeUnrecoverableItems(String secret, Session session) throws OXException {
-        // Ignore        
+        // Ignore
     }
 }

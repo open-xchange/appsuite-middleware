@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -77,6 +78,15 @@ public interface SubscribeService {
     public void update(Subscription subscription) throws OXException;
 
     public Collection<?> getContent(Subscription subscription) throws OXException;
+
+    /**
+     * Loads the contents of this subscription.
+     *
+     * @param subscription The subscription to load
+     * @return A search iterator providing the subscription's content
+     * @throws OXException
+     */
+    SearchIterator<?> loadContent(Subscription subscription) throws OXException;
 
     public boolean knows(Context context, int subscriptionId) throws OXException;
 
