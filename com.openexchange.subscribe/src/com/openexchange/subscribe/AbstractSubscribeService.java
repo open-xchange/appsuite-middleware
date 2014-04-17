@@ -68,6 +68,8 @@ import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -378,6 +380,14 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             }
             unsubscribe(subscription);
         }
+    }
+
+    /**
+     * Override if possible to allow pipelined processing of the subscription's content.
+     */
+    @Override
+    public SearchIterator<?> loadContent(Subscription subscription) throws OXException {
+        return new SearchIteratorDelegator(getContent(subscription));
     }
 
     private static String getSubscriptionSourceId(final Subscription subscription) {

@@ -54,6 +54,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterServiceV2;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 
 /**
@@ -86,42 +88,26 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
     }
 
     @Override
-    public void save(final Collection<T> data, final TargetFolderDefinition target) throws OXException {
-        final Object session = strategy.startSession(target);
-
-        final Collection<T> dataInFolder = strategy.getData(target, session);
-
-        try {
-            for(final T element : data) {
-                final T bestMatch = findBestMatch(element, dataInFolder, session);
-                if(bestMatch == null) {
-                    strategy.save(element, session);
-                } else {
-                    strategy.update(bestMatch, element, session);
-                }
-            }
-        } catch (final OXException x) {
-            LOG.error("", x);
-            throw x;
-        } finally {
-            strategy.closeSession(session);
-        }
+    public void save(final SearchIterator<T> data, final TargetFolderDefinition target) throws OXException {
+        save(data, target, null);
     }
 
     @Override
-    public void save(Collection<T> data, TargetFolderDefinition target, Collection<OXException> errors) throws OXException {
+    public void save(SearchIterator<T> data, TargetFolderDefinition target, Collection<OXException> errors) throws OXException {
         final Object session = strategy.startSession(target);
-
         final Collection<T> dataInFolder = strategy.getData(target, session);
-
         try {
-            for(final T element : data) {
-                final T bestMatch = findBestMatch(element, dataInFolder, session);
-                if(bestMatch == null) {
-                    strategy.save(element, session);
-                } else {
-                    strategy.update(bestMatch, element, session);
+            while (data.hasNext()) {
+                T element = data.next();
+                if (null != element) {
+                    final T bestMatch = findBestMatch(element, dataInFolder, session);
+                    if(bestMatch == null) {
+                        strategy.save(element, session);
+                    } else {
+                        strategy.update(bestMatch, element, session);
+                    }
                 }
+                element = null;
             }
         } catch (final OXException x) {
             if (null == errors) {
@@ -129,8 +115,9 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
             } else {
                 errors.add(x);
             }
-            throw x;
+            throw x; //TODO: re-throw also in case of passed errors collection?
         } finally {
+            SearchIterators.close(data);
             strategy.closeSession(session);
         }
     }

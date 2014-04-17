@@ -51,6 +51,7 @@ package com.openexchange.groupware.generic;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
@@ -63,11 +64,11 @@ public interface FolderUpdaterServiceV2<T> extends FolderUpdaterService<T> {
     /**
      * Saves folder modification
      *
-     * @param data The data
+     * @param data A search iterator over the data to store
      * @param target The target definition
      * @param errors The optional collection of error
      * @throws OXException If update fails
      */
-    public void save(Collection<T> data, TargetFolderDefinition target, final Collection<OXException> errors) throws OXException;
+    void save(SearchIterator<T> data, TargetFolderDefinition target, final Collection<OXException> errors) throws OXException;
 
 }
