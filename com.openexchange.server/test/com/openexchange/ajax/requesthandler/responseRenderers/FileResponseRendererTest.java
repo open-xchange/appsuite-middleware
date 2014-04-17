@@ -144,7 +144,7 @@ public class FileResponseRendererTest extends TestCase {
     }
 
     public void testContentLengthMailAttachments_Bug26926() {
-        try {            
+        try {
             final File file = new File(TEST_DATA_DIR, "OX6-User-Guide-German-v6.22.2.pdf");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
@@ -172,9 +172,9 @@ public class FileResponseRendererTest extends TestCase {
             fail(e.getMessage());
         }
     }
-    
+
     public void testZeroByteTransformation_Bug28429() {
-        try {            
+        try {
             final File file = new File(TEST_DATA_DIR, "28429.jpg");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
@@ -207,9 +207,9 @@ public class FileResponseRendererTest extends TestCase {
             fail(e.getMessage());
         }
     }
-    
+
     public void testContentTypeByFileName_Bug31648() {
-        try {            
+        try {
             final File file = new File(TEST_DATA_DIR, "VM1161.PNG");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
@@ -242,9 +242,9 @@ public class FileResponseRendererTest extends TestCase {
             fail(e.getMessage());
         }
     }
-    
+
     public void testRangeHeader_Bug27394() {
-        try {            
+        try {
             final File file = new File(TEST_DATA_DIR, "OX6-User-Guide-German-v6.22.2.pdf");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
@@ -303,7 +303,7 @@ public class FileResponseRendererTest extends TestCase {
         fileHolder.setDelivery("download");
         fileHolder.setDisposition("attachment");
         fileHolder.setName("");
-        
+
         resp = new SimHttpServletResponse();
         servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
@@ -314,7 +314,7 @@ public class FileResponseRendererTest extends TestCase {
 
         // test with empty content type and empty filename
         fileHolder.setContentType("");
-        
+
         resp = new SimHttpServletResponse();
         servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
@@ -326,13 +326,13 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testXSSVuln_Bug26244() throws IOException {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
-        
+
         final File file = new File(TEST_DATA_DIR, "xss_utf16.html");
         final InputStream is = new FileInputStream(file);
         final byte[] bytes = IOUtils.toByteArray(is);
         final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
         fileHolder.setName(file.getName());
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
         final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         final SimHttpServletRequest req = new SimHttpServletRequest();
@@ -343,6 +343,31 @@ public class FileResponseRendererTest extends TestCase {
         resp.setOutputStream(servletOutputStream);
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         final String expectedCT = "text/html";
+        assertEquals("Wrong Content-Type", expectedCT, resp.getContentType());
+    }
+
+    public void testXSSVuln_Bug29147() throws IOException {
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+
+        final File file = new File(TEST_DATA_DIR, "29147.svg");
+        final InputStream is = new FileInputStream(file);
+        final byte[] bytes = IOUtils.toByteArray(is);
+        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+        {
+            fileHolder.setContentType("image/svg+xml");
+            fileHolder.setDelivery("view");
+            fileHolder.setDisposition("inline");
+            fileHolder.setName(file.getName());
+        }
+
+        final AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        final String expectedCT = "application/octet-stream"; // force download
         assertEquals("Wrong Content-Type", expectedCT, resp.getContentType());
     }
 

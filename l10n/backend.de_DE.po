@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-04-11 11:01+0100\n"
+"PO-Revision-Date: 2014-04-16 11:56+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -2541,7 +2541,7 @@ msgstr "Dateityp"
 #. Search in file size
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:87
 msgid "File size"
-msgstr "Dateiegröße"
+msgstr "Dateigröße"
 
 #. -------------------------- i18n strings for file types ---------------------------- //
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:91
