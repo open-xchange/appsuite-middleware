@@ -1,6 +1,7 @@
-* 2014-04-16 - tobias.friedrich@open-xchange.com
+* 2014-04-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32076: Process images of imported contacts in a serialized way  
+ - Fix for bug 30835: Sort languages by name  
 
 * 2014-04-15 - tobias.friedrich@open-xchange.com
 
