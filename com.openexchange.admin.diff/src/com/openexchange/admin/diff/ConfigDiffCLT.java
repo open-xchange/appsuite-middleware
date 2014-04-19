@@ -58,7 +58,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
 /**
- * {@link ConfigDiffCLT}
+ * CLT to execute the configuration diff tool.
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -96,7 +96,8 @@ public class ConfigDiffCLT {
                     file = null;
                 }
                 executeDiff(originalFolder, installedFolder, file);
-            } else {
+            }
+            else {
                 printUsage(-1);
             }
         } catch (ParseException e) {
@@ -113,6 +114,9 @@ public class ConfigDiffCLT {
      * @param file optional file to store the diff
      */
     private static void executeDiff(String original, String installed, String file) {
+        ConfigDiff configDiff = new ConfigDiff(original, installed);
+        configDiff.run();
+
         if (file == null) {
             // do not export diff to file
         } else {
@@ -131,4 +135,5 @@ public class ConfigDiffCLT {
         hf.printHelp("Help", options);
         System.exit(exitCode);
     }
+
 }

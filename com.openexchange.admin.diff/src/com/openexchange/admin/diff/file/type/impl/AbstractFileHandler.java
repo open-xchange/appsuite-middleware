@@ -47,91 +47,60 @@
  *
  */
 
-package com.openexchange.admin.diff;
+package com.openexchange.admin.diff.file.type.impl;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
-import com.openexchange.admin.diff.file.FileHandler;
-import com.openexchange.admin.diff.file.provider.ConfFolderFileProvider;
-import com.openexchange.admin.diff.file.provider.JarFileProvider;
-import com.openexchange.admin.diff.file.provider.RecursiveFileProvider;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.admin.diff.file.type.IConfFileHandler;
 import com.openexchange.admin.diff.result.DiffResult;
 
-
 /**
- * Main class that is invoked to execute the configuration diffs.
- * 
+ * {@link AbstractFileHandler}
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.0
  */
-public class ConfigDiff {
+public abstract class AbstractFileHandler implements IConfFileHandler {
+
+    protected volatile Map<String, String> installedFiles = new HashMap<String, String>();
+
+    protected volatile Map<String, String> originalFiles = new HashMap<String, String>();
 
     /**
-     * Default folder for original configuration files
+     * {@inheritDoc}
      */
-    private String originalFolder = "/opt/open-xchange/bundles";
-
-    /**
-     * Default folder for installed configuration files
-     */
-    private String installationFolder = "/opt/open-xchange/etc";
-
-    /**
-     * Handles processing with files
-     */
-    private FileHandler fileHandler = new FileHandler();
-
-    /**
-     * Handlers that are registered for diff processing
-     */
-    private static Set<IConfFileHandler> handlers = new HashSet<IConfFileHandler>();
-
-    public static void register(IConfFileHandler handler) {
-        handlers.add(handler);
-    }
-
-    public ConfigDiff(String originalFolder, String installationFolder) {
-        if (StringUtils.isNoneBlank(originalFolder)) {
-            this.originalFolder = originalFolder;
-        }
-        if (StringUtils.isNoneBlank(installationFolder)) {
-            this.installationFolder = installationFolder;
+    @Override
+    public void addFile(String fileName, String content, boolean isOriginal) {
+        if (isOriginal) {
+            originalFiles.put(fileName, content);
+        } else {
+            installedFiles.put(fileName, content);
         }
     }
 
-    public DiffResult run() {
-        DiffResult diffResult = new DiffResult();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DiffResult getDiff(DiffResult diff) {
+        getFileDiffs(diff, new HashMap<String, String>(this.originalFiles), new HashMap<String, String>(this.installedFiles));
 
-        try {
-            this.fileHandler.readConfFiles(this.originalFolder, true, new JarFileProvider(), new ConfFolderFileProvider());
-
-            this.fileHandler.readConfFiles(this.installationFolder, false, new RecursiveFileProvider());
-
-            return getDiffs(diffResult);
-        } catch (FileNotFoundException e) {
-            diffResult.getProcessingErrors().add(e.getLocalizedMessage());
-        } catch (IOException e) {
-            diffResult.getProcessingErrors().add(e.getLocalizedMessage());
-        }
-        return diffResult;
+        return getDiff(diff, this.originalFiles, this.installedFiles);
     }
 
-    /**
-     * Calls all registered handles to get the diffs
-     * 
-     * @param diffResult - object to add the DiffResults to
-     * @return - DiffResult object with all diffs
-     */
-    protected DiffResult getDiffs(DiffResult diffResult) {
+    protected void getFileDiffs(DiffResult diff, final HashMap<String, String> lOriginalFiles, final HashMap<String, String> lInstalledFiles) {
 
-        for (IConfFileHandler handler : handlers) {
-            handler.getDiff(diffResult);
+        for (String origFile : lOriginalFiles.keySet()) {
+            if (!lInstalledFiles.keySet().contains(origFile)) {
+                diff.getMissingFiles().add(origFile);
+            }
+            lInstalledFiles.remove(origFile);
         }
-        System.out.println(diffResult.toString());
-        return diffResult;
+
+        if (lInstalledFiles.size() > 0) {
+            for (String installedFile : lInstalledFiles.keySet()) {
+                diff.getAdditionalFiles().put(installedFile, lInstalledFiles.get(installedFile));
+            }
+        }
     }
 }
