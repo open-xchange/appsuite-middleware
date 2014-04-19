@@ -1,3 +1,7 @@
+* 2014-04-17 - martin.schneider@open-xchange.com
+
+ - Fix for bug 30914: Ignore dates for import that contain only zeros
+
 * 2014-04-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32076: Process images of imported contacts in a serialized way  
