@@ -392,7 +392,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     private TimeZone getTimeZone() throws OXException {
         if (timeZone == null) {
-            timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+            if (session instanceof ServerSession) {
+                timeZone = TimeZoneUtils.getTimeZone(((ServerSession) session).getUser().getTimeZone());
+            } else {
+                timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+            }
         }
         return timeZone;
     }
@@ -1333,6 +1337,14 @@ public final class JsonMessageHandler implements MailMessageHandler {
             }
         }
          */
+
+        // Check whether to discard passed part
+        if ((textAppended || null != plainText) && isAlternative && null != altId && id.startsWith(altId)) {
+            // Ignore it as part of a multipart/alternative and a text version was already selected
+            return true;
+        }
+
+        // Process it
         final ContentType contentType = part.getContentType();
         if (isVCalendar(baseContentType) && !contentType.containsParameter("method")) {
             /*
