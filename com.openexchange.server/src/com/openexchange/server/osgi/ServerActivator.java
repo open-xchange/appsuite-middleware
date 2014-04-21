@@ -76,6 +76,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.meta.MetaContributorRegistry;
@@ -805,6 +806,7 @@ public final class ServerActivator extends HousekeepingActivator {
                 secretService.close();
                 secretService = null;
             }
+            LoginServlet.setRampUpServices(null);
         } finally {
             started.set(false);
             CONTEXT = null;
