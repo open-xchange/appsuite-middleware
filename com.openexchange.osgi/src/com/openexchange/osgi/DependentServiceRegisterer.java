@@ -69,9 +69,9 @@ import com.openexchange.osgi.console.ServiceStateLookup;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DependantServiceRegisterer<S> implements ServiceTrackerCustomizer<Object,Object> {
+public class DependentServiceRegisterer<S> implements ServiceTrackerCustomizer<Object,Object> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DependantServiceRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DependentServiceRegisterer.class);
 
     private final Lock lock = new ReentrantLock();
     private final BundleContext context;
@@ -84,7 +84,7 @@ public class DependantServiceRegisterer<S> implements ServiceTrackerCustomizer<O
     private S registeredService;
     private ServiceRegistration<?> registration;
 
-    public DependantServiceRegisterer(BundleContext context, Class<S> serviceType, Class<? extends S> serviceClass, Dictionary<String, ?> properties, Class<?>... neededServices) {
+    public DependentServiceRegisterer(BundleContext context, Class<S> serviceType, Class<? extends S> serviceClass, Dictionary<String, ?> properties, Class<?>... neededServices) {
         super();
         this.context = context;
         this.serviceType = serviceType;
