@@ -84,33 +84,21 @@ public @ThreadSafe class ServiceSet<E> implements NavigableSet<E>, SimpleRegistr
         entries = new ConcurrentSkipListSet<E>(new Comparator<E>() {
 
             @Override
-            public int compare(E o1, E o2) {
-                Long r1;
-                {
-                    final Integer i1 = serviceRankings.get(o1);
-                    r1 = Long.valueOf(null == i1 ? 0L : i1.longValue());
-                }
-                Long r2;
-                {
-                    final Integer i2 = serviceRankings.get(o2);
-                    r2 = Long.valueOf(null == i2 ? 0L : i2.longValue());
-                }
-
-                if (longValue(r1) == longValue(r2)) {
-                    r1 = serviceIds.get(o1);
-                    r2 = serviceIds.get(o2);
-                }
-                if (r1 == null) {
-                    r1 = Long.valueOf(0L);
-                }
-                if (r2 == null) {
-                    r2 = Long.valueOf(0L);
-                }
-                return (int) (r1.longValue() - r2.longValue());
+            public int compare(final E o1, final E o2) {
+                // First order is ranking, second order is service identifier
+                final int ranking1 = getRanking(o1);
+                final int ranking2 = getRanking(o2);
+                return ranking1 == ranking2 ? (int) (getServiceId(o1) - getServiceId(o2)) : ranking1 - ranking2;
             }
 
-            private long longValue(final Long l) {
-                return null == l ? -1L : l.longValue();
+            private int getRanking(final E e) {
+                final Integer i = serviceRankings.get(e);
+                return null == i ? 0 : i.intValue();
+            }
+
+            private long getServiceId(final E e) {
+                final Long l = serviceIds.get(e);
+                return null == l ? 0L : l.longValue();
             }
         });
     }
