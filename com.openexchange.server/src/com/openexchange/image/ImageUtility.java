@@ -59,6 +59,7 @@ import jonelo.jacksum.algorithm.AbstractChecksum;
 import jonelo.jacksum.algorithm.MD;
 import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtilis;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostData;
@@ -169,7 +170,7 @@ public final class ImageUtility {
 
     private static String decodeQueryStringValue(final String queryStringValue) {
         try {
-            return AJAXServlet.decodeUrl(queryStringValue, UTF_8);
+            return AJAXUtilis.decodeUrl(queryStringValue, UTF_8);
         } catch (final RuntimeException e) {
             return queryStringValue;
         }

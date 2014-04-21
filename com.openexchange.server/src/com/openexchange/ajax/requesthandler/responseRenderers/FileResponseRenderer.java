@@ -72,6 +72,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtilis;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
 import com.openexchange.ajax.container.FileHolder;
@@ -233,11 +234,11 @@ public class FileResponseRenderer implements ResponseRenderer {
              *
              */
             // Check certain parameters
-            String delivery = AJAXServlet.sanitizeParam(req.getParameter(DELIVERY));
+            String delivery = AJAXUtilis.sanitizeParam(req.getParameter(DELIVERY));
             if (delivery == null) {
                 delivery = file.getDelivery();
             }
-            String contentType = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_TYPE), true);
+            String contentType = AJAXUtilis.encodeUrl(req.getParameter(PARAMETER_CONTENT_TYPE), true);
             boolean contentTypeByParameter = false;
             if (null == contentType) {
                 if (DOWNLOAD.equalsIgnoreCase(delivery)) {
@@ -257,7 +258,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     contentType = SAVE_AS_TYPE;
                 }
             }
-            String contentDisposition = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
+            String contentDisposition = AJAXUtilis.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
             if (null == contentDisposition) {
                 if (VIEW.equalsIgnoreCase(delivery)) {
                     contentDisposition = "inline";
@@ -292,7 +293,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
                 return;
             }
-            final String userAgent = AJAXServlet.sanitizeParam(req.getHeader("user-agent"));
+            final String userAgent = AJAXUtilis.sanitizeParam(req.getHeader("user-agent"));
             if (DOWNLOAD.equalsIgnoreCase(delivery) || (SAVE_AS_TYPE.equals(contentType) && !VIEW.equalsIgnoreCase(delivery))) {
                 // Write as a common file download: application/octet-stream
                 final StringBuilder sb = new StringBuilder(32);

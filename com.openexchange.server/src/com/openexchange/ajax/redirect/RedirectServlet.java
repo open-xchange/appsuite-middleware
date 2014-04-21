@@ -57,6 +57,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.AJAXUtilis;
 
 /**
  * {@link RedirectServlet}
@@ -85,7 +86,7 @@ public class RedirectServlet extends HttpServlet {
         }
 
         if (isServerRelative(location)) {
-            resp.sendRedirect(encodeUrl(location, true));
+            resp.sendRedirect(AJAXUtilis.encodeUrl(location, true));
             return;
         }
 
@@ -98,7 +99,7 @@ public class RedirectServlet extends HttpServlet {
 
         location = assumeRelative(referer, location);
 
-        resp.sendRedirect(encodeUrl(location, true, true));
+        resp.sendRedirect(AJAXUtilis.encodeUrl(location, true, true));
 
     }
 

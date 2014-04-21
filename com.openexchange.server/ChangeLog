@@ -1,3 +1,7 @@
+* 2014-04-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32033: Escape user input that is supposed to be displayed as HTML
+
 * 2014-04-17 - martin.schneider@open-xchange.com
 
  - Fix for bug 30914: Ignore dates for import that contain only zeros
