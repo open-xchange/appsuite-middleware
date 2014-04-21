@@ -96,13 +96,18 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public abstract class AbstractLoginRequestHandler implements LoginRequestHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractLoginRequestHandler.class);
-    
-    private Set<LoginRampUpService> rampUp = null;
-    
-    public AbstractLoginRequestHandler(Set<LoginRampUpService> rampUp) {
-        this.rampUp = rampUp;
+
+    private final Set<LoginRampUpService> rampUpServices;
+
+    /**
+     * Initializes a new {@link AbstractLoginRequestHandler}.
+     *
+     * @param rampUpServices The optional ramp-up services
+     */
+    protected AbstractLoginRequestHandler(final Set<LoginRampUpService> rampUpServices) {
+        this.rampUpServices = rampUpServices;
     }
-    
+
     /**
      * @return a boolean value indicated if an auto login should proceed afterwards
      */
@@ -184,10 +189,10 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     LOG.warn("Modules could not be added to login JSON response", cause);
                 }
             }
-            
+
             // Perform Client Specific Ramp-Up
             performRampUp(req, session, json, serverSession);
-            
+
             // Set response
             response.setData(json);
         } catch (final OXException e) {
@@ -252,14 +257,15 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
         if (req.getParameter("rampUp") != null && "false".equals(req.getParameter("rampUp"))) {
             return;
         }
-        if (rampUp != null) {
-            for (LoginRampUpService rampUpService : rampUp) {
+        final Set<LoginRampUpService> rampUpServices = this.rampUpServices;
+        if (rampUpServices != null) {
+            for (LoginRampUpService rampUpService : rampUpServices) {
                 if (rampUpService.contributesTo(session.getClient())) {
                     JSONObject contribution = rampUpService.getContribution(serverSession, AJAXRequestDataTools.getInstance().parseRequest(req, false, false, serverSession, ""));
                     json.put("rampUp", contribution);
                     break;
                 }
-            }                
+            }
         }
     }
 
