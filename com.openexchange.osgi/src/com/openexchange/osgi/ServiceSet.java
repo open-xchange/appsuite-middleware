@@ -86,9 +86,8 @@ public @ThreadSafe class ServiceSet<E> implements NavigableSet<E>, SimpleRegistr
             @Override
             public int compare(final E o1, final E o2) {
                 // First order is ranking, second order is service identifier
-                final int ranking1 = getRanking(o1);
-                final int ranking2 = getRanking(o2);
-                return ranking1 == ranking2 ? (int) (getServiceId(o1) - getServiceId(o2)) : ranking1 - ranking2;
+                final int result = getRanking(o1) - getRanking(o2);
+                return 0 == result ? (int) (getServiceId(o1) - getServiceId(o2)) : result;
             }
 
             private int getRanking(final E e) {
