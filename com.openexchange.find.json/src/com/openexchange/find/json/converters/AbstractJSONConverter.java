@@ -131,7 +131,7 @@ public abstract class AbstractJSONConverter implements ResultConverter {
             for (Filter filter : filters) {
                 JSONObject filterJSON = new JSONObject();
                 filterJSON.put("id", filter.getId());
-                // TODO: introduce boolean if displayName is localizable or state in javadoc
+                // TODO: introduce boolean if "display_name" is localizable or state in JavaDoc
                 // that it has to be always localizable
                 filterJSON.put("display_name", translator.translate(locale, filter.getDisplayName()));
                 filterJSON.put("filter", convertFilter(filter));
