@@ -189,10 +189,13 @@ public class FindRequest {
                 return "";
             }
 
+            /*-
+             *
             final char lastChar = prefix.charAt(prefix.length() - 1);
             if ('*' == lastChar || '?' == lastChar) {
                 throw AjaxExceptionCodes.IMVALID_PARAMETER.create(PARAM_PREFIX);
             }
+            */
 
             return prefix;
         } catch (final JSONException e) {
