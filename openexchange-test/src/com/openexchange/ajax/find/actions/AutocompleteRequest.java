@@ -155,12 +155,14 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
         @Override
         protected AutocompleteResponse createResponse(final Response response) throws JSONException {
             final JSONObject jResponse = (JSONObject) response.getData();
-
-            final JSONArray jFacets = jResponse.getJSONArray("facets");
-            final int length = jFacets.length();
-            final List<Facet> facets = new ArrayList<Facet>(length);
-            for (int i = 0; i < length; i++) {
-                facets.add(parseJFacet(jFacets.getJSONObject(i)));
+            List<Facet> facets = null;
+            if (jResponse != null) {
+                final JSONArray jFacets = jResponse.getJSONArray("facets");
+                final int length = jFacets.length();
+                facets = new ArrayList<Facet>(length);
+                for (int i = 0; i < length; i++) {
+                    facets.add(parseJFacet(jFacets.getJSONObject(i)));
+                }
             }
             return new AutocompleteResponse(response, facets);
         }
