@@ -58,6 +58,7 @@ import java.util.regex.PatternSyntaxException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -90,6 +91,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 @DispatcherNotes(noSession = true)
 public class ConfigAction implements AJAXActionService {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ConfigAction.class);
 
     private final ServiceLookup services;
     private final ServerConfigServicesLookup registry;
@@ -142,69 +145,99 @@ public class ConfigAction implements AJAXActionService {
     @SuppressWarnings("unchecked")
     protected JSONObject getFromConfiguration(AJAXRequestData requestData, ServerSession session) throws JSONException, OXException {
         // Get configured brands/server configurations
-        Map<String, Object> serverConfigs = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config.yml");
+        Map<String, Object> configurations = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config.yml");
 
         // The resulting brand/server configuration
-        Map<String, Object> serverConfig = new HashMap<String, Object>();
+        Map<String, Object> serverConfiguration = new HashMap<String, Object>(4);
 
         // Check for default brands/server configurations
         {
             Map<String, Object> defaults = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config-defaults.yml");
             if (defaults != null) {
-                serverConfig.putAll((Map<String, Object>) defaults.get("default"));
+                serverConfiguration.putAll((Map<String, Object>) defaults.get("default"));
             }
         }
 
-        // Find other applicable configurations
-        if (serverConfigs != null) {
+        // Find other applicable brands/server configurations
+        if (configurations != null) {
+            boolean added = false;
             LinkedList<Map<String, Object>> applicableConfigs = new LinkedList<Map<String,Object>>();
-            for (Object value : serverConfigs.values()) {
-                Map<String, Object> possibleConfig = (Map<String, Object>) value;
-                if (looksApplicable(possibleConfig, requestData, session)) {
+            for (Object value : configurations.values()) {
+                Map<String, Object> possibleConfiguration = (Map<String, Object>) value;
+                if (looksApplicable(possibleConfiguration, requestData, session)) {
                     // ensure that "all"-host-wildcards are applied first
-                    if ("all".equals(possibleConfig.get("host"))) {
-                        applicableConfigs.addFirst(possibleConfig);
+                    if ("all".equals(possibleConfiguration.get("host"))) {
+                        applicableConfigs.addFirst(possibleConfiguration);
+                        added = true;
                     } else {
-                        applicableConfigs.add(possibleConfig);
+                        applicableConfigs.add(possibleConfiguration);
+                        added = true;
                     }
                 }
             }
-            for (Map<String, Object> config : applicableConfigs) {
-                serverConfig.putAll(config);
+            if (added) {
+                for (Map<String, Object> config : applicableConfigs) {
+                    serverConfiguration.putAll(config);
+                }
             }
         }
 
         // Return its JSON representation
-        return (JSONObject) JSONCoercion.coerceToJSON(serverConfig);
+        return (JSONObject) JSONCoercion.coerceToJSON(serverConfiguration);
     }
 
-    protected boolean looksApplicable(Map<String, Object> value, AJAXRequestData requestData, ServerSession session) throws OXException {
-        if (value == null) {
+    protected boolean looksApplicable(Map<String, Object> possibleConfiguration, AJAXRequestData requestData, ServerSession session) throws OXException {
+        if (possibleConfiguration == null) {
             return false;
         }
-        String host = (String) value.get("host");
-        if (host != null) {
-            if (host.equals(requestData.getHostname()) || "all".equals(host)) {
-                return true;
-            }
-        }
 
-        String hostRegex = (String) value.get("hostRegex");
-        if (hostRegex != null) {
-            try {
-                Pattern pattern = Pattern.compile(hostRegex);
-                if (pattern.matcher(requestData.getHostname()).find()) {
+        // Check "host"
+        {
+            final String host = (String) possibleConfiguration.get("host");
+            if (host != null) {
+                if ("all".equals(host)) {
                     return true;
                 }
-            } catch (final PatternSyntaxException e) {
-                // Ignore. Treat as absent.
+
+                final String hostName = requestData.getHostname();
+                if (host.equals(hostName)) {
+                    return true;
+                }
+
+                // Not applicable according to host check
+                LOGGER.debug("Host '{}' does not apply to {}", host, hostName);
             }
         }
 
-        List<ServerConfigMatcherService> matchers = registry.getMatchers();
-        for (ServerConfigMatcherService matcher : matchers) {
-            if (matcher.looksApplicable(value, requestData, session)) {
-                return true;
+        // Check "hostRegex"
+        {
+            final String keyHostRegex = "hostRegex";
+            final String hostRegex = (String) possibleConfiguration.get(keyHostRegex);
+            if (hostRegex != null) {
+                try {
+                    final Pattern pattern = Pattern.compile(hostRegex);
+
+                    final String hostName = requestData.getHostname();
+                    if (pattern.matcher(hostName).find()) {
+                        return true;
+                    }
+
+                    // Not applicable according to hostRegex check
+                    LOGGER.debug("Host-Regex '{}' does not match {}", hostRegex, hostName);
+                } catch (final PatternSyntaxException e) {
+                    // Ignore. Treat as absent.
+                    LOGGER.debug("Invalid regex pattern for {}: {}", keyHostRegex, hostRegex, e);
+                }
+            }
+        }
+
+        // Check by matchers
+        {
+            final List<ServerConfigMatcherService> matchers = registry.getMatchers();
+            for (final ServerConfigMatcherService matcher : matchers) {
+                if (matcher.looksApplicable(possibleConfiguration, requestData, session)) {
+                    return true;
+                }
             }
         }
 
