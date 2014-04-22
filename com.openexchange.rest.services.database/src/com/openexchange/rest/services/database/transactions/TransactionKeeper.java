@@ -47,46 +47,40 @@
  *
  */
 
-package com.openexchange.rest.services;
+package com.openexchange.rest.services.database.transactions;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
- * {@link Response}
+ * The {@link TransactionKeeper} manages running transactions in the RESTDBService.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Response {
+public interface TransactionKeeper {
+    
+    /**
+     * Create a new Transaction. Will switch off autocommit on the connection object and store the transaction
+     */
+    public abstract Transaction newTransaction(Connection con) throws SQLException;
+    
+    /**
+     * Retrieve a transaction by ID.
+     * 
+     * @see Transaction#getID()
+     * @param txId The transaction ID
+     * @return The transaction or null if the transaction could not be found (maybe because it autoexpired). 
+     */
+    public abstract Transaction getTransaction(String txId);
 
-    private Iterable<String> body;
-    private int status = 200;
-    private Map<String, String> headers = new HashMap<String, String>();
+    /**
+     * Commit and then forget the transaction.
+     */
+    public abstract void commit(String txId) throws SQLException;
     
-    public Iterable<String> getBody() {
-        return body;
-    }
-    
-    public void setBody(Iterable<String> body) {
-        this.body = body;
-    }
-    
-    public int getStatus() {
-        return status;
-    }
-    
-    public void setStatus(int status) {
-        this.status = status;
-    }
-    
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-    
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-    
-    
+    /**
+     * Roll back and then forget the transaction.
+     */
+    public abstract void rollback(String txId) throws SQLException;
+
 }

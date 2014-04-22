@@ -47,46 +47,28 @@
  *
  */
 
-package com.openexchange.rest.services;
+package com.openexchange.rest.services.database;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import org.junit.runner.RunWith;
+import com.openexchange.rest.services.database.migrations.VersionCheckerTest;
+import com.openexchange.rest.services.database.transactions.InMemoryTransactionKeeperTest;
+import com.openexchange.rest.services.database.transactions.TransactionTest;
 
 
 /**
- * {@link Response}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Response {
-
-    private Iterable<String> body;
-    private int status = 200;
-    private Map<String, String> headers = new HashMap<String, String>();
-    
-    public Iterable<String> getBody() {
-        return body;
-    }
-    
-    public void setBody(Iterable<String> body) {
-        this.body = body;
-    }
-    
-    public int getStatus() {
-        return status;
-    }
-    
-    public void setStatus(int status) {
-        this.status = status;
-    }
-    
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-    
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-    
+@RunWith(Suite.class)
+@SuiteClasses({
+    InMemoryTransactionKeeperTest.class,
+    TransactionTest.class,
+    VersionCheckerTest.class,
+    DBRESTServiceTest.class
+})
+public class UnitTests {
     
 }

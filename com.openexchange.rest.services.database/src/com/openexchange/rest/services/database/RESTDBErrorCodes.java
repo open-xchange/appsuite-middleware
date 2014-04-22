@@ -47,46 +47,67 @@
  *
  */
 
-package com.openexchange.rest.services;
+package com.openexchange.rest.services.database;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 
 
 /**
- * {@link Response}
+ * {@link RESTDBErrorCodes}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Response {
+public enum RESTDBErrorCodes implements OXExceptionCode {
+    // There is a problem with the database, please try again later.
+    SQL_ERROR(1, Category.CATEGORY_SERVICE_DOWN, RESTDBErrorMessages.SQL_ERROR), 
+    // You have exceeded the query limit for one batch. Maximum %1$d, you sent %2$d queries.
+    QUERY_LIMIT_EXCEEDED(2, Category.CATEGORY_CAPACITY, RESTDBErrorMessages.QUOTA_LIMIT_EXCEEDED),
+    // Version should be known but is unknown for module %1$s
+    VERSION_MUST_BE_KNOWN(3, Category.CATEGORY_ERROR, RESTDBErrorMessages.VERSION_MUST_BE_KNOWN);
+    
+    ;
+    
+    public static final String PREFIX = "REST-DB";
+    
+    private int number;
+    private Category category;
+    private String message;
+    
+    RESTDBErrorCodes(int number, Category category, String message) {
+        this.number = number;
+        this.category = category;
+        this.message = message;
+    }
 
-    private Iterable<String> body;
-    private int status = 200;
-    private Map<String, String> headers = new HashMap<String, String>();
-    
-    public Iterable<String> getBody() {
-        return body;
+    @Override
+    public int getNumber() {
+        return number;
     }
-    
-    public void setBody(Iterable<String> body) {
-        this.body = body;
+
+    @Override
+    public Category getCategory() {
+        return category;
     }
-    
-    public int getStatus() {
-        return status;
+
+    @Override
+    public String getPrefix() {
+        return PREFIX;
     }
-    
-    public void setStatus(int status) {
-        this.status = status;
+
+    @Override
+    public String getMessage() {
+        return message;
     }
-    
-    public Map<String, String> getHeaders() {
-        return headers;
+
+    @Override
+    public boolean equals(OXException e) {
+        return e.getPrefix().equals(PREFIX) && e.getCode() == number;
     }
-    
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
+
+    public OXException create(Object...args) {
+        return new OXException(number, message, args);
     }
-    
-    
+
 }

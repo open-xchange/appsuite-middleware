@@ -47,46 +47,28 @@
  *
  */
 
-package com.openexchange.rest.services;
+package com.openexchange.rest.services.database.transactions;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import java.sql.SQLException;
+import org.junit.Test;
+import static org.mockito.Mockito.*;
 
 /**
- * {@link Response}
+ * {@link TransactionTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Response {
-
-    private Iterable<String> body;
-    private int status = 200;
-    private Map<String, String> headers = new HashMap<String, String>();
+public class TransactionTest {
     
-    public Iterable<String> getBody() {
-        return body;
+    @Test
+    public void testTimeOut() throws SQLException {
+        TransactionKeeper txKeeper = mock(TransactionKeeper.class);
+        
+        Transaction tx = new Transaction(null, txKeeper);
+        tx.tick(System.currentTimeMillis() + 1 * 60 * 1000);
+        verifyZeroInteractions(txKeeper);
+        
+        tx.tick(System.currentTimeMillis() + 3 * 60 * 1000);
+        verify(txKeeper).rollback(tx.getID());
     }
-    
-    public void setBody(Iterable<String> body) {
-        this.body = body;
-    }
-    
-    public int getStatus() {
-        return status;
-    }
-    
-    public void setStatus(int status) {
-        this.status = status;
-    }
-    
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-    
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-    
-    
 }

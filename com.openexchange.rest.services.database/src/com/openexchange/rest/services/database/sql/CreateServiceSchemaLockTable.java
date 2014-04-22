@@ -47,46 +47,35 @@
  *
  */
 
-package com.openexchange.rest.services;
+package com.openexchange.rest.services.database.sql;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 
 /**
- * {@link Response}
+ * {@link CreateServiceSchemaLockTable}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Response {
+public class CreateServiceSchemaLockTable extends AbstractCreateTableImpl {
 
-    private Iterable<String> body;
-    private int status = 200;
-    private Map<String, String> headers = new HashMap<String, String>();
-    
-    public Iterable<String> getBody() {
-        return body;
+    @Override
+    public String[] requiredTables() {
+        return new String[0];
     }
-    
-    public void setBody(Iterable<String> body) {
-        this.body = body;
+
+    @Override
+    public String[] tablesToCreate() {
+        return new String[]{"serviceSchemaMigrationLock"};
     }
-    
-    public int getStatus() {
-        return status;
+
+    @Override
+    protected String[] getCreateStatements() {
+        return new String[]{"CREATE TABLE `serviceSchemaMigrationLock` (" + 
+            "  `module` varchar(128) NOT NULL DEFAULT ''," + 
+            "  `expires` bigint(20) DEFAULT NULL," + 
+            "  PRIMARY KEY (`module`))" + 
+            ")"};
     }
-    
-    public void setStatus(int status) {
-        this.status = status;
-    }
-    
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-    
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-    
-    
+
 }

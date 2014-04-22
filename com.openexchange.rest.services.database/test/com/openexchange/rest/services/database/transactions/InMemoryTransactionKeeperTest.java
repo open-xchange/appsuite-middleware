@@ -47,46 +47,57 @@
  *
  */
 
-package com.openexchange.rest.services;
+package com.openexchange.rest.services.database.transactions;
 
-import java.util.HashMap;
-import java.util.Map;
-
-
+import java.sql.Connection;
+import java.sql.SQLException;
+import org.junit.Test;
+import com.openexchange.rest.services.database.transactions.Transaction;
+import com.openexchange.rest.services.database.transactions.InMemoryTransactionKeeper;
+import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 /**
- * {@link Response}
+ * {@link InMemoryTransactionKeeperTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Response {
+public class InMemoryTransactionKeeperTest {
+    
+    private InMemoryTransactionKeeper keeper = new InMemoryTransactionKeeper();
+    private Connection con = mock(Connection.class);
+    
+    
+    @Test
+    public void testLifecycle() throws Exception {
+        String txId = begin();
+        doOperations(txId);
+        commit(txId);
+        
+        con = mock(Connection.class);
+        txId = begin();
+        doOperations(txId);
+        rollback(txId);
+    }
 
-    private Iterable<String> body;
-    private int status = 200;
-    private Map<String, String> headers = new HashMap<String, String>();
-    
-    public Iterable<String> getBody() {
-        return body;
+    private String begin() throws SQLException {
+        Transaction tx = keeper.newTransaction(con);
+        verify(con).setAutoCommit(false);
+        return tx.getID();
+    }
+
+    private void doOperations(String txId) {
+        // Don't really do operations, just verify we've got the
+        // correct connection object
+        assertSame(con, keeper.getTransaction(txId).getConnection());
+    }
+
+    private void commit(String txId) throws SQLException {
+        keeper.commit(txId);
+        verify(con).commit();
     }
     
-    public void setBody(Iterable<String> body) {
-        this.body = body;
+    private void rollback(String txId) throws SQLException {
+        keeper.rollback(txId);
+        verify(con).rollback();
     }
-    
-    public int getStatus() {
-        return status;
-    }
-    
-    public void setStatus(int status) {
-        this.status = status;
-    }
-    
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-    
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-    
-    
 }
