@@ -109,7 +109,8 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageFetchIMAPCommand.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageFetchIMAPCommand.class);
 
     private static final int LENGTH = 9; // "FETCH <nums> (<command>)"
     private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
@@ -905,7 +906,13 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                         final String name = names.nextElement().toString();
                         final String value = cParams.get(name);
                         if (!isEmpty(value)) {
-                            contentType.setParameter(name, value);
+                            try {
+                                contentType.setParameterErrorAware(name, value);
+                            } catch (final OXException e) {
+                                final long uid = msg.getUid();
+                                final String folder = msg.getFolder();
+                                LOG.warn("Ignoring invalid parameter in Content-Type header contained in message {} of folder {}.", uid <= 0 ? "<unknown>" : Long.toString(uid), null == folder ? "<unknown>" : folder, e);
+                            }
                         }
                     }
                 }

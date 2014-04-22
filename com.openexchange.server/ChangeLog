@@ -1,3 +1,7 @@
+* 2014-04-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32111: Added setParameter() method that is error aware & improved log output in case of an invalid Content-Type parameter
+
 * 2014-04-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 32033: Escape user input that is supposed to be displayed as HTML
