@@ -54,6 +54,7 @@ import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -71,6 +72,8 @@ import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.realtime.payload.converter.impl.DefaultPayloadTreeConverter;
+import com.openexchange.realtime.payload.converter.impl.DurationToJSONConverter;
+import com.openexchange.realtime.payload.converter.impl.JSONToDurationConverter;
 import com.openexchange.realtime.synthetic.DevNullChannel;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -153,6 +156,8 @@ public class RealtimeActivator extends HousekeepingActivator {
         registerService(PayloadTreeConverter.class, converter);
 
         registerService(Channel.class, new DevNullChannel());
+        registerService(SimplePayloadConverter.class, new DurationToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToDurationConverter());
 
         //Register all RealtimeJanitors
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {

@@ -55,6 +55,8 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -81,6 +83,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class RTJSONHandler implements StanzaSender {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RTJSONHandler.class);
     protected final StateManager stateManager;
     protected final RTProtocol protocol;
     protected final StanzaSequenceGate gate;
@@ -152,10 +155,13 @@ public class RTJSONHandler implements StanzaSender {
      */
     private void startCleanupTimer() {
         JSONServiceRegistry.getInstance().getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
-
             @Override
             public void run() {
+                try {
                 stateManager.timeOutStaleStates(System.currentTimeMillis());
+                } catch (Throwable t) {
+                    LOG.error("Error during CleanupTimer run.", t);
+                }
             }
 
         }, 1, 10, TimeUnit.SECONDS);

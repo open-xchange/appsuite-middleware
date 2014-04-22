@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.json.payload.converter.sim;
+package com.openexchange.realtime.payload.converter.sim;
 
 import java.util.ArrayList;
 import java.util.HashMap;
