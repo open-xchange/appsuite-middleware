@@ -294,7 +294,10 @@ public class UploadHelper {
         return new AbstractMap.SimpleEntry<File, String>(file, checksum);
     }
 
-    private Entry<File, String> upload(String path, FileVersion newVersion, InputStream uploadStream, String contentType, long offset, long totalLength) throws OXException {
+    /**
+     * Perfom the upload
+     */
+    Entry<File, String> upload(String path, FileVersion newVersion, InputStream uploadStream, String contentType, long offset, long totalLength) throws OXException {
         /*
          * get/create upload file
          */
