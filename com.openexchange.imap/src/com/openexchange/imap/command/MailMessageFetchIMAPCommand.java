@@ -911,7 +911,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                             } catch (final OXException e) {
                                 final long uid = msg.getUid();
                                 final String folder = msg.getFolder();
-                                LOG.warn("Ignoring invalid parameter in Content-Type header contained in message {} of folder {}.", uid <= 0 ? "<unknown>" : Long.toString(uid), null == folder ? "<unknown>" : folder);
+                                LOG.debug("Ignoring invalid parameter in Content-Type header contained in message {} of folder {}.", uid <= 0 ? "<unknown>" : Long.toString(uid), null == folder ? "<unknown>" : folder);
                             }
                         }
                     }
