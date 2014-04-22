@@ -332,8 +332,9 @@ public class FindRequest {
 
         try {
             Module module = requireModule();
-            List<ActiveFacet> facets = new ArrayList<ActiveFacet>(jFacets.length());
-            for (int i = 0; i < jFacets.length(); i++) {
+            final int length = jFacets.length();
+            List<ActiveFacet> facets = new ArrayList<ActiveFacet>(length);
+            for (int i = 0; i < length; i++) {
                 JSONObject jFacet = jFacets.getJSONObject(i);
                 String jType = jFacet.getString("facet");
                 FacetType type = facetTypeFor(module, jType);

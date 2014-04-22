@@ -90,6 +90,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -100,16 +101,16 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CSVContactImporter extends AbstractImporter {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactImporter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactImporter.class);
 
-	private LinkedList<ContactFieldMapper> mappers;
+    private LinkedList<ContactFieldMapper> mappers;
 
-	private ContactFieldMapper currentMapper;
+    private ContactFieldMapper currentMapper;
 
 
-	public CSVContactImporter(ServiceLookup services) {
-	    super(services);
-	}
+    public CSVContactImporter(ServiceLookup services) {
+        super(services);
+    }
 
     @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
@@ -225,13 +226,13 @@ public class CSVContactImporter extends AbstractImporter {
             if (folderUpdater == null) {
                 throw ImportExportExceptionCodes.CANNOT_IMPORT.create();
             }
+            SearchIteratorDelegator<Contact> searchIterator = new SearchIteratorDelegator<Contact>(contacts);
             if (folderUpdater instanceof FolderUpdaterServiceV2) {
-                ((FolderUpdaterServiceV2<Contact>) folderUpdater).save(contacts, target, errors);
+                ((FolderUpdaterServiceV2<Contact>) folderUpdater).save(searchIterator, target, errors);
             } else {
-                folderUpdater.save(contacts, target);
+                folderUpdater.save(searchIterator, target);
             }
         }
-
 
         // Build result list
         final List<ImportResult> results = new ArrayList<ImportResult>(intentions.size());
@@ -328,7 +329,7 @@ public class CSVContactImporter extends AbstractImporter {
                 atLeastOneFieldWithWrongName = true;
                 wrongFields.add(fieldName);
             } else {
-                if (currEntry.length() > 0) {
+                if (currEntry.length() > 0 && isValid(currEntry)) {
                     currField.doSwitch(conSet, contactObj, currEntry);
                     final Collection<OXException> warns = contactObj.getWarnings();
                     if (!warns.isEmpty()) {
@@ -347,6 +348,28 @@ public class CSVContactImporter extends AbstractImporter {
             addErrorInformation(result, lineNumber, fields);
         }
         return contactObj;
+    }
+
+    /**
+     * Validates if the given value can be parsed and a date object can be created. Based on regular expressions only dates will be
+     * evaluated
+     * 
+     * @param currEntry - string to be validated
+     * @return true if the value can be used for processing, false if the given string is not valid
+     */
+    protected boolean isValid(String currEntry) {
+        boolean valid = true;
+
+        if (currEntry == null) {
+            valid = false;
+        }
+
+        String dotDate = currEntry.replace('/', '.').replace('-', '.');
+        if (dotDate.matches("0?0\\.0?0\\.(00){1,2}") || dotDate.trim().equals("")) {
+            valid = false;
+        }
+
+        return valid;
     }
 
     /**
@@ -431,8 +454,8 @@ public class CSVContactImporter extends AbstractImporter {
         return getCurrentMapper() == null ? null : retval;
     }
 
-	public boolean checkFields(final List<String> fields) {
-		currentMapper = null;
+    public boolean checkFields(final List<String> fields) {
+        currentMapper = null;
         int highestAmountOfMappedFields = 0;
 
         for (ContactFieldMapper mapper : getMappers()) {
@@ -465,26 +488,26 @@ public class CSVContactImporter extends AbstractImporter {
             getCurrentMapper().getNameOfField(ContactField.MIDDLE_NAME));
     }
 
-	public void addFieldMapper(ContactFieldMapper mapper) {
-		if (mappers == null) {
-			mappers = new LinkedList<ContactFieldMapper>();
-		}
-		mappers.add(mapper);
-	}
+    public void addFieldMapper(ContactFieldMapper mapper) {
+        if (mappers == null) {
+            mappers = new LinkedList<ContactFieldMapper>();
+        }
+        mappers.add(mapper);
+    }
 
 
-	private LinkedList<ContactFieldMapper> getMappers() {
-		return mappers;
-	}
+    private LinkedList<ContactFieldMapper> getMappers() {
+        return mappers;
+    }
 
     protected ContactField getRelevantField(final String name) {
         return getCurrentMapper().getFieldByName(name);
     }
 
 
-	private ContactFieldMapper getCurrentMapper() {
-		return currentMapper;
-	}
+    private ContactFieldMapper getCurrentMapper() {
+        return currentMapper;
+    }
 
     protected CSVParser getCSVParser() {
         final CSVParser result = new CSVParser();

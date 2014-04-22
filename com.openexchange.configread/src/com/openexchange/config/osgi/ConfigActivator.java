@@ -118,7 +118,7 @@ public final class ConfigActivator extends HousekeepingActivator {
                 rememberTracker(new ManagedServiceTracker(context, configService));
             }
 
-            // Add & open ervice trackers
+            // Add & open service trackers
             track(Reloadable.class, new ReloadableServiceTracker(context, configService));
             track(ManagementService.class, new ManagementServiceTracker(context, configService));
             openTrackers();

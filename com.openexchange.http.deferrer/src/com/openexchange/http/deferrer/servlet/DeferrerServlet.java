@@ -64,6 +64,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
+import com.openexchange.ajax.AJAXUtilis;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
@@ -100,7 +101,7 @@ public class DeferrerServlet extends HttpServlet {
         }
 
         final Map<String, String> params = parseQueryStringFromUrl(redirectURL);
-        final StringBuilder builder = new StringBuilder(encodeUrl(redirectURL, true, false));
+        final StringBuilder builder = new StringBuilder(AJAXUtilis.encodeUrl(redirectURL, true, false));
         for (final Enumeration<?> parameterNames = req.getParameterNames(); parameterNames.hasMoreElements();) {
             final String name = (String) parameterNames.nextElement();
             if ("redirect".equals(name) || params.containsKey(name)) {
@@ -109,7 +110,7 @@ public class DeferrerServlet extends HttpServlet {
             final String parameter = req.getParameter(name);
             builder.append(concat);
             concat = '&';
-            builder.append(name).append('=').append(encodeUrl(parameter, true, true));
+            builder.append(name).append('=').append(AJAXUtilis.encodeUrl(parameter, true, true));
         }
         resp.sendRedirect(builder.toString());
     }

@@ -47,30 +47,25 @@
  *
  */
 
-package com.openexchange.groupware.generic;
+package com.openexchange.importexport;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.iterator.SearchIterator;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.importexport.importers.CSVContactImporterTest;
 
 /**
- * {@link FolderUpdaterService}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * Unit tests for the bundle com.openexchange.importexport
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.0
  */
-public interface FolderUpdaterService<T> {
-    public boolean handles(FolderObject folder);
+@RunWith(Suite.class)
+@SuiteClasses({
+    CSVContactImporterTest.class
+})
+public class UnitTests {
 
-    public boolean usesMultipleStrategy();
-
-    /**
-     * Saves the data in the target folder.
-     *
-     * @param data A search iterator over the data to store
-     * @param target The target folder definition
-     * @throws OXException
-     */
-    void save(SearchIterator<T> data, TargetFolderDefinition target) throws OXException;
+    public UnitTests() {
+    }
 }

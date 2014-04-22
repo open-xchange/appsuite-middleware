@@ -67,6 +67,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.helper.ImageUtils;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
@@ -175,7 +176,7 @@ public class ImageComparingTest extends TestCase {
         }
     }
 
-    public void testTransformationOfAlphaChannelPicture_Bug28163() {
+    public void testAlphaChannelPictureIsNotTransformed_Bug28163() {
         try {
             final File fileInput = new File(TEST_DATA_DIR, "28163.jpg");
 
@@ -220,6 +221,45 @@ public class ImageComparingTest extends TestCase {
             fail(e.getMessage());
         }
     }
+    
+    public void testGIFPictureIsAnimated_Bug29072() {
+        try {
+            final File fileInput = new File(TEST_DATA_DIR, "29072.gif");
+
+            final FileHolder fileHolder = new FileHolder(fileInput);
+            {
+                fileHolder.setContentType("image/gif");
+                fileHolder.setName(fileInput.getName());
+                fileHolder.setDelivery("view");
+                fileHolder.setDisposition("inline");
+            }
+            final AJAXRequestData requestData = new AJAXRequestData();
+            {
+                requestData.setSession(new SimServerSession(1, 1));
+                requestData.putParameter("cache", "false");
+                requestData.putParameter("delivery", "view");
+            }
+
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            final SimHttpServletRequest req = new SimHttpServletRequest();
+            final SimHttpServletResponse resp = new SimHttpServletResponse();
+            requestData.setHttpServletResponse(resp);
+            ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+            resp.setOutputStream(servletOutputStream);
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+            fileResponseRenderer.setScaler(new JavaImageTransformationService());
+            fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+            final byte[] bytesCurrent = servletOutputStream.toByteArray();
+
+            // Converts byte streams to buffered images
+            InputStream inAfter = new ByteArrayInputStream(bytesCurrent);
+            assertTrue("Animated GIF image not animated anymore", ImageUtils.isAnimatedGif(inAfter));
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
 
     /**
      * Asserts that a value is in range between rangeMin and rangeMax

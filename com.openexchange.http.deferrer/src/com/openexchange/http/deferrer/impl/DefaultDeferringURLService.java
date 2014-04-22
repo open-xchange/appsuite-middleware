@@ -50,6 +50,7 @@
 package com.openexchange.http.deferrer.impl;
 
 import static com.openexchange.ajax.AJAXServlet.encodeUrl;
+import com.openexchange.ajax.AJAXUtilis;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.java.Strings;
@@ -86,7 +87,7 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
             return url;
         }
         // Return deferred URL
-        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(encodeUrl(url, false, false)).toString();
+        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXUtilis.encodeUrl(url, false, false)).toString();
     }
 
     @Override

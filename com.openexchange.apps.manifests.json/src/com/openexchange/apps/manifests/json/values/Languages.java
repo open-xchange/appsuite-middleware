@@ -49,12 +49,12 @@
 
 package com.openexchange.apps.manifests.json.values;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Properties;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,8 +86,8 @@ public class Languages implements ComputedServerConfigValueService {
 
         ConfigurationService config = services.getService(ConfigurationService.class);
         Properties properties = config.getPropertiesInFolder("languages/appsuite");
-        final Map<String, String> languageMap = new HashMap<String, String>();
 
+        List<SimpleEntry<String, String>> languages = new ArrayList<SimpleEntry<String,String>>();
         for (Object key : properties.keySet()) {
             String propName = (String) key;
             String languageName = properties.getProperty(propName);
@@ -96,40 +96,36 @@ public class Languages implements ComputedServerConfigValueService {
             if (index > 0) {
                 propName = propName.substring(index + 1);
             }
-            languageMap.put(propName, languageName);
+            languages.add(new SimpleEntry<String, String>(propName, languageName));
         }
 
-        if (languageMap.isEmpty()) {
+        if (languages.isEmpty()) {
             // Assume american english
-            languageMap.put("en_US", "English");
+            languages.add(new SimpleEntry<String, String>("en_US", "English"));
         }
 
         // Sort it alphabetically
-        SortedSet<String> keys = new TreeSet<String>(new Comparator<String>() {
+        Collections.sort(languages, new Comparator<SimpleEntry<String, String>>() {
 
             @Override
-            public int compare(String arg0, String arg1) {
-                return arg0.compareToIgnoreCase(arg1);
+            public int compare(SimpleEntry<String, String> arg0, SimpleEntry<String, String> arg1) {
+                String language1 = arg0.getValue();
+                String language2 = arg1.getValue();
+                if (null == language1) {
+                    return null == language2 ? 0 : 1;
+                }
+                if (null == language2) {
+                    return -1;
+                }
+                return language1.compareToIgnoreCase(language2);
             }
-
         });
 
-        keys.addAll(languageMap.keySet());
-
-        final JSONArray allLanguages = new JSONArray(keys.size());
-        this.allLanguages = allLanguages;
-        try {
-            int i = 0;
-            for (String key : keys) {
-                JSONArray obj = new JSONArray();
-                obj.put(key);
-                obj.put(languageMap.get(key));
-                allLanguages.put(i++, obj);
-            }
-        } catch (JSONException x) {
-            // Doesn't happen
-            LOG.error("", x);
+        final JSONArray allLanguages = new JSONArray(languages.size());
+        for (SimpleEntry<String, String> language : languages) {
+            allLanguages.put(new JSONArray(2).put(language.getKey()).put(language.getValue()));
         }
+        this.allLanguages = allLanguages;
     }
 
     @Override

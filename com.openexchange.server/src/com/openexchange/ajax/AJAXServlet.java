@@ -57,13 +57,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -72,24 +68,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
-import org.apache.commons.httpclient.URI;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -764,7 +754,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     characterEncoding = "ISO-8859-1";
                 }
             }
-            uri = decodeUrl(req.getRequestURI(), characterEncoding);
+            uri = AJAXUtilis.decodeUrl(req.getRequestURI(), characterEncoding);
         }
         final String path = new StringBuilder(req.getContextPath()).append(req.getServletPath()).toString();
         final int pos = uri.indexOf(path);
@@ -775,49 +765,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     /**
-     * BitSet of www-form-url safe characters.
-     */
-    protected static final BitSet WWW_FORM_URL;
-
-    /**
-     * BitSet of www-form-url safe characters including safe characters for an anchor.
-     */
-    protected static final BitSet WWW_FORM_URL_ANCHOR;
-
-    // Static initializer for www_form_url
-    static {
-        {
-            final BitSet bitSet = new BitSet(256);
-            // alpha characters
-            for (int i = 'a'; i <= 'z'; i++) {
-                bitSet.set(i);
-            }
-            for (int i = 'A'; i <= 'Z'; i++) {
-                bitSet.set(i);
-            }
-            // numeric characters
-            for (int i = '0'; i <= '9'; i++) {
-                bitSet.set(i);
-            }
-            // special chars
-            bitSet.set('-');
-            bitSet.set('_');
-            bitSet.set('.');
-            bitSet.set('*');
-            // blank to be replaced with +
-            bitSet.set(' ');
-            WWW_FORM_URL = bitSet;
-        }
-        WWW_FORM_URL_ANCHOR = URIExtended.URI_REFERENCE;
-    }
-
-    /**
      * URL encodes given string.
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     * @deprecated Use {@link AJAXUtilis#encodeUrl(String)} instead
      */
+    @Deprecated
     public static String encodeUrl(final String s) {
-        return encodeUrl(s, false);
+        return AJAXUtilis.encodeUrl(s);
     }
 
     /**
@@ -825,9 +780,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      * @throws IllegalArgumentException If URL is invalid
+     * @deprecated Use {@link AJAXUtilis#encodeUrl(String,boolean)} instead
      */
+    @Deprecated
     public static String encodeUrl(final String s, final boolean forAnchor) {
-        return encodeUrl(s, forAnchor, false);
+        return AJAXUtilis.encodeUrl(s, forAnchor);
     }
 
     /**
@@ -835,85 +792,24 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      * @throws IllegalArgumentException If URL is invalid
+     * @deprecated Use {@link AJAXUtilis#encodeUrl(String,boolean,boolean)} instead
      */
+    @Deprecated
     public static String encodeUrl(final String s, final boolean forAnchor, final boolean forLocation) {
-        return encodeUrl(s, forAnchor, forLocation, null);
+        return AJAXUtilis.encodeUrl(s, forAnchor, forLocation);
     }
-
-    private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|\r|(?:%0[aA])?%0[dD]|%0[aA]");
-    private static final Pattern PATTERN_DSLASH = Pattern.compile("(?://+)");
-    private static final Pattern PATTERN_DSLASH2 = Pattern.compile("(?:/|%2[fF]){2,}");
 
     /**
      * URL encodes given string.
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      * @throws IllegalArgumentException If URL is invalid
+     * @deprecated Use {@link AJAXUtilis#encodeUrl(String,boolean,boolean,String)} instead
      */
+    @Deprecated
     public static String encodeUrl(final String s, final boolean forAnchor, final boolean forLocation, final String charsetName) {
-        if (isEmpty(s)) {
-            return s;
-        }
-        try {
-            String prefix = null;
-            // Strip possible "\r?\n" and/or "%0A?%0D"
-            String retval = PATTERN_CRLF.matcher(s).replaceAll("");
-            final Charset charset;
-            {
-                final String cs = isEmpty(charsetName) ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charsetName;
-                charset = isEmpty(cs) ? Charsets.UTF_8 : Charsets.forName(cs);
-            }
-            if (forAnchor) {
-                // Prepare for being used as anchor/link
-                retval = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, retval.getBytes(charset)));
-                final int pos = retval.length() > 6 ? retval.indexOf("://") : -1;
-                if (pos > 0) { // Seems to contain protocol/scheme part; e.g "http://..."
-                    final String tmp = Strings.toLowerCase(retval.substring(0, pos));
-                    if ("https".equals(tmp)) {
-                        prefix = "https://";
-                        retval = retval.substring(pos + 3);
-                    } else if ("http".equals(tmp)) {
-                        prefix = "http://";
-                        retval = retval.substring(pos + 3);
-                    }
-                }
-            } else {
-                retval = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, retval.getBytes(charset)));
-            }
-            // Again -- Strip possible "\r?\n" and/or "%0A?%0D"
-            retval = PATTERN_CRLF.matcher(retval).replaceAll("");
-            // Check for a relative URI
-            Pattern dupSlashes = PATTERN_DSLASH;
-            if (forLocation) {
-                try {
-                    final java.net.URI uri = new java.net.URI(retval);
-                    if (uri.isAbsolute() || null != uri.getScheme() || null != uri.getHost()) {
-                        throw new IllegalArgumentException("Illegal Location value: " + s);
-                    }
-                } catch (final URISyntaxException e) {
-                    throw new IllegalArgumentException("Illegal Location value: " + s, e);
-                }
-                // Adapt pattern
-                dupSlashes = PATTERN_DSLASH2;
-            }
-            // Replace double slashes with single one
-            {
-                Matcher matcher = dupSlashes.matcher(retval);
-                while (matcher.find()) {
-                    retval = matcher.replaceAll("/");
-                    matcher = dupSlashes.matcher(retval);
-                }
-            }
-            return null == prefix ? retval : new StringBuilder(prefix).append(retval).toString();
-        } catch (final IllegalArgumentException e) {
-            throw e;
-        } catch (final RuntimeException e) {
-            LOG.error("A runtime error occurred.", e);
-            return s;
-        }
+        return AJAXUtilis.encodeUrl(s, forAnchor, forLocation, charsetName);
     }
-
-    private static final Pattern PATTERN_CONTROL = Pattern.compile("[\\x00-\\x1F\\x7F]");
 
     /**
      * Sanitizes specified String input.
@@ -926,85 +822,22 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      *
      * @param sInput The input to sanitize
      * @return The sanitized input
+     * @deprecated Use {@link AJAXUtilis#sanitizeParam(String)} instead
      */
+    @Deprecated
     public static String sanitizeParam(String sInput) {
-        if (isEmpty(sInput)) {
-            return sInput;
-        }
-
-        String s = sInput;
-
-        // Do URL decoding until fully decoded
-        {
-            int pos;
-            while ((pos = s.indexOf('%')) >= 0 && pos < s.length() - 1) {
-                try {
-                    s = new URLCodec("UTF-8").decode(s);
-                } catch (org.apache.commons.codec.DecoderException e) {
-                    break;
-                }
-            }
-        }
-
-        // Drop ASCII control characters
-        s = PATTERN_CONTROL.matcher(s).replaceAll("");
-
-        // Escape using HTML entities
-        s = org.apache.commons.lang.StringEscapeUtils.escapeHtml(s);
-
-        // Replace double slashes with single one
-        {
-            final Pattern patternDslash = PATTERN_DSLASH;
-            Matcher matcher = patternDslash.matcher(s);
-            while (matcher.find()) {
-                s = matcher.replaceAll("/");
-                matcher = patternDslash.matcher(s);
-            }
-        }
-
-        // Return result
-        return s;
-    }
-
-    private static final ConcurrentMap<String, URLCodec> URL_CODECS = new ConcurrentHashMap<String, URLCodec>(8);
-
-    private static URLCodec getUrlCodec(final String charset) {
-        String cs = charset;
-        if (null == cs) {
-            final String defCharset = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
-            if (null == defCharset) {
-                return null;
-            }
-            cs = defCharset;
-        }
-        URLCodec urlCodec = URL_CODECS.get(cs);
-        if (null == urlCodec) {
-            final URLCodec nc = new URLCodec(cs);
-            urlCodec = URL_CODECS.putIfAbsent(cs, nc);
-            if (null == urlCodec) {
-                urlCodec = nc;
-            }
-        }
-        return urlCodec;
+        return AJAXUtilis.sanitizeParam(sInput);
     }
 
     /**
      * URL decodes given string.
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     * @deprecated Use {@link AJAXUtilis#decodeUrl(String,String)} instead
      */
+    @Deprecated
     public static String decodeUrl(final String s, final String charset) {
-        try {
-            if (isEmpty(s)) {
-                return s;
-            }
-            final String cs = isEmpty(charset) ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charset;
-            return getUrlCodec(cs).decode(s, cs);
-        } catch (final DecoderException e) {
-            return s;
-        } catch (final UnsupportedEncodingException e) {
-            return s;
-        }
+        return AJAXUtilis.decodeUrl(s, charset);
     }
 
     /**
@@ -1284,7 +1117,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return UPLOAD_ACTIONS.contains(action) || Arrays.asList("CSV", "VCARD","ICAL", "OUTLOOK_CSV").contains(action); //Boo! Bad hack to get importer/export bundle working
     }
 
-    private static boolean isEmpty(final String string) {
+    static boolean isEmpty(final String string) {
         return Strings.isEmpty(string);
     }
 
@@ -1469,17 +1302,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             module = -1;
         }
         return module;
-    }
-
-    private static final class URIExtended extends URI {
-
-        /**
-         * BitSet for URI-reference.
-         * <p><blockquote><pre>
-         * URI-reference = [ absoluteURI | relativeURI ] [ "#" fragment ]
-         * </pre></blockquote><p>
-         */
-        public static BitSet URI_REFERENCE = URI_reference;
     }
 
 }

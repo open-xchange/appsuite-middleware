@@ -6,7 +6,8 @@ Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.find.json.osgi.FindJsonActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax.requesthandler,
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.capabilities,
  com.openexchange.documentation,
