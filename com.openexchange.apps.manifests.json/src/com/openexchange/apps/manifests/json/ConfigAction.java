@@ -99,8 +99,9 @@ public class ConfigAction implements AJAXActionService {
         this.services = services;
         this.registry = registry;
 
-        computedValues = new ComputedServerConfigValueService[]{
-            new Manifests(services, manifests), new Capabilities(services),
+        computedValues = new ComputedServerConfigValueService[] {
+            new Manifests(services, manifests),
+            new Capabilities(services),
             new Hosts(),
             new ServerVersion(),
             new Languages(services),
@@ -109,8 +110,7 @@ public class ConfigAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData,
-        ServerSession session) throws OXException {
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
             JSONObject serverconfig = getFromConfiguration(requestData, session);
 
@@ -119,7 +119,7 @@ public class ConfigAction implements AJAXActionService {
 
             return new AJAXRequestResult(serverconfig, "json");
         } catch (JSONException x) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(x.toString());
+            throw AjaxExceptionCodes.JSON_ERROR.create(x, x.toString());
         }
     }
 
