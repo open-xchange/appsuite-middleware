@@ -175,7 +175,12 @@ public class ConfigAction implements AJAXActionService {
                     }
                     empty = false;
                 } else {
-                    LOGGER.debug("Configuration {} is not applicable", configEntry.getKey());
+                    final String configName = configEntry.getKey();
+                    if (null == possibleConfiguration) {
+                        LOGGER.debug("Empty configuration \"{}\" is not applicable", configName);
+                    } else {
+                        LOGGER.debug("Configuration \"{}\" is not applicable: {}", configName, prettyPrint(configName, possibleConfiguration));
+                    }
                 }
             }
             if (!empty) {
@@ -256,6 +261,8 @@ public class ConfigAction implements AJAXActionService {
         }
     }
 
+    // ---------------------------------------------------- DEBUG STUFF --------------------------------------------------------------- //
+
     /**
      * Output pretty-printed configuration to debug log.
      *
@@ -268,14 +275,14 @@ public class ConfigAction implements AJAXActionService {
 
                 @Override
                 public String toString() {
-                    return prettyPrint(configurations);
+                    return prettyPrintConfigurations(configurations);
                 }
             };
             LOGGER.debug("Read configurations from \"{}\": {}", ymlName, str);
         }
     }
 
-    String prettyPrint(Map<String, Object> configurations) {
+    String prettyPrintConfigurations(Map<String, Object> configurations) {
         if (null == configurations) {
             return "<not-set>";
         }
@@ -286,7 +293,6 @@ public class ConfigAction implements AJAXActionService {
         boolean first = true;
 
         for (final Entry<String, Object> configurationEntry : configurations.entrySet()) {
-            final String configName = configurationEntry.getKey();
             @SuppressWarnings("unchecked")
             final Map<String, Object> configuration = (Map<String, Object>) configurationEntry.getValue();
             if (null != configuration) {
@@ -295,19 +301,7 @@ public class ConfigAction implements AJAXActionService {
                     first = false;
                 }
 
-                sb.append(indent).append(configName).append(':').append(sep);
-
-                for (final Entry<String, Object> entry : configuration.entrySet()) {
-                    final String key = entry.getKey();
-                    final Object value = entry.getValue();
-                    sb.append(indent).append(indent).append(key).append(": ");
-                    if (value instanceof String) {
-                        sb.append('\'').append(value).append('\'');
-                    } else {
-                        sb.append(value);
-                    }
-                    sb.append(sep);
-                }
+                prettyPrint(configurationEntry.getKey(), configuration, indent, sep, sb);
             }
         }
 
@@ -316,6 +310,38 @@ public class ConfigAction implements AJAXActionService {
         }
 
         return sb.toString();
+    }
+
+    String prettyPrint(final String configName, Map<String, Object> configuration) {
+        if (null == configuration) {
+            return "<not-set>";
+        }
+
+        final StringBuilder sb = new StringBuilder(configuration.size() << 4);
+        final String indent = "    ";
+        final String sep = Strings.getLineSeparator();
+
+        sb.append(sep);
+        prettyPrint(configName, configuration, indent, sep, sb);
+        return sb.toString();
+    }
+
+    void prettyPrint(final String configName, Map<String, Object> configuration, final String indent, final String sep, final StringBuilder sb) {
+        if (null != configuration) {
+            sb.append(indent).append(configName).append(':').append(sep);
+
+            for (final Entry<String, Object> entry : configuration.entrySet()) {
+                final String key = entry.getKey();
+                final Object value = entry.getValue();
+                sb.append(indent).append(indent).append(key).append(": ");
+                if (value instanceof String) {
+                    sb.append('\'').append(value).append('\'');
+                } else {
+                    sb.append(value);
+                }
+                sb.append(sep);
+            }
+        }
     }
 
 }
