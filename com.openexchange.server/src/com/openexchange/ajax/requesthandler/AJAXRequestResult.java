@@ -688,10 +688,20 @@ public class AJAXRequestResult {
         setFormat(format);
     }
 
+    /**
+     * Sets the exception that is supposed to be logged by dispatcher
+     *
+     * @param exception The exception to log
+     */
     public void setException(final @Nullable OXException exception) {
         this.exception = exception;
     }
 
+    /**
+     * Gets the optional exception that is supposed to be logged by dispatcher
+     *
+     * @return The exception to log or <code>null</code>
+     */
     public @Nullable OXException getException() {
         return exception;
     }

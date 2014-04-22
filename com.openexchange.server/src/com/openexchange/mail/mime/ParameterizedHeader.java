@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.DecoderException;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
@@ -144,6 +145,17 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      */
     public void setParameter(final String key, final String value) {
         parameterList.setParameter(key, value);
+    }
+
+    /**
+     * Sets the given parameter. Existing value is overwritten.
+     *
+     * @param key The parameter name
+     * @param value The parameter value
+     * @throws OXException If parameter name/value is invalid
+     */
+    public void setParameterErrorAware(final String key, final String value) throws OXException {
+        parameterList.setParameterErrorAware(key, value);
     }
 
     /**

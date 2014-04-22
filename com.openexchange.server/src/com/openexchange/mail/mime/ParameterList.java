@@ -320,9 +320,22 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     public void setParameter(final String name, final String value) {
         if ((null == name) || containsSpecial(name)) {
-            final OXException me = MailExceptionCode.INVALID_PARAMETER.create(name);
-            LOG.error("", me);
+            LOG.warn("", MailExceptionCode.INVALID_PARAMETER.create(name));
             return;
+        }
+        parameters.put(name.toLowerCase(Locale.ENGLISH), new Parameter(name, value));
+    }
+
+    /**
+     * Sets the given parameter. Existing value is overwritten.
+     *
+     * @param name The sole parameter name
+     * @param value The parameter value
+     * @throws OXException If parameter name/value is invalid
+     */
+    public void setParameterErrorAware(final String name, final String value) throws OXException {
+        if ((null == name) || containsSpecial(name)) {
+            throw MailExceptionCode.INVALID_PARAMETER.create(name);
         }
         parameters.put(name.toLowerCase(Locale.ENGLISH), new Parameter(name, value));
     }
