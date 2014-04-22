@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.json.JSONArray;
@@ -79,6 +80,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -146,6 +148,7 @@ public class ConfigAction implements AJAXActionService {
     protected JSONObject getFromConfiguration(AJAXRequestData requestData, ServerSession session) throws JSONException, OXException {
         // Get configured brands/server configurations
         Map<String, Object> configurations = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config.yml");
+        debugOut("as-config.yml", configurations);
 
         // The resulting brand/server configuration
         Map<String, Object> serverConfiguration = new HashMap<String, Object>(4);
@@ -155,6 +158,7 @@ public class ConfigAction implements AJAXActionService {
             Map<String, Object> defaults = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config-defaults.yml");
             if (defaults != null) {
                 serverConfiguration.putAll((Map<String, Object>) defaults.get("default"));
+                debugOut("as-config-defaults.yml", defaults);
             }
         }
 
@@ -251,6 +255,68 @@ public class ConfigAction implements AJAXActionService {
         for (ComputedServerConfigValueService computed : registry.getComputed()) {
             computed.addValue(serverconfig, requestData, session);
         }
+    }
+
+    /**
+     * Output pretty-printed configuration to debug log.
+     *
+     * @param ymlName The name of the YML file
+     * @param configurations The read configurations from YML file
+     */
+    private void debugOut(final String ymlName, final Map<String, Object> configurations) {
+        if (null != configurations) {
+            final Object str = new Object() {
+
+                @Override
+                public String toString() {
+                    return prettyPrint(configurations);
+                }
+            };
+            LOGGER.debug("Read configurations from \"{}\": {}", ymlName, str);
+        }
+    }
+
+    String prettyPrint(Map<String, Object> configurations) {
+        if (null == configurations) {
+            return "<not-set>";
+        }
+
+        final StringBuilder sb = new StringBuilder(configurations.size() << 4);
+        final String indent = "    ";
+        final String sep = Strings.getLineSeparator();
+        boolean first = true;
+
+        for (final Entry<String, Object> configurationEntry : configurations.entrySet()) {
+            final String configName = configurationEntry.getKey();
+            @SuppressWarnings("unchecked")
+            final Map<String, Object> configuration = (Map<String, Object>) configurationEntry.getValue();
+            if (null != configuration) {
+                if (first) {
+                    sb.append(sep);
+                    first = false;
+                }
+
+                sb.append(indent).append(configName).append(':').append(sep);
+
+                for (final Entry<String, Object> entry : configuration.entrySet()) {
+                    final String key = entry.getKey();
+                    final Object value = entry.getValue();
+                    sb.append(indent).append(indent).append(key).append(": ");
+                    if (value instanceof String) {
+                        sb.append('\'').append(value).append('\'');
+                    } else {
+                        sb.append(value);
+                    }
+                    sb.append(sep);
+                }
+            }
+        }
+
+        if (first) {
+            return "<not-set>";
+        }
+
+        return sb.toString();
     }
 
 }
