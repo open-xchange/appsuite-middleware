@@ -50,10 +50,15 @@
 package com.openexchange.admin.diff.result;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.admin.diff.util.CaseInsensitiveSorter;
 
 /**
  * Presents the results of diff processing
@@ -74,7 +79,7 @@ public class DiffResult {
     private List<String> missingFiles = new ArrayList<String>();
 
     /**
-     * Includes configuration files that are duplicate within the installation TODO change to multimap to get info about duplicate files
+     * Includes configuration files that are duplicate within the installation
      */
     private List<String> duplicateFiles = new ArrayList<String>();
 
@@ -195,7 +200,15 @@ public class DiffResult {
      */
     @Override
     public String toString() {
+        sortMaps();
+
         StringBuilder builder = new StringBuilder();
+
+        builder.append("---------- PROCESSING ERRORS WHILE EXECUTION: " + processingErrors.size() + " ---------- \n");
+        for (String processingError : processingErrors) {
+            builder.append(processingError + "\n");
+        }
+
         builder.append("---------- Missing configuration files: " + missingFiles.size() + " ---------- \n");
         for (String missingFile : missingFiles) {
             builder.append(missingFile + "\n");
@@ -209,7 +222,6 @@ public class DiffResult {
         builder.append("---------- Additional configuration files: " + additionalFiles.size() + " ---------- \n");
         for (Entry<String, String> additionalFile : additionalFiles.entrySet()) {
             builder.append(additionalFile.getKey() + "\n");
-            // TODO you may add the value of the additional files with additionalField.getValue()
         }
 
         builder.append("---------- Additional properties: " + additionalProperties.size() + " ---------- \n");
@@ -240,5 +252,52 @@ public class DiffResult {
         }
 
         return builder.toString();
+    }
+
+    /**
+     * Sort all maps based on keys for output
+     */
+    private void sortMaps() {
+        Map<String, String> sortedAdditionalFiles = sortByKeys(this.additionalFiles);
+        this.additionalFiles = sortedAdditionalFiles;
+
+        Map<String, PropertyDiffResultSet> sortedAdditionalProperties = sortByKeys(this.additionalProperties);
+        this.additionalProperties = sortedAdditionalProperties;
+
+        Map<String, PropertyDiffResultSet> sortedChangedProperties = sortByKeys(this.changedProperties);
+        this.changedProperties = sortedChangedProperties;
+
+        Collections.sort(this.duplicateFiles, new CaseInsensitiveSorter());
+
+        Map<String, String> sortedDuplicateProperties = sortByKeys(this.duplicateProperties);
+        this.duplicateProperties = sortedDuplicateProperties;
+
+        Collections.sort(this.missingFiles, new CaseInsensitiveSorter());
+
+        Map<String, String> sortedMissingProperties = sortByKeys(this.missingProperties);
+        this.missingProperties = sortedMissingProperties;
+
+        Collections.sort(this.nonConfigurationFiles, new CaseInsensitiveSorter());
+        Collections.sort(this.processingErrors, new CaseInsensitiveSorter());
+    }
+
+    /**
+     * Sorts the given Map based on the keys
+     * 
+     * @param map to sort
+     * @return Sorted map
+     */
+    private static <K extends Comparable<?>, V extends Comparable<?>> Map<K, V> sortByKeys(Map<K, V> map) {
+        List<K> keys = new LinkedList<K>(map.keySet());
+        Collections.sort(keys, (Comparator) new CaseInsensitiveSorter());
+
+        // LinkedHashMap will keep the keys in the order they are inserted
+        // which is currently sorted on natural ordering
+        Map<K, V> sortedMap = new LinkedHashMap<K, V>();
+        for (K key : keys) {
+            sortedMap.put(key, map.get(key));
+        }
+
+        return sortedMap;
     }
 }

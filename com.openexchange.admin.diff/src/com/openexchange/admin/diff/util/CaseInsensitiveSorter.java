@@ -47,95 +47,26 @@
  *
  */
 
-package com.openexchange.admin.diff.result;
+package com.openexchange.admin.diff.util;
+
+import java.util.Comparator;
 
 
 /**
- * {@link PropertyDiffResultSet}
- *
+ * Sorts given Strings independently from given cases.
+ * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.0
  */
-public class PropertyDiffResultSet implements Comparable<PropertyDiffResultSet> {
-
-    private String fileName;
-
-    private String property;
-
-    private String value;
-
-    public static final String DETAILED_COMPARISION_NOT_POSSIBLE_MSG = "COMPLETE FILE CONTENT DIFF; COPY THE FOLLOWING SENTENCE IN A HTML FILE AND OPEN IT WITH A BROWSER: ";
-
-    public static final String CHANGES_FOUND_MSG = "Changes found: ";
-
-    public PropertyDiffResultSet(String fileName, String property, String value) {
-        this.fileName = fileName;
-        this.property = property;
-        this.value = value;
-    }
-
-    /**
-     * Gets the fileName
-     * 
-     * @return The fileName
-     */
-    public String getFileName() {
-        return fileName;
-    }
-
-    /**
-     * Sets the fileName
-     * 
-     * @param fileName The fileName to set
-     */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    /**
-     * Gets the property
-     * 
-     * @return The property
-     */
-    public String getProperty() {
-        return property;
-    }
-
-    /**
-     * Sets the property
-     * 
-     * @param property The property to set
-     */
-    public void setProperty(String property) {
-        this.property = property;
-    }
-
-    /**
-     * Gets the value
-     * 
-     * @return The value
-     */
-    public String getValue() {
-        return value;
-    }
-
-    /**
-     * Sets the value
-     * 
-     * @param value The value to set
-     */
-    public void setValue(String value) {
-        this.value = value;
-    }
+public class CaseInsensitiveSorter implements Comparator<String> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(PropertyDiffResultSet paramT) {
-        String a1 = paramT.getFileName();
-        String b1 = this.getFileName();
+    public final int compare(String a, String b) {
+        String a1 = a.toLowerCase();
+        String b1 = b.toLowerCase();
         return a1.compareTo(b1);
     }
-
 }

@@ -56,6 +56,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import com.openexchange.admin.diff.result.DiffResult;
 
 /**
  * CLT to execute the configuration diff tool.
@@ -115,12 +116,12 @@ public class ConfigDiffCLT {
      */
     private static void executeDiff(String original, String installed, String file) {
         ConfigDiff configDiff = new ConfigDiff(original, installed);
-        configDiff.run();
+        DiffResult diffResult = configDiff.run();
 
         if (file == null) {
-            // do not export diff to file
+            System.out.println(diffResult.toString());
         } else {
-            // execute diff and display to default output
+            // TODO export to file
         }
     }
 

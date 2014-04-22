@@ -51,6 +51,7 @@ package com.openexchange.admin.diff.file.type.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.admin.diff.file.type.IConfFileHandler;
 import com.openexchange.admin.diff.result.DiffResult;
 
@@ -62,9 +63,15 @@ import com.openexchange.admin.diff.result.DiffResult;
  */
 public abstract class AbstractFileHandler implements IConfFileHandler {
 
-    protected volatile Map<String, String> installedFiles = new HashMap<String, String>();
+    /**
+     * Registered installed files
+     */
+    protected Map<String, String> installedFiles = new ConcurrentHashMap<String, String>();
 
-    protected volatile Map<String, String> originalFiles = new HashMap<String, String>();
+    /**
+     * Registered original files
+     */
+    protected Map<String, String> originalFiles = new ConcurrentHashMap<String, String>();
 
     /**
      * {@inheritDoc}
@@ -72,8 +79,14 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
     @Override
     public void addFile(String fileName, String content, boolean isOriginal) {
         if (isOriginal) {
+            if (installedFiles.containsKey(fileName)) {
+                // TODO - handle duplicate files System.out.println(fileName + " already in the installed map");
+            }
             originalFiles.put(fileName, content);
         } else {
+            if (installedFiles.containsKey(fileName)) {
+                // TODO - handle duplicate files System.out.println(fileName + " already in the installed map");
+            }
             installedFiles.put(fileName, content);
         }
     }
@@ -88,6 +101,13 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
         return getDiff(diff, this.originalFiles, this.installedFiles);
     }
 
+    /**
+     * Returns the diffs that belong to files. This method is called for each configuration file extension.
+     * 
+     * @param diff - the diff objet to add file diff results
+     * @param lOriginalFiles - original files that should be compared
+     * @param lInstalledFiles - installed files the original ones should be compared with
+     */
     protected void getFileDiffs(DiffResult diff, final HashMap<String, String> lOriginalFiles, final HashMap<String, String> lInstalledFiles) {
 
         for (String origFile : lOriginalFiles.keySet()) {

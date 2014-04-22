@@ -131,7 +131,6 @@ public class ConfigDiff {
         for (IConfFileHandler handler : handlers) {
             handler.getDiff(diffResult);
         }
-        System.out.println(diffResult.toString());
         return diffResult;
     }
 }
