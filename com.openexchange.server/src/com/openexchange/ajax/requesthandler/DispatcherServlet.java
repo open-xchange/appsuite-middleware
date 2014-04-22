@@ -71,6 +71,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -381,17 +382,15 @@ public class DispatcherServlet extends SessionServlet {
                 // No further processing
                 return;
             }
-            /*
+            /*-
              * A common result
+             *
+             * Check for optional exception to log...
              */
-            OXException exception = result.getException();
-            if (exception != null) {
-                if (exception.isLoggable()) {
-                    logException(exception, LogLevel.DEBUG);
-                } else {
-                    logException(exception, LogLevel.TRACE);
-                }
-            }
+            logException(result.getException(), LogLevel.DEBUG);
+            /*
+             * ... and send response
+             */
             sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (final OXException e) {
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e) || AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
@@ -432,38 +431,43 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private void logException(final Exception e) {
+    private void logException(final @Nullable Exception e) {
         logException(e, null, -1);
     }
 
-    private void logException(final Exception e, final LogLevel logLevel) {
+    private void logException(final @Nullable Exception e, final @Nullable LogLevel logLevel) {
         logException(e, logLevel, -1);
     }
 
-    private void logException(final Exception e, final LogLevel logLevel, final int statusCode) {
+    private void logException(final @Nullable Exception e, final @Nullable LogLevel logLevel, final int statusCode) {
+        if (null == e) {
+            return;
+        }
+
         final String msg = statusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
 
         if (null == logLevel) {
             LOG.error(msg, e);
-        } else {
-            switch (logLevel) {
-            case TRACE:
-                LOG.trace(msg, e);
-                break;
-            case DEBUG:
-                LOG.debug(msg, e);
-                break;
-            case INFO:
-                LOG.info(msg, e);
-                break;
-            case WARNING:
-                LOG.warn(msg, e);
-                break;
-            case ERROR:
-                // fall-through
-            default:
-                LOG.error(msg, e);
-            }
+            return;
+        }
+
+        switch (logLevel) {
+        case TRACE:
+            LOG.trace(msg, e);
+            break;
+        case DEBUG:
+            LOG.debug(msg, e);
+            break;
+        case INFO:
+            LOG.info(msg, e);
+            break;
+        case WARNING:
+            LOG.warn(msg, e);
+            break;
+        case ERROR:
+            // fall-through
+        default:
+            LOG.error(msg, e);
         }
     }
 
