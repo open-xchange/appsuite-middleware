@@ -47,54 +47,92 @@
  *
  */
 
-package com.openexchange.find.json.actions;
+package com.openexchange.find;
 
-import java.util.List;
 import java.util.Map;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.find.Module;
-import com.openexchange.find.SearchRequest;
-import com.openexchange.find.SearchResult;
-import com.openexchange.find.SearchService;
-import com.openexchange.find.facet.ActiveFacet;
-import com.openexchange.find.json.FindRequest;
-import com.openexchange.find.json.Offset;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link QueryAction}
+ * Encapsulates additional options for find requests. Common options are
+ * available via concrete methods. Module-specific ones should be queried
+ * by their modules via the generic methods.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public class QueryAction extends AbstractFindAction {
+public class RequestOptions {
 
-    /**
-     * Initializes a new {@link QueryAction}.
-     *
-     * @param services The service look-up
-     */
-    public QueryAction(final ServiceLookup services) {
-        super(services);
+    private static final String INCLUDE_CONTEXT_ADMIN = "admin";
+
+    private final Map<String, String> optionMap;
+
+    private final boolean includeContextAdmin;
+
+    public RequestOptions(final Map<String, String> optionMap) {
+        super();
+        this.optionMap = optionMap;
+        this.includeContextAdmin = getBoolOption(INCLUDE_CONTEXT_ADMIN, false);
     }
 
-    @Override
-    protected AJAXRequestResult doPerform(final FindRequest request) throws OXException, JSONException {
-        final SearchService searchService = getSearchService();
-        final Module module = request.requireModule();
-        final Offset offset = request.getOffset();
-        if (offset.len <= 0) {
-            return new AJAXRequestResult(SearchResult.EMPTY, SearchResult.class.getName());
+    /**
+     * Modules that contain contacts in autocomplete or query responses
+     * can be instructed to include or exclude the context administrator.
+     *
+     * @return Whether the context administrator should be included or not.
+     */
+    public boolean includeContextAdmin() {
+        return includeContextAdmin;
+    }
+
+    /**
+     * Gets an option by its name.
+     *
+     * @param The options name.
+     * @return The options value or <code>null</code> if not specified.
+     */
+    public String getOption(String name) {
+        return optionMap.get(name);
+    }
+
+    /**
+     * Gets an option by its name.
+     *
+     * @param The options name.
+     * @param defaultValue The default value if the option is missing.
+     * @return The options value or <code>defaultValue</code> if not specified.
+     */
+    public String getOption(String name, String defaultValue) {
+        String tmp = optionMap.get(name);
+        if (tmp != null) {
+            return tmp;
         }
 
-        final List<ActiveFacet> activeFacets = request.getActiveFacets();
-        Map<String, String> options = request.getOptions();
-        final SearchRequest searchRequest = new SearchRequest(offset.off, offset.len, activeFacets, options);
-        final SearchResult result = searchService.search(searchRequest, module, request.getServerSession());
-        return new AJAXRequestResult(result, SearchResult.class.getName());
+        return defaultValue;
+    }
+
+    /**
+     * Gets a boolean option by its name.
+     *
+     * @param The options name.
+     * @return The options value or <code>false</code> if not specified.
+     */
+    public boolean getBoolOption(String name) {
+        return getBoolOption(name, false);
+    }
+
+    /**
+     * Gets a boolean option by its name.
+     *
+     * @param The options name.
+     * @param defaultValue The default value if the option is missing.
+     * @return The options value or <code>defaultValue</code> if not specified.
+     */
+    public boolean getBoolOption(String name, boolean defaultValue) {
+        String tmp = optionMap.get(name);
+        if (tmp != null) {
+            return Boolean.parseBoolean(tmp);
+        }
+
+        return defaultValue;
     }
 
 }

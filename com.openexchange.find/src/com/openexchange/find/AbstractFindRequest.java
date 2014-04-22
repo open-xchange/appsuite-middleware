@@ -47,54 +47,88 @@
  *
  */
 
-package com.openexchange.find.json.actions;
+package com.openexchange.find;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.find.Module;
-import com.openexchange.find.SearchRequest;
-import com.openexchange.find.SearchResult;
-import com.openexchange.find.SearchService;
 import com.openexchange.find.facet.ActiveFacet;
-import com.openexchange.find.json.FindRequest;
-import com.openexchange.find.json.Offset;
-import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link QueryAction}
+ * An abstract class for find requests that support active facets and options.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public class QueryAction extends AbstractFindAction {
+public abstract class AbstractFindRequest implements Serializable {
+
+    private static final long serialVersionUID = -3332517681701235711L;
+
+    private final List<ActiveFacet> activeFacets;
+
+    private final RequestOptions options;
 
     /**
-     * Initializes a new {@link QueryAction}.
+     * Initializes a new {@link AbstractFindRequest}.
      *
-     * @param services The service look-up
+     * @param activeFacets The list of currently active facets; must not be <code>null</code>
+     * @param optionMap A map containing client and module specific options; must not be <code>null</code>
      */
-    public QueryAction(final ServiceLookup services) {
-        super(services);
+    protected AbstractFindRequest(final List<ActiveFacet> activeFacets, final Map<String, String> optionMap) {
+        super();
+        this.activeFacets = activeFacets;
+        this.options = new RequestOptions(optionMap);
+    }
+
+    /**
+     * Gets a list of active facets that are currently set.
+     *
+     * @return The list of facets. May be empty but never <code>null</code>.
+     */
+    public List<ActiveFacet> getActiveFacets() {
+        return activeFacets;
+    }
+
+    /**
+     * Gets options that can be set by clients to set optional properties.
+     *
+     * @return The {@link RequestOptions}; never <code>null</code>.
+     */
+    public RequestOptions getOptions() {
+        return options;
+    }
+
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((activeFacets == null) ? 0 : activeFacets.hashCode());
+        result = prime * result + ((options == null) ? 0 : options.hashCode());
+        return result;
     }
 
     @Override
-    protected AJAXRequestResult doPerform(final FindRequest request) throws OXException, JSONException {
-        final SearchService searchService = getSearchService();
-        final Module module = request.requireModule();
-        final Offset offset = request.getOffset();
-        if (offset.len <= 0) {
-            return new AJAXRequestResult(SearchResult.EMPTY, SearchResult.class.getName());
-        }
-
-        final List<ActiveFacet> activeFacets = request.getActiveFacets();
-        Map<String, String> options = request.getOptions();
-        final SearchRequest searchRequest = new SearchRequest(offset.off, offset.len, activeFacets, options);
-        final SearchResult result = searchService.search(searchRequest, module, request.getServerSession());
-        return new AJAXRequestResult(result, SearchResult.class.getName());
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AbstractFindRequest other = (AbstractFindRequest) obj;
+        if (activeFacets == null) {
+            if (other.activeFacets != null)
+                return false;
+        } else if (!activeFacets.equals(other.activeFacets))
+            return false;
+        if (options == null) {
+            if (other.options != null)
+                return false;
+        } else if (!options.equals(other.options))
+            return false;
+        return true;
     }
 
 }

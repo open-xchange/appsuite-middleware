@@ -91,7 +91,7 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
             modifiedFacets.add(globalFacet);
         }
 
-        filterFacets(autocompleteResult.getFacets(), autocompleteRequest.getActiveFactes(), modifiedFacets);
+        filterFacets(autocompleteResult.getFacets(), autocompleteRequest.getActiveFacets(), modifiedFacets);
         autocompleteResult.setFacets(modifiedFacets);
         return autocompleteResult;
     }

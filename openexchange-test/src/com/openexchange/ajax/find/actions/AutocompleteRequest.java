@@ -92,21 +92,25 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
      * Initializes a new {@link AutocompleteRequest}.
      */
     public AutocompleteRequest(final String prefix, final String module) {
-        this(prefix, module, null, true);
+        this(prefix, module, null, null, true);
     }
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
      */
     public AutocompleteRequest(final String prefix, final String module, final List<ActiveFacet> activeFacets) {
-        this(prefix, module, activeFacets, true);
+        this(prefix, module, activeFacets, null, true);
+    }
+
+    public AutocompleteRequest(final String prefix, final String module, final Map<String, String> options) {
+        this(prefix, module, null, options, true);
     }
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
      */
-    public AutocompleteRequest(final String prefix, final String module, final List<ActiveFacet> activeFacets, final boolean failOnError) {
-        super();
+    public AutocompleteRequest(final String prefix, final String module, final List<ActiveFacet> activeFacets, final Map<String, String> options, final boolean failOnError) {
+        super(options);
         this.failOnError = failOnError;
         this.prefix = prefix;
         this.module = module;
@@ -137,6 +141,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
         final JSONObject jBody = new JSONObject(2);
         jBody.put("prefix", prefix);
         addFacets(jBody, activeFacets);
+        addOptions(jBody);
         return jBody;
     }
 
