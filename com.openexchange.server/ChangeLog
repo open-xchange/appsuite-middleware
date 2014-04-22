@@ -1,6 +1,7 @@
 * 2014-04-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 32111: Added setParameter() method that is error aware & improved log output in case of an invalid Content-Type parameter
+ - Fix for bug 31684: Prefer look-up by user identifier over look-up by object/folder identifier pair
 
 * 2014-04-21 - thorben.betten@open-xchange.com
 

@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -76,6 +77,7 @@ import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.HaloExceptionCodes;
 import com.openexchange.halo.Picture;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -90,12 +92,12 @@ import com.openexchange.user.UserService;
 public class ContactHaloImpl implements ContactHalo {
 
     private final Map<String, HaloContactDataSource> contactDataSources;
-    private final List<HaloContactImageSource> imageSources; 
-    
+    private final List<HaloContactImageSource> imageSources;
+
     private final Lock imageSourcesLock = new ReentrantLock();
-    
+
     private final ServiceLookup services;
-    
+
     /**
      * Initializes a new {@link ContactHaloImpl}.
      *
@@ -122,11 +124,11 @@ public class ContactHaloImpl implements ContactHalo {
         }
         return dataSource.investigate(buildQuery(contact, session), req, session);
     }
-    
+
     @Override
     public Picture getPicture(Contact contact, ServerSession session) throws OXException {
         HaloContactQuery contactQuery = buildQuery(contact, session);
-        
+
         for (HaloContactImageSource source : imageSources) {
             if (!source.isAvailable(session)) {
                 continue;
@@ -135,40 +137,47 @@ public class ContactHaloImpl implements ContactHalo {
             if (picture != null){
                 StringBuilder etagBuilder = new StringBuilder();
                 etagBuilder.append(source.getClass().getName()).append("://").append(picture.getEtag());
-                
+
                 picture.setEtag(etagBuilder.toString());
-                
+
                 return picture;
             }
         }
         return null;
     }
-    
+
     // Friendly for testing
-    HaloContactQuery buildQuery(Contact contact, final ServerSession session) throws OXException {
+    HaloContactQuery buildQuery(final Contact contact, final ServerSession session) throws OXException {
         final UserService userService = services.getService(UserService.class);
         final ContactService contactService = services.getService(ContactService.class);
-
         final HaloContactQuery contactQuery = new HaloContactQuery();
+        Contact resultContact = contact;
 
-        if (contact.getObjectID() > 0 && contact.getParentFolderID() > 0) {
-            Contact loaded = contactService.getContact(session, "" + contact.getParentFolderID(), "" + contact.getObjectID());
-            contactQuery.setContact(loaded);
-            contactQuery.setMergedContacts(Arrays.asList(loaded));
-            return contactQuery;
+        // Look-up associated user...
+        User user = null;
+
+        // Prefer look-up by user identifier
+        {
+            final int userId = resultContact.getInternalUserId();
+            if (userId > 0) {
+                user = userService.getUser(userId, session.getContext());
+            }
         }
 
+        // Check by object/folder identifier
+        if (null == user) {
+            if (resultContact.getObjectID() > 0 && resultContact.getParentFolderID() > 0) {
+                Contact loaded = contactService.getContact(session, "" + resultContact.getParentFolderID(), "" + resultContact.getObjectID());
+                contactQuery.setContact(loaded);
+                contactQuery.setMergedContacts(Arrays.asList(loaded));
+                return contactQuery;
+            }
+        }
 
         // Try to find a user with a given eMail address
-
-        User user = null;
-        if (contact.getInternalUserId() > 0) {
-            user = userService.getUser(contact.getInternalUserId(), session.getContext());
-        }
-
         if (user == null) {
             try {
-                user = userService.searchUser(contact.getEmail1(), session.getContext(), false);
+                user = userService.searchUser(resultContact.getEmail1(), session.getContext(), false);
             } catch (final OXException x) {
                 // Don't care. This is all best effort anyway.
             }
@@ -176,7 +185,7 @@ public class ContactHaloImpl implements ContactHalo {
 
         if (user == null) {
             try {
-                user = userService.searchUser(contact.getEmail2(), session.getContext(), false);
+                user = userService.searchUser(resultContact.getEmail2(), session.getContext(), false);
             } catch (final OXException x) {
                 // Don't care. This is all best effort anyway.
             }
@@ -184,31 +193,32 @@ public class ContactHaloImpl implements ContactHalo {
 
         if (user == null) {
             try {
-                user = userService.searchUser(contact.getEmail3(), session.getContext(), false);
+                user = userService.searchUser(resultContact.getEmail3(), session.getContext(), false);
             } catch (final OXException x) {
                 // Don't care. This is all best effort anyway.
             }
         }
 
         contactQuery.setUser(user);
-        final List<Contact> contactsToMerge = new ArrayList<Contact>();
+        final List<Contact> contactsToMerge = new LinkedList<Contact>();
         if (user != null) {
             // Load the associated contact
-            contact = contactService.getUser(session, user.getId());
-            contactsToMerge.add(contact);
-        } else if (contact.getEmail1() != null && contact.getEmail1().length() > 0){
+            resultContact = contactService.getUser(session, user.getId());
+            contactsToMerge.add(resultContact);
+        } else if (false == Strings.isEmpty(resultContact.getEmail1())){
             // Try to find a contact
             final ContactSearchObject contactSearch = new ContactSearchObject();
-            contactSearch.setEmail1(contact.getEmail1());
-            contactSearch.setEmail2(contact.getEmail1());
-            contactSearch.setEmail3(contact.getEmail1());
+            final String email = resultContact.getEmail1();
+            contactSearch.setEmail1(email);
+            contactSearch.setEmail2(email);
+            contactSearch.setEmail3(email);
             contactSearch.setOrSearch(true);
             SearchIterator<Contact> iterator = null;
             try {
                 iterator = contactService.searchContacts(session, contactSearch);
                 while (iterator.hasNext()) {
                     Contact c = iterator.next();
-                    if (checkEmails(c, contact.getEmail1())) {
+                    if (checkEmails(c, email)) {
                         contactsToMerge.add(c);
                     }
                 }
@@ -222,25 +232,14 @@ public class ContactHaloImpl implements ContactHalo {
 
         final ContactMerger contactMerger = new ContactMerger(false);
         for (final Contact c : contactsToMerge) {
-            contact = contactMerger.merge(contact, c);
+            resultContact = contactMerger.merge(resultContact, c);
         }
-        contactQuery.setContact(contact);
+        contactQuery.setContact(resultContact);
         return contactQuery;
     }
 
     private boolean checkEmails(Contact c, String email1) {
-        if (c.getEmail1() != null && c.getEmail1().equalsIgnoreCase(email1)) {
-            return true;
-        }
-        
-        if (c.getEmail2() != null && c.getEmail2().equalsIgnoreCase(email1)) {
-            return true;
-        }
-        if (c.getEmail3() != null && c.getEmail3().equalsIgnoreCase(email1)) {
-            return true;
-        }
-        
-        return false;
+        return (email1.equalsIgnoreCase(c.getEmail1()) || email1.equalsIgnoreCase(c.getEmail2()) || email1.equalsIgnoreCase(c.getEmail3()));
     }
 
     @Override
@@ -267,7 +266,7 @@ public class ContactHaloImpl implements ContactHalo {
     public void removeContactDataSource(final HaloContactDataSource ds) {
         contactDataSources.remove(ds.getId());
     }
-    
+
     public void addContactImageSource(final HaloContactImageSource is) {
         try {
             imageSourcesLock.lock();
@@ -278,18 +277,18 @@ public class ContactHaloImpl implements ContactHalo {
                 public int compare(HaloContactImageSource o1, HaloContactImageSource o2) {
                     return o2.getPriority() - o1.getPriority();
                 }
-                
+
             });
         } finally {
             imageSourcesLock.unlock();
         }
     }
-    
+
     public void removeContactImageSource(final HaloContactImageSource is) {
         try {
             imageSourcesLock.lock();
             imageSources.remove(is);
-            
+
         } finally {
             imageSourcesLock.unlock();
         }
