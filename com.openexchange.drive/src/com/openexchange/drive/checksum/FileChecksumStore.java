@@ -194,15 +194,6 @@ public interface FileChecksumStore {
     List<FileChecksum> getFileChecksums(FolderID folderID) throws OXException;
 
     /**
-     * Gets all file checksums matching the supplied checksum
-     *
-     * @param checksum The checksum to lookup
-     * @return The file checksums
-     * @throws OXException
-     */
-    List<FileChecksum> getMatchingFileChecksums(String checksum) throws OXException;
-
-    /**
      * Gets all file checksums matching the supplied checksums
      *
      * @param checksum The checksums to lookup
