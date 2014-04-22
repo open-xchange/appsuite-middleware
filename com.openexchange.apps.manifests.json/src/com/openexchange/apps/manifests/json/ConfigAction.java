@@ -162,22 +162,23 @@ public class ConfigAction implements AJAXActionService {
 
         // Find other applicable brands/server configurations
         if (configurations != null) {
-            boolean added = false;
+            boolean empty = true;
             LinkedList<Map<String, Object>> applicableConfigs = new LinkedList<Map<String,Object>>();
-            for (Object value : configurations.values()) {
-                Map<String, Object> possibleConfiguration = (Map<String, Object>) value;
+            for (Map.Entry<String, Object> configEntry : configurations.entrySet()) {
+                Map<String, Object> possibleConfiguration = (Map<String, Object>) configEntry.getValue();
                 if (looksApplicable(possibleConfiguration, requestData, session)) {
                     // ensure that "all"-host-wildcards are applied first
                     if ("all".equals(possibleConfiguration.get("host"))) {
                         applicableConfigs.addFirst(possibleConfiguration);
-                        added = true;
                     } else {
                         applicableConfigs.add(possibleConfiguration);
-                        added = true;
                     }
+                    empty = false;
+                } else {
+                    LOGGER.debug("Configuration {} is not applicable", configEntry.getKey());
                 }
             }
-            if (added) {
+            if (!empty) {
                 for (Map<String, Object> config : applicableConfigs) {
                     serverConfiguration.putAll(config);
                 }
