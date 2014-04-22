@@ -447,8 +447,7 @@ public final class OXFolderAdminHelper {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt =
-                writeCon.prepareStatement("SELECT permission_id,system FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
+            stmt = writeCon.prepareStatement("SELECT permission_id,system FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND permission_id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, globalAddressBookId);
@@ -463,8 +462,7 @@ public final class OXFolderAdminHelper {
              * Insert/Update
              */
             if (update) {
-                stmt =
-                    writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ? AND system = ?");
+                stmt = writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ? AND system = ?");
                 pos = 1;
                 if (disable) {
                     stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
@@ -473,9 +471,7 @@ public final class OXFolderAdminHelper {
                 } else {
                     stmt.setInt(pos++, OCLPermission.READ_FOLDER);
                     stmt.setInt(pos++, OCLPermission.READ_ALL_OBJECTS);
-                    stmt.setInt(
-                        pos++,
-                        OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
+                    stmt.setInt(pos++, OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
                 }
                 stmt.setInt(pos++, isAdmin ? 1 : 0);
                 stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
@@ -485,8 +481,7 @@ public final class OXFolderAdminHelper {
                 stmt.setInt(pos++, system);
                 stmt.executeUpdate();
             } else {
-                stmt =
-                    writeCon.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                stmt = writeCon.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 pos = 1;
                 stmt.setInt(pos++, cid); // cid
                 stmt.setInt(pos++, globalAddressBookId); // fuid
@@ -498,9 +493,7 @@ public final class OXFolderAdminHelper {
                 } else {
                     stmt.setInt(pos++, OCLPermission.READ_FOLDER); // fp
                     stmt.setInt(pos++, OCLPermission.READ_ALL_OBJECTS); // orp
-                    stmt.setInt(
-                        pos++,
-                        OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS); // owp
+                    stmt.setInt(pos++, OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS); // owp
                 }
                 stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
                 stmt.setInt(pos++, isAdmin ? 1 : 0); // admin_flag
