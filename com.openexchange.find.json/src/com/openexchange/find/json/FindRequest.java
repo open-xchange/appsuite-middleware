@@ -51,7 +51,9 @@ package com.openexchange.find.json;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,6 +87,7 @@ public class FindRequest {
     private static final String PARAM_START = "start";
     private static final String PARAM_SIZE = "size";
     private static final String PARAM_FACETS = "facets";
+    private static final String PARAM_OPTIONS = "options";
     private static final int DEFAULT_SIZE = 20;
 
     // -------------------------------------------------------------------------------------------- //
@@ -112,47 +115,6 @@ public class FindRequest {
      */
     public ServerSession getServerSession() {
         return session;
-    }
-
-    /**
-     * Gets the offset
-     *
-     * @return The offset
-     */
-    public Offset getOffset() throws OXException {
-        JSONObject json = (JSONObject) request.requireData();
-        int off = 0;
-        int len = -1;
-        try {
-            if (json.has(PARAM_START)) {
-                off = json.getInt(PARAM_START);
-            }
-            if (json.has(PARAM_SIZE)) {
-                len = json.getInt(PARAM_SIZE);
-            }
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        }
-
-        if (off < 0 || len < 0) {
-            return new Offset(0, DEFAULT_SIZE);
-        }
-
-        return new Offset(off, len);
-    }
-
-    /**
-     * Gets the module associated with this request.
-     *
-     * @return The module or <code>null</code>
-     */
-    public Module getModule() {
-        final String module = request.getParameter(PARAM_MODULE);
-        if (module == null) {
-            return null;
-        }
-
-        return Module.moduleFor(module);
     }
 
     /**
@@ -203,80 +165,97 @@ public class FindRequest {
         }
     }
 
-//    /**
-//     * Gets the checked filters for search.
-//     *
-//     * @return The filters
-//     * @throws OXException If filters are invalid
-//     */
-//    public List<Filter> optFilters() throws OXException {
-//        final JSONObject json = (JSONObject) request.requireData();
-//        try {
-//            final JSONArray jFilters = json.optJSONArray(PARAM_FILTERS);
-//            if (null == jFilters) {
-//                return Collections.emptyList();
-//            }
-//
-//            final int length = jFilters.length();
-//            final List<Filter> filters = new ArrayList<Filter>(length);
-//            for (int i = 0; i < length; i++) {
-//                final JSONObject jFilter = jFilters.getJSONObject(i);
-//
-//                final JSONArray jQueries = jFilter.getJSONArray("queries");
-//                int len = jQueries.length();
-//                final List<String> queries = new ArrayList<String>(len);
-//                for (int j = 0; j < len; j++) {
-//                    queries.add(jQueries.getString(j));
-//                }
-//
-//                final JSONArray jFields = jFilter.getJSONArray("fields");
-//                len = jFields.length();
-//                final List<String> fields = new ArrayList<String>(len);
-//                for (int j = 0; j < len; j++) {
-//                    fields.add(jFields.getString(j));
-//                }
-//
-//                filters.add(parseFilter(jValue));
-//            }
-//
-//            return filters;
-//        } catch (final JSONException e) {
-//            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-//        }
-//    }
-
-    public Filter parseFilter(JSONObject jFilter) throws JSONException {
-        JSONArray jQueries = jFilter.getJSONArray("queries");
-        int len = jQueries.length();
-        List<String> queries = new ArrayList<String>(len);
-        for (int j = 0; j < len; j++) {
-            queries.add(jQueries.getString(j));
+    /**
+     * Gets the offset
+     *
+     * @return The offset
+     * @throws OXException if no request data exists.
+     */
+    public Offset getOffset() throws OXException {
+        JSONObject json = (JSONObject) request.requireData();
+        int off = 0;
+        int len = -1;
+        try {
+            if (json.has(PARAM_START)) {
+                off = json.getInt(PARAM_START);
+            }
+            if (json.has(PARAM_SIZE)) {
+                len = json.getInt(PARAM_SIZE);
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
 
-        JSONArray jFields = jFilter.getJSONArray("fields");
-        len = jFields.length();
-        List<String> fields = new ArrayList<String>(len);
-        for (int j = 0; j < len; j++) {
-            fields.add(jFields.getString(j));
+        if (off < 0 || len < 0) {
+            return new Offset(0, DEFAULT_SIZE);
         }
 
-        return new Filter(fields, queries);
+        return new Offset(off, len);
     }
 
     /**
-     * Gets the facets.
-     *
-     * @return The facets.
-     * @throws OXException If facets are invalid
+     * Gets the active facets.
+     * @return A list of {@link ActiveFacet}s. May be empty but not <code>null</code>.
      */
-    public JSONArray optFacets() throws OXException {
+    public List<ActiveFacet> getActiveFacets() throws OXException {
         JSONObject json = (JSONObject) request.requireData();
-        Object facetsObj = json.opt(PARAM_FACETS);
-        if (facetsObj != null && facetsObj instanceof JSONArray) {
-            return (JSONArray) facetsObj;
+        JSONArray jFacets = json.optJSONArray(PARAM_FACETS);
+        if (jFacets == null || jFacets.isEmpty()) {
+            return Collections.emptyList();
         }
 
-        return null;
+        try {
+            Module module = requireModule();
+            final int length = jFacets.length();
+            List<ActiveFacet> facets = new ArrayList<ActiveFacet>(length);
+            for (int i = 0; i < length; i++) {
+                JSONObject jFacet = jFacets.getJSONObject(i);
+                String jType = jFacet.getString("facet");
+                FacetType type = facetTypeFor(module, jType);
+                if (type == null) {
+                    throw FindExceptionCode.UNSUPPORTED_FACET.create(jType, module.getIdentifier());
+                }
+
+                String valueId = jFacet.getString("value");
+                JSONObject jFilter = jFacet.optJSONObject("filter");
+                Filter filter;
+                if (jFilter == null) {
+                    filter = Filter.NO_FILTER;
+                } else {
+                    filter = parseFilter(jFilter);
+                }
+                facets.add(new ActiveFacet(type, valueId, filter));
+            }
+
+            return facets;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the optional options map that may contain module specific properties.
+     *
+     * @return The map; never <code>null</code>
+     * @throws OXException if no request data exists.
+     */
+    public Map<String, String> getOptions() throws OXException {
+        Map<String, String> options = new HashMap<String, String>();
+        JSONObject json = (JSONObject) request.requireData();
+        JSONObject jOptions = json.optJSONObject(PARAM_OPTIONS);
+        if (jOptions == null) {
+            return Collections.emptyMap();
+        }
+
+        for (String key : jOptions.keySet()) {
+            try {
+                options.put(key, jOptions.getString(key));
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            }
+        }
+
+        return options;
     }
 
     /**
@@ -323,43 +302,22 @@ public class FindRequest {
         return request.getParameter(name, coerceTo);
     }
 
-    /**
-     * Gets the active facets.
-     * @return A list of {@link ActiveFacet}s. May be empty but not <code>null</code>.
-     */
-    public List<ActiveFacet> getActiveFacets() throws OXException {
-        JSONArray jFacets = optFacets();
-        if (jFacets == null || jFacets.isEmpty()) {
-            return Collections.emptyList();
+    private static Filter parseFilter(JSONObject jFilter) throws JSONException {
+        JSONArray jQueries = jFilter.getJSONArray("queries");
+        int len = jQueries.length();
+        List<String> queries = new ArrayList<String>(len);
+        for (int j = 0; j < len; j++) {
+            queries.add(jQueries.getString(j));
         }
 
-        try {
-            Module module = requireModule();
-            final int length = jFacets.length();
-            List<ActiveFacet> facets = new ArrayList<ActiveFacet>(length);
-            for (int i = 0; i < length; i++) {
-                JSONObject jFacet = jFacets.getJSONObject(i);
-                String jType = jFacet.getString("facet");
-                FacetType type = facetTypeFor(module, jType);
-                if (type == null) {
-                    throw FindExceptionCode.UNSUPPORTED_FACET.create(jType, module.getIdentifier());
-                }
-
-                String valueId = jFacet.getString("value");
-                JSONObject jFilter = jFacet.optJSONObject("filter");
-                Filter filter;
-                if (jFilter == null) {
-                    filter = Filter.NO_FILTER;
-                } else {
-                    filter = parseFilter(jFilter);
-                }
-                facets.add(new ActiveFacet(type, valueId, filter));
-            }
-
-            return facets;
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        JSONArray jFields = jFilter.getJSONArray("fields");
+        len = jFields.length();
+        List<String> fields = new ArrayList<String>(len);
+        for (int j = 0; j < len; j++) {
+            fields.add(jFields.getString(j));
         }
+
+        return new Filter(fields, queries);
     }
 
     private static FacetType facetTypeFor(Module module, String id) {

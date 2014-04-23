@@ -53,6 +53,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.find.common.Bug32060Test;
+import com.openexchange.ajax.find.contacts.ExcludeContextAdminTest;
 import com.openexchange.ajax.find.drive.BasicDriveTest;
 import com.openexchange.ajax.find.mail.BasicMailTest;
 import com.openexchange.ajax.find.tasks.FindTasksAutocompleteTests;
@@ -90,6 +91,7 @@ public final class FindTestSuite {
         tests.addTestSuite(FindTasksQueryTests.class);
         tests.addTestSuite(FindTasksAutocompleteTests.class);
         tests.addTestSuite(Bug32060Test.class);
+        tests.addTestSuite(ExcludeContextAdminTest.class);
 
 
         TestSetup setup = new TestSetup(tests) {

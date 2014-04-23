@@ -47,46 +47,67 @@
  *
  */
 
-package com.openexchange.rest.services;
+package com.openexchange.rest.services.database.transactions;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- * {@link Response}
+ * The {@link InMemoryTransactionKeeper} is an implementation of the TransactionKeeper interface. 
+ * @see TransactionKeeper
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Response {
+public class InMemoryTransactionKeeper implements TransactionKeeper {
+    
+    private ConcurrentHashMap<String, Transaction> transactions = new ConcurrentHashMap<String, Transaction>();
+    
+    @Override
+    public Transaction newTransaction(Connection con) throws SQLException {
+        Transaction tx = new Transaction(con, this);
+        con.setAutoCommit(false);
+        
+        transactions.put(tx.getID(), tx);
+        return tx;
+    }
 
-    private Iterable<String> body;
-    private int status = 200;
-    private Map<String, String> headers = new HashMap<String, String>();
-    
-    public Iterable<String> getBody() {
-        return body;
+    @Override
+    public Transaction getTransaction(String txId) {
+        return transactions.get(txId);
+    }
+
+    @Override
+    public void commit(String txId) throws SQLException {
+        Transaction tx = getTransaction(txId);
+        if (null == tx) {
+            return;
+        }
+        try {
+            tx.getConnection().commit();
+        } finally {
+            transactions.remove(txId);
+        }
+    }
+
+    @Override
+    public void rollback(String txId) throws SQLException {
+        Transaction tx = getTransaction(txId);
+        if (null == tx) {
+            return;
+        }
+        try {
+            tx.getConnection().rollback();
+        } finally {
+            transactions.remove(txId);        
+        }
     }
     
-    public void setBody(Iterable<String> body) {
-        this.body = body;
+    public void tick(long now) {
+        for(Transaction tx: transactions.values()) {
+            tx.tick(now);
+        }
     }
-    
-    public int getStatus() {
-        return status;
-    }
-    
-    public void setStatus(int status) {
-        this.status = status;
-    }
-    
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-    
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-    
-    
+
 }

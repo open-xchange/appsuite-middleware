@@ -50,6 +50,8 @@
 package com.openexchange.ajax.find.actions;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,11 +73,14 @@ public abstract class AbstractFindRequest<T extends AbstractAJAXResponse> implem
      */
     public static final String FIND_URL = "/ajax/find";
 
+    private final Map<String, String> options;
+
     /**
      * Initializes a new {@link AbstractFindRequest}.
      */
-    protected AbstractFindRequest() {
+    protected AbstractFindRequest(final Map<String, String> options) {
         super();
+        this.options = options;
     }
 
     @Override
@@ -86,6 +91,16 @@ public abstract class AbstractFindRequest<T extends AbstractAJAXResponse> implem
     @Override
     public Header[] getHeaders() {
         return NO_HEADER;
+    }
+
+    protected void addOptions(JSONObject jBody) throws JSONException {
+        if (options != null) {
+            JSONObject jOptions = new JSONObject();
+            for (Entry<String, String> entry : options.entrySet()) {
+                jOptions.put(entry.getKey(), entry.getValue());
+            }
+            jBody.put("options", jOptions);
+        }
     }
 
     protected void addFacets(JSONObject jBody, List<ActiveFacet> activeFacets) throws JSONException {

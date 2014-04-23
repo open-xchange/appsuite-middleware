@@ -50,6 +50,7 @@
 package com.openexchange.rest.services.servlet;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Map;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -82,6 +83,14 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(0, 0), PREFIX, resp);
+            
+            Enumeration headers = req.getHeaderNames();
+            while(headers.hasMoreElements()) {
+                String headerName = (String) headers.nextElement();
+                request.setHeader(headerName, req.getHeader(headerName));
+            }
+
+            
             String path = request.getPathInfo();
             
             OXRESTServiceWrapper wrapper = retrieveWrapper(req.getMethod(), path);

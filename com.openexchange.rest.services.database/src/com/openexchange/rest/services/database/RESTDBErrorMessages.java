@@ -47,46 +47,19 @@
  *
  */
 
-package com.openexchange.rest.services;
+package com.openexchange.rest.services.database;
 
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
- * {@link Response}
+ * {@link RESTDBErrorMessages}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Response {
-
-    private Iterable<String> body;
-    private int status = 200;
-    private Map<String, String> headers = new HashMap<String, String>();
-    
-    public Iterable<String> getBody() {
-        return body;
-    }
-    
-    public void setBody(Iterable<String> body) {
-        this.body = body;
-    }
-    
-    public int getStatus() {
-        return status;
-    }
-    
-    public void setStatus(int status) {
-        this.status = status;
-    }
-    
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-    
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-    
+public class RESTDBErrorMessages {
+    // Don't need to be translated, as they are for the internal REST API. 
+    public static final String SQL_ERROR = "There is a problem with the database: '%1$s'";
+    public static final String QUOTA_LIMIT_EXCEEDED = "You have exceeded the query limit for one batch. Maximum %1$d, you sent %2$d queries.";
+    public static final String VERSION_MUST_BE_KNOWN = "Version should be known but is unknown for module %1$s";
     
 }
