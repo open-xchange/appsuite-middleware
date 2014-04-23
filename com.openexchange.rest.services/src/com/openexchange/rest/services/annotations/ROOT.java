@@ -55,7 +55,7 @@ import java.lang.annotation.Retention;
 
 
 /**
- * {@link ROOT}
+ * Declares the {@link ROOT} path of a REST service
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

@@ -53,7 +53,7 @@ import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link Services}
+ * A {@link Services} instance keeps a static reference to the ServiceLookup
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

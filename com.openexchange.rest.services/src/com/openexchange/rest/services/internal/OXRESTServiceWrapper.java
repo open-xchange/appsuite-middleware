@@ -56,13 +56,22 @@ import com.openexchange.rest.services.Response;
 
 
 /**
- * {@link OXRESTServiceWrapper}
+ * An {@link OXRESTServiceWrapper} instance knows how to process a REST API request. These usually exist for one request and remain bound to one thread, so during processing
+ * are allowed to set member variables and refer to them during processing.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface OXRESTServiceWrapper {
     public void setRequest(AJAXRequestData request);
+    
+    /**
+     * Tries to deliver a response for the request.
+     */
     public Response execute() throws OXException;
-
+    
+    /**
+     * The match object that was used to choose this wrapper.
+     * @see OXRESTServiceFactory#newWrapper(OXRESTMatch)
+     */
     public OXRESTMatch getMatch();
 }

@@ -61,13 +61,14 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.OXRESTMatch;
+import com.openexchange.rest.services.OXRESTService;
 import com.openexchange.rest.services.Response;
 import com.openexchange.rest.services.internal.OXRESTServiceWrapper;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
- * {@link OXRESTServlet}
+ * The {@link OXRESTServlet} delegates handling to an {@link OXRESTService} instance
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
