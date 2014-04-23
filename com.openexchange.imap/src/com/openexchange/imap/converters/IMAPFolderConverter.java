@@ -392,7 +392,10 @@ public final class IMAPFolderConverter {
                     /*
                      * Default folder
                      */
-                    if ("INBOX".equals(imapFullName)) {
+                    if (mailFolder.isShared() || mailFolder.isPublic()) {
+                        mailFolder.setDefaultFolder(false);
+                        mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
+                    } else if ("INBOX".equals(imapFullName)) {
                         mailFolder.setDefaultFolder(true);
                         mailFolder.setDefaultFolderType(DefaultFolderType.INBOX);
                     } else if (isDefaultFoldersChecked(session, accountId)) {
