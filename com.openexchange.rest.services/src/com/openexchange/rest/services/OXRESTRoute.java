@@ -61,13 +61,15 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OXRESTRoute {
+
     private String method;
     private String path;
     private Pattern pattern;
-    private List<String> variableNames = new ArrayList<String>(5);
-    
+    private final List<String> variableNames;
+
     public OXRESTRoute(String method, String path) {
         super();
+        variableNames = new ArrayList<String>(5);
         this.method = method.toUpperCase();
         setPath(path);
     }
@@ -75,30 +77,30 @@ public class OXRESTRoute {
     public String getMethod() {
         return method;
     }
-    
+
     public void setMethod(String method) {
         this.method = method.toUpperCase();
     }
-    
+
     public String getPath() {
         return path;
     }
-    
+
     public void setPath(String path) {
         if (!path.startsWith("/")) {
             this.path = "/" + path;
         } else {
-            this.path = path;            
+            this.path = path;
         }
-        
+
         // Build a pattern
         boolean captureName = false;
         StringBuilder regex = new StringBuilder("^");
         StringBuilder name = new StringBuilder();
-        
+
         pattern = null;
         variableNames.clear();
-        
+
         for(char c: this.path.toCharArray()) {
             if (captureName) {
                 if (c == '/') {
@@ -117,12 +119,12 @@ public class OXRESTRoute {
                 }
             }
         }
-        
+
         if (captureName) {
             regex.append("([^/]*)$");
             variableNames.add(name.toString());
         }
-        
+
         pattern = Pattern.compile(regex.toString());
     }
 
@@ -130,7 +132,7 @@ public class OXRESTRoute {
         if (!method.equalsIgnoreCase(this.method)) {
             return null;
         }
-        
+
         Matcher matcher = pattern.matcher(path);
         if (matcher.find()) {
             OXRESTMatch match = new OXRESTMatch();
@@ -141,7 +143,7 @@ public class OXRESTRoute {
             match.setParameterNames(new ArrayList<String>(variableNames));
             return match;
         }
-        
+
         return null;
-    } 
+    }
 }
