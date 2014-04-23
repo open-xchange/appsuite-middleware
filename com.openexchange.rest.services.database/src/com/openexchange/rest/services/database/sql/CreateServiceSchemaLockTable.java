@@ -74,8 +74,7 @@ public class CreateServiceSchemaLockTable extends AbstractCreateTableImpl {
         return new String[]{"CREATE TABLE `serviceSchemaMigrationLock` (" + 
             "  `module` varchar(128) NOT NULL DEFAULT ''," + 
             "  `expires` bigint(20) DEFAULT NULL," + 
-            "  PRIMARY KEY (`module`))" + 
-            ")"};
+            "  PRIMARY KEY (`module`))"};
     }
 
 }
