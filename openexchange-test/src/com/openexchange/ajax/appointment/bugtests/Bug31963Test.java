@@ -52,13 +52,12 @@ package com.openexchange.ajax.appointment.bugtests;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConflictObject;
-import com.openexchange.ajax.appointment.action.InsertRequest;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.test.CalendarTestManager;
 
 /**
  * {@link Bug31963Test}
@@ -67,7 +66,9 @@ import com.openexchange.java.util.TimeZones;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug31963Test extends AppointmentTest {
+public class Bug31963Test extends AbstractAJAXSession {
+
+    private CalendarTestManager ctm;
 
     /**
      * Initializes a new {@link Bug31963Test}.
@@ -76,6 +77,18 @@ public class Bug31963Test extends AppointmentTest {
      */
     public Bug31963Test(String name) {
         super(name);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        ctm = new CalendarTestManager(getClient());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        ctm.cleanUp();
+        super.tearDown();
     }
 
     public void testNotConflictingAppointment() throws Exception {
@@ -95,7 +108,7 @@ public class Bug31963Test extends AppointmentTest {
         appointment.setEndDate(end);
         appointment.setFullTime(true);
         appointment.setIgnoreConflicts(true);
-        create(appointment);
+        appointment = ctm.insert(appointment);
         /*
          * create appointment an hour before and check for conflicts
          */
@@ -109,9 +122,8 @@ public class Bug31963Test extends AppointmentTest {
         notConflictingAppointment.setStartDate(start);
         notConflictingAppointment.setEndDate(end);
         notConflictingAppointment.setIgnoreConflicts(false);
-        InsertRequest insertRequest = new InsertRequest(notConflictingAppointment, TimeZones.UTC, true);
-        AppointmentInsertResponse insertResponse = getClient().execute(insertRequest);
-        List<ConflictObject> conflicts = insertResponse.getConflicts();
+        ctm.insert(notConflictingAppointment);
+        List<ConflictObject> conflicts = ctm.getLastResponse().getConflicts();
         assertTrue("conflicts detected", null == conflicts || 0 == conflicts.size());
         /*
          * create appointment an hour after and check for conflicts
@@ -126,9 +138,8 @@ public class Bug31963Test extends AppointmentTest {
         notConflictingAppointment.setStartDate(start);
         notConflictingAppointment.setEndDate(end);
         notConflictingAppointment.setIgnoreConflicts(false);
-        insertRequest = new InsertRequest(notConflictingAppointment, TimeZones.UTC, true);
-        insertResponse = getClient().execute(insertRequest);
-        conflicts = insertResponse.getConflicts();
+        ctm.insert(notConflictingAppointment);
+        conflicts = ctm.getLastResponse().getConflicts();
         assertTrue("conflicts detected", null == conflicts || 0 == conflicts.size());
     }
 
