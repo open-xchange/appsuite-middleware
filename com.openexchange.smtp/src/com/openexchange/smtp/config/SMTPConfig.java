@@ -181,5 +181,17 @@ public final class SMTPConfig extends TransportConfig {
             }
         }
         return false;
+
+        /*-
+         * Was:
+         *
+         * if (!account.isDefaultAccount()) {
+                login = account.getTransportLogin();
+                password = MailPasswordUtil.decrypt(account.getTransportPassword(), session, account.getId(), login, account.getTransportServer());
+                return true;
+            }
+            return false;
+         *
+         */
     }
 }
