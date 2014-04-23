@@ -70,6 +70,8 @@ fi
 %changelog
 * Fri Apr 11 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 First release candidate for 7.6.0
+* Thu Apr 10 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-04-11
 * Thu Apr 03 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2014-04-07
 * Mon Mar 31 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
