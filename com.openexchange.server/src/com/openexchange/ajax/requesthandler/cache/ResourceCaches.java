@@ -125,8 +125,15 @@ public class ResourceCaches {
         // Generate MD5 sum
         try {
             final byte[] md5Bytes = sb.toString().getBytes("UTF-8");
+            final String hashedParams = asHex(MessageDigest.getInstance("MD5").digest(md5Bytes));
+            String prefix = eTag;
+
+            // ensure key size does not exceed 128 characters (current db limit)
+            if (prefix.length() + 33 > 128) {
+                prefix = asHex(MessageDigest.getInstance("MD5").digest(prefix.getBytes()));
+            }
             sb.setLength(0);
-            return sb.append(eTag).append('-').append(asHex(MessageDigest.getInstance("MD5").digest(md5Bytes))).toString();
+            return sb.append(prefix).append('-').append(hashedParams).toString();
         } catch (final UnsupportedEncodingException e) {
             // Shouldn't happen
             LOG.error("", e);
