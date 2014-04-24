@@ -1,3 +1,7 @@
+* 2014-04-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32157: Added null guard for possible null reference to a MailMessage
+
 * 2014-04-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 32111: Added setParameter() method that is error aware & improved log output in case of an invalid Content-Type parameter
