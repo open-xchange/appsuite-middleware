@@ -754,7 +754,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             }
                         } else {
                             try {
-                                asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.equals(displayMode));
+                                asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, false);
                                 getAttachmentsArr().remove(0);
                             } catch (final JSONException e) {
                                 throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
