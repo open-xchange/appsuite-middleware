@@ -72,6 +72,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class SyncFoldersAction extends AbstractDriveAction {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyncFoldersAction.class);
+
     @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
         /*
@@ -94,14 +96,11 @@ public class SyncFoldersAction extends AbstractDriveAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
         /*
-         * determine sync actions
-         */
-        DriveService driveService = Services.getService(DriveService.class, true);
-        SyncResult<DirectoryVersion> syncResult = driveService.syncFolders(session, originalVersions, clientVersions);
-        /*
-         * return json result
+         * determine sync actions & return json result
          */
         try {
+            DriveService driveService = Services.getService(DriveService.class, true);
+            SyncResult<DirectoryVersion> syncResult = driveService.syncFolders(session, originalVersions, clientVersions);
             if (null != session.isDiagnostics()) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("diagnostics", syncResult.getDiagnostics());
@@ -109,6 +108,13 @@ public class SyncFoldersAction extends AbstractDriveAction {
                 return new AJAXRequestResult(jsonObject, "json");
             }
             return new AJAXRequestResult(JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()), "json");
+        } catch (OXException e) {
+            if ("DRV".equals(e.getPrefix())) {
+                LOG.debug("Error performing syncFolders request", e);
+            } else {
+                LOG.warn("Error performing syncFolders request", e);
+            }
+            throw e;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
