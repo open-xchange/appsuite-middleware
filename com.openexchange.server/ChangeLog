@@ -1,6 +1,7 @@
 * 2014-04-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 32157: Added null guard for possible null reference to a MailMessage
+ - Fix for bug 32156: Deal with possible null value int metadata settings extension
 
 * 2014-04-22 - thorben.betten@open-xchange.com
 
