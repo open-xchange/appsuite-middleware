@@ -47,62 +47,28 @@
  *
  */
 
-package com.openexchange.file.storage.json.services;
+package com.openexchange.xing;
 
-import java.util.concurrent.atomic.AtomicReference;
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.rdiff.RdiffService;
-import com.openexchange.server.ServiceLookup;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * {@link Services}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * Unit tests for the bundle com.openexchange.xing
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.0
  */
-public class Services {
-
-    private static AtomicReference<ServiceLookup> LOOKUP_REF = new AtomicReference<ServiceLookup>();
+@RunWith(Suite.class)
+@SuiteClasses({
+ AddressTest.class
+})
+public class UnitTests {
 
     /**
-     * Sets the service look-up instance.
-     *
-     * @param serviceLookup The service look-up instance
+     * Initializes a new {@link UnitTests}.
      */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        LOOKUP_REF.set(serviceLookup);
-    }
-
-    public static ConfigurationService getConfigurationService() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(ConfigurationService.class);
-    }
-
-    public static EventAdmin getEventAdmin() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(EventAdmin.class);
-    }
-
-    public static IDBasedFileAccessFactory getFileAccessFactory() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(IDBasedFileAccessFactory.class);
-    }
-
-    public static AttachmentBase getAttachmentBase() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(AttachmentBase.class);
-    }
-
-    public static RdiffService getRdiffService() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(RdiffService.class);
-    }
-
-    public static FolderService getFolderService() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(FolderService.class);
+    public UnitTests() {
+        super();
     }
 }

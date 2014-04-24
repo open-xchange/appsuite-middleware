@@ -122,7 +122,7 @@ public final class Create {
         SAXException, JSONException {
         return createPublicFolder(client, name, module, true);
     }
-    
+
     /**
      * This method creates a public folder
      * @param client
@@ -148,14 +148,14 @@ public final class Create {
      * This method creates a private folder object. Admin user gets full access
      * permissions.
      * @param name name of the folder.
-     * @param type PIM type of the folder.
+     * @param module PIM module of the folder.
      * @param admin user identifier of the admin.
      * @return a ready to insert folder.
      */
-    public static FolderObject createPrivateFolder(final String name, final int type, final int admin) {
+    public static FolderObject createPrivateFolder(final String name, final int module, final int admin) {
         final FolderObject folder = new FolderObject();
         folder.setFolderName(name);
-        folder.setModule(type);
+        folder.setModule(module);
         folder.setType(FolderObject.PRIVATE);
         final OCLPermission perm = ocl(
             admin,

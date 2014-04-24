@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.parser.handlers;
 
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.groupware.contexts.SimContext;
@@ -63,7 +64,6 @@ import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
-import junit.framework.TestCase;
 
 
 /**
@@ -513,15 +513,22 @@ public class JsonMessageHandlerTest extends TestCase {
 
             JSONArray jAttachments = jMail.getJSONArray("attachments");
             assertNotNull(jAttachments);
-            assertEquals("Unexpected number of attachments", 2, jAttachments.length());
+            assertEquals("Unexpected number of attachments", 3, jAttachments.length());
 
             final JSONObject jAttachment1 = jAttachments.getJSONObject(0);
             assertNotNull(jAttachment1);
             final JSONObject jAttachment2 = jAttachments.getJSONObject(1);
             assertNotNull(jAttachment2);
+            final JSONObject jAttachment3 = jAttachments.getJSONObject(2);
+            assertNotNull(jAttachment3);
 
             assertTrue("Unexpected content", jAttachment1.getString("content_type").startsWith("text/html"));
-            assertTrue("Unexpected content", jAttachment2.getString("content_type").startsWith("application/ics"));
+            assertTrue("Unexpected content", jAttachment2.getString("content_type").startsWith("text/calendar"));
+            assertTrue("Unexpected content", jAttachment3.getString("content_type").startsWith("application/ics"));
+
+            assertTrue("Unexpected Content-Dispostion for " + jAttachment2.getString("id"), jAttachment2.getString("disp").startsWith("none"));
+
+            // System.out.println(jAttachment2.toString(2));
 
         } catch (Exception e) {
             e.printStackTrace();

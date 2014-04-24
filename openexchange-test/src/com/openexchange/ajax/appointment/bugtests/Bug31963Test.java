@@ -128,6 +128,30 @@ public class Bug31963Test extends AbstractAJAXSession {
         ctm.insert(notConflictingAppointment);
         conflicts = ctm.getLastResponse().getConflicts();
         assertTrue("conflicts detected", null == conflicts || 0 == conflicts.size());
+        /*
+         * create a (really) conflicting appointment in user's timezone and check for conflicts
+         */
+        Appointment conflictingAppointment = new Appointment();
+        conflictingAppointment.setParentFolderID(folderID);
+        conflictingAppointment.setTitle(getClass().getName());
+        conflictingAppointment.setStartDate(TimeTools.D("28.04." + nextYear + " 00:00", getClient().getValues().getTimeZone()));
+        conflictingAppointment.setEndDate(TimeTools.D("28.04." + nextYear + " 01:00", getClient().getValues().getTimeZone()));
+        conflictingAppointment.setIgnoreConflicts(false);
+        ctm.insert(conflictingAppointment);
+        conflicts = ctm.getLastResponse().getConflicts();
+        assertTrue("no conflicts detected", null != conflicts && 0 < conflicts.size());
+        /*
+         * create another (really) conflicting appointment in user's timezone and check for conflicts
+         */
+        conflictingAppointment = new Appointment();
+        conflictingAppointment.setParentFolderID(folderID);
+        conflictingAppointment.setTitle(getClass().getName());
+        conflictingAppointment.setStartDate(TimeTools.D("28.04." + nextYear + " 23:00", getClient().getValues().getTimeZone()));
+        conflictingAppointment.setEndDate(TimeTools.D("29.04." + nextYear + " 00:00", getClient().getValues().getTimeZone()));
+        conflictingAppointment.setIgnoreConflicts(false);
+        ctm.insert(conflictingAppointment);
+        conflicts = ctm.getLastResponse().getConflicts();
+        assertTrue("no conflicts detected", null != conflicts && 0 < conflicts.size());
     }
 
 }

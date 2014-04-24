@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.Deflater;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.json.JSONArray;
@@ -63,11 +64,14 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -154,6 +158,7 @@ public class ZipDocumentsAction extends AbstractFileAction {
         final ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
         zipOutput.setEncoding("UTF-8");
         zipOutput.setUseLanguageEncodingFlag(true);
+        zipOutput.setLevel(getZipDocumentsCompressionLevel());
         try {
             final int buflen = 8192;
             final byte[] buf = new byte[buflen];
@@ -234,6 +239,24 @@ public class ZipDocumentsAction extends AbstractFileAction {
             isWhitespace = Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Gets the configured value for "com.openexchange.infostore.zipDocumentsCompressionLevel".
+     *
+     * @return The configured compression level
+     * @throws OXException
+     */
+    private static int getZipDocumentsCompressionLevel() throws OXException {
+        ConfigurationService configService = Services.getConfigurationService();
+        if (null == configService) {
+            return Deflater.DEFAULT_COMPRESSION;
+        }
+        int level = configService.getIntProperty("com.openexchange.infostore.zipDocumentsCompressionLevel", Deflater.DEFAULT_COMPRESSION);
+        if (level < Deflater.DEFAULT_COMPRESSION || level > Deflater.BEST_COMPRESSION) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openexchange.infostore.zipDocumentsCompressionLevel");
+        }
+        return level;
     }
 
 }
