@@ -141,8 +141,19 @@ public class ShareFolderTest extends AbstractAJAXSession {
         final List<FolderObject> l = FolderTools.getSubFolders(secondClient, Integer.toString(shareFolderId), true);
         assertTrue("No shared subfolder available for second user " + secondUserValues.getUserId(), l != null && !l.isEmpty());
 
-        boolean found = false;
+        /*-
+         * Expected:
+         *
+         * - Shared folders
+         *       |
+         *        - ...
+         *       |
+         *        - Calendar
+         *              |
+         *              - TestShared...
+         */
 
+        boolean found = false;
         Next: for (FolderObject virtualFO : l) {
             final List<FolderObject> subList = FolderTools.getSubFolders(secondClient, virtualFO.getFullName(), true);
             for (final FolderObject sharedFolder : subList) {
@@ -156,6 +167,9 @@ public class ShareFolderTest extends AbstractAJAXSession {
                         }
                     }
 
+                } else if (sharedFolder.getObjectID() == folderId) {
+                    found = true;
+                    break Next;
                 }
             }
         }
