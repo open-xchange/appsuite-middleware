@@ -58,7 +58,7 @@ import org.osgi.framework.BundleContext;
  * Currently it means registering all providers that are needed to instantiate input, output and validation schema factories; these are
  * needed since JDK service-introspection (which is the standard Stax instance instantiation mechanism) does not work with OSGi.
  * <p>
- * All sources obtained from <a href="http://wiki.fasterxml.com/WoodstoxDownload">Woodstox Download</a>
+ * All resources obtained from <a href="http://wiki.fasterxml.com/WoodstoxDownload">Woodstox Download</a>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.1
