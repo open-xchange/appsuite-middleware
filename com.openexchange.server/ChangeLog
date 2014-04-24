@@ -1,3 +1,7 @@
+* 2014-04-24 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31963: Conflict handling for full time appointments.
+
 * 2014-04-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 32157: Added null guard for possible null reference to a MailMessage

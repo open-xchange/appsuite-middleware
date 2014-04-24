@@ -217,7 +217,7 @@ public class ConflictHandler {
             readcon = DBPool.pickup(ctx);
             final long whole_day_start = cdao.getFullTime() ? start.getTime() : recColl.getUserTimeUTCDate(start, user.getTimeZone());
             long whole_day_end = cdao.getFullTime() ? end.getTime() : recColl.getUserTimeUTCDate(end, user.getTimeZone());
-            if (!cdao.getFullTime() || whole_day_end <= whole_day_start) {
+            if (whole_day_end <= whole_day_start) {
                 whole_day_end = whole_day_end+Constants.MILLI_DAY;
             }
             prep = calendarsqlimp.getConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in, true);
