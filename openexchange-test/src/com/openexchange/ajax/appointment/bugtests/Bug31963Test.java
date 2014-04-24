@@ -50,7 +50,6 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -94,49 +93,37 @@ public class Bug31963Test extends AbstractAJAXSession {
     public void testNotConflictingAppointment() throws Exception {
         int folderID = super.getClient().getValues().getPrivateAppointmentFolder();
         /*
-         * create whole day appointment
+         * create whole day appointment (client sends UTC dates)
          */
-        Date start = TimeTools.D("next thursday at midnight", TimeZones.UTC);
-        Calendar calendar = Calendar.getInstance(TimeZones.UTC);
-        calendar.setTime(start);
-        calendar.add(Calendar.DATE, 1);
-        Date end = calendar.getTime();
+        int nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         Appointment appointment = new Appointment();
         appointment.setParentFolderID(folderID);
         appointment.setTitle(getClass().getName());
-        appointment.setStartDate(start);
-        appointment.setEndDate(end);
+        appointment.setStartDate(TimeTools.D("28.04." + nextYear + " 00:00", TimeZones.UTC));
+        appointment.setEndDate(TimeTools.D("29.04." + nextYear + " 00:00", TimeZones.UTC));
         appointment.setFullTime(true);
         appointment.setIgnoreConflicts(true);
         appointment = ctm.insert(appointment);
         /*
-         * create appointment an hour before and check for conflicts
+         * create appointment an hour before in user's timezone and check for conflicts
          */
-        calendar.setTime(appointment.getStartDate());
-        calendar.add(Calendar.HOUR_OF_DAY, -1);
-        start = calendar.getTime();
-        end = appointment.getStartDate();
         Appointment notConflictingAppointment = new Appointment();
         notConflictingAppointment.setParentFolderID(folderID);
         notConflictingAppointment.setTitle(getClass().getName());
-        notConflictingAppointment.setStartDate(start);
-        notConflictingAppointment.setEndDate(end);
+        notConflictingAppointment.setStartDate(TimeTools.D("27.04." + nextYear + " 23:00", getClient().getValues().getTimeZone()));
+        notConflictingAppointment.setEndDate(TimeTools.D("28.04." + nextYear + " 00:00", getClient().getValues().getTimeZone()));
         notConflictingAppointment.setIgnoreConflicts(false);
         ctm.insert(notConflictingAppointment);
         List<ConflictObject> conflicts = ctm.getLastResponse().getConflicts();
         assertTrue("conflicts detected", null == conflicts || 0 == conflicts.size());
         /*
-         * create appointment an hour after and check for conflicts
+         * create appointment an hour after in user's timezone and check for conflicts
          */
-        calendar.setTime(appointment.getEndDate());
-        calendar.add(Calendar.HOUR_OF_DAY, 1);
-        end = calendar.getTime();
-        start = appointment.getEndDate();
         notConflictingAppointment = new Appointment();
         notConflictingAppointment.setParentFolderID(folderID);
         notConflictingAppointment.setTitle(getClass().getName());
-        notConflictingAppointment.setStartDate(start);
-        notConflictingAppointment.setEndDate(end);
+        notConflictingAppointment.setStartDate(TimeTools.D("29.04." + nextYear + " 00:00", getClient().getValues().getTimeZone()));
+        notConflictingAppointment.setEndDate(TimeTools.D("29.04." + nextYear + " 01:00", getClient().getValues().getTimeZone()));
         notConflictingAppointment.setIgnoreConflicts(false);
         ctm.insert(notConflictingAppointment);
         conflicts = ctm.getLastResponse().getConflicts();
