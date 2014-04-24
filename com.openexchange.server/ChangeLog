@@ -1,3 +1,7 @@
+* 2014-04-24 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32152: Sanitize imported Xing phone, fax and cell numbers  
+
 * 2014-04-24 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31970: Always close LDAP naming enumerations  

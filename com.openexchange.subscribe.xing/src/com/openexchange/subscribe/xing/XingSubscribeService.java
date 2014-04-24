@@ -388,12 +388,6 @@ public class XingSubscribeService extends AbstractSubscribeService {
             return null;
         }
         final Contact oxContact = new Contact();
-        final String id = xingUser.getId();
-        {
-            if (isNotNull(id)) {
-                oxContact.setUserField20(id);
-            }
-        }
         {
             final String s = xingUser.getActiveMail();
             if (isNotNull(s)) {
@@ -562,7 +556,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
             try {
                 optPhotoHandler.handlePhoto(xingUser, oxContact, session);
             } catch (final Exception e) {
-                LOG.warn("Could not handle photo from XING contact {} ({}).", xingUser.getDisplayName(), id);
+                LOG.warn("Could not handle photo from XING contact {} ({}).", xingUser.getDisplayName(), xingUser.getId());
             }
         }
         return oxContact;
