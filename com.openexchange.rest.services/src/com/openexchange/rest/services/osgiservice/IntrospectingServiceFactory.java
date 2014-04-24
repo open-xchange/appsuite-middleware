@@ -71,7 +71,7 @@ import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link IntrospectingServiceFactory}
+ * The {@link IntrospectingServiceFactory} examines an OXRESTService class for annotations to offer a REST service implementation.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

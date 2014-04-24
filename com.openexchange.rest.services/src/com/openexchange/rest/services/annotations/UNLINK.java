@@ -54,7 +54,7 @@ import java.lang.annotation.RetentionPolicy;
 
 
 /**
- * {@link UNLINK}
+ * Declares a path to a method via the {@link UNLINK} HTTP Method
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

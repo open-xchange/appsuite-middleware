@@ -88,20 +88,23 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
             return result;
         }
         AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
-        
+
         setETag(picture.getEtag(), -1, result);
-        
+
         return result;
     }
 
     @Override
     public boolean checkETag(String clientETag, AJAXRequestData request, ServerSession session) throws OXException {
+        /*
+         * TODO: Quite inefficient way to check if a clients cache is up date.
+         * We should delegate the responsibility for checking the ETag to ContactHalo.
+         */
         Picture picture = getPicture(request, session);
-        
         if (picture != null && picture.getEtag() != null) {
             return picture.getEtag().equals(clientETag);
         }
-        
+
         return false;
     }
 
@@ -112,11 +115,11 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
             result.setHeader("ETag", eTag);
         }
     }
-    
+
     private Picture getPicture(AJAXRequestData req, ServerSession session) throws OXException {
         Contact contact = new Contact();
         boolean hadCriterium = false;
-        
+
         if (req.isSet("internal_userid")) {
             hadCriterium = true;
             contact.setInternalUserId(req.getIntParameter("internal_userid"));
@@ -127,7 +130,7 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
             hadCriterium = true;
             contact.setInternalUserId(req.getIntParameter("user_id"));
         }
-        
+
         if (req.isSet("id") && !hadCriterium) {
             contact.setObjectID(req.getIntParameter("id"));
             if (req.isSet("folder")) {
@@ -135,26 +138,26 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
                 contact.setParentFolderID(req.getIntParameter("folder"));
             }
         }
-        
-        
+
+
         if (req.isSet("email")) {
             hadCriterium = true;
             contact.setEmail1(req.getParameter("email"));
         } else if (req.isSet("email1")) {
             hadCriterium = true;
             contact.setEmail1(req.getParameter("email1"));
-        } 
+        }
 
         if (req.isSet("email2")) {
             hadCriterium = true;
             contact.setEmail2(req.getParameter("email2"));
-        } 
+        }
 
         if (req.isSet("email3")) {
             hadCriterium = true;
             contact.setEmail3(req.getParameter("email3"));
         }
-        
+
         if (!hadCriterium) {
             return fallbackPicture();
         }
@@ -169,12 +172,12 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
             return fallbackPicture();
         }
     }
-    
+
     private static final byte[] TRANSPARENT_GIF = new byte[]{71,73,70,56,57,97,1,0,1,0,-128,0,0,0,0,0,-1,-1,-1,33,-7,4,1,0,0,0,0,44,0,0,0,0,1,0,1,0,0,2,1,68,0,59};
-    
+
     private Picture fallbackPicture() {
         ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(TRANSPARENT_GIF);
-        fileHolder.setContentType("image/gif");        
+        fileHolder.setContentType("image/gif");
         return new Picture(null, fileHolder);
     }
 

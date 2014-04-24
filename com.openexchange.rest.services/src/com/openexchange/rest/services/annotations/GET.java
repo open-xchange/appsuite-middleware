@@ -55,7 +55,7 @@ import java.lang.annotation.Retention;
 
 
 /**
- * {@link GET}
+ * Declares a path to a method via the {@link GET} HTTP Method
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

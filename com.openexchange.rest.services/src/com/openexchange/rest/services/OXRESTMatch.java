@@ -55,7 +55,11 @@ import java.util.Map;
 
 
 /**
- * {@link OXRESTMatch}
+ * An {@link OXRESTMatch} denotes a successful match of a route for a path. 
+ * e.g. the route /resources/:myResourceId matches the path /resources/12 with a 
+ * value for myResourceId of 12
+ * 
+ * @see #getParameters()
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -65,22 +69,37 @@ public class OXRESTMatch {
     private Map<String, String> parameters = new HashMap<String, String>();
     private List<String> parameterNames;
     
+    /**
+     * The route that created this match
+     */
     public void setRoute(OXRESTRoute route) {
         this.route = route;
     }
     
+    /**
+     * The route that created this match
+     */
     public OXRESTRoute getRoute() {
         return route;
     }
-
+    
+    /**
+     * The parameter names that were extracted from the path
+     */
     public void setParameterNames(List<String> parameterNames) {
         this.parameterNames = parameterNames;
     }
-
+    
+    /**
+     * Get the parameter name (from left to right) by index
+     */
     public String getParameterName(int index) {
         return parameterNames.get(index);
     }
-
+    
+    /**
+     * Get extracted parameters
+     */
     public Map<String, String> getParameters() {
         return parameters;
     }

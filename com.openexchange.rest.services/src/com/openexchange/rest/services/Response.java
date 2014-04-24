@@ -54,7 +54,7 @@ import java.util.Map;
 
 
 /**
- * {@link Response}
+ * A simple {@link Response} object for RESTful services.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -64,14 +64,21 @@ public class Response {
     private int status = 200;
     private Map<String, String> headers = new HashMap<String, String>();
     
+    /**
+     * The response body, just iterate and send it all.
+     */
     public Iterable<String> getBody() {
         return body;
     }
     
+    
     public void setBody(Iterable<String> body) {
         this.body = body;
     }
-    
+    /**
+     * The status code
+     * @return
+     */
     public int getStatus() {
         return status;
     }
@@ -80,6 +87,9 @@ public class Response {
         this.status = status;
     }
     
+    /**
+     * The response headers
+     */
     public Map<String, String> getHeaders() {
         return headers;
     }
@@ -87,6 +97,4 @@ public class Response {
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
-    
-    
 }

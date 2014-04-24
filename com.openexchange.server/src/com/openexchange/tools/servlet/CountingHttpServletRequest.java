@@ -64,7 +64,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.Parameterizable;
+import com.openexchange.server.reloadable.GenericReloadable;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.CountingInputStream;
 
@@ -80,6 +82,44 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
 
     private static final String LINE_SEP = System.getProperty("line.separator");
 
+    private static volatile Long lMax;
+    private static long max() {
+        Long tmp = lMax;
+        if (null == tmp) {
+            synchronized (CountingHttpServletRequest.class) {
+                tmp = lMax;
+                if (null == tmp) {
+                    final ConfigurationService cs = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final long defaultVal = 104857600L;
+                    if (null == cs) {
+                        return defaultVal;
+                    }
+
+                    tmp = Long.valueOf(ConfigTools.getLongProperty("com.openexchange.servlet.maxBodySize", defaultVal, cs));
+                    lMax = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
+    static {
+        GenericReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                lMax = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------- //
+
     private final HttpServletRequest servletRequest;
     private volatile long max;
     private final Parameterizable parameterizable;
@@ -92,10 +132,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
      * @throws RateLimitedException If associated request is rate limited
      */
     public CountingHttpServletRequest(final HttpServletRequest servletRequest) {
-        this(servletRequest, ConfigTools.getLongProperty(
-            "com.openexchange.servlet.maxBodySize",
-            104857600L,
-            ServerServiceRegistry.getInstance().getService(ConfigurationService.class)));
+        this(servletRequest, max());
     }
 
     /**
