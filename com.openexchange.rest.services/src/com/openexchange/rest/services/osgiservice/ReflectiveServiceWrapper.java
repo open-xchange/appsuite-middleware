@@ -63,7 +63,7 @@ import com.openexchange.rest.services.Response;
 
 
 /**
- * {@link ReflectiveServiceWrapper}
+ * The {@link ReflectiveServiceWrapper} wraps an {@link OXRESTService} and knows how to execute a service method
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

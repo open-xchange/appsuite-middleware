@@ -48,8 +48,8 @@
  */
 package com.openexchange.find;
 
-import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.find.facet.ActiveFacet;
 
 /**
@@ -58,13 +58,11 @@ import com.openexchange.find.facet.ActiveFacet;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class AutocompleteRequest implements Serializable {
+public class AutocompleteRequest extends AbstractFindRequest {
 
     private static final long serialVersionUID = -5927763265822552092L;
 
     private final String prefix;
-
-    private final List<ActiveFacet> activeFacets;
 
     private final int limit;
 
@@ -75,12 +73,12 @@ public class AutocompleteRequest implements Serializable {
      * @param prefix The prefix to autocomplete on. Must not end with a wildcard character.
      * Must never be <code>null</code>, but may be empty.
      * @param activeFacets The list of currently active facets; must not be <code>null</code>
-     * @param limit The maximum number of results to return, or <code>0</code> if not defined
+     * @param options A map containing client and module specific options; must not be <code>null</code>
+     * @param limit The maximum number of values per facet to return, or <code>0</code> if unlimited
      */
-    public AutocompleteRequest(final String prefix, final List<ActiveFacet> activeFacets, final int limit) {
-        super();
+    public AutocompleteRequest(final String prefix, final List<ActiveFacet> activeFacets, final Map<String, String> options, final int limit) {
+        super(activeFacets, options);
         this.prefix = prefix;
-        this.activeFacets = activeFacets;
         this.limit = limit;
     }
 
@@ -94,18 +92,9 @@ public class AutocompleteRequest implements Serializable {
     }
 
     /**
-     * Gets a list of active facets that are currently set.
+     * Gets the maximum number of values per facet to return.
      *
-     * @return The list of facets. May be empty but never <code>null</code>.
-     */
-    public List<ActiveFacet> getActiveFactes() {
-        return activeFacets;
-    }
-
-    /**
-     * Gets the maximum number of results to return.
-     *
-     * @return The limit, or <code>0</code> if not defined
+     * @return The limit, or <code>0</code> if unlimited
      */
     public int getLimit() {
         return limit;
@@ -114,8 +103,8 @@ public class AutocompleteRequest implements Serializable {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
-        result = prime * result + ((activeFacets == null) ? 0 : activeFacets.hashCode());
+        int result = super.hashCode();
+        result = prime * result + limit;
         result = prime * result + ((prefix == null) ? 0 : prefix.hashCode());
         return result;
     }
@@ -124,15 +113,12 @@ public class AutocompleteRequest implements Serializable {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (obj == null)
+        if (!super.equals(obj))
             return false;
         if (getClass() != obj.getClass())
             return false;
         AutocompleteRequest other = (AutocompleteRequest) obj;
-        if (activeFacets == null) {
-            if (other.activeFacets != null)
-                return false;
-        } else if (!activeFacets.equals(other.activeFacets))
+        if (limit != other.limit)
             return false;
         if (prefix == null) {
             if (other.prefix != null)
@@ -144,7 +130,7 @@ public class AutocompleteRequest implements Serializable {
 
     @Override
     public String toString() {
-        return "AutocompleteRequest [prefix=" + prefix + ", activeFacets=" + activeFacets + "]";
+        return "AutocompleteRequest [prefix=" + prefix + ", limit=" + limit + ", activeFactes=" + getActiveFacets() + ", options=" + getOptions() + "]";
     }
 
 }

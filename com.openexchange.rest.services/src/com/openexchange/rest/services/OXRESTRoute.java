@@ -56,7 +56,11 @@ import java.util.regex.Pattern;
 
 
 /**
- * {@link OXRESTRoute}
+ * An {@link OXRESTRoute} consists of an HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package com.openexchange.rest.services.annotation) and a 
+ * path declaration with variables led by a colon. e.g. 
+ * /resources/:myResourceId
+ * 
+ * which would match the path /resources/12 keeping the 12 as the myResourceId variable.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -125,7 +129,10 @@ public class OXRESTRoute {
         
         pattern = Pattern.compile(regex.toString());
     }
-
+    
+    /**
+     * Tries to match the given path to this route. Returns null if the path does not match, or a OXRESTMatch object containing the variables of the match.
+     */
     public OXRESTMatch match(String method, String path) {
         if (!method.equalsIgnoreCase(this.method)) {
             return null;

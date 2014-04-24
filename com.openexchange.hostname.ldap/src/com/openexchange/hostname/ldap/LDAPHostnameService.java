@@ -85,6 +85,7 @@ public class LDAPHostnameService implements HostnameService {
 
     private static String fetchFromLdap(final int contextId) throws OXException, NamingException {
         LdapContext context = null;
+        NamingEnumeration<SearchResult> search = null;
         try {
             final ConfigurationService service = HostnameLDAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
             final String dn = LDAPHostnameProperties.getProperty(service, Property.bind_dn);
@@ -110,7 +111,7 @@ public class LDAPHostnameService implements HostnameService {
 
             LOG.debug("\nLDAP search triggered with:\nFilter: {}BaseDN: {}Scope: {}ldapReturnField: {}\n", ownFilter, ownBaseDN, scope, ldapReturnField);
 
-            final NamingEnumeration<SearchResult> search = context.search(ownBaseDN, ownFilter, getSearchControls(ldapReturnField, scope));
+            search = context.search(ownBaseDN, ownFilter, getSearchControls(ldapReturnField, scope));
             // We will only catch the first element...
             while (null != search && search.hasMoreElements()) {
                 final SearchResult next = search.next();
@@ -122,6 +123,9 @@ public class LDAPHostnameService implements HostnameService {
             LOG.debug("No result found");
             return null;
         } finally {
+            if (null != search) {
+                search.close();
+            }
             if( context != null ) {
                 context.close();
             }

@@ -61,7 +61,7 @@ import com.openexchange.rest.services.internal.OXRESTServiceWrapper;
 
 
 /**
- * {@link OXRESTRegistry}
+ * The {@link OXRESTRegistry} keeps references to {@link OXRESTServiceFactory} s and knows how to select them for a given access path.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

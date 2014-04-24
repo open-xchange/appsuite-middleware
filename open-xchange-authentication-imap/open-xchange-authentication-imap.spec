@@ -60,6 +60,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc imapau
 %changelog
 * Fri Apr 11 2014 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.6.0
+* Thu Apr 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-04-11
 * Thu Apr 03 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-04-07
 * Mon Mar 31 2014 Marcus Klein <marcus.klein@open-xchange.com>

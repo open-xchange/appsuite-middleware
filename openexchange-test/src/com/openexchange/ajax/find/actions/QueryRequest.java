@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,14 +83,14 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
      * Initializes a new {@link QueryRequest}.
      */
     public QueryRequest(int start, int size, List<ActiveFacet> activeFacets, String module) {
-        this(true, start, size, activeFacets, module);
+        this(true, start, size, activeFacets, null, module);
     }
 
     /**
      * Initializes a new {@link QueryRequest}.
      */
-    public QueryRequest(boolean failOnError, int start, int size, List<ActiveFacet> activeFacets, String module) {
-        super();
+    public QueryRequest(boolean failOnError, int start, int size, List<ActiveFacet> activeFacets, Map<String, String> options, String module) {
+        super(options);
         this.failOnError = failOnError;
         this.start = start;
         this.size = size;
@@ -119,6 +120,7 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
     public Object getBody() throws IOException, JSONException {
         final JSONObject jBody = new JSONObject(3);
         addFacets(jBody, activeFacets);
+        addOptions(jBody);
 
         // Add size / start if present
         if (0 < start) {

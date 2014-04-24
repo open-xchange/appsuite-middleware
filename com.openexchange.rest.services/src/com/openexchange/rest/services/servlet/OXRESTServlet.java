@@ -50,6 +50,7 @@
 package com.openexchange.rest.services.servlet;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Map;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -60,13 +61,14 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.OXRESTMatch;
+import com.openexchange.rest.services.OXRESTService;
 import com.openexchange.rest.services.Response;
 import com.openexchange.rest.services.internal.OXRESTServiceWrapper;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
- * {@link OXRESTServlet}
+ * The {@link OXRESTServlet} delegates handling to an {@link OXRESTService} instance
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -82,6 +84,14 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(0, 0), PREFIX, resp);
+            
+            Enumeration headers = req.getHeaderNames();
+            while(headers.hasMoreElements()) {
+                String headerName = (String) headers.nextElement();
+                request.setHeader(headerName, req.getHeader(headerName));
+            }
+
+            
             String path = request.getPathInfo();
             
             OXRESTServiceWrapper wrapper = retrieveWrapper(req.getMethod(), path);

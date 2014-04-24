@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Database REST Service
+Bundle-SymbolicName: com.openexchange.rest.services.database
+Bundle-Version: 7.6.0
+Bundle-Activator: com.openexchange.rest.services.database.osgi.DatabaseRESTActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.google.common.cache,
+ com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.tools,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.update,
+ com.openexchange.i18n,
+ com.openexchange.java.util,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.rest.services,
+ com.openexchange.rest.services.annotations,
+ com.openexchange.rest.services.osgiservice,
+ com.openexchange.server,
+ com.openexchange.timer,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.sql,
+ org.json,
+ org.osgi.framework;version="1.3.0",
+ org.slf4j;version="1.7.5"

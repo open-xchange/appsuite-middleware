@@ -482,14 +482,15 @@ public class OXRESTService<T> {
     /**
      * Called before the action method is called
      */
-    public void before() {
+    public void before() throws OXException {
         
     }
     
     /**
      * Called after the action method has finished. It is guaranteed that this method will always be called.
+     * @throws OXException 
      */
-    public void after() {
+    public void after() throws OXException {
         
     }
 

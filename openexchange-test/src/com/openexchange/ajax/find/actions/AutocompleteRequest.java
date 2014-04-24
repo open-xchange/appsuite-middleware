@@ -92,21 +92,25 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
      * Initializes a new {@link AutocompleteRequest}.
      */
     public AutocompleteRequest(final String prefix, final String module) {
-        this(prefix, module, null, true);
+        this(prefix, module, null, null, true);
     }
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
      */
     public AutocompleteRequest(final String prefix, final String module, final List<ActiveFacet> activeFacets) {
-        this(prefix, module, activeFacets, true);
+        this(prefix, module, activeFacets, null, true);
+    }
+
+    public AutocompleteRequest(final String prefix, final String module, final Map<String, String> options) {
+        this(prefix, module, null, options, true);
     }
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
      */
-    public AutocompleteRequest(final String prefix, final String module, final List<ActiveFacet> activeFacets, final boolean failOnError) {
-        super();
+    public AutocompleteRequest(final String prefix, final String module, final List<ActiveFacet> activeFacets, final Map<String, String> options, final boolean failOnError) {
+        super(options);
         this.failOnError = failOnError;
         this.prefix = prefix;
         this.module = module;
@@ -137,6 +141,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
         final JSONObject jBody = new JSONObject(2);
         jBody.put("prefix", prefix);
         addFacets(jBody, activeFacets);
+        addOptions(jBody);
         return jBody;
     }
 
@@ -155,12 +160,14 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
         @Override
         protected AutocompleteResponse createResponse(final Response response) throws JSONException {
             final JSONObject jResponse = (JSONObject) response.getData();
-
-            final JSONArray jFacets = jResponse.getJSONArray("facets");
-            final int length = jFacets.length();
-            final List<Facet> facets = new ArrayList<Facet>(length);
-            for (int i = 0; i < length; i++) {
-                facets.add(parseJFacet(jFacets.getJSONObject(i)));
+            List<Facet> facets = null;
+            if (jResponse != null) {
+                final JSONArray jFacets = jResponse.getJSONArray("facets");
+                final int length = jFacets.length();
+                facets = new ArrayList<Facet>(length);
+                for (int i = 0; i < length; i++) {
+                    facets.add(parseJFacet(jFacets.getJSONObject(i)));
+                }
             }
             return new AutocompleteResponse(response, facets);
         }

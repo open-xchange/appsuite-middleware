@@ -47,19 +47,34 @@
  *
  */
 
-package com.openexchange.rest.services.annotations;
+package com.openexchange.rest.services.database.sql;
 
-import java.lang.annotation.RetentionPolicy;
-
-import java.lang.annotation.Retention;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 
 /**
- * {@link ROOT}
+ * {@link CreateServiceSchemaLockTable}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Path {
-    String value();
+public class CreateServiceSchemaLockTable extends AbstractCreateTableImpl {
+
+    @Override
+    public String[] requiredTables() {
+        return new String[0];
+    }
+
+    @Override
+    public String[] tablesToCreate() {
+        return new String[]{"serviceSchemaMigrationLock"};
+    }
+
+    @Override
+    protected String[] getCreateStatements() {
+        return new String[]{"CREATE TABLE `serviceSchemaMigrationLock` (" + 
+            "  `module` varchar(128) NOT NULL DEFAULT ''," + 
+            "  `expires` bigint(20) DEFAULT NULL," + 
+            "  PRIMARY KEY (`module`))"};
+    }
+
 }

@@ -51,6 +51,7 @@ package com.openexchange.ajax.find.common;
 
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
+import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.exception.OXException;
 
 
@@ -73,12 +74,8 @@ public class Bug32060Test extends AbstractFindTest {
     }
 
     public void testUnknownModule() throws Exception {
-        OXException expectedException = null;
-        try {
-            client.execute(new AutocompleteRequest("", "ox-messenger"));
-        } catch (OXException e) {
-            expectedException = e;
-        }
+        AutocompleteResponse response = client.execute(new AutocompleteRequest("", "ox-messenger", null, null, false));
+        OXException expectedException = response.getException();
         assertNotNull("got no exception", expectedException);
         assertEquals("SVL-0010", expectedException.getErrorCode());
     }
