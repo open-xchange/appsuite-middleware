@@ -1,6 +1,7 @@
 * 2014-04-24 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31970: Always close LDAP naming enumerations  
+ - Fix for bug 29613: Allow configuration of used zip compression level  
 
 * 2014-04-24 - martin.herfurth@open-xchange.com
 
