@@ -101,7 +101,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.Connection;
+import org.glassfish.grizzly.ConnectionProbe;
 import org.glassfish.grizzly.Grizzly;
+import org.glassfish.grizzly.IOEvent;
 import org.glassfish.grizzly.ReadHandler;
 import org.glassfish.grizzly.attributes.Attribute;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
@@ -180,12 +182,13 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         }
     }
 
-    private static final class WatchInfo implements CompletionListener {
+    private static final class WatchInfo implements CompletionListener, ConnectionProbe {
 
         final ScheduledTimerTask timerTask;
         final Response handlerResponse;
         private final AtomicInteger pingCount;
         private final Object sync;
+        private long lastReadTime = -1;
 
         WatchInfo(ScheduledTimerTask timerTask, Response handlerResponse, AtomicInteger pingCount, Object sync) {
             super();
@@ -206,6 +209,41 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
             }
         }
 
+        @Override
+        public void onBindEvent(Connection connection) {}
+
+        @Override
+        public void onAcceptEvent(Connection serverConnection, Connection clientConnection) {}
+
+        @Override
+        public void onConnectEvent(Connection connection) {}
+
+        @Override
+        public void onReadEvent(Connection connection, Buffer data, int size) {
+            lastReadTime = System.currentTimeMillis();
+        }
+
+        @Override
+        public void onWriteEvent(Connection connection, Buffer data, long size) {
+            // Sending a ping will touch the lastWriteTime
+            //lastWriteTime = System.currentTimeMillis();
+        }
+
+        @Override
+        public void onErrorEvent(Connection connection, Throwable error) {}
+
+        @Override
+        public void onCloseEvent(Connection connection) {}
+
+        @Override
+        public void onIOEventReadyEvent(Connection connection, IOEvent ioEvent) {}
+
+        @Override
+        public void onIOEventEnableEvent(Connection connection, IOEvent ioEvent) {}
+
+        @Override
+        public void onIOEventDisableEvent(Connection connection, IOEvent ioEvent) {}
+
     }
 
     private static final Logger LOGGER = Grizzly.logger(OXHttpServerFilter.class);
@@ -220,6 +258,10 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     private final int pingDelay;
     private final int maxPingCount;
     private volatile Ping ping;
+    private final String USM_URI;
+    private final String EAS_URI;
+    private final static String EAS_URI_DEFAULT = "/Microsoft-Server-ActiveSync";
+    private final static String USM_URI_DEFAULT = "/usm-json";
 
     // ------------------------------------------------------------ Constructors
 
@@ -232,6 +274,8 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
             pingDelay = null == service ? 90000 : service.getIntProperty("com.openexchange.http.grizzly.pingDelay", 90000);
             maxPingCount = null == service ? 9 : service.getIntProperty("com.openexchange.http.grizzly.maxPingCount", 9);
             ping = null == service ? Ping.PROCESSING : Ping.pingFor(service.getProperty("com.openexchange.http.grizzly.ping", "PROCESSING").trim());
+            USM_URI = null == service ? USM_URI_DEFAULT : service.getProperty("com.openexchange.usm.json.alias", USM_URI_DEFAULT).trim();
+            EAS_URI = null == service ? EAS_URI_DEFAULT : service.getProperty("com.openexchange.usm.eas.alias", EAS_URI_DEFAULT).trim();
         }
         // Rest
         suspendedResponseQueue = Response.createDelayQueue(delayedExecutor);
@@ -300,7 +344,9 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                         final HttpHandler httpHandlerLocal = httpHandler;
                         if (httpHandlerLocal != null) {
                             // Initiate ping
-                            pingInitiated = initiatePing(handlerResponse, ctx);
+                            if(!isLongRunning(handlerRequest)) {
+                                pingInitiated = initiatePing(handlerResponse, ctx);
+                            }
                             // Handle HTTP message
                             httpHandlerLocal.doHandle(handlerRequest, handlerResponse);
                         }
@@ -331,6 +377,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                             watchInfo.stopPing();
                             watchInfo.timerTask.cancel(false);
                             ctx.removeCompletionListener(watchInfo);
+                            connection.getMonitoringConfig().removeProbes(watchInfo);
                             // Canceled timer task gets purged by CustomThreadPoolExecutorTimerService.PurgeRunnable
                         }
                     }
@@ -373,6 +420,10 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         return ctx.getStopAction();
     }
 
+    private boolean isLongRunning(final Request request) {
+        return  USM_URI.equals(request.getRequestURI()) || EAS_URI.equals(request.getRequestURI());
+    }
+
     private boolean initiatePing(final Response handlerResponse, final FilterChainContext ctx) {
         final Ping ping = this.ping;
         if (ping != Ping.NONE) {
@@ -396,6 +447,13 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                             final WatchInfo watchInfo = cm.get(ctx);
                             boolean pingIssued = false;
                             if (null != watchInfo && (watchInfo.handlerResponse instanceof OXResponse)) {
+
+                                //We are still reading from the client?
+                                long readDiffMillis = System.currentTimeMillis() - watchInfo.lastReadTime;
+                                if(readDiffMillis < pingDelay) {
+                                    return;
+                                }
+
                                 final StampingNIOOutputStreamImpl stamped = (StampingNIOOutputStreamImpl) ((OXResponse) watchInfo.handlerResponse).createOutputStream();
 
                                 // Issue a ping as long as stream not closed AND nothing has been written to upstream
@@ -474,6 +532,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                 ref.set(timerTask);
                 final WatchInfo watchInfo = new WatchInfo(timerTask, handlerResponse, pingCount, r);
                 cm.put(ctx, watchInfo);
+                ctx.getConnection().getMonitoringConfig().addProbes(watchInfo);
                 ctx.addCompletionListener(watchInfo);
             }
         };
