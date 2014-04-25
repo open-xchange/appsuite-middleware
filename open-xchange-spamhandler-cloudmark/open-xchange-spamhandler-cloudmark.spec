@@ -62,6 +62,8 @@ fi
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Tue Apr 15 2014 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2014-04-22
 * Fri Apr 11 2014 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 First release candidate for 7.6.0
 * Thu Apr 10 2014 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
