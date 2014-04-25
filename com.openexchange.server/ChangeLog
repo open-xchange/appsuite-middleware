@@ -1,3 +1,7 @@
+* 2014-04-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25701: Consider "pref" in "TEL" properties of vCards 
+ 
 * 2014-04-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 32191: Added hardening in case a mail account update takes place that might have its URL set to null
