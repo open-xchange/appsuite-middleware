@@ -51,6 +51,7 @@ package com.openexchange.mail.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -79,6 +80,16 @@ public final class MailFolderUtility {
      */
     private MailFolderUtility() {
         super();
+    }
+
+    /**
+     * Checks for an empty string.
+     *
+     * @param string The string
+     * @return <code>true</code> if input is null or empty; else <code>false</code>
+     */
+    public static boolean isEmpty(final String string) {
+        return Strings.isEmpty(string);
     }
 
     /**
@@ -231,7 +242,7 @@ public final class MailFolderUtility {
      *     ==&gt;
      *   "actual/folder/path"
      * </pre>
-     * 
+     *
      * @param fullName The full name
      * @return The possibly sanitized full name
      */
