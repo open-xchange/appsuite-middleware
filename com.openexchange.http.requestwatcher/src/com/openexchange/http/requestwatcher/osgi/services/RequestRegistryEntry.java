@@ -49,6 +49,7 @@
 
 package com.openexchange.http.requestwatcher.osgi.services;
 
+import java.util.Collections;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,6 +64,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
     private final long number;
     private final Thread thread;
+    private final Map<String, String> propertyMap;
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final long birthTime;
@@ -74,11 +76,13 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      * @param number The entry's unique number
      * @param request the incoming request to register
      * @param thread the thread associated with the request
+     * @param propertyMap
      */
-    public RequestRegistryEntry(final long number, final HttpServletRequest request, final HttpServletResponse response, final Thread thread) {
+    public RequestRegistryEntry(final long number, final HttpServletRequest request, final HttpServletResponse response, final Thread thread, Map<String, String> propertyMap) {
         super();
         this.number = number;
         this.thread = thread;
+        this.propertyMap = null == propertyMap ? Collections.<String, String> emptyMap() : propertyMap;
         this.request = request;
         this.response = response;
         this.birthTime = System.currentTimeMillis();
@@ -156,6 +160,15 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      */
     public Thread getThread() {
         return thread;
+    }
+
+    /**
+     * Gets the log properties
+     *
+     * @return The log properties; never <code>null</code>
+     */
+    public Map<String, String> getPropertyMap() {
+        return propertyMap;
     }
 
     @Override

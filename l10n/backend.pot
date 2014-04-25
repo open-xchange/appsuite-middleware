@@ -3741,7 +3741,37 @@ msgid "No UDP channel is configured."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:62
-msgid "Quota exceeded. Please delete some items in order to create new ones."
+msgid ""
+"Quota exceeded. Please delete some items in order to create new ones. Please "
+"note: The quota refers to all items of all users in this context."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:64
+msgid ""
+"Quota exceeded for calendar. Quota limit: %2$s. Quota used: %1$s. Please "
+"delete some appointments in order to create new ones. Please note: The quota "
+"refers to all appointments of all users in this context."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
+msgid ""
+"Quota exceeded for contacts. Quota limit: %2$s. Quota used: %1$s. Please "
+"delete some contacts in order to create new ones. Please note: The quota "
+"refers to all contacts of all users in this context."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:68
+msgid ""
+"Quota exceeded for tasks. Quota limit: %2$s. Quota used: %1$s. Please delete "
+"some tasks in order to create new ones. Please note: The quota refers to all "
+"tasks of all users in this context."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:70
+msgid ""
+"Quota exceeded for files. Quota limit: %2$s. Quota used: %1$s. Please delete "
+"some files in order to create new ones. Please note: The quota refers to all "
+"files of all users in this context."
 msgstr ""
 
 #. Could not find a handler for the specified stanza

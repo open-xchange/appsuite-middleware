@@ -1,6 +1,46 @@
+* 2014-04-10 - marc.arens@open-xchange.com
+
+ - Fix for bug 31942: Fix for unconsumed request remainders and configure that we want to accept payloads for methods where a payload is currently undefined but not forbidden.
+ 
+* 2014-04-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31912: Don't apply personal reminder setting for appointments in shared folders  
+
+* 2014-04-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31962: Fixed request watcher runs
+
 * 2014-04-02 - ioannis.chouklis@open-xchange.com
 
+ - Fix for Bug 31855: [L3] email cannot be displayed and customer gets only a MSG-0020
+
+* 2014-03-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31582: Invalidate affected users' LIST/LSUB cache on IMAP folder changes & remotely distribute this
+
+* 2014-03-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31395: Enhanced localized error message according to proposal from documentation team
+
+* 2014-03-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31392: Made module-specific error messages
+ - Fix for bug 31217: No translation of standard folders for external accounts + prefer localized standard folder names than taking the ones
+                      from primary account (as they might get translated)
+ - Fix for bug 31394: Added possibility to delete a quota value once it is set through specifying a value less than zero
+
+* 2014-04-02 - ioannis.chouklis@open-xchange.com
+
+ - Fix for Bug 31855: [L3] email cannot be displayed and customer gets only a MSG-0020
  - Fix for bug 31854: NPE at POP3Store.reinitCapabilities
+
+* 2014-03-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30598: Set disposition explicitly to "attachment" on forward-as-attachment action
+
+* 2014-04-01 - jan.bauerdick@open-xchange.com
+
+- Fix for bug 29758: Extracted CLT parts from c.o.control to new project c.o.control.clt & let CLT do help output before connecting to server
 
 * 2014-03-31 - thorben.betten@open-xchange.com
  

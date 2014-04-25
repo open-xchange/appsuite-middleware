@@ -128,7 +128,43 @@ public final class ThresholdFileHolder implements IFileHolder {
         count = 0;
         this.threshold = threshold > 0 ? threshold : DEFAULT_IN_MEMORY_THRESHOLD;
         contentType = "application/octet-stream";
-        this.initalCapacity = initalCapacity > 0 ? initalCapacity : 2048;
+        this.initalCapacity = initalCapacity > 0 ? initalCapacity : 65536;
+    }
+
+    /**
+     * Resets this file holder.
+     * <p>
+     * Deletes associated file (if set) and resets internal buffer.
+     */
+    public void reset() {
+        final File tempFile = this.tempFile;
+        if (null != tempFile) {
+            tempFile.delete();
+            this.tempFile = null;
+        }
+        final ByteArrayOutputStream  baos = this.buf;
+        if (null != baos) {
+            baos.reset();
+        }
+    }
+
+    /**
+     * Gets the internal buffer.
+     *
+     * @return The buffer
+     * @see #isInMemory()
+     */
+    public ByteArrayOutputStream getBuffer() {
+        return buf;
+    }
+
+    /**
+     * Checks if file holder's content is completely held in memory.
+     *
+     * @return <code>true</code> if in memory; otherwise <code>false</code>
+     */
+    public boolean isInMemory() {
+        return (null == tempFile);
     }
 
     /**

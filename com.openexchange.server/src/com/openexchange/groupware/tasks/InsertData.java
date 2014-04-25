@@ -141,7 +141,7 @@ public final class InsertData {
             if (amount > 0) {
                 int numberOfTasks = storage.countTasks(ctx);
                 if (numberOfTasks + 1 > amount) {
-                    throw QuotaExceptionCodes.QUOTA_EXCEEDED.create();
+                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_TASKS.create(numberOfTasks, amount);
                 }
             }
         }

@@ -1868,7 +1868,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void setQuotaValue(final AdminParser parser) {
-        this.quotaValue = setLongOpt(parser,OPT_QUOTA_VALUE,"The numeric quota value specifying the max. number of items allowed for context; zero is unlimited", true, false,false);
+        this.quotaValue = setLongOpt(parser,OPT_QUOTA_VALUE,"The numeric quota value specifying the max. number of items allowed for context. Zero is unlimited. A value less than zero deletes the quota entry (and falls back to configured behavior)", true, false,false);
     }
 
     protected final void setAliasesOption(final AdminParser admp){

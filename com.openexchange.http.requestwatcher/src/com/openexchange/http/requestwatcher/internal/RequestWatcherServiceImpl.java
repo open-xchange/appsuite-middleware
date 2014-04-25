@@ -110,36 +110,40 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                  */
                 @Override
                 public void run() {
-                    final boolean debugEnabled = LOG.isDebugEnabled();
-                    final Iterator<RequestRegistryEntry> descendingEntryIterator = requestRegistry.descendingIterator();
-                    final StringBuilder sb = new StringBuilder(256);
-                    boolean stillOldRequestsLeft = true;
-                    while (stillOldRequestsLeft && descendingEntryIterator.hasNext()) {
-                        if (debugEnabled) {
-                            sb.setLength(0);
-                            for (final RequestRegistryEntry entry : requestRegistry) {
-                                sb.append(lineSeparator).append("RegisteredThreads:").append(lineSeparator).append("    age: ").append(entry.getAge()).append(" ms").append(
-                                    ", thread: ").append(entry.getThreadInfo());
+                    try {
+                        final boolean debugEnabled = LOG.isDebugEnabled();
+                        final Iterator<RequestRegistryEntry> descendingEntryIterator = requestRegistry.descendingIterator();
+                        final StringBuilder sb = new StringBuilder(256);
+                        boolean stillOldRequestsLeft = true;
+                        while (stillOldRequestsLeft && descendingEntryIterator.hasNext()) {
+                            if (debugEnabled) {
+                                sb.setLength(0);
+                                for (final RequestRegistryEntry entry : requestRegistry) {
+                                    sb.append(lineSeparator).append("RegisteredThreads:").append(lineSeparator).append("    age: ").append(entry.getAge()).append(" ms").append(
+                                        ", thread: ").append(entry.getThreadInfo());
+                                }
+                                final String entries = sb.toString();
+                                if (!entries.isEmpty()) {
+                                    LOG.debug(sb.toString());
+                                }
                             }
-                            final String entries = sb.toString();
-                            if (!entries.isEmpty()) {
-                                LOG.debug(sb.toString());
+                            final RequestRegistryEntry requestRegistryEntry = descendingEntryIterator.next();
+                            if (requestRegistryEntry.getAge() > requestMaxAge) {
+                                sb.setLength(0);
+                                logRequestRegistryEntry(requestRegistryEntry, sb);
+                                // Don't remove
+                                // requestRegistry.remove(requestRegistryEntry);
+                            } else {
+                                stillOldRequestsLeft = false;
                             }
                         }
-                        final RequestRegistryEntry requestRegistryEntry = descendingEntryIterator.next();
-                        if (requestRegistryEntry.getAge() > requestMaxAge) {
-                            sb.setLength(0);
-                            logRequestRegistryEntry(requestRegistryEntry, sb);
-                            // Don't remove
-                            // requestRegistry.remove(requestRegistryEntry);
-                        } else {
-                            stillOldRequestsLeft = false;
-                        }
+                    } catch (final Exception e) {
+                        LOG.error("Request watcher run failed", e);
                     }
                 }
 
                 private void logRequestRegistryEntry(final RequestRegistryEntry entry, final StringBuilder logBuilder) {
-                    final Throwable trace = new Throwable();
+                    final Throwable trace = new FastThrowable();
                     {
                         final StackTraceElement[] stackTrace = entry.getStackTrace();
                         if (dontLog(stackTrace)) {
@@ -153,7 +157,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     {
                         // Sort the properties for readability
                         Map<String, String> sorted = new TreeMap<String, String>();
-                        for (Entry<String, String> propertyEntry : LogProperties.getPropertyMap().entrySet()) {
+                        for (Entry<String, String> propertyEntry : entry.getPropertyMap().entrySet()) {
                             String propertyName = propertyEntry.getKey();
                             String value = propertyEntry.getValue();
                             if (null != value) {
@@ -210,8 +214,8 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
     }
 
     @Override
-    public RequestRegistryEntry registerRequest(final HttpServletRequest request, final HttpServletResponse response, final Thread thread) {
-        final RequestRegistryEntry registryEntry = new RequestRegistryEntry(NUMBER.incrementAndGet(), request, response, thread);
+    public RequestRegistryEntry registerRequest(final HttpServletRequest request, final HttpServletResponse response, final Thread thread, final Map<String, String> propertyMap) {
+        final RequestRegistryEntry registryEntry = new RequestRegistryEntry(NUMBER.incrementAndGet(), request, response, thread, propertyMap);
         requestRegistry.add(registryEntry);
         return registryEntry;
     }
@@ -228,6 +232,20 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
             return requestWatcherTask.cancel();
         }
         return true;
+    }
+
+    // ----------------------------------------------------------------------------- //
+
+    static final class FastThrowable extends Throwable {
+
+        FastThrowable() {
+            super("tracked request");
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
     }
 
 }

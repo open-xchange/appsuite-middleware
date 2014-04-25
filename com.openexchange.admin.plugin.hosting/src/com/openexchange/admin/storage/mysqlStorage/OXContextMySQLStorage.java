@@ -2080,17 +2080,29 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
                 // Insert/update row
                 if (exists) {
-                    stmt = con.prepareStatement("UPDATE quota_context SET value=? WHERE cid=? AND module=?");
-                    stmt.setLong(1, quota <= 0 ? 0 : quota);
-                    stmt.setInt(2, contextId);
-                    stmt.setString(3, module);
-                    stmt.executeUpdate();
+                    if (quota < 0) {
+                        // Delete
+                        stmt = con.prepareStatement("DELETE FROM quota_context WHERE cid=? AND module=?");
+                        stmt.setInt(1, contextId);
+                        stmt.setString(2, module);
+                        stmt.executeUpdate();
+                    } else {
+                        // Update
+                        stmt = con.prepareStatement("UPDATE quota_context SET value=? WHERE cid=? AND module=?");
+                        stmt.setLong(1, quota <= 0 ? 0 : quota);
+                        stmt.setInt(2, contextId);
+                        stmt.setString(3, module);
+                        stmt.executeUpdate();
+                    }
                 } else {
-                    stmt = con.prepareStatement("INSERT INTO quota_context (cid, module, value) VALUES (?, ?, ?)");
-                    stmt.setInt(1, contextId);
-                    stmt.setString(2, module);
-                    stmt.setLong(3, quota <= 0 ? 0 : quota);
-                    stmt.executeUpdate();
+                    if (quota >= 0) {
+                        // Insert
+                        stmt = con.prepareStatement("INSERT INTO quota_context (cid, module, value) VALUES (?, ?, ?)");
+                        stmt.setInt(1, contextId);
+                        stmt.setString(2, module);
+                        stmt.setLong(3, quota <= 0 ? 0 : quota);
+                        stmt.executeUpdate();
+                    }
                 }
             }
             con.commit(); // COMMIT

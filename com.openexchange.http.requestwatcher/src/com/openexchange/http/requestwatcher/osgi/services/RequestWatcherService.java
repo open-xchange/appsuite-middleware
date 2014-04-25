@@ -49,6 +49,7 @@
 
 package com.openexchange.http.requestwatcher.osgi.services;
 
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -65,9 +66,10 @@ public interface RequestWatcherService {
      *
      * @param request the request to register
      * @param thread the thread associated with the request
+     * @param propertyMap The log properties associated with the thread
      * @return A RequestRegistryEntry wrapping the registered request
      */
-    RequestRegistryEntry registerRequest(HttpServletRequest request, HttpServletResponse response, Thread thread);
+    RequestRegistryEntry registerRequest(HttpServletRequest request, HttpServletResponse response, Thread thread, Map<String, String> propertyMap);
 
     /**
      * Unregister a request from the request registry
