@@ -246,7 +246,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
         } catch (final RuntimeException e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ScribeGenericHTTPRequestBuilder.class);
             logger.warn("Associated OAuth \"{} ({})\" account misses token information.", account.getDisplayName(), account.getId());
-            throw OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
+            throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, account.getDisplayName(), account.getId());
         }
     }
 
