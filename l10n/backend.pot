@@ -3395,22 +3395,28 @@ msgstr ""
 msgid "The request sent was missing its body"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:75
+#. The account is invalid, please recreate it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:76
 msgid "The account is invalid, please recreate it."
 msgstr ""
 
+#. The account "%1$s" is invalid, please recreate it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:79
+msgid "The account \"%1$s\" is invalid, please recreate it."
+msgstr ""
+
 #. Please provide a display name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:82
 msgid "Please provide a display name."
 msgstr ""
 
 #. The associated OAuth provider denied the request: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:85
 msgid "The associated OAuth provider denied the request: %1$s."
 msgstr ""
 
 #. The OAuth authentication process has been canceled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
 msgid "The OAuth authentication process has been canceled."
 msgstr ""
 
