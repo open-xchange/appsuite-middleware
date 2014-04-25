@@ -107,16 +107,31 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
 
     @Override
     public Picture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
+        return getPicture0(contactQuery, session, true);
+    }
+
+    @Override
+    public String getPictureETag(HaloContactQuery contactQuery, ServerSession session) throws OXException {
+        final Picture picture = getPicture0(contactQuery, session, true);
+        return null == picture ? null : picture.getEtag();
+    }
+
+    private Picture getPicture0(HaloContactQuery contactQuery, ServerSession session, boolean withBytes) throws OXException {
         List<Contact> mergedContacts = contactQuery.getMergedContacts();
         Collections.sort(mergedContacts,  new ImagePrecedence());
 
         for (final Contact contact : mergedContacts) {
             if (contact.getImage1() != null) {
-                ByteArrayFileHolder holder = new ByteArrayFileHolder(contact.getImage1());
-                holder.setContentType(contact.getImageContentType());
-                holder.setName("image");
+                final ByteArrayFileHolder holder;
+                if (withBytes) {
+                    holder = new ByteArrayFileHolder(contact.getImage1());
+                    holder.setContentType(contact.getImageContentType());
+                    holder.setName("image");
+                } else {
+                    holder = null;
+                }
 
-                return new Picture(contact.getParentFolderID() + "/" + contact.getObjectID() + "/" + contact.getLastModified().getTime(), holder);
+                return new Picture(buildETagFor(contact), holder);
             }
         }
 
@@ -124,27 +139,32 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
         for (Contact c : mergedContacts) {
             final Contact contact = getContact(session, Integer.toString(c.getParentFolderID()), Integer.toString(c.getObjectID()));
             if (contact.getImage1() != null) {
-                ByteArrayFileHolder holder = new ByteArrayFileHolder(contact.getImage1());
-                holder.setContentType(contact.getImageContentType());
-                holder.setName("image");
+                final ByteArrayFileHolder holder;
+                if (withBytes) {
+                    holder = new ByteArrayFileHolder(contact.getImage1());
+                    holder.setContentType(contact.getImageContentType());
+                    holder.setName("image");
+                } else {
+                    holder = null;
+                }
 
-                return new Picture(new StringBuilder(256).append(contact.getParentFolderID()).append('/').append(contact.getObjectID()).append('/').append(contact.getLastModified().getTime()).toString(), holder);
+                return new Picture(buildETagFor(contact), holder);
             }
         }
 
         Contact contact = contactQuery.getContact();
 
-        Picture p = searchByMailAddress(session, contact.getEmail1());
+        Picture p = searchByMailAddress(session, contact.getEmail1(), withBytes);
         if (p != null) {
             return p;
         }
 
-        p = searchByMailAddress(session, contact.getEmail2());
+        p = searchByMailAddress(session, contact.getEmail2(), withBytes);
         if (p != null) {
             return p;
         }
 
-        p = searchByMailAddress(session, contact.getEmail3());
+        p = searchByMailAddress(session, contact.getEmail3(), withBytes);
         if (p != null) {
             return p;
         }
@@ -153,7 +173,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
         return null;
     }
 
-    private Picture searchByMailAddress(ServerSession session, String email) throws OXException {
+    private Picture searchByMailAddress(ServerSession session, String email, boolean withBytes) throws OXException {
         if (email == null) {
             return null;
         }
@@ -179,11 +199,16 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
         Collections.sort(contacts, new ImagePrecedence());
 
         for (Contact contact : contacts) {
-            ByteArrayFileHolder holder = new ByteArrayFileHolder(contact.getImage1());
-            holder.setContentType(contact.getImageContentType());
-            holder.setName("image");
+            final ByteArrayFileHolder holder;
+            if (withBytes) {
+                holder = new ByteArrayFileHolder(contact.getImage1());
+                holder.setContentType(contact.getImageContentType());
+                holder.setName("image");
+            } else {
+                holder = null;
+            }
 
-            return new Picture(contact.getParentFolderID() + "/" + contact.getObjectID()+ "/" + contact.getLastModified().getTime(), holder);
+            return new Picture(buildETagFor(contact), holder);
         }
 
         return null;
@@ -206,7 +231,18 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
         return services.getService(ContactService.class).getContact(session, folderId, id);
     }
 
+    private static String buildETagFor(final Contact contact) {
+        return null == contact ? null : new StringBuilder(512).append(contact.getParentFolderID()).append('/').append(contact.getObjectID()).append('/').append(contact.getLastModified().getTime()).toString();
+    }
+
     private static class ImagePrecedence implements Comparator<Contact> {
+
+        /**
+         * Initializes a new {@link ContactDataSource.ImagePrecedence}.
+         */
+        ImagePrecedence() {
+            super();
+        }
 
         @Override
         public int compare(Contact o1, Contact o2) {

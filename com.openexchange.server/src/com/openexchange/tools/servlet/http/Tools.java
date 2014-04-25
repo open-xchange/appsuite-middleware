@@ -194,11 +194,13 @@ public final class Tools {
      * <i>Cache-Control</i>, and <i>Pragma</i>)
      *
      * @param eTag The ETag value
-     * @param resp The HTTP servlet response to apply to
+     * @param resp The HTTP response to apply to
      */
     public static void setETag(final String eTag, final HttpServletResponse resp) {
-        setETag(eTag, null, resp);
+        setETag(eTag, -1L, resp);
     }
+
+    private static final long MILLIS_5MIN = 300000L;
 
     private static final long MILLIS_WEEK = 604800000L;
 
@@ -209,25 +211,39 @@ public final class Tools {
      * <i>Cache-Control</i>, and <i>Pragma</i>)
      *
      * @param eTag The ETag value
-     * @param expires The optional expires date, pass <code>null</code> to set default expiry (+ 1 year)
+     * @param expiry The optional expiry milliseconds, pass <code>-1</code> to set default expiry (+ 5 minutes)
      * @param resp The HTTP servlet response to apply to
      */
-    public static void setETag(final String eTag, final Date expires, final HttpServletResponse resp) {
+    public static void setETag(final String eTag, final long expiry, final HttpServletResponse resp) {
         removeCachingHeader(resp);
         resp.setHeader(NAME_ETAG, eTag); // ETag
-        if (null == expires) {
+        if (expiry <= 0) {
             synchronized (HEADER_DATEFORMAT) {
-                resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_YEAR)));
+                resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_5MIN)));
             }
-            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
+            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=300");
         } else {
             synchronized (HEADER_DATEFORMAT) {
-                resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(expires));
+                resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + expiry)));
             }
-            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
+            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=" + (expiry / 1000)); // 1 year
         }
     }
 
+    /**
+     * Gets the default of 5 minutes for <code>Expires</code> header.
+     *
+     * @return The default of 5 minutes for <code>Expires</code> header
+     */
+    public static long getDefaultExpiry() {
+        return MILLIS_5MIN;
+    }
+
+    /**
+     * Sets the given date for <code>Expires</code> header.
+     *
+     * @param resp The HTTP response to apply to
+     */
     public static void setExpires(final Date expires, final HttpServletResponse resp) {
         if (null != expires) {
             synchronized (HEADER_DATEFORMAT) {
@@ -237,6 +253,23 @@ public final class Tools {
         }
     }
 
+    /**
+     * Sets the default of 5 minutes for <code>Expires</code> header.
+     *
+     * @param resp The HTTP response to apply to
+     */
+    public static void setDefaultExpiry(final HttpServletResponse resp) {
+        synchronized (HEADER_DATEFORMAT) {
+            resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_5MIN)));
+        }
+        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=300");
+    }
+
+    /**
+     * Sets the amount of 1 year for <code>Expires</code> header.
+     *
+     * @param resp The HTTP response to apply to
+     */
     public static void setExpiresInOneYear(final HttpServletResponse resp) {
         synchronized (HEADER_DATEFORMAT) {
             resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_YEAR)));

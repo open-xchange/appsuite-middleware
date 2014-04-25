@@ -6,6 +6,7 @@
 * 2014-04-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 32191: Added hardening in case a mail account update takes place that might have its URL set to null
+ - Fix for bug 31918: Set more reasonable max-age for images held in Browser cache
 
 * 2014-04-25 - marc.arens@open-xchange.com
 
