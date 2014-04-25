@@ -47,65 +47,51 @@
  *
  */
 
-package org.glassfish.grizzly.http.server;
+package com.openexchange.mail.mime;
 
-import java.io.IOException;
-import org.glassfish.grizzly.Buffer;
+import junit.framework.TestCase;
 
 
 /**
- * {@link StampingNIOOutputStreamImpl} - Extends {@link NIOOutputStreamImpl} by tracing write accesses.
+ * {@link ContentTypeTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class StampingNIOOutputStreamImpl extends NIOOutputStreamImpl {
-
-    protected volatile boolean doPing = true;
-    protected volatile boolean closed = false;
+public class ContentTypeTest extends TestCase {
 
     /**
-     * Initializes a new {@link StampingNIOOutputStreamImpl}.
+     * Initializes a new {@link ContentTypeTest}.
      */
-    public StampingNIOOutputStreamImpl() {
+    public ContentTypeTest() {
         super();
     }
 
-    @Override
-    public void write(int b) throws IOException {
-        super.write(b);
-        doPing = false;
+    public void testTruncatedNameParameter() {
+        try {
+            String hdr = "application/pdf; name=The New York Times - Breaking News, World News & Multimedia.loc.pdf";
+            com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
+            String name = contentType.getNameParameter();
+
+            assertEquals("Unexpected \"name\" parameter.", "The New York Times - Breaking News, World News & Multimedia.loc.pdf", name);
+
+            assertEquals("Unexpected toString() result.", "application/pdf; name=\"The New York Times - Breaking News, World News & Multimedia.loc.pdf\"", contentType.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
-    @Override
-    public void write(byte[] b) throws IOException {
-        super.write(b);
-        doPing = false;
-    }
+    public void testWithCurlyBraces() {
+        try {
+            String hdr = "{\"application/octet-stream\"}; name=\"6N1911.pdf\"";
+            com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
 
-    @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        super.write(b, off, len);
-        doPing = false;
-    }
+            System.out.println(contentType);
 
-    @Override
-    public void close() throws IOException {
-        super.close();
-        closed = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
-
-    @Override
-    public void write(Buffer buffer) throws IOException {
-        super.write(buffer);
-        doPing = false;
-    }
-
-    @Override
-    public void recycle() {
-        closed = false;
-        doPing = true;
-        super.recycle();
-    }
-
 
 }

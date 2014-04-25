@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,75 @@
  *
  */
 
-package org.glassfish.grizzly.http.server;
+package com.openexchange.imap.osgi;
 
-import java.io.IOException;
-import org.glassfish.grizzly.Buffer;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import com.openexchange.caching.events.CacheEvent;
+import com.openexchange.caching.events.CacheEventService;
+import com.openexchange.caching.events.CacheListener;
+import com.openexchange.imap.cache.ListLsubCache;
 
 
 /**
- * {@link StampingNIOOutputStreamImpl} - Extends {@link NIOOutputStreamImpl} by tracing write accesses.
+ * {@link ListLsubInvalidator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
-public class StampingNIOOutputStreamImpl extends NIOOutputStreamImpl {
+public final class ListLsubInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService> {
 
-    protected volatile boolean doPing = true;
-    protected volatile boolean closed = false;
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ListLsubInvalidator.class);
+
+    private static final String REGION = ListLsubCache.REGION;
+
+    private final BundleContext context;
 
     /**
-     * Initializes a new {@link StampingNIOOutputStreamImpl}.
+     * Initializes a new {@link ListLsubInvalidator}.
+     *
+     * @param context The bundle context
      */
-    public StampingNIOOutputStreamImpl() {
+    public ListLsubInvalidator(final BundleContext context) {
         super();
+        this.context = context;
     }
 
     @Override
-    public void write(int b) throws IOException {
-        super.write(b);
-        doPing = false;
+    public void onEvent(final Object sender, final CacheEvent cacheEvent, final boolean fromRemote) {
+        if (fromRemote) {
+            // Remotely received
+            LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);
+
+            final String region = cacheEvent.getRegion();
+            if (REGION.equals(region)) {
+                final String key = cacheEvent.getKey().toString(); // <user-id> + "@" + <context-id>
+                final int pos = key.indexOf('@');
+                final int userId = Integer.parseInt(key.substring(0, pos));
+                final int contextId = Integer.parseInt(key.substring(pos + 1));
+                ListLsubCache.dropFor(userId, contextId);
+            }
+        }
     }
 
     @Override
-    public void write(byte[] b) throws IOException {
-        super.write(b);
-        doPing = false;
+    public CacheEventService addingService(final ServiceReference<CacheEventService> reference) {
+        final CacheEventService service = context.getService(reference);
+        service.addListener(REGION, this);
+        return service;
     }
 
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        super.write(b, off, len);
-        doPing = false;
+    public void modifiedService(final ServiceReference<CacheEventService> reference, final CacheEventService service) {
+        // Nothing to do
     }
 
     @Override
-    public void close() throws IOException {
-        super.close();
-        closed = true;
+    public void removedService(final ServiceReference<CacheEventService> reference, final CacheEventService service) {
+        service.removeListener(REGION, this);
+        context.ungetService(reference);
     }
-
-    @Override
-    public void write(Buffer buffer) throws IOException {
-        super.write(buffer);
-        doPing = false;
-    }
-
-    @Override
-    public void recycle() {
-        closed = false;
-        doPing = true;
-        super.recycle();
-    }
-
 
 }

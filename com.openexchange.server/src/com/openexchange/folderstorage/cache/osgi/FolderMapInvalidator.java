@@ -126,6 +126,7 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
     public void removedService(final ServiceReference<CacheEventService> reference, final CacheEventService service) {
         service.removeListener("GlobalFolderCache", this);
         service.removeListener("OXFolderCache", this);
+        context.ungetService(reference);
     }
 
 }

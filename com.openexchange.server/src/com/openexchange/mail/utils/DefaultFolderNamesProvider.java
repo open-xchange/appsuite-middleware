@@ -252,7 +252,13 @@ public final class DefaultFolderNamesProvider {
             isSpamEnabled);
     }
 
-    private static String extractFullname(final String fullnameParameter) {
+    /**
+     * Extracts full name from passed full name parameter.
+     *
+     * @param fullnameParameter The full name parameter
+     * @return The extracted full name
+     */
+    public static String extractFullname(final String fullnameParameter) {
         return null == fullnameParameter ? null : MailFolderUtility.prepareMailFolderParam(fullnameParameter).getFullname();
     }
 

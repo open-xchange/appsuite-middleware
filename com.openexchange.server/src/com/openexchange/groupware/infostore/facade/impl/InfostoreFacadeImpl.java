@@ -558,7 +558,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     if (quotaValue > 0) {
                         final long used = getUsedQuota(context);
                         if (used > 0 && used >= quotaValue) {
-                            throw QuotaExceptionCodes.QUOTA_EXCEEDED.create();
+                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_FILES.create(used, quotaValue);
                         }
                     }
                 }

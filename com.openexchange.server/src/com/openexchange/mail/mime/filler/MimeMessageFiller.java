@@ -49,10 +49,13 @@
 
 package com.openexchange.mail.mime.filler;
 
+import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -84,10 +87,12 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.idn.IDNA;
+import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
@@ -107,7 +112,6 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
-import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -148,7 +152,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -185,8 +188,6 @@ public class MimeMessageFiller {
     private static final String PREFIX_PART = "part";
 
     private static final String EXT_EML = ".eml";
-
-    private static final int BUF_SIZE = 0x2000;
 
     private static final String VERSION_1_0 = "1.0";
 
@@ -949,12 +950,10 @@ public class MimeMessageFiller {
                      * Add referenced mail(s)
                      */
                     final StringBuilder sb = new StringBuilder(32);
-                    final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
-                    final byte[] bbuf = new byte[BUF_SIZE];
                     for (int i = 0; i < size; i++) {
                         final MailPart enclosedMailPart = mail.getEnclosedMailPart(i);
                         if (enclosedMailPart.getContentType().startsWith("message/rfc822") || (enclosedMailPart.getContentType().getNameParameter() != null && enclosedMailPart.getContentType().getNameParameter().endsWith(".eml"))) {
-                            addNestedMessage(enclosedMailPart, primaryMultipart, sb, out, bbuf);
+                            addNestedMessage(enclosedMailPart, Boolean.FALSE, primaryMultipart, sb);
                         } else {
                             addMessageBodyPart(primaryMultipart, enclosedMailPart, false);
                         }
@@ -1434,13 +1433,13 @@ public class MimeMessageFiller {
         return relatedMultipart;
     }
 
+    private static final String MIME_MESSAGE_RFC822 = MimeTypes.MIME_MESSAGE_RFC822;
+
     protected final void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline) throws MessagingException, OXException, IOException {
-        if (part.getContentType().startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
+        if (part.getContentType().startsWith(MIME_MESSAGE_RFC822)) {
             // TODO: Works correctly?
             final StringBuilder sb = new StringBuilder(32);
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
-            final byte[] bbuf = new byte[BUF_SIZE];
-            addNestedMessage(part, mp, sb, out, bbuf);
+            addNestedMessage(part, null, mp, sb);
             return;
         }
         /*
@@ -1499,27 +1498,14 @@ public class MimeMessageFiller {
         mp.addBodyPart(messageBodyPart);
     }
 
-    protected void addNestedMessage(final MailPart mailPart, final Multipart primaryMultipart, final StringBuilder sb, final ByteArrayOutputStream out, final byte[] bbuf) throws OXException, IOException, MessagingException {
-        final byte[] rfcBytes;
-        {
-            final InputStream in = mailPart.getInputStream();
-            try {
-                int len;
-                while ((len = in.read(bbuf)) > 0) {
-                    out.write(bbuf, 0, len);
-                }
-            } finally {
-                Streams.close(in);
-            }
-            rfcBytes = out.toByteArray();
-        }
-        out.reset();
+    protected void addNestedMessage(final MailPart mailPart, final Boolean inline, final Multipart primaryMultipart, final StringBuilder sb) throws OXException, MessagingException {
+        final ThresholdFileHolder sink = new ThresholdFileHolder(65536, 65536);
+        sink.write(mailPart.getInputStream());
         final String fn;
         if (null == mailPart.getFileName()) {
-            String subject =
-                MimeMessageUtility.checkNonAscii(new InternetHeaders(new UnsynchronizedByteArrayInputStream(rfcBytes)).getHeader(
-                    MessageHeaders.HDR_SUBJECT,
-                    null));
+            String subject = MimeMessageUtility.checkNonAscii(new InternetHeaders(sink.getStream()).getHeader(
+                MessageHeaders.HDR_SUBJECT,
+                null));
             if (null == subject || subject.length() == 0) {
                 fn = sb.append(PREFIX_PART).append(EXT_EML).toString();
             } else {
@@ -1530,11 +1516,12 @@ public class MimeMessageFiller {
         } else {
             fn = mailPart.getFileName();
         }
-        addNestedMessage(
-            primaryMultipart,
-            new DataHandler(new MessageDataSource(rfcBytes, MimeTypes.MIME_MESSAGE_RFC822)),
-            fn,
-            Part.INLINE.equalsIgnoreCase(mailPart.getContentDisposition().getDisposition()));
+        final boolean bInline = null != inline ? inline.booleanValue() : (Part.INLINE.equalsIgnoreCase(mailPart.getContentDisposition().getDisposition()));
+        if (sink.isInMemory()) {
+            addNestedMessage(primaryMultipart, new DataHandler(new ByteArrayDataSource(sink.getBuffer().toByteArray(), MIME_MESSAGE_RFC822)), fn, bInline);
+        } else {
+            addNestedMessage(primaryMultipart, new DataHandler(new FileHolderDataSource(sink, MIME_MESSAGE_RFC822)), fn, bInline);
+        }
     }
 
     private final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename, final boolean inline) throws MessagingException, OXException {
@@ -1549,7 +1536,7 @@ public class MimeMessageFiller {
         /*
          * Set content type
          */
-        final ContentType ct = new ContentType(MimeTypes.MIME_MESSAGE_RFC822);
+        final ContentType ct = new ContentType(MIME_MESSAGE_RFC822);
         if (null != filename) {
             ct.setNameParameter(filename);
         }
@@ -2113,36 +2100,65 @@ public class MimeMessageFiller {
         }
     } // End of ImageDataImageProvider
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    /** ASCII-wise to lower-case */
-    static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
     private static boolean isFolderNotFound(final OXException e) {
         if (null == e) {
             return false;
         }
         return ((MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) || (MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.equals(e)) || ("IMAP".equals(e.getPrefix()) && (MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() == e.getCode())));
     }
+
+    private static final class FileHolderDataSource implements DataSource {
+
+        private final ThresholdFileHolder is;
+        private final String contentType;
+
+        FileHolderDataSource(ThresholdFileHolder is, String contentType) {
+            super();
+            this.is = is;
+            this.contentType = contentType;
+        }
+
+        @Override
+        public String getContentType() {
+            return contentType;
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            try {
+                return is.getStream();
+            } catch (final OXException e) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof IOException) {
+                    throw (IOException) cause;
+                }
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public OutputStream getOutputStream() throws IOException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+            final ThresholdFileHolder tmp = is;
+            if (null != tmp) {
+                try {
+                    tmp.close();
+                } catch (final Exception ignore) {
+                    // Ignore
+                }
+            }
+        }
+
+    }
+
 }
