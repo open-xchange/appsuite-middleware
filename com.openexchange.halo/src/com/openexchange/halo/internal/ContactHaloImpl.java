@@ -90,12 +90,12 @@ import com.openexchange.user.UserService;
 public class ContactHaloImpl implements ContactHalo {
 
     private final Map<String, HaloContactDataSource> contactDataSources;
-    private final List<HaloContactImageSource> imageSources; 
-    
+    private final List<HaloContactImageSource> imageSources;
+
     private final Lock imageSourcesLock = new ReentrantLock();
-    
+
     private final ServiceLookup services;
-    
+
     /**
      * Initializes a new {@link ContactHaloImpl}.
      *
@@ -122,11 +122,11 @@ public class ContactHaloImpl implements ContactHalo {
         }
         return dataSource.investigate(buildQuery(contact, session), req, session);
     }
-    
+
     @Override
     public Picture getPicture(Contact contact, ServerSession session) throws OXException {
         HaloContactQuery contactQuery = buildQuery(contact, session);
-        
+
         for (HaloContactImageSource source : imageSources) {
             if (!source.isAvailable(session)) {
                 continue;
@@ -135,15 +135,32 @@ public class ContactHaloImpl implements ContactHalo {
             if (picture != null){
                 StringBuilder etagBuilder = new StringBuilder();
                 etagBuilder.append(source.getClass().getName()).append("://").append(picture.getEtag());
-                
+
                 picture.setEtag(etagBuilder.toString());
-                
+
                 return picture;
             }
         }
         return null;
     }
-    
+
+    @Override
+    public String getPictureETag(Contact contact, ServerSession session) throws OXException {
+        HaloContactQuery contactQuery = buildQuery(contact, session);
+        for (HaloContactImageSource source : imageSources) {
+            if (!source.isAvailable(session)) {
+                continue;
+            }
+            String eTag = source.getPictureETag(contactQuery, session);
+            if (eTag != null) {
+                StringBuilder etagBuilder = new StringBuilder();
+                etagBuilder.append(source.getClass().getName()).append("://").append(eTag);
+                return etagBuilder.toString();
+            }
+        }
+        return null;
+    }
+
     // Friendly for testing
     HaloContactQuery buildQuery(Contact contact, final ServerSession session) throws OXException {
         final UserService userService = services.getService(UserService.class);
@@ -232,14 +249,14 @@ public class ContactHaloImpl implements ContactHalo {
         if (c.getEmail1() != null && c.getEmail1().equalsIgnoreCase(email1)) {
             return true;
         }
-        
+
         if (c.getEmail2() != null && c.getEmail2().equalsIgnoreCase(email1)) {
             return true;
         }
         if (c.getEmail3() != null && c.getEmail3().equalsIgnoreCase(email1)) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -267,7 +284,7 @@ public class ContactHaloImpl implements ContactHalo {
     public void removeContactDataSource(final HaloContactDataSource ds) {
         contactDataSources.remove(ds.getId());
     }
-    
+
     public void addContactImageSource(final HaloContactImageSource is) {
         try {
             imageSourcesLock.lock();
@@ -278,18 +295,18 @@ public class ContactHaloImpl implements ContactHalo {
                 public int compare(HaloContactImageSource o1, HaloContactImageSource o2) {
                     return o2.getPriority() - o1.getPriority();
                 }
-                
+
             });
         } finally {
             imageSourcesLock.unlock();
         }
     }
-    
+
     public void removeContactImageSource(final HaloContactImageSource is) {
         try {
             imageSourcesLock.lock();
             imageSources.remove(is);
-            
+
         } finally {
             imageSourcesLock.unlock();
         }

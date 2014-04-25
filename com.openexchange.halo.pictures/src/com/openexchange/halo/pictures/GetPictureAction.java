@@ -59,7 +59,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.Picture;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -71,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(allowPublicSession=true, defaultFormat="file")
 public class GetPictureAction implements ETagAwareAJAXActionService {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public GetPictureAction(ServiceLookup services) {
         super();
@@ -88,20 +90,22 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
             return result;
         }
         AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
-        
+
         setETag(picture.getEtag(), -1, result);
-        
+
         return result;
     }
 
     @Override
     public boolean checkETag(String clientETag, AJAXRequestData request, ServerSession session) throws OXException {
-        Picture picture = getPicture(request, session);
-        
-        if (picture != null && picture.getEtag() != null) {
-            return picture.getEtag().equals(clientETag);
+        String pictureETag = getPictureETag(request, session);
+        if (pictureETag == null) {
+            return false;
         }
-        
+        if (pictureETag.equals(clientETag)) {
+            request.setExpires(Tools.getDefaultExpiry());
+            return true;
+        }
         return false;
     }
 
@@ -112,11 +116,25 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
             result.setHeader("ETag", eTag);
         }
     }
-    
+
     private Picture getPicture(AJAXRequestData req, ServerSession session) throws OXException {
+        return getPictureResource(req, session, false);
+    }
+
+    private String getPictureETag(AJAXRequestData req, ServerSession session) throws OXException {
+        return getPictureResource(req, session, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <V> V getPictureResource(AJAXRequestData req, ServerSession session, boolean eTagOnly) throws OXException {
+        final ContactHalo contactHalo = services.getService(ContactHalo.class);
+        if (null == contactHalo) {
+            throw ServiceExceptionCode.absentService(ContactHalo.class);
+        }
+
         Contact contact = new Contact();
         boolean hadCriterium = false;
-        
+
         if (req.isSet("internal_userid")) {
             hadCriterium = true;
             contact.setInternalUserId(req.getIntParameter("internal_userid"));
@@ -127,7 +145,7 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
             hadCriterium = true;
             contact.setInternalUserId(req.getIntParameter("user_id"));
         }
-        
+
         if (req.isSet("id") && !hadCriterium) {
             contact.setObjectID(req.getIntParameter("id"));
             if (req.isSet("folder")) {
@@ -135,46 +153,49 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
                 contact.setParentFolderID(req.getIntParameter("folder"));
             }
         }
-        
-        
+
         if (req.isSet("email")) {
             hadCriterium = true;
             contact.setEmail1(req.getParameter("email"));
         } else if (req.isSet("email1")) {
             hadCriterium = true;
             contact.setEmail1(req.getParameter("email1"));
-        } 
+        }
 
         if (req.isSet("email2")) {
             hadCriterium = true;
             contact.setEmail2(req.getParameter("email2"));
-        } 
+        }
 
         if (req.isSet("email3")) {
             hadCriterium = true;
             contact.setEmail3(req.getParameter("email3"));
         }
-        
-        if (!hadCriterium) {
-            return fallbackPicture();
-        }
-        try {
-            Picture picture = services.getService(ContactHalo.class).getPicture(contact, session);
-            if (picture == null) {
-                return fallbackPicture();
-            }
-            return picture;
 
+        if (!hadCriterium) {
+            return (V) (eTagOnly ? null : fallbackPicture());
+        }
+
+        try {
+            if (eTagOnly) {
+                return (V) contactHalo.getPictureETag(contact, session);
+            }
+
+            Picture picture = contactHalo.getPicture(contact, session);
+            if (picture == null) {
+                return (V) fallbackPicture();
+            }
+            return (V) picture;
         } catch (OXException x) {
-            return fallbackPicture();
+            return (V) (eTagOnly ? null : fallbackPicture());
         }
     }
-    
+
     private static final byte[] TRANSPARENT_GIF = new byte[]{71,73,70,56,57,97,1,0,1,0,-128,0,0,0,0,0,-1,-1,-1,33,-7,4,1,0,0,0,0,44,0,0,0,0,1,0,1,0,0,2,1,68,0,59};
-    
+
     private Picture fallbackPicture() {
         ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(TRANSPARENT_GIF);
-        fileHolder.setContentType("image/gif");        
+        fileHolder.setContentType("image/gif");
         return new Picture(null, fileHolder);
     }
 

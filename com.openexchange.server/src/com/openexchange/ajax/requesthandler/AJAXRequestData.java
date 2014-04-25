@@ -57,7 +57,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -437,25 +436,13 @@ public class AJAXRequestData {
      * <i>Cache-Control</i>, and <i>Pragma</i>)
      *
      * @param eTag The ETag value
-     * @param expires The optional expires time, pass <code>-1</code> to set default expiry (+ 1 year)
+     * @param expiry The optional expiry milliseconds, pass <code>-1</code> to set default expiry (+ 5 minutes)
      * @return <code>true</code> if set; otherwise <code>false</code>
      */
-    public boolean setResponseETag(final @NonNull String eTag, final long expires) {
-        return setResponseETag(eTag, expires > 0 ? new Date(expires) : null);
-    }
-
-    /**
-     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
-     * <i>Cache-Control</i>, and <i>Pragma</i>)
-     *
-     * @param eTag The ETag value
-     * @param expires The optional expires date, pass <code>null</code> to set default expiry (+ 1 year)
-     * @return <code>true</code> if set; otherwise <code>false</code>
-     */
-    public boolean setResponseETag(final @NonNull String eTag, final Date expires) {
+    public boolean setResponseETag(final @NonNull String eTag, final long expiry) {
         final HttpServletResponse resp = this.httpServletResponse;
         if (null != resp) {
-            Tools.setETag(eTag, expires, resp);
+            Tools.setETag(eTag, expiry > 0 ? expiry : -1L, resp);
             return true;
         }
         return false;
