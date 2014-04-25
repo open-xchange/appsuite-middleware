@@ -258,6 +258,10 @@ public final class EventQueue {
             LOG.info("Shutting down event system, so no events are accepted. Throwing Invalid State Exception");
             throw new OXException().setLogMessage("Event system is being shut down and therefore does not accept new events.");
         }
+        if (null == eventObj) {
+            LOG.warn("Skipping null event", new Throwable());
+            return;
+        }
         LOG.debug("add EventObject: {}", eventObj);
 
         if (!isEnabled) {
@@ -304,6 +308,10 @@ public final class EventQueue {
     }
 
     protected static void event(final EventObject eventObj, final boolean noDelay) {
+        if (null == eventObj) {
+            LOG.warn("Skipping null event", new Throwable());
+            return;
+        }
         final int module = eventObj.getModule();
         switch (module) {
         case Types.APPOINTMENT:

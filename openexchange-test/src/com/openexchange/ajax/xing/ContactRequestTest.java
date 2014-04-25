@@ -85,8 +85,10 @@ public class ContactRequestTest extends AbstractAJAXSession {
         final ContactJoinRevokeRequest revokeRequest = new ContactJoinRevokeRequest("ewaldbartkowiak@googlemail.com", true);
         final ContactJoinRevokeResponse revokeResponse = client.execute(revokeRequest);
         assertNotNull(revokeResponse);
-        final ContactJoinRequest request = new ContactJoinRequest("ewaldbartkowiak@googlemail.com", true);
-        final ContactJoinResponse response = client.execute(request);
-        assertNotNull(response);
+        assertTrue((Boolean) revokeResponse.getData());
+        final ContactJoinRequest joinRequest = new ContactJoinRequest("ewaldbartkowiak@googlemail.com", true);
+        final ContactJoinResponse joinResponse = client.execute(joinRequest);
+        assertNotNull(joinResponse);
+        assertTrue((Boolean) joinResponse.getData());
     }
 }

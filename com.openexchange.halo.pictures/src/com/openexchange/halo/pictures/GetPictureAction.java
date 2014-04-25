@@ -59,7 +59,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.Picture;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -71,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(allowPublicSession=true, defaultFormat="file")
 public class GetPictureAction implements ETagAwareAJAXActionService {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public GetPictureAction(ServiceLookup services) {
         super();
@@ -96,15 +98,14 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
 
     @Override
     public boolean checkETag(String clientETag, AJAXRequestData request, ServerSession session) throws OXException {
-        /*
-         * TODO: Quite inefficient way to check if a clients cache is up date.
-         * We should delegate the responsibility for checking the ETag to ContactHalo.
-         */
-        Picture picture = getPicture(request, session);
-        if (picture != null && picture.getEtag() != null) {
-            return picture.getEtag().equals(clientETag);
+        String pictureETag = getPictureETag(request, session);
+        if (pictureETag == null) {
+            return false;
         }
-
+        if (pictureETag.equals(clientETag)) {
+            request.setExpires(Tools.getDefaultExpiry());
+            return true;
+        }
         return false;
     }
 
@@ -117,6 +118,20 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
     }
 
     private Picture getPicture(AJAXRequestData req, ServerSession session) throws OXException {
+        return getPictureResource(req, session, false);
+    }
+
+    private String getPictureETag(AJAXRequestData req, ServerSession session) throws OXException {
+        return getPictureResource(req, session, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <V> V getPictureResource(AJAXRequestData req, ServerSession session, boolean eTagOnly) throws OXException {
+        final ContactHalo contactHalo = services.getService(ContactHalo.class);
+        if (null == contactHalo) {
+            throw ServiceExceptionCode.absentService(ContactHalo.class);
+        }
+
         Contact contact = new Contact();
         boolean hadCriterium = false;
 
@@ -139,7 +154,6 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
             }
         }
 
-
         if (req.isSet("email")) {
             hadCriterium = true;
             contact.setEmail1(req.getParameter("email"));
@@ -159,17 +173,21 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
         }
 
         if (!hadCriterium) {
-            return fallbackPicture();
+            return (V) (eTagOnly ? null : fallbackPicture());
         }
-        try {
-            Picture picture = services.getService(ContactHalo.class).getPicture(contact, session);
-            if (picture == null) {
-                return fallbackPicture();
-            }
-            return picture;
 
+        try {
+            if (eTagOnly) {
+                return (V) contactHalo.getPictureETag(contact, session);
+            }
+
+            Picture picture = contactHalo.getPicture(contact, session);
+            if (picture == null) {
+                return (V) fallbackPicture();
+            }
+            return (V) picture;
         } catch (OXException x) {
-            return fallbackPicture();
+            return (V) (eTagOnly ? null : fallbackPicture());
         }
     }
 

@@ -69,6 +69,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * Retrieves the arising reminder for a user.
@@ -106,40 +107,54 @@ public class GetArisingReminder {
         final Date now = new Date();
         for (final ReminderObject reminder : reminders) {
             if (Types.APPOINTMENT == reminder.getModule()) {
-                final CalendarDataObject appointment;
-                try {
-                    appointment = appointmentSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
-                } catch (final OXException e) {
-                    if (e.isGeneric(Generic.NOT_FOUND)) {
-                        STORAGE.deleteReminder(ctx, reminder);
+
+                // Check folder existence
+                final boolean folderExists = new OXFolderAccess(ctx).exists(reminder.getFolder());
+                if (folderExists) {
+                    final CalendarDataObject appointment;
+                    try {
+                        appointment = appointmentSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
+                    } catch (final OXException e) {
+                        if (e.isGeneric(Generic.NOT_FOUND)) {
+                            STORAGE.deleteReminder(ctx, reminder);
+                            continue;
+                        }
+                        LOG.debug("", e);
+                        continue;
+                    } catch (final SQLException e) {
+                        final OXException re = ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                        LOG.debug("", re);
                         continue;
                     }
-                    LOG.debug("", e);
-                    continue;
-                } catch (final SQLException e) {
-                    final OXException re = ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-                    LOG.debug("", re);
-                    continue;
-                }
-                if (appointment.getRecurrenceType() != CalendarObject.NO_RECURRENCE && (!appointment.containsUntil() || appointment.getUntil().after(now))) {
-                    retval.add(reminder);
-                } else if (appointment.getEndDate().after(now)) {
-                    retval.add(reminder);
-                } else {
-                    try {
-                        new DeleteReminder(ctx, reminder).perform();
-                    } catch (final OXException e) {
-                        if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
-                            throw e;
-                        }
-                        // Ignore
+                    if (appointment.getRecurrenceType() != CalendarObject.NO_RECURRENCE && (!appointment.containsUntil() || appointment.getUntil().after(now))) {
+                        retval.add(reminder);
+                    } else if (appointment.getEndDate().after(now)) {
+                        retval.add(reminder);
+                    } else {
+                        deleteReminder(reminder);
                     }
+                } else {
+                    STORAGE.deleteReminder(ctx, reminder);
+                    continue;
                 }
             } else {
                 retval.add(reminder);
             }
         }
         return retval.toArray(new ReminderObject[retval.size()]);
+    }
+
+    private void deleteReminder(final ReminderObject reminder) throws OXException {
+        if (null != reminder) {
+            try {
+                new DeleteReminder(ctx, reminder).perform();
+            } catch (final OXException e) {
+                if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+                // Ignore
+            }
+        }
     }
 
 }

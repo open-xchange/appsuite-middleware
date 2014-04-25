@@ -59,9 +59,12 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface HaloContactImageSource {
-    public int getPriority();
-    
-    public Picture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException;
-    
-    public boolean isAvailable(ServerSession session) throws OXException;
+
+    int getPriority();
+
+    Picture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException;
+
+    String getPictureETag(HaloContactQuery contactQuery, ServerSession session) throws OXException;
+
+    boolean isAvailable(ServerSession session) throws OXException;
 }

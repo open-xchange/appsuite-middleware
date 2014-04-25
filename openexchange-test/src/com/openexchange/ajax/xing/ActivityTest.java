@@ -51,11 +51,9 @@ package com.openexchange.ajax.xing;
 
 import java.io.IOException;
 import java.util.UUID;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.xing.actions.ChangeStatusRequest;
 import com.openexchange.ajax.xing.actions.ChangeStatusResponse;
@@ -135,6 +133,7 @@ public class ActivityTest extends AbstractAJAXSession {
         final ChangeStatusRequest createRequest = new ChangeStatusRequest("My new status", true);
         final ChangeStatusResponse createResponse = client.execute(createRequest);
         assertNotNull(createResponse);
+        assertTrue((Boolean) createResponse.getData());
         deleteActivity(false);
     }
 
@@ -148,11 +147,14 @@ public class ActivityTest extends AbstractAJAXSession {
      */
     public void testShowActivityWithUserFields() throws OXException, IOException, JSONException {
         JSONObject json = (JSONObject) client.execute(new UserFeedRequest(XING_OWNER, -1, -1, new int[0], true)).getData();
+        assertNotNull("No activity available", json.getJSONArray("network_activities").getJSONObject(0));
         String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
         final int[] uf = { UserField.FIRST_NAME.ordinal(), UserField.LAST_NAME.ordinal(), UserField.DISPLAY_NAME.ordinal() };
         final ShowActivityRequest request = new ShowActivityRequest(activityId, uf, true);
         final ShowActivityResponse response = client.execute(request);
         assertNotNull(response);
+        JSONObject jsonResponse = (JSONObject) response.getData();
+        assertNotNull(jsonResponse.get("activities"));
     }
 
     /**
@@ -164,10 +166,13 @@ public class ActivityTest extends AbstractAJAXSession {
      */
     public void testShowActivity() throws OXException, IOException, JSONException {
         JSONObject json = (JSONObject) client.execute(new UserFeedRequest(XING_OWNER, -1, -1, new int[0], true)).getData();
+        assertNotNull("No activity available", json.getJSONArray("network_activities").getJSONObject(0));
         String activityId = json.getJSONArray("network_activities").getJSONObject(0).getJSONArray("ids").getString(0);
         final ShowActivityRequest request = new ShowActivityRequest(activityId, new int[0], true);
         final ShowActivityResponse response = client.execute(request);
         assertNotNull(response);
+        JSONObject jsonResponse = (JSONObject) response.getData();
+        assertNotNull(jsonResponse.get("activities"));
     }
 
     /**
@@ -194,6 +199,7 @@ public class ActivityTest extends AbstractAJAXSession {
         final DeleteActivityRequest request = new DeleteActivityRequest(activityId, true);
         final DeleteActivityResponse response = client.execute(request);
         assertNotNull(response);
+        assertTrue((Boolean) response.getData());
     }
 
     /**
@@ -208,7 +214,6 @@ public class ActivityTest extends AbstractAJAXSession {
         final ShareLinkResponse response = client.execute(request);
         assertNotNull(response);
         assertTrue((Boolean) response.getData());
-        deleteActivity(false);
     }
 
     /**
@@ -230,7 +235,7 @@ public class ActivityTest extends AbstractAJAXSession {
                 fail(exc.getMessage());
             }
         }
-
+        assertTrue((Boolean) response.getData());
         deleteActivity(false);
     }
 
@@ -255,11 +260,11 @@ public class ActivityTest extends AbstractAJAXSession {
         // Begin delete comment - only delete if comments are available
         int commentAmount =json.getJSONArray("network_activities").getJSONObject(0).getJSONObject("comments").getInt("amount");
         if(commentAmount > 0) {
-        	String commentId = json.getJSONArray("network_activities").getJSONObject(0).getJSONObject("comments").getJSONArray(
-        			"latest_comments").getJSONObject(0).getString("id");
-        	final DeleteCommentRequest deleteRequest = new DeleteCommentRequest(activityId, commentId, false);
-        	final DeleteCommentResponse deleteResponse = client.execute(deleteRequest);
-        	assertNotNull(deleteResponse);
+            String commentId = json.getJSONArray("network_activities").getJSONObject(0).getJSONObject("comments").getJSONArray(
+                "latest_comments").getJSONObject(0).getString("id");
+            final DeleteCommentRequest deleteRequest = new DeleteCommentRequest(activityId, commentId, false);
+            final DeleteCommentResponse deleteResponse = client.execute(deleteRequest);
+            assertNotNull(deleteResponse);
         }
     }
 
@@ -297,7 +302,7 @@ public class ActivityTest extends AbstractAJAXSession {
                 break;
             }
         }
-        assertTrue("An activity with this permission could not being found " + permission, found);
+        assertTrue("An activity with permission " + permission + " could not being found ", found);
         return activityId;
     }
 }

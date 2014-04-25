@@ -146,6 +146,23 @@ public class ContactHaloImpl implements ContactHalo {
         return null;
     }
 
+    @Override
+    public String getPictureETag(Contact contact, ServerSession session) throws OXException {
+        HaloContactQuery contactQuery = buildQuery(contact, session);
+        for (HaloContactImageSource source : imageSources) {
+            if (!source.isAvailable(session)) {
+                continue;
+            }
+            String eTag = source.getPictureETag(contactQuery, session);
+            if (eTag != null) {
+                StringBuilder etagBuilder = new StringBuilder();
+                etagBuilder.append(source.getClass().getName()).append("://").append(eTag);
+                return etagBuilder.toString();
+            }
+        }
+        return null;
+    }
+
     // Friendly for testing
     HaloContactQuery buildQuery(final Contact contact, final ServerSession session) throws OXException {
         final UserService userService = services.getService(UserService.class);

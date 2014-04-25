@@ -145,7 +145,7 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testContentLengthMailAttachments_Bug26926() {
         try {
-            final File file = new File(TEST_DATA_DIR, "OX6-User-Guide-German-v6.22.2.pdf");
+            final File file = new File(TEST_DATA_DIR, "26926_27394.pdf");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
@@ -210,7 +210,7 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testContentTypeByFileName_Bug31648() {
         try {
-            final File file = new File(TEST_DATA_DIR, "VM1161.PNG");
+            final File file = new File(TEST_DATA_DIR, "31648.png");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
@@ -245,7 +245,7 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testRangeHeader_Bug27394() {
         try {
-            final File file = new File(TEST_DATA_DIR, "OX6-User-Guide-German-v6.22.2.pdf");
+            final File file = new File(TEST_DATA_DIR, "26926_27394.pdf");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);

@@ -1078,7 +1078,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(2, group_id);
             rs = prep_check.executeQuery();
             if (!rs.next()) {
-                throw new StorageException("No such group "+group_id+" in context "+contextId+"");
+                throw new StorageException("No such group "+group_id+" in context "+contextId);
             }
             // grab username and return
             return rs.getString("identifier");
@@ -1147,7 +1147,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(2, resource_id);
             rs = prep_check.executeQuery();
             if (!rs.next()) {
-                throw new StorageException("No such resource "+resource_id+" in context "+ctx.getId().intValue()+"");
+                throw new StorageException("No such resource "+resource_id+" in context "+ctx.getId().intValue());
             }
             // grab user name and return
             return rs.getString("identifier");
@@ -1225,7 +1225,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(2, user_id);
             rs = prep_check.executeQuery();
             if (!rs.next()) {
-                throw new StorageException("No such user "+user_id+" in context "+ctx.getId().intValue()+"");
+                throw new StorageException("No such user "+user_id+" in context "+ctx.getId().intValue());
             }
             // grab user name and return
             return rs.getString("uid");
@@ -1380,7 +1380,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 stmt.setString(2, username);
                 rs = stmt.executeQuery();
                 if (!rs.next()) {
-                    throw new StorageException("No such user " + username + " in context " + ctxid + "");
+                    throw new StorageException("No such user " + username + " in context " + ctxid);
                 }
                 user.setId(I(rs.getInt(1)));
                 return null == rs.getString(2) ? false : true;

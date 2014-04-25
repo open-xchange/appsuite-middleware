@@ -268,7 +268,7 @@ public class LabelHelper {
 
 
 
-    	return template.replaceAll("\\[hostname\\]", hostname).replaceAll("\\[uiwebpath\\]", webpath).replaceAll("\\[module\\]", module).replaceAll("\\[object\\]", objectId+"").replaceAll("\\[folder\\]", folder+"");
+    	return template.replaceAll("\\[hostname\\]", hostname).replaceAll("\\[uiwebpath\\]", webpath).replaceAll("\\[module\\]", module).replaceAll("\\[object\\]", Integer.toString(objectId)).replaceAll("\\[folder\\]", Integer.toString(folder));
     }
 
     public String getAttachmentNote() {

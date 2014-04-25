@@ -161,13 +161,13 @@ public class ICal4JEmitter implements ICalEmitter {
     }
 
     protected VEvent createEvent(final Mode mode, final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
-        return createEvent(mode, index, appointment, ctx, errors, warnings, new ITipContainer());
+        return createEvent(mode, index, appointment, ctx, errors, warnings, null);
     }
 
     protected VEvent createEvent(final Mode mode, final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings, final ITipContainer iTip) {
 
         final VEvent vevent = new VEvent();
-        List<AttributeConverter<VEvent,Appointment>> converters = AppointmentConverters.getConverters(iTip.getMethod());
+        List<AttributeConverter<VEvent,Appointment>> converters = iTip == null ? AppointmentConverters.ALL : AppointmentConverters.getConverters(iTip.getMethod());
 
         for (final AttributeConverter<VEvent, Appointment> converter : converters) {
             if (converter.isSet(appointment)) {
@@ -181,6 +181,8 @@ public class ICal4JEmitter implements ICalEmitter {
 
         return vevent;
     }
+    
+    //protected VEvent createEvent(Mode mode, int index, Appointment appointment, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings, )
 
     /**
      * Converts a task object into an iCal event.

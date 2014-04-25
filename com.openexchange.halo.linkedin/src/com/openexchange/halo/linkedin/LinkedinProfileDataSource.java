@@ -187,6 +187,11 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
         return null;
     }
 
+    @Override
+    public String getPictureETag(HaloContactQuery contactQuery, ServerSession session) throws OXException {
+        return null;
+    }
+
     private List<String> getEMail(final Contact queryContact) {
         final List<String> emails = new ArrayList<String>(3);
         if (queryContact.containsEmail1()) {

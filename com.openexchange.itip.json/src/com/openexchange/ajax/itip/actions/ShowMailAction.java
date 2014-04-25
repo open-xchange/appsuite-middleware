@@ -202,7 +202,7 @@ public class ShowMailAction implements AJAXActionService{
             for (final Participant participant : participants) {
                 if (participant instanceof UserParticipant) {
                     final UserParticipant up = (UserParticipant) participant;
-                    Integer confirmStatus = confirmMap.get(up.getIdentifier()+"");
+                    Integer confirmStatus = confirmMap.get(Integer.toString(up.getIdentifier()));
                     if (confirmStatus == null) {
                         confirmStatus = confirmMap.get(up.getEmailAddress().toLowerCase());
                     }
@@ -230,7 +230,7 @@ public class ShowMailAction implements AJAXActionService{
         final UserParticipant[] users = parsed.getUsers();
         if (users != null) {
             for (final UserParticipant up : users) {
-                Integer confirmStatus = confirmMap.get(up.getIdentifier()+"");
+                Integer confirmStatus = confirmMap.get(Integer.toString(up.getIdentifier()));
                 if (confirmStatus == null && up.getEmailAddress() != null) {
                     confirmStatus = confirmMap.get(up.getEmailAddress().toLowerCase());
                 }

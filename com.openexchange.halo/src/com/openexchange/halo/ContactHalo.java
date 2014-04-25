@@ -50,7 +50,6 @@
 package com.openexchange.halo;
 
 import java.util.List;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -59,11 +58,28 @@ import com.openexchange.tools.session.ServerSession;
 
 public interface ContactHalo {
 
-	public abstract AJAXRequestResult investigate(String provider,
-			Contact contact, AJAXRequestData req, ServerSession session) throws OXException;
-	
-	public abstract Picture getPicture(Contact contact, ServerSession session) throws OXException;
+    AJAXRequestResult investigate(String provider, Contact contact, AJAXRequestData req, ServerSession session) throws OXException;
 
-	public abstract List<String> getProviders(ServerSession session) throws OXException;
+    /**
+     * Gets the contact's picture.
+     *
+     * @param contact The associated contact
+     * @param session The session
+     * @return The picture or <code>null</code>
+     * @throws OXException If returning the picture fails
+     */
+    Picture getPicture(Contact contact, ServerSession session) throws OXException;
+
+    /**
+     * Gets the ETag of the contact's picture.
+     *
+     * @param contact The associated contact
+     * @param session The session
+     * @return The picture's ETag or <code>null</code>
+     * @throws OXException If returning the ETag fails
+     */
+    String getPictureETag(Contact contact, ServerSession session) throws OXException;
+
+    List<String> getProviders(ServerSession session) throws OXException;
 
 }
