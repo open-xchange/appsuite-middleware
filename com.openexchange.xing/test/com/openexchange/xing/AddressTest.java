@@ -18,9 +18,9 @@ public class AddressTest {
 
     private String filledNothingInfrontOfCountryCode = "{\"street\":\"Karl-Wilhelma 99\",\"zip_code\":\"77777\",\"city\":\"Untereschbach\",\"province\":\"Nordrhein-Westfalen\",\"country\":\"DE\",\"email\":\"anton@zuhause.de\",\"fax\":null,\"phone\":\"49|771|12 34 56 1-0\",\"mobile_phone\":\"49|100|012345678\"}";
 
-    private String filledPlusExistend = "{\"street\":\"Zullicher Straße 1\",\"zip_code\":\"33333\",\"city\":\"Gross-Kleinostheim\",\"province\":\"Nordrhein-Westfalen\",\"country\":\"DE\",\"email\":\"huhu@huphup.hup\",\"fax\":\"+49|111|111111-1111\",\"phone\":\"+49|111|22222-2222\",\"mobile_phone\":\"+49|170|87654321\"}";
+    private String filledPlusExistend = "{\"street\":\"Zullicher Strasse 1\",\"zip_code\":\"33333\",\"city\":\"Gross-Kleinostheim\",\"province\":\"Nordrhein-Westfalen\",\"country\":\"DE\",\"email\":\"huhu@huphup.hup\",\"fax\":\"+49|111|111111-1111\",\"phone\":\"+49|111|22222-2222\",\"mobile_phone\":\"+49|170|87654321\"}";
 
-    private String filledZeroZeroExistend = "{\"street\":\"Zullicher Straße 1\",\"zip_code\":\"33333\",\"city\":\"Gross-Kleinostheim\",\"province\":\"Nordrhein-Westfalen\",\"country\":\"DE\",\"email\":\"huhu@huphup.hup\",\"fax\":\"0049|111|111111-1111\",\"phone\":\"0049|111|22222-2222\",\"mobile_phone\":\"0049|170|87654321\"}";
+    private String filledZeroZeroExistend = "{\"street\":\"Zullicher Strasse 1\",\"zip_code\":\"33333\",\"city\":\"Gross-Kleinostheim\",\"province\":\"Nordrhein-Westfalen\",\"country\":\"DE\",\"email\":\"huhu@huphup.hup\",\"fax\":\"0049|111|111111-1111\",\"phone\":\"0049|111|22222-2222\",\"mobile_phone\":\"0049|170|87654321\"}";
 
     @Test
     public void testConstructor_emptyJSON_stillNull() throws JSONException {
@@ -60,7 +60,7 @@ public class AddressTest {
         Assert.assertEquals("Gross-Kleinostheim", address.getCity());
         Assert.assertEquals("DE", address.getCountry());
         Assert.assertEquals("huhu@huphup.hup", address.getEmail());
-        Assert.assertEquals("Zullicher Straße 1", address.getStreet());
+        Assert.assertEquals("Zullicher Strasse 1", address.getStreet());
     }
 
     @Test
@@ -75,6 +75,6 @@ public class AddressTest {
         Assert.assertEquals("Gross-Kleinostheim", address.getCity());
         Assert.assertEquals("DE", address.getCountry());
         Assert.assertEquals("huhu@huphup.hup", address.getEmail());
-        Assert.assertEquals("Zullicher Straße 1", address.getStreet());
+        Assert.assertEquals("Zullicher Strasse 1", address.getStreet());
     }
 }
