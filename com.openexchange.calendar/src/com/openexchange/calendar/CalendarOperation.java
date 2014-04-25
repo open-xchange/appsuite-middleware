@@ -585,17 +585,19 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
             if (cdao.getFolderType() != FolderObject.SHARED && check_special_action == action) {
                 LOG.debug(
-                    "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
+                    "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder:action {}:{}:{}:{}:{}",
                     I(so.getUserId()),
                     I(oid),
+                    I(cdao.getEffectiveFolderId()),
                     I(inFolder),
                     I(action));
                 throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create();
             } else if (action_folder != inFolder && check_special_action == action) {
                 LOG.debug(
-                    "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
+                    "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder:action {}:{}:{}:{}:{}",
                     I(so.getUserId()),
                     I(oid),
+                    I(action_folder),
                     I(inFolder),
                     I(action));
                 throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_3.create();
