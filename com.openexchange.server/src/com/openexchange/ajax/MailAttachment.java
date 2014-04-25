@@ -209,7 +209,7 @@ public class MailAttachment extends AJAXServlet {
                  * Set Content-Type and Content-Disposition header
                  */
                 final String fileName = mailPart.getFileName();
-                final String userAgent = AJAXServlet.sanitizeParam(req.getHeader("user-agent"));
+                final String userAgent = AJAXUtilis.sanitizeParam(req.getHeader("user-agent"));
                 final String contentType;
                 if (saveToDisk) {
                     /*

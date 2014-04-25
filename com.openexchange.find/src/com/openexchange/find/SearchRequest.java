@@ -48,8 +48,6 @@
  */
 package com.openexchange.find;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,7 +67,7 @@ import com.openexchange.find.facet.Filter;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class SearchRequest implements Serializable {
+public class SearchRequest extends AbstractFindRequest {
 
     private static final long serialVersionUID = -3958179907725259325L;
 
@@ -77,22 +75,25 @@ public class SearchRequest implements Serializable {
 
     private final int size;
 
-    private final List<ActiveFacet> activeFacets;
-
     private final Map<FacetType, List<ActiveFacet>> facetMap;
-
-    private String folderId;
 
     private List<Filter> filters;
 
     private List<String> queries;
 
 
-    public SearchRequest(int start, int size, List<ActiveFacet> activeFacets) {
-        super();
+    /**
+     * Initializes a new {@link SearchRequest}.
+     *
+     * @param start The start index for pagination
+     * @param size The max. number of documents to return
+     * @param activeFacets The list of currently active facets; must not be <code>null</code>
+     * @param options A map containing client and module specific options; must not be <code>null</code>
+     */
+    public SearchRequest(final int start, final int size, final List<ActiveFacet> activeFacets, final Map<String, String> options) {
+        super(activeFacets, options);
         this.start = start;
         this.size = size;
-        this.activeFacets = new ArrayList<ActiveFacet>(activeFacets);
         facetMap = new HashMap<FacetType, List<ActiveFacet>>(activeFacets.size());
         for (ActiveFacet facet : activeFacets) {
             FacetType type = facet.getType();
@@ -158,7 +159,6 @@ public class SearchRequest implements Serializable {
     public List<Filter> getFilters() {
         if (filters == null) {
             filters = new LinkedList<Filter>();
-
             Set<FacetType> exclude = new HashSet<FacetType>(2);
             exclude.add(CommonFacetType.GLOBAL);
             exclude.add(CommonFacetType.FOLDER);
@@ -207,17 +207,40 @@ public class SearchRequest implements Serializable {
         return null;
     }
 
-    /**
-     * Gets the original list of active facets.
-     * @return A possibly empty list, never <code>null</code>.
-     */
-    public List<ActiveFacet> getActiveFacets() {
-        return activeFacets;
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((facetMap == null) ? 0 : facetMap.hashCode());
+        result = prime * result + size;
+        result = prime * result + start;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SearchRequest other = (SearchRequest) obj;
+        if (facetMap == null) {
+            if (other.facetMap != null)
+                return false;
+        } else if (!facetMap.equals(other.facetMap))
+            return false;
+        if (size != other.size)
+            return false;
+        if (start != other.start)
+            return false;
+        return true;
     }
 
     @Override
     public String toString() {
-        return "SearchRequest [start=" + start + ", size=" + size + ", queries=" + getQueries() + ", filters=" + getFilters() + "]";
+        return "SearchRequest [start=" + start + ", size=" + size + ", queries=" + getQueries() + ", filters=" + getFilters() + ", options=" + getOptions() + "]";
     }
 
 }

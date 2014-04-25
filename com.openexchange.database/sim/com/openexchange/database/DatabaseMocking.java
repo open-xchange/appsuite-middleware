@@ -76,6 +76,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.Assert;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import com.mysql.jdbc.ResultSetMetaData;
 
 /**
  * {@link DatabaseMocking}
@@ -170,6 +171,8 @@ public class DatabaseMocking {
         public List<Object> parameters;
         public ArrayList<List<Object>> rows;
         public List<String> cols;
+        public int numberOfUpdatedRows;
+        public boolean fail;
         
         
         public QueryStub(String query) {
@@ -257,6 +260,7 @@ public class DatabaseMocking {
                 }
             };
         }
+        
     }
     
     
@@ -282,6 +286,7 @@ public class DatabaseMocking {
                             
                         PreparedStatement stmt = mock(PreparedStatement.class);
                         paramCollector.intercept(stmt);
+                        
 
                         when(stmt.executeQuery()).then(new Answer<ResultSet>() {
 
@@ -306,11 +311,17 @@ public class DatabaseMocking {
                                     }
                                 }
                                 
+                                
                                 if (results == null) {
                                     Assert.fail("Could not find appropriate rows");
                                 }
                                 
+                                if (results.fail) {
+                                    throw new SQLException("Kabooom!");
+                                }
+                                
                                 ResultSet rs = mock(ResultSet.class);
+                                
                                 ResultSetAnswers answers = new ResultSetAnswers(results);
                                 
                                 doAnswer(answers.next()).when(rs).next();
@@ -335,11 +346,60 @@ public class DatabaseMocking {
                                 doAnswer(answers.getIndexed(String.class)).when(rs).getString(anyInt());
                                 doAnswer(answers.getIndexed(Object.class)).when(rs).getObject(anyInt());
                                 
+                                ResultSetMetaData metaData = mock(ResultSetMetaData.class);
+                                when(metaData.getColumnCount()).thenReturn(results.cols.size());
+                                
+                                final QueryStub query = results;
+                                doAnswer(new Answer<String>() {
+
+                                    @Override
+                                    public String answer(InvocationOnMock invocation) throws Throwable {
+                                        int index = (Integer) invocation.getArguments()[0];
+                                        return query.cols.get(index - 1);
+                                    }
+                                }).when(metaData).getColumnName(anyInt());
+                                
+                                when(rs.getMetaData()).thenReturn(metaData);
+                                
                                 return rs;
                             }
                             
                         });
-                        
+
+                        when(stmt.executeUpdate()).thenAnswer(new Answer<Integer>() {
+
+                            @Override
+                            public Integer answer(InvocationOnMock invocation) throws Throwable {
+                                QueryStub results = null;
+                                for(QueryStub qStub: queries) {
+                                    if (qStub.query.equals(query)) {
+                                        boolean success = true;
+                                        for (int i = 0, size = qStub.parameters.size(); i < size; i++) {
+                                            Object param = qStub.parameters.get(i);
+                                            Object setParam = paramCollector.getParameter(i+1);
+                                            if (!param.equals(setParam)) {
+                                                success = false;
+                                                break;
+                                            }
+                                        }
+                                        if (success) {
+                                            results = qStub;                                
+                                        }
+                                    }
+                                }
+                                
+                                
+                                if (results == null) {
+                                    return 0;
+                                }
+                                
+                                if (results.fail) {
+                                    throw new SQLException("Kabooom!");
+                                }
+
+                                return results.numberOfUpdatedRows;
+                            }
+                        });
                         collector.registerQuery(query, paramCollector);
                         return stmt;
                     }
@@ -382,6 +442,18 @@ public class DatabaseMocking {
         public QueryStubBuilder andRow(Object...rowDefinition) {
             query.rows.add(Arrays.asList(rowDefinition));
             return this;
+        }
+
+        public void thenReturnModifiedRows(int i) {
+            query.numberOfUpdatedRows = i;
+        }
+
+        public void thenFail() {
+            query.fail = true;
+        }
+
+        public void andNoRows() {
+            // Syntactic Sugar to better express intent
         }
     }
 

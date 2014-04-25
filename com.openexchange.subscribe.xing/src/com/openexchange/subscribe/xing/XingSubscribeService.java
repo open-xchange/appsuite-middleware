@@ -80,6 +80,7 @@ import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.xing.Address;
 import com.openexchange.xing.Contacts;
@@ -277,7 +278,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
                         // Store them
                         final List<Contact> convertees = convert(chunk, loadingPhotoHandler, session);
                         LOG.info("Converted {} XING contacts for user {} in context {}", chunk.size(), session.getUserId(), session.getContextId());
-                        folderUpdater.save(convertees, subscription);
+                        folderUpdater.save(new SearchIteratorDelegator<Contact>(convertees), subscription);
                         // Next chunk...
                         off += chunk.size();
                     }
@@ -387,12 +388,6 @@ public class XingSubscribeService extends AbstractSubscribeService {
             return null;
         }
         final Contact oxContact = new Contact();
-        final String id = xingUser.getId();
-        {
-            if (isNotNull(id)) {
-                oxContact.setUserField20(id);
-            }
-        }
         {
             final String s = xingUser.getActiveMail();
             if (isNotNull(s)) {
@@ -561,7 +556,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
             try {
                 optPhotoHandler.handlePhoto(xingUser, oxContact, session);
             } catch (final Exception e) {
-                LOG.warn("Could not handle photo from XING contact {} ({}).", xingUser.getDisplayName(), id);
+                LOG.warn("Could not handle photo from XING contact {} ({}).", xingUser.getDisplayName(), xingUser.getId());
             }
         }
         return oxContact;

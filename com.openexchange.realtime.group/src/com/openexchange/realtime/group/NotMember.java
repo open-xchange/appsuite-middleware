@@ -70,11 +70,13 @@ public class NotMember extends Message {
      * 
      * @param from The GroupDispatcher he is trying to reach
      * @param to The client trying to reach the {@link GroupDispatcher}
+     * @param selector 
      */
-    public NotMember(ID from, ID to) {
+    public NotMember(ID from, ID to, String selector) {
         super();
         setTo(to);
         setFrom(from);
+        setSelector(selector);
         setError(RealtimeExceptionCodes.NOT_A_MEMBER.create(from));
     }
 

@@ -49,12 +49,7 @@
 
 package com.openexchange.oauth.facebook;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
@@ -75,8 +70,8 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
-import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
@@ -100,14 +95,10 @@ public class FacebookServiceImpl implements FacebookService {
     }
 
     @Override
-    public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) throws OXException {
-
-        List<Contact> contacts = Collections.emptyList();
+    public SearchIterator<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) throws OXException {
         final OAuthService service = new ServiceBuilder().provider(FacebookApi.class).apiKey(facebookMetaData.getAPIKey(session)).apiSecret(
             facebookMetaData.getAPISecret(session)).build();
-
         OAuthAccount account = null;
-
         try {
             account = oAuthService.getAccount(accountId, session, user, contextId);
         } catch (final OXException e) {
@@ -140,7 +131,7 @@ public class FacebookServiceImpl implements FacebookService {
             try {
                 final JSONArray allConnections = new JSONArray(jsonString);
                 jsonString = null;
-                contacts = parseIntoContacts(allConnections);
+                return parse(allConnections);
             } catch (JSONException e) {
                 // Maybe this is a JSONObject with an error
                 try {
@@ -155,9 +146,7 @@ public class FacebookServiceImpl implements FacebookService {
                 LOG.error("", e);
             }
         }
-
-        return contacts;
-
+        return SearchIteratorAdapter.emptyIterator();
     }
 
     private static final Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
@@ -175,88 +164,118 @@ public class FacebookServiceImpl implements FacebookService {
         return sb.toString();
     }
 
-    public List<Contact> parseIntoContacts(final JSONArray allConnections) throws OXException {
-        final int length = allConnections.length();
-        if (length <= 0) {
-            return Collections.emptyList();
+    /**
+     * Parses facebook contacts from the supplied JSON array and provides them sequentially via a search iterator.
+     *
+     * @param allConnections The JSON array containing the facebook contacts
+     * @return A search iterator for the parsed contacts
+     */
+    private SearchIterator<Contact> parse(final JSONArray allConnections) {
+        if (null == allConnections || 0 == allConnections.length()) {
+            return SearchIteratorAdapter.emptyIterator();
         }
+        return new SearchIterator<Contact>() {
 
-        final List<Contact> contacts = new ArrayList<Contact>(length);
-        final CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
-        int taskCount = 0;
+            int index = 0;
 
-        for (int i = 0; i < length; i++) {
-            final JSONObject connection = allConnections.optJSONObject(i);
-            if (null != connection) {
-                final Contact contact = new Contact();
-                {
-                    final String profileUrl = connection.optString("profile_url", null);
-                    if (isValid(profileUrl)) {
-                        contact.setURL(profileUrl);
-                    }
-                }
-                {
-                    final String givenName = connection.optString("first_name", null);
-                    if (isValid(givenName)) {
-                        contact.setGivenName(givenName);
-                    }
-                }
-                {
-                    final String surName = connection.optString("last_name", null);
-                    if (isValid(surName)) {
-                        contact.setSurName(surName);
-                    }
-                }
-                {
-                    final String email = connection.optString("email", null);
-                    setEmail(contact, email);
-                }
-                {
-                    final String imageUrl = connection.optString("pic_big", null);
-                    if (isValid(imageUrl)) {
-                        completionService.submit(new Callable<Void>() {
+            @Override
+            public int size() {
+                return allConnections.length();
+            }
 
-                            @Override
-                            public Void call() throws Exception {
-                                try {
-                                    OXContainerConverter.loadImageFromURL(contact, imageUrl);
-                                } catch (final Exception e) {
-                                    LOG.error("", e);
-                                }
-                                return null;
-                            }
-                        });
-                        taskCount++;
-                    }
-                }
-                {
-                    final String birthdayString = connection.optString("birthday_date", null);
-                    setBirthday(contact, birthdayString);
-                }
-                final JSONObject currentLocation = connection.optJSONObject("current_location");
-                if (null != currentLocation) {
-                    String tmp = connection.optString("city", null);
-                    if (isValid(tmp)) {
-                        contact.setCityHome(tmp);
-                    }
-                    tmp = connection.optString("country", null);
-                    if (isValid(tmp)) {
-                        contact.setCountryHome(tmp);
-                    }
-                    tmp = connection.optString("zip", null);
-                    if (isValid(tmp)) {
-                        contact.setPostalCodeHome(tmp);
-                    }
-                }
-                contacts.add(contact);
+            @Override
+            public Contact next() throws OXException {
+                JSONObject connection = allConnections.optJSONObject(index++);
+                return null != connection ? parse(connection) : null;
+            }
+
+            @Override
+            public boolean hasWarnings() {
+                return false;
+            }
+
+            @Override
+            public boolean hasNext() throws OXException {
+
+                return index < allConnections.length();
+            }
+
+            @Override
+            public OXException[] getWarnings() {
+                return null;
+            }
+
+            @Override
+            public void close() throws OXException {
+                //
+            }
+
+            @Override
+            public void addWarning(OXException warning) {
+            }
+        };
+    }
+
+    /**
+     * Parses a facebook contact from the supplied JSON object.
+     *
+     * @param connection The JSON object containing the facebook contact
+     * @return The parsed contact
+     */
+    private Contact parse(JSONObject connection) {
+        final Contact contact = new Contact();
+        {
+            final String profileUrl = connection.optString("profile_url", null);
+            if (isValid(profileUrl)) {
+                contact.setURL(profileUrl);
             }
         }
-
-        if (taskCount > 0) {
-            ThreadPools.awaitCompletionService(completionService, taskCount);
+        {
+            final String givenName = connection.optString("first_name", null);
+            if (isValid(givenName)) {
+                contact.setGivenName(givenName);
+            }
         }
-
-        return contacts;
+        {
+            final String surName = connection.optString("last_name", null);
+            if (isValid(surName)) {
+                contact.setSurName(surName);
+            }
+        }
+        {
+            final String email = connection.optString("email", null);
+            setEmail(contact, email);
+        }
+        {
+            final String imageUrl = connection.optString("pic_big", null);
+            if (isValid(imageUrl)) {
+                try {
+                    OXContainerConverter.loadImageFromURL(contact, imageUrl);
+                } catch (final Exception e) {
+                    LOG.error("", e);
+                }
+            }
+        }
+        {
+            final String birthdayString = connection.optString("birthday_date", null);
+            setBirthday(contact, birthdayString);
+        }
+        final JSONObject currentLocation = connection.optJSONObject("current_location");
+        if (null != currentLocation) {
+            String tmp = connection.optString("city", null);
+            if (isValid(tmp)) {
+                contact.setCityHome(tmp);
+            }
+            tmp = connection.optString("country", null);
+            if (isValid(tmp)) {
+                contact.setCountryHome(tmp);
+            }
+            tmp = connection.optString("zip", null);
+            if (isValid(tmp)) {
+                contact.setPostalCodeHome(tmp);
+            }
+        }
+        return contact;
     }
 
     @Override
@@ -277,7 +296,7 @@ public class FacebookServiceImpl implements FacebookService {
 
     /**
      * Sets the birthday for the contact based on the facebook information
-     * 
+     *
      * @param contact - the {@link Contact} to set the birthday for
      * @param birthday - the string the birthday is included in
      */
@@ -312,7 +331,7 @@ public class FacebookServiceImpl implements FacebookService {
 
     /**
      * Sets the email address for the contact based on the facebook information
-     * 
+     *
      * @param contact - the {@link Contact} to set the birthday for
      * @param email - the string the email is included in
      */

@@ -51,7 +51,6 @@ package com.openexchange.config;
 
 import java.util.Map;
 
-
 /**
  * {@link Reloadable} - Marks services that perform necessary actions in order to apply (possibly) new configuration.
  *
@@ -71,8 +70,9 @@ public interface Reloadable {
     void reloadConfiguration(ConfigurationService configService);
 
     /**
-     * Returns a set of configfile names, which are needed for the reloadable service.
-     * @return Set of configfile names
+     * Returns a set of configuration file names, which are needed for the reloadable service.
+     *
+     * @return A set of configuration file names
      */
     Map<String, String[]> getConfigFileNames();
 

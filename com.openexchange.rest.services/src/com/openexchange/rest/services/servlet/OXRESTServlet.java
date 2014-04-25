@@ -1,0 +1,138 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.rest.services.servlet;
+
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Map;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.exception.OXException;
+import com.openexchange.rest.services.OXRESTMatch;
+import com.openexchange.rest.services.OXRESTService;
+import com.openexchange.rest.services.Response;
+import com.openexchange.rest.services.internal.OXRESTServiceWrapper;
+import com.openexchange.tools.session.ServerSessionAdapter;
+
+
+/**
+ * The {@link OXRESTServlet} delegates handling to an {@link OXRESTService} instance
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class OXRESTServlet extends HttpServlet implements Servlet {
+
+    private static final long serialVersionUID = -1956702653546932381L;
+
+    private static final String PREFIX = "/rest";
+    
+    public static final OXRESTRegistry REST_SERVICES = new OXRESTRegistry();
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(0, 0), PREFIX, resp);
+            
+            Enumeration headers = req.getHeaderNames();
+            while(headers.hasMoreElements()) {
+                String headerName = (String) headers.nextElement();
+                request.setHeader(headerName, req.getHeader(headerName));
+            }
+
+            
+            String path = request.getPathInfo();
+            
+            OXRESTServiceWrapper wrapper = retrieveWrapper(req.getMethod(), path);
+            if (wrapper == null) {
+                resp.sendError(404);
+                return;
+            }
+            enhance(wrapper.getMatch(), request);
+            wrapper.setRequest(request);
+            Response response = wrapper.execute();
+            
+            sendResponse(response, resp);
+            
+        } catch (OXException e) {
+            resp.sendError(500, e.getMessage());
+        }
+    }
+
+    private void sendResponse(Response response, HttpServletResponse resp) throws IOException {
+        resp.setStatus(response.getStatus());
+        for(Map.Entry<String, String> entry: response.getHeaders().entrySet()) {
+            resp.setHeader(entry.getKey(), entry.getValue());
+        }
+        // TODO: Allow for binary streams
+        Iterable<String> body = response.getBody();
+        if (body != null) {
+            for (String chunk : body) {
+                resp.getWriter().print(chunk);
+            }
+        }
+    }
+
+    private void enhance(OXRESTMatch match, AJAXRequestData request) {
+        for(Map.Entry<String, String> entry: match.getParameters().entrySet()) {
+            request.putParameter(entry.getKey(), entry.getValue());
+        }
+    }
+
+
+    private OXRESTServiceWrapper retrieveWrapper(String method, String path) {
+        return REST_SERVICES.retrieve(method, path);
+    }
+    
+}

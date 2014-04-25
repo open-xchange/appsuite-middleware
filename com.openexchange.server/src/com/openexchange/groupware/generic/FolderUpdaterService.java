@@ -49,9 +49,9 @@
 
 package com.openexchange.groupware.generic;
 
-import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
@@ -65,5 +65,12 @@ public interface FolderUpdaterService<T> {
 
     public boolean usesMultipleStrategy();
 
-    public void save(Collection<T> data, TargetFolderDefinition target) throws OXException;
+    /**
+     * Saves the data in the target folder.
+     *
+     * @param data A search iterator over the data to store
+     * @param target The target folder definition
+     * @throws OXException
+     */
+    void save(SearchIterator<T> data, TargetFolderDefinition target) throws OXException;
 }

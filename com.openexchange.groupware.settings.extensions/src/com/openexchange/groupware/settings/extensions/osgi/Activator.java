@@ -253,15 +253,17 @@ public class Activator extends HousekeepingActivator {
 
                         @Override
                         public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                                final ComposedConfigProperty<String> prop = viewFactory.getView(user.getId(), ctx.getContextId()).property(propertyName, String.class);
-                                Object value = prop.get(metadataName);
+                            final ComposedConfigProperty<String> prop = viewFactory.getView(user.getId(), ctx.getContextId()).property(propertyName, String.class);
+                            Object value = prop.get(metadataName);
+                            if (null != value) {
                                 try {
                                     // Let's turn this into a nice object, if it conforms to JSON
                                     value = new JSONTokener(value.toString()).nextValue();
                                 } catch (final JSONException x) {
                                     // Ah well, let's pretend it's a string.
                                 }
-                                setting.setSingleValue(value);
+                            }
+                            setting.setSingleValue(value);
                         }
 
                         @Override

@@ -52,9 +52,9 @@ package com.openexchange.ajax.xing;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.json.JSONArray;
 import org.json.JSONException;
-
+import org.json.JSONObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.xing.actions.FindByMailRequest;
 import com.openexchange.ajax.xing.actions.FindByMailResponse;
@@ -91,9 +91,22 @@ public class FindByMailTest extends AbstractAJAXSession {
     	emails.add("annamariaoberhuber@googlemail.com");
         final FindByMailsRequest findByMailsRequest = new FindByMailsRequest(emails, true);
         final FindByMailsResponse findByMailsResponse = client.execute(findByMailsRequest);
+        JSONObject jsonResponse = (JSONObject) findByMailsResponse.getData();
         assertNotNull(findByMailsResponse);
+        assertNotNull(jsonResponse.getJSONObject("results"));
+        int returnedResults = jsonResponse.getJSONObject("results").getInt("total");
+        assertEquals("Returned unexpected total of users", returnedResults, 2);
+        JSONObject results = jsonResponse.getJSONObject("results");
+        assertNotNull(results.getJSONArray("items"));
+        JSONArray items = results.getJSONArray("items");
+        JSONObject user1 = items.getJSONObject(0);
+        assertNotNull(user1.get("user"));
+        assertNotNull(user1.get("email"));
+        JSONObject user2 = items.getJSONObject(1);
+        assertNotNull(user2.get("user"));
+        assertNotNull(user2.get("email"));
     }
-    
+
     /**
      * Test find_by_mail action
      * 
@@ -104,6 +117,8 @@ public class FindByMailTest extends AbstractAJAXSession {
     public void testFindByMail() throws OXException, IOException, JSONException {
         final FindByMailRequest findByMailRequest = new FindByMailRequest("ewaldbartkowiak@googlemail.com", true);
         final FindByMailResponse findByMailResponse = client.execute(findByMailRequest);
+        JSONObject jsonResponse = (JSONObject) findByMailResponse.getData();
         assertNotNull(findByMailResponse);
+        assertNotNull(jsonResponse.get("id"));
     }
 }

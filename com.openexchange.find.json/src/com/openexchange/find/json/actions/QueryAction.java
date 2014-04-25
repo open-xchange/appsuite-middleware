@@ -50,6 +50,7 @@
 package com.openexchange.find.json.actions;
 
 import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -90,7 +91,8 @@ public class QueryAction extends AbstractFindAction {
         }
 
         final List<ActiveFacet> activeFacets = request.getActiveFacets();
-        final SearchRequest searchRequest = new SearchRequest(offset.off, offset.len, activeFacets);
+        Map<String, String> options = request.getOptions();
+        final SearchRequest searchRequest = new SearchRequest(offset.off, offset.len, activeFacets, options);
         final SearchResult result = searchService.search(searchRequest, module, request.getServerSession());
         return new AJAXRequestResult(result, SearchResult.class.getName());
     }

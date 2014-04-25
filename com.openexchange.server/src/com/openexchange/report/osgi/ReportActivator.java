@@ -57,7 +57,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.login.LoginHandlerService;
-import com.openexchange.osgi.DependantServiceRegisterer;
+import com.openexchange.osgi.DependentServiceRegisterer;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.report.internal.LastLoginRecorder;
@@ -85,7 +85,7 @@ public final class ReportActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        track(new DependantServiceRegisterer<LoginHandlerService>(
+        track(new DependentServiceRegisterer<LoginHandlerService>(
             context,
             LoginHandlerService.class,
             LastLoginRecorder.class,
@@ -94,7 +94,7 @@ public final class ReportActivator extends HousekeepingActivator {
             UserService.class));
         final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
         dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
-        track(new DependantServiceRegisterer<EventHandler>(
+        track(new DependentServiceRegisterer<EventHandler>(
             context,
             EventHandler.class,
             LastLoginUpdater.class,
@@ -104,7 +104,7 @@ public final class ReportActivator extends HousekeepingActivator {
         registerService(LoginCounterService.class, new LoginCounterImpl());
     }
 
-    private final void track(DependantServiceRegisterer<?> registerer) throws InvalidSyntaxException {
+    private final void track(DependentServiceRegisterer<?> registerer) throws InvalidSyntaxException {
         track(registerer.getFilter(), registerer);
     }
 }

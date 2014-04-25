@@ -112,6 +112,7 @@ public class UCSAuthentication implements AuthenticationService {
     public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
 
         DirContext ctx = null;
+        NamingEnumeration<SearchResult> result = null;
 
         try {
 
@@ -156,7 +157,7 @@ public class UCSAuthentication implements AuthenticationService {
                 search_pattern = search_pattern.replaceFirst("@USER@", uid);
 
 
-                final NamingEnumeration<SearchResult> result = ctx.search("",search_pattern,sc);
+                result = ctx.search("",search_pattern,sc);
 
                 LOG.debug("Now searching on server {} for DN of User {} with BASE: {} and pattern {}", LDAP_CONFIG.get(Context.PROVIDER_URL), uid, props.get("LDAP_BASE"), search_pattern);
 
@@ -276,6 +277,13 @@ public class UCSAuthentication implements AuthenticationService {
             LOG.error("Internal error!", e1);
             throw LoginExceptionCodes.COMMUNICATION.create(e1);
         } finally {
+            if (null != result) {
+                try {
+                    result.close();
+                } catch (NamingException e) {
+                    LOG.error("", e);
+                }
+            }
             if (null != ctx) {
                 try {
                     ctx.close();

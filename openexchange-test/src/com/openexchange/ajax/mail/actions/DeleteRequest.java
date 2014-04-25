@@ -128,11 +128,13 @@ public class DeleteRequest extends AbstractMailRequest<DeleteResponse> {
         return array;
     }
 
-    public void ignoreError() {
+    public DeleteRequest ignoreError() {
         failOnError = false;
+        return this;
     }
 
-    public void failOnError() {
+    public DeleteRequest failOnError() {
         failOnError = true;
+        return this;
     }
 }

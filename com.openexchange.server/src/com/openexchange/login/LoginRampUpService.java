@@ -56,27 +56,28 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * A @link LoginRampUpService} contributes data based on the client id sent in the login request.
- * This allows optimisation of the number of calls needed for an intial login.
+ * A {@link LoginRampUpService} contributes data based on the client id sent in the login request.
+ * This allows optimization of the number of calls needed for an initial login.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface LoginRampUpService {
-    
+
     /**
      * Return whether this ramp up service wants to contribute to a given client ID
      * Note that only one RampUpService will ever be used for a given client.
      * @param client
      * @return true, if this ramp up service deals with the given client
      */
-    public boolean contributesTo(String client);
-    
+    boolean contributesTo(String client);
+
     /**
      * Generate the contribution for the given session
      * @param session The authenticated session
-     * @param request 
+     * @param request
      * @return The contribution
      * @throws OXException
      */
-    public JSONObject getContribution(ServerSession session, AJAXRequestData request) throws OXException;
+    JSONObject getContribution(ServerSession session, AJAXRequestData request) throws OXException;
+
 }

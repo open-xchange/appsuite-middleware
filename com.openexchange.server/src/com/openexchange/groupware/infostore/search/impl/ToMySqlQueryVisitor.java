@@ -150,7 +150,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         if (null != allFolderIds && 0 < allFolderIds.length) {
             if (null != ownFolderIds && ownFolderIds.length > 0) {
                 needOr = true;
-                sb.append("(");
+                sb.append('(');
             }
             if (1 == allFolderIds.length) {
                 sb.append(INFOSTORE).append("folder_id = ").append(allFolderIds[0]);
@@ -166,15 +166,15 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
                     sb.append(" OR ");
                 }
                 if (1 == length) {
-                    sb.append("(").append(INFOSTORE).append("folder_id = ").append(ownFolderIds[0]);
-                    sb.append(" AND ").append(INFOSTORE).append("created_by = ").append(userId).append(")");
+                    sb.append('(').append(INFOSTORE).append("folder_id = ").append(ownFolderIds[0]);
+                    sb.append(" AND ").append(INFOSTORE).append("created_by = ").append(userId).append(')');
                 } else {
-                    sb.append("(").append(INFOSTORE).append("folder_id IN ");
+                    sb.append('(').append(INFOSTORE).append("folder_id IN ");
                     sb.append(appendFolders(ownFolderIds));
-                    sb.append(" AND ").append(INFOSTORE).append("created_by = ").append(userId).append(")");
+                    sb.append(" AND ").append(INFOSTORE).append("created_by = ").append(userId).append(')');
                 }
                 if (needOr) {
-                    sb.append(")");
+                    sb.append(')');
                 }
             }
         }
@@ -211,29 +211,52 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     public void visit(AndTerm andTerm) throws OXException {
         final List<SearchTerm<?>> terms = andTerm.getPattern();
         final int size = terms.size();
-        sb.append("(");
-        for (int i = 0; i < size; i++) {
-            final SearchTerm<?> searchTerm = terms.get(i);
-            searchTerm.visit(this);
-            sb.append("AND ");
-        }
-        sb.delete(sb.length() - 4, sb.length());
-        sb.append(")");
 
+        // Empty?
+        if (size <= 0) {
+            return;
+        }
+
+        // Only one term?
+        if (1 == size) {
+            terms.get(0).visit(this);
+            return;
+        }
+
+        // More than 1 term
+        sb.append('(');
+        terms.get(0).visit(this);
+        for (int i = 1; i < size; i++) {
+            sb.append("AND ");
+            terms.get(i).visit(this);
+        }
+        sb.append(')');
     }
 
     @Override
     public void visit(OrTerm orTerm) throws OXException {
         final List<SearchTerm<?>> terms = orTerm.getPattern();
         final int size = terms.size();
-        sb.append("(");
-        for (int i = 0; i < size; i++) {
-            final SearchTerm<?> searchTerm = terms.get(i);
-            searchTerm.visit(this);
-            sb.append("OR ");
+
+        // Empty?
+        if (size <= 0) {
+            return;
         }
-        sb.delete(sb.length() - 3, sb.length());
-        sb.append(")");
+
+        // Only one term?
+        if (1 == size) {
+            terms.get(0).visit(this);
+            return;
+        }
+
+        // More than 1 term
+        sb.append('(');
+        terms.get(0).visit(this);
+        for (int i = 1; i < size; i++) {
+            sb.append("OR ");
+            terms.get(i).visit(this);
+        }
+        sb.append(')');
     }
 
     @Override

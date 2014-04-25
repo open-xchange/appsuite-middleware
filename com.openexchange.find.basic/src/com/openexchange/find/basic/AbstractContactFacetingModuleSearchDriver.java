@@ -116,7 +116,13 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * @throws OXException If auto-complete search fails for any reason
      */
     protected List<Contact> autocompleteContacts(ServerSession session, AutocompleteRequest autocompleteRequest) throws OXException {
-        return searchContacts(session, autocompleteRequest.getPrefix(), true, null, autocompleteRequest.getLimit(), false);
+        return searchContacts(
+            session,
+            autocompleteRequest.getPrefix(),
+            true,
+            null,
+            autocompleteRequest.getLimit(),
+            autocompleteRequest.getOptions().includeContextAdmin());
     }
 
     /**
@@ -128,8 +134,13 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * @throws OXException If auto-complete search fails for any reason
      */
     protected List<Contact> autocompleteUsers(ServerSession session, AutocompleteRequest autocompleteRequest) throws OXException {
-        return searchContacts(session, autocompleteRequest.getPrefix(), false,
-            Collections.singletonList(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID)), autocompleteRequest.getLimit(), false);
+        return searchContacts(
+            session,
+            autocompleteRequest.getPrefix(),
+            false,
+            Collections.singletonList(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID)),
+            autocompleteRequest.getLimit(),
+            autocompleteRequest.getOptions().includeContextAdmin());
     }
 
     /**
@@ -177,14 +188,14 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * @param requireEmail <code>true</code> if the returned contacts should have at least one e-mail address, <code>false</code>,
      *                     otherwise
      * @param folderIDs A list of folder IDs to restrict the search for, or <code>null</code> to search in all visible folders
-     * @param excludeAdmin <code>true</code> to exclude the context administrator from search results, <code>false</code>, otherwise
+     * @param includeAdmin <code>true</code> to include the context administrator from search results, <code>false</code>, otherwise
      * @return A list of found contacts, sorted using the {@link UseCountComparator} comparator
      * @throws OXException If contact search fails
      */
-    private List<Contact> searchContacts(ServerSession session, String prefix, boolean requireEmail, List<String> folderIDs, int limit, boolean excludeAdmin) throws OXException {
+    private List<Contact> searchContacts(ServerSession session, String prefix, boolean requireEmail, List<String> folderIDs, int limit, boolean includeAdmin) throws OXException {
         SortOptions sortOptions = new SortOptions(SORT_ORDER);
         sortOptions.setLimit(0 < limit ? limit : DEFAULT_LIMIT);
-        int excludedAdminID = excludeAdmin ? session.getContext().getMailadmin() : -1;
+        int excludedAdminID = !includeAdmin ? session.getContext().getMailadmin() : -1;
         List<Contact> contacts = null;
         {
             SearchIterator<Contact> searchIterator = null;

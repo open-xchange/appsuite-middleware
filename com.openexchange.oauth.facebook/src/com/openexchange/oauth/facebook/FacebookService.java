@@ -49,11 +49,10 @@
 
 package com.openexchange.oauth.facebook;
 
-import java.util.List;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
 
 
 /**
@@ -63,7 +62,17 @@ import com.openexchange.session.Session;
  */
 public interface FacebookService {
 
-    public abstract List<Contact> getContacts(Session session, int user, int contextId, int accountId) throws OXException;
+    /**
+     * Loads and parses the facebook contacts in the supplied account.
+     *
+     * @param session The session
+     * @param user The user ID
+     * @param contextId The context ID
+     * @param accountId The account ID
+     * @return A search iterator for the loaded contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getContacts(Session session, int user, int contextId, int accountId) throws OXException;
 
     public abstract String getAccountDisplayName(Session session, int user, int contextId, int accountId);
 }

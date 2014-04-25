@@ -49,12 +49,12 @@
 
 package com.openexchange.config.json.actions;
 
-import static com.openexchange.ajax.AJAXServlet.decodeUrl;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtilis;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -137,7 +137,7 @@ public abstract class AbstractConfigAction implements AJAXActionService {
         String uri;
         try {
             final String characterEncoding = req.getCharacterEncoding();
-            uri = decodeUrl(req.getRequestURI(), characterEncoding == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : characterEncoding);
+            uri = AJAXUtilis.decodeUrl(req.getRequestURI(), characterEncoding == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : characterEncoding);
         } catch (final RuntimeException e) {
             LOG.error("Unsupported encoding", e);
             uri = req.getRequestURI();

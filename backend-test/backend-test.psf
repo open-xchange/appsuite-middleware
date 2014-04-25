@@ -31,6 +31,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.http.grizzly"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.http.testservlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.i18n"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.importexport"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.index.solr"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.java"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.jolokia"/>
@@ -64,6 +65,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.threadpool"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.tokenlogin.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.user.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.xing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,javax.mail"/>
 </provider>
 </psf>

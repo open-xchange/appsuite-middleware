@@ -64,7 +64,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtilis;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
@@ -94,7 +94,7 @@ public final class LoginTools {
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      */
     public static String encodeUrl(final String s, final boolean forAnchor) {
-        return AJAXServlet.encodeUrl(s, forAnchor);
+        return AJAXUtilis.encodeUrl(s, forAnchor);
     }
 
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|(?:%0[aA])?%0[dD]");

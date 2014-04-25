@@ -215,18 +215,23 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
                 cons.setSearchScope(SearchControls.SUBTREE_SCOPE);
                 cons.setCountLimit(0);
                 cons.setReturningAttributes(new String[]{"dn"});
-                NamingEnumeration<SearchResult> res = context.search(baseDN, filter, cons);
-                if( res.hasMoreElements() ) {
-                    dn = res.nextElement().getNameInNamespace();
+                NamingEnumeration<SearchResult> res = null;
+                try {
+                    res = context.search(baseDN, filter, cons);
                     if( res.hasMoreElements() ) {
-                        final String errortext = "Found more then one user with " + uidAttribute + "=" + uid;
+                        dn = res.nextElement().getNameInNamespace();
+                        if( res.hasMoreElements() ) {
+                            final String errortext = "Found more then one user with " + uidAttribute + "=" + uid;
+                            LOG.error(errortext);
+                            throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                        }
+                    } else {
+                        final String errortext = "No user found with " + uidAttribute + "=" + uid;
                         LOG.error(errortext);
-                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uid);
                     }
-                } else {
-                    final String errortext = "No user found with " + uidAttribute + "=" + uid;
-                    LOG.error(errortext);
-                    throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uid);
+                } finally {
+                    close(res);
                 }
                 context.close();
             } else {
@@ -258,27 +263,32 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
                     searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
                     searchControls.setCountLimit(0);
                     searchControls.setReturningAttributes(new String[]{ldapReturnField});
-                    final NamingEnumeration<SearchResult> search;
+                    NamingEnumeration<SearchResult> search = null;
                     NamingEnumeration<SearchResult> searchProxy = null;
-                    if (null == samAccountName) {
-                        if( proxyAs != null ) {
-                            search = context.search(this.baseDN, "(displayName=" + uid + ")", searchControls);
-                            searchProxy = context.search(this.baseDN, "(displayName=" + proxyAs + ")", searchControls);
+                    try {
+                        if (null == samAccountName) {
+                            if( proxyAs != null ) {
+                                search = context.search(this.baseDN, "(displayName=" + uid + ")", searchControls);
+                                searchProxy = context.search(this.baseDN, "(displayName=" + proxyAs + ")", searchControls);
+                            } else {
+                                search = context.search(this.baseDN, "(displayName=" + uid + ")", searchControls);
+                            }
                         } else {
-                            search = context.search(this.baseDN, "(displayName=" + uid + ")", searchControls);
+                            search = context.search(this.baseDN, "(sAMAccountName=" + samAccountName + ")", searchControls);
                         }
-                    } else {
-                        search = context.search(this.baseDN, "(sAMAccountName=" + samAccountName + ")", searchControls);
-                    }
-                    if (null != search && search.hasMoreElements()) {
-                        final SearchResult next = search.next();
-                        userDnAttributes = next.getAttributes();
-                        if( proxyAs != null && searchProxy != null ) {
-                            puser = (String)searchProxy.next().getAttributes().get(ldapReturnField).get();
+                        if (null != search && search.hasMoreElements()) {
+                            final SearchResult next = search.next();
+                            userDnAttributes = next.getAttributes();
+                            if( proxyAs != null && searchProxy != null ) {
+                                puser = (String)searchProxy.next().getAttributes().get(ldapReturnField).get();
+                            }
+                        } else {
+                            LOG.error("No user with displayname {} found.", uid);
+                            throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uid);
                         }
-                    } else {
-                        LOG.error("No user with displayname {} found.", uid);
-                        throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uid);
+                    } finally {
+                        close(search);
+                        close(searchProxy);
                     }
                 } else {
                     userDnAttributes = context.getAttributes(dn);
@@ -414,4 +424,20 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
         map.put(CONFIGFILE, PROPERTIES);
         return map;
     }
+
+    /**
+     * Closes the supplied naming enumeration, swallowing a possible {@link NamingException}.
+     *
+     * @param namingEnumeration The naming operation to close, or <code>null</code> to do nothing for convenience
+     */
+    private static void close(NamingEnumeration<?> namingEnumeration) {
+        if (null != namingEnumeration) {
+            try {
+                namingEnumeration.close();
+            } catch (NamingException e) {
+                LOG.warn("Error closing naming enumeration", e);
+            }
+        }
+    }
+
 }

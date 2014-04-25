@@ -70,7 +70,7 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
     private final int defaultRanking;
 
     /**
-     * Initializes a new {@link RankingAwareNearRegistryServiceTracker}.
+     * Initializes a new {@link RankingAwareNearRegistryServiceTracker} with <tt>0</tt> (zero) as default ranking.
      *
      * @param context The bundle context
      * @param clazz The service's class

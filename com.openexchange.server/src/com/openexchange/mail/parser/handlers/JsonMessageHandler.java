@@ -392,7 +392,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     private TimeZone getTimeZone() throws OXException {
         if (timeZone == null) {
-            timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+            if (session instanceof ServerSession) {
+                timeZone = TimeZoneUtils.getTimeZone(((ServerSession) session).getUser().getTimeZone());
+            } else {
+                timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+            }
         }
         return timeZone;
     }
@@ -750,7 +754,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             }
                         } else {
                             try {
-                                asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.equals(displayMode));
+                                asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, false);
                                 getAttachmentsArr().remove(0);
                             } catch (final JSONException e) {
                                 throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1333,6 +1337,15 @@ public final class JsonMessageHandler implements MailMessageHandler {
             }
         }
          */
+
+        String disposition = null;
+        // Check whether to discard passed part
+        if ((textAppended || null != plainText) && isAlternative && null != altId && id.startsWith(altId)) {
+            // Ignore it as part of a multipart/alternative and a text version was already selected
+            disposition = "none";
+        }
+
+        // Process it
         final ContentType contentType = part.getContentType();
         if (isVCalendar(baseContentType) && !contentType.containsParameter("method")) {
             /*
@@ -1357,7 +1370,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
          * When creating a JSON message object from a message we do not distinguish special parts or image parts from "usual" attachments.
          * Therefore invoke the handleAttachment method. Maybe we need a separate handling in the future for vcards.
          */
-        return handleAttachment(part, false, baseContentType, fileName, id);
+        return handleAttachment0(part, false, disposition, baseContentType, fileName, id);
     }
 
     private static boolean isVCalendar(final String baseContentType) {

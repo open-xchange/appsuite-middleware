@@ -162,8 +162,8 @@ public class GroupDispatcher implements ComponentHandle {
                 defaultAction(stanza);
             }
         } else {
-            LOG.error("Refusing to send to GroupDispatcher {} as sender is no member of the GrupDispatcher {}", stanza.getFrom(), groupId);
-            send(new NotMember(groupId, sender));
+            LOG.error("Refusing to send to GroupDispatcher {} as sender is no member of the GroupDispatcher {}", stanza.getFrom(), groupId);
+            send(new NotMember(groupId, sender, stanza.getSelector()));
         }
     }
 
@@ -172,7 +172,7 @@ public class GroupDispatcher implements ComponentHandle {
      * @param sender The sender of the {@link Stanza}
      * @return true if the user is always allowed to send e.g. is a synthetic component from an internal context
      */
-    private boolean isWhitelisted(ID sender) {
+    protected boolean isWhitelisted(ID sender) {
         if(
             sender != null 
             && sender.isInternal()
@@ -412,7 +412,9 @@ public class GroupDispatcher implements ComponentHandle {
      * and uses the GroupDispatchers current sequence number for sending this Stanza.
      */
     public void stamp(Stanza s) {
-        s.setSelector(getStamp(s.getTo()));
+        if (s.getSelector() == null || s.getSelector().equals(Stanza.DEFAULT_SELECTOR)) {
+            s.setSelector(getStamp(s.getTo()));
+        }
         s.setSequencePrincipal(groupId);
         s.setSequenceNumber(sequenceNumber.getAndIncrement());
     }

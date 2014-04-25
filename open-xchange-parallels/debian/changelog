@@ -1,8 +1,26 @@
+open-xchange-parallels (7.6.0-1) stable; urgency=low
+
+  * First release candidate for 7.6.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 11 Apr 2014 16:21:50 +0200
+
 open-xchange-parallels (7.6.0-0) unstable; urgency=low
 
   * prepare for 7.6.0
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 12 Feb 2014 09:36:16 +0100
+
+open-xchange-parallels (7.4.2-20) stable; urgency=low
+
+  * Build for patch 2014-04-22
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 15 Apr 2014 08:43:38 +0200
+
+open-xchange-parallels (7.4.2-19) stable; urgency=low
+
+  * Build for patch 2014-04-11
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 10 Apr 2014 14:56:33 +0200
 
 open-xchange-parallels (7.4.2-18) stable; urgency=low
 

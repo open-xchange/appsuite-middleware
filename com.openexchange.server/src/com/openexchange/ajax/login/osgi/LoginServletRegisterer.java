@@ -88,12 +88,10 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
 
     private LoginServlet login;
 
-    public LoginServletRegisterer(final BundleContext context, ServiceSet<LoginRampUpService> rampUp) {
+    public LoginServletRegisterer(final BundleContext context, final ServiceSet<LoginRampUpService> rampUp) {
         super();
         this.context = context;
-        if (LoginServlet.RAMP_UP == null) {
-            LoginServlet.RAMP_UP = rampUp;
-        }
+        LoginServlet.setRampUpServices(rampUp);
     }
 
     @Override
