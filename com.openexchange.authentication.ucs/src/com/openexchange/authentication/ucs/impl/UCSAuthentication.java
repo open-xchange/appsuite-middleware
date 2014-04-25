@@ -313,11 +313,11 @@ public class UCSAuthentication implements AuthenticationService {
 
         // #### custom ssl socket factory if needed ##
         // LDAP_CONFIG.put("java.naming.ldap.factory.socket","com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
-        // LDAP_CONFIG.put(Context.PROVIDER_URL, "ldaps://"+ (String)props.get("LDAP_HOST") + ":"+ (String) props.get("LDAP_PORT") + "/"+(String) props.get("LDAP_BASE") + "");
+        // LDAP_CONFIG.put(Context.PROVIDER_URL, "ldaps://"+ (String)props.get("LDAP_HOST") + ":"+ (String) props.get("LDAP_PORT") + "/"+(String) props.get("LDAP_BASE"));
         // ###########################################
 
         // we choose normal ldap without secure socket,
-        LDAP_CONFIG.put(Context.PROVIDER_URL, "ldap://"+ (String) props.get("LDAP_HOST") + ":"+ (String) props.get("LDAP_PORT") + "/"+ (String) props.get("LDAP_BASE") + "");
+        LDAP_CONFIG.put(Context.PROVIDER_URL, "ldap://"+ (String) props.get("LDAP_HOST") + ":"+ (String) props.get("LDAP_PORT") + "/"+ (String) props.get("LDAP_BASE"));
 
     }
 

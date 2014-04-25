@@ -1380,7 +1380,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 stmt.setString(2, username);
                 rs = stmt.executeQuery();
                 if (!rs.next()) {
-                    throw new StorageException("No such user " + username + " in context " + ctxid + "");
+                    throw new StorageException("No such user " + username + " in context " + ctxid);
                 }
                 user.setId(I(rs.getInt(1)));
                 return null == rs.getString(2) ? false : true;
