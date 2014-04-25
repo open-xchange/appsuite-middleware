@@ -76,6 +76,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1296,13 +1297,25 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     orderedAttributes = new ArrayList<Attribute>(attributes);
 
                     final UpdateMailAccountBuilder sqlBuilder = new UpdateMailAccountBuilder();
-                    for (final Attribute attribute : orderedAttributes) {
-                        attribute.doSwitch(sqlBuilder);
-                    }
+                    final GetSwitch getter = new GetSwitch(mailAccount);
 
+                    // Build SQL statement
+                    for (final Iterator<Attribute> iter = orderedAttributes.iterator(); iter.hasNext();) {
+                        final Attribute attribute = iter.next();
+                        if (Attribute.MAIL_URL_LITERAL == attribute) {
+                            final Object value = attribute.doSwitch(getter);
+                            if (null == value) {
+                                iter.remove();
+                            } else {
+                                attribute.doSwitch(sqlBuilder);
+                            }
+                        } else {
+                            attribute.doSwitch(sqlBuilder);
+                        }
+                    }
                     stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
 
-                    final GetSwitch getter = new GetSwitch(mailAccount);
+                    // Fill prepared statement
                     int pos = 1;
                     for (final Attribute attribute : orderedAttributes) {
                         if (!sqlBuilder.handles(attribute)) {
@@ -1388,13 +1401,25 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
                     if (exists) {
                         final UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder();
-                        for (final Attribute attribute : orderedAttributes) {
-                            attribute.doSwitch(sqlBuilder);
-                        }
+                        final GetSwitch getter = new GetSwitch(mailAccount);
 
+                        // Compose SQL statement
+                        for (final Iterator<Attribute> iter = orderedAttributes.iterator(); iter.hasNext();) {
+                            final Attribute attribute = iter.next();
+                            if (Attribute.TRANSPORT_URL_LITERAL == attribute) {
+                                final Object value = attribute.doSwitch(getter);
+                                if (null == value) {
+                                    iter.remove();
+                                } else {
+                                    attribute.doSwitch(sqlBuilder);
+                                }
+                            } else {
+                                attribute.doSwitch(sqlBuilder);
+                            }
+                        }
                         stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
 
-                        final GetSwitch getter = new GetSwitch(mailAccount);
+                        // Fill prepared statement
                         pos = 1;
                         for (final Attribute attribute : orderedAttributes) {
                             if (!sqlBuilder.handles(attribute)) {
