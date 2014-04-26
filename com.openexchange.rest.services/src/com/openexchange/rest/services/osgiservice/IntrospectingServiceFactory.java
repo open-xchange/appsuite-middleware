@@ -53,7 +53,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.rest.services.OXRESTMatch;
 import com.openexchange.rest.services.OXRESTRoute;
 import com.openexchange.rest.services.OXRESTService;
@@ -78,33 +77,35 @@ import com.openexchange.server.ServiceLookup;
  */
 public class IntrospectingServiceFactory<T> implements OXRESTServiceFactory {
 
-    private final Class<? extends OXRESTService<T>> klass;
+    private final Class<? extends OXRESTService<T>> clazz;
     private final String root;
 
-    private final Map<OXRESTRoute, Method> methods = new HashMap<OXRESTRoute, Method>();
-    private List<OXRESTRoute> routes = null;
+    private final HashMap<OXRESTRoute, Method> methods;
+    private final List<OXRESTRoute> routes;
     private final ServiceLookup services;
     private final T context;
 
     /**
      * Initializes a new {@link IntrospectingServiceFactory}.
-     * @param klass
-     * @param services
+     *
+     * @param clazz The service's class
+     * @param services The service look-up
+     * @param context The associated context
      */
-    public IntrospectingServiceFactory(Class<? extends OXRESTService<T>> klass, ServiceLookup services, T context) {
+    public IntrospectingServiceFactory(Class<? extends OXRESTService<T>> clazz, ServiceLookup services, T context) {
         super();
+        methods = new HashMap<OXRESTRoute, Method>();
         this.services = services;
-        this.klass = klass;
+        this.clazz = clazz;
         this.context = context;
-        ROOT rootAnnotation = klass.getAnnotation(ROOT.class);
+        ROOT rootAnnotation = clazz.getAnnotation(ROOT.class);
         if (rootAnnotation == null) {
             throw new IllegalArgumentException("The service class must contain a 'root' annotation");
         }
 
         this.root = rootAnnotation.value();
 
-
-        Method[] instanceMethods = klass.getMethods();
+        Method[] instanceMethods = clazz.getMethods();
         routes = new ArrayList<OXRESTRoute>(instanceMethods.length);
         for(Method m: instanceMethods) {
             GET getAnnotation = m.getAnnotation(GET.class);
@@ -183,7 +184,7 @@ public class IntrospectingServiceFactory<T> implements OXRESTServiceFactory {
         }
 
         try {
-            OXRESTService<T> newInstance = klass.newInstance();
+            OXRESTService<T> newInstance = clazz.newInstance();
             newInstance.setServices(services);
             newInstance.setContext(context);
             return new ReflectiveServiceWrapper(method, newInstance, match);

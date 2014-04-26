@@ -61,10 +61,21 @@ import com.openexchange.rest.services.internal.OXRESTServiceFactory;
  */
 public abstract class OXRESTActivator extends HousekeepingActivator {
 
+    /**
+     * Registers specified REST web service.
+     *
+     * @param serviceClass The service's class
+     * @param context The associated context
+     */
     protected <T> void registerWebService(Class<? extends OXRESTService<T>> serviceClass, T context) {
         registerService(OXRESTServiceFactory.class, new IntrospectingServiceFactory<T>(serviceClass, this, context));
     }
 
+    /**
+     * Registers specified REST web service.
+     *
+     * @param serviceClass The service's class
+     */
     protected void registerWebService(Class<? extends OXRESTService<Void>> serviceClass) {
         registerWebService(serviceClass, null);
     }
