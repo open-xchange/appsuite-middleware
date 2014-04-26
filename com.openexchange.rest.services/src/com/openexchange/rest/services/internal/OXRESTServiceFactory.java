@@ -60,21 +60,20 @@ import com.openexchange.rest.services.OXRESTRoute;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface OXRESTServiceFactory {
-    
+
     /**
      * The root path for handlers of this factory. e.g. /myservice, which will then be responsible for paths below /rest/myservice
      */
-    public String getRoot();
-    
+    String getRoot();
+
     /**
      * A list of routes this handler feels responsible for.
      */
-    public List<OXRESTRoute> getRoutes();
+    List<OXRESTRoute> getRoutes();
 
    /**
     * Creates a service instance for the route match. The match contains arguments extracted from the request path.
     */
-    public OXRESTServiceWrapper newWrapper(OXRESTMatch match);
-    
-    
+    OXRESTServiceWrapper newWrapper(OXRESTMatch match);
+
 }

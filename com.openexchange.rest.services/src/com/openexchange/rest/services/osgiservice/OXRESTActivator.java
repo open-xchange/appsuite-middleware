@@ -64,8 +64,9 @@ public abstract class OXRESTActivator extends HousekeepingActivator {
     protected <T> void registerWebService(Class<? extends OXRESTService<T>> serviceClass, T context) {
         registerService(OXRESTServiceFactory.class, new IntrospectingServiceFactory<T>(serviceClass, this, context));
     }
-    
+
     protected void registerWebService(Class<? extends OXRESTService<Void>> serviceClass) {
         registerWebService(serviceClass, null);
     }
+
 }

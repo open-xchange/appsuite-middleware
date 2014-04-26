@@ -62,16 +62,23 @@ import com.openexchange.rest.services.Response;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface OXRESTServiceWrapper {
-    public void setRequest(AJAXRequestData request);
-    
+
+    /**
+     * Sets given request data.
+     *
+     * @param request The request data to set
+     */
+    void setRequest(AJAXRequestData request);
+
     /**
      * Tries to deliver a response for the request.
      */
-    public Response execute() throws OXException;
-    
+    Response execute() throws OXException;
+
     /**
      * The match object that was used to choose this wrapper.
      * @see OXRESTServiceFactory#newWrapper(OXRESTMatch)
      */
-    public OXRESTMatch getMatch();
+    OXRESTMatch getMatch();
+
 }
