@@ -64,22 +64,22 @@ public interface IConfFileHandler {
     /**
      * This method is used from internal files
      * 
-     * @param diff - The {@link DiffResult} the processing results of the current handler will be attached.
+     * @param diffResult - The {@link DiffResult} the processing results of the current handler will be attached.
      * @return The {@link DiffResult} with all results of the previously given and the results of this handler.
      */
-    public DiffResult getDiff(DiffResult diff);
+    public DiffResult getDiff(DiffResult diffResult);
 
     /**
      * This method might be used from different handlers<br>
      * <br>
      * Hint: only use provided objects for processing within this method and do not work on singleton members!
      * 
-     * @param diff
+     * @param diffResult
      * @param lOriginalFiles
      * @param lInstalledFiles
      * @return
      */
-    public DiffResult getDiff(DiffResult diff, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles);
+    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles);
 
     /**
      * Add a file for processing to get a diff result.

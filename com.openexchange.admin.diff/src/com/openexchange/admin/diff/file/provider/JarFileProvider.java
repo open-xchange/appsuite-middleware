@@ -61,8 +61,10 @@ import java.util.jar.JarFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.openexchange.admin.diff.file.type.ConfFileHandler;
 import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
+import com.openexchange.admin.diff.result.DiffResult;
 
 /**
  * Provides configuration files from within a jar file.<br>
@@ -80,7 +82,7 @@ public class JarFileProvider implements IConfigurationFileProvider {
      * @throws IOException
      */
     @Override
-    public List<File> readConfigurationFiles(String rootFolder, String[] fileExtension) {
+    public List<File> readConfigurationFiles(DiffResult diffResult, String rootFolder, String[] fileExtension) {
         Collection<File> listFiles = FileUtils.listFiles(new File(rootFolder), new String[] { "jar" }, false);
 
         if (listFiles != null) {
@@ -93,31 +95,36 @@ public class JarFileProvider implements IConfigurationFileProvider {
      * {@inheritDoc}
      */
     @Override
-    public void addFilesToDiffQueue(List<File> filesToAdd, boolean isOriginal) throws IOException {
+    public void addFilesToDiffQueue(DiffResult diffResult, List<File> filesToAdd, boolean isOriginal) {
         if (filesToAdd == null) {
             return;
         }
 
         for (File currentFile : filesToAdd) {
 
-            JarFile jarFile = new JarFile(currentFile);
-            final Enumeration<JarEntry> entries = jarFile.entries();
+            JarFile jarFile;
+            try {
+                jarFile = new JarFile(currentFile);
+                final Enumeration<JarEntry> entries = jarFile.entries();
 
-            while (entries.hasMoreElements()) {
-                final JarEntry entry = entries.nextElement();
-                final String entryName = entry.getName();
+                while (entries.hasMoreElements()) {
+                    final JarEntry entry = entries.nextElement();
+                    final String entryName = entry.getName();
 
-                // TODO diese Abfrage noch benoetigt oder dank currentFile.isFile schon abgehandelt?!
-                final int slashIdx = entryName.lastIndexOf('/');
-                if (slashIdx > 0) {
-                    final String entryExt = entryName.substring(slashIdx + 1);
+                    // TODO diese Abfrage noch benoetigt oder dank currentFile.isFile schon abgehandelt?!
+                    final int slashIdx = entryName.lastIndexOf('/');
+                    if (slashIdx > 0) {
+                        final String entryExt = entryName.substring(slashIdx + 1);
 
-                    if (!"".equalsIgnoreCase(entryExt) && FilenameUtils.isExtension(entryExt, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE)) {
-                        InputStream inputStream = jarFile.getInputStream(entry);
-                        String fileContent = IOUtils.toString(inputStream);
-                        ConfFileHandler.addConfigurationFile(entryExt, fileContent, isOriginal);
+                        if (!"".equalsIgnoreCase(entryExt) && FilenameUtils.isExtension(entryExt, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE)) {
+                            InputStream inputStream = jarFile.getInputStream(entry);
+                            String fileContent = IOUtils.toString(inputStream);
+                            ConfFileHandler.addConfigurationFile(entryExt, fileContent, isOriginal);
+                        }
                     }
                 }
+            } catch (IOException e) {
+                diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
             }
         }
     }

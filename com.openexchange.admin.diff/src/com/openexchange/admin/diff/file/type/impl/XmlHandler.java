@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.custommonkey.xmlunit.DetailedDiff;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.Difference;
@@ -91,7 +92,7 @@ public class XmlHandler extends AbstractFileHandler {
      * {@inheritDoc}
      */
     @Override
-    public DiffResult getDiff(DiffResult diff, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
+    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
         configureXMLUnitComparator();
 
         Iterator<Entry<String, String>> it = lOriginalFiles.entrySet().iterator();
@@ -118,14 +119,14 @@ public class XmlHandler extends AbstractFileHandler {
                     Difference next = iterator.next();
                     difference = difference.concat(next.toString() + "\n");
                 }
-                diff.getChangedProperties().put(pairs.getKey(), new PropertyDiffResultSet(pairs.getKey(), PropertyDiffResultSet.DETAILED_COMPARISION_NOT_POSSIBLE_MSG, difference));
+                diffResult.getChangedProperties().put(pairs.getKey(), new PropertyDiffResultSet(pairs.getKey(), PropertyDiffResultSet.DETAILED_COMPARISION_NOT_POSSIBLE_MSG, difference));
             } catch (SAXException e) {
-                diff.getProcessingErrors().add(e.getLocalizedMessage());
+                diffResult.getProcessingErrors().add("Error while xml diff: " + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
             } catch (IOException e) {
-                diff.getProcessingErrors().add(e.getLocalizedMessage());
+                diffResult.getProcessingErrors().add(e.getLocalizedMessage());
             }
         }
-        return diff;
+        return diffResult;
 
     }
 

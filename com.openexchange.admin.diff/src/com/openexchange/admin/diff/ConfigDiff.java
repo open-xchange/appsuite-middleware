@@ -49,12 +49,9 @@
 
 package com.openexchange.admin.diff;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.openexchange.admin.diff.file.FileHandler;
 import com.openexchange.admin.diff.file.provider.ConfFolderFileProvider;
 import com.openexchange.admin.diff.file.provider.JarFileProvider;
@@ -107,15 +104,8 @@ public class ConfigDiff {
     public DiffResult run() {
         DiffResult diffResult = new DiffResult();
 
-        try {
-            this.fileHandler.readConfFiles(this.originalFolder, true, new JarFileProvider(), new ConfFolderFileProvider());
-
-            this.fileHandler.readConfFiles(this.installationFolder, false, new RecursiveFileProvider());
-        } catch (FileNotFoundException e) {
-            diffResult.getProcessingErrors().add("Stopped reading files with the following exception\n" + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
-        } catch (IOException e) {
-            diffResult.getProcessingErrors().add("Stopped reading files with the following exception\n" + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
-        }
+        this.fileHandler.readConfFiles(diffResult, this.originalFolder, true, new JarFileProvider(), new ConfFolderFileProvider());
+        this.fileHandler.readConfFiles(diffResult, this.installationFolder, false, new RecursiveFileProvider());
 
         return getDiffs(diffResult);
     }

@@ -95,10 +95,10 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
      * {@inheritDoc}
      */
     @Override
-    public DiffResult getDiff(DiffResult diff) {
-        getFileDiffs(diff, new HashMap<String, String>(this.originalFiles), new HashMap<String, String>(this.installedFiles));
+    public DiffResult getDiff(DiffResult diffResult) {
+        getFileDiffs(diffResult, new HashMap<String, String>(this.originalFiles), new HashMap<String, String>(this.installedFiles));
 
-        return getDiff(diff, this.originalFiles, this.installedFiles);
+        return getDiff(diffResult, this.originalFiles, this.installedFiles);
     }
 
     /**
@@ -108,18 +108,18 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
      * @param lOriginalFiles - original files that should be compared
      * @param lInstalledFiles - installed files the original ones should be compared with
      */
-    protected void getFileDiffs(DiffResult diff, final HashMap<String, String> lOriginalFiles, final HashMap<String, String> lInstalledFiles) {
+    protected void getFileDiffs(DiffResult diffResult, final HashMap<String, String> lOriginalFiles, final HashMap<String, String> lInstalledFiles) {
 
         for (String origFile : lOriginalFiles.keySet()) {
             if (!lInstalledFiles.keySet().contains(origFile)) {
-                diff.getMissingFiles().add(origFile);
+                diffResult.getMissingFiles().add(origFile);
             }
             lInstalledFiles.remove(origFile);
         }
 
         if (lInstalledFiles.size() > 0) {
             for (String installedFile : lInstalledFiles.keySet()) {
-                diff.getAdditionalFiles().put(installedFile, lInstalledFiles.get(installedFile));
+                diffResult.getAdditionalFiles().put(installedFile, lInstalledFiles.get(installedFile));
             }
         }
     }

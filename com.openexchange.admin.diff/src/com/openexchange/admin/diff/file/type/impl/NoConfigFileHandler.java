@@ -85,10 +85,10 @@ public class NoConfigFileHandler extends AbstractFileHandler {
      * {@inheritDoc}
      */
     @Override
-    public DiffResult getDiff(DiffResult diff, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
+    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
         for (Entry<String, String> installedNonconfigurationFile : lInstalledFiles.entrySet()) {
-            diff.getNonConfigurationFiles().add(installedNonconfigurationFile.getKey());
+            diffResult.getNonConfigurationFiles().add(installedNonconfigurationFile.getKey());
         }
-        return diff;
+        return diffResult;
     }
 }

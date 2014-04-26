@@ -54,8 +54,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.openexchange.admin.diff.file.provider.IConfigurationFileProvider;
 import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
+import com.openexchange.admin.diff.result.DiffResult;
 
 
 /**
@@ -73,18 +75,24 @@ public class FileHandler {
      * @param rootDirectory is a valid directory, which can be read.
      * @throws IOException
      */
-    public void readConfFiles(String rootDirectory, boolean isOriginal, IConfigurationFileProvider... configurationFileProviders) throws IOException {
+    public void readConfFiles(DiffResult diffResult, String rootDirectory, boolean isOriginal, IConfigurationFileProvider... configurationFileProviders) {
         if (configurationFileProviders == null) {
             return;
         }
 
-        validateDirectory(new File(rootDirectory));
+        try {
+            validateDirectory(new File(rootDirectory));
+        } catch (FileNotFoundException e) {
+
+            diffResult.getProcessingErrors().add("Error in validating directory " + rootDirectory + "\n" + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
+            return;
+        }
 
         List<File> confFiles = new ArrayList<File>();
 
         for (IConfigurationFileProvider configurationFileProvider : configurationFileProviders) {
-            confFiles = configurationFileProvider.readConfigurationFiles(rootDirectory, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
-            configurationFileProvider.addFilesToDiffQueue(confFiles, isOriginal);
+            confFiles = configurationFileProvider.readConfigurationFiles(diffResult, rootDirectory, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
+            configurationFileProvider.addFilesToDiffQueue(diffResult, confFiles, isOriginal);
         }
     }
 

@@ -50,6 +50,7 @@
 package com.openexchange.admin.diff.file.provider;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,7 +58,9 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.openexchange.admin.diff.file.type.ConfFileHandler;
+import com.openexchange.admin.diff.result.DiffResult;
 
 
 /**
@@ -72,7 +75,7 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
      * {@inheritDoc}
      */
     @Override
-    public List<File> readConfigurationFiles(String rootFolder, String[] fileExtension) {
+    public List<File> readConfigurationFiles(DiffResult diffResult, String rootFolder, String[] fileExtension) {
         // read all file types and not those in ConfigurationFileTypes.CONFIGURATION_FILE_TYPE to get unexpected files
         Collection<File> listFiles = FileUtils.listFiles(new File(rootFolder), null, true);
 
@@ -82,16 +85,25 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
         return new ArrayList<File>();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void addFilesToDiffQueue(List<File> filesToAdd, boolean isOriginal) throws IOException {
+    public void addFilesToDiffQueue(DiffResult diffResult, List<File> filesToAdd, boolean isOriginal) {
         if (filesToAdd == null) {
             return;
         }
 
         for (File currentFile : filesToAdd) {
-            String fileContent = IOUtils.toString(new FileReader(currentFile));
-            ConfFileHandler.addConfigurationFile(currentFile.getName(), fileContent, isOriginal);
+            String fileContent;
+            try {
+                fileContent = IOUtils.toString(new FileReader(currentFile));
+                ConfFileHandler.addConfigurationFile(currentFile.getName(), fileContent, isOriginal);
+            } catch (FileNotFoundException e) {
+                diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
+            } catch (IOException e) {
+                diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
+            }
         }
-
     }
 }

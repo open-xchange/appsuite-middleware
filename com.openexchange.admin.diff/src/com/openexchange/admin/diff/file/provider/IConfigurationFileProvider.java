@@ -50,8 +50,8 @@
 package com.openexchange.admin.diff.file.provider;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
+import com.openexchange.admin.diff.result.DiffResult;
 
 /**
  * Provides configuration files and adds them to the diff queue.
@@ -64,20 +64,20 @@ public interface IConfigurationFileProvider {
     /**
      * Read the configuration files from the given rootFolder.
      * 
+     * @param diffResult
      * @param rootFolder - the folder to start reading
      * @param fileExtension - the file extensions to look at
      * @return List with the configuration files read or an empty List if no file was found. Never returns null!
-     * @throws IOException
      */
-    public List<File> readConfigurationFiles(String rootFolder, String[] fileExtension) throws IOException;
+    public List<File> readConfigurationFiles(DiffResult diffResult, String rootFolder, String[] fileExtension);
 
     /**
      * Adds the given files to the diff queue
      * 
+     * @param diffResult
      * @param filesToAdd - the files to add to the queue
      * @param isOriginal - flag if the files to add are from original installation folder or if they are currently installed
-     * @throws IOException
      */
-    public void addFilesToDiffQueue(List<File> filesToAdd, boolean isOriginal) throws IOException;
+    public void addFilesToDiffQueue(DiffResult diffResult, List<File> filesToAdd, boolean isOriginal);
 
 }

@@ -82,7 +82,7 @@ public class ShHandler extends AbstractFileHandler {
      * {@inheritDoc}
      */
     @Override
-    public DiffResult getDiff(DiffResult diff, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
-        return PropertyHandler.getInstance().getDiff(diff, lOriginalFiles, lInstalledFiles);
+    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
+        return PropertyHandler.getInstance().getDiff(diffResult, lOriginalFiles, lInstalledFiles);
     }
 }

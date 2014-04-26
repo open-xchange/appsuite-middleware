@@ -86,11 +86,11 @@ public class YamlHandler extends AbstractFileHandler {
      * {@inheritDoc}
      */
     @Override
-    public DiffResult getDiff(DiffResult diff, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
+    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
         DiffWriter diffMatchPatchWriter = new DiffMatchPatchWriter();
-        diffMatchPatchWriter.addOutputToDiffResult(diff, lOriginalFiles, lInstalledFiles);
+        diffMatchPatchWriter.addOutputToDiffResult(diffResult, lOriginalFiles, lInstalledFiles);
 
-        return diff;
+        return diffResult;
     }
 
 }
