@@ -66,6 +66,16 @@ import com.openexchange.admin.diff.result.DiffResult;
 @SuppressWarnings("static-access")
 public class ConfigDiffCLT {
 
+    /**
+     * Default folder for original configuration files
+     */
+    private static String originalFolder = "/opt/open-xchange/bundles";
+
+    /**
+     * Default folder for installed configuration files
+     */
+    private static String installationFolder = "/opt/open-xchange/etc";
+
     private static final Options options = new Options();
     static {
         options.addOption(OptionBuilder.withLongOpt("original").hasArgs(1).withDescription("The original configuration folder provided by OX").isRequired(true).create("o"));
@@ -81,25 +91,26 @@ public class ConfigDiffCLT {
      */
     public static void main(String[] args) {
         CommandLineParser parser = new PosixParser();
-        final String originalFolder;
-        final String installedFolder;
         final String file;
         try {
             CommandLine cl = parser.parse(options, args);
+
+            if (cl.hasOption("f")) {
+                file = cl.getOptionValue("f");
+            } else {
+                file = null;
+            }
+
             if (cl.hasOption("h")) {
                 printUsage(0);
             } else if (cl.hasOption("o") && cl.hasOption("i")) {
                 originalFolder = cl.getOptionValue("o");
-                installedFolder = cl.getOptionValue("i");
-                if (cl.hasOption("f")) {
-                    file = cl.getOptionValue("f");
-                } else {
-                    file = null;
-                }
-                executeDiff(originalFolder, installedFolder, file);
+                installationFolder = cl.getOptionValue("i");
+
+                executeDiff(originalFolder, installationFolder, file);
             }
             else {
-                printUsage(-1);
+                executeDiff(ConfigDiffCLT.originalFolder, ConfigDiffCLT.installationFolder, file);
             }
         } catch (ParseException e) {
             System.out.println(e.getMessage());
