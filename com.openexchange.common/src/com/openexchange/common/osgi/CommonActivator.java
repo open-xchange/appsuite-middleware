@@ -96,8 +96,7 @@ public final class CommonActivator implements BundleActivator {
                 		"# can't support image types because java.awt.Toolkit doesn't work on servers\n" +
                 		"#\n" +
                 		"#image/gif;;        x-java-content-handler=com.sun.mail.handlers.image_gif\n" +
-                		"#image/jpeg;;       x-java-content-handler=com.sun.mail.handlers.image_jpeg\n" +
-                		"";
+                		"#image/jpeg;;       x-java-content-handler=com.sun.mail.handlers.image_jpeg\n";
                 mailcapRegistration = context.registerService(MailcapCommandMap.class, new OXMailcapCommandMap(mailcap), null);
             }
         } catch (final Exception e) {
