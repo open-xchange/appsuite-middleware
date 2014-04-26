@@ -247,7 +247,7 @@ public class MSNServiceImpl implements MSNService {
     		JSONObject metadata = new JSONObject(account.getSecret());
     		callback = metadata.getString("callback");
     	} catch (JSONException x) {
-    		throw OAuthExceptionCodes.INVALID_ACCOUNT.create();
+    		throw OAuthExceptionCodes.INVALID_ACCOUNT.create(account.getDisplayName(), account.getId());
     	}
     	String accessToken = "";
 

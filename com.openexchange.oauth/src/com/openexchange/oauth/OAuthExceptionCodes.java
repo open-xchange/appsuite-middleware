@@ -120,6 +120,10 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_ACCOUNT("The account is invalid, please recreate it.", CATEGORY_TRY_AGAIN, 13, OAuthExceptionMessages.INVALID_ACCOUNT_MSG),
     /**
+     * The account "%1$s" (id=%2$s) is invalid, please recreate it.
+     */
+    INVALID_ACCOUNT_EXTENDED("The account \"%1$s\" (id=%2$s) is invalid, please recreate it.", CATEGORY_TRY_AGAIN, 13, OAuthExceptionMessages.INVALID_ACCOUNT_MSG), // Yapp, the same error code
+    /**
      * Please provide a display name.
      */
     MISSING_DISPLAY_NAME("Please provide a display name.", CATEGORY_USER_INPUT, 14, OAuthExceptionMessages.MISSING_DISPLAY_NAME_MSG),
@@ -166,7 +170,7 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     public int getNumber() {
         return number;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

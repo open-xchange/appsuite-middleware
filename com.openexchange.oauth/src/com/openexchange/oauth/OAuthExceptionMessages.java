@@ -72,7 +72,11 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
 
 	public static final String MISSING_BODY_MSG = "The request sent was missing its body";
 
+	// The account is invalid, please recreate it.
 	public static final String INVALID_ACCOUNT_MSG = "The account is invalid, please recreate it.";
+
+    // The account "%1$s" is invalid, please recreate it.
+    public static final String INVALID_ACCOUNT_EXTENDED_MSG = "The account \"%1$s\" is invalid, please recreate it.";
 
 	// Please provide a display name.
     public static final String MISSING_DISPLAY_NAME_MSG = "Please provide a display name.";
