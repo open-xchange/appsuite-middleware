@@ -51,8 +51,10 @@ package com.openexchange.rest.services.osgiservice;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.rest.services.OXRESTMatch;
 import com.openexchange.rest.services.OXRESTRoute;
 import com.openexchange.rest.services.OXRESTService;
@@ -80,7 +82,7 @@ public class IntrospectingServiceFactory<T> implements OXRESTServiceFactory {
     private final Class<? extends OXRESTService<T>> clazz;
     private final String root;
 
-    private final HashMap<OXRESTRoute, Method> methods;
+    private final Map<OXRESTRoute, Method> methods;
     private final List<OXRESTRoute> routes;
     private final ServiceLookup services;
     private final T context;
@@ -173,7 +175,7 @@ public class IntrospectingServiceFactory<T> implements OXRESTServiceFactory {
 
     @Override
     public List<OXRESTRoute> getRoutes() {
-        return routes;
+        return Collections.unmodifiableList(routes);
     }
 
     @Override
