@@ -220,8 +220,7 @@ public final class MimeReplyTest extends TestCase {
             "------=_NextPart_Avast_Info_Boundary--\n" +
             "\n" +
             "------=_NextPart_000_0005_01CF428F.A3C3FA00--\n" +
-            "\n" +
-            "").getBytes();
+            "\n").getBytes();
 
         try {
             final javax.mail.Session mailSession = MimeDefaultSession.getDefaultSession();
