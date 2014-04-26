@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+import com.openexchange.annotation.NonNull;
 
 
 /**
@@ -71,6 +73,12 @@ public class OXRESTRoute {
     private Pattern pattern;
     private final List<String> variableNames;
 
+    /**
+     * Initializes a new {@link OXRESTRoute}.
+     *
+     * @param method The method
+     * @param path The path
+     */
     public OXRESTRoute(String method, String path) {
         super();
         variableNames = new ArrayList<String>(5);
@@ -78,19 +86,40 @@ public class OXRESTRoute {
         setPath(path);
     }
 
-    public String getMethod() {
+    /**
+     * Gets the associated HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package com.openexchange.rest.services.annotation).
+     *
+     * @return The HTTP method name
+     */
+    public @NonNull String getMethod() {
         return method;
     }
 
-    public void setMethod(String method) {
+    /**
+     * Sets the associated HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package com.openexchange.rest.services.annotation).
+     *
+     * @param method The HTTP method name
+     */
+    public void setMethod(@NonNull String method) {
         this.method = method.toUpperCase();
     }
 
-    public String getPath() {
+    /**
+     * Gets the path declaration
+     *
+     * @return The path declaration.
+     */
+    public @NonNull String getPath() {
         return path;
     }
 
-    public void setPath(String path) {
+    /**
+     * Sets the path declaration (should start with a slash <code>"/"</code>).
+     *
+     * @param path The path declaration
+     * @throws IllegalArgumentException If given path is invalid
+     */
+    public void setPath(@NonNull String path) {
         if (!path.startsWith("/")) {
             this.path = "/" + path;
         } else {
@@ -105,7 +134,9 @@ public class OXRESTRoute {
         pattern = null;
         variableNames.clear();
 
-        for(char c: this.path.toCharArray()) {
+        final int length = this.path.length();
+        for (int i = 0; i < length; i++) {
+            final char c = this.path.charAt(i);
             if (captureName) {
                 if (c == '/') {
                     captureName = false;
@@ -129,11 +160,19 @@ public class OXRESTRoute {
             variableNames.add(name.toString());
         }
 
-        pattern = Pattern.compile(regex.toString());
+        try {
+            pattern = Pattern.compile(regex.toString());
+        } catch (final PatternSyntaxException e) {
+            throw new IllegalArgumentException("Specified path is invalid", e);
+        }
     }
 
     /**
-     * Tries to match the given path to this route. Returns null if the path does not match, or a OXRESTMatch object containing the variables of the match.
+     * Tries to match the given path to this route.
+     *
+     * @param method The method associated with given path
+     * @param path The path to check on
+     * @return <code>null</code> if the path does not match, or a {@link OXRESTMatch} instance containing the variables of the match.
      */
     public OXRESTMatch match(String method, String path) {
         if (!method.equalsIgnoreCase(this.method)) {

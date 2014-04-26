@@ -81,7 +81,7 @@ public class IntrospectingServiceFactory<T> implements OXRESTServiceFactory {
     private final String root;
 
     private final HashMap<OXRESTRoute, Method> methods;
-    private List<OXRESTRoute> routes = null;
+    private final List<OXRESTRoute> routes;
     private final ServiceLookup services;
     private final T context;
 
@@ -104,7 +104,6 @@ public class IntrospectingServiceFactory<T> implements OXRESTServiceFactory {
         }
 
         this.root = rootAnnotation.value();
-
 
         Method[] instanceMethods = clazz.getMethods();
         routes = new ArrayList<OXRESTRoute>(instanceMethods.length);

@@ -49,19 +49,39 @@
 
 package com.openexchange.rest.services.internal;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
- * A {@link Services} instance keeps a static reference to the ServiceLookup
+ * A {@link Services} instance keeps a static reference to the {@link ServiceLookup} instance.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Services {
-    public static ServiceLookup SERVICES = null;
-    
-    
-    public static <T> T getService(Class<T> klass) {
-        return SERVICES.getService(klass);
+
+    /**
+     * The reference for static service look-up.
+     */
+    private static final AtomicReference<ServiceLookup> SERVICES_REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the static service look-up.
+     *
+     * @param serviceLookup The static service look-up.
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        SERVICES_REF.set(serviceLookup);
     }
+
+    /**
+     * Gets the service associated with given class.
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code>
+     */
+    public static <T> T getService(final Class<T> clazz) {
+        final ServiceLookup serviceLookup = SERVICES_REF.get();
+        return null == serviceLookup ? null : serviceLookup.getService(clazz);
+    }
+
 }
