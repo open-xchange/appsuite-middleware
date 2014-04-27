@@ -77,23 +77,33 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
     private static final long serialVersionUID = -1956702653546932381L;
 
     private static final String PREFIX = "/rest";
-    
+
+    /**
+     * The OX REST registry instance.
+     */
     public static final OXRESTRegistry REST_SERVICES = new OXRESTRegistry();
+
+    /**
+     * Initializes a new {@link OXRESTServlet}.
+     */
+    public OXRESTServlet() {
+        super();
+    }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(0, 0), PREFIX, resp);
-            
+
             Enumeration headers = req.getHeaderNames();
             while(headers.hasMoreElements()) {
                 String headerName = (String) headers.nextElement();
                 request.setHeader(headerName, req.getHeader(headerName));
             }
 
-            
+
             String path = request.getPathInfo();
-            
+
             OXRESTServiceWrapper wrapper = retrieveWrapper(req.getMethod(), path);
             if (wrapper == null) {
                 resp.sendError(404);
@@ -102,9 +112,9 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
             enhance(wrapper.getMatch(), request);
             wrapper.setRequest(request);
             Response response = wrapper.execute();
-            
+
             sendResponse(response, resp);
-            
+
         } catch (OXException e) {
             resp.sendError(500, e.getMessage());
         }
@@ -134,5 +144,5 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
     private OXRESTServiceWrapper retrieveWrapper(String method, String path) {
         return REST_SERVICES.retrieve(method, path);
     }
-    
+
 }
