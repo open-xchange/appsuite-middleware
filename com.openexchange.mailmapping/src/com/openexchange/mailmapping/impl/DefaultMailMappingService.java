@@ -53,8 +53,10 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.mailmapping.ResolvedMail;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -64,13 +66,16 @@ import com.openexchange.user.UserService;
  * to the domain name for an email address, while the mail address of the user should be the primary mail address or one of the aliases.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Simple code clean-up
  */
 public class DefaultMailMappingService implements MailResolver {
 
-    private ServiceLookup services;
+    /** The service look-up */
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link DefaultMailMappingService}.
+     *
      * @param mailMappingActivator
      */
      public DefaultMailMappingService(ServiceLookup services) {
@@ -80,25 +85,41 @@ public class DefaultMailMappingService implements MailResolver {
 
     @Override
     public ResolvedMail resolve(String mail) throws OXException {
-        if (mail == null) {
+        if (Strings.isEmpty(mail)) {
             return null;
         }
+
         int atSign = mail.lastIndexOf('@');
+        if (atSign <= 0 || atSign >= mail.length()) {
+            // Does not seem to be a valid E-Mail address
+            return null;
+        }
+
+        // Extract domain
         String domain = mail.substring(atSign + 1);
-        
-        // Map the domain name to a context id
+
+        // Acquire needed services
         ContextService contexts = services.getService(ContextService.class);
+        if (null == contexts) {
+            throw ServiceExceptionCode.absentService(ContextService.class);
+        }
+        UserService users = services.getService(UserService.class);
+        if (null == users) {
+            throw ServiceExceptionCode.absentService(UserService.class);
+        }
+
+        // Map the domain name to a context id
         int cid = contexts.getContextId(domain);
         if (cid <= 0) {
             return null;
         }
         Context context = contexts.getContext(cid);
         // Search for a user with the mail address
-        User found = services.getService(UserService.class).searchUser(mail, context, true);
+        User found = users.searchUser(mail, context, true);
         if (found == null) {
             return null;
         }
-        
+
         return new ResolvedMail(found.getId(), context.getContextId());
     }
 

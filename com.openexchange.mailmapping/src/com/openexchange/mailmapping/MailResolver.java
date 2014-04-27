@@ -51,14 +51,21 @@ package com.openexchange.mailmapping;
 
 import com.openexchange.exception.OXException;
 
-
 /**
- * A {@link MailResolver} knows how to resolve mail addresses to a context and userId. 
+ * A {@link MailResolver} knows how to resolve mail addresses to a context and userId.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public interface MailResolver {
 
+    /**
+     * Resolves specified E-Mail address
+     *
+     * @param mail The E-Mail address to resolve
+     * @return The resolved E-Mail address or <code>null</code> if it could not be resolved
+     * @throws OXException If resolve operation fails
+     */
     ResolvedMail resolve(String mail) throws OXException;
 
 }
