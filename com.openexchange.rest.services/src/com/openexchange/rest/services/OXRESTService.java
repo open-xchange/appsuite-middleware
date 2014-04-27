@@ -58,10 +58,10 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.annotations.DELETE;
-import com.openexchange.rest.services.annotations.PATCH;
 import com.openexchange.rest.services.annotations.GET;
 import com.openexchange.rest.services.annotations.LINK;
 import com.openexchange.rest.services.annotations.OPTIONS;
+import com.openexchange.rest.services.annotations.PATCH;
 import com.openexchange.rest.services.annotations.POST;
 import com.openexchange.rest.services.annotations.PUT;
 import com.openexchange.rest.services.annotations.ROOT;
@@ -70,12 +70,16 @@ import com.openexchange.rest.services.internal.Services;
 import com.openexchange.rest.services.osgiservice.OXRESTActivator;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
+<<<<<<< HEAD
  * A {@link OXRESTService} is the entry class for defining a RESTful service. Subclass this class, annotate it with annotations from com.openexchange.rest.services.annotations and
  * publish it in a subclass of {@link OXRESTActivator}.
  *
  * Consider this example:
+=======
+ * A {@link OXRESTService} is the entry class for defining a RESTful service. Subclass this class, annotate it with annotations from
+ * com.openexchange.rest.services.annotations and publish it in a subclass of {@link OXRESTActivator}. Consider this example:
+>>>>>>> ef73bf11ba492ddb5d9c656533ad4e5290c1d39c
  *
  * <pre>
  * @ROOT("/myservice")
@@ -86,6 +90,7 @@ import com.openexchange.server.ServiceLookup;
  * }
  * </pre>
  *
+<<<<<<< HEAD
  * Every service class declares its root URL with the {@link ROOT} annotation. The service will then be reachable under /rest/myservice. In order to implement concrete calls,
  * declare methods in the service class and annotate them with a route specifying how these methods should be accessed.
  *
@@ -95,9 +100,22 @@ import com.openexchange.server.ServiceLookup;
  *
  *   // e.g. /rest/myservide/bookmarks/1
  *   @GET("bookmarks/:id")
+=======
+ * Every service class declares its root URL with the {@link ROOT} annotation. The service will then be reachable under /rest/myservice. In
+ * order to implement concrete calls, declare methods in the service class and annotate them with a route specifying how these methods
+ * should be accessed.
+ *
+ * <pre>
+ * &#064;ROOT(&quot;/myservice&quot;)
+ * public class MyService extends OXRestService&lt;Void&gt; {
+ *
+ *     // e.g. /rest/myservide/bookmarks/1
+ *     &#064;GET(&quot;bookmarks/:id&quot;)
+>>>>>>> ef73bf11ba492ddb5d9c656533ad4e5290c1d39c
  *   public Object getBookmark(int bookmarkId) {
- *     return "http://www.open-xchange.com"
+ *     return &quot;http://www.open-xchange.com&quot;
  *   }
+<<<<<<< HEAD
  *
  * }
  * </pre>
@@ -144,20 +162,111 @@ import com.openexchange.server.ServiceLookup;
  *     context.save(bookmark);
  *     respond(200);
  *   }
+=======
+ * }
+ *
+ *
+ * </pre>
+ *
+ * The method annotations {@link GET}, {@link PUT}, {@link POST}, {@link DELETE}, {@link PATCH}, {@link OPTIONS}, {@link LINK},
+ * {@link UNLINK} expect as their parameter the subpath that triggers the method. A path can contain variables market by the colon sign (:),
+ * which denote arbitrary path elements. These elements are passed to the method in the same order as they appear in the path. The system
+ * tries to turn them into the types declared as method parameters (say the int above). The values are also available under their name via
+ * the {@link #param(String)} method. e.g. param("id") or param("id", int.class). A method can return any object. The system tries to
+ * convert this into a String, if the object is not already one, to send back to the client. Maps and Lists are turned into their respective
+ * JSON representations (see {@link JSONCoercion} ), other objects are issued a #toString call to turn them into the response. Instead of
+ * returning the response, a method can also call the {@link #respond(String)} and {@link #halt()} methods to set a response and optionally
+ * halt further execution. These methods can also be used to set a status code or headers. Client headers are available through the
+ * {@link #request} Object. The methods {@link #before()} and {@link #after()} are called before and after processing respectively. Every
+ * request instantiates a new instance of this class, so feel free to set member variables in before and after methods during processing.
+ * e.g:
+ *
+ * <pre>
+ *
+ *
+ * &#064;ROOT(&quot;/bookmarks&quot;)
+ * public class MyService extends OXRestService&lt;VOID&gt; {
+ *
+ *     private Bookmark bookmark;
+ *
+ *     public void before() {
+ *         contentType(&quot;application/json&quot;);
+ *         if (isSet(&quot;id&quot;)) {
+ *             this.bookmark = services.getService(BookmarkService.class).loadBookmark(param(&quot;id&quot;, int.class));
+ *             if (this.bookmark == null) {
+ *                 halt(404);
+ *             }
+ *         }
+ *     }
+ *
+ *     // e.g. GET /rest/bookmarks/1
+ *     &#064;GET(&quot;/:id&quot;)
+ *     public Object getBookmark() {
+ *         return bookmark.getURL(); // Populated in #before
+ *     }
+ *
+ *     &#064;PATCH(&quot;/:id&quot;)
+ *     public void updateBookmark() {
+ *         bookmark.setURL(param(&quot;url&quot;)); // Populated in #before
+ *         context.save(bookmark);
+ *         respond(200);
+ *     }
+>>>>>>> ef73bf11ba492ddb5d9c656533ad4e5290c1d39c
  *
  * }
  * </pre>
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class OXRESTService<T> {
+public abstract class OXRESTService<T> {
 
     /**
      * Used internally for control flow.
      */
     public static class HALT extends RuntimeException {
-        private static final long serialVersionUID = 1L;
+
+        private static final long serialVersionUID = -8250665093049331109L;
+
+        /**
+         * Initializes a new {@link HALT} instance.
+         */
+        public HALT() {
+            super();
+        }
+
+        /**
+         * Initializes a new {@link HALT} instance.
+         *
+         * @param message The detail message (which is saved for later retrieval by the {@link #getMessage()} method).
+         * @param cause The cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt> value is
+         *            permitted, and indicates that the cause is nonexistent or unknown.)
+         */
+        public HALT(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+
+        /**
+         * Initializes a new {@link HALT} instance.
+         *
+         * @param message The detail message (which is saved for later retrieval by the {@link #getMessage()} method).
+         */
+        public HALT(final String message) {
+            super(message);
+        }
+
+        /**
+         * Initializes a new {@link HALT} instance.
+         *
+         * @param cause The cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt> value is
+         *            permitted, and indicates that the cause is nonexistent or unknown.)
+         */
+        public HALT(final Throwable cause) {
+            super(cause);
+        }
+
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * The response that should be constructed by the action methods
@@ -183,6 +292,13 @@ public class OXRESTService<T> {
      * An optional context object that can be passed from the activator to instances.
      */
     protected T context;
+
+    /**
+     * Initializes a new {@link OXRESTService}.
+     */
+    protected OXRESTService() {
+        super();
+    }
 
     /**
      * Send the string back to the client
@@ -368,14 +484,15 @@ public class OXRESTService<T> {
     }
 
     /**
-     * Builds a suburl to this controller
+     * Builds a sub-URL to this controller
      */
     public String url(String path) {
         return request.constructURL(path, true).toString();
     }
 
     /**
-     * Builds a suburl to this controller, optionally include the routing information for this specific backend
+     * Builds a sub-URL to this controller, optionally include the routing information for this specific end point
+     *
      * @param path
      * @param withRoute
      */
@@ -384,7 +501,8 @@ public class OXRESTService<T> {
     }
 
     /**
-     * Builds a suburl to this controller, optionally with routing information for this backend and a query string
+     * Builds a sub-URL to this controller, optionally with routing information for this end point and a query string
+     *
      * @param path
      * @param withRoute
      * @param query
@@ -395,7 +513,8 @@ public class OXRESTService<T> {
     }
 
     /**
-     * Builds a suburl to this controller.
+     * Builds a sub-URL to this controller.
+     *
      * @param path
      * @param query
      */
@@ -432,8 +551,7 @@ public class OXRESTService<T> {
     }
 
     /**
-     * Sends a redirect to the given URL. Usage:
-     * <code>
+     * Sends a redirect to the given URL. Usage: <code>
      *   redirect(to("/myController/otherAction"));
      * </code>
      */
@@ -482,15 +600,16 @@ public class OXRESTService<T> {
      * Called before the action method is called
      */
     public void before() throws OXException {
-
+        // Empty method
     }
 
     /**
      * Called after the action method has finished. It is guaranteed that this method will always be called.
+     *
      * @throws OXException
      */
     public void after() throws OXException {
-
+        // Empty method
     }
 
 }

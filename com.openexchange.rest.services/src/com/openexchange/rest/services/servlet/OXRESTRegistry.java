@@ -51,6 +51,7 @@ package com.openexchange.rest.services.servlet;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -67,13 +68,21 @@ import com.openexchange.rest.services.internal.OXRESTServiceWrapper;
  */
 public class OXRESTRegistry implements SimpleRegistryListener<OXRESTServiceFactory>{
 
-    private ConcurrentHashMap<String, List<OXRESTServiceFactory>> factories = new ConcurrentHashMap<String, List<OXRESTServiceFactory>>();
-    
+    private final ConcurrentMap<String, List<OXRESTServiceFactory>> factories;
+
+    /**
+     * Initializes a new {@link OXRESTRegistry}.
+     */
+    public OXRESTRegistry() {
+        super();
+        factories = new ConcurrentHashMap<String, List<OXRESTServiceFactory>>(32);
+    }
+
     @Override
     public void added(ServiceReference<OXRESTServiceFactory> ref, OXRESTServiceFactory service) {
         String root = service.getRoot();
         List<OXRESTServiceFactory> list = factories.get(root);
-        
+
         if (list == null) {
             List<OXRESTServiceFactory> meantime = factories.putIfAbsent(root, list = new CopyOnWriteArrayList<OXRESTServiceFactory>());
             if (meantime != null) {
@@ -100,7 +109,7 @@ public class OXRESTRegistry implements SimpleRegistryListener<OXRESTServiceFacto
                 if (!subpath.startsWith("/")) {
                     subpath = "/" + subpath;
                 }
-                
+
                 List<OXRESTServiceFactory> list = factories.get(root);
                 for (OXRESTServiceFactory factory : list) {
                     List<OXRESTRoute> routes = factory.getRoutes();

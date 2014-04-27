@@ -68,87 +68,87 @@ public class OXRESTServiceTest {
     // Methods about the request
     @Test
     public void testIsSet() {
-        OXRESTService<Void> service = new OXRESTService<Void>();
+        OXRESTService<Void> service = new OXRESTService<Void>() {};
         AJAXRequestData mock = mock(AJAXRequestData.class);
         service.setRequest(mock);
-        
+
         when(mock.isSet("param")).thenReturn(true);
         when(mock.isSet("param2")).thenReturn(false);
-        
+
         assertTrue(service.isSet("param"));
         assertFalse(service.isSet("param2"));
     }
-    
+
 
     @Test
     public void testParamMethod() {
-        OXRESTService<Void> service = new OXRESTService<Void>();
+        OXRESTService<Void> service = new OXRESTService<Void>() {};
         AJAXRequestData mock = mock(AJAXRequestData.class);
         service.setRequest(mock);
-        
+
         when(mock.getParameter("param")).thenReturn("value");
-        
+
         assertEquals("value", service.param("param"));
     }
-    
+
     @Test
     public void testParamTypeCoercion() throws OXException {
-        OXRESTService<Void> service = new OXRESTService<Void>();
+        OXRESTService<Void> service = new OXRESTService<Void>() {};
         AJAXRequestData mock = mock(AJAXRequestData.class);
         service.setRequest(mock);
-        
+
         when(mock.getParameter("param", int.class)).thenReturn(12);
-        
+
         assertEquals((Integer)12, service.param("param", int.class));
     }
-    
+
     @Test
     public void testUrl() {
-        OXRESTService<Void> service = new OXRESTService<Void>();
+        OXRESTService<Void> service = new OXRESTService<Void>() {};
         AJAXRequestData mock = mock(AJAXRequestData.class);
         service.setRequest(mock);
-        
+
         when(mock.constructURL("path", true)).thenReturn(new StringBuilder("constructedPath"));
-        
+
         assertEquals("constructedPath", service.url("path"));
     }
-    
+
     // Methods about the response
     // Higher level methods like #respond and #halt delegate to body, status and headers, so we
     // are only testing the lower level methods
     @Test
     public void testBody() throws JSONException {
-        OXRESTService<Void> service = new OXRESTService<Void>();
-        
+        OXRESTService<Void> service = new OXRESTService<Void>() {};
+
         service.respond(Arrays.asList("Hello", "World"));
         Iterator<String> body = service.getResponse().getBody().iterator();
-        
+
         assertEquals("Hello", body.next());
         assertEquals("World", body.next());
         assertFalse(body.hasNext());
-        
+
         service.respond("Single String");
         assertEquals("Single String", service.getResponse().getBody().iterator().next());
 
         service.respond((Object) Arrays.asList("test", "test1", "test2"));
         JSONArray array = new JSONArray(service.getResponse().getBody().iterator().next());
-        
+
         assertEquals(3, array.length());
         assertEquals("test", array.getString(0));
         assertEquals("test1", array.getString(1));
         assertEquals("test2", array.getString(2));
     }
-    
+
     @Test
     public void testStatus() {
-        OXRESTService<Void> service = new OXRESTService<Void>();
+        OXRESTService<Void> service = new OXRESTService<Void>() {};
         service.status(404);
-        
+
         assertEquals(404, service.getResponse().getStatus());
     }
-    
+
     @Test
     public void testHeaders() {
-        
+
     }
 }
