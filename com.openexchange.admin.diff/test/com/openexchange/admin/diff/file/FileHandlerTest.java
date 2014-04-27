@@ -59,6 +59,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import com.openexchange.admin.diff.file.provider.IConfigurationFileProvider;
+import com.openexchange.admin.diff.result.DiffResult;
 
 /**
  * {@link FileHandlerTest}
@@ -74,9 +75,9 @@ public class FileHandlerTest {
     @Mock
     private IConfigurationFileProvider configurationFileProvider;
 
-    private String rootDirectory = "/opt/open-xchange/etc";
+    private final String rootDirectory = "/opt/open-xchange/etc";
 
-    private boolean isOriginal = false;
+    private final boolean isOriginal = false;
 
     @Before
     public void setUp() throws Exception {
@@ -87,19 +88,19 @@ public class FileHandlerTest {
     public void testReadConfFiles_noConfigurationFileProvider_doNothing() throws IOException {
         Mockito.doNothing().when(fileHandler).validateDirectory((File) Matchers.any());
 
-        fileHandler.readConfFiles(rootDirectory, isOriginal, null);
+        fileHandler.readConfFiles(new DiffResult(), rootDirectory, isOriginal, null);
 
-        Mockito.verify(configurationFileProvider, Mockito.never()).addFilesToDiffQueue(Matchers.anyList(), Matchers.anyBoolean());
-        Mockito.verify(configurationFileProvider, Mockito.never()).readConfigurationFiles(Matchers.anyString(), Matchers.any(String[].class));
+        Mockito.verify(configurationFileProvider, Mockito.never()).addFilesToDiffQueue(new DiffResult(), Matchers.anyList(), Matchers.anyBoolean());
+        Mockito.verify(configurationFileProvider, Mockito.never()).readConfigurationFiles(new DiffResult(), Matchers.anyString(), Matchers.any(String[].class));
     }
 
     @Test
     public void testReadConfFiles_configurationFileProvider_readAndAddFiles() throws IOException {
         Mockito.doNothing().when(fileHandler).validateDirectory((File) Matchers.any());
 
-        fileHandler.readConfFiles(rootDirectory, isOriginal, configurationFileProvider);
+        fileHandler.readConfFiles(new DiffResult(), rootDirectory, isOriginal, configurationFileProvider);
 
-        Mockito.verify(configurationFileProvider, Mockito.times(1)).addFilesToDiffQueue(Matchers.anyList(), Matchers.anyBoolean());
-        Mockito.verify(configurationFileProvider, Mockito.times(1)).readConfigurationFiles(Matchers.anyString(), Matchers.any(String[].class));
+        Mockito.verify(configurationFileProvider, Mockito.times(1)).addFilesToDiffQueue(new DiffResult(), Matchers.anyList(), Matchers.anyBoolean());
+        Mockito.verify(configurationFileProvider, Mockito.times(1)).readConfigurationFiles(new DiffResult(), Matchers.anyString(), Matchers.any(String[].class));
     }
 }

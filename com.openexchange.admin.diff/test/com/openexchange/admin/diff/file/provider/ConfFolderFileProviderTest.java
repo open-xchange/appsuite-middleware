@@ -22,10 +22,11 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.admin.diff.file.type.ConfFileHandler;
 import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
+import com.openexchange.admin.diff.result.DiffResult;
 
 /**
  * {@link ConfFolderFileProviderTest}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.0
  */
@@ -40,11 +41,11 @@ public class ConfFolderFileProviderTest {
     private File configurationFile;
 
     @Rule
-    private TemporaryFolder folder = new TemporaryFolder();
+    private final TemporaryFolder folder = new TemporaryFolder();
 
     List<File> configurationFiles = new ArrayList<File>();
 
-    private String rootFolder = "/opt/open-xchange/etc";
+    private final String rootFolder = "/opt/open-xchange/etc";
 
     @Before
     public void setUp() throws Exception {
@@ -60,7 +61,7 @@ public class ConfFolderFileProviderTest {
     public void testReadConfigurationFiles_listFilesNull_returnEmptyArray() {
         PowerMockito.when(FileUtils.listFiles((File) Matchers.any(), Matchers.any(String[].class), Matchers.anyBoolean())).thenReturn(null);
 
-        List<File> readConfigurationFiles = fileProvider.readConfigurationFiles(rootFolder, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
+        List<File> readConfigurationFiles = fileProvider.readConfigurationFiles(new DiffResult(), rootFolder, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
 
         Assert.assertEquals(0, readConfigurationFiles.size());
     }
@@ -69,14 +70,14 @@ public class ConfFolderFileProviderTest {
     public void testReadConfigurationFiles_fileFound_fileInList() {
         PowerMockito.when(FileUtils.listFiles((File) Matchers.any(), Matchers.any(String[].class), Matchers.anyBoolean())).thenReturn(configurationFiles);
 
-        List<File> readConfigurationFiles = fileProvider.readConfigurationFiles(rootFolder, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
+        List<File> readConfigurationFiles = fileProvider.readConfigurationFiles(new DiffResult(), rootFolder, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
 
         Assert.assertEquals(1, readConfigurationFiles.size());
     }
 
     @Test
     public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() throws IOException {
-        fileProvider.addFilesToDiffQueue(null, true);
+        fileProvider.addFilesToDiffQueue(new DiffResult(), null, true);
 
         PowerMockito.verifyStatic(Mockito.never());
         ConfFileHandler.addConfigurationFile(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean());
@@ -90,7 +91,7 @@ public class ConfFolderFileProviderTest {
         files.add(newFile);
         files.add(newFile2);
 
-        fileProvider.addFilesToDiffQueue(files, true);
+        fileProvider.addFilesToDiffQueue(new DiffResult(), files, true);
 
         PowerMockito.verifyStatic(Mockito.never());
         ConfFileHandler.addConfigurationFile(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean());
@@ -112,7 +113,7 @@ public class ConfFolderFileProviderTest {
         files.add(newFile);
         files.add(newFile2);
 
-        fileProvider.addFilesToDiffQueue(files, true);
+        fileProvider.addFilesToDiffQueue(new DiffResult(), files, true);
 
         PowerMockito.verifyStatic(Mockito.times(2));
         ConfFileHandler.addConfigurationFile(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean());
