@@ -532,7 +532,7 @@ public abstract class OXRESTService<T> {
      * Called before the action method is called
      */
     public void before() throws OXException {
-
+        // Empty method
     }
 
     /**
@@ -541,7 +541,7 @@ public abstract class OXRESTService<T> {
      * @throws OXException
      */
     public void after() throws OXException {
-
+        // Empty method
     }
 
 }
