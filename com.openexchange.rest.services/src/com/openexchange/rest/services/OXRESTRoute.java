@@ -56,13 +56,14 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import com.openexchange.annotation.NonNull;
 
-
 /**
- * An {@link OXRESTRoute} consists of an HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package <code>com.openexchange.rest.services.annotation</code>) and a
- * path declaration with variables led by a colon. e.g.
- * /resources/:myResourceId
- *
+ * An {@link OXRESTRoute} consists of an HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package
+ * <code>com.openexchange.rest.services.annotation</code>) and a path declaration with variables led by a colon.
+ * <p>
+ * e.g. <code>/resources/:myResourceId</code><br>
  * which would match the path /resources/12 keeping the 12 as the myResourceId variable.
+ * <p>
+ * The route is yielded from an annotated method declaration inside an {@link OXRESTService} sub-class.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -76,7 +77,8 @@ public class OXRESTRoute {
     /**
      * Initializes a new {@link OXRESTRoute}.
      *
-     * @param method The HTTP method (e.g. GET, POST, PUT, DELETE, etc. see the package <code>com.openexchange.rest.services.annotation</code>)
+     * @param method The HTTP method (e.g. GET, POST, PUT, DELETE, etc. see the package
+     *            <code>com.openexchange.rest.services.annotation</code>)
      * @param path The path; e.g. <code>"/resources/:myResourceId"</code>
      */
     public OXRESTRoute(String method, String path) {
@@ -87,16 +89,19 @@ public class OXRESTRoute {
     }
 
     /**
-     * Gets the associated HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package <code>com.openexchange.rest.services.annotation</code>).
+     * Gets the associated HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package
+     * <code>com.openexchange.rest.services.annotation</code>).
      *
      * @return The HTTP method name
      */
-    public @NonNull String getMethod() {
+    public @NonNull
+    String getMethod() {
         return method;
     }
 
     /**
-     * Sets the associated HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package <code>com.openexchange.rest.services.annotation</code>).
+     * Sets the associated HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package
+     * <code>com.openexchange.rest.services.annotation</code>).
      *
      * @param method The HTTP method name
      */
@@ -109,7 +114,8 @@ public class OXRESTRoute {
      *
      * @return The path declaration.
      */
-    public @NonNull String getPath() {
+    public @NonNull
+    String getPath() {
         return path;
     }
 
@@ -184,7 +190,7 @@ public class OXRESTRoute {
             OXRESTMatch match = new OXRESTMatch();
             match.setRoute(this);
             for (int i = 0, size = variableNames.size(); i < size; i++) {
-                match.getParameters().put(variableNames.get(i), matcher.group(i+1));
+                match.getParameters().put(variableNames.get(i), matcher.group(i + 1));
             }
             match.setParameterNames(new ArrayList<String>(variableNames));
             return match;
