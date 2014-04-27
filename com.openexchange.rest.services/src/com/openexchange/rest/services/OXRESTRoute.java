@@ -142,7 +142,7 @@ public class OXRESTRoute {
                     captureName = false;
                     regex.append("([^/]*)/");
                     variableNames.add(name.toString());
-                    name = new StringBuilder();
+                    name.setLength(0);
                 } else {
                     name.append(c);
                 }
