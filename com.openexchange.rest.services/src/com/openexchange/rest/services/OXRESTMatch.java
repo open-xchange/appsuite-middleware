@@ -112,4 +112,16 @@ public class OXRESTMatch {
         return parameters;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(512);
+        if (route != null) {
+            builder.append(route).append(" ");
+        }
+        if (parameters != null) {
+            builder.append(parameters).append(" ");
+        }
+        return builder.toString();
+    }
+
 }
