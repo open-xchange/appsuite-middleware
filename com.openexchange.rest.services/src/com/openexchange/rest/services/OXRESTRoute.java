@@ -58,7 +58,7 @@ import com.openexchange.annotation.NonNull;
 
 
 /**
- * An {@link OXRESTRoute} consists of an HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package com.openexchange.rest.services.annotation) and a
+ * An {@link OXRESTRoute} consists of an HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package <code>com.openexchange.rest.services.annotation</code>) and a
  * path declaration with variables led by a colon. e.g.
  * /resources/:myResourceId
  *
@@ -76,8 +76,8 @@ public class OXRESTRoute {
     /**
      * Initializes a new {@link OXRESTRoute}.
      *
-     * @param method The method
-     * @param path The path
+     * @param method The HTTP method (e.g. GET, POST, PUT, DELETE, etc. see the package <code>com.openexchange.rest.services.annotation</code>)
+     * @param path The path; e.g. <code>"/resources/:myResourceId"</code>
      */
     public OXRESTRoute(String method, String path) {
         super();
@@ -87,7 +87,7 @@ public class OXRESTRoute {
     }
 
     /**
-     * Gets the associated HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package com.openexchange.rest.services.annotation).
+     * Gets the associated HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package <code>com.openexchange.rest.services.annotation</code>).
      *
      * @return The HTTP method name
      */
@@ -96,7 +96,7 @@ public class OXRESTRoute {
     }
 
     /**
-     * Sets the associated HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package com.openexchange.rest.services.annotation).
+     * Sets the associated HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package <code>com.openexchange.rest.services.annotation</code>).
      *
      * @param method The HTTP method name
      */
