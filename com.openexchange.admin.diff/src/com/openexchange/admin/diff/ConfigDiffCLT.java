@@ -78,8 +78,8 @@ public class ConfigDiffCLT {
 
     private static final Options options = new Options();
     static {
-        options.addOption(OptionBuilder.withLongOpt("original").hasArgs(1).withDescription("The original configuration folder provided by OX").isRequired(true).create("o"));
-        options.addOption(OptionBuilder.withLongOpt("installed").hasArgs(1).withDescription("The installed configuration folder").isRequired(true).create("i"));
+        options.addOption(OptionBuilder.withLongOpt("original").hasArgs(1).withDescription("The original configuration folder provided by OX; '/opt/open-xchange/bundles/' if nothing provided.").isRequired(false).create("o"));
+        options.addOption(OptionBuilder.withLongOpt("installed").hasArgs(1).withDescription("The installed configuration folder; '/opt/open-xchange/etc/' if nothing provided.").isRequired(false).create("i"));
         options.addOption(OptionBuilder.withLongOpt("file").hasArgs(1).withDescription("Export diff to file").isRequired(false).create("f"));
         options.addOption(OptionBuilder.withLongOpt("help").hasArg(false).withDescription("Print usage").isRequired(false).create("h"));
     }
@@ -95,23 +95,21 @@ public class ConfigDiffCLT {
         try {
             CommandLine cl = parser.parse(options, args);
 
+            if (cl.hasOption("h")) {
+                printUsage(0);
+            }
             if (cl.hasOption("f")) {
                 file = cl.getOptionValue("f");
             } else {
                 file = null;
             }
-
-            if (cl.hasOption("h")) {
-                printUsage(0);
-            } else if (cl.hasOption("o") && cl.hasOption("i")) {
-                originalFolder = cl.getOptionValue("o");
-                installationFolder = cl.getOptionValue("i");
-
-                executeDiff(originalFolder, installationFolder, file);
+            if (cl.hasOption("o")) {
+                ConfigDiffCLT.originalFolder = cl.getOptionValue("o");
             }
-            else {
-                executeDiff(ConfigDiffCLT.originalFolder, ConfigDiffCLT.installationFolder, file);
+            if (cl.hasOption("i")) {
+                ConfigDiffCLT.installationFolder = cl.getOptionValue("i");
             }
+            executeDiff(ConfigDiffCLT.originalFolder, ConfigDiffCLT.installationFolder, file);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             printUsage(-1);
