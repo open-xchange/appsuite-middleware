@@ -126,48 +126,57 @@ public class OXRESTRoute {
      * @throws IllegalArgumentException If given path is invalid
      */
     public void setPath(@NonNull String path) {
-        if (!path.startsWith("/")) {
-            this.path = "/" + path;
-        } else {
-            this.path = path;
-        }
+        final String pazz = path.startsWith("/") ? path : "/" + path;
+        this.path = pazz;
 
-        // Build a pattern
+        // Build a pattern from path
+        final StringBuilder regexBuilder = new StringBuilder("^");
         boolean captureName = false;
-        StringBuilder regex = new StringBuilder("^");
-        StringBuilder name = new StringBuilder();
+        boolean quote = false;
+        final StringBuilder nameBuilder = new StringBuilder();
+        final StringBuilder quoteBuilder = new StringBuilder();
 
         pattern = null;
         variableNames.clear();
 
-        final int length = this.path.length();
+        final int length = pazz.length();
         for (int i = 0; i < length; i++) {
-            final char c = this.path.charAt(i);
+            final char c = pazz.charAt(i);
             if (captureName) {
                 if (c == '/') {
                     captureName = false;
-                    regex.append("([^/]*)/");
-                    variableNames.add(name.toString());
-                    name.setLength(0);
+                    regexBuilder.append("([^/]*)/");
+                    variableNames.add(nameBuilder.toString());
+                    nameBuilder.setLength(0);
                 } else {
-                    name.append(c);
+                    nameBuilder.append(c);
                 }
             } else {
                 if (c == ':') {
                     captureName = true;
+                    if (quote) {
+                        regexBuilder.append(Pattern.quote(quoteBuilder.toString()));
+                        quote = false;
+                        quoteBuilder.setLength(0);
+                    }
                 } else {
-                    regex.append(Pattern.quote(Character.toString(c)));
+                    quote = true;
+                    quoteBuilder.append(c);
                 }
             }
         }
 
+        if (quote) {
+            regexBuilder.append(Pattern.quote(quoteBuilder.toString()));
+        }
+
         if (captureName) {
-            regex.append("([^/]*)$");
-            variableNames.add(name.toString());
+            regexBuilder.append("([^/]*)$");
+            variableNames.add(nameBuilder.toString());
         }
 
         try {
-            pattern = Pattern.compile(regex.toString());
+            pattern = Pattern.compile(regexBuilder.toString());
         } catch (final PatternSyntaxException e) {
             throw new IllegalArgumentException("Specified path is invalid", e);
         }
@@ -198,4 +207,17 @@ public class OXRESTRoute {
 
         return null;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(256);
+        if (method != null) {
+            builder.append(method).append(" ");
+        }
+        if (path != null) {
+            builder.append(path);
+        }
+        return builder.toString();
+    }
+
 }
