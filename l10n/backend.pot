@@ -3842,12 +3842,14 @@ msgid ""
 msgstr ""
 
 #. *
-#. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.
+#. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work. Please be advised that while it is safe to ignore this warning, the POP3 account might not work if the supplied credentials are invalid.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:295
 msgid ""
 "Validation of POP3 credentials is disabled due to possible login "
-"restrictions by provider. Otherwise subsequent login attempt might not work."
+"restrictions by provider. Otherwise subsequent login attempt might not work. "
+"Please be advised that while it is safe to ignore this warning, the POP3 "
+"account might not work if the supplied credentials are invalid."
 msgstr ""
 
 #. POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
