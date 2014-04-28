@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.AndFileFilter;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -67,7 +69,7 @@ public class JarFileProviderTest {
 
     @Test
     public void testReadConfigurationFiles_fileFound_fileInList() {
-        PowerMockito.when(FileUtils.listFiles((File) Matchers.any(), Matchers.any(String[].class), Matchers.anyBoolean())).thenReturn(configurationFiles);
+        PowerMockito.when(FileUtils.listFiles((File) Matchers.any(), Matchers.any(AndFileFilter.class), Matchers.any(IOFileFilter.class))).thenReturn(configurationFiles);
 
         List<File> readConfigurationFiles = fileProvider.readConfigurationFiles(new DiffResult(), rootFolder, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
 
