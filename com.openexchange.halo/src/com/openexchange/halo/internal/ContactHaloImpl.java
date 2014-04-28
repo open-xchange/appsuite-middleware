@@ -195,7 +195,7 @@ public class ContactHaloImpl implements ContactHalo {
         }
 
         // Try to find a user with a given eMail address
-        if (user == null) {
+        if (user == null && resultContact.containsEmail1()) {
             try {
                 user = userService.searchUser(resultContact.getEmail1(), session.getContext(), false);
             } catch (final OXException x) {
@@ -203,7 +203,7 @@ public class ContactHaloImpl implements ContactHalo {
             }
         }
 
-        if (user == null) {
+        if (user == null && resultContact.containsEmail2()) {
             try {
                 user = userService.searchUser(resultContact.getEmail2(), session.getContext(), false);
             } catch (final OXException x) {
@@ -211,7 +211,7 @@ public class ContactHaloImpl implements ContactHalo {
             }
         }
 
-        if (user == null) {
+        if (user == null && resultContact.containsEmail3()) {
             try {
                 user = userService.searchUser(resultContact.getEmail3(), session.getContext(), false);
             } catch (final OXException x) {
