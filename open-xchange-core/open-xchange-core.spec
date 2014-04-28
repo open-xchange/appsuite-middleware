@@ -950,6 +950,9 @@ ox_set_property com.openexchange.jolokia.restrict.to.localhost "$VALUE" /opt/ope
 # SoftwareChange_Request-1985
 ox_remove_property com.openexchange.log.propertyNames /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-1990
+ox_add_property com.openexchange.quota.attachment -1 /opt/open-xchange/etc/quota.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
