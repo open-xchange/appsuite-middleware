@@ -68,6 +68,7 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.drive.Constants;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Filter;
@@ -142,7 +143,7 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testSizeFacet() throws Exception {
-        ActiveFacet fileSizeFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(
+        ActiveFacet fileSizeFacet = new ActiveFacet(DriveFacetType.FILE_SIZE, FileSizeDisplayItem.Size.MB1.getSize(), new Filter(
             Collections.singletonList(Constants.FIELD_FILE_SIZE),
             FileSizeDisplayItem.Size.MB1.getSize()));
         QueryRequest request = new QueryRequest(0, 10, Collections.singletonList(fileSizeFacet), Module.DRIVE.getIdentifier());

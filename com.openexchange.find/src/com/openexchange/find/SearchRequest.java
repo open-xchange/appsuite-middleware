@@ -56,10 +56,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
  * Encapsulates a search request.
@@ -150,9 +153,9 @@ public class SearchRequest extends AbstractFindRequest {
 
     /**
      * A list of filters to be applied on the search results based
-     * on the currently active facets. {@link CommonFacetType#GLOBAL}
-     * and {@link CommonFacetType#FOLDER} are always ignored when
-     * constructing the filters.
+     * on the currently active facets. {@link CommonFacetType#GLOBAL},
+     * {@link CommonFacetType#FOLDER} and {@link CommonFacetType#FOLDER_TYPE}
+     * are always ignored when constructing the filters.
      *
      * @return May be empty but never <code>null</code>.
      */
@@ -162,6 +165,7 @@ public class SearchRequest extends AbstractFindRequest {
             Set<FacetType> exclude = new HashSet<FacetType>(2);
             exclude.add(CommonFacetType.GLOBAL);
             exclude.add(CommonFacetType.FOLDER);
+            exclude.add(CommonFacetType.FOLDER_TYPE);
             for (Entry<FacetType, List<ActiveFacet>> entry : facetMap.entrySet()) {
                 FacetType type = entry.getKey();
                 if (!exclude.contains(type)) {
@@ -176,6 +180,28 @@ public class SearchRequest extends AbstractFindRequest {
         }
 
         return filters;
+    }
+
+    /**
+     * Gets the folder type set via a present facet of type {@link CommonFacetType#FOLDER_TYPE}.
+     * @return The folder type as specified in {@link FolderObject} or <code>-1</code>.
+     */
+    public int getFolderType() throws OXException {
+        List<ActiveFacet> facets = facetMap.get(CommonFacetType.FOLDER_TYPE);
+        if (facets == null || facets.isEmpty()) {
+            return -1;
+        }
+
+        String type = facets.get(0).getValueId();
+        if (FolderTypeDisplayItem.Type.PRIVATE.getIdentifier().equals(type)) {
+            return FolderObject.PRIVATE;
+        } else if (FolderTypeDisplayItem.Type.PUBLIC.getIdentifier().equals(type)) {
+            return FolderObject.PUBLIC;
+        } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(type)) {
+            return FolderObject.SHARED;
+        } else {
+            throw FindExceptionCode.INVALID_FOLDER_TYPE.create(type == null ? "null" : type);
+        }
     }
 
     /**
@@ -205,6 +231,19 @@ public class SearchRequest extends AbstractFindRequest {
         }
 
         return null;
+    }
+
+    /**
+     * Gets the active facets for the given type.
+     * @return The facets or <code>null</code> if not present.
+     */
+    public List<ActiveFacet> getActiveFacets(FacetType type) {
+        List<ActiveFacet> facets = facetMap.get(type);
+        if (facets == null) {
+            return null;
+        }
+
+        return Collections.unmodifiableList(facets);
     }
 
     @Override

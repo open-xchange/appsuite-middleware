@@ -50,6 +50,7 @@
 package com.openexchange.ajax.find;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -62,6 +63,7 @@ import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
@@ -258,6 +260,13 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
             }
         }
         return null;
+    }
+
+    protected static ActiveFacet createFolderTypeFacet(FolderTypeDisplayItem.Type type) {
+        return createActiveFacet(
+            CommonFacetType.FOLDER_TYPE,
+            type.getIdentifier(),
+            new Filter(Collections.singletonList(CommonFacetType.FOLDER_TYPE.getId()), type.getIdentifier()));
     }
 
     protected static ActiveFacet createQuery(String query) {

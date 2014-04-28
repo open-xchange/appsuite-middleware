@@ -66,6 +66,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -163,6 +164,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         }
 
         return config;
+    }
+
+    @Override
+    protected Set<Integer> getSupportedFolderTypes() {
+        return FOLDER_TYPE_NOT_SUPPORTED;
     }
 
     @Override

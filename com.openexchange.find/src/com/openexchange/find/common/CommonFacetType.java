@@ -77,7 +77,7 @@ public enum CommonFacetType implements FacetType {
      * The facet type for folder type. The presence of this facet is mutually exclusive
      * with {@link CommonFacetType#FOLDER}.
      */
-    FOLDER_TYPE(CommonStrings.FACET_TYPE_FOLDER_TYPE),
+    FOLDER_TYPE(CommonStrings.FACET_TYPE_FOLDER_TYPE, false, true),
     ;
 
     private static final Map<String, CommonFacetType> typesById = new HashMap<String, CommonFacetType>();

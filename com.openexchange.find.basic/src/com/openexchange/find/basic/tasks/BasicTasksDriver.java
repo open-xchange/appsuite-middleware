@@ -54,6 +54,7 @@ import static com.openexchange.find.basic.tasks.Constants.FIELD_TYPE;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
@@ -63,10 +64,7 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
-import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
@@ -110,31 +108,28 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.find.spi.ModuleSearchDriver#getModule()
-     */
     @Override
     public Module getModule() {
         return Module.TASKS;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.find.spi.ModuleSearchDriver#isValidFor(com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public boolean isValidFor(ServerSession session) throws OXException {
         return session.getUserConfiguration().hasTask();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.find.basic.tasks.MockTasksDriver#search(com.openexchange.find.SearchRequest, com.openexchange.tools.session.ServerSession)
-     */
+    @Override
+    protected Set<Integer> getSupportedFolderTypes() {
+        return ALL_FOLDER_TYPES;
+    }
+
     @Override
     public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
-        TaskSearchObjectBuilder builder = new TaskSearchObjectBuilder(session);
-        TaskSearchObject searchObject = builder.addFilters(searchRequest.getFilters()).addQueries(searchRequest.getQueries())
-            .applyFolder(searchRequest.getFolderId()).build();
+        TaskSearchObject searchObject = new TaskSearchObjectBuilder(session)
+            .addFilters(searchRequest.getFilters())
+            .addQueries(searchRequest.getQueries())
+            .applyFolders(searchRequest.getFolderId(), searchRequest.getFolderType())
+            .build();
         searchObject.setStart(searchRequest.getStart());
         searchObject.setSize(searchRequest.getSize());
 
@@ -147,17 +142,11 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         return new SearchResult(documents.size(), searchRequest.getStart(), documents, searchRequest.getActiveFacets());
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.find.spi.AbstractModuleSearchDriver#getFormatStringForGlobalFacet()
-     */
     @Override
     protected String getFormatStringForGlobalFacet() {
         return TasksStrings.FACET_GLOBAL;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.find.spi.AbstractModuleSearchDriver#doAutocomplete(com.openexchange.find.AutocompleteRequest, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     protected AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         String prefix = autocompleteRequest.getPrefix();
@@ -192,13 +181,6 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.DEFERRED, TasksStrings.TASK_STATUS_DEFERRED);
         facets.add(new Facet(TasksFacetType.TASK_STATUS, statusFacets));
 
-        //add folder type facets
-        List<FacetValue> folderFacets = new ArrayList<FacetValue>(3);
-        addFolderFacet(folderFacets, FolderTypeDisplayItem.Type.PRIVATE, CommonStrings.FOLDER_TYPE_PRIVATE);
-        addFolderFacet(folderFacets, FolderTypeDisplayItem.Type.PUBLIC, CommonStrings.FOLDER_TYPE_PUBLIC);
-        addFolderFacet(folderFacets, FolderTypeDisplayItem.Type.SHARED, CommonStrings.FOLDER_TYPE_SHARED);
-        facets.add(new Facet(CommonFacetType.FOLDER_TYPE, folderFacets));
-
         //add type facets
         final List<FacetValue> typeFacets = new ArrayList<FacetValue>(5);
         addTypeFacet(typeFacets, TaskTypeDisplayItem.Type.SINGLE_TASK, TasksStrings.TASK_TYPE_SINGLE_TASK);
@@ -231,16 +213,6 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         statusFacets.add(new FacetValue(type.getIdentifier(),
                             new TaskStatusDisplayItem(status,type), FacetValue.UNKNOWN_COUNT,
                             new Filter(Collections.singletonList(FIELD_STATUS),type.getIdentifier())));
-    }
-
-    /**
-     * Add a folder facet
-     * @param folderFacets
-     * @param type
-     * @param folderType
-     */
-    private static final void addFolderFacet(List<FacetValue> folderFacets, FolderTypeDisplayItem.Type type, String folderType) {
-        folderFacets.add(new FacetValue(type.getIdentifier(), new FolderTypeDisplayItem(folderType, type), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(Constants.FIELD_FOLDER_TYPE), type.getIdentifier())));
     }
 
     /**

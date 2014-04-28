@@ -72,10 +72,7 @@ import com.openexchange.find.calendar.CalendarStrings;
 import com.openexchange.find.calendar.RecurringTypeDisplayItem;
 import com.openexchange.find.calendar.RelativeDateDisplayItem;
 import com.openexchange.find.calendar.StatusDisplayItem;
-import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
@@ -141,6 +138,11 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     @Override
+    protected Set<Integer> getSupportedFolderTypes() {
+        return ALL_FOLDER_TYPES;
+    }
+
+    @Override
     public AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         /*
          * collect possible facets for current auto-complete iteration
@@ -171,7 +173,6 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
          * add other facets
          */
         facets.add(getStatusFacet());
-        facets.add(getFolderTypeFacet());
         facets.add(getRelativeDateFacet());
         facets.add(getRecurringTypeFacet());
         return new AutocompleteResult(facets);
@@ -193,21 +194,6 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             new StatusDisplayItem(CalendarStrings.STATUS_NONE, StatusDisplayItem.Status.NONE),
             FacetValue.UNKNOWN_COUNT, new Filter(fields, StatusDisplayItem.Status.NONE.getIdentifier())));
         return new Facet(CalendarFacetType.STATUS, statusValues);
-    }
-
-    private static Facet getFolderTypeFacet() {
-        List<FacetValue> folderValues = new ArrayList<FacetValue>();
-        List<String> fields = Collections.singletonList(CommonFacetType.FOLDER_TYPE.getId());
-        folderValues.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
-            CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT,
-            new Filter(fields, FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
-        folderValues.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
-            CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT,
-            new Filter(fields, FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
-        folderValues.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
-            CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT,
-            new Filter(fields, FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
-        return new Facet(CommonFacetType.FOLDER_TYPE, folderValues);
     }
 
     private static Facet getRelativeDateFacet() {
@@ -243,8 +229,8 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         AppointmentSearchObject appointmentSearch = searchBuilder
             .applyFilters(searchRequest.getFilters())
             .applyQueries(searchRequest.getQueries())
-            .applyFolder(searchRequest.getFolderId())
-        .build();
+            .applyFolders(searchRequest.getFolderId(), searchRequest.getFolderType())
+            .build();
         if (searchBuilder.isFalse()) {
             return SearchResult.EMPTY;
         }

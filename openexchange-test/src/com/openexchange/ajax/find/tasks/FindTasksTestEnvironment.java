@@ -79,6 +79,7 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.Filter;
@@ -139,9 +140,9 @@ public class FindTasksTestEnvironment {
     private Set<Integer> tasksToFind = new HashSet<Integer>();
 
     private final static UUID trackingID = UUID.randomUUID();
-    
+
     private Map<String, List<Integer>> rootTasks = new HashMap<String, List<Integer>>();
-    
+
     private Map<Integer, Task> tasks = new HashMap<Integer, Task>();
 
     /**
@@ -419,7 +420,7 @@ public class FindTasksTestEnvironment {
         //insert a task with no attachment in private with status done and 2 internal participants (a+b) for user A
         list.add(usrPartA);
         rememberTask(userB, insertTask(clientA, FolderType.PRIVATE, Status.DONE, userAprivateTestFolder.getObjectID(), list, false, false));
-        
+
         //insert a recurring task with attachment in shared folder with status not started and 2 internal participants for user b
         rememberTask(userB, insertTask(clientB, FolderType.SHARED, Status.NOT_STARTED, userBsharedTestFolderRO.getObjectID(), list, true, true));
 
@@ -455,7 +456,7 @@ public class FindTasksTestEnvironment {
             br.close();
         return sb.toString();
     }
-    
+
     /**
      * Remember tasks
      * @param u
@@ -498,7 +499,7 @@ public class FindTasksTestEnvironment {
             builder.append(t.getNote()).append(" and have ").append(participants.size()).append(" participants");
             t.setNote(builder.toString());
         }
-        
+
         if (recurrence) {
             t.setStartDate(new Date(System.currentTimeMillis()));
             t.setInterval(1);
@@ -517,11 +518,11 @@ public class FindTasksTestEnvironment {
 
         if (attachment)
             client.execute(new AttachRequest(t, "my cool attachment", new ByteArrayInputStream(readFile("attachment.base64").getBytes()), "image/jpeg"));
-        
+
         t = client.execute(new com.openexchange.ajax.task.actions.GetRequest(folder, t.getObjectID())).getTask(client.getValues().getTimeZone());
-        
+
         tasks.put(t.getObjectID(), t);
-        
+
         return t;
     }
 
@@ -551,10 +552,9 @@ public class FindTasksTestEnvironment {
 
         //folder type
         l = new ArrayList<ActiveFacet>(3);
-        type = CommonFacetType.FOLDER_TYPE;
-        l.add(createActiveFacet(type, FolderObject.PRIVATE, createFilter("folder_type", FolderObject.SYSTEM_PRIVATE_FOLDER_NAME)));
-        l.add(createActiveFacet(type, FolderObject.PUBLIC, createFilter("folder_type", FolderObject.SYSTEM_PUBLIC_FOLDER_NAME)));
-        l.add(createActiveFacet(type, FolderObject.SHARED, createFilter("folder_type", FolderObject.SYSTEM_SHARED_FOLDER_NAME)));
+        l.add(createFolderTypeFacet(FolderTypeDisplayItem.Type.PRIVATE));
+        l.add(createFolderTypeFacet(FolderTypeDisplayItem.Type.PUBLIC));
+        l.add(createFolderTypeFacet(FolderTypeDisplayItem.Type.SHARED));
         facets.add(l);
 
         //type
@@ -571,6 +571,13 @@ public class FindTasksTestEnvironment {
 
     private final ActiveFacet createActiveFacet(FacetType type, String valueId, Filter filter) {
         return new ActiveFacet(type, valueId, filter);
+    }
+
+    private final ActiveFacet createFolderTypeFacet(FolderTypeDisplayItem.Type type) {
+        return createActiveFacet(
+            CommonFacetType.FOLDER_TYPE,
+            type.getIdentifier(),
+            new Filter(Collections.singletonList(CommonFacetType.FOLDER_TYPE.getId()), type.getIdentifier()));
     }
 
     /**
@@ -594,14 +601,14 @@ public class FindTasksTestEnvironment {
                 initUsers();
             clientA.execute(new DeleteRequest(EnumAPI.OX_NEW, userAprivateTestFolder, userApublicTestFolder));
             clientB.execute(new DeleteRequest(EnumAPI.OX_NEW, userBsharedTestFolderRO, userBsharedTestFolderRW, userBprivateTestFolder, userBpublicTestFolder));
-            
+
             cleanRootTasks(clientA, rootTasks.get(userA.getDefaultAddress()));
             cleanRootTasks(clientB, rootTasks.get(userB.getDefaultAddress()));
-            
+
             logout();
         }
     }
-    
+
     /**
      * Clean up the root tasks
      * @param client
@@ -653,7 +660,7 @@ public class FindTasksTestEnvironment {
     public static final ActiveFacet createGlobalFacet(String query) {
         return new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(Collections.singletonList("global"), query));
     }
-    
+
     /**
      * Get a task
      * @param id

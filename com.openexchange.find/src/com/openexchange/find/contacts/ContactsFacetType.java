@@ -51,7 +51,6 @@ package com.openexchange.find.contacts;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.java.Strings;
 
@@ -79,10 +78,6 @@ public enum ContactsFacetType implements FacetType {
      * The "address" field facet
      */
     ADDRESS("address", null, false, true),
-    /**
-     * The "folder type" facet
-     */
-    FOLDER_TYPE("folder_type", CommonStrings.FACET_TYPE_FOLDER_TYPE, true, false),
     /**
      * The "contact type" facet
      */

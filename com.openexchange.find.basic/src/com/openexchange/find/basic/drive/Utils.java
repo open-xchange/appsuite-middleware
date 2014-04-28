@@ -124,9 +124,6 @@ public final class Utils {
             return new ContentTerm(query, true, true);
         } else if (Constants.FIELD_FILE_TYPE.equals(field)) {
             return new FileMimeTypeTerm(query);
-        } else if (Constants.FIELD_FOLDER_TYPE.equals(field)) {
-            // TODO
-            return null;
         } else if (Constants.FIELD_FILE_SIZE.equals(field)) {
             final long bytes = parseFilesizeQuery(query);
             final ComparisonType comparison = parseComparisonType(query);

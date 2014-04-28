@@ -84,6 +84,12 @@ public class FindExceptionMessages implements LocalizableStrings {
     public static final String MISSING_MANDATORY_FACET = "The facet \"%1$s\" is mandatory and has to be set.";
 
     // Could not parse \"%1$s\".
-    public static final String PARSING_ERROR_MSG = "Could not parse \"%1$s\".";
+    public static final String PARSING_ERROR = "Could not parse \"%1$s\".";
+
+    // The folder id \"%1$s\" is invalid for module \"%2$s\".
+    public static final String INVALID_FOLDER_ID = "The folder id \"%1$s\" is invalid for module \"%2$s\".";
+
+    // The folder type \"%1$s\" is not supported.
+    public static final String INVALID_FOLDER_TYPE = "The folder type \"%1$s\" is not supported.";
 
 }

@@ -53,7 +53,7 @@ import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 
 /**
- * The display item for folder type; either <i>private</i>, <i>public</i>, <i>shared</i> or <i>external</i>.
+ * The display item for folder type; either <i>private</i>, <i>public</i>, <i>shared</i>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
@@ -76,11 +76,7 @@ public class FolderTypeDisplayItem implements DisplayItem {
         /**
          * The type denoting shared folders.
          */
-        SHARED("shared"),
-        /**
-         * The type denoting external folders; e.g. subscribed account.
-         */
-        EXTERNAL("external"),
+        SHARED("shared")
         ;
 
         private final String identifier;

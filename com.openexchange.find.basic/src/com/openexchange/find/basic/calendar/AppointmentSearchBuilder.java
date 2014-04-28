@@ -57,13 +57,12 @@ import java.util.Set;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
+import com.openexchange.find.Module;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.calendar.RecurringTypeDisplayItem;
 import com.openexchange.find.calendar.RelativeDateDisplayItem;
 import com.openexchange.find.calendar.StatusDisplayItem;
-import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderStorage;
@@ -74,6 +73,7 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.java.SearchStrings;
 import com.openexchange.java.Strings;
@@ -147,8 +147,6 @@ public class AppointmentSearchBuilder {
                 applyStatus(filter.getQueries());
             } else if (CalendarFacetType.RECURRING_TYPE.getId().equals(field)) {
                 applyRecurringType(filter.getQueries());
-            } else if (CalendarFacetType.FOLDER_TYPE.getId().equals(field)) {
-                applyFolderType(filter.getQueries());
             } else if ("participants".equals(field)) {
                 applyParticipants(filter.getQueries());
             } else if ("users".equals(field)) {
@@ -202,20 +200,53 @@ public class AppointmentSearchBuilder {
     }
 
     /**
-     * Applies a specific folder ID to the search.
+     * Applies folder IDs to the search, depending on the existence of a specific
+     * folder ID or a folder type.
      *
      * @param folderID The folder ID to apply, or <code>null</code> if not specified
+     * @param folderType The folder type for that all folder shall be applied. -1 if not specified.
      * @return The builder
      * @throws OXException
      */
-    public AppointmentSearchBuilder applyFolder(String folderID) throws OXException {
-        if (null != folderID) {
+    public AppointmentSearchBuilder applyFolders(String folderID, int folderType) throws OXException {
+        final Set<Integer> folderIDs;
+        if (null == folderID) {
+            Type type = null;
+            if (FolderObject.PRIVATE == folderType) {
+                type = PrivateType.getInstance();
+            } else if (FolderObject.PUBLIC == folderType) {
+                type = PublicType.getInstance();
+            } else if (FolderObject.SHARED == folderType) {
+                type = SharedType.getInstance();
+            }
+
+            if (type == null) {
+                folderIDs = null;
+            } else {
+                hasFolderFilter = true;
+                folderIDs = new HashSet<Integer>();
+                FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
+                    FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session, null);
+                UserizedFolder[] folders = visibleFolders.getResponse();
+                if (null != folders && 0 < folders.length) {
+                    for (UserizedFolder folder : folders) {
+                        try {
+                            folderIDs.add(Integer.valueOf(folder.getID()));
+                        } catch (NumberFormatException e) {
+                            throw FindExceptionCode.INVALID_FOLDER_ID.create(folder.getID(), Module.CALENDAR.getIdentifier());
+                        }
+                    }
+                }
+            }
+        } else {
             try {
-                appointmentSearch.setFolderIDs(Collections.singleton(Integer.valueOf(folderID)));
+                folderIDs = Collections.singleton(Integer.valueOf(folderID));
             } catch (NumberFormatException e) {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, folderID, CommonFacetType.FOLDER.getId());
+                throw FindExceptionCode.INVALID_FOLDER_ID.create(folderID, Module.CALENDAR.getIdentifier());
             }
         }
+
+        appointmentSearch.setFolderIDs(folderIDs);
         return this;
     }
 
@@ -249,39 +280,6 @@ public class AppointmentSearchBuilder {
             }
         }
         appointmentSearch.setUserIDs(userIDs);
-    }
-
-    private void applyFolderType(List<String> queries) throws OXException {
-        Set<Integer> folderIDs = appointmentSearch.getFolderIDs();
-        if (null == folderIDs) {
-            folderIDs = new HashSet<Integer>();
-        }
-        for (String query : queries) {
-            Type type;
-            if (FolderTypeDisplayItem.Type.PRIVATE.getIdentifier().equals(query)) {
-                type = PrivateType.getInstance();
-            } else if (FolderTypeDisplayItem.Type.PUBLIC.getIdentifier().equals(query)) {
-                type = PublicType.getInstance();
-            } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(query)) {
-                type = SharedType.getInstance();
-            } else {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
-            }
-            FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
-                FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session, null);
-            UserizedFolder[] folders = visibleFolders.getResponse();
-            if (null != folders && 0 < folders.length) {
-                for (UserizedFolder folder : folders) {
-                    try {
-                        folderIDs.add(Integer.valueOf(folder.getID()));
-                    } catch (NumberFormatException e) {
-                        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, query, CommonFacetType.FOLDER_TYPE.getId());
-                    }
-                }
-            }
-        }
-        appointmentSearch.setFolderIDs(folderIDs);
-        hasFolderFilter = true;
     }
 
     private void applyStatus(List<String> queries) throws OXException {

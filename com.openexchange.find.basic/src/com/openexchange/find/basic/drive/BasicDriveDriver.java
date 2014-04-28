@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -120,6 +121,11 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     @Override
     protected String getFormatStringForGlobalFacet() {
         return DriveStrings.FACET_GLOBAL;
+    }
+
+    @Override
+    protected Set<Integer> getSupportedFolderTypes() {
+        return FOLDER_TYPE_NOT_SUPPORTED;
     }
 
     @Override

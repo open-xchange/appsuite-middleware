@@ -82,9 +82,6 @@ public final class Constants {
     /** The field for file size */
     public static final String FIELD_FILE_SIZE = "file_size";
 
-    /** The field for folder type */
-    public static final String FIELD_FOLDER_TYPE = "folder_type";
-
     // ---------------------------------------------------------------------------------------------------------- //
 
     /** The fields to query for */

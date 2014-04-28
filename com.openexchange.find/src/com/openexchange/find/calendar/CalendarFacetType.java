@@ -51,7 +51,6 @@ package com.openexchange.find.calendar;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.java.Strings;
 
@@ -85,10 +84,6 @@ public enum CalendarFacetType implements FacetType {
      * The "my status" facet
      */
     STATUS("status", CalendarStrings.FACET_TYPE_STATUS, true, false),
-    /**
-     * The "folder type" facet
-     */
-    FOLDER_TYPE("folder_type", CommonStrings.FACET_TYPE_FOLDER_TYPE, true, false),
     /**
      * The "date" facet
      */

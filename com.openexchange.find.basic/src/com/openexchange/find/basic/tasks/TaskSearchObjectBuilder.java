@@ -67,6 +67,7 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.tools.session.ServerSession;
 
@@ -174,14 +175,34 @@ public class TaskSearchObjectBuilder {
     }
 
     /**
-     * Applies a specific folder ID to the search.
+     * Applies folder IDs to the search, depending on the existence of a specific
+     * folder ID or a folder type.
      *
      * @param folderID The folder ID to apply, or <code>null</code> if not specified
+     * @param folderType The folder type for that all folder shall be applied. -1 if not specified.
      * @return The builder
      * @throws OXException
      */
-    public TaskSearchObjectBuilder applyFolder(String folderID) throws OXException {
-        if (null != folderID) {
+    public TaskSearchObjectBuilder applyFolders(String folderID, int folderType) throws OXException {
+        if (null == folderID) {
+            Type t = null;
+            if (FolderObject.PUBLIC == folderType) {
+                t = PublicType.getInstance();
+            } else if (FolderObject.SHARED == folderType) {
+                t = SharedType.getInstance();
+            } else if (FolderObject.PRIVATE == folderType) {
+                t = PrivateType.getInstance();
+            }
+
+            if (t != null) {
+                UserizedFolder[] folders = Services.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, TaskContentType.getInstance(), t, false, session, null).getResponse();
+                if (folders != null && folders.length > 0) {
+                    for (UserizedFolder uf : folders) {
+                        searchObject.addFolder(Integer.valueOf(uf.getID()));
+                    }
+                }
+            }
+        } else {
             try {
                 searchObject.setFolders(Collections.singletonList(Integer.valueOf(folderID)));
             } catch (NumberFormatException e) {
