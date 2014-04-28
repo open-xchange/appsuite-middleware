@@ -794,10 +794,6 @@ public class AJAXRequestData {
      */
     public @NonNull <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo) throws OXException {
         final String value = getParameter(name);
-        if (null == value) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, "null");
-        }
-
         try {
             final StringParser parser = ServerServiceRegistry.getInstance().getService(StringParser.class);
             if (null == parser) {
