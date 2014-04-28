@@ -108,7 +108,7 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
             session = sessiondService.getSession(req.getParameter("session"));
             final JSONObject json = new JSONObject(8);
     
-            performRampUp(req, session, json, ServerSessionAdapter.valueOf(session));
+            performRampUp(req, session, json, ServerSessionAdapter.valueOf(session), true);
     
             // Set data
             response.setData(json);
