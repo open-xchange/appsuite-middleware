@@ -741,7 +741,16 @@ The database service increments a transaction counter for the partition you sele
 
 For reading, the replication monitor checks the transaction counter on the slave and for the given partition, if it matches the one it previously wrote or retrieved from the master server, you will use the slave DB for reading (as it is up-to-date), otherwise the system will fall back to using the master. 
 
-If parts of your database are completely independent of one another, you can partition the database with partitionIds. We use the contextId for this. Clearly this is an optimization strategy, so you might well not need this. In that case just omit the partitionId (it will then default to "0"). 
+If parts of your database are completely independent of one another, you can partition the database with partitionIds. We use the contextId for this. Clearly this is an optimization strategy, so you might well not need this. In that case just omit the partitionId (it will then default to "0"). If you want to use a partitionId, you have to register it first. Let's register a couple of partitionIds: 
+
+PUT http://localhost:8009/rest/database/pool/w/[writeId]/[schemaName]/partitions
+
+With the body consisting of a JSONArray with the IDs you need registered. For example:
+
+PUT http://localhost:8009/rest/database/pool/w/2/myCustomSchema/partitions
+[1,2,3,4,5]
+
+Which responds with a 200 (OK).
 
 All these parts, the readId of the slave, the writeId of the master, the schema and optionally the partitionId make up the address of your database: 
 
