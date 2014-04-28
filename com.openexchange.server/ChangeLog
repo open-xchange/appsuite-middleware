@@ -2,9 +2,12 @@
 
  - Fix for bug 32059: Added port to connection string for distributed files.
 
+* 2014-04-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 32044: Update the reminder's folderID for all accessing users, if there are no participants.
+
 * 2014-04-28 - ioannis.chouklis@open-xchange.com
 
- - Fix for bug 32044: Update the reminder's folderID for the organizer, if there are no participants.
  - Fix for bug 32149: Improved POP3 validation warning message.
 
 * 2014-04-28 - tobias.friedrich@open-xchange.com
