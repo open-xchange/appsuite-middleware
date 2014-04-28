@@ -1,6 +1,6 @@
 * 2014-04-25 - thorben.betten@open-xchange.com
 
- - Fix for bug 31918: Set more reasonable max-age for images held in Browser cache
+ - Fix for bug 31684: Prefer look-up by user identifier over look-up by object/folder identifier pair
 
 * 2014-04-16 - tobias.friedrich@open-xchange.com
 
