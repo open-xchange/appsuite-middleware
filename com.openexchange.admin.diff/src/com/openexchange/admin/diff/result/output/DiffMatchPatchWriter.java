@@ -94,10 +94,10 @@ public class DiffMatchPatchWriter implements DiffWriter {
                 String difference = "";
                 for (Diff d : diff_main) {
                     if (d.operation != Operation.EQUAL) {
-                        difference = difference.concat(d.operation + ": " + d.text + "\n");
+                        difference = difference.concat("\n" + d.operation + ": " + d.text);
                     }
                 }
-                diffResult.getChangedProperties().put(pairs.getKey(), new PropertyDiffResultSet(pairs.getKey(), PropertyDiffResultSet.CHANGES_FOUND_MSG, difference));
+                diffResult.getChangedProperties().put(pairs.getKey(), new PropertyDiffResultSet(pairs.getKey(), difference));
             }
         }
     }

@@ -119,7 +119,7 @@ public class XmlHandler extends AbstractFileHandler {
                     Difference next = iterator.next();
                     difference = difference.concat(next.toString() + "\n");
                 }
-                diffResult.getChangedProperties().put(pairs.getKey(), new PropertyDiffResultSet(pairs.getKey(), PropertyDiffResultSet.DETAILED_COMPARISION_NOT_POSSIBLE_MSG, difference));
+                diffResult.getChangedProperties().put(pairs.getKey(), new PropertyDiffResultSet(pairs.getKey(), difference));
             } catch (SAXException e) {
                 diffResult.getProcessingErrors().add("Error while xml diff: " + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
             } catch (IOException e) {

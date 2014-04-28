@@ -49,6 +49,9 @@
 
 package com.openexchange.admin.diff;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -56,6 +59,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.io.FileUtils;
 import com.openexchange.admin.diff.result.DiffResult;
 
 /**
@@ -113,6 +117,9 @@ public class ConfigDiffCLT {
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             printUsage(-1);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            printUsage(-1);
         }
     }
 
@@ -122,15 +129,18 @@ public class ConfigDiffCLT {
      * @param original folder
      * @param installed folder
      * @param file optional file to store the diff
+     * @throws IOException
      */
-    private static void executeDiff(String original, String installed, String file) {
+    private static void executeDiff(String original, String installed, String file) throws IOException {
         ConfigDiff configDiff = new ConfigDiff(original, installed);
         DiffResult diffResult = configDiff.run();
 
         if (file == null) {
             System.out.println(diffResult.toString());
         } else {
-            // TODO export to file
+            File output = new File(file);
+
+            FileUtils.write(output, diffResult.toString(), Charset.defaultCharset());
         }
     }
 

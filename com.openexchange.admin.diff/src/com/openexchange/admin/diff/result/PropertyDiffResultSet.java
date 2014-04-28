@@ -60,18 +60,17 @@ public class PropertyDiffResultSet implements Comparable<PropertyDiffResultSet> 
 
     private String fileName;
 
-    private String property;
+    private String propertyNameAndValue;
 
-    private String value;
-
-    public static final String DETAILED_COMPARISION_NOT_POSSIBLE_MSG = "COMPLETE FILE CONTENT DIFF; COPY THE FOLLOWING SENTENCE IN A HTML FILE AND OPEN IT WITH A BROWSER: ";
-
-    public static final String CHANGES_FOUND_MSG = "Changes found: ";
-
-    public PropertyDiffResultSet(String fileName, String property, String value) {
+    /**
+     * Initializes a new {@link PropertyDiffResultSet}.
+     * 
+     * @param fileName
+     * @param propertyNameAndValue
+     */
+    public PropertyDiffResultSet(String fileName, String propertyNameAndValue) {
         this.fileName = fileName;
-        this.property = property;
-        this.value = value;
+        this.propertyNameAndValue = propertyNameAndValue;
     }
 
     /**
@@ -92,40 +91,24 @@ public class PropertyDiffResultSet implements Comparable<PropertyDiffResultSet> 
         this.fileName = fileName;
     }
 
-    /**
-     * Gets the property
-     * 
-     * @return The property
-     */
-    public String getProperty() {
-        return property;
-    }
 
     /**
-     * Sets the property
+     * Gets the propertyNameAndValue
      * 
-     * @param property The property to set
+     * @return The propertyNameAndValue
      */
-    public void setProperty(String property) {
-        this.property = property;
+    public String getPropertyNameAndValue() {
+        return propertyNameAndValue;
     }
 
-    /**
-     * Gets the value
-     * 
-     * @return The value
-     */
-    public String getValue() {
-        return value;
-    }
 
     /**
-     * Sets the value
+     * Sets the propertyNameAndValue
      * 
-     * @param value The value to set
+     * @param propertyNameAndValue The propertyNameAndValue to set
      */
-    public void setValue(String value) {
-        this.value = value;
+    public void setPropertyNameAndValue(String propertyNameAndValue) {
+        this.propertyNameAndValue = propertyNameAndValue;
     }
 
     /**

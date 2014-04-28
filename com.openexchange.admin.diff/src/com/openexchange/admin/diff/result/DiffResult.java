@@ -229,7 +229,7 @@ public class DiffResult {
         builder.append("---------- Additional properties: " + additionalProperties.size() + " ---------- \n");
         for (Entry<String, PropertyDiffResultSet> additionalProperty : additionalProperties.entrySet()) {
             PropertyDiffResultSet propertyAdded = additionalProperty.getValue();
-            builder.append(propertyAdded.getFileName() + ": " + propertyAdded.getProperty() + "=" + propertyAdded.getValue() + "\n");
+            builder.append(propertyAdded.getFileName() + ": " + propertyAdded.getPropertyNameAndValue() + "\n");
         }
 
         builder.append("---------- Duplicate configuration files: " + duplicateFiles.size() + " ---------- \n");
@@ -250,7 +250,7 @@ public class DiffResult {
         builder.append("---------- Changed properties: " + changedProperties.size() + " ---------- \n");
         for (Entry<String, PropertyDiffResultSet> changedProperty : changedProperties.entrySet()) {
             PropertyDiffResultSet propertyChanged = changedProperty.getValue();
-            builder.append(propertyChanged.getFileName() + ": " + propertyChanged.getProperty() + "=" + propertyChanged.getValue() + "\n");
+            builder.append(propertyChanged.getFileName() + ": " + propertyChanged.getPropertyNameAndValue() + "\n");
         }
 
         return builder.toString();

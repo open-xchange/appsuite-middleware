@@ -156,7 +156,7 @@ public class PropertyHandler extends AbstractFileHandler {
 
             String installedPropertyValue = installedProperties.getProperty(key);
             if (!originalPropertyValue.equalsIgnoreCase(installedPropertyValue)) {
-                diffResult.getChangedProperties().put(key, new PropertyDiffResultSet(fileName, key, obscure(key, installedPropertyValue)));
+                diffResult.getChangedProperties().put(key, new PropertyDiffResultSet(fileName, key + "=" + obscure(key, installedPropertyValue)));
             } else if (installedPropertyValue == null) {
                 diffResult.getMissingProperties().put(fileName, key);
             }
@@ -167,7 +167,7 @@ public class PropertyHandler extends AbstractFileHandler {
 
         if (!installedProperties.isEmpty()) {
             for (String key : installedProperties.stringPropertyNames()) {
-                diffResult.getAdditionalProperties().put(fileName, new PropertyDiffResultSet(fileName, key, installedProperties.getProperty(key)));
+                diffResult.getAdditionalProperties().put(fileName, new PropertyDiffResultSet(fileName, key + "=" + installedProperties.getProperty(key)));
             }
         }
         return diffResult;
