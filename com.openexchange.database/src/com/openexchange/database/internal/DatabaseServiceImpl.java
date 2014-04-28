@@ -83,6 +83,10 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final AssignmentImpl assign = configDatabaseService.getAssignment(contextId);
+        return get(assign, write, noTimeout);
+    }
+
+    private Connection get(final AssignmentImpl assign, final boolean write, final boolean noTimeout) throws OXException {
         LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, assign.getSchema());
         return monitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
@@ -286,6 +290,23 @@ public final class DatabaseServiceImpl implements DatabaseService {
         }
         return con;
     }
+    
+    public Connection getReadOnlyMonitored(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+        return getMonitoredConnection(readPoolId, writePoolId, schema, partitionId, false, false);
+    }
+    
+    public Connection getWritableMonitored(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+        return getMonitoredConnection(readPoolId, writePoolId, schema, partitionId, true, false);
+    }
+    
+    public Connection getWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+        return getMonitoredConnection(readPoolId, writePoolId, schema, partitionId, true, true);
+    }
+    
+    public Connection getMonitoredConnection(int readPoolId, int writePoolId, String schema, int partitionId, boolean write, boolean noTimeout) throws OXException {
+        AssignmentImpl assignment = new AssignmentImpl(partitionId, Server.getServerId(), readPoolId, writePoolId, schema);
+        return get(assignment, write, noTimeout);
+    }
 
     @Override
     public void backReadOnly(final Context ctx, final Connection con) {
@@ -347,5 +368,20 @@ public final class DatabaseServiceImpl implements DatabaseService {
         } catch (final OXException e) {
             LOG.error("", e);
         }
+    }
+    
+    @Override
+    public void backReadOnlyMonitored(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+        back(con);
+    }
+    
+    @Override
+    public void backWritableMonitored(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+        back(con);
+    }
+    
+    @Override
+    public void backWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+        back(con);
     }
 }
