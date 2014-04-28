@@ -116,7 +116,7 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
              * 5. Apply AJAXRequestData to OXRESTServiceWrapper
              *
              * 6. Invoke OXRESTServiceWrapper.execute()
-             *    Reflection-based invocation of java.lang.reflect.Method inside ReflectiveServiceWrapper
+             *    Reflection-based invocation via java.lang.reflect.Method inside ReflectiveServiceWrapper
              */
 
             OXRESTServiceWrapper wrapper = retrieveWrapper(req.getMethod(), request.getPathInfo());
