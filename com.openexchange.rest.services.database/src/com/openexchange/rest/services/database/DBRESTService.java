@@ -314,7 +314,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         new CreateServiceSchemaLockTable().perform(con);
     }
     
-    @PUT("/pool/w/:writeId/:schema")
+    @PUT("/pool/w/:writeId/:schema/partitions")
     public void insertPartitionIds(int writeId, String schema) throws OXException {
         try {
             JSONArray arr = (JSONArray) request.getData();
