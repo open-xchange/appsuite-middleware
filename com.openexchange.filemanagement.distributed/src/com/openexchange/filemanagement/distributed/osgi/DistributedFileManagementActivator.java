@@ -36,6 +36,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
 
         HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
         final String prefix = getService(DispatcherPrefixService.class).getPrefix();
+        final int port = getService(ConfigurationService.class).getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
         final ServiceLookup services = this;
         if (hazelcastConfig.isEnabled()) {
             track(HazelcastInstance.class, new SimpleRegistryListener<HazelcastInstance>() {
@@ -45,7 +46,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
                     DistributedFileManagementImpl.setHazelcastInstance(service);
                     String address = service.getCluster().getLocalMember().getInetSocketAddress().getHostName();
                     String mapName = discoverMapName(service.getConfig());
-                    address += prefix;
+                    address = address + ":" + port + prefix;
                     registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(services, address, mapName));
                 }
 
