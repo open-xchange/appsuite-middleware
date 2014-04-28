@@ -757,9 +757,15 @@ class UpdateData {
     void updateReminder() throws OXException, OXException {
         if (isMove() && getUpdatedParticipants().isEmpty()) {
             ReminderHandler handler = new ReminderHandler(ctx);
-            ReminderObject reminder = handler.loadReminder(getUpdated().getObjectID(), user.getId(), Types.TASK);
-            reminder.setFolder(getDestFolderId());
-            handler.updateReminder(reminder);
+            try {
+                ReminderObject reminder = handler.loadReminder(getUpdated().getObjectID(), user.getId(), Types.TASK);
+                reminder.setFolder(getDestFolderId());
+                handler.updateReminder(reminder);
+            } catch (OXException e) {
+                if (!e.getErrorCode().equals("REM-0009")) {
+                    throw e;
+                }
+            }
         }
         updateReminder(ctx, getUpdated(), user, isMove(), getRemoved(), getDestFolder(), getUpdatedParticipants(), getUpdatedFolder());
     }
