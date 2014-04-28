@@ -443,6 +443,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             // Return
             return managedFile;
         } catch (final OXException e) {
+            LOG.warn("Could not load remote file: {}", id, e);
             return null;
         }
 
