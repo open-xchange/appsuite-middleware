@@ -188,7 +188,7 @@ public class OXRESTRoute {
      * @return <code>null</code> if the path does not match, or a {@link OXRESTMatch} instance containing the variables of the match.
      */
     public OXRESTMatch match(String method, String path) {
-        if (!method.equalsIgnoreCase(this.method)) {
+        if (!this.method.equalsIgnoreCase(method)) {
             return null;
         }
 
