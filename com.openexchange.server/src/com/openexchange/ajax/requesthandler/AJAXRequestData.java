@@ -79,6 +79,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.json.actions.AbstractMailAction;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -793,14 +794,31 @@ public class AJAXRequestData {
      */
     public @NonNull <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo) throws OXException {
         final String value = getParameter(name);
+        if (null == value) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, "null");
+        }
+
         try {
-            return ServerServiceRegistry.getInstance().getService(StringParser.class).parse(value, coerceTo);
+            final StringParser parser = ServerServiceRegistry.getInstance().getService(StringParser.class);
+            if (null == parser) {
+                if (int.class.equals(coerceTo) || Integer.class.equals(coerceTo)) {
+                    return (T) Integer.valueOf(value);
+                }
+                if (long.class.equals(coerceTo) || Long.class.equals(coerceTo)) {
+                    return (T) Long.valueOf(value);
+                }
+                if (boolean.class.equals(coerceTo) || Boolean.class.equals(coerceTo)) {
+                    return (T) Boolean.valueOf(value);
+                }
+                throw ServiceExceptionCode.absentService(StringParser.class);
+            }
+            return parser.parse(value, coerceTo);
         } catch (final RuntimeException e) {
             /*
              * Auto-unboxing may lead to NullPointerExceptions or NumberFormatExceptions if e.g. null or "Hello" should be coerced to an
              * integer value. Handle RuntimeException here to cover all possible non-declarable exceptions.
              */
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, null == value ? "null" : value);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, value);
         }
     }
 
