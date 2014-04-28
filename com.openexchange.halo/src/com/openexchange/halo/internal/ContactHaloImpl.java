@@ -67,6 +67,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
@@ -122,12 +123,12 @@ public class ContactHaloImpl implements ContactHalo {
         if (!(contact.getInternalUserId() > 0) && !contact.containsEmail1() & !contact.containsEmail2() & !contact.containsEmail3()) {
             throw HaloExceptionCodes.INVALID_CONTACT.create();
         }
-        return dataSource.investigate(buildQuery(contact, session), req, session);
+        return dataSource.investigate(buildQuery(contact, session, true), req, session);
     }
 
     @Override
     public Picture getPicture(Contact contact, ServerSession session) throws OXException {
-        HaloContactQuery contactQuery = buildQuery(contact, session);
+        HaloContactQuery contactQuery = buildQuery(contact, session, true);
 
         for (HaloContactImageSource source : imageSources) {
             if (!source.isAvailable(session)) {
@@ -148,7 +149,7 @@ public class ContactHaloImpl implements ContactHalo {
 
     @Override
     public String getPictureETag(Contact contact, ServerSession session) throws OXException {
-        HaloContactQuery contactQuery = buildQuery(contact, session);
+        HaloContactQuery contactQuery = buildQuery(contact, session, false);
         for (HaloContactImageSource source : imageSources) {
             if (!source.isAvailable(session)) {
                 continue;
@@ -164,10 +165,12 @@ public class ContactHaloImpl implements ContactHalo {
     }
 
     // Friendly for testing
-    HaloContactQuery buildQuery(final Contact contact, final ServerSession session) throws OXException {
+    HaloContactQuery buildQuery(final Contact contact, final ServerSession session, final boolean withBytes) throws OXException {
         final UserService userService = services.getService(UserService.class);
         final ContactService contactService = services.getService(ContactService.class);
         final HaloContactQuery contactQuery = new HaloContactQuery();
+        final ContactField[] fields = withBytes ? null : new ContactField[] { ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.FOLDER_ID };
+
         Contact resultContact = contact;
 
         // Look-up associated user...
@@ -184,7 +187,7 @@ public class ContactHaloImpl implements ContactHalo {
         // Check by object/folder identifier
         if (null == user) {
             if (resultContact.getObjectID() > 0 && resultContact.getParentFolderID() > 0) {
-                Contact loaded = contactService.getContact(session, "" + resultContact.getParentFolderID(), "" + resultContact.getObjectID());
+                Contact loaded = contactService.getContact(session, Integer.toString(resultContact.getParentFolderID()), Integer.toString(resultContact.getObjectID()), fields);
                 contactQuery.setContact(loaded);
                 contactQuery.setMergedContacts(Arrays.asList(loaded));
                 return contactQuery;
@@ -220,7 +223,7 @@ public class ContactHaloImpl implements ContactHalo {
         final List<Contact> contactsToMerge = new LinkedList<Contact>();
         if (user != null) {
             // Load the associated contact
-            resultContact = contactService.getUser(session, user.getId());
+            resultContact = contactService.getUser(session, user.getId(), fields);
             contactsToMerge.add(resultContact);
         } else if (false == Strings.isEmpty(resultContact.getEmail1())){
             // Try to find a contact
@@ -230,9 +233,10 @@ public class ContactHaloImpl implements ContactHalo {
             contactSearch.setEmail2(email);
             contactSearch.setEmail3(email);
             contactSearch.setOrSearch(true);
+            contactSearch.setExactMatch(true);
             SearchIterator<Contact> iterator = null;
             try {
-                iterator = contactService.searchContacts(session, contactSearch);
+                iterator = contactService.searchContacts(session, contactSearch, fields);
                 while (iterator.hasNext()) {
                     Contact c = iterator.next();
                     if (checkEmails(c, email)) {
