@@ -101,7 +101,8 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
 
     private final static int TASKS_FIELDS[] = new int[] { Task.FOLDER_ID, Task.OBJECT_ID, Task.LAST_MODIFIED, Task.CREATED_BY, Task.CREATION_DATE,
                                                         Task.RECURRENCE_TYPE, Task.PERCENT_COMPLETED, Task.PRIVATE_FLAG, Task.TITLE, Task.PRIORITY,
-                                                        Task.START_DATE, Task.END_DATE, Task.COLOR_LABEL, Task.STATUS, Task.NOTE };
+                                                        Task.START_DATE, Task.END_DATE, Task.COLOR_LABEL, Task.STATUS, Task.NOTE, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT,
+                                                        Task.MODIFIED_BY, Task.NUMBER_OF_ATTACHMENTS, Task.PARTICIPANTS, Task.UID, Task.USERS};
 
     /**
      * Initializes a new {@link BasicTasksDriver}.
