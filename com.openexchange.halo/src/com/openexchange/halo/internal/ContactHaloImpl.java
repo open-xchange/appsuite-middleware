@@ -165,6 +165,11 @@ public class ContactHaloImpl implements ContactHalo {
     }
 
     // Friendly for testing
+    HaloContactQuery buildQuery(final Contact contact, final ServerSession session) throws OXException {
+        return buildQuery(contact, session, true);
+    }
+
+    // Friendly for testing
     HaloContactQuery buildQuery(final Contact contact, final ServerSession session, final boolean withBytes) throws OXException {
         final UserService userService = services.getService(UserService.class);
         final ContactService contactService = services.getService(ContactService.class);
