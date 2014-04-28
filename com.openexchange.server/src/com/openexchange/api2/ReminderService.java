@@ -115,7 +115,7 @@ public interface ReminderService {
     ReminderObject[] loadReminders(int[] targetIds, int userId, int module, Connection con)
         throws OXException;
 
-    public SearchIterator listReminder(int module, int targetId) throws OXException;
+    SearchIterator<ReminderObject> listReminder(int module, int targetId) throws OXException;
 
     /**
      * Fetches the list of reminder that should pop up in the time frame starting now and ending at the given end date.

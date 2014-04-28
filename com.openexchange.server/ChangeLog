@@ -1,3 +1,8 @@
+* 2014-05-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 32044: Update the reminder's folderID for all accessing users, if there are no participants. Check additionally permissions
+   on the destination folder for all reminder.
+
 * 2014-04-30 - martin.schneider@open-xchange.com
 
  - Fix for bug 32036: Use 'transport_auth' for setting SMTP credentials usage. 

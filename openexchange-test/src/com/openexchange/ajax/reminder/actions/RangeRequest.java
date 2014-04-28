@@ -50,7 +50,6 @@
 package com.openexchange.ajax.reminder.actions;
 
 import java.util.Date;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 
 /**
@@ -63,51 +62,42 @@ public class RangeRequest extends AbstractReminderRequest<RangeResponse> {
      * Reminder until this date will be fetched from server.
      */
     private final Date end;
+    private boolean failOnError;
+
+    public RangeRequest(Date end, boolean failOnError) {
+        super();
+        this.failOnError = failOnError;
+        this.end = new Date(end.getTime());
+    }
 
     /**
      * Default constructor.
      * @param end reminder until this date will be fetched from server.
      */
     public RangeRequest(final Date end) {
-        super();
-        this.end = new Date(end.getTime());
+        this(end, true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Method getMethod() {
         return Method.GET;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_RANGE),
-            new Parameter(AJAXServlet.PARAMETER_END, String.valueOf(end
-                .getTime()))
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_RANGE),
+            new Parameter(AJAXServlet.PARAMETER_END, String.valueOf(end.getTime()))
         };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public RangeParser getParser() {
-        return new RangeParser();
+        return new RangeParser(failOnError);
     }
-
 }
