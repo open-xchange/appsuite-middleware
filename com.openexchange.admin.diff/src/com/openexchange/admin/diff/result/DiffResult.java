@@ -74,7 +74,9 @@ public class DiffResult {
     private List<String> processingErrors = new ArrayList<String>();
 
     /**
-     * Includes configuration files missing in the installation
+     * Includes configuration files missing in the installation<br>
+     * <br>
+     * TODO change to data object (that must be defined) list to get to know where the file was found in the original installation
      */
     private List<String> missingFiles = new ArrayList<String>();
 

@@ -111,7 +111,7 @@ public class JarFileProvider implements IConfigurationFileProvider {
                     final JarEntry entry = entries.nextElement();
                     final String entryName = entry.getName();
 
-                    // TODO diese Abfrage noch benoetigt oder dank currentFile.isFile schon abgehandelt?!
+                    // TODO check previously if 'isFile'
                     final int slashIdx = entryName.lastIndexOf('/');
                     if (slashIdx > 0) {
                         final String entryExt = entryName.substring(slashIdx + 1);

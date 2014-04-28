@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -97,7 +98,9 @@ public class ConfFolderFileProviderTest {
         ConfFileHandler.addConfigurationFile(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean());
     }
 
+    @Ignore
     @Test
+    // Ignore as long as it is not possible to move the files ton 'conf' folder
     public void testAddFilesToDiffQueue_filesInConfFolder_addedToQueue() throws IOException {
         File newFolder = folder.newFolder("/conf/");
 

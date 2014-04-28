@@ -49,7 +49,10 @@
 
 package com.openexchange.admin.diff.file.type.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.admin.diff.file.type.IConfFileHandler;
@@ -62,6 +65,14 @@ import com.openexchange.admin.diff.result.DiffResult;
  * @since 7.6.0
  */
 public abstract class AbstractFileHandler implements IConfFileHandler {
+
+    /**
+     * List of files that will be ignored within the diff process
+     */
+    private List<String> ignoredFiles = new ArrayList<String>(Arrays.asList(new String[] {
+        "mpasswd",
+        ""
+    }));
 
     /**
      * Registered installed files
@@ -78,14 +89,18 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
      */
     @Override
     public void addFile(String fileName, String content, boolean isOriginal) {
+        if (ignoredFiles.contains(fileName)) {
+            return;
+        }
+
         if (isOriginal) {
             if (installedFiles.containsKey(fileName)) {
-                // TODO - handle duplicate files System.out.println(fileName + " already in the installed map");
+                // TODO - handle duplicate files: add to processing error map?
             }
             originalFiles.put(fileName, content);
         } else {
             if (installedFiles.containsKey(fileName)) {
-                // TODO - handle duplicate files System.out.println(fileName + " already in the installed map");
+                // TODO - handle duplicate files: add to processing error map?
             }
             installedFiles.put(fileName, content);
         }
