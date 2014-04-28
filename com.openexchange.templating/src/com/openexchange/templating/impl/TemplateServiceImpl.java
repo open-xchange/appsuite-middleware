@@ -140,12 +140,7 @@ public class TemplateServiceImpl implements TemplateService {
             return null;
         }
 
-        final OXTemplateImpl retval;
-        if (exceptionHandler == null) {
-            retval = new OXTemplateImpl();
-        } else {
-            retval = new OXTemplateImpl(exceptionHandler);
-        }
+        final OXTemplateImpl retval = exceptionHandler == null ? new OXTemplateImpl() : new OXTemplateImpl(exceptionHandler);
 
         retval.setLevel(TemplateLevel.SERVER);
         Properties properties = new Properties();
@@ -285,7 +280,7 @@ public class TemplateServiceImpl implements TemplateService {
     /**
      * Indicates if a given template is an admin template which means that it is defined from the administrator and stored within the
      * backend.
-     * 
+     *
      * @param templateName - the name of the template to check.
      * @return true - if the template is indicated to be from the admin. false - if it is configured from the user.
      */
