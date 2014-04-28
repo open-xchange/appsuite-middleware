@@ -1,3 +1,7 @@
+* 2014-04-28 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32200: Added import from and export to csv for "categories" property
+ 
 * 2014-04-25 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25701: Consider "pref" in "TEL" properties of vCards 
