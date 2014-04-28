@@ -61,6 +61,10 @@ import java.util.jar.JarFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.AndFileFilter;
+import org.apache.commons.io.filefilter.PrefixFileFilter;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.openexchange.admin.diff.file.type.ConfFileHandler;
 import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
@@ -83,7 +87,7 @@ public class JarFileProvider implements IConfigurationFileProvider {
      */
     @Override
     public List<File> readConfigurationFiles(DiffResult diffResult, String rootFolder, String[] fileExtension) {
-        Collection<File> listFiles = FileUtils.listFiles(new File(rootFolder), new String[] { "jar" }, false);
+        Collection<File> listFiles = FileUtils.listFiles(new File(rootFolder), new AndFileFilter(new PrefixFileFilter("com.openexchange."), new SuffixFileFilter(".jar")), TrueFileFilter.TRUE);
 
         if (listFiles != null) {
             return new ArrayList<File>(listFiles);
