@@ -706,6 +706,167 @@ GET http://localhost:8009/rest/database//unlock/for/1/andModule/com.openexchange
 
 specifying the context name and module in the URL.
 
+# Accessing NON-OX schemas and database servers
+
+You can also access NON-OX databases (both servers and schemas) using our REST service, but for that we'll have to look at some of the internals of our database pooling implementation and talk  about a few concepts. 
+OX connects to database servers which were registered with the 'registerdatabase' command line tool. A database can be either a master database, used for writing, or a slave database used for reading. There might not be a reading slave in a setup though. The command 'listdatabase' shows you a list of all databases that are known to your OX installation along with their IDs. You will need these IDs to reference the databases:
+
+root@beta:/opt/open-xchange/sbin# ./listdatabase 
+ id name       hostname  master mid weight maxctx curctx hlimit max inital
+  3 oxdatabase io2.ox.io true     0    100   1000    363 true   100      0
+444 ciscoDB    db.ox.io  true     0    100      0      0 true   100      0
+
+Whenever I talk about a writeId, you can use the id number of a master server, the readId always has to point to a slave server that was set up to sync with the master. In case you don't use a master/slave setup, just use the masters database id for both the readId and writeId. Here is the call to register a database:
+
+./registerdatabase --name=ciscoDB --hostname=db.ox.io --dbpasswd=superSecret --master=true --maxunit=0
+database 444 registered
+
+The name is an arbitrary name, just pick something nice and memorable. The hostname points to the host the database is living on, the dbpasswd is the database password. In this case I'm registering a master database, if this is set to false, you will have to provide the masters database id in --masterid. Maxunit tells the system how many contexts it can place in this database, and, in case this server only handles your custom database, has to be set to 0. 
+
+This part provides the hostname for the database to use. Next comes the "schema" name, which is the name of the database you created with "CREATE DATABASE".
+
+Lastly there is something we refer to as the partitionId. If your database can logically be partitioned into sections that are updated and queried completely independently of one another, that region should get its own "partitionId". The partitionId determines which parts of the database get invalidated when an update is done. This is done by our replication monitor, which makes sure you always read up-to-date data. Consider this example: 
+
+On the master
+You do an update to a table
+
+On the slave
+You query the same table
+
+At times, the slave will not have applied the update yet, and you would read old data. So, what really happens, when using our replication monitor is this:
+
+On the master
+You do an update to a table
+The database service increments a transaction counter for the partition you selected
+
+For reading, the replication monitor checks the transaction counter on the slave and for the given partition, if it matches the one it previously wrote or retrieved from the master server, you will use the slave DB for reading (as it is up-to-date), otherwise the system will fall back to using the master. 
+
+If parts of your database are completely independent of one another, you can partition the database with partitionIds. We use the contextId for this. Clearly this is an optimization strategy, so you might well not need this. In that case just omit the partitionId (it will then default to "0"). 
+
+All these parts, the readId of the slave, the writeId of the master, the schema and optionally the partitionId make up the address of your database: 
+
+PUT http://localhost:8009/rest/database/pool/r/[readId]/w/[writeId]/[schema]/[partitionId]
+
+Add /writable or /readOnly to it to get the address to do updates and queries. If you need to do a schema migration the URL looks like this:
+
+PUT http://localhost:8009/rest/database/migration/for/pool/r/[readId]/w/[writeId]/[schema]/[partitionId]/from/[oldVersion]/to/[toVersion]/forModule/[module]
+
+Optional parts are again the partitionId and the /from/[oldVersion] part for the initial update. 
+
+This is the address to unlock a locked schema
+GET http://localhost:8009/rest/database/unlock/pool/r/[readId]/w/[writeId]/[schema]/[partitionId]/andModule/[module]
+
+There are some tables that need to exist for the replication monitor and the migration system to work. So for every schema that you want to access via our service, you have to issue a call like this: 
+
+http://localhost:8009/rest/database/init/w/[writeId]/[schema]
+
+Let's walk through a typical interaction with the database, including the creation of the DB schema.
+
+## Creating the schema to use
+
+In this example I will use an existing and already registered database server (id: 2) and a custom schema named appropriately "myCustomSchema". I will not be using a master/slave setup, so will use the same (master) database ID for reading and writing. I will not partition the database, so leave off the partitionId.     
+
+## Initializing the schema 
+
+Before using the schema at all, we have to initialize the database:
+
+GET http://localhost:8009/rest/database/init/w/2/myCustomSchema
+
+which responds with a 200 (OK). Now we're ready to use the schema with our service. 
+
+## Inserting into a table, but failing the version constraint
+
+So let's try inserting into the greetings table. "Which greetings table?", you ask. It's not there yet, but the migration system will tell us about it: 
+
+PUT http://localhost:8009/rest/database/pool/r/2/w/2/myCustomSchema/writable
+X-OX-DB-MODULE: com.openexchange.myModule
+X-OX-DB-VERSION: 1
+
+{
+  "insertGreeting": {
+    "query": "INSERT INTO greetings (cid, uid, greeting) VALUES (?, ?, ?)",
+    "params": [1,3, "Aloha"]
+  }
+}
+
+To which the server responds with a 409 (Conflict) to tell us, the schema is not matching our asked for version. 
+
+## Updating the database
+
+So, let's do the migration on this database:
+
+PUT http://localhost:8009/rest/database//migration/for/pool/r/2/w/2/myCustomSchema/to/1/forModule/com.openexchange.myModule
+{
+  "createGreetingTable": {
+    "query": "CREATE TABLE greetings (cid INT(10), uid INT(10), greeting VARCHAR(128))"
+  }
+}
+
+Which garners this response: 
+{
+    "results": {
+        "createGreetingTable": {
+            "updated": 0
+        }
+    }
+}
+
+## Inserting into the table
+
+Alright, the table is there and our versioning constraint is met, so the insert goes through:
+
+PUT http://localhost:8009/rest/database/pool/r/2/w/2/myCustomSchema/writable
+X-OX-DB-MODULE: com.openexchange.myModule
+X-OX-DB-VERSION: 1
+
+{
+  "insertGreeting": {
+    "query": "INSERT INTO greetings (cid, uid, greeting) VALUES (?, ?, ?)",
+    "params": [1,3, "Aloha"]
+  }
+}
+
+To which the server responds:
+{
+    "results": {
+        "insertGreeting": {
+            "updated": 1
+        }
+    }
+}
+
+## Querying the table
+
+Let's query the table for the greeting: 
+
+PUT http://localhost:8009/rest/database/pool/r/2/w/2/myCustomSchema/readOnly
+X-OX-DB-MODULE: com.openexchange.myModule
+X-OX-DB-VERSION: 1
+
+{
+  "selectGreeting": {
+    "query": "SELECT greeting FROM greetings WHERE cid = ? AND uid = ?",
+    "params": [1,3]
+  }
+}
+
+Response: 
+{
+    "results": {
+        "selectGreeting": {
+            "rows": [
+                {
+                    "greeting": "Aloha"
+                }
+            ]
+        }
+    }
+}
+
+## Transactions
+
+Transactions work exactly the same as with the other database types. Just include a "keepOpen=true" parameter in the call and use the transaction id of the response for further queries. 
+
 # TODOs
-Accessing arbitrary databases
-JSON Parser Errors!!!!!
+JSON Parser Errors don't show up nicely in responses!!!!!
+Add partition ids

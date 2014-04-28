@@ -166,8 +166,6 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         perform();
     }
     
-    
-    
     @PUT("/transaction/:transactionId")
     public void queryTransaction(String txId) throws OXException {
         tx = context.transactions.getTransaction(txId);
@@ -315,7 +313,21 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         new CreateServiceSchemaVersionTable().perform(con);
         new CreateServiceSchemaLockTable().perform(con);
     }
-
+    
+    @PUT("/pool/w/:writeId/:schema")
+    public void insertPartitionIds(int writeId, String schema) throws OXException {
+        try {
+            JSONArray arr = (JSONArray) request.getData();
+            int[] partitionIds = new int[arr.length()];
+            for(int i = 0; i < partitionIds.length; i++) {
+                partitionIds[i] = arr.getInt(i);
+            }
+            
+            dbService().initPartitions(writeId, schema, partitionIds);
+        } catch (JSONException x) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
+        }
+    }
     
     @Override
     public void after() throws OXException {

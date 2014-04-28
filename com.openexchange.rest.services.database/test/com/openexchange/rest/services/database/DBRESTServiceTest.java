@@ -51,6 +51,7 @@ package com.openexchange.rest.services.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -963,6 +964,17 @@ public class DBRESTServiceTest {
         
     }
     
+    @Test
+    public void insertPartitionIds() throws Exception {
+        data(list().add(1,2,3,4,5).build());
+        
+        service.before();
+        service.insertPartitionIds(writePoolId, schema);
+        service.after();
+        
+        verify(dbs).initPartitions(writePoolId, schema, 1,2,3,4,5);
+    }
+    
     private void newRequest() {
         setup();
     }
@@ -973,6 +985,10 @@ public class DBRESTServiceTest {
     
     private void data(Map map) throws JSONException {
         data(JSONCoercion.coerceToJSON(map));
+    }
+    
+    private void data(List list) throws JSONException {
+        data(JSONCoercion.coerceToJSON(list));
     }
     
     private void param(String name, String value) {
