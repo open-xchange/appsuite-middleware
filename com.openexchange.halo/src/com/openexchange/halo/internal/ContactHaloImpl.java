@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -66,6 +67,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
@@ -76,6 +78,7 @@ import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.HaloExceptionCodes;
 import com.openexchange.halo.Picture;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -120,12 +123,12 @@ public class ContactHaloImpl implements ContactHalo {
         if (!(contact.getInternalUserId() > 0) && !contact.containsEmail1() & !contact.containsEmail2() & !contact.containsEmail3()) {
             throw HaloExceptionCodes.INVALID_CONTACT.create();
         }
-        return dataSource.investigate(buildQuery(contact, session), req, session);
+        return dataSource.investigate(buildQuery(contact, session, true), req, session);
     }
 
     @Override
     public Picture getPicture(Contact contact, ServerSession session) throws OXException {
-        HaloContactQuery contactQuery = buildQuery(contact, session);
+        HaloContactQuery contactQuery = buildQuery(contact, session, true);
 
         for (HaloContactImageSource source : imageSources) {
             if (!source.isAvailable(session)) {
@@ -146,7 +149,7 @@ public class ContactHaloImpl implements ContactHalo {
 
     @Override
     public String getPictureETag(Contact contact, ServerSession session) throws OXException {
-        HaloContactQuery contactQuery = buildQuery(contact, session);
+        HaloContactQuery contactQuery = buildQuery(contact, session, false);
         for (HaloContactImageSource source : imageSources) {
             if (!source.isAvailable(session)) {
                 continue;
@@ -162,30 +165,39 @@ public class ContactHaloImpl implements ContactHalo {
     }
 
     // Friendly for testing
-    HaloContactQuery buildQuery(Contact contact, final ServerSession session) throws OXException {
+    HaloContactQuery buildQuery(final Contact contact, final ServerSession session, final boolean withBytes) throws OXException {
         final UserService userService = services.getService(UserService.class);
         final ContactService contactService = services.getService(ContactService.class);
-
         final HaloContactQuery contactQuery = new HaloContactQuery();
+        final ContactField[] fields = withBytes ? null : new ContactField[] { ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.FOLDER_ID };
 
-        if (contact.getObjectID() > 0 && contact.getParentFolderID() > 0) {
-            Contact loaded = contactService.getContact(session, "" + contact.getParentFolderID(), "" + contact.getObjectID());
-            contactQuery.setContact(loaded);
-            contactQuery.setMergedContacts(Arrays.asList(loaded));
-            return contactQuery;
+        Contact resultContact = contact;
+
+        // Look-up associated user...
+        User user = null;
+
+        // Prefer look-up by user identifier
+        {
+            final int userId = resultContact.getInternalUserId();
+            if (userId > 0) {
+                user = userService.getUser(userId, session.getContext());
+            }
         }
 
+        // Check by object/folder identifier
+        if (null == user) {
+            if (resultContact.getObjectID() > 0 && resultContact.getParentFolderID() > 0) {
+                Contact loaded = contactService.getContact(session, Integer.toString(resultContact.getParentFolderID()), Integer.toString(resultContact.getObjectID()), fields);
+                contactQuery.setContact(loaded);
+                contactQuery.setMergedContacts(Arrays.asList(loaded));
+                return contactQuery;
+            }
+        }
 
         // Try to find a user with a given eMail address
-
-        User user = null;
-        if (contact.getInternalUserId() > 0) {
-            user = userService.getUser(contact.getInternalUserId(), session.getContext());
-        }
-
         if (user == null) {
             try {
-                user = userService.searchUser(contact.getEmail1(), session.getContext(), false);
+                user = userService.searchUser(resultContact.getEmail1(), session.getContext(), false);
             } catch (final OXException x) {
                 // Don't care. This is all best effort anyway.
             }
@@ -193,7 +205,7 @@ public class ContactHaloImpl implements ContactHalo {
 
         if (user == null) {
             try {
-                user = userService.searchUser(contact.getEmail2(), session.getContext(), false);
+                user = userService.searchUser(resultContact.getEmail2(), session.getContext(), false);
             } catch (final OXException x) {
                 // Don't care. This is all best effort anyway.
             }
@@ -201,31 +213,33 @@ public class ContactHaloImpl implements ContactHalo {
 
         if (user == null) {
             try {
-                user = userService.searchUser(contact.getEmail3(), session.getContext(), false);
+                user = userService.searchUser(resultContact.getEmail3(), session.getContext(), false);
             } catch (final OXException x) {
                 // Don't care. This is all best effort anyway.
             }
         }
 
         contactQuery.setUser(user);
-        final List<Contact> contactsToMerge = new ArrayList<Contact>();
+        final List<Contact> contactsToMerge = new LinkedList<Contact>();
         if (user != null) {
             // Load the associated contact
-            contact = contactService.getUser(session, user.getId());
-            contactsToMerge.add(contact);
-        } else if (contact.getEmail1() != null && contact.getEmail1().length() > 0){
+            resultContact = contactService.getUser(session, user.getId(), fields);
+            contactsToMerge.add(resultContact);
+        } else if (false == Strings.isEmpty(resultContact.getEmail1())){
             // Try to find a contact
             final ContactSearchObject contactSearch = new ContactSearchObject();
-            contactSearch.setEmail1(contact.getEmail1());
-            contactSearch.setEmail2(contact.getEmail1());
-            contactSearch.setEmail3(contact.getEmail1());
+            final String email = resultContact.getEmail1();
+            contactSearch.setEmail1(email);
+            contactSearch.setEmail2(email);
+            contactSearch.setEmail3(email);
             contactSearch.setOrSearch(true);
+            contactSearch.setExactMatch(true);
             SearchIterator<Contact> iterator = null;
             try {
-                iterator = contactService.searchContacts(session, contactSearch);
+                iterator = contactService.searchContacts(session, contactSearch, fields);
                 while (iterator.hasNext()) {
                     Contact c = iterator.next();
-                    if (checkEmails(c, contact.getEmail1())) {
+                    if (checkEmails(c, email)) {
                         contactsToMerge.add(c);
                     }
                 }
@@ -239,9 +253,9 @@ public class ContactHaloImpl implements ContactHalo {
 
         final ContactMerger contactMerger = new ContactMerger(false);
         for (final Contact c : contactsToMerge) {
-            contact = contactMerger.merge(contact, c);
+            resultContact = contactMerger.merge(resultContact, c);
         }
-        contactQuery.setContact(contact);
+        contactQuery.setContact(resultContact);
         return contactQuery;
     }
 
