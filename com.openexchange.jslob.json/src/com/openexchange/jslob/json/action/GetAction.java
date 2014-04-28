@@ -118,7 +118,7 @@ public final class GetAction extends JSlobAction {
         /*
          * We got an action string
          */
-        String serviceId = jslobRequest.getParameter("serviceId", String.class);
+        String serviceId = jslobRequest.getParameter("serviceId", String.class, true);
         if (null == serviceId) {
             serviceId = DEFAULT_SERVICE_ID;
         }

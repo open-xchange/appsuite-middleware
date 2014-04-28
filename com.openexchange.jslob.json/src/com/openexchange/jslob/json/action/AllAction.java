@@ -88,7 +88,7 @@ public final class AllAction extends JSlobAction {
 
     @Override
     protected AJAXRequestResult perform(final JSlobRequest jslobRequest) throws OXException {
-        String serviceId = jslobRequest.getParameter("serviceId", String.class);
+        String serviceId = jslobRequest.getParameter("serviceId", String.class, true);
         if (null == serviceId) {
             serviceId = DEFAULT_SERVICE_ID;
         }

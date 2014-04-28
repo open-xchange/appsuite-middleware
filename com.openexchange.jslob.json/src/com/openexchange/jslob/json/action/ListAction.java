@@ -89,7 +89,7 @@ public final class ListAction extends JSlobAction {
     @Override
     protected AJAXRequestResult perform(final JSlobRequest jslobRequest) throws OXException, JSONException {
         try {
-            String serviceId = jslobRequest.getParameter("serviceId", String.class);
+            String serviceId = jslobRequest.getParameter("serviceId", String.class, true);
             if (null == serviceId) {
                 serviceId = DEFAULT_SERVICE_ID;
             }
