@@ -114,6 +114,10 @@ public class Bug16158Test extends TestCase {
         for (final Thread rotatorThread : rotatorThreads) {
             rotatorThread.join();
         }
+
+        //ensure that the finders are able to set notFound to true if no session is present.
+        Thread.sleep(50);
+
         for (final SessionFinder finder : finders) {
             finder.stop();
         }

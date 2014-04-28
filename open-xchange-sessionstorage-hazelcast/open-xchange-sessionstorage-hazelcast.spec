@@ -71,12 +71,6 @@ if [ ${1:-0} -eq 2 ]; then
     if ! ox_exists_property com.openexchange.hazelcast.configuration.map.name $pfile; then
        ox_set_property com.openexchange.hazelcast.configuration.map.name "sessions-2" $pfile
     fi
-
-    # obsoleted by SoftwareChange_Request-1291
-    #if ! ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile; then
-    #   ox_set_property com.openexchange.hazelcast.configuration.map.indexes.attributes "contextId,userId" $pfile
-    #fi
-
 fi
 
 %clean
@@ -88,8 +82,9 @@ fi
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/hazelcast/
+%dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/*
+%dir /opt/open-xchange/etc/hazelcast/
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog

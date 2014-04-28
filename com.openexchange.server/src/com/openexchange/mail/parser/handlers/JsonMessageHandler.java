@@ -1338,13 +1338,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
          */
 
-        String disposition = null;
-        // Check whether to discard passed part
-        if ((textAppended || null != plainText) && isAlternative && null != altId && id.startsWith(altId)) {
-            // Ignore it as part of a multipart/alternative and a text version was already selected
-            disposition = "none";
-        }
-
         // Process it
         final ContentType contentType = part.getContentType();
         if (isVCalendar(baseContentType) && !contentType.containsParameter("method")) {
@@ -1370,7 +1363,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
          * When creating a JSON message object from a message we do not distinguish special parts or image parts from "usual" attachments.
          * Therefore invoke the handleAttachment method. Maybe we need a separate handling in the future for vcards.
          */
-        return handleAttachment0(part, false, disposition, baseContentType, fileName, id);
+        return handleAttachment0(part, false, null, baseContentType, fileName, id);
     }
 
     private static boolean isVCalendar(final String baseContentType) {

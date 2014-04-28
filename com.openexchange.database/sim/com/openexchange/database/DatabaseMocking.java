@@ -170,7 +170,7 @@ public class DatabaseMocking {
         public String query;
         public List<Object> parameters;
         public ArrayList<List<Object>> rows;
-        public List<String> cols;
+        public List<String> cols = new ArrayList<String>();
         public int numberOfUpdatedRows;
         public boolean fail;
         

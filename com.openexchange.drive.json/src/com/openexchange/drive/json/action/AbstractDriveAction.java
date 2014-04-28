@@ -99,8 +99,8 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * check module permissions
          */
         {
-            CapabilityService capabilityService = Services.getService(CapabilityService.class);
-            if (null == capabilityService || false == capabilityService.getCapabilities(session).contains(DriveService.CAPABILITY_DRIVE)) {
+            CapabilityService capabilityService = Services.getService(CapabilityService.class, true);
+            if (false == capabilityService.getCapabilities(session).contains(DriveService.CAPABILITY_DRIVE)) {
                 throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("drive");
             }
         }

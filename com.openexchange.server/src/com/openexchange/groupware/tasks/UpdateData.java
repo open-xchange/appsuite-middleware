@@ -66,11 +66,14 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.reminder.ReminderHandler;
+import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.mapping.Status;
@@ -752,6 +755,18 @@ class UpdateData {
     }
 
     void updateReminder() throws OXException, OXException {
+        if (isMove() && getUpdatedParticipants().isEmpty()) {
+            ReminderHandler handler = new ReminderHandler(ctx);
+            try {
+                ReminderObject reminder = handler.loadReminder(getUpdated().getObjectID(), user.getId(), Types.TASK);
+                reminder.setFolder(getDestFolderId());
+                handler.updateReminder(reminder);
+            } catch (OXException e) {
+                if (!e.getErrorCode().equals("REM-0009")) {
+                    throw e;
+                }
+            }
+        }
         updateReminder(ctx, getUpdated(), user, isMove(), getRemoved(), getDestFolder(), getUpdatedParticipants(), getUpdatedFolder());
     }
 

@@ -792,21 +792,22 @@ public class AJAXRequestData {
      * @return The coerced value
      * @throws OXException if coercion fails
      */
-    public @NonNull <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo) throws OXException {
+    public @Nullable <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo) throws OXException {
         return getParameter(name, coerceTo, false);
     }
-    
+
     /**
      * Get the value of an optional parameter
-     * 
+     *
      * @param name name of the optional parameter
      * @param coerceTo parse the value to the specified type
+     * @param optional <code>true</code> if parameter is optional; otherwise <code>false</code> to throw an exception on absence
      * @return the coerced value
      * @throws OXException if coercion fails
      */
-    public @Nullable<T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo, boolean opt) throws OXException {
+    public @Nullable<T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo, final boolean optional) throws OXException {
         final String value = getParameter(name);
-        if (null == value && !opt) {
+        if (null == value && !optional) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, "null");
         }
 
