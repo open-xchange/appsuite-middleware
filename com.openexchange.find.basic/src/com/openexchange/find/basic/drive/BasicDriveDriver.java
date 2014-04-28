@@ -139,7 +139,10 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
 
         // Yield search term from search request
-        final SearchTerm<?> term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
+        SearchTerm<?> term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
+        if (term == null) {
+            term = new TitleTerm("*", true, true);
+        }
 
         // Folder identifiers
         final String folderId = searchRequest.getFolderId();

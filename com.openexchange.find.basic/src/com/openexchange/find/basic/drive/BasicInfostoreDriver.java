@@ -66,6 +66,7 @@ import com.openexchange.file.storage.infostore.ToInfostoreTermVisitor;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.AndTerm;
 import com.openexchange.file.storage.search.SearchTerm;
+import com.openexchange.file.storage.search.TitleTerm;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
@@ -163,6 +164,9 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
 
         List<Integer> folderIds = determineFolderIds(searchRequest, session);
         SearchTerm<?> term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
+        if (term == null) {
+            term = new TitleTerm("*", true, true);
+        }
 
         ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
         term.visit(visitor);

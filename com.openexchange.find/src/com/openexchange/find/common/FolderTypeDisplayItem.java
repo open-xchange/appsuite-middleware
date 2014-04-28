@@ -49,6 +49,8 @@
 
 package com.openexchange.find.common;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 
@@ -79,6 +81,13 @@ public class FolderTypeDisplayItem implements DisplayItem {
         SHARED("shared")
         ;
 
+        private static final Map<String, Type> typesById = new HashMap<String, Type>(3);
+        static {
+            for (Type type : values()) {
+                typesById.put(type.getIdentifier(), type);
+            }
+        }
+
         private final String identifier;
 
         private Type(final String identifier) {
@@ -92,6 +101,15 @@ public class FolderTypeDisplayItem implements DisplayItem {
          */
         public String getIdentifier() {
             return identifier;
+        }
+
+        /**
+         * Gets the type by its identifier.
+         *
+         * @return The type or <code>null</code> if unknown.
+         */
+        public static Type getByIdentifier(String identifier) {
+            return typesById.get(identifier);
         }
     }
 

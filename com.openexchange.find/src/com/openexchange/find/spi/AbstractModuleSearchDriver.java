@@ -102,7 +102,7 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
     public final AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         AutocompleteResult autocompleteResult = doAutocomplete(autocompleteRequest, session);
         List<Facet> modifiedFacets = new LinkedList<Facet>();
-        int folderTypeFacetIndex = 0;
+        List<Facet> resultFacets = new LinkedList<Facet>();
         if (!autocompleteRequest.getPrefix().isEmpty()) {
             Facet globalFacet = new FieldFacet(
                 CommonFacetType.GLOBAL,
@@ -110,26 +110,17 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
                 new Filter(Collections.singletonList(CommonFacetType.GLOBAL.getId()),
                     Collections.singletonList(autocompleteRequest.getPrefix())));
             modifiedFacets.add(globalFacet);
-            folderTypeFacetIndex = 1;
         }
 
+        modifiedFacets.addAll(autocompleteResult.getFacets());
         Facet folderTypeFacet = getFolderTypeFacet(getSupportedFolderTypes());
         if (folderTypeFacet != null) {
             modifiedFacets.add(folderTypeFacet);
         }
-        filterFacets(autocompleteResult.getFacets(), autocompleteRequest.getActiveFacets(), modifiedFacets);
 
-        /*
-         * Ensure that the folder type facet is always the last one
-         */
-        if (modifiedFacets.size() > folderTypeFacetIndex) {
-            Facet secondFacet = modifiedFacets.get(folderTypeFacetIndex);
-            if (secondFacet.getType() == CommonFacetType.FOLDER_TYPE) {
-                modifiedFacets.remove(folderTypeFacetIndex);
-                modifiedFacets.add(folderTypeFacet);
-            }
-        }
-        autocompleteResult.setFacets(modifiedFacets);
+
+        filterFacets(modifiedFacets, autocompleteRequest.getActiveFacets(), resultFacets);
+        autocompleteResult.setFacets(resultFacets);
         return autocompleteResult;
     }
 
