@@ -51,6 +51,7 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -388,13 +389,54 @@ public final class DatabaseServiceImpl implements DatabaseService {
     public void initMonitoringTables(int writePoolId, String schema) throws OXException {
         Connection con = get(writePoolId, schema);
         try {
-            
+            con.setAutoCommit(false);
+            CreateReplicationTable createReplicationTable = new CreateReplicationTable();
+            createReplicationTable.perform(con);
+            con.commit();
+        } catch (SQLException x) {
+            try {
+                con.rollback();
+            } catch (SQLException e) {
+            }
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(x.getMessage());           
         } finally {
-            
+            if (con != null) {
+                try {
+                    con.setAutoCommit(true);
+                } catch (SQLException e) {
+                }
+                back(writePoolId, con);
+            }
         }
     }
     
     public void initPartitions(int writePoolId, String schema, int...partitions) throws OXException {
-        
+        Connection con = get(writePoolId, schema);
+        PreparedStatement stmt = null;
+        try {
+            con.setAutoCommit(false);
+            stmt = con.prepareStatement("INSERT INTO replicationMonitor (cid, transaction) VALUES (?, ?)");
+            stmt.setInt(2, 0);
+            for(int partition: partitions) {
+                stmt.setInt(1, partition);
+                stmt.executeUpdate();
+            }
+            con.commit();
+        } catch (SQLException x) {
+            try {
+                con.rollback();
+            } catch (SQLException e) {
+            }
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(x.getMessage());           
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            if (con != null) {
+                try {
+                    con.setAutoCommit(true);
+                } catch (SQLException e) {
+                }
+                back(writePoolId, con);
+            }
+        }
     }
 }

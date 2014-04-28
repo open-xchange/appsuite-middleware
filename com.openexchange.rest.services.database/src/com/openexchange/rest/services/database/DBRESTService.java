@@ -75,6 +75,8 @@ import com.openexchange.rest.services.annotations.GET;
 import com.openexchange.rest.services.annotations.PUT;
 import com.openexchange.rest.services.annotations.ROOT;
 import com.openexchange.rest.services.database.migrations.VersionChecker;
+import com.openexchange.rest.services.database.sql.CreateServiceSchemaLockTable;
+import com.openexchange.rest.services.database.sql.CreateServiceSchemaVersionTable;
 import com.openexchange.rest.services.database.transactions.Transaction;
 import com.openexchange.rest.services.database.transactions.TransactionKeeper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -234,7 +236,21 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         
         perform();
     }
+    @PUT("/migration/for/pool/r/:readId/w/:writeId/:schema/to/:toVersion/forModule/:module")
+    public void migrateMonitored(int readPoolId, int writePoolId, String schema, String toVersion, String module) throws OXException {
+        migrateMonitored(readPoolId, writePoolId, schema, 0, "", toVersion, module);
+    }
+
+    @PUT("/migration/for/pool/r/:readId/w/:writeId/:schema/:partitionId/to/:toVersion/forModule/:module")
+    public void migrateMonitored(int readPoolId, int writePoolId, String schema, int partitionId, String toVersion, String module) throws OXException {
+        migrateMonitored(readPoolId, writePoolId, schema, partitionId, "", toVersion, module);
+    }
     
+    @PUT("/migration/for/pool/r/:readId/w/:writeId/:schema/from/:fromVersion/to/:toVersion/forModule/:module")
+    public void migrateMonitored(int readPoolId, int writePoolId, String schema, String fromVersion, String toVersion, String module) throws OXException {
+        migrateMonitored(readPoolId, writePoolId, schema, 0, fromVersion, toVersion, module);
+    }
+
     @PUT("/migration/for/pool/r/:readId/w/:writeId/:schema/:partitionId/from/:fromVersion/to/:toVersion/forModule/:module")
     public void migrateMonitored(int readPoolId, int writePoolId, String schema, int partitionId, String fromVersion, String toVersion, String module) throws OXException {
         finishMigrationWhenDone(readPoolId, writePoolId, schema, partitionId);
@@ -287,6 +303,19 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         }
         
     }
+    
+    @GET("/init/w/:writeId/:schema")
+    public void initSchema(int writePoolId, String schema) throws OXException {
+        DatabaseService db = dbService();
+        db.initMonitoringTables(writePoolId, schema);
+        db.initPartitions(writePoolId, schema, 0);
+        
+        Connection con = db.get(writePoolId, schema);
+        
+        new CreateServiceSchemaVersionTable().perform(con);
+        new CreateServiceSchemaLockTable().perform(con);
+    }
+
     
     @Override
     public void after() throws OXException {
@@ -491,6 +520,8 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         Object id = null;
         if (ctxId != null) {
             id = "ctx:" + ctxId;
+        } else if (monitoredMetadata != null) {
+            id = monitoredMetadata.getID();
         } else {
             halt(403, "Can not modify the schema of the configdb");
         }
@@ -753,6 +784,10 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             this.schema = schema;
             this.partitionId = partitionId;
         }
+
+        public String getID() {
+            return readId+":"+writeId+":"+schema;
+        }
         
     }
     
@@ -794,6 +829,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         }
         
     }
+    
 
 
 
