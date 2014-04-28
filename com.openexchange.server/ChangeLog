@@ -10,6 +10,7 @@
 * 2014-04-28 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32200: Added import from and export to csv for "categories" property
+ - Fix for bug 32216: Respond with "SRV-0001" in case the capability service is missing
  
 * 2014-04-25 - tobias.friedrich@open-xchange.com
 
