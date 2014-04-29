@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
+import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import gnu.trove.TIntCollection;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
@@ -512,60 +514,27 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     private FolderObject updateFolder(final FolderObject fo, final boolean checkPermissions, final boolean handDown, final long lastModified, int options) throws OXException {
-        final boolean isRenameOnly = false && OXFolderUtility.isRenameOnly(fo, getFolderFromMaster(fo.getObjectID()));
         if (checkPermissions) {
-            if (fo.containsType() && fo.getType() == FolderObject.PUBLIC && fo.getModule() != FolderObject.INFOSTORE && !userPerms.hasFullPublicFolderAccess()) {
-                throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(OXFolderUtility.getUserName(session, user),
-                    OXFolderUtility.getFolderName(fo),
-                    Integer.valueOf(ctx.getContextId()));
+            if (fo.containsType() && fo.getType() == FolderObject.PUBLIC &&
+                fo.getModule() != FolderObject.INFOSTORE && !userPerms.hasFullPublicFolderAccess()) {
+                throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(
+                    getUserName(session, user), getFolderName(fo), Integer.valueOf(ctx.getContextId()));
             }
             /*
              * Fetch effective permission from storage
              */
             final EffectivePermission perm = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(), userPerms);
-            if (!perm.isFolderVisible()) {
-                if (!perm.getUnderlyingPermission().isFolderVisible()) {
-                    throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(fo.getObjectID()),
-                        OXFolderUtility.getUserName(session, user),
-                        Integer.valueOf(ctx.getContextId()));
-                }
-                throw OXFolderExceptionCode.NOT_VISIBLE.create(CATEGORY_PERMISSION_DENIED,
-                    Integer.valueOf(fo.getObjectID()),
-                    OXFolderUtility.getUserName(session, user),
-                    Integer.valueOf(ctx.getContextId()));
+            if (!perm.isFolderVisible() || !perm.getUnderlyingPermission().isFolderVisible()) {
+                throw OXFolderExceptionCode.NOT_VISIBLE.create(
+                    Integer.valueOf(fo.getObjectID()), getUserName(session, user), Integer.valueOf(ctx.getContextId()));
             }
-            {
-                if (isRenameOnly) {
-                    final EffectivePermission parentPerm = getOXFolderAccess().getFolderPermission(getFolderFromMaster(fo.getObjectID()).getParentFolderID(), user.getId(), userPerms);
-                    if (!perm.isFolderAdmin() && !parentPerm.canCreateSubfolders()) {
-                        if (!perm.getUnderlyingPermission().isFolderAdmin() && !parentPerm.getUnderlyingPermission().canCreateSubfolders()) {
-                            throw OXFolderExceptionCode.NO_RENAME_ACCESS.create(OXFolderUtility.getUserName(session, user),
-                                OXFolderUtility.getFolderName(fo),
-                                Integer.valueOf(ctx.getContextId()));
-                        }
-                        throw OXFolderExceptionCode.NO_RENAME_ACCESS.create(CATEGORY_PERMISSION_DENIED, OXFolderUtility.getUserName(
-                            session,
-                            user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
-                    }
-                } else {
-                    if (!perm.isFolderAdmin()) {
-                        if (!perm.getUnderlyingPermission().isFolderAdmin()) {
-                            throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(session, user),
-                                OXFolderUtility.getFolderName(fo),
-                                Integer.valueOf(ctx.getContextId()));
-                        }
-                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(CATEGORY_PERMISSION_DENIED, OXFolderUtility.getUserName(
-                            session,
-                            user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
-                    }
-                }
+            if (!perm.isFolderAdmin() || !perm.getUnderlyingPermission().isFolderAdmin()) {
+                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(
+                    getUserName(session, user), getFolderName(fo), Integer.valueOf(ctx.getContextId()));
             }
-            {
-                if (fo.getObjectID() == getPublishedMailAttachmentsFolder(session)) {
-                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(CATEGORY_PERMISSION_DENIED, OXFolderUtility.getUserName(
-                        session,
-                        user), OXFolderUtility.getFolderName(fo), Integer.valueOf(ctx.getContextId()));
-                }
+            if (fo.getObjectID() == getPublishedMailAttachmentsFolder(session)) {
+                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(
+                    getUserName(session, user), getFolderName(fo), Integer.valueOf(ctx.getContextId()));
             }
         }
         final boolean performMove = fo.containsParentFolderID();
@@ -576,14 +545,10 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             final int newParentFolderID = fo.getParentFolderID();
             if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                 move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
-                // Reload storage's folder
+                // Reload storage's folder for following update
                 storageObject = getFolderFromMaster(fo.getObjectID());
             }
-            if (isRenameOnly) {
-                rename(fo, storageObject, lastModified);
-            } else {
-                update(fo, options, storageObject, lastModified, handDown);
-            }
+            update(fo, options, storageObject, lastModified, handDown);
         } else if (fo.containsFolderName()) {
             final int newParentFolderID = fo.getParentFolderID();
             if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
@@ -640,10 +605,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     try {
                         FolderObject newParentFolder = FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx, wc, true, false);
                         new EventClient(session).modify(originalFolder, fo, newParentFolder);
-//                        new EventClient(session).modify(
-//                            getFolderFromMaster(fo.getObjectID()),
-//                            fo,
-//                            FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx, wc, true, false));
                     } catch (final OXException e) {
                         LOG.warn("Update event could not be enqueued", e);
                     }
