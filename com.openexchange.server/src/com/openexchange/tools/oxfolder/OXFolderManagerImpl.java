@@ -569,10 +569,10 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
         }
         final boolean performMove = fo.containsParentFolderID();
-        int oldParentId = -1;
+        FolderObject originalFolder = getFolderFromMaster(fo.getObjectID());
+        int oldParentId = originalFolder.getParentFolderID();
+        FolderObject storageObject = originalFolder.clone();
         if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
-            FolderObject storageObject = getFolderFromMaster(fo.getObjectID());
-            oldParentId = storageObject.getParentFolderID();
             final int newParentFolderID = fo.getParentFolderID();
             if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                 move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
@@ -585,8 +585,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 update(fo, options, storageObject, lastModified, handDown);
             }
         } else if (fo.containsFolderName()) {
-            final FolderObject storageObject = getFolderFromMaster(fo.getObjectID());
-            oldParentId = storageObject.getParentFolderID();
             final int newParentFolderID = fo.getParentFolderID();
             if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                 move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
@@ -597,8 +595,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             /*
              * Perform move
              */
-            FolderObject storageObject = getFolderFromMaster(fo.getObjectID());
-            oldParentId = storageObject.getParentFolderID();
             move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), null, storageObject, lastModified);
         }
         /*
@@ -642,10 +638,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 }
                 if (FolderObject.SYSTEM_MODULE != fo.getModule()) {
                     try {
-                        new EventClient(session).modify(
-                            getFolderFromMaster(fo.getObjectID()),
-                            fo,
-                            FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx, wc, true, false));
+                        FolderObject newParentFolder = FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx, wc, true, false);
+                        new EventClient(session).modify(originalFolder, fo, newParentFolder);
+//                        new EventClient(session).modify(
+//                            getFolderFromMaster(fo.getObjectID()),
+//                            fo,
+//                            FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx, wc, true, false));
                     } catch (final OXException e) {
                         LOG.warn("Update event could not be enqueued", e);
                     }
