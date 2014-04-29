@@ -11,6 +11,10 @@
 
  - Fix for bug 31684: Prefer look-up by user identifier over look-up by object/folder identifier pair
 
+* 2014-04-25 - marc.arens@open-xchange.com
+
+ - Fix for bug 32127: Don't send keepalive pings/processing while reading data from upstream
+
 * 2014-04-16 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32076: Process images of imported contacts in a serialized way

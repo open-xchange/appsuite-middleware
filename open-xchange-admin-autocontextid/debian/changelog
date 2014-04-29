@@ -1,3 +1,9 @@
+open-xchange-admin-autocontextid (7.4.2-21) stable; urgency=low
+
+  * Build for patch 2014-04-29
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 25 Apr 2014 15:12:26 +0200
+
 open-xchange-admin-autocontextid (7.4.2-20) stable; urgency=low
 
   * Build for patch 2014-04-22
