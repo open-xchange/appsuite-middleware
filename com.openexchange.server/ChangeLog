@@ -2,6 +2,10 @@
 
  - Fix for bug 32743: Property was added in a patch and according post installation scripting should be contained in a patch, too.
 
+* 2014-04-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31842: Provide human-readable quota information
+
 * 2014-05-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 32677: Do net set SMTP credentials if not explicitly set + several sanitizing operations to ensure SMTP authentication does still work
