@@ -55,10 +55,10 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.PushbackInputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.UnsupportedCharsetException;
@@ -1138,32 +1138,32 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 retval.setFileName(fileName);
             }
             retval.setContentType(item.getContentType());
-            retval.setSize(item.getSize());
+            final long size = item.getSize();
+            retval.setSize(size);
             final File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));
             tmpFile.deleteOnExit();
             // Write to tmp file
-            {
-                InputStream in = null;
+            if (size != 0) {
+                PushbackInputStream in = null;
                 OutputStream out = null;
                 try {
-                    in = item.getInputStream();
-                    out = new FileOutputStream(tmpFile, false);
-                    final int buflen = BUFLEN;
-                    final byte[] buf = new byte[buflen];
-                    {
-                        int read = in.read(buf, 0, buflen);
-                        if (read <= 0) {
-                            // Empty file item...
-                            LOG.warn("Detected empty upload file {}.", retval.getFileName());
-                        } else {
-                            // Write remainder
-                            do {
-                                out.write(buf, 0, read);
-                                read = in.read(buf, 0, buflen);
-                            } while (read > 0);
+                    in = new PushbackInputStream(item.getInputStream());
+                    // Check if readable...
+                    final int check = in.read();
+                    if (check >= 0) {
+                        // ... then push back to stream
+                        in.unread(check);
+                        out = new FileOutputStream(tmpFile, false);
+                        final int buflen = BUFLEN;
+                        final byte[] buf = new byte[buflen];
+                        for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
+                            out.write(buf, 0, read);
                         }
+                        out.flush();
+                    } else {
+                        // Empty file item...
+                        LOG.warn("Detected empty upload file {}.", retval.getFileName());
                     }
-                    out.flush();
                 } finally {
                     Streams.close(in, out);
                 }
