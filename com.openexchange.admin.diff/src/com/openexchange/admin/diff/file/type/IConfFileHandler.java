@@ -74,9 +74,9 @@ public interface IConfFileHandler {
      * <br>
      * Hint: only use provided objects for processing within this method and do not work on singleton members!
      * 
-     * @param diffResult
-     * @param lOriginalFiles
-     * @param lInstalledFiles
+     * @param diffResult - the object that will be aerated with the results
+     * @param lOriginalFiles - original files to diff
+     * @param lInstalledFiles - installed files to diff
      * @return
      */
     public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles);

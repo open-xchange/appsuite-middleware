@@ -123,7 +123,7 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
      * @param lOriginalFiles - original files that should be compared
      * @param lInstalledFiles - installed files the original ones should be compared with
      */
-    protected void getFileDiffs(DiffResult diffResult, final HashMap<String, String> lOriginalFiles, final HashMap<String, String> lInstalledFiles) {
+    protected void getFileDiffs(DiffResult diffResult, final Map<String, String> lOriginalFiles, final Map<String, String> lInstalledFiles) {
 
         for (String origFile : lOriginalFiles.keySet()) {
             if (!lInstalledFiles.keySet().contains(origFile)) {

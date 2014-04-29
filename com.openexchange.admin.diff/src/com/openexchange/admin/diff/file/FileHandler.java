@@ -54,7 +54,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.openexchange.admin.diff.file.provider.IConfigurationFileProvider;
 import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
 import com.openexchange.admin.diff.result.DiffResult;
@@ -84,7 +83,7 @@ public class FileHandler {
             validateDirectory(new File(rootDirectory));
         } catch (FileNotFoundException e) {
 
-            diffResult.getProcessingErrors().add("Error in validating directory " + rootDirectory + "\n" + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
+            diffResult.getProcessingErrors().add("Error in validating directory " + rootDirectory + "\n" + e.getLocalizedMessage() + "\n");
             return;
         }
 

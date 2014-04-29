@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.custommonkey.xmlunit.DetailedDiff;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.Difference;
@@ -121,13 +120,12 @@ public class XmlHandler extends AbstractFileHandler {
                 }
                 diffResult.getChangedProperties().put(pairs.getKey(), new PropertyDiffResultSet(pairs.getKey(), difference));
             } catch (SAXException e) {
-                diffResult.getProcessingErrors().add("Error while xml diff: " + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
+                diffResult.getProcessingErrors().add("Error while xml diff: " + e.getLocalizedMessage() + "\n");
             } catch (IOException e) {
-                diffResult.getProcessingErrors().add(e.getLocalizedMessage());
+                diffResult.getProcessingErrors().add("Error while xml diff: " + e.getLocalizedMessage() + "\n");
             }
         }
         return diffResult;
-
     }
 
     private void configureXMLUnitComparator() {

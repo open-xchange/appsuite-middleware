@@ -93,6 +93,8 @@ public class PropertyHandler extends AbstractFileHandler {
         ""
     }));
 
+    protected final static String OBSCURED_PROPERTY = "********";
+
     private PropertyHandler() {
         ConfigDiff.register(this);
     }
@@ -118,7 +120,14 @@ public class PropertyHandler extends AbstractFileHandler {
         return diffResult;
     }
 
-    private void getPropertyDiffsPerFile(DiffResult diffResult, HashMap<String, String> lOriginalFiles, HashMap<String, String> lInstalledFiles) {
+    /**
+     * Diff the properties from the given files and adds the differences to the provided DiffResult
+     * 
+     * @param diffResult - the object that will be aerated with the results
+     * @param lOriginalFiles - original files to diff
+     * @param lInstalledFiles - installed files to diff
+     */
+    protected void getPropertyDiffsPerFile(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
         Iterator<Entry<String, String>> it = lOriginalFiles.entrySet().iterator();
 
         while (it.hasNext()) {
@@ -137,13 +146,21 @@ public class PropertyHandler extends AbstractFileHandler {
                 installedProperty.load(new StringReader(installedFileContent));
 
                 getDiffProperties(diffResult, pairs.getKey(), originalProperty, installedProperty);
-            }catch (IOException e) {
-                diffResult.getProcessingErrors().add(e.getLocalizedMessage());
+            } catch (IOException e) {
+                diffResult.getProcessingErrors().add("Error while property diff per file: " + e.getLocalizedMessage() + "\n");
             }
         }
     }
 
-    private DiffResult getDiffProperties(DiffResult diffResult, String fileName, final Properties originalProperties, final Properties installedProperties) {
+    /**
+     * Diffs the given properties of one file and adds the diff to the given DiffResult.
+     * 
+     * @param diffResult - the object that will be aerated with the results
+     * @param fileName - name of the file the property is included in
+     * @param originalProperties - properties of the original file
+     * @param installedProperties - properties of the installed file
+     */
+    protected void getDiffProperties(DiffResult diffResult, String fileName, final Properties originalProperties, final Properties installedProperties) {
 
         for (String key : originalProperties.stringPropertyNames()) {
             String originalPropertyValue = originalProperties.getProperty(key);
@@ -170,7 +187,6 @@ public class PropertyHandler extends AbstractFileHandler {
                 diffResult.getAdditionalProperties().put(fileName, new PropertyDiffResultSet(fileName, key + "=" + installedProperties.getProperty(key)));
             }
         }
-        return diffResult;
     }
 
     /**
@@ -180,9 +196,9 @@ public class PropertyHandler extends AbstractFileHandler {
      * @param propertyValue - the property to obscure
      * @return - the given string if not included in the criticalProperties List or ******** if it is critical
      */
-    private String obscure(String key, String propertyValue) {
+    protected String obscure(String key, String propertyValue) {
         if (criticalProperties.contains(key)) {
-            propertyValue = "********";
+            propertyValue = OBSCURED_PROPERTY;
         }
         return propertyValue;
     }

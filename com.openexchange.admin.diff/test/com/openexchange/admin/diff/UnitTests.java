@@ -57,7 +57,7 @@ import com.openexchange.admin.diff.file.provider.ConfFolderFileProviderTest;
 import com.openexchange.admin.diff.file.provider.JarFileProviderTest;
 import com.openexchange.admin.diff.file.provider.RecursiveFileProviderTest;
 import com.openexchange.admin.diff.file.type.ConfFileHandlerTest;
-import com.openexchange.admin.diff.file.type.impl.NoConfigFileHandlerTest;
+import com.openexchange.admin.diff.file.type.impl.AbstractFileHandlerTest;
 import com.openexchange.admin.diff.file.type.impl.PropertyHandlerTest;
 
 
@@ -72,7 +72,7 @@ import com.openexchange.admin.diff.file.type.impl.PropertyHandlerTest;
     ConfigDiffTest.class,
     FileHandlerTest.class,
     ConfFileHandlerTest.class,
-    NoConfigFileHandlerTest.class,
+    AbstractFileHandlerTest.class,
     PropertyHandlerTest.class,
     ConfFolderFileProviderTest.class,
     JarFileProviderTest.class,

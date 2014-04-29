@@ -58,7 +58,6 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.openexchange.admin.diff.file.type.ConfFileHandler;
 import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
 import com.openexchange.admin.diff.result.DiffResult;
@@ -101,9 +100,9 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
                     fileContent = IOUtils.toString(new FileReader(currentFile));
                     ConfFileHandler.addConfigurationFile(currentFile.getName(), fileContent, isOriginal);
                 } catch (FileNotFoundException e) {
-                    diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
+                    diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n");
                 } catch (IOException e) {
-                    diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
+                    diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n");
                 }
             }
         }

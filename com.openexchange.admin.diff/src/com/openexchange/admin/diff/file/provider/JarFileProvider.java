@@ -65,7 +65,6 @@ import org.apache.commons.io.filefilter.AndFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.openexchange.admin.diff.file.type.ConfFileHandler;
 import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
 import com.openexchange.admin.diff.result.DiffResult;
@@ -128,7 +127,7 @@ public class JarFileProvider implements IConfigurationFileProvider {
                     }
                 }
             } catch (IOException e) {
-                diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n" + ExceptionUtils.getStackTrace(e));
+                diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n");
             }
         }
     }

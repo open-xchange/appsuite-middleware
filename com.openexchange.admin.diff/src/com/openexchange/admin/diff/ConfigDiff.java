@@ -71,12 +71,12 @@ public class ConfigDiff {
     /**
      * Default folder for original configuration files
      */
-    private String originalFolder = "/opt/open-xchange/bundles";
+    protected String originalFolder = "/opt/open-xchange/bundles";
 
     /**
      * Default folder for installed configuration files
      */
-    private String installationFolder = "/opt/open-xchange/etc";
+    protected String installationFolder = "/opt/open-xchange/etc";
 
     /**
      * Handles processing with files
