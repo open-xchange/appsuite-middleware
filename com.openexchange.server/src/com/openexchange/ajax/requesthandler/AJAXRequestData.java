@@ -338,6 +338,21 @@ public class AJAXRequestData {
     }
 
     /**
+     * Checks if this AJAX request data has access to <code>HttpServletResponse</code> instance; thus offering support for:
+     * <ul>
+     * <li> {@link #optOutputStream()} </li>
+     * <li> {@link #optWriter()} </li>
+     * <li> {@link #setCharacterEncoding(String)} </li>
+     * <ul>
+     * <p>
+     *
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    public boolean isHttpServletResponseAvailable() {
+        return null != httpServletResponse;
+    }
+
+    /**
      * Returns a {@link OutputStream} suitable for writing binary data in the response. The servlet container does not encode the
      * binary data.
      * <p>
@@ -350,10 +365,8 @@ public class AJAXRequestData {
      * @see #optWriter()
      */
     public @Nullable OutputStream optOutputStream() throws IOException {
-        if (null != httpServletResponse) {
-            return httpServletResponse.getOutputStream();
-        }
-        return null;
+        final HttpServletResponse httpResponse = httpServletResponse;
+        return null == httpResponse ? null : httpResponse.getOutputStream();
     }
 
     /**
@@ -374,10 +387,8 @@ public class AJAXRequestData {
      * @see #setCharacterEncoding
      */
     public @Nullable PrintWriter optWriter() throws IOException {
-        if (null != httpServletResponse) {
-            return httpServletResponse.getWriter();
-        }
-        return null;
+        final HttpServletResponse httpResponse = httpServletResponse;
+        return null == httpResponse ? null : httpResponse.getWriter();
     }
 
     /**

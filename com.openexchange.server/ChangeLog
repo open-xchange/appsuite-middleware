@@ -6,6 +6,7 @@
 
  - Fix for bug 32211: Removed usage of removed String constructor in JSON bundle + Proper reflection-wise look-up of "extendedProvider" field in Java8
  - Fix for bug 31842: Provide human-readable quota information
+ - Fix for bug 32238: Do not pre-acquire Writer from HTTP response to leave room for error responses
 
 * 2014-04-28 - martin.herfurth@open-xchange.com
 
