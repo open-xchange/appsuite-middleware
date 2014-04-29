@@ -118,6 +118,8 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.StorageUtility;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -345,27 +347,15 @@ public final class MimeReply {
                 /*
                  * Add user's address to filter
                  */
-                if (InternetAddress.getLocalAddress(mailSession) != null) {
-                    filter.add(InternetAddress.getLocalAddress(mailSession));
-                }
-                /*
-                 * Add any other address the user is known by to filter
-                 */
-                final String alternates = mailSession.getProperty("mail.alternates");
-                if (alternates != null) {
-                    filter.addAll(Arrays.asList(parseAddressList(alternates, false)));
-                }
-                /*
-                 * Add user's aliases to filter
-                 */
-                final String[] userAddrs = UserStorage.getInstance().getUser(session.getUserId(), ctx).getAliases();
-                if (userAddrs != null && userAddrs.length > 0) {
-                    final StringBuilder addrBuilder = new StringBuilder();
-                    addrBuilder.append(userAddrs[0]);
-                    for (int i = 1; i < userAddrs.length; i++) {
-                        addrBuilder.append(',').append(userAddrs[i]);
+                if (accountId == MailAccount.DEFAULT_ID) {
+                    addUserAddresses(filter, mailSession, session, ctx);
+                } else {
+                    final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                    if (null == mass) {
+                        addUserAddresses(filter, mailSession, session, ctx);
+                    } else {
+                        filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
                     }
-                    filter.addAll(Arrays.asList(parseAddressList(addrBuilder.toString(), false)));
                 }
                 /*
                  * Determine if other original recipients should be added to 'Cc'.
@@ -583,6 +573,31 @@ public final class MimeReply {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
 
+    }
+
+    private static void addUserAddresses(final Set<InternetAddress> filter, final javax.mail.Session mailSession, final Session session, final Context ctx) throws OXException {
+        if (InternetAddress.getLocalAddress(mailSession) != null) {
+            filter.add(InternetAddress.getLocalAddress(mailSession));
+        }
+        /*
+         * Add any other address the user is known by to filter
+         */
+        final String alternates = mailSession.getProperty("mail.alternates");
+        if (alternates != null) {
+            filter.addAll(Arrays.asList(parseAddressList(alternates, false)));
+        }
+        /*
+         * Add user's aliases to filter
+         */
+        final String[] userAddrs = UserStorage.getInstance().getUser(session.getUserId(), ctx).getAliases();
+        if (userAddrs != null && userAddrs.length > 0) {
+            final StringBuilder addrBuilder = new StringBuilder();
+            addrBuilder.append(userAddrs[0]);
+            for (int i = 1; i < userAddrs.length; i++) {
+                addrBuilder.append(',').append(userAddrs[i]);
+            }
+            filter.addAll(Arrays.asList(parseAddressList(addrBuilder.toString(), false)));
+        }
     }
 
     /**
