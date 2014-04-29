@@ -1,6 +1,7 @@
 * 2014-04-29 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32221: Supply reference to old parent folder ID in folder update event
+ - Fix for bug 32169: Added debug logging to track down unnatural big JSlobs
 
 * 2014-04-29 - thorben.betten@open-xchange.com
 
