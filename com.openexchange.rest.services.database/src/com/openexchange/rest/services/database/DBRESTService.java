@@ -662,7 +662,12 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                     db.backReadOnlyMonitored(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
                     break;
                 case WRITE:
-                    db.backWritableMonitored(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
+                    if (migrationMetadata != null) {
+                        db.backWritableMonitoredForUpdateTask(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
+                        
+                    } else {
+                        db.backWritableMonitored(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);                        
+                    }
                     break;
                 }
             } else if (migrationMetadata != null) {

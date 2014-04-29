@@ -268,4 +268,19 @@ public interface DatabaseService extends ConfigDatabaseService {
      * @param con The connection to return.
      */
     public void backWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId, Connection con);
+    
+    /**
+     * Creates the replication monitoring tables in the schema on the given writePool. Does nothing if the tables already exist
+     * @param writePoolId The id referencing the master db server
+     * @param schema The name of the schema
+     */
+    public void initMonitoringTables(int writePoolId, String schema) throws OXException;
+    
+    /**
+     * Add these partition ids to the replication monitor table
+     * @param writePoolId The id referencing the master db server
+     * @param schema The database schema name
+     * @param partitions The partitions to add to the replication monitor table
+     */
+    public void initPartitions(int writePoolId, String schema, int...partitions) throws OXException;
 }
