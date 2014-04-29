@@ -96,6 +96,8 @@ public final class FolderTestSuite {
         final TestSuite tests = new TestSuite("com.openexchange.ajax.folder.FolderTestSuite");
         // First the function tests.
         tests.addTestSuite(FunctionTests.class);
+        tests.addTestSuite(com.openexchange.ajax.folder.ShareFolderTest.class);
+        tests.addTestSuite(com.openexchange.ajax.folder.DeleteFolderTest.class);
 
         // Now several single function tests.
         tests.addTestSuite(GetMailInboxTest.class);
