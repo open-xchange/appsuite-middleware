@@ -1155,13 +1155,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                         if (read <= 0) {
                             // Empty file item...
                             LOG.warn("Detected empty upload file {} although signaled to hold {} bytes.", retval.getFileName(), retval.getSize());
-                            throw UploadException.UploadCode.UNEXPECTED_EOF.create();
+                        } else {
+                            // Write remainder
+                            do {
+                                out.write(buf, 0, read);
+                                read = in.read(buf, 0, buflen);
+                            } while (read > 0);
                         }
-                        // Write remainder
-                        do {
-                            out.write(buf, 0, read);
-                            read = in.read(buf, 0, buflen);
-                        } while (read > 0);
                     }
                     out.flush();
                 } finally {
