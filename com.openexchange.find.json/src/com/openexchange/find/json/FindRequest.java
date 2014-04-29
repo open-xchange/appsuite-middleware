@@ -302,6 +302,29 @@ public class FindRequest {
         return request.getParameter(name, coerceTo);
     }
 
+    /**
+     * Gets the requested columns that shall be filled in the response items.
+     *
+     * @return An array of columns or <code>null</code>.
+     */
+    public int[] getColumns() throws OXException {
+        String valueStr = request.getParameter("columns");
+        if (null == valueStr) {
+            return null;
+        }
+
+        String[] valueStrArr = valueStr.split(",");
+        int[] values = new int[valueStrArr.length];
+        for (int i = 0; i < values.length; i++) {
+            try {
+                values[i] = Integer.parseInt(valueStrArr[i].trim());
+            } catch (final NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "columns", valueStr);
+            }
+        }
+        return values;
+    }
+
     private static Filter parseFilter(JSONObject jFilter) throws JSONException {
         JSONArray jQueries = jFilter.getJSONArray("queries");
         int len = jQueries.length();

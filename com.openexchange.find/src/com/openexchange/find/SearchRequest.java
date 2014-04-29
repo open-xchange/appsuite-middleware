@@ -77,6 +77,8 @@ public class SearchRequest extends AbstractFindRequest {
 
     private final int size;
 
+    private final int[] columns;
+
     private List<Filter> filters;
 
     private List<String> queries;
@@ -89,11 +91,13 @@ public class SearchRequest extends AbstractFindRequest {
      * @param size The max. number of documents to return
      * @param activeFacets The list of currently active facets; must not be <code>null</code>
      * @param options A map containing client and module specific options; must not be <code>null</code>
+     * @param columns The columns that shall be returned in the response items or <code>null</code> to use the modules default
      */
-    public SearchRequest(final int start, final int size, final List<ActiveFacet> activeFacets, final Map<String, String> options) {
+    public SearchRequest(final int start, final int size, final List<ActiveFacet> activeFacets, final Map<String, String> options, final int[] columns) {
         super(activeFacets, options);
         this.start = start;
         this.size = size;
+        this.columns = columns;
     }
 
     /**
@@ -114,6 +118,15 @@ public class SearchRequest extends AbstractFindRequest {
      */
     public int getSize() {
         return size;
+    }
+
+    /**
+     * Gets the columns that shall be returned in the response items.
+     *
+     * @return An array of columns or <code>null</code> if not present.
+     */
+    public int[] getColumns() {
+        return columns;
     }
 
     /**
