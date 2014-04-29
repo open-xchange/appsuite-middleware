@@ -51,9 +51,13 @@ package com.openexchange.ajax.find.drive;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
+import com.openexchange.ajax.find.actions.AutocompleteRequest;
+import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -63,6 +67,7 @@ import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.find.Document;
+import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.drive.Constants;
@@ -171,6 +176,33 @@ public class BasicDriveTest extends AbstractFindTest {
         assertEquals("Expected all 3 folder types", 3, folderTypeFacet.getValues().size());
         facets = autocomplete("", Collections.singletonList(createActiveFacet(CommonFacetType.FOLDER, client.getValues().getPrivateInfostoreFolder(), Filter.NO_FILTER)));
         assertNull("Folder type facet was returned", findByType(CommonFacetType.FOLDER_TYPE, facets));
+    }
+
+    public void testConflictsFolderFlag() throws Exception {
+        List<Facet> facets = autocomplete("");
+        Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
+        assertNotNull("Missing folder type facet", folderTypeFacet);
+        boolean found = false;
+        String prefix = "conflicts:";
+        for (String flag : folderTypeFacet.getFlags()) {
+            int index = flag.indexOf(prefix);
+            if (index > -1) {
+                if (CommonFacetType.FOLDER.getId().equals(flag.substring(index + prefix.length()))) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        assertTrue("Flag not found", found);
+    }
+
+    public void testConflictingFacetsCauseException() throws Exception {
+        List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
+        facets.add(createActiveFacet(CommonFacetType.FOLDER, client.getValues().getPrivateInfostoreFolder(), Filter.NO_FILTER));
+        facets.add(createFolderTypeFacet(FolderTypeDisplayItem.Type.PRIVATE));
+        AutocompleteRequest autocompleteRequest = new AutocompleteRequest("", Module.DRIVE.getIdentifier(), facets, (Map<String, String>) null, false);
+        AutocompleteResponse resp = client.execute(autocompleteRequest);
+        assertTrue("Wrong exception", FindExceptionCode.FACET_CONFLICT.equals(resp.getException()));
     }
 
     protected List<Facet> autocomplete(String prefix) throws Exception {

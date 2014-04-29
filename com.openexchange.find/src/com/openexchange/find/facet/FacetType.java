@@ -49,6 +49,7 @@
 
 package com.openexchange.find.facet;
 
+import java.util.List;
 import com.openexchange.i18n.I18nService;
 
 
@@ -91,5 +92,14 @@ public interface FacetType {
      * with different values and filters.
      */
     boolean appliesOnce();
+
+    /**
+     * Gets a list of facet types that must not be used together with this one in
+     * autocomplete and query requests because they are mutually exclusive
+     * (e.g. folder and folder type).
+     *
+     * @return A list of conflicting types; never <code>null</code>.
+     */
+    List<FacetType> conflictingFacets();
 
 }

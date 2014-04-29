@@ -58,8 +58,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.AbstractFindRequest;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
+import com.openexchange.find.FindExceptionCode;
+import com.openexchange.find.SearchRequest;
+import com.openexchange.find.SearchResult;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.FolderTypeDisplayItem;
@@ -100,6 +104,7 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
 
     @Override
     public final AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+        checkActiveFacets(autocompleteRequest);
         AutocompleteResult autocompleteResult = doAutocomplete(autocompleteRequest, session);
         List<Facet> modifiedFacets = new LinkedList<Facet>();
         List<Facet> resultFacets = new LinkedList<Facet>();
@@ -125,8 +130,26 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
     }
 
     @Override
+    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
+        checkActiveFacets(searchRequest);
+        return doSearch(searchRequest, session);
+    }
+
+    @Override
     public SearchConfiguration getSearchConfiguration(ServerSession session) throws OXException {
         return new SearchConfiguration();
+    }
+
+    private void checkActiveFacets(AbstractFindRequest req) throws OXException {
+        List<ActiveFacet> facets = req.getActiveFacets();
+        for (ActiveFacet facet : facets) {
+            for (FacetType conflictingType : facet.getType().conflictingFacets()) {
+                List<ActiveFacet> conflicts = req.getActiveFacets(conflictingType);
+                if (conflicts != null && !conflicts.isEmpty()) {
+                    throw FindExceptionCode.FACET_CONFLICT.create(facet.getType().getId(), conflicts.get(0).getType().getId());
+                }
+            }
+        }
     }
 
     /**
@@ -140,6 +163,11 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
      * @see ModuleSearchDriver#autocomplete(ServerSession, AutocompleteRequest)
      */
     protected abstract AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException;
+
+    /**
+     * @see ModuleSearchDriver#search(SearchRequest, ServerSession)
+     */
+    protected abstract SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException;
 
     /**
      * Specifies if the {@link CommonFacetType#FOLDER_TYPE} facet is supported.
@@ -252,6 +280,7 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
                 new Filter(fields, FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
         }
 
-        return new Facet(CommonFacetType.FOLDER_TYPE, folderValues);
+        Facet facet = new Facet(CommonFacetType.FOLDER_TYPE, folderValues);
+        return facet;
     }
 }

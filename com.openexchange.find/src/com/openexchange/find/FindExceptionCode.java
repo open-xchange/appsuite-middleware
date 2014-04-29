@@ -122,6 +122,10 @@ public enum FindExceptionCode implements DisplayableOXExceptionCode {
      * The folder type \"%1$s\" is not supported.
      */
     INVALID_FOLDER_TYPE(FindExceptionMessages.INVALID_FOLDER_TYPE, Category.CATEGORY_USER_INPUT, 15, FindExceptionMessages.INVALID_FOLDER_TYPE),
+    /**
+     * The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.
+     */
+    FACET_CONFLICT(FindExceptionMessages.FACET_CONFLICT, Category.CATEGORY_USER_INPUT, 16, FindExceptionMessages.FACET_CONFLICT),
 
     ;
 

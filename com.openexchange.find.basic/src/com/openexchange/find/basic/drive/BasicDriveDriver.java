@@ -129,7 +129,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    public SearchResult search(final SearchRequest searchRequest, final ServerSession session) throws OXException {
+    public SearchResult doSearch(final SearchRequest searchRequest, final ServerSession session) throws OXException {
         final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
         if (null == fileAccessFactory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());

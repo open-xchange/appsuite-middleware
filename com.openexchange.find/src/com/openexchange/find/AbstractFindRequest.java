@@ -50,9 +50,13 @@
 package com.openexchange.find;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.FacetType;
 
 
 /**
@@ -69,6 +73,8 @@ public abstract class AbstractFindRequest implements Serializable {
 
     private final RequestOptions options;
 
+    protected final Map<FacetType, List<ActiveFacet>> facetMap;
+
     /**
      * Initializes a new {@link AbstractFindRequest}.
      *
@@ -79,6 +85,17 @@ public abstract class AbstractFindRequest implements Serializable {
         super();
         this.activeFacets = activeFacets;
         this.options = new RequestOptions(optionMap);
+        facetMap = new HashMap<FacetType, List<ActiveFacet>>(activeFacets.size());
+        for (ActiveFacet facet : activeFacets) {
+            FacetType type = facet.getType();
+            List<ActiveFacet> facetList = facetMap.get(type);
+            if (facetList == null) {
+                facetList = new LinkedList<ActiveFacet>();
+                facetMap.put(type, facetList);
+            }
+
+            facetList.add(facet);
+        }
     }
 
     /**
@@ -99,6 +116,34 @@ public abstract class AbstractFindRequest implements Serializable {
         return options;
     }
 
+    /**
+     * Gets the active facet for the given type if and only if
+     * {@link FacetType#appliesOnce()} is <code>true</code>.
+     * @return The facet or <code>null</code> if not present.
+     */
+    public ActiveFacet getActiveFacet(FacetType type) {
+        if (type.appliesOnce()) {
+            List<ActiveFacet> list = facetMap.get(type);
+            if (list != null) {
+                return list.get(0);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Gets the active facets for the given type.
+     * @return The facets or <code>null</code> if not present.
+     */
+    public List<ActiveFacet> getActiveFacets(FacetType type) {
+        List<ActiveFacet> facets = facetMap.get(type);
+        if (facets == null) {
+            return null;
+        }
+
+        return Collections.unmodifiableList(facets);
+    }
 
     @Override
     public int hashCode() {

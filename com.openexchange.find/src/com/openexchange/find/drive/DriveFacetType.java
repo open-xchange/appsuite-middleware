@@ -50,6 +50,8 @@
 package com.openexchange.find.drive;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.java.Strings;
@@ -84,6 +86,8 @@ public enum DriveFacetType implements FacetType {
 
     private final boolean appliesOnce;
 
+    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
+
     private DriveFacetType(final String displayName) {
         this(displayName, false);
     }
@@ -116,6 +120,11 @@ public enum DriveFacetType implements FacetType {
     @Override
     public boolean appliesOnce() {
         return appliesOnce;
+    }
+
+    @Override
+    public List<FacetType> conflictingFacets() {
+        return conflictingFacets;
     }
 
     /**

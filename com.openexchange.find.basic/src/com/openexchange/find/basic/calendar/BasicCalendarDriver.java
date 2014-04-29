@@ -221,7 +221,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     @Override
-    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
+    public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
         /*
          * build appointment search
          */

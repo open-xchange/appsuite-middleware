@@ -50,6 +50,8 @@
 package com.openexchange.find.common;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.java.Strings;
@@ -85,6 +87,9 @@ public enum CommonFacetType implements FacetType {
         for (CommonFacetType type : values()) {
             typesById.put(type.getId(), type);
         }
+
+        FOLDER.conflictingFacets.add(FOLDER_TYPE);
+        FOLDER_TYPE.conflictingFacets.add(FOLDER);
     }
 
     private final String displayName;
@@ -92,6 +97,7 @@ public enum CommonFacetType implements FacetType {
     private final boolean isFieldFacet;
 
     private final boolean appliesOnce;
+    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
 
     private CommonFacetType() {
         this(null, true);
@@ -105,10 +111,15 @@ public enum CommonFacetType implements FacetType {
         this(displayName, isFieldFacet, false);
     }
 
-    private CommonFacetType(final String displayName, final boolean isFieldFacet, final boolean appliesOnce) {
+    private CommonFacetType(final String displayName, final boolean isFieldFacet, final boolean appliesOnce, final FacetType... conflictingFacets) {
         this.displayName = displayName;
         this.isFieldFacet = isFieldFacet;
         this.appliesOnce = appliesOnce;
+        if (conflictingFacets != null) {
+            for (FacetType conflicting : conflictingFacets) {
+                this.conflictingFacets.add(conflicting);
+            }
+        }
     }
 
     @Override
@@ -129,6 +140,11 @@ public enum CommonFacetType implements FacetType {
     @Override
     public boolean appliesOnce() {
         return appliesOnce;
+    }
+
+    @Override
+    public List<FacetType> conflictingFacets() {
+        return conflictingFacets;
     }
 
     /**

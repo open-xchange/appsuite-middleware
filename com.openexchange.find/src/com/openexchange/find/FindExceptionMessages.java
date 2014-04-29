@@ -92,4 +92,7 @@ public class FindExceptionMessages implements LocalizableStrings {
     // The folder type \"%1$s\" is not supported.
     public static final String INVALID_FOLDER_TYPE = "The folder type \"%1$s\" is not supported.";
 
+    // The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.
+    public static final String FACET_CONFLICT = "The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.";
+
 }

@@ -124,7 +124,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
     }
 
     @Override
-    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
+    public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
         TaskSearchObject searchObject = new TaskSearchObjectBuilder(session)
             .addFilters(searchRequest.getFilters())
             .addQueries(searchRequest.getQueries())

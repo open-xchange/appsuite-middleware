@@ -152,7 +152,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
+    public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
         InfostoreSearchEngine searchEngine = Services.getInfostoreSearchEngine();
         if (null == searchEngine) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreFacade.class.getName());

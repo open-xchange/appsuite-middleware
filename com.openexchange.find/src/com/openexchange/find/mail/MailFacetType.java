@@ -50,6 +50,8 @@
 package com.openexchange.find.mail;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.java.Strings;
@@ -81,6 +83,8 @@ public enum MailFacetType implements FacetType {
     private final boolean isFieldFacet;
 
     private final boolean appliesOnce;
+
+    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
 
     private MailFacetType() {
         this(null);
@@ -114,6 +118,11 @@ public enum MailFacetType implements FacetType {
     @Override
     public boolean appliesOnce() {
         return appliesOnce;
+    }
+
+    @Override
+    public List<FacetType> conflictingFacets() {
+        return conflictingFacets;
     }
 
     /**

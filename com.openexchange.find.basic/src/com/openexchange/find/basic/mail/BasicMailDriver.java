@@ -188,7 +188,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     @Override
-    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
+    public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
         String folderName = searchRequest.getFolderId();
         if (folderName == null && Strings.isEmpty(virtualAllMessagesFolder)) {
             throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());

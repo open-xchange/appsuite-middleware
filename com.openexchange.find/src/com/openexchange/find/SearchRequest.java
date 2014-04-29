@@ -49,7 +49,6 @@
 package com.openexchange.find;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,8 +77,6 @@ public class SearchRequest extends AbstractFindRequest {
 
     private final int size;
 
-    private final Map<FacetType, List<ActiveFacet>> facetMap;
-
     private List<Filter> filters;
 
     private List<String> queries;
@@ -97,17 +94,6 @@ public class SearchRequest extends AbstractFindRequest {
         super(activeFacets, options);
         this.start = start;
         this.size = size;
-        facetMap = new HashMap<FacetType, List<ActiveFacet>>(activeFacets.size());
-        for (ActiveFacet facet : activeFacets) {
-            FacetType type = facet.getType();
-            List<ActiveFacet> facetList = facetMap.get(type);
-            if (facetList == null) {
-                facetList = new LinkedList<ActiveFacet>();
-                facetMap.put(type, facetList);
-            }
-
-            facetList.add(facet);
-        }
     }
 
     /**
@@ -215,35 +201,6 @@ public class SearchRequest extends AbstractFindRequest {
         }
 
         return facets.get(0).getValueId();
-    }
-
-    /**
-     * Gets the active facet for the given type if and only if
-     * {@link FacetType#appliesOnce()} is <code>true</code>.
-     * @return The facet or <code>null</code> if not present.
-     */
-    public ActiveFacet getActiveFacet(FacetType type) {
-        if (type.appliesOnce()) {
-            List<ActiveFacet> list = facetMap.get(type);
-            if (list != null) {
-                return list.get(0);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Gets the active facets for the given type.
-     * @return The facets or <code>null</code> if not present.
-     */
-    public List<ActiveFacet> getActiveFacets(FacetType type) {
-        List<ActiveFacet> facets = facetMap.get(type);
-        if (facets == null) {
-            return null;
-        }
-
-        return Collections.unmodifiableList(facets);
     }
 
     @Override

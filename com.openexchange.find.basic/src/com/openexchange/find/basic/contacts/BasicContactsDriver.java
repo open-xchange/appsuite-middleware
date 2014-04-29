@@ -152,7 +152,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     @Override
-    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
+    public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
         /*
          * build filters
