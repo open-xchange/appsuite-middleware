@@ -49,45 +49,22 @@
 
 package com.openexchange.realtime.group;
 
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.realtime.payload.PayloadTreeNode;
-import com.openexchange.realtime.util.Duration;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 
 /**
- * {@link InactivityNotice} - Inform a groupDispatcher about the inactivity duration of one of its members.
+ * {@link UnitTests}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
-public class InactivityNotice extends Message {
 
-    private static final long serialVersionUID = 1L;
+@RunWith(Suite.class)
+@SuiteClasses({
+InactivityNoticeTest.class
+})
+public class UnitTests {
 
-    /**
-     * Initializes a new {@link InactivityNotice}.
-     * 
-     * @param group
-     * @param member
-     * @param inactivity
-     */
-    public InactivityNotice(ID group, ID member, Duration inactivity) {
-        super();
-        setTo(group);
-        setFrom(member);
-        addPayload(new PayloadTree(PayloadTreeNode.builder()
-        .withPayload(
-            "inactivityNotice",
-            "json",
-            "",
-            "action")
-        .andChild(
-            inactivity,
-            Duration.class.getName(),
-            "com.openexchange.realtime.client",
-            "inactivity")
-        .build()));
-    }
 }

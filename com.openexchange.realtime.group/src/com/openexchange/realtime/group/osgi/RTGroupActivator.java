@@ -62,6 +62,7 @@ import com.openexchange.realtime.group.GroupManagerService;
 import com.openexchange.realtime.group.conversion.GroupCommand2JSON;
 import com.openexchange.realtime.group.conversion.JSON2GroupCommand;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
+import com.openexchange.realtime.util.Duration;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -81,9 +82,12 @@ public class RTGroupActivator extends HousekeepingActivator implements BundleAct
         groupManager = new GroupManager();
         GroupDispatcher.GROUPMANAGER_REF.set(groupManager);
         registerService(GroupManagerService.class, groupManager);
-        getService(PayloadTreeConverter.class).declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
+        PayloadTreeConverter treeConverter = getService(PayloadTreeConverter.class);
+        treeConverter.declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
+        treeConverter.declarePreferredFormat(new ElementPath("com.openexchange.realtime.client","inactivity"), Duration.class.getName());
         registerService(SimplePayloadConverter.class, new GroupCommand2JSON());
         registerService(SimplePayloadConverter.class, new JSON2GroupCommand());
+        
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
             registerService(RealtimeJanitor.class, realtimeJanitor);
         }

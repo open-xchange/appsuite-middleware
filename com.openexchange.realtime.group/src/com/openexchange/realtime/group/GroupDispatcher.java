@@ -51,6 +51,7 @@ package com.openexchange.realtime.group;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,6 +77,7 @@ import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ActionHandler;
+import com.openexchange.realtime.util.Duration;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -527,6 +529,17 @@ public class GroupDispatcher implements ComponentHandle {
      */
     protected void defaultAction(Stanza stanza) {
         LOG.error("Couldn't find matching handler for {}. \nUse default", stanza);
+    }
+
+    public void handleInactivityNotice(Stanza stanza) throws OXException {
+        Collection<PayloadElement> inactivityDurations = stanza.filterPayloadElements(new com.openexchange.realtime.util.ElementPath("com.openexchange.realtime.client", "inactivity"));
+        if(inactivityDurations.size() != 1) {
+            LOG.warn("Was expecting a single 'com.openexchange.realtime.client.inactivity' payload but can't find it in the Stanza.");
+        } else {
+            Duration inactivity = (Duration) inactivityDurations.iterator().next().getData();
+            ID inactiveUser = stanza.getFrom();
+            LOG.info("User {} was inactive for {} ",inactiveUser, inactivity);
+        }
     }
 
     @Override

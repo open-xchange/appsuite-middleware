@@ -66,6 +66,7 @@ import com.openexchange.realtime.util.Duration;
  * The {@link StateManager} manages the state of connected clients.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class StateManager implements RealtimeJanitor {
 
@@ -122,22 +123,29 @@ public class StateManager implements RealtimeJanitor {
      * @param timestamp - The timestamp to compare the lastSeen value to
      */
     public void timeOutStaleStates(long timestamp) {
+        GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
+        GroupManagerService groupManager = JSONServiceRegistry.getInstance().getService(GroupManagerService.class);
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
             ID client = state.getId();
-            long stateLastSeenMillis = state.getLastSeen();
-            Duration  inactivity = Duration.roundDownTo(System.currentTimeMillis() - stateLastSeenMillis, MILLISECONDS);
-            LOG.info("Client {} is inactive since {} seconds", client, inactivity.getValueInS());
-            GroupManagerService groupManager = JSONServiceRegistry.getInstance().getService(GroupManagerService.class);
-            groupManager.setInactivity(client, inactivity);
-            if (Duration.THIRTY_MINUTES.equals(inactivity)) {
+            Duration inactivity = state.getInactivityDuration();
+            LOG.debug("Client {} is inactive since {} seconds", client, inactivity.getValueInS());
+            if(groupManager != null) {
+                groupManager.setInactivity(client, inactivity);
+            } else {
+                LOG.error("Unable to inform GroupManager about inactivity duration. GroupManagerService is missing!");
+            }
+            if (state.isTimedOut(timestamp)) {
                 /*
                  * The client timed out: if he'd be still active and was just rerouted to another backend the cleanup would have already
                  * happened during enrol on the other node. As we reached this code there was no cleanup yet and we still have to do
                  * it cluster-wide.
                  */
                 LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
-                GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
-                globalRealtimeCleanup.cleanForId(state.getId());
+                if(globalRealtimeCleanup != null) {
+                    globalRealtimeCleanup.cleanForId(state.getId());
+                } else {
+                    LOG.error("Unable to cleanup for id {}. GLobalRealtimeCleanupService is missing!", client);
+                }
             } else {
                 try {
                     state.getId().trigger(ID.Events.REFRESH, this);
@@ -145,23 +153,6 @@ public class StateManager implements RealtimeJanitor {
                     LOG.error("Triggering refresh of ID: {} failed.", state.getId(), e);
                 }
             }
-            
-//            if (state.isTimedOut(timestamp)) {
-//                /*
-//                 * The client timed out: if he'd be still active and was just rerouted to another backend the cleanup would have already
-//                 * happened during enrol on the other node. As we reached this code there was no cleanup yet and we still have to do
-//                 * it cluster-wide.
-//                 */
-//                LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
-//                GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
-//                globalRealtimeCleanup.cleanForId(state.getId());
-//            } else {
-//                try {
-//                    state.getId().trigger(ID.Events.REFRESH, this);
-//                } catch (Exception e) {
-//                    LOG.error("Triggering refresh of ID: {} failed.", state.getId(), e);
-//                }
-//            }
         }
     }
 

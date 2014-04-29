@@ -109,6 +109,20 @@ public class Duration {
         return SECONDS.convert(value, unit);
     }
 
+    /**
+     * Round down to the nearest predefined Duration.
+     * 
+     * Examples:
+     * <ul>
+     *  <li>roundDownTo(25, SECONDS) -> Duration.TEN_SECONDS</li>
+     *  <li>roundDownTo(32, SECONDS) -> Duration.THIRTY_SECONDS</li>
+     *  <li>roundDownTo(22, MINUTES) -> Duration.TWENTY_MINUTES</li>
+     * </ul>
+     *  
+     * @param value The duration value 
+     * @param unit The TimeUnit of the {@link Duration}
+     * @return The nearest predefined Duration found by rounding down.
+     */
     public static Duration roundDownTo(long value, TimeUnit unit) {
         Validate.isTrue(value > 0, "Duration value must be > 0.");
         Validate.notNull(unit, "Duration TimeUnit must not be null.");
@@ -177,5 +191,10 @@ public class Duration {
             return false;
         return true;
     }
-    
+
+    @Override
+    public String toString() {
+        return value + " " + unit.toString();
+    }
+
 }

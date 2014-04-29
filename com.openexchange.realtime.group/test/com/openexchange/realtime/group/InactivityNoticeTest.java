@@ -49,45 +49,46 @@
 
 package com.openexchange.realtime.group;
 
+import static org.junit.Assert.*;
+import java.util.Collection;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.util.ActionHandler;
 import com.openexchange.realtime.util.Duration;
 
 
 /**
- * {@link InactivityNotice} - Inform a groupDispatcher about the inactivity duration of one of its members.
+ * {@link InactivityNoticeTest}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.6.0
+ * @since 7.x.y
  */
-public class InactivityNotice extends Message {
-
-    private static final long serialVersionUID = 1L;
+public class InactivityNoticeTest {
 
     /**
-     * Initializes a new {@link InactivityNotice}.
-     * 
-     * @param group
-     * @param member
-     * @param inactivity
+     * @throws java.lang.Exception
      */
-    public InactivityNotice(ID group, ID member, Duration inactivity) {
-        super();
-        setTo(group);
-        setFrom(member);
-        addPayload(new PayloadTree(PayloadTreeNode.builder()
-        .withPayload(
-            "inactivityNotice",
-            "json",
-            "",
-            "action")
-        .andChild(
-            inactivity,
-            Duration.class.getName(),
-            "com.openexchange.realtime.client",
-            "inactivity")
-        .build()));
+    @Before
+    public void setUp() throws Exception {
     }
+
+    @Test
+    public void test() throws OXException {
+        ID group = new ID("synthetic.office://operations@premium/66499.62446");
+        ID member = new ID("ox://francisco.laguna@internal/20d39asd9da93249f009d");
+        InactivityNotice ian = new InactivityNotice(group, member, Duration.THIRTY_SECONDS);
+        Collection<PayloadElement> inactivityDurations = ian.filterPayloadElements(new com.openexchange.realtime.util.ElementPath("com.openexchange.realtime.client", "inactivity"));
+        if(inactivityDurations.size() != 1) {
+            fail("Was expecting a single 'com.openexchange.realtime.client.inactivity' payload but can't find it in the Stanza.");
+        } else {
+            Duration inactivity = (Duration) inactivityDurations.iterator().next().getData();
+            ID inactiveUser = ian.getFrom();
+            assertEquals(member, inactiveUser);
+            assertEquals(Duration.THIRTY_SECONDS, inactivity);
+        }
+    }
+
 }

@@ -25,7 +25,6 @@ Import-Package: com.google.common.collect,
  javax.annotation.concurrent,
  org.apache.commons.lang;version="2.6.0",
  org.apache.commons.logging,
- org.json,
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.realtime.group,
