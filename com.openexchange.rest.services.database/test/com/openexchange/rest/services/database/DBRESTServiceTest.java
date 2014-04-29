@@ -905,8 +905,36 @@ public class DBRESTServiceTest {
     }
     
     @Test
-    public void migrateMonitoredAcrossTransactions() {
-        //fail("Implement me!");
+    public void migrateMonitoredAcrossTransactions() throws Exception {
+        Transaction tx = new Transaction(con, txs);
+        when(txs.newTransaction(con)).thenReturn(tx);
+        when(dbs.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
+        when(versionChecker.lock(eq(con), eq("com.openexchange.myModule"), anyLong(), anyLong())).thenReturn(true);
+        
+        data("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        param("keepOpen", true, boolean.class);
+        
+        service.before();
+        service.migrateMonitored(readPoolId, writePoolId, schema, partitionId, "1", "2", "com.openexchange.myModule");
+        service.after();
+
+        verifyConnection(con).receivedQuery("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        verify(versionChecker).updateVersion(con, "com.openexchange.myModule", "1", "2");
+
+        newRequest();
+        
+        tx.setConnection(con);
+        when(txs.getTransaction(tx.getID())).thenReturn(tx);
+
+        data("CREATE TABLE myModule_myTable2 (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+
+        service.before();
+        service.queryTransaction(tx.getID());
+        service.after();
+
+        verifyConnection(con).receivedQuery("CREATE TABLE myModule_myTable2 (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        verify(versionChecker).unlock(con, "com.openexchange.myModule");
+        verify(dbs).backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, con);
     }
     
     @Test

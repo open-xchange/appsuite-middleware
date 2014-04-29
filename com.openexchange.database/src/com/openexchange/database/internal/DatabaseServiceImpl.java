@@ -384,4 +384,17 @@ public final class DatabaseServiceImpl implements DatabaseService {
     public void backWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
         back(con);
     }
+
+    public void initMonitoringTables(int writePoolId, String schema) throws OXException {
+        Connection con = get(writePoolId, schema);
+        try {
+            
+        } finally {
+            
+        }
+    }
+    
+    public void initPartitions(int writePoolId, String schema, int...partitions) throws OXException {
+        
+    }
 }
