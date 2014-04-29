@@ -62,7 +62,6 @@ import com.openexchange.java.Strings;
 public enum TasksFacetType implements FacetType {
 
     TASK_PARTICIPANTS(TasksStrings.FACET_TASK_PARTICIPANTS,false),
-    TASK_FOLDERS(TasksStrings.FACET_TASK_FOLDERS, false),
     TASK_TITLE(TasksStrings.FACET_TASK_TITLE, true),
     TASK_DESCRIPTION(TasksStrings.FACET_TASK_DESCRIPTION, true),
     TASK_ATTACHMENT_NAME(TasksStrings.FACET_TASK_ATTACHMENT_NAME, true),

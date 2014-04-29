@@ -79,7 +79,7 @@ public interface DisplayItem {
     /**
      * Gets the item associated with this instance.
      *
-     * @return The item
+     * @return The item; possibly <code>null</code>
      */
     Object getItem();
 

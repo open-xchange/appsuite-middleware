@@ -149,7 +149,7 @@ public abstract class AbstractJSONConverter implements ResultConverter {
     protected String convertDisplayItem(Locale locale, DisplayItem displayItem) {
         JSONDisplayItemVisitor visitor = new JSONDisplayItemVisitor(translator, locale);
         displayItem.accept(visitor);
-        return visitor.getResult();
+        return visitor.getDisplayName();
     }
 
     protected JSONObject convertFilter(Filter filter) throws JSONException {

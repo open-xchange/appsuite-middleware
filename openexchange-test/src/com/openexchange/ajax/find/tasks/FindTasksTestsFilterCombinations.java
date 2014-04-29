@@ -126,7 +126,6 @@ public class FindTasksTestsFilterCombinations extends AbstractFindTasksTest {
         queries.add("thorben.betten@premium");
         queries.add("x_x_x_x_x_x_x@asdasdasda");
         Filter filter = new Filter(Collections.singletonList("participant"), queries);
-        facets.add(new ActiveFacet(TasksFacetType.TASK_FOLDERS, "custom", new Filter(Collections.<String> emptyList(), Collections.<String> emptyList())));
         facets.add(new ActiveFacet(TasksFacetType.TASK_PARTICIPANTS, "contact/1/464373", filter));
         assertResults(0, facets);
     }
