@@ -162,6 +162,7 @@
 
  - Fix for bug 31842: Provide human-readable quota information
  - Fix for bug 32239: Filter associated account's address from recipient list
+ - Fix for bug 32211: Removed usage of removed String constructor in JSON bundle + Proper reflection-wise look-up of "extendedProvider" field in Java8
 
 * 2014-04-25 - thorben.betten@open-xchange.com
 

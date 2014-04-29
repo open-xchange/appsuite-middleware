@@ -59,6 +59,8 @@ import java.nio.charset.spi.CharsetProvider;
  */
 public final class ModifyCharsetExtendedProvider {
 
+    private static volatile Field extendedProviderField;
+
     /**
      * Initializes a new {@link ModifyCharsetExtendedProvider}.
      */
@@ -82,8 +84,26 @@ public final class ModifyCharsetExtendedProvider {
         /*
          * Modify java.nio.charset.Charset class
          */
-        final Field extendedProviderField = java.nio.charset.Charset.class.getDeclaredField("extendedProvider");
+        Field extendedProviderField = null;
+        try {
+            extendedProviderField = java.nio.charset.Charset.class.getDeclaredField("extendedProvider");
+        } catch (final java.lang.NoSuchFieldException e) {
+            // Java v8 ?
+            Class<?> extendedProviderHolderClass = null;
+            final Class<?>[] declaredClasses = java.nio.charset.Charset.class.getDeclaredClasses();
+            for (int i = 0; null == extendedProviderHolderClass && i < declaredClasses.length; i++) {
+                final Class<?> subclass = declaredClasses[i];
+                if (subclass.getCanonicalName().endsWith("ExtendedProviderHolder")) {
+                    extendedProviderHolderClass = subclass;
+                }
+            }
+            if (null == extendedProviderHolderClass) {
+                throw e;
+            }
+            extendedProviderField = extendedProviderHolderClass.getDeclaredField("extendedProvider");
+        }
         extendedProviderField.setAccessible(true);
+        ModifyCharsetExtendedProvider.extendedProviderField = extendedProviderField;
         /*
          * Backup old charset provider
          */
@@ -108,19 +128,20 @@ public final class ModifyCharsetExtendedProvider {
      * Restores field <code>java.nio.charset.Charset.extendedProvider</code>
      *
      * @param provider The {@link CharsetProvider} instance to restore to
-     * @throws NoSuchFieldException If field "extendedProvider" does not exist
      * @throws IllegalAccessException If field "extendedProvider" is not accessible
      */
-    public static void restoreCharsetExtendedProvider(final CharsetProvider provider) throws NoSuchFieldException, IllegalAccessException {
+    public static void restoreCharsetExtendedProvider(final CharsetProvider provider) throws IllegalAccessException {
         /*
          * Restore java.nio.charset.Charset class
          */
-        final Field extendedProviderField = java.nio.charset.Charset.class.getDeclaredField("extendedProvider");
-        extendedProviderField.setAccessible(true);
-        /*
-         * Assign previously remembered charset provider
-         */
-        extendedProviderField.set(null, provider);
+        final Field extendedProviderField = ModifyCharsetExtendedProvider.extendedProviderField;
+        if (null != extendedProviderField) {
+            /*
+             * Assign previously remembered charset provider
+             */
+            extendedProviderField.set(null, provider);
+            ModifyCharsetExtendedProvider.extendedProviderField = null;
+        }
     }
 
 }
