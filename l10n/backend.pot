@@ -2258,6 +2258,13 @@ msgstr ""
 msgid "The folder type \"%1$s\" is not supported."
 msgstr ""
 
+#. The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:96
+msgid ""
+"The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not "
+"be used within one request."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:61
 msgid "%1$s <i>in appointments</i>"
 msgstr ""
