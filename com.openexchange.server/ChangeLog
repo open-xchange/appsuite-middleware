@@ -94,7 +94,7 @@
 
  - Fix for bug 31942: Fix for unconsumed request remainders and configure that we want to accept payloads for methods where a payload is
                       currently undefined but not forbidden.
- 
+
 * 2014-04-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29950: Require "write own objects" permissions when creating files via WebDAV 
@@ -108,7 +108,7 @@
 * 2014-04-09 - marc.arens@open-xchange.com
 
  - Fix for bug 31974: Don't lookup ssl attributes on an unsecure request
- 
+
 * 2014-04-09 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31966: Check for quota exceptions from external storages, too 
