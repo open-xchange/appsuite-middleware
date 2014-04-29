@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.actions;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,6 +67,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -139,7 +141,11 @@ public final class DeleteAction extends AbstractFolderAction {
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
                 try {
-                    folderService.deleteFolder(treeId, folderId, timestamp, session, decorator);
+                    final FolderResponse<Void> response = folderService.deleteFolder(treeId, folderId, timestamp, session, decorator);
+                    final Collection<OXException> warnings = response.getWarnings();
+                    if (null != warnings && !warnings.isEmpty()) {
+                        throw warnings.iterator().next();
+                    }
                 } catch (final OXException e) {
                     e.setCategory(Category.CATEGORY_ERROR);
                     log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
