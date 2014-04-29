@@ -53,8 +53,11 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -1096,7 +1099,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     }
                 } catch (final UnsupportedCharsetException e) {
                     throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
-                } catch (final Exception e) {
+                } catch (final IOException e) {
+                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+                } catch (final RuntimeException e) {
                     throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
                 }
             }
@@ -1121,7 +1126,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return Strings.isEmpty(string);
     }
 
-    private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir, final String fileName) throws Exception {
+    private static final int BUFLEN = 65536;
+
+    private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir, final String fileName) throws IOException, OXException {
         try {
             final UploadFile retval = new UploadFileImpl();
             retval.setFieldName(item.getFieldName());
@@ -1134,7 +1141,33 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             retval.setSize(item.getSize());
             final File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));
             tmpFile.deleteOnExit();
-            item.write(tmpFile);
+            // Write to tmp file
+            {
+                InputStream in = null;
+                OutputStream out = null;
+                try {
+                    in = item.getInputStream();
+                    out = new FileOutputStream(tmpFile, false);
+                    final int buflen = BUFLEN;
+                    final byte[] buf = new byte[buflen];
+                    {
+                        int read = in.read(buf, 0, buflen);
+                        if (read <= 0) {
+                            // Empty file item...
+                            LOG.warn("Detected empty upload file {} although signaled to hold {} bytes.", retval.getFileName(), retval.getSize());
+                            throw UploadException.UploadCode.UNEXPECTED_EOF.create();
+                        }
+                        // Write remainder
+                        do {
+                            out.write(buf, 0, read);
+                            read = in.read(buf, 0, buflen);
+                        } while (read > 0);
+                    }
+                    out.flush();
+                } finally {
+                    Streams.close(in, out);
+                }
+            }
             retval.setTmpFile(tmpFile);
             return retval;
         } finally {
