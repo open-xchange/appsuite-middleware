@@ -52,6 +52,8 @@ package com.openexchange.rest.services.osgiservice;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
@@ -69,12 +71,21 @@ import com.openexchange.rest.services.Response;
  */
 public class ReflectiveServiceWrapper implements OXRESTServiceWrapper {
 
-    private Method method;
-    private OXRESTService delegate;
-    private OXRESTMatch match;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReflectiveServiceWrapper.class);
+
+    private final Method method;
+    private final OXRESTService<?> delegate;
+    private final OXRESTMatch match;
     private AJAXRequestData request;
 
-    public ReflectiveServiceWrapper(Method method, OXRESTService newInstance, OXRESTMatch match) {
+    /**
+     * Initializes a new {@link ReflectiveServiceWrapper}.
+     *
+     * @param method The associated reflection method
+     * @param newInstance The new service instance for this wrapper
+     * @param match The match providing parameters
+     */
+    public ReflectiveServiceWrapper(Method method, OXRESTService<?> newInstance, OXRESTMatch match) {
         super();
         this.method = method;
         this.delegate = newInstance;
@@ -101,7 +112,7 @@ public class ReflectiveServiceWrapper implements OXRESTServiceWrapper {
             Object result;
             if (parameterTypes.length == 0) {
                 // Just invoke the method
-                result = method.invoke(delegate);                
+                result = method.invoke(delegate);
             } else {
                 Object[] args = new Object[parameterTypes.length];
                 int i = 0;
@@ -115,10 +126,11 @@ public class ReflectiveServiceWrapper implements OXRESTServiceWrapper {
                 }
                 result = method.invoke(delegate, args);
             }
-            
+
             if (result != null) {
                 if (result instanceof Iterable) {
-                    delegate.body((Iterable<String>) result);
+                    final Iterable<String> body = (Iterable<String>) result;
+                    delegate.body(body);
                 } else if (result instanceof String){
                     delegate.body((String) result);
                 } else {
@@ -129,33 +141,33 @@ public class ReflectiveServiceWrapper implements OXRESTServiceWrapper {
                     }
                 }
             }
-        } catch (InvocationTargetException x) {
+        } catch (final InvocationTargetException x) {
             if (x.getCause() instanceof OXException) {
                 throw (OXException) x.getCause();
             } else if (x.getCause() instanceof HALT) {
                 // processing has finished
-                
             } else {
-                // TODO
-                x.printStackTrace();
+                LOGGER.error("Error invoking method {} of REST service {}", method.getName(), delegate.getClass().getSimpleName(), x);
             }
-            
-        } catch (IllegalArgumentException e) {
-            // TODO
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO
-            e.printStackTrace();
+        } catch (final IllegalArgumentException e) {
+            LOGGER.error("Passed wrong arguments when invoking method {} of REST service {}", method.getName(), delegate.getClass().getSimpleName(), e);
+        } catch (final IllegalAccessException e) {
+            LOGGER.error("Illegal access to method {} of REST service {}", method.getName(), delegate.getClass().getSimpleName(), e);
+        } catch (final RuntimeException e) {
+            LOGGER.error("Runtime error when invoking method {} of REST service {}", method.getName(), delegate.getClass().getSimpleName(), e);
         } finally {
             delegate.after();
         }
         return delegate.getResponse();
     }
-    
-    
+
+    /**
+     * Gets the (newly created) service instance associated with this wrapper.
+     *
+     * @return The service instance
+     */
     public <T> OXRESTService<T> getDelegate() {
-        return delegate;
+        return (OXRESTService<T>) delegate;
     }
-    
 
 }

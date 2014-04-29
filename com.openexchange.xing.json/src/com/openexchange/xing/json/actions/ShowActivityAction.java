@@ -73,34 +73,33 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public final class ShowActivityAction extends AbstractXingAction {
 
-	/**
-	 * Initializes a new {@link ShowActivityAction}.
-	 */
-	public ShowActivityAction(final ServiceLookup services) {
-		super(services);
-	}
+    /**
+     * Initializes a new {@link ShowActivityAction}.
+     */
+    public ShowActivityAction(final ServiceLookup services) {
+        super(services);
+    }
 
-	@Override
-	protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
-		final String activityId = getMandatoryStringParameter(req, "activity_id");
-		// User Fields
-		Collection<UserField> optUserFields = getUserFields(req.getParameter("user_fields"));
+    @Override
+    protected AJAXRequestResult perform(final XingRequest req) throws OXException, JSONException, XingException {
+        final String activityId = getMandatoryStringParameter(req, "activity_id");
+        // User Fields
+        Collection<UserField> optUserFields = getUserFields(req.getParameter("user_fields"));
+        String token = req.getParameter("testToken");
+        String secret = req.getParameter("testSecret");
+        final XingOAuthAccess xingOAuthAccess;
+        {
+            if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+                xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
+            } else {
+                xingOAuthAccess = getXingOAuthAccess(req);
+            }
+        }
+        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+        Map<String, Object> activity = xingAPI.showActivity(activityId, optUserFields);
+        JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(activity);
 
-		String token = req.getParameter("testToken");
-		String secret = req.getParameter("testSecret");
-		final XingOAuthAccess xingOAuthAccess;
-		{
-			if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
-				xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
-			} else {
-				xingOAuthAccess = getXingOAuthAccess(req);
-			}
-		}
-		XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-		Map<String, Object> activity = xingAPI.showActivity(activityId, optUserFields);
-		JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(activity);
-
-		return new AJAXRequestResult(result);
-	}
+        return new AJAXRequestResult(result);
+    }
 
 }

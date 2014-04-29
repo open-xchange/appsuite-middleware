@@ -60,6 +60,8 @@ import java.nio.charset.spi.CharsetProvider;
  */
 public final class ModifyCharsetStandardProvider {
 
+    private static volatile Field standardProviderField;
+
     /**
      * Initializes a new {@link ModifyCharsetStandardProvider}.
      */
@@ -81,6 +83,7 @@ public final class ModifyCharsetStandardProvider {
          */
         final Field standardProviderField = java.nio.charset.Charset.class.getDeclaredField("standardProvider");
         standardProviderField.setAccessible(true);
+        ModifyCharsetStandardProvider.standardProviderField = standardProviderField;
         /*
          * Backup old charset provider
          */
@@ -134,19 +137,20 @@ public final class ModifyCharsetStandardProvider {
      * Restores field <code>java.nio.charset.Charset.standardProvider</code>
      *
      * @param provider The {@link CharsetProvider} instance to restore to
-     * @throws NoSuchFieldException If field "standardProvider" does not exist
      * @throws IllegalAccessException If field "standardProvider" is not accessible
      */
-    public static void restoreCharsetExtendedProvider(final CharsetProvider provider) throws NoSuchFieldException, IllegalAccessException {
+    public static void restoreCharsetExtendedProvider(final CharsetProvider provider) throws IllegalAccessException {
         /*
          * Restore java.nio.charset.Charset class
          */
-        final Field extendedProviderField = java.nio.charset.Charset.class.getDeclaredField("standardProvider");
-        extendedProviderField.setAccessible(true);
-        /*
-         * Assign previously remembered charset provider
-         */
-        extendedProviderField.set(null, provider);
+        final Field standardProviderField = ModifyCharsetStandardProvider.standardProviderField;
+        if (null != standardProviderField) {
+            /*
+             * Assign previously remembered charset provider
+             */
+            standardProviderField.set(null, provider);
+            ModifyCharsetStandardProvider.standardProviderField = null;
+        }
     }
 
 }

@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -57,6 +60,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.httpclient.URI;
@@ -326,6 +330,41 @@ public final class AJAXUtilis {
             return s;
         } catch (final UnsupportedEncodingException e) {
             return s;
+        }
+    }
+
+    /**
+     * Gets the writer from given HTTP response.
+     *
+     * @param resp The HTTP response
+     * @return The writer or <code>null</code>
+     * @throws IOException If an I/O error occurs
+     */
+    public static PrintWriter getWriter(final HttpServletResponse resp, final boolean tryFallBack) throws IOException {
+        if (null == resp) {
+            return null;
+        }
+        try {
+            return resp.getWriter();
+        } catch (final IllegalStateException e) {
+            // ServletResponse.getOutputStream() was already called
+            if (tryFallBack) {
+                try {
+                    String charenc = resp.getCharacterEncoding();
+                    if (Strings.isEmpty(charenc)) {
+                        charenc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+                        if (Strings.isEmpty(charenc)) {
+                            charenc = "UTF-8";
+                        }
+                    }
+                    return new PrintWriter(new OutputStreamWriter(resp.getOutputStream(), charenc), false);
+                } catch (final Exception x) {
+                    LOG.warn("Unable to acquire Writer instance from HTTP response.", x);
+                }
+            } else {
+                LOG.warn("Unable to acquire Writer instance from HTTP response.", e);
+            }
+            return null;
         }
     }
 

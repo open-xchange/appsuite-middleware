@@ -56,7 +56,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -369,7 +368,7 @@ public class DispatcherServlet extends SessionServlet {
             if (ETAG.equals(result.getType())) {
                 httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 final long expires = result.getExpires();
-                Tools.setETag(requestData.getETag(), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, httpResponse);
+                Tools.setETag(requestData.getETag(), expires > 0 ?  expires : -1L, httpResponse);
                 return;
             }
 

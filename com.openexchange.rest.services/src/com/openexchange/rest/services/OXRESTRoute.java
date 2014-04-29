@@ -53,102 +53,171 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.util.regex.PatternSyntaxException;
+import com.openexchange.annotation.NonNull;
 
 /**
- * An {@link OXRESTRoute} consists of an HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package com.openexchange.rest.services.annotation) and a 
- * path declaration with variables led by a colon. e.g. 
- * /resources/:myResourceId
- * 
+ * An {@link OXRESTRoute} consists of an HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package
+ * <code>com.openexchange.rest.services.annotation</code>) and a path declaration with variables led by a colon.
+ * <p>
+ * e.g. <code>/resources/:myResourceId</code><br>
  * which would match the path /resources/12 keeping the 12 as the myResourceId variable.
+ * <p>
+ * The route is yielded from an annotated method declaration inside an {@link OXRESTService} sub-class.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OXRESTRoute {
+
     private String method;
     private String path;
     private Pattern pattern;
-    private List<String> variableNames = new ArrayList<String>(5);
-    
+    private final List<String> variableNames;
+
+    /**
+     * Initializes a new {@link OXRESTRoute}.
+     *
+     * @param method The HTTP method (e.g. GET, POST, PUT, DELETE, etc. see the package
+     *            <code>com.openexchange.rest.services.annotation</code>)
+     * @param path The path; e.g. <code>"/resources/:myResourceId"</code>
+     */
     public OXRESTRoute(String method, String path) {
         super();
+        variableNames = new ArrayList<String>(5);
         this.method = method.toUpperCase();
         setPath(path);
     }
 
-    public String getMethod() {
+    /**
+     * Gets the associated HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package
+     * <code>com.openexchange.rest.services.annotation</code>).
+     *
+     * @return The HTTP method name
+     */
+    public @NonNull
+    String getMethod() {
         return method;
     }
-    
-    public void setMethod(String method) {
+
+    /**
+     * Sets the associated HTTP method name (e.g. GET, POST, PUT, DELETE, etc. see the package
+     * <code>com.openexchange.rest.services.annotation</code>).
+     *
+     * @param method The HTTP method name
+     */
+    public void setMethod(@NonNull String method) {
         this.method = method.toUpperCase();
     }
-    
-    public String getPath() {
+
+    /**
+     * Gets the path declaration
+     *
+     * @return The path declaration.
+     */
+    public @NonNull
+    String getPath() {
         return path;
     }
-    
-    public void setPath(String path) {
-        if (!path.startsWith("/")) {
-            this.path = "/" + path;
-        } else {
-            this.path = path;            
-        }
-        
-        // Build a pattern
+
+    /**
+     * Sets the path declaration (should start with a slash <code>"/"</code>).
+     *
+     * @param path The path declaration
+     * @throws IllegalArgumentException If given path is invalid
+     */
+    public void setPath(@NonNull String path) {
+        final String pazz = path.startsWith("/") ? path : "/" + path;
+        this.path = pazz;
+
+        // Build a pattern from path
+        final StringBuilder regexBuilder = new StringBuilder("^");
         boolean captureName = false;
-        StringBuilder regex = new StringBuilder("^");
-        StringBuilder name = new StringBuilder();
-        
+        boolean quote = false;
+        final StringBuilder nameBuilder = new StringBuilder();
+        final StringBuilder quoteBuilder = new StringBuilder();
+
         pattern = null;
         variableNames.clear();
-        
-        for(char c: this.path.toCharArray()) {
+
+        final int length = pazz.length();
+        for (int i = 0; i < length; i++) {
+            final char c = pazz.charAt(i);
             if (captureName) {
                 if (c == '/') {
                     captureName = false;
-                    regex.append("([^/]*)/");
-                    variableNames.add(name.toString());
-                    name = new StringBuilder();
+                    regexBuilder.append("([^/]*)/");
+                    variableNames.add(nameBuilder.toString());
+                    nameBuilder.setLength(0);
                 } else {
-                    name.append(c);
+                    nameBuilder.append(c);
                 }
             } else {
                 if (c == ':') {
                     captureName = true;
+                    if (quote) {
+                        regexBuilder.append(Pattern.quote(quoteBuilder.toString()));
+                        quote = false;
+                        quoteBuilder.setLength(0);
+                    }
                 } else {
-                    regex.append(Pattern.quote(c + ""));
+                    quote = true;
+                    quoteBuilder.append(c);
                 }
             }
         }
-        
-        if (captureName) {
-            regex.append("([^/]*)$");
-            variableNames.add(name.toString());
+
+        if (quote) {
+            regexBuilder.append(Pattern.quote(quoteBuilder.toString()));
         }
-        
-        pattern = Pattern.compile(regex.toString());
+
+        if (captureName) {
+            regexBuilder.append("([^/]*)$");
+            variableNames.add(nameBuilder.toString());
+        }
+
+        try {
+            pattern = Pattern.compile(regexBuilder.toString());
+        } catch (final PatternSyntaxException e) {
+            throw new IllegalArgumentException("Specified path is invalid", e);
+        }
     }
-    
+
     /**
-     * Tries to match the given path to this route. Returns null if the path does not match, or a OXRESTMatch object containing the variables of the match.
+     * Tries to match the given path to this route.
+     *
+     * @param method The method associated with given path
+     * @param path The path to check on
+     * @return <code>null</code> if the path does not match, or a {@link OXRESTMatch} instance containing the variables of the match.
      */
     public OXRESTMatch match(String method, String path) {
-        if (!method.equalsIgnoreCase(this.method)) {
+        if (!this.method.equalsIgnoreCase(method)) {
             return null;
         }
-        
+
         Matcher matcher = pattern.matcher(path);
         if (matcher.find()) {
             OXRESTMatch match = new OXRESTMatch();
             match.setRoute(this);
             for (int i = 0, size = variableNames.size(); i < size; i++) {
-                match.getParameters().put(variableNames.get(i), matcher.group(i+1));
+                match.getParameters().put(variableNames.get(i), matcher.group(i + 1));
             }
             match.setParameterNames(new ArrayList<String>(variableNames));
             return match;
         }
-        
+
         return null;
-    } 
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(256);
+        if (method != null) {
+            builder.append(method).append(" ");
+        }
+        if (path != null) {
+            builder.append(path);
+        }
+        return builder.toString();
+    }
+
 }

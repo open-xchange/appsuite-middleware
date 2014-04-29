@@ -107,7 +107,7 @@ public class NotificationMail {
 	private boolean attachmentUpdate;
 
 	private boolean sortedParticipants;
-	
+
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotificationMail.class);
 
     public ITipMessage getMessage() {
@@ -532,14 +532,14 @@ public class NotificationMail {
     	if (!isAboutStateChangesOnly(false)) {
     		return false;
     	}
-		return diff.isAboutCertainParticipantsStateChangeOnly(actor.getIdentifier()+"");
+		return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(actor.getIdentifier()));
 	}
 
 	public boolean someoneElseChangedPrincipalsState() {
 		if (actor.getIdentifier() == getPrincipal().getIdentifier()) {
 			return false;
 		}
-		return diff.isAboutCertainParticipantsStateChangeOnly(getPrincipal().getIdentifier()+"");
+		return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(getPrincipal().getIdentifier()));
 	}
 
     private boolean isAboutRecipientsStateChangeOnly() {

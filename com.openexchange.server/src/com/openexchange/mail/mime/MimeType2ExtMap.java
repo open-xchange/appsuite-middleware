@@ -62,9 +62,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.configuration.SystemConfig;
@@ -91,9 +92,9 @@ public final class MimeType2ExtMap {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeType2ExtMap.class);
 
-    private static volatile Map<String, String> typeMap;
+    private static volatile ConcurrentMap<String, String> typeMap;
 
-    private static volatile Map<String, List<String>> extMap;
+    private static volatile ConcurrentMap<String, List<String>> extMap;
 
     /**
      * No instance.
@@ -143,8 +144,8 @@ public final class MimeType2ExtMap {
                     return;
                 }
                 try {
-                    typeMap = new HashMap<String, String>();
-                    extMap = new HashMap<String, List<String>>();
+                    typeMap = new ConcurrentHashMap<String, String>(1024);
+                    extMap = new ConcurrentHashMap<String, List<String>>(1024);
                     final StringBuilder sb = new StringBuilder(128);
                     final boolean debugEnabled = LOG.isDebugEnabled();
                     {
@@ -217,6 +218,41 @@ public final class MimeType2ExtMap {
                 }
             }
         }
+    }
+
+    /**
+     * Adds specified MIME type to file type mapping; e.g <code>"image/png"</code> -&gt; <code>"png"</code>.
+     *
+     * @param mimeType The MIME type
+     * @param fileExtension The file extension
+     */
+    public static void addMimeType(final String mimeType, final String fileExtension) {
+        addMimeType(mimeType, Collections.singletonList(fileExtension));
+    }
+
+    /**
+     * Adds specified MIME type to file type mapping; e.g <code>"image/jpeg"</code> -&gt; [ <code>"jpeg"</code>, <code>"jpg"</code>, <code>"jpe"</code> ].
+     *
+     * @param mimeType The MIME type
+     * @param fileExtensions The file extensions
+     */
+    public static void addMimeType(final String mimeType, final List<String> fileExtensions) {
+        init();
+        final ConcurrentMap<String, String> tm = typeMap;
+        for (String ext : fileExtensions) {
+            tm.put(ext, mimeType);
+        }
+
+        final ConcurrentMap<String, List<String>> em = extMap;
+        List<String> list = em.get(mimeType);
+        if (null == list) {
+            final List<String> nl = new ArrayList<String>(2);
+            list = em.putIfAbsent(mimeType, nl);
+            if (null == list) {
+                list = nl;
+            }
+        }
+        list.add(mimeType);
     }
 
     /**

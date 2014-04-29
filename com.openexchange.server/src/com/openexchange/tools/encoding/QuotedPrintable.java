@@ -113,7 +113,7 @@ public final class QuotedPrintable {
             for (int a = 0; a < b.length; a++) {
                 if (b[a] == 61) {
                     if ((a + 2) < b.length) {
-                        x = ((char) b[a + 1] + "" + (char) b[a + 2]);
+                        x = (new StringBuilder().append((char) b[a + 1]).append((char) b[a + 2]).toString());
 
                         i = Integer.parseInt(x, 16);
 

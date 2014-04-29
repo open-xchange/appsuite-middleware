@@ -53,38 +53,77 @@ import java.util.UUID;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.java.util.UUIDs;
 
-
 /**
- * {@link Picture}
+ * {@link Picture} - A picture.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class Picture {
+
     private String etag;
     private IFileHolder fileHolder;
-    
+
+    /**
+     * Initializes a new {@link Picture} with a default random ETag.
+     */
     public Picture() {
         // Initialize with a default random etag.
         this(UUIDs.getUnformattedString(UUID.randomUUID()), null);
     }
-    
+
+    /**
+     * Initializes a new {@link Picture}.
+     *
+     * @param etag The associated ETag
+     */
+    public Picture(String etag) {
+        this(etag, null);
+    }
+
+    /**
+     * Initializes a new {@link Picture}.
+     *
+     * @param etag The associated ETag
+     * @param fileHolder The file holder
+     */
     public Picture(String etag, IFileHolder fileHolder) {
         this.etag = etag;
         this.fileHolder = fileHolder;
     }
-    
+
+    /**
+     * Gets the etag
+     *
+     * @return The etag
+     */
     public String getEtag() {
         return etag;
     }
 
+    /**
+     * Sets the etag
+     *
+     * @param etag The etag to set
+     */
     public void setEtag(String etag) {
         this.etag = etag;
     }
-    
+
+    /**
+     * Gets the file holder
+     *
+     * @return The file holder
+     */
     public IFileHolder getFileHolder() {
         return fileHolder;
     }
-    
+
+    /**
+     * Sets the file holder
+     *
+     * @param fileHolder The file holder to set
+     */
     public void setFileHolder(IFileHolder fileHolder) {
         this.fileHolder = fileHolder;
     }

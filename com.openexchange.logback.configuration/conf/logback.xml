@@ -100,6 +100,10 @@
     <logger name="com.openexchange.documentconverter.impl.Manager" level="WARN"/>
     <logger name="com.gargoylesoftware.htmlunit" level="WARN"/>
 
+   	<logger name="org.docx4j" level="WARN"/>
+   	<logger name="org.xlsx4j" level="WARN"/>
+   	<logger name="org.pptx4j" level="WARN"/>
+
     <!-- Set to DEBUG to log SOAP requests for debugging purpose -->
     <logger name="org.apache.cxf" level="WARN"/>
     <logger name="com.openexchange.soap.cxf.logger" level="WARN"/>

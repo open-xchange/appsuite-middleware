@@ -61,11 +61,20 @@ import com.openexchange.osgi.SimpleRegistryListener;
  * The {@link OSGIMailMappingService} is a utility class for consulting mail mapping services
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added constructor
  */
 public class OSGIMailMappingService implements MailResolver, SimpleRegistryListener<MailResolver> {
-    
-    private ServiceSet<MailResolver> allResolvers = new ServiceSet<MailResolver>();
-    
+
+    private final ServiceSet<MailResolver> allResolvers;
+
+    /**
+     * Initializes a new {@link OSGIMailMappingService}.
+     */
+    public OSGIMailMappingService() {
+        super();
+        allResolvers = new ServiceSet<MailResolver>();
+    }
+
     @Override
     public ResolvedMail resolve(String mail) throws OXException {
         for (MailResolver resolver : allResolvers) {

@@ -52,6 +52,7 @@ package com.openexchange.drive.events.internal;
 import static com.openexchange.file.storage.FileStorageEventConstants.FILE_NAME;
 import static com.openexchange.file.storage.FileStorageEventConstants.FOLDER_ID;
 import static com.openexchange.file.storage.FileStorageEventConstants.FOLDER_PATH;
+import static com.openexchange.file.storage.FileStorageEventConstants.OLD_PARENT_FOLDER_ID;
 import static com.openexchange.file.storage.FileStorageEventConstants.PARENT_FOLDER_ID;
 import static com.openexchange.file.storage.FileStorageEventConstants.SESSION;
 import java.util.Arrays;
@@ -195,6 +196,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
                 Integer contextID = Integer.valueOf(session.getContextId());
                 String folderID = (String)(event.containsProperty(PARENT_FOLDER_ID) ?
                     event.getProperty(PARENT_FOLDER_ID) : event.getProperty(FOLDER_ID));
+                String oldParentFolderID = (String)event.getProperty(OLD_PARENT_FOLDER_ID);
                 String[] folderPath = (String[])event.getProperty(FOLDER_PATH);
                 /*
                  * get buffer for this context
@@ -214,6 +216,9 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
                     buffer.add(session, folderID, Arrays.asList(folderPath));
                 } else {
                     buffer.add(session, folderID);
+                }
+                if (null != oldParentFolderID) {
+                    buffer.add(session, oldParentFolderID);
                 }
                 return null;
             }

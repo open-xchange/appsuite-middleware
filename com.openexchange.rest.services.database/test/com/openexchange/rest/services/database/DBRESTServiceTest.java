@@ -51,6 +51,7 @@ package com.openexchange.rest.services.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -92,6 +93,12 @@ public class DBRESTServiceTest {
     private int ctxId = 42;
     
     private AJAXRequestData req;
+    
+    private int readPoolId = 1;
+    private int writePoolId = 2;
+    private String schema = "mySchema";
+    private int partitionId = 0;
+    
     
     @Before
     public void setup() {
@@ -211,6 +218,94 @@ public class DBRESTServiceTest {
         verify(con).setAutoCommit(true);
         verify(con).commit();
         verify(dbs).backReadOnly(ctxId, con);
+    }
+    
+    @Test
+    public void updateInMonitoredDB() throws OXException, SQLException, JSONException {
+        
+        when(dbs.getWritableMonitored(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
+        
+        data("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12");
+        whenConnection(con).isQueried("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12").thenReturnModifiedRows(1);
+        
+        service.before();
+        service.updateInMonitoredConnection(readPoolId, writePoolId, schema);
+        service.after();
+        
+        JSONObject result = getQueryResult("result");
+        
+        assertEquals(1, result.getInt("updated"));
+        
+        verify(con).setAutoCommit(true);
+        verify(con).commit();
+        verify(dbs).backWritableMonitored(readPoolId, writePoolId, schema, partitionId, con);
+    }
+    
+    @Test
+    public void queryInMonitoredDB() throws Exception {
+        when(dbs.getReadOnlyMonitored(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
+        
+        data("SELECT * FROM myTable WHERE user = 12");
+        whenConnection(con).isQueried("SELECT * FROM myTable WHERE user = 12").thenReturnColumns("id folder displayName").andRow(12, 13, "Charlie").andRow(13, 13, "Linus");
+        
+        service.before();
+        service.queryInMonitoredConnection(readPoolId, writePoolId, schema);
+        service.after();
+        
+        JSONObject result = getQueryResult("result");
+        JSONArray rows = result.getJSONArray("rows");
+        
+        assertEquals(2, rows.length());
+   
+        assertEquals(12, rows.getJSONObject(0).getInt("id"));
+        assertEquals(13, rows.getJSONObject(0).getInt("folder"));
+        assertEquals("Charlie", rows.getJSONObject(0).getString("displayName"));
+        
+        assertEquals(13, rows.getJSONObject(1).getInt("id"));
+        assertEquals(13, rows.getJSONObject(1).getInt("folder"));
+        assertEquals("Linus", rows.getJSONObject(1).getString("displayName"));
+       
+        verify(con).setAutoCommit(true);
+        verify(con).commit();
+        verify(dbs).backReadOnlyMonitored(readPoolId, writePoolId, schema, partitionId, con);
+    }
+    
+    @Test
+    public void monitoredDBConnectionIsClosedProperlyInTransaction() throws Exception {
+        int readPoolId = 1;
+        int writePoolId = 2;
+        String schema = "mySchema";
+        int partitionId = 0;
+        
+        when(dbs.getWritableMonitored(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
+        
+        Transaction tx = new Transaction(con, txs);
+        when(txs.newTransaction(con)).thenReturn(tx);
+
+        data("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12");
+        param("keepOpen", true, boolean.class);
+        
+        whenConnection(con).isQueried("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12").thenReturnModifiedRows(1);
+        
+        service.before();
+        service.updateInMonitoredConnection(readPoolId, writePoolId, schema);
+        service.after();
+        
+        assertNotNull(tx.getParameter("monitoredMetadata"));
+        
+        newRequest();
+
+        tx.setConnection(con);
+        when(txs.getTransaction(tx.getID())).thenReturn(tx);
+        
+        data("UPDATE someOtherTable SET someColumn = 'someValue' WHERE someIdentifier = 12");
+        whenConnection(con).isQueried("UPDATE someOtherTable SET someColumn = 'someValue' WHERE someIdentifier = 12").thenReturnModifiedRows(1);
+        
+        service.before();
+        service.queryTransaction(tx.getID());
+        service.after();
+        
+        verify(dbs).backWritableMonitored(readPoolId, writePoolId, schema, partitionId, con);
     }
     
     @Test
@@ -792,6 +887,58 @@ public class DBRESTServiceTest {
     }
     
     @Test
+    public void migrateMonitored() throws Exception {
+        when(dbs.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
+        when(versionChecker.lock(eq(con), eq("com.openexchange.myModule"), anyLong(), anyLong())).thenReturn(true);
+        data("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        
+        service.before();
+        service.migrateMonitored(readPoolId, writePoolId, schema, partitionId, "1", "2", "com.openexchange.myModule");
+        service.after();
+        
+        verify(con).setAutoCommit(false);
+        verifyConnection(con).receivedQuery("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        verify(versionChecker).updateVersion(con, "com.openexchange.myModule", "1", "2");
+        verify(con).commit();
+        verify(con).setAutoCommit(true);
+        verify(versionChecker).unlock(con, "com.openexchange.myModule");
+        verify(dbs).backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, con);
+    }
+    
+    @Test
+    public void migrateMonitoredAcrossTransactions() throws Exception {
+        Transaction tx = new Transaction(con, txs);
+        when(txs.newTransaction(con)).thenReturn(tx);
+        when(dbs.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
+        when(versionChecker.lock(eq(con), eq("com.openexchange.myModule"), anyLong(), anyLong())).thenReturn(true);
+        
+        data("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        param("keepOpen", true, boolean.class);
+        
+        service.before();
+        service.migrateMonitored(readPoolId, writePoolId, schema, partitionId, "1", "2", "com.openexchange.myModule");
+        service.after();
+
+        verifyConnection(con).receivedQuery("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        verify(versionChecker).updateVersion(con, "com.openexchange.myModule", "1", "2");
+
+        newRequest();
+        
+        tx.setConnection(con);
+        when(txs.getTransaction(tx.getID())).thenReturn(tx);
+
+        data("CREATE TABLE myModule_myTable2 (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+
+        service.before();
+        service.queryTransaction(tx.getID());
+        service.after();
+
+        verifyConnection(con).receivedQuery("CREATE TABLE myModule_myTable2 (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        verify(versionChecker).unlock(con, "com.openexchange.myModule");
+        verify(dbs).backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, con);
+    }
+    
+    @Test
     public void forcedUnlock() throws OXException {
         when(dbs.getForUpdateTask(ctxId)).thenReturn(con);
         
@@ -801,6 +948,31 @@ public class DBRESTServiceTest {
         
         verify(versionChecker).unlock(con, "com.openexchange.myModule");
         verify(dbs).backForUpdateTask(ctxId, con);
+    }
+    
+    
+    @Test
+    public void forceUnlockMonitoredSchema() throws OXException {
+        when(dbs.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
+        
+        service.before();
+        service.unlockMonitored(readPoolId, writePoolId, schema, partitionId, "com.openexchange.myModule");
+        service.after();
+        
+        verify(versionChecker).unlock(con, "com.openexchange.myModule");
+        verify(dbs).backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, con);
+        
+    }
+    
+    @Test
+    public void insertPartitionIds() throws Exception {
+        data(list().add(1,2,3,4,5).build());
+        
+        service.before();
+        service.insertPartitionIds(writePoolId, schema);
+        service.after();
+        
+        verify(dbs).initPartitions(writePoolId, schema, 1,2,3,4,5);
     }
     
     private void newRequest() {
@@ -813,6 +985,10 @@ public class DBRESTServiceTest {
     
     private void data(Map map) throws JSONException {
         data(JSONCoercion.coerceToJSON(map));
+    }
+    
+    private void data(List list) throws JSONException {
+        data(JSONCoercion.coerceToJSON(list));
     }
     
     private void param(String name, String value) {

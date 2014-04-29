@@ -163,6 +163,31 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
     }
 
     @Override
+    public String getPictureETag(HaloContactQuery query, ServerSession session) throws OXException {
+        XingAPI<WebAuthSession> api = getAPI(session);
+        com.openexchange.xing.User userInfo = loadXingUser(api, query, session);
+        if (userInfo == null) {
+            return null;
+        }
+
+        PhotoUrls photoUrls = userInfo.getPhotoUrls();
+        if (photoUrls == null) {
+            return null;
+        }
+
+        String url = photoUrls.getMaxiThumbUrl();
+        if (url == null) {
+            url = photoUrls.getLargestAvailableUrl();
+        }
+
+        if (url != null) {
+            return Base64.encode(url);
+        }
+
+        return null;
+    }
+
+    @Override
     public Picture getPicture(HaloContactQuery query, ServerSession session) throws OXException {
         XingAPI<WebAuthSession> api = getAPI(session);
         com.openexchange.xing.User userInfo = loadXingUser(api, query, session);

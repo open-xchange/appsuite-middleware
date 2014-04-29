@@ -50,8 +50,6 @@
 package com.openexchange.importexport.actions.exporter;
 
 import static com.openexchange.java.Autoboxing.I2i;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,16 +98,9 @@ public abstract class AbstractExportAction implements AJAXActionService {
     protected Map<String, Object> getOptionalParams(ExportRequest req) {
         final Map<String, Object> optionalParams;
         final AJAXRequestData request = req.getRequest();
-        OutputStream out = null;
-        try {
-            out = request.optOutputStream();
-        } catch (IOException e) {
-            // Ignore
-        }
 
-        if (null == out) {
-            optionalParams = null;
-        } else {
+        final boolean responseAccess = request.isHttpServletResponseAvailable();
+        if (responseAccess) {
             optionalParams = new HashMap<String, Object>(4);
             optionalParams.put("__requestData", request);
             String contentType = request.getParameter(PARAMETER_CONTENT_TYPE);
@@ -117,6 +108,8 @@ public abstract class AbstractExportAction implements AJAXActionService {
             if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
                 optionalParams.put("__saveToDisk", Boolean.TRUE);
             }
+        } else {
+            optionalParams = null;
         }
 
         return optionalParams;

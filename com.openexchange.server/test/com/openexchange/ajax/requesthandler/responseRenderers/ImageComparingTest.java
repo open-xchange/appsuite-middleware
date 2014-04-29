@@ -49,10 +49,12 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
 import javax.servlet.http.sim.SimHttpServletRequest;
@@ -129,7 +131,6 @@ public class ImageComparingTest extends TestCase {
     public void testRotationSuccess_Bug26630() {
         try {
             final File fileInput = new File(TEST_DATA_DIR, "26630_R90CW.jpg");
-            final File fileExpected = new File(TEST_DATA_DIR, "26630_R90CW_rotated.jpg");
 
             final FileHolder fileHolder = new FileHolder(fileInput);
             {
@@ -158,18 +159,32 @@ public class ImageComparingTest extends TestCase {
             final byte[] bytesCurrent = servletOutputStream.toByteArray();
 
             // Converts byte streams to buffered images
-            InputStream inExpected = new FileInputStream(fileExpected);
-            BufferedImage expectedImage = ImageIO.read(inExpected);
-            InputStream inAfter = new ByteArrayInputStream(bytesCurrent);
-            BufferedImage currentImage = ImageIO.read(inAfter);
+            InputStream inOutput = new ByteArrayInputStream(bytesCurrent);
+            BufferedImage outputImage = ImageIO.read(inOutput);
 
-            // TODO: detection if image is rotated
+            // check image is rotated
+            boolean transformed = false;
+            float averageAreaTop = 0; // should contain the black area
+            float averageAreaBottom = 0; // should contain the white area
+            for (int i = 0; i < outputImage.getHeight(); i++) {
+                int red = new Color(outputImage.getRGB(50, i)).getRed();
+                int green = new Color(outputImage.getRGB(50, i)).getGreen();
+                int blue = new Color(outputImage.getRGB(50, i)).getBlue();
+                if (i < 50) {
+                    averageAreaTop += (red + green + blue) / 3.0f;
+                } else {
+                    averageAreaBottom += (red + green + blue) / 3.0f;
+                }
+            }
+            averageAreaBottom /= 50;
+            averageAreaTop /= 50;
 
+            // some tolerance because of compression
+            if (averageAreaTop < 1 && averageAreaBottom > 253) {
+                transformed = true;
+            }
 
-            // histogram check
-            float expectedHistogram = ImageComparingTools.meanHistogramRGBValue(expectedImage);
-            float currentHistogram = ImageComparingTools.meanHistogramRGBValue(currentImage);
-            assertEquals("Image histogram differs ", expectedHistogram, currentHistogram);
+            assertTrue("Rotation of image not succesfull", transformed);
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -182,7 +197,7 @@ public class ImageComparingTest extends TestCase {
 
             final FileHolder fileHolder = new FileHolder(fileInput);
             {
-                fileHolder.setContentType("image/png");
+                fileHolder.setContentType("image/jpg");
                 fileHolder.setName(fileInput.getName());
                 fileHolder.setDelivery("view");
                 fileHolder.setDisposition("inline");
@@ -221,7 +236,7 @@ public class ImageComparingTest extends TestCase {
             fail(e.getMessage());
         }
     }
-    
+
     public void testGIFPictureIsAnimated_Bug29072() {
         try {
             final File fileInput = new File(TEST_DATA_DIR, "29072.gif");
@@ -260,6 +275,33 @@ public class ImageComparingTest extends TestCase {
         }
     }
 
+    public void testReadImageWithCMYKProfile_Bug29147() throws IOException {
+
+        final File file = new File(TEST_DATA_DIR, "28082.jpg");
+        final FileHolder fileHolder = new FileHolder(file);
+        {
+            fileHolder.setContentType("image/jpg");
+            fileHolder.setDelivery("view");
+            fileHolder.setDisposition("inline");
+            fileHolder.setName(file.getName());
+        }
+        final AJAXRequestData requestData = new AJAXRequestData();
+        {
+            requestData.setSession(new SimServerSession(1, 1));
+            requestData.putParameter("cache", "false");
+            requestData.putParameter("delivery", "view");
+        }
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        requestData.setHttpServletResponse(resp);
+        ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+        fileResponseRenderer.setScaler(new JavaImageTransformationService());
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        assertNull("Got exception: " + resp.getStatusMessage(), resp.getStatusMessage());
+    }
 
     /**
      * Asserts that a value is in range between rangeMin and rangeMax

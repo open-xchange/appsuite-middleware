@@ -74,7 +74,12 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class FindJsonActivator extends AJAXModuleActivator {
 
-    private final String MODULE_PATH = "find";
+    /**
+     * Initializes a new {@link FindJsonActivator}.
+     */
+    public FindJsonActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -93,7 +98,7 @@ public class FindJsonActivator extends AJAXModuleActivator {
 
         registerService(ResultConverter.class, new AutocompleteResultJSONConverter(translator));
         registerService(ResultConverter.class, new SearchResultJSONConverter(translator, converterRegistry));
-        registerModule(new FindActionFactory(this), MODULE_PATH);
+        registerModule(new FindActionFactory(this), "find");
 
         final String sCapability = "search";
         final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);

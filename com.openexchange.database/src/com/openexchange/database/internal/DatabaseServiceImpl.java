@@ -51,10 +51,12 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -83,6 +85,10 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final AssignmentImpl assign = configDatabaseService.getAssignment(contextId);
+        return get(assign, write, noTimeout);
+    }
+
+    private Connection get(final AssignmentImpl assign, final boolean write, final boolean noTimeout) throws OXException {
         LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, assign.getSchema());
         return monitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
@@ -288,6 +294,26 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
+    public Connection getReadOnlyMonitored(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+        return getMonitoredConnection(readPoolId, writePoolId, schema, partitionId, false, false);
+    }
+
+    @Override
+    public Connection getWritableMonitored(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+        return getMonitoredConnection(readPoolId, writePoolId, schema, partitionId, true, false);
+    }
+
+    @Override
+    public Connection getWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+        return getMonitoredConnection(readPoolId, writePoolId, schema, partitionId, true, true);
+    }
+
+    public Connection getMonitoredConnection(int readPoolId, int writePoolId, String schema, int partitionId, boolean write, boolean noTimeout) throws OXException {
+        AssignmentImpl assignment = new AssignmentImpl(partitionId, Server.getServerId(), readPoolId, writePoolId, schema);
+        return get(assignment, write, noTimeout);
+    }
+
+    @Override
     public void backReadOnly(final Context ctx, final Connection con) {
         back(con);
     }
@@ -348,4 +374,78 @@ public final class DatabaseServiceImpl implements DatabaseService {
             LOG.error("", e);
         }
     }
+
+    @Override
+    public void backReadOnlyMonitored(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+        back(con);
+    }
+
+    @Override
+    public void backWritableMonitored(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+        back(con);
+    }
+
+    @Override
+    public void backWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+        back(con);
+    }
+
+    @Override
+    public void initMonitoringTables(int writePoolId, String schema) throws OXException {
+        Connection con = get(writePoolId, schema);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+            CreateReplicationTable createReplicationTable = new CreateReplicationTable();
+            createReplicationTable.perform(con);
+            con.commit();
+            rollback = false;
+        } catch (SQLException x) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(x, x.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            if (con != null) {
+                Databases.autocommit(con);
+                back(writePoolId, con);
+            }
+        }
+    }
+
+    @Override
+    public void initPartitions(int writePoolId, String schema, int...partitions) throws OXException {
+        if (null == partitions || partitions.length <= 0) {
+            return;
+        }
+        Connection con = get(writePoolId, schema);
+        PreparedStatement stmt = null;
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+            stmt = con.prepareStatement("INSERT INTO replicationMonitor (cid, transaction) VALUES (?, ?)");
+            stmt.setInt(2, 0);
+            for (int partition: partitions) {
+                stmt.setInt(1, partition);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            con.commit();
+            rollback = false;
+        } catch (SQLException x) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(x, x.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            DBUtils.closeSQLStuff(stmt);
+            if (con != null) {
+                Databases.autocommit(con);
+                back(writePoolId, con);
+            }
+        }
+    }
+
 }

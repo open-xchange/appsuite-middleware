@@ -3504,9 +3504,19 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
      */
     @Override
     public long getUserTimeUTCDate(final Date date, final String timezone) {
-        final long ndl = date.getTime() + (Tools.getTimeZone(timezone).getOffset(date.getTime()));
-        return ndl - (ndl % Constants.MILLI_DAY);
-        // System.out.println(" GOT "+date+" and return "+new Date(ndl));
+        Calendar c = new GregorianCalendar(TimeZone.getTimeZone(timezone));
+        c.setTime(date);
+        Calendar target = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        target.set(Calendar.YEAR, c.get(Calendar.YEAR));
+        target.set(Calendar.MONTH, c.get(Calendar.MONTH));
+        target.set(Calendar.DAY_OF_MONTH, c.get(Calendar.DAY_OF_MONTH));
+        target.set(Calendar.HOUR_OF_DAY, 0);
+        target.set(Calendar.MINUTE, 0);
+        target.set(Calendar.SECOND, 0);
+        target.set(Calendar.MILLISECOND, 0);
+        //System.out.println("--------> " + date + " to " + new Date(target.getTimeInMillis()));
+        return target.getTimeInMillis();
+
     }
 
     /* (non-Javadoc)

@@ -55,10 +55,10 @@ import java.util.Map;
 
 
 /**
- * An {@link OXRESTMatch} denotes a successful match of a route for a path. 
- * e.g. the route /resources/:myResourceId matches the path /resources/12 with a 
+ * An {@link OXRESTMatch} denotes a successful match of a route for a path.
+ * e.g. the route /resources/:myResourceId matches the path /resources/12 with a
  * value for myResourceId of 12
- * 
+ *
  * @see #getParameters()
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
@@ -66,42 +66,62 @@ import java.util.Map;
 public class OXRESTMatch {
 
     private OXRESTRoute route;
-    private Map<String, String> parameters = new HashMap<String, String>();
+    private final Map<String, String> parameters;
     private List<String> parameterNames;
-    
+
+    /**
+     * Initializes a new {@link OXRESTMatch}.
+     */
+    public OXRESTMatch() {
+        super();
+        parameters = new HashMap<String, String>(6);
+    }
+
     /**
      * The route that created this match
      */
     public void setRoute(OXRESTRoute route) {
         this.route = route;
     }
-    
+
     /**
      * The route that created this match
      */
     public OXRESTRoute getRoute() {
         return route;
     }
-    
+
     /**
      * The parameter names that were extracted from the path
      */
     public void setParameterNames(List<String> parameterNames) {
         this.parameterNames = parameterNames;
     }
-    
+
     /**
      * Get the parameter name (from left to right) by index
      */
     public String getParameterName(int index) {
         return parameterNames.get(index);
     }
-    
+
     /**
      * Get extracted parameters
      */
     public Map<String, String> getParameters() {
         return parameters;
     }
-    
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(512);
+        if (route != null) {
+            builder.append(route).append(" ");
+        }
+        if (parameters != null) {
+            builder.append(parameters).append(" ");
+        }
+        return builder.toString();
+    }
+
 }

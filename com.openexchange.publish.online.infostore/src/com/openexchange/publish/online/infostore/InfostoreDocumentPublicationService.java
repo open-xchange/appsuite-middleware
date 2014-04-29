@@ -151,7 +151,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
             // Valid entity identifier needed in order to load associated document's meta-data
             DocumentMetadata metadata = InfostorePublicationUtils.loadDocumentMetadata(publication, this.fileAccessFactory);
             publication.setDisplayName((metadata.getTitle() == null) ? metadata.getFileName() : metadata.getTitle());
-            publication.setEntityId(IDMangler.mangle(metadata.getId() + "", metadata.getFolderId() + ""));
+            publication.setEntityId(IDMangler.mangle(Integer.toString(metadata.getId()), Long.toString(metadata.getFolderId())));
         }
     }
 

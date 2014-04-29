@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.rest.services.osgi;
 
 import org.osgi.service.http.HttpService;
@@ -55,23 +56,38 @@ import com.openexchange.rest.services.internal.OXRESTServiceFactory;
 import com.openexchange.rest.services.internal.Services;
 import com.openexchange.rest.services.servlet.OXRESTServlet;
 
+/**
+ * {@link RESTServicesActivator}
+ */
 public class RESTServicesActivator extends HousekeepingActivator {
+
+    /**
+     * Initializes a new {@link RESTServicesActivator}.
+     */
+    public RESTServicesActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{HttpService.class, SimpleConverter.class };
+        return new Class<?>[] { HttpService.class, SimpleConverter.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+
         track(OXRESTServiceFactory.class, OXRESTServlet.REST_SERVICES);
         openTrackers();
 
         HttpService httpService = getService(HttpService.class);
         httpService.registerServlet("/rest", new OXRESTServlet(), null, null);
-        
-        Services.SERVICES = this;
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServiceLookup(null);
+        super.stopBundle();
+    }
 
 }

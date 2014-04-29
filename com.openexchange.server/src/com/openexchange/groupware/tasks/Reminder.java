@@ -63,6 +63,7 @@ import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.tools.Collections;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * This class contains everything for handling reminder for tasks.
@@ -240,6 +241,18 @@ final class Reminder {
         } catch (final OXException e) {
             if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
                 throw e;
+            }
+        }
+    }
+
+    static void updateReminderOnMove(Context ctx, int taskId, int sourceFolderId, int destFolderId) throws OXException {
+        ReminderService service = new ReminderHandler(ctx);
+        SearchIterator<ReminderObject> iter = service.listReminder(Types.TASK, taskId);
+        while (iter.hasNext()) {
+            ReminderObject reminder = iter.next();
+            if (reminder.getFolder() == sourceFolderId) {
+                reminder.setFolder(destFolderId);
+                service.updateReminder(reminder);
             }
         }
     }

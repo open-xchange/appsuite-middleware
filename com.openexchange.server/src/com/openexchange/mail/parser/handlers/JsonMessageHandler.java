@@ -754,7 +754,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             }
                         } else {
                             try {
-                                asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.equals(displayMode));
+                                asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, false);
                                 getAttachmentsArr().remove(0);
                             } catch (final JSONException e) {
                                 throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1338,12 +1338,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
          */
 
-        // Check whether to discard passed part
-        if ((textAppended || null != plainText) && isAlternative && null != altId && id.startsWith(altId)) {
-            // Ignore it as part of a multipart/alternative and a text version was already selected
-            return true;
-        }
-
         // Process it
         final ContentType contentType = part.getContentType();
         if (isVCalendar(baseContentType) && !contentType.containsParameter("method")) {
@@ -1369,7 +1363,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
          * When creating a JSON message object from a message we do not distinguish special parts or image parts from "usual" attachments.
          * Therefore invoke the handleAttachment method. Maybe we need a separate handling in the future for vcards.
          */
-        return handleAttachment(part, false, baseContentType, fileName, id);
+        return handleAttachment0(part, false, null, baseContentType, fileName, id);
     }
 
     private static boolean isVCalendar(final String baseContentType) {

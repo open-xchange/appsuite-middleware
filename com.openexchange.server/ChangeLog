@@ -1,3 +1,63 @@
+* 2014-04-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32221: Supply reference to old parent folder ID in folder update event
+
+* 2014-04-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32211: Removed usage of removed String constructor in JSON bundle + Proper reflection-wise look-up of "extendedProvider" field in Java8
+ - Fix for bug 31842: Provide human-readable quota information
+ - Fix for bug 32238: Do not pre-acquire Writer from HTTP response to leave room for error responses
+
+* 2014-04-28 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 32059: Added port to connection string for distributed files.
+
+* 2014-04-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 32044: Update the reminder's folderID for all accessing users, if there are no participants.
+
+* 2014-04-28 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32149: Improved POP3 validation warning message.
+
+* 2014-04-28 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32200: Added import from and export to csv for "categories" property
+ - Fix for bug 32216: Respond with "SRV-0001" in case the capability service is missing
+ 
+* 2014-04-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25701: Consider "pref" in "TEL" properties of vCards 
+ - Fix for bug 32193: Don't try to deliver null events 
+ 
+* 2014-04-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32191: Added hardening in case a mail account update takes place that might have its URL set to null
+ - Fix for bug 31918: Set more reasonable max-age for images held in Browser cache
+ - Fix for bug 32099: Drop obsolete reminders during reminder range check
+
+* 2014-04-25 - marc.arens@open-xchange.com
+
+ - Fix for bug 32127: Don't send keepalive pings/processing while reading data from upstream
+
+* 2014-04-24 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32152: Sanitize imported Xing phone, fax and cell numbers  
+
+* 2014-04-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31970: Always close LDAP naming enumerations  
+ - Fix for bug 29613: Allow configuration of used zip compression level  
+
+* 2014-04-24 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31963: Conflict handling for full time appointments.
+
+* 2014-04-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32157: Added null guard for possible null reference to a MailMessage
+ - Fix for bug 32156: Deal with possible null value int metadata settings extension
+
 * 2014-04-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 32111: Added setParameter() method that is error aware & improved log output in case of an invalid Content-Type parameter

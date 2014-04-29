@@ -53,9 +53,12 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.PushbackInputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.UnsupportedCharsetException;
@@ -246,7 +249,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_STORE = "store";
 
-    public static final String ACTION_RAMPUP = "rampUp";
+    public static final String ACTION_RAMPUP = "rampup";
 
     public static final String ACTION_LOGOUT = "logout";
 
@@ -1096,7 +1099,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     }
                 } catch (final UnsupportedCharsetException e) {
                     throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
-                } catch (final Exception e) {
+                } catch (final IOException e) {
+                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+                } catch (final RuntimeException e) {
                     throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
                 }
             }
@@ -1121,7 +1126,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return Strings.isEmpty(string);
     }
 
-    private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir, final String fileName) throws Exception {
+    private static final int BUFLEN = 65536;
+
+    private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir, final String fileName) throws IOException, OXException {
         try {
             final UploadFile retval = new UploadFileImpl();
             retval.setFieldName(item.getFieldName());
@@ -1131,10 +1138,36 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 retval.setFileName(fileName);
             }
             retval.setContentType(item.getContentType());
-            retval.setSize(item.getSize());
+            final long size = item.getSize();
+            retval.setSize(size);
             final File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));
             tmpFile.deleteOnExit();
-            item.write(tmpFile);
+            // Write to tmp file
+            if (size != 0) {
+                PushbackInputStream in = null;
+                OutputStream out = null;
+                try {
+                    in = new PushbackInputStream(item.getInputStream());
+                    // Check if readable...
+                    final int check = in.read();
+                    if (check >= 0) {
+                        // ... then push back to stream
+                        in.unread(check);
+                        out = new FileOutputStream(tmpFile, false);
+                        final int buflen = BUFLEN;
+                        final byte[] buf = new byte[buflen];
+                        for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
+                            out.write(buf, 0, read);
+                        }
+                        out.flush();
+                    } else {
+                        // Empty file item...
+                        LOG.warn("Detected empty upload file {}.", retval.getFileName());
+                    }
+                } finally {
+                    Streams.close(in, out);
+                }
+            }
             retval.setTmpFile(tmpFile);
             return retval;
         } finally {

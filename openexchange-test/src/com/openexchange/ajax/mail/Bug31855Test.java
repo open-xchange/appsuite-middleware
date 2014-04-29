@@ -71,15 +71,15 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link Bug31855Test}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class Bug31855Test extends AbstractMailTest {
 
     private UserValues values;
-    
+
     String[][] fmid;
-    
+
     public Bug31855Test(final String name) {
         super(name);
     }
@@ -92,8 +92,9 @@ public class Bug31855Test extends AbstractMailTest {
 
     @Override
     protected void tearDown() throws Exception {
-        DeleteRequest req = new DeleteRequest(fmid);
-        client.execute(req);
+        if (null != fmid) {
+            client.execute(new DeleteRequest(fmid, true).ignoreError());
+        }
         super.tearDown();
     }
 
@@ -137,8 +138,7 @@ public class Bug31855Test extends AbstractMailTest {
         assertEquals("Incorrect content type of attachment 3", "application/octet-stream", array.getJSONObject(2).getString("content_type"));
 
         if ((folderID != null) && (mailID != null)) {
-            DeleteRequest deleteRequest = new DeleteRequest(folderID, mailID, true);
-            DeleteResponse deleteResponse = client.execute(deleteRequest);
+            DeleteResponse deleteResponse = client.execute(new DeleteRequest(folderID, mailID, true));
             assertNull("Error deleting mail. Artifacts remain", deleteResponse.getErrorMessage());
         }
     }

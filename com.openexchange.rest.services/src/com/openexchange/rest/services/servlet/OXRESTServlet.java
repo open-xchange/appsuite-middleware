@@ -77,34 +77,59 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
     private static final long serialVersionUID = -1956702653546932381L;
 
     private static final String PREFIX = "/rest";
-    
+
+    /**
+     * The OX REST registry instance.
+     */
     public static final OXRESTRegistry REST_SERVICES = new OXRESTRegistry();
+
+    /**
+     * Initializes a new {@link OXRESTServlet}.
+     */
+    public OXRESTServlet() {
+        super();
+    }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(0, 0), PREFIX, resp);
-            
-            Enumeration headers = req.getHeaderNames();
-            while(headers.hasMoreElements()) {
-                String headerName = (String) headers.nextElement();
+
+            for (@SuppressWarnings("unchecked") final Enumeration<String> headers = req.getHeaderNames(); headers.hasMoreElements();) {
+                String headerName = headers.nextElement();
                 request.setHeader(headerName, req.getHeader(headerName));
             }
 
-            
-            String path = request.getPathInfo();
-            
-            OXRESTServiceWrapper wrapper = retrieveWrapper(req.getMethod(), path);
+            /*-
+             * 1. Determine OXRESTRoute for method/path pair. OXRESTRoute knows path pattern and variables.
+             *
+             * 2. Yield OXRESTMatch by OXRESTRoute.match().
+             *    The OXRESTMatch instance stores the parameters (variable-name -> path-value)
+             *
+             * 3. Create an OXRESTServiceWrapper from the OXRESTMatch instance (IntrospectingServiceFactory -> ReflectiveServiceWrapper)
+             *    a) Create a new service instance
+             *    b) Pass reflection information (java.lang.reflect.Method) and OXRESTMatch instance
+             *    c) Create a new ReflectiveServiceWrapper
+             *
+             * 4. Put parameters obtained from OXRESTServiceWrapper into AJAXRequestData ( enhance() )
+             *
+             * 5. Apply AJAXRequestData to OXRESTServiceWrapper
+             *
+             * 6. Invoke OXRESTServiceWrapper.execute()
+             *    Reflection-based invocation via java.lang.reflect.Method inside ReflectiveServiceWrapper
+             */
+
+            OXRESTServiceWrapper wrapper = retrieveWrapper(req.getMethod(), request.getPathInfo());
             if (wrapper == null) {
                 resp.sendError(404);
                 return;
             }
+
             enhance(wrapper.getMatch(), request);
             wrapper.setRequest(request);
             Response response = wrapper.execute();
-            
+
             sendResponse(response, resp);
-            
         } catch (OXException e) {
             resp.sendError(500, e.getMessage());
         }
@@ -134,5 +159,5 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
     private OXRESTServiceWrapper retrieveWrapper(String method, String path) {
         return REST_SERVICES.retrieve(method, path);
     }
-    
+
 }

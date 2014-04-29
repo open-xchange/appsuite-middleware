@@ -448,17 +448,6 @@ if ! ox_exists_property com.openexchange.user.maxClientCount $pfile; then
     ox_set_property com.openexchange.user.maxClientCount -1 $pfile
 fi
 
-# SoftwareChange_Request-1275
-pfile=/opt/open-xchange/etc/server.properties
-if grep -E "com.openexchange.log.propertyNames.*.ajp13." $pfile > /dev/null; then
-   ptmp=${pfile}.$$
-   sed -e 's;\.ajp13\.;.ajpv13.;g' $pfile > $ptmp
-   if [ -s $ptmp ]; then
-      cp $ptmp $pfile
-   fi
-   rm -f $ptmp
-fi
-
 # SoftwareChange_Request-1252
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/whitelist.properties
@@ -958,6 +947,12 @@ ox_set_property com.openexchange.sessiond.sessionDefaultLifeTime "$VALUE" /opt/o
 VALUE=$(ox_read_property com.openexchange.jolokia.restrict.to.localhost /opt/open-xchange/etc/jolokia.properties)
 ox_set_property com.openexchange.jolokia.restrict.to.localhost "$VALUE" /opt/open-xchange/etc/jolokia.properties
 
+# SoftwareChange_Request-1985
+ox_remove_property com.openexchange.log.propertyNames /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-1990
+ox_add_property com.openexchange.quota.attachment -1 /opt/open-xchange/etc/quota.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -997,6 +992,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Tue Apr 15 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-04-22
 * Fri Apr 11 2014 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.6.0
 * Thu Apr 10 2014 Marcus Klein <marcus.klein@open-xchange.com>

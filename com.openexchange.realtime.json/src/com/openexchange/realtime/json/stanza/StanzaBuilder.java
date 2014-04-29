@@ -113,7 +113,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
         if (json.has("to")) {
             String defaultContext = null;
             if (session != null) {
-                defaultContext = session.getContext().getContextId() + "";
+                defaultContext = Integer.toString(session.getContext().getContextId());
             }
             stanza.setTo(new ID(json.optString("to"), defaultContext));
         }
@@ -124,19 +124,19 @@ public abstract class StanzaBuilder<T extends Stanza> {
             stanza.setId(json.optString("id"));
         }
     }
-    
+
     private void selector() {
         if (json.has("selector")) {
             stanza.setSelector(json.optString("selector"));
         }
     }
-    
+
     private void tracer() {
         if (json.has("tracer")) {
             stanza.setTracer(json.optString("tracer"));
         }
     }
-    
+
     private void sequence() {
         if (json.has("seq")) {
             stanza.setSequenceNumber(json.optLong("seq"));
@@ -203,7 +203,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
      * @param payload The payload data
      * @return the PayloadTreeNode with the filled PayloadElement and possible children attached.
      * @throws RealtimeException For payloads with broken syntax
-     * @throws JSONException 
+     * @throws JSONException
      */
     private PayloadTreeNode payloadToPayloadTreeNode(JSONObject payload) throws RealtimeException {
         PayloadTreeNode node = new PayloadTreeNode();

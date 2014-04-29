@@ -392,7 +392,7 @@ public class AJAXRequestResult {
      * <p>
      * Have a notion of a time-to-live value.
      *
-     * @return The expiry time or <code>-1</code> for no expiry
+     * @return The expiry time or <code>-1</code> for default expiry
      */
     public long getExpires() {
         return expires;
@@ -401,7 +401,7 @@ public class AJAXRequestResult {
     /**
      * Sets the expires time
      *
-     * @param expires The expires time or <code>-1</code> for no expiry
+     * @param expires The expires time or <code>-1</code> for default expiry
      */
     public void setExpires(final long expires) {
         this.expires = expires;

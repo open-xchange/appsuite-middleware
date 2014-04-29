@@ -131,7 +131,7 @@ public class QuotaFileStorageTest extends TestCase {
         rmdir(tempFile);
     }
 
-    
+
     public static final class TestQuotaFileStorage extends DBQuotaFileStorage {
 
         public TestQuotaFileStorage(final Context ctx, final FileStorage fs, final DatabaseService dbs) throws OXException {
@@ -176,7 +176,7 @@ public class QuotaFileStorageTest extends TestCase {
         }
     }
 
-   
+
 
     static final class DummyDatabaseService implements DatabaseService {
 
@@ -347,6 +347,46 @@ public class QuotaFileStorageTest extends TestCase {
 
         @Override
         public void backForUpdateTaskAfterReading(int contextId, Connection con) {
+            //nothing to do
+        }
+
+        @Override
+        public Connection getReadOnlyMonitored(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+            return null;
+        }
+
+        @Override
+        public Connection getWritableMonitored(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+            return null;
+        }
+
+        @Override
+        public Connection getWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId) throws OXException {
+            return null;
+        }
+
+        @Override
+        public void backReadOnlyMonitored(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+            //nothing to do
+        }
+
+        @Override
+        public void backWritableMonitored(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+            //nothing to do
+        }
+
+        @Override
+        public void backWritableMonitoredForUpdateTask(int readPoolId, int writePoolId, String schema, int partitionId, Connection con) {
+            //nothing to do
+        }
+
+        @Override
+        public void initMonitoringTables(int writePoolId, String schema) throws OXException {
+            //nothing to do
+        }
+
+        @Override
+        public void initPartitions(int writePoolId, String schema, int... partitions) throws OXException {
             //nothing to do
         }
     }

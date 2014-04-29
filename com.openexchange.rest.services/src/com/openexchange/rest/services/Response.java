@@ -62,19 +62,32 @@ public class Response {
 
     private Iterable<String> body;
     private int status = 200;
-    private Map<String, String> headers = new HashMap<String, String>();
-    
+    private Map<String, String> headers;
+
+    /**
+     * Initializes a new {@link Response}.
+     */
+    public Response() {
+        super();
+        headers = new HashMap<String, String>(8);
+    }
+
     /**
      * The response body, just iterate and send it all.
      */
     public Iterable<String> getBody() {
         return body;
     }
-    
-    
+
+    /**
+     * Sets the response body.
+     *
+     * @param body The iterable body.
+     */
     public void setBody(Iterable<String> body) {
         this.body = body;
     }
+
     /**
      * The status code
      * @return
@@ -82,19 +95,30 @@ public class Response {
     public int getStatus() {
         return status;
     }
-    
+
+    /**
+     * Sets the status.
+     *
+     * @param status The status
+     */
     public void setStatus(int status) {
         this.status = status;
     }
-    
+
     /**
      * The response headers
      */
     public Map<String, String> getHeaders() {
         return headers;
     }
-    
+
+    /**
+     * Sets the response headers
+     *
+     * @param headers The response headers
+     */
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
+
 }

@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-04-16 11:56+0100\n"
+"PO-Revision-Date: 2014-04-29 10:18+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -3631,22 +3631,28 @@ msgstr "Die Adresse %1$s ist nicht in der Positivliste der %2$s OAuth API"
 msgid "The request sent was missing its body"
 msgstr "In der gesendeten Anfrage fehlt der Hauptteil"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:75
+#. The account is invalid, please recreate it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:76
 msgid "The account is invalid, please recreate it."
 msgstr "Der Account ist ungültig. Bitte erstellen Sie ihn erneut."
 
+#. The account "%1$s" is invalid, please recreate it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:79
+msgid "The account \"%1$s\" is invalid, please recreate it."
+msgstr "Der Account \"%1$s\" ist ungültig. Bitte erstellen Sie ihn erneut."
+
 #. Please provide a display name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:82
 msgid "Please provide a display name."
 msgstr "Bitte geben Sie einen Anzeigenamen an."
 
 #. The associated OAuth provider denied the request: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:85
 msgid "The associated OAuth provider denied the request: %1$s."
 msgstr "Der zugehörige OAuth-Provider hat die Anfrage verweigert: %1$s."
 
 #. The OAuth authentication process has been canceled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
 msgid "The OAuth authentication process has been canceled."
 msgstr "Der OAuth-Authentifizierungsvorgang wurde abgebrochen."
 
@@ -4135,16 +4141,21 @@ msgstr ""
 "Benutzer %2$s nicht angelegt werden."
 
 #. *
-#. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.
+#. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work. Please be advised that while it is safe to ignore this warning, the POP3 account might not work if the supplied credentials are invalid.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:295
 msgid ""
 "Validation of POP3 credentials is disabled due to possible login "
-"restrictions by provider. Otherwise subsequent login attempt might not work."
+"restrictions by provider. Otherwise subsequent login attempt might not work. "
+"Please be advised that while it is safe to ignore this warning, the POP3 "
+"account might not work if the supplied credentials are invalid."
 msgstr ""
 "Validierung der POP3-Anmeldedaten wurde aufgrund möglicher "
 "Anmeldebeschränkungen vom Provider deaktiviert. Andernfalls wären "
-"nachfolgende Anmeldeversuche möglicherweise nicht erfolgreich."
+"nachfolgende Anmeldeversuche möglicherweise nicht erfolgreich. Bitte "
+"beachten Sie, dass zwar das Ignorieren dieses Warnhinweises sicher ist, dass "
+"aber der POP3-Account möglicherweise nicht funktioniert, wenn die "
+"Anmeldedaten falsch sind."
 
 #. POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:298

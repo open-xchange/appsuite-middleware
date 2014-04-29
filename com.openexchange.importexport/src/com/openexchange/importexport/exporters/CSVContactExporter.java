@@ -91,6 +91,7 @@ public class CSVContactExporter implements Exporter {
     protected static final EnumSet<ContactField> POSSIBLE_FIELDS = EnumSet.of(
         ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY,
         // CommonObject.PRIVATE_FLAG, // CommonObject.CATEGORIES,
+        ContactField.CATEGORIES,
         ContactField.SUR_NAME, ContactField.ANNIVERSARY, ContactField.ASSISTANT_NAME, ContactField.BIRTHDAY, ContactField.BRANCHES,
         ContactField.BUSINESS_CATEGORY, ContactField.CATEGORIES, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2,
         ContactField.CITY_BUSINESS, ContactField.CITY_HOME, ContactField.CITY_OTHER, ContactField.COMMERCIAL_REGISTER,

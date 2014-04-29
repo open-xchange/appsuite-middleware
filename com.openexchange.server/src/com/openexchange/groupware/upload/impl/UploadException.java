@@ -129,8 +129,7 @@ public class UploadException extends OXException {
         /**
          * Connection has been closed unexpectedly. Please try again.
          */
-        UNEXPECTED_EOF("Connection has been closed unexpectedly. Please try again.", UploadExceptionMessage.UNEXPECTED_EOF_MSG,
-            CATEGORY_TRY_AGAIN, 13),
+        UNEXPECTED_EOF("Connection has been closed unexpectedly. Please try again.", UploadExceptionMessage.UNEXPECTED_EOF_MSG, CATEGORY_TRY_AGAIN, 13),
 
         ;
 

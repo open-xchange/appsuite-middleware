@@ -70,6 +70,7 @@ import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformations;
@@ -86,7 +87,7 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class FileResponseRendererTest extends TestCase {
 
-    private final String TEST_DATA_DIR = "testconf/"; 
+    private final String TEST_DATA_DIR = "testconf/";
 
     /**
      * Initializes a new {@link FileResponseRendererTest}.
@@ -145,7 +146,7 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testContentLengthMailAttachments_Bug26926() {
         try {
-            final File file = new File(TEST_DATA_DIR, "OX6-User-Guide-German-v6.22.2.pdf");
+            final File file = new File(TEST_DATA_DIR, "26926_27394.pdf");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
@@ -210,7 +211,7 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testContentTypeByFileName_Bug31648() {
         try {
-            final File file = new File(TEST_DATA_DIR, "VM1161.PNG");
+            final File file = new File(TEST_DATA_DIR, "31648.png");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
@@ -231,6 +232,9 @@ public class FileResponseRendererTest extends TestCase {
             final SimHttpServletResponse resp = new SimHttpServletResponse();
             final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
             resp.setOutputStream(servletOutputStream);
+
+            MimeType2ExtMap.addMimeType("image/png", "png");
+
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
             fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
@@ -245,7 +249,7 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testRangeHeader_Bug27394() {
         try {
-            final File file = new File(TEST_DATA_DIR, "OX6-User-Guide-German-v6.22.2.pdf");
+            final File file = new File(TEST_DATA_DIR, "26926_27394.pdf");
             final InputStream is = new FileInputStream(file);
             final byte[] bytes = IOUtils.toByteArray(is);
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
@@ -255,7 +259,7 @@ public class FileResponseRendererTest extends TestCase {
                 fileHolder.setDisposition("inline");
                 fileHolder.setName(file.getName());
             }
-            final AJAXRequestData requestData = new AJAXRequestData(); 
+            final AJAXRequestData requestData = new AJAXRequestData();
             {
                 requestData.setSession(new SimServerSession(1, 1));
                 requestData.putParameter("width", "10");

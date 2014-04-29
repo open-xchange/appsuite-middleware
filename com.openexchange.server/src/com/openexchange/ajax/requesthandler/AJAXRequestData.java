@@ -57,7 +57,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -80,6 +79,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.json.actions.AbstractMailAction;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -338,6 +338,21 @@ public class AJAXRequestData {
     }
 
     /**
+     * Checks if this AJAX request data has access to <code>HttpServletResponse</code> instance; thus offering support for:
+     * <ul>
+     * <li> {@link #optOutputStream()} </li>
+     * <li> {@link #optWriter()} </li>
+     * <li> {@link #setCharacterEncoding(String)} </li>
+     * <ul>
+     * <p>
+     *
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    public boolean isHttpServletResponseAvailable() {
+        return null != httpServletResponse;
+    }
+
+    /**
      * Returns a {@link OutputStream} suitable for writing binary data in the response. The servlet container does not encode the
      * binary data.
      * <p>
@@ -350,10 +365,8 @@ public class AJAXRequestData {
      * @see #optWriter()
      */
     public @Nullable OutputStream optOutputStream() throws IOException {
-        if (null != httpServletResponse) {
-            return httpServletResponse.getOutputStream();
-        }
-        return null;
+        final HttpServletResponse httpResponse = httpServletResponse;
+        return null == httpResponse ? null : httpResponse.getOutputStream();
     }
 
     /**
@@ -374,10 +387,8 @@ public class AJAXRequestData {
      * @see #setCharacterEncoding
      */
     public @Nullable PrintWriter optWriter() throws IOException {
-        if (null != httpServletResponse) {
-            return httpServletResponse.getWriter();
-        }
-        return null;
+        final HttpServletResponse httpResponse = httpServletResponse;
+        return null == httpResponse ? null : httpResponse.getWriter();
     }
 
     /**
@@ -437,25 +448,13 @@ public class AJAXRequestData {
      * <i>Cache-Control</i>, and <i>Pragma</i>)
      *
      * @param eTag The ETag value
-     * @param expires The optional expires time, pass <code>-1</code> to set default expiry (+ 1 year)
+     * @param expiry The optional expiry milliseconds, pass <code>-1</code> to set default expiry (+ 5 minutes)
      * @return <code>true</code> if set; otherwise <code>false</code>
      */
-    public boolean setResponseETag(final @NonNull String eTag, final long expires) {
-        return setResponseETag(eTag, expires > 0 ? new Date(expires) : null);
-    }
-
-    /**
-     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
-     * <i>Cache-Control</i>, and <i>Pragma</i>)
-     *
-     * @param eTag The ETag value
-     * @param expires The optional expires date, pass <code>null</code> to set default expiry (+ 1 year)
-     * @return <code>true</code> if set; otherwise <code>false</code>
-     */
-    public boolean setResponseETag(final @NonNull String eTag, final Date expires) {
+    public boolean setResponseETag(final @NonNull String eTag, final long expiry) {
         final HttpServletResponse resp = this.httpServletResponse;
         if (null != resp) {
-            Tools.setETag(eTag, expires, resp);
+            Tools.setETag(eTag, expiry > 0 ? expiry : -1L, resp);
             return true;
         }
         return false;
@@ -807,13 +806,26 @@ public class AJAXRequestData {
     public @NonNull <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo) throws OXException {
         final String value = getParameter(name);
         try {
-            return ServerServiceRegistry.getInstance().getService(StringParser.class).parse(value, coerceTo);
+            final StringParser parser = ServerServiceRegistry.getInstance().getService(StringParser.class);
+            if (null == parser) {
+                if (int.class.equals(coerceTo) || Integer.class.equals(coerceTo)) {
+                    return (T) Integer.valueOf(value);
+                }
+                if (long.class.equals(coerceTo) || Long.class.equals(coerceTo)) {
+                    return (T) Long.valueOf(value);
+                }
+                if (boolean.class.equals(coerceTo) || Boolean.class.equals(coerceTo)) {
+                    return (T) Boolean.valueOf(value);
+                }
+                throw ServiceExceptionCode.absentService(StringParser.class);
+            }
+            return parser.parse(value, coerceTo);
         } catch (final RuntimeException e) {
             /*
              * Auto-unboxing may lead to NullPointerExceptions or NumberFormatExceptions if e.g. null or "Hello" should be coerced to an
              * integer value. Handle RuntimeException here to cover all possible non-declarable exceptions.
              */
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, null == value ? "null" : value);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, value);
         }
     }
 

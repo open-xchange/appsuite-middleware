@@ -92,6 +92,11 @@ public class FileStorageEventConstants {
     public static final String PARENT_FOLDER_ID = "parentFolderId";
 
     /**
+     * The old parent folder ID (in case of moves) in it's absolute/unique form, i.e. containing the service/account information.
+     */
+    public static final String OLD_PARENT_FOLDER_ID = "oldParentFolderId";
+
+    /**
      * The path to the default folder in an array of folder IDs in their absolute/unique form, i.e. all containing the service/account
      * information.
      */

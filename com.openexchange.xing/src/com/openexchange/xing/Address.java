@@ -92,11 +92,31 @@ public class Address {
         this.country = addressInformation.optString("country", null);
         this.zipCode = addressInformation.optString("zip_code", null);
         this.street = addressInformation.optString("street", null);
-        this.phone = addressInformation.optString("phone", null);
-        this.fax = addressInformation.optString("fax", null);
+        this.phone = sanitizePhoneNumber(addressInformation.optString("phone", null));
+        this.fax = sanitizePhoneNumber(addressInformation.optString("fax", null));
         this.province = addressInformation.optString("province", null);
         this.email = addressInformation.optString("email", null);
-        this.mobilePhone = addressInformation.optString("mobile_phone", null);
+        this.mobilePhone = sanitizePhoneNumber(addressInformation.optString("mobile_phone", null));
+    }
+
+    /**
+     * Sanitizes the phone number so that it starts with a '+' or '00'
+     * 
+     * @param phoneNumber - the number to sanitize
+     * @return String with the sanitized number or 'null' if provided
+     */
+    private String sanitizePhoneNumber(String phoneNumber) {
+        String toSanitize = phoneNumber;
+
+        if (toSanitize.equalsIgnoreCase("null")) {
+            return toSanitize;
+        } else if ((toSanitize.startsWith("+") || (toSanitize.startsWith("00")))) {
+            return toSanitize;
+        } else {
+            toSanitize = "+" + toSanitize;
+        }
+
+        return toSanitize;
     }
 
     /**

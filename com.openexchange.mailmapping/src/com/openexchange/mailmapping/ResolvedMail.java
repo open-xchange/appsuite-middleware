@@ -49,41 +49,63 @@
 
 package com.openexchange.mailmapping;
 
-
 /**
  * {@link ResolvedMail}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class ResolvedMail {
-    private int userID, contextID;
 
-    
+    private int userID;
+    private int contextID;
+
+    /**
+     * Initializes a new {@link ResolvedMail}.
+     *
+     * @param userID The user identifier
+     * @param contextID The context identifier
+     */
     public ResolvedMail(int userID, int contextID) {
         super();
         this.userID = userID;
         this.contextID = contextID;
     }
 
-
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
     public int getUserID() {
         return userID;
     }
 
-    
+    /**
+     * Sets the user identifier
+     *
+     * @param userID The user identifier
+     */
     public void setUserID(int userID) {
         this.userID = userID;
     }
 
-    
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
     public int getContextID() {
         return contextID;
     }
 
-    
+    /**
+     * Sets the context identifier
+     *
+     * @param contextID The context identifier
+     */
     public void setContextID(int contextID) {
         this.contextID = contextID;
     }
-    
-    
+
 }

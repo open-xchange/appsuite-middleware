@@ -290,9 +290,9 @@ public class POP3ExceptionMessage implements LocalizableStrings {
      */
     public final static String ILLEGAL_PATH_MSG = "The POP3 storage path is invalid. POP3 storage path \"%1$s\" cannot be created for user %2$s";
     /**
-     * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.
+     * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work. Please be advised that while it is safe to ignore this warning, the POP3 account might not work if the supplied credentials are invalid.
      */
-    public final static String VALIDATE_DENIED_MSG = "Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.";
+    public final static String VALIDATE_DENIED_MSG = "Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work. Please be advised that while it is safe to ignore this warning, the POP3 account might not work if the supplied credentials are invalid.";
 
     // POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
     public static final String QUOTA_CONSTRAINT_MSG = "POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.";

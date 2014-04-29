@@ -56,11 +56,6 @@ postFix() {
     if ! ox_exists_property com.openexchange.hazelcast.configuration.map.name $pfile; then
        ox_set_property com.openexchange.hazelcast.configuration.map.name "sessions-2" $pfile
     fi
-
-    # obsoleted by SoftwareChange_Request-1291
-    #if ! ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile; then
-    #   ox_set_property com.openexchange.hazelcast.configuration.map.indexes.attributes "contextId,userId" $pfile
-    #fi
 }
 
 case "$1" in
