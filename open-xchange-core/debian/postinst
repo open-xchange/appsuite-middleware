@@ -808,6 +808,9 @@ rm -f /opt/open-xchange/etc/logback.xml.new
 # SoftwareChange_Request-1990
 ox_add_property com.openexchange.quota.attachment -1 /opt/open-xchange/etc/quota.properties
 
+# SoftwareChagne_Request-2002
+ox_add_property com.openexchange.infostore.zipDocumentsCompressionLevel -1 /opt/open-xchange/etc/infostore.properties
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT
