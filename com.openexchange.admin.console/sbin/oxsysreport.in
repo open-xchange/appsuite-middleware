@@ -106,7 +106,9 @@ TMP=/tmp
 TMP_LONG=tempdir
 LOGDIR=ox_support_infos-$(date +%Y%m%d-%H%M%S)
 LOGDIR_LONG=logdir
-LOGARC=${TMP}/${LOGDIR}.tar.gz
+LOGARC=${TMP}/${LOGDIR}.tar
+LOGARC_SUFFIX=".gz"
+LOGS_AND_FILES_SUFFIX=".bz2"
 LOGARC_LONG=log-archive
 KEEP_TMP=false
 KEEP_TMP_LONG=keep-tmp-files
@@ -117,6 +119,9 @@ CREATE_THREAD_DUMP_VALUES="true false"
 CREATE_HEAP_DUMP=false
 CREATE_HEAP_DUMP_LONG=heap-dump
 CREATE_HEAP_DUMP_VALUES="true false"
+SKIP_COMPRESSION=false
+SKIP_COMPRESSION_LONG=skip-compression
+SKIP_COMPRESSION_VALUES="true false"
 
 # NOTE: Do not add arbitrary directories here!
 OX_LOG_DIR=/var/log/open-xchange
@@ -125,7 +130,7 @@ ARCHIVE_DIRS="/opt/open-xchange/etc ${OX_LOG_DIR}"
 PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf'
 
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
-LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:'
+LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:'
 
 usage() {
     echo
@@ -195,6 +200,12 @@ while true; do
             JMAP=$(check_on_needed jmap)
             warning_heap_dump
         ;;
+        --${SKIP_COMPRESSION_LONG})
+            SKIP_COMPRESSION=$(check_argument ${1} ${2})
+            shift 2
+            unset LOGARC_SUFFIX
+            unset LOGS_AND_FILES_SUFFIX
+        ;;        
         -h|--help)
             usage
             exit
@@ -292,7 +303,9 @@ collect_files() {
    done
    IFS=${OIFS}
    ${TAR} rvf /${TMP}/${LOGDIR}/ox_files_and_logs.tar --ignore-failed-read ${ALLFILES} > /dev/null 2>&1
-   bzip2 -9 /${TMP}/${LOGDIR}/ox_files_and_logs.tar
+   if [ 'true' != "${SKIP_COMPRESSION}" ]; then
+       bzip2 -9 /${TMP}/${LOGDIR}/ox_files_and_logs.tar
+   fi
 }
 
 collect_output() {
@@ -349,10 +362,13 @@ fi
 if [ 'true' == "${HEAP_DUMP}" ]; then
     create_heap_dump
 fi
-echo collecting files into ${TMP}/${LOGDIR}/ox_files_and_logs.tar.bz2
+echo collecting files into ${TMP}/${LOGDIR}/ox_files_and_logs.tar${LOGS_AND_FILES_SUFFIX}
 collect_files
 echo collecting system data into ${TMP}/${LOGDIR}
 collect_output
-echo creating archive ${LOGARC}
-${TAR} cvfz ${LOGARC} -C ${TMP} ${LOGDIR} > /dev/null 2>&1
+echo creating archive ${LOGARC}${LOGARC_SUFFIX}
+${TAR} cvf ${LOGARC} -C ${TMP} ${LOGDIR} > /dev/null 2>&1
+if [ 'true' != "${SKIP_COMPRESSION}" ]; then
+       gzip ${LOGARC}
+fi
 clean_up
