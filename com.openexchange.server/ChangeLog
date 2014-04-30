@@ -1,3 +1,7 @@
+* 2014-04-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29904: Throw "FILE_STORAGE-0017" in case of empty or missing "folder" parameter
+
 * 2014-04-30 - martin.schneider@open-xchange.com
 
  - Fix for bug 32036: Use 'transport_auth' for setting SMTP credentials usage. 
