@@ -57,6 +57,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
@@ -308,7 +309,7 @@ public class FindRequest {
      * @return An array of columns or <code>null</code>.
      */
     public int[] getColumns() throws OXException {
-        String valueStr = request.getParameter("columns");
+        String valueStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
         if (null == valueStr) {
             return null;
         }
