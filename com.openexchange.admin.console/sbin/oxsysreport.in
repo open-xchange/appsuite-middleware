@@ -48,8 +48,8 @@
 #
 #
 
-set -e
 OXFUNCTIONS=@oxfunctions@
+
 test -f ${OXFUNCTIONS} || {
     echo "missing common shell functions file"
     exit 1
@@ -63,6 +63,22 @@ check_on_needed() {
     fi
     echo ${path}
 }
+
+check_argument() {
+    local _pattern=$(echo ${2} | tr [:upper:] [:lower:])
+    case ${_pattern} in
+        false) _pattern=false ;;
+        true) _pattern=true ;;
+        yes) _pattern=true ;;
+        *) _pattern=invalid ;;
+    esac
+    echo ${_pattern}
+    if [ 'invalid' == "${_pattern}" ]; then
+        echo "${0}: Error, option '${1}' requires true or false argument" >&2
+        exit 1
+    fi
+}
+
 
 TAR=$(check_on_needed tar)
 BZIP2=$(check_on_needed bzip2)
@@ -82,14 +98,18 @@ LOGARC_LONG=log-archive
 KEEP_TMP=false
 KEEP_TMP_LONG=keep-tmp-files
 KEEP_TMP_VALUES="true false"
+CREATE_THREAD_DUMP=false
+CREATE_THREAD_DUMP_LONG=thread-dump
+CREATE_THREAD_DUMP_VALUES="true false"
 
 # NOTE: Do not add arbitrary directories here!
-ARCHIVE_DIRS="/opt/open-xchange/etc /var/log/open-xchange"
+OX_LOG_DIR=/var/log/open-xchange
+ARCHIVE_DIRS="/opt/open-xchange/etc ${OX_LOG_DIR}"
 
 PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf'
 
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
-LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:'
+LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:'
 
 usage() {
     echo
@@ -126,6 +146,9 @@ TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:hD --long "$(eval echo ${LONGOPTS}),
 
 eval set -- "${TEMP}"
 
+# needed to catch the exit from a sub shell
+set -e
+
 while true; do
     case "${1}" in
         --${TMP_LONG})
@@ -137,12 +160,18 @@ while true; do
             shift 2
         ;;
         --${KEEP_TMP_LONG})
-            KEEP_TMP=${2}
+            KEEP_TMP=$(check_argument ${1} ${2})
             shift 2
         ;;
         --${LOGARC_LONG})
             LOGARC=${2}
             shift 2
+        ;;
+        --${CREATE_THREAD_DUMP_LONG})
+            THREAD_DUMP=$(check_argument ${1} ${2})
+            shift 2
+            KILL=$(check_on_needed kill)
+            TOP=$(check_on_needed top)
         ;;
         -h|--help)
             usage
@@ -197,9 +226,8 @@ for opt in ${ALLOPTS}; do
         fi
     fi
 done
-
+set +e
 # distribution depending staff should go here
-
 ox_system_type
 DIST=${?}
 
@@ -245,8 +273,7 @@ collect_files() {
    bzip2 -9 /${TMP}/${LOGDIR}/ox_files_and_logs.tar
 }
 
-
-collect_output(){
+collect_output() {
    cd /${TMP}
    IFS=";"
    for i in ${PROCS}; do
@@ -262,11 +289,37 @@ clean_up(){
    test "${KEEP_TMP}" = "true" || rm -rf ${TMP}/${LOGDIR}
 }
 
+get_ox_pid() {
+    local _ox_pid=$(ps ax | \
+        grep 'open-xchange' | \
+        grep 'java' | \
+        head -n 1 | \
+        awk '{print $1}')
+    echo "${_ox_pid}"
+}
+
+create_thread_dumps() {
+    local _delay=3
+    local _count=5
+    local _top_cmd="top -d ${_delay} -bHn 5"
+    ${_top_cmd} >> ${TMP}/${LOGDIR}/commands/"${_top_cmd} (thread-dump)" &
+    echo -n "Creating Threaddumps: "
+    for i in $(seq ${_count}); do
+        echo -n "${i} "
+        ${KILL} -3 $(get_ox_pid)
+        sleep ${_delay}
+    done
+    echo
+}
+
 trap "rm -f ${LOGARC}; clean_up; exit 1" SIGINT SIGSEGV SIGQUIT SIGTERM
 
 echo creating logdir ${TMP}/${LOGDIR}
 mkdir -p ${TMP}/${LOGDIR}/commands/
-echo collecting files into ${TMP}/${LOGDIR}/ox_files_and_logs.tar.bz2 
+if [ 'true' == "${THREAD_DUMP}" ]; then
+    create_thread_dumps
+fi
+echo collecting files into ${TMP}/${LOGDIR}/ox_files_and_logs.tar.bz2
 collect_files
 echo collecting system data into ${TMP}/${LOGDIR}
 collect_output
