@@ -50,9 +50,6 @@
 package com.openexchange.find.json.converters;
 
 import java.util.Locale;
-import com.openexchange.find.calendar.RecurringTypeDisplayItem;
-import com.openexchange.find.calendar.RelativeDateDisplayItem;
-import com.openexchange.find.calendar.StatusDisplayItem;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.ContactTypeDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
@@ -114,27 +111,12 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
     }
 
     @Override
-    public void visit(StatusDisplayItem item) {
-        result = translator.translate(locale, item.getDefaultValue());
-    }
-
-    @Override
     public void visit(TaskTypeDisplayItem item) {
         result = translator.translate(locale, item.getDefaultValue());
     }
 
     @Override
-    public void visit(RelativeDateDisplayItem item) {
-        result = translator.translate(locale, item.getDefaultValue());
-    }
-
-    @Override
     public void visit(ContactTypeDisplayItem item) {
-        result = translator.translate(locale, item.getDefaultValue());
-    }
-
-    @Override
-    public void visit(RecurringTypeDisplayItem item) {
         result = translator.translate(locale, item.getDefaultValue());
     }
 

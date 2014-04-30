@@ -79,7 +79,7 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.mail.MailConstants;
+import com.openexchange.find.mail.MailFacetValues;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.mail.MailStrings;
@@ -247,20 +247,20 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     private static void addTimeFacet(List<Facet> facets) {
         List<FacetValue> values = new ArrayList<FacetValue>(3);
         values.add(new FacetValue(
-            MailConstants.FACET_VALUE_LAST_WEEK,
+            MailFacetValues.FACET_VALUE_LAST_WEEK,
             new SimpleDisplayItem(MailStrings.LAST_WEEK, true),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(asList(FIELD_TIME), MailConstants.FACET_VALUE_LAST_WEEK)));
+            new Filter(asList(FIELD_TIME), MailFacetValues.FACET_VALUE_LAST_WEEK)));
         values.add(new FacetValue(
-            MailConstants.FACET_VALUE_LAST_MONTH,
+            MailFacetValues.FACET_VALUE_LAST_MONTH,
             new SimpleDisplayItem(MailStrings.LAST_MONTH, true),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(asList(FIELD_TIME), MailConstants.FACET_VALUE_LAST_MONTH)));
+            new Filter(asList(FIELD_TIME), MailFacetValues.FACET_VALUE_LAST_MONTH)));
         values.add(new FacetValue(
-            MailConstants.FACET_VALUE_LAST_YEAR,
+            MailFacetValues.FACET_VALUE_LAST_YEAR,
             new SimpleDisplayItem(MailStrings.LAST_YEAR, true),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(asList(FIELD_TIME), MailConstants.FACET_VALUE_LAST_YEAR)));
+            new Filter(asList(FIELD_TIME), MailFacetValues.FACET_VALUE_LAST_YEAR)));
         facets.add(new Facet(MailFacetType.TIME, values));
     }
 
@@ -530,15 +530,15 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         Comparison comparison;
         long timestamp;
         Calendar cal = new GregorianCalendar(TimeZones.UTC);
-        if (MailConstants.FACET_VALUE_LAST_WEEK.equals(query)) {
+        if (MailFacetValues.FACET_VALUE_LAST_WEEK.equals(query)) {
             cal.add(Calendar.WEEK_OF_YEAR, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
-        } else if (MailConstants.FACET_VALUE_LAST_MONTH.equals(query)) {
+        } else if (MailFacetValues.FACET_VALUE_LAST_MONTH.equals(query)) {
             cal.add(Calendar.MONTH, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
-        } else if (MailConstants.FACET_VALUE_LAST_YEAR.equals(query)) {
+        } else if (MailFacetValues.FACET_VALUE_LAST_YEAR.equals(query)) {
             cal.add(Calendar.YEAR, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();

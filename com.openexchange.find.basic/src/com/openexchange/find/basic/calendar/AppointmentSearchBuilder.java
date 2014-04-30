@@ -49,6 +49,14 @@
 
 package com.openexchange.find.basic.calendar;
 
+import static com.openexchange.find.calendar.CalendarFacetValues.RECURRING_TYPE_SERIES;
+import static com.openexchange.find.calendar.CalendarFacetValues.RECURRING_TYPE_SINGLE;
+import static com.openexchange.find.calendar.CalendarFacetValues.RELATIVE_DATE_COMING;
+import static com.openexchange.find.calendar.CalendarFacetValues.RELATIVE_DATE_PAST;
+import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_ACCEPTED;
+import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_DECLINED;
+import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_NONE;
+import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_TENTATIVE;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -60,9 +68,6 @@ import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.calendar.CalendarFacetType;
-import com.openexchange.find.calendar.RecurringTypeDisplayItem;
-import com.openexchange.find.calendar.RelativeDateDisplayItem;
-import com.openexchange.find.calendar.StatusDisplayItem;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderStorage;
@@ -289,13 +294,13 @@ public class AppointmentSearchBuilder {
         }
         for (String query : queries) {
             int status;
-            if (StatusDisplayItem.Status.ACCEPTED.getIdentifier().equals(query)) {
+            if (STATUS_ACCEPTED.equals(query)) {
                 status = CalendarDataObject.ACCEPT;
-            } else if (StatusDisplayItem.Status.NONE.getIdentifier().equals(query)) {
+            } else if (STATUS_NONE.equals(query)) {
                 status = CalendarDataObject.NONE;
-            } else if (StatusDisplayItem.Status.TENTATIVE.getIdentifier().equals(query)) {
+            } else if (STATUS_TENTATIVE.equals(query)) {
                 status = CalendarDataObject.TENTATIVE;
-            } else if (StatusDisplayItem.Status.DECLINED.getIdentifier().equals(query)) {
+            } else if (STATUS_DECLINED.equals(query)) {
                 status = CalendarDataObject.DECLINE;
             } else {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.STATUS.getId());
@@ -307,9 +312,9 @@ public class AppointmentSearchBuilder {
 
     private void applyRecurringType(List<String> queries) throws OXException {
         for (String query : queries) {
-            if (RecurringTypeDisplayItem.RecurringType.SERIES.getIdentifier().equals(query)) {
+            if (RECURRING_TYPE_SERIES.equals(query)) {
                 appointmentSearch.setExcludeNonRecurringAppointments(true);
-            } else if (RecurringTypeDisplayItem.RecurringType.SINGLE.getIdentifier().equals(query)) {
+            } else if (RECURRING_TYPE_SINGLE.equals(query)) {
                 appointmentSearch.setExcludeRecurringAppointments(true);
             } else {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RECURRING_TYPE.getId());
@@ -319,9 +324,9 @@ public class AppointmentSearchBuilder {
 
     private void applyRelativeDate(List<String> queries) throws OXException {
         for (String query : queries) {
-            if (RelativeDateDisplayItem.RelativeDate.COMING.getIdentifier().equals(query)) {
+            if (RELATIVE_DATE_COMING.equals(query)) {
                 appointmentSearch.setMinimumEndDate(new Date());
-            } else if (RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier().equals(query)) {
+            } else if (RELATIVE_DATE_PAST.equals(query)) {
                 appointmentSearch.setMaximumStartDate(new Date());
             } else {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RELATIVE_DATE.getId());

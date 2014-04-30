@@ -49,9 +49,6 @@
 
 package com.openexchange.find.facet;
 
-import com.openexchange.find.calendar.RecurringTypeDisplayItem;
-import com.openexchange.find.calendar.RelativeDateDisplayItem;
-import com.openexchange.find.calendar.StatusDisplayItem;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.ContactTypeDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
@@ -80,12 +77,6 @@ public interface DisplayItemVisitor {
     void visit(FolderTypeDisplayItem item);
 
     void visit(FileTypeDisplayItem fileTypeDisplayItem);
-
-    void visit(StatusDisplayItem item);
-
-    void visit(RelativeDateDisplayItem item);
-
-    void visit(RecurringTypeDisplayItem item);
 
     void visit(TaskStatusDisplayItem item);
 

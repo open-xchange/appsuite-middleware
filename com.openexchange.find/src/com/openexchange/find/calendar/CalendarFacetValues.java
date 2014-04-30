@@ -49,57 +49,30 @@
 
 package com.openexchange.find.calendar;
 
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
 
 /**
- * {@link RecurringTypeDisplayItem}
- *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public class RecurringTypeDisplayItem implements DisplayItem {
+public class CalendarFacetValues {
 
-    public static enum RecurringType {
-        SINGLE("single"), SERIES("series");
+    // Recurring Type
+    public static final String RECURRING_TYPE_SINGLE = "single";
 
-        private String identifier;
+    public static final String RECURRING_TYPE_SERIES = "series";
 
-        private RecurringType(String identifier) {
-            this.identifier = identifier;
-        }
+    //Relative Date
+    public static final String RELATIVE_DATE_COMING = "coming";
 
-        public String getIdentifier() {
-            return identifier;
-        }
-    }
+    public static final String RELATIVE_DATE_PAST = "past";
 
-    private String displayName;
+    // Status
+    public static final String STATUS_ACCEPTED = "accepted";
 
-    private RecurringType type;
+    public static final String STATUS_DECLINED = "declined";
 
-    public RecurringTypeDisplayItem(String displayName, RecurringType type) {
-        this.displayName = displayName;
-        this.type = type;
-    }
+    public static final String STATUS_TENTATIVE = "tentative";
 
-    @Override
-    public String getDefaultValue() {
-        return displayName;
-    }
-
-    @Override
-    public RecurringType getItem() {
-        return type;
-    }
-
-    @Override
-    public boolean isLocalizable() {
-        return true;
-    }
-
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
-    }
+    public static final String STATUS_NONE = "none";
 
 }

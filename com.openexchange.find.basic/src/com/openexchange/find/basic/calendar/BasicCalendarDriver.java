@@ -68,12 +68,11 @@ import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.calendar.CalendarDocument;
 import com.openexchange.find.calendar.CalendarFacetType;
+import com.openexchange.find.calendar.CalendarFacetValues;
 import com.openexchange.find.calendar.CalendarStrings;
-import com.openexchange.find.calendar.RecurringTypeDisplayItem;
-import com.openexchange.find.calendar.RelativeDateDisplayItem;
-import com.openexchange.find.calendar.StatusDisplayItem;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
+import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FieldFacet;
@@ -181,43 +180,43 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     private static Facet getStatusFacet() {
         List<FacetValue> statusValues = new ArrayList<FacetValue>();
         List<String> fields = Collections.singletonList(CalendarFacetType.STATUS.getId());
-        statusValues.add(new FacetValue(StatusDisplayItem.Status.ACCEPTED.getIdentifier(),
-            new StatusDisplayItem(CalendarStrings.STATUS_ACCEPTED, StatusDisplayItem.Status.ACCEPTED),
-            FacetValue.UNKNOWN_COUNT, new Filter(fields, StatusDisplayItem.Status.ACCEPTED.getIdentifier())));
-        statusValues.add(new FacetValue(StatusDisplayItem.Status.DECLINED.getIdentifier(),
-            new StatusDisplayItem(CalendarStrings.STATUS_DECLINED, StatusDisplayItem.Status.DECLINED),
-            FacetValue.UNKNOWN_COUNT, new Filter(fields, StatusDisplayItem.Status.DECLINED.getIdentifier())));
-        statusValues.add(new FacetValue(StatusDisplayItem.Status.TENTATIVE.getIdentifier(),
-            new StatusDisplayItem(CalendarStrings.STATUS_TENTATIVE, StatusDisplayItem.Status.TENTATIVE),
-            FacetValue.UNKNOWN_COUNT, new Filter(fields, StatusDisplayItem.Status.TENTATIVE.getIdentifier())));
-        statusValues.add(new FacetValue(StatusDisplayItem.Status.NONE.getIdentifier(),
-            new StatusDisplayItem(CalendarStrings.STATUS_NONE, StatusDisplayItem.Status.NONE),
-            FacetValue.UNKNOWN_COUNT, new Filter(fields, StatusDisplayItem.Status.NONE.getIdentifier())));
+        statusValues.add(buildStatusFacetValue(CalendarFacetValues.STATUS_ACCEPTED, CalendarStrings.STATUS_ACCEPTED, fields));
+        statusValues.add(buildStatusFacetValue(CalendarFacetValues.STATUS_DECLINED, CalendarStrings.STATUS_DECLINED, fields));
+        statusValues.add(buildStatusFacetValue(CalendarFacetValues.STATUS_TENTATIVE, CalendarStrings.STATUS_TENTATIVE, fields));
+        statusValues.add(buildStatusFacetValue(CalendarFacetValues.STATUS_NONE, CalendarStrings.STATUS_NONE, fields));
         return new Facet(CalendarFacetType.STATUS, statusValues);
+    }
+
+    private static FacetValue buildStatusFacetValue(String id, String displayName, List<String> filterFields) {
+        return buildStaticFacetValue(id, displayName, filterFields, id);
     }
 
     private static Facet getRelativeDateFacet() {
         List<FacetValue> dateValues = new ArrayList<FacetValue>();
         List<String> fields = Collections.singletonList(CalendarFacetType.RELATIVE_DATE.getId());
-        dateValues.add(new FacetValue(RelativeDateDisplayItem.RelativeDate.COMING.getIdentifier(),
-            new RelativeDateDisplayItem(CalendarStrings.RELATIVE_DATE_COMING, RelativeDateDisplayItem.RelativeDate.COMING),
-            FacetValue.UNKNOWN_COUNT, new Filter(fields, RelativeDateDisplayItem.RelativeDate.COMING.getIdentifier())));
-        dateValues.add(new FacetValue(RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier(),
-            new RelativeDateDisplayItem(CalendarStrings.RELATIVE_DATE_PAST, RelativeDateDisplayItem.RelativeDate.PAST),
-            FacetValue.UNKNOWN_COUNT, new Filter(fields, RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier())));
+        dateValues.add(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_COMING, CalendarStrings.RELATIVE_DATE_COMING, fields));
+        dateValues.add(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_PAST, CalendarStrings.RELATIVE_DATE_PAST, fields));
         return new Facet(CalendarFacetType.RELATIVE_DATE, dateValues);
+    }
+
+    private static FacetValue buildRelativeDateFacetValue(String id, String displayName, List<String> filterFields) {
+        return buildStaticFacetValue(id, displayName, filterFields, id);
     }
 
     private static Facet getRecurringTypeFacet() {
         List<FacetValue> recurringTypeValues = new ArrayList<FacetValue>();
         List<String> fields = Collections.singletonList(CalendarFacetType.RECURRING_TYPE.getId());
-        recurringTypeValues.add(new FacetValue(RecurringTypeDisplayItem.RecurringType.SINGLE.getIdentifier(),
-            new RecurringTypeDisplayItem(CalendarStrings.RECURRING_TYPE_SINGLE, RecurringTypeDisplayItem.RecurringType.SINGLE),
-            FacetValue.UNKNOWN_COUNT, new Filter(fields, RecurringTypeDisplayItem.RecurringType.SINGLE.getIdentifier())));
-        recurringTypeValues.add(new FacetValue(RecurringTypeDisplayItem.RecurringType.SERIES.getIdentifier(),
-            new RecurringTypeDisplayItem(CalendarStrings.RECURRING_TYPE_SERIES, RecurringTypeDisplayItem.RecurringType.SERIES),
-            FacetValue.UNKNOWN_COUNT, new Filter(fields, RecurringTypeDisplayItem.RecurringType.SERIES.getIdentifier())));
+        recurringTypeValues.add(buildRecurringTypeFacetValue(CalendarFacetValues.RECURRING_TYPE_SERIES, CalendarStrings.RECURRING_TYPE_SERIES, fields));
+        recurringTypeValues.add(buildRecurringTypeFacetValue(CalendarFacetValues.RECURRING_TYPE_SINGLE, CalendarStrings.RECURRING_TYPE_SINGLE, fields));
         return new Facet(CalendarFacetType.RECURRING_TYPE, recurringTypeValues);
+    }
+
+    private static FacetValue buildRecurringTypeFacetValue(String id, String displayName, List<String> filterFields) {
+        return buildStaticFacetValue(id, displayName, filterFields, id);
+    }
+
+    private static FacetValue buildStaticFacetValue(String id, String displayName, List<String> filterFields, String filterQuery) {
+        return new FacetValue(id, new SimpleDisplayItem(displayName, true), FacetValue.UNKNOWN_COUNT, new Filter(filterFields, filterQuery));
     }
 
     @Override
