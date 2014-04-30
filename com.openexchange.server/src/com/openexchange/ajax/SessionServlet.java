@@ -761,17 +761,39 @@ public abstract class SessionServlet extends AJAXServlet {
             if (cookies.isEmpty()) {
                 LOG.info("Empty Cookies in HTTP request. No session secret can be looked up.");
             } else {
-                Cookie cookie = cookies.get(SECRET_PREFIX + getHash(cookieHash, req, hash, client));
+                final String secretPrefix = SECRET_PREFIX;
+                final StringBuilder tmp = new StringBuilder(256);
+                final String expectedSecretCookieName = tmp.append(secretPrefix).append(getHash(cookieHash, req, hash, client)).toString();
+
+                // Look-up Cookie by expected name
+                Cookie cookie = cookies.get(expectedSecretCookieName);
                 if (null != cookie) {
                     return cookie.getValue();
                 }
+
+                // Check for special User-Agent to allow look-up by remembered cookie name
                 if (isMediaPlayerAgent(req.getHeader(USER_AGENT))) {
-                    cookie = cookies.get(SECRET_PREFIX + hash);
+                    tmp.setLength(0);
+                    cookie = cookies.get(tmp.append(secretPrefix).append(hash).toString());
                     if (null != cookie) {
                         return cookie.getValue();
                     }
                 }
-                LOG.info("Didn't find an appropriate Cookie for name \"{}\" (CookieHashSource={}) which provides the session secret.", (SECRET_PREFIX + getHash(cookieHash, req, hash, client)), cookieHash.toString());
+
+                // All look-up attempts failed - Log information
+                tmp.setLength(0);
+                for (final String cookieName : cookies.keySet()) {
+                    if (cookieName.startsWith(secretPrefix)) {
+                        tmp.append(cookieName.substring(secretPrefix.length())).append(", ");
+                    }
+                }
+                final int hlen = tmp.length();
+                if (hlen > 0) {
+                    tmp.setLength(hlen - 2);
+                    LOG.info("Didn't find an appropriate Cookie for expected name \"{}\" (CookieHashSource={}) which provides the session secret. Remembered hash: {}. Available hashes: {}", expectedSecretCookieName, cookieHash.toString(), hash, tmp.toString());
+                } else {
+                    LOG.info("Didn't find an appropriate Cookie for expected name \"{}\" (CookieHashSource={}) which provides the session secret. Remembered hash={}. No available hashes.", expectedSecretCookieName, cookieHash.toString(), hash);
+                }
             }
         } else {
             LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
