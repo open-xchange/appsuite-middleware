@@ -267,11 +267,10 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
                 new FileTypeDisplayItem(DriveStrings.FILE_TYPE_AUDIO, FileTypeDisplayItem.Type.AUDIO),
                 FacetValue.UNKNOWN_COUNT,
                 new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier(), new FileTypeDisplayItem(
-                DriveStrings.FILE_TYPE_DOCUMENTS,
-                FileTypeDisplayItem.Type.DOCUMENTS), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singletonList(fieldFileType),
-                FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier(),
+                new FileTypeDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS, FileTypeDisplayItem.Type.DOCUMENTS),
+                FacetValue.UNKNOWN_COUNT,
+                new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
             fileTypes.add(new FacetValue(
                 FileTypeDisplayItem.Type.IMAGES.getIdentifier(),
                 new FileTypeDisplayItem(DriveStrings.FILE_TYPE_IMAGES, FileTypeDisplayItem.Type.IMAGES),
