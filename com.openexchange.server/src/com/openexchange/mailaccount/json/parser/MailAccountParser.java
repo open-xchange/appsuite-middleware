@@ -287,38 +287,9 @@ public class MailAccountParser extends DataParser {
         // Check port for standards
         checkMailPort(account, warnings);
         checkTransportPort(account, warnings);
-        // Continue parsing
-        if (json.has(MailAccountFields.TRANSPORT_LOGIN)) {
-            account.setTransportLogin(parseString(json, MailAccountFields.TRANSPORT_LOGIN));
-            attributes.add(Attribute.TRANSPORT_LOGIN_LITERAL);
-        }
-        if (json.has(MailAccountFields.TRANSPORT_PASSWORD)) {
-            account.setTransportPassword(parseString(json, MailAccountFields.TRANSPORT_PASSWORD));
-            attributes.add(Attribute.TRANSPORT_PASSWORD_LITERAL);
-        }
-        // Special handling for a new account
-        if (asNewAccount) {
-            if (json.hasAndNotNull("transport_credentials")) {
-                final boolean transportCredentials = json.optBoolean("transport_credentials", true);
-                if (!transportCredentials) {
-                    // JSON field "transport_credentials" explicitly set to "false"
-                    if (isEmpty(account.getTransportLogin())) {
-                        final String login = account.getLogin();
-                        if (!isEmpty(login)) {
-                            account.setTransportLogin(login);
-                            attributes.add(Attribute.TRANSPORT_LOGIN_LITERAL);
-                        }
-                    }
-                    if (isEmpty(account.getTransportPassword())) {
-                        final String pw = account.getPassword();
-                        if (!isEmpty(pw)) {
-                            account.setTransportPassword(pw);
-                            attributes.add(Attribute.TRANSPORT_PASSWORD_LITERAL);
-                        }
-                    }
-                }
-            }
-        }
+
+        parseTransportCredentials(account, json, attributes);
+
         if (json.has(MailAccountFields.NAME)) {
             account.setName(parseString(json, MailAccountFields.NAME));
             attributes.add(Attribute.NAME_LITERAL);
@@ -453,6 +424,37 @@ public class MailAccountParser extends DataParser {
          */
         account.setProperties(props);
         return attributes;
+    }
+
+    /**
+     * Parses the transport credentials based on 'transport_auth' param and if credentials are set within the json request.
+     *
+     * @param account
+     * @param json
+     * @param attributes
+     */
+    protected void parseTransportCredentials(final MailAccountDescription account, final JSONObject json, final Set<Attribute> attributes) {
+        String login = account.getLogin();
+        String password = account.getPassword();
+
+        final boolean transportAuth = json.optBoolean(MailAccountFields.TRANSPORT_AUTH, true);
+        if (transportAuth) {
+            String transLogin = json.optString(MailAccountFields.TRANSPORT_LOGIN, null);
+            String transPassw = json.optString(MailAccountFields.TRANSPORT_PASSWORD, null);
+            if (!Strings.isEmpty(transLogin) || !Strings.isEmpty(transPassw)) {
+                // Either one is not empty
+                login = transLogin;
+                password = transPassw;
+            }
+        } else {
+            login = null;
+            password = null;
+        }
+
+        account.setTransportLogin(login);
+        attributes.add(Attribute.TRANSPORT_LOGIN_LITERAL);
+        account.setTransportPassword(password);
+        attributes.add(Attribute.TRANSPORT_PASSWORD_LITERAL);
     }
 
     private static void checkMailPort(final MailAccountDescription account, final Collection<OXException> warnings) {
