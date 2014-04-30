@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
 
 /**
  * {@link MailAccountParserTest}
@@ -44,7 +43,6 @@ public class MailAccountParserTest {
         this.mailAccountDescription.setId(-1);
         this.mailAccountDescription.setLogin(imapLogin);
         this.mailAccountDescription.setPassword(imapPassword);
-        this.mailAccountDescription.addTransportProperty(MailAccountFields.TRANSPORT_AUTH, Boolean.toString(true));
     }
 
     @Test
