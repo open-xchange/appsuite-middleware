@@ -61,7 +61,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.checksum.events.ChecksumEventListener;
 import com.openexchange.drive.checksum.events.DelayedChecksumEventListener;
-import com.openexchange.drive.checksum.rdb.DirectoryChecksumsAddUserColumnTask;
+import com.openexchange.drive.checksum.rdb.DirectoryChecksumsAddUserAndETagColumnTask;
 import com.openexchange.drive.checksum.rdb.DriveCreateTableService;
 import com.openexchange.drive.checksum.rdb.DriveCreateTableTask;
 import com.openexchange.drive.checksum.rdb.DriveDeleteListener;
@@ -118,7 +118,7 @@ public class DriveActivator extends HousekeepingActivator {
         registerService(DriveService.class, new ThrottlingDriveService(new DriveServiceImpl()));
         registerService(CreateTableService.class, new DriveCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
-            new DriveCreateTableTask(), new DirectoryChecksumsAddUserColumnTask()));
+            new DriveCreateTableTask(), new DirectoryChecksumsAddUserAndETagColumnTask()));
         registerService(DeleteListener.class, new DriveDeleteListener());
         /*
          * register event handler

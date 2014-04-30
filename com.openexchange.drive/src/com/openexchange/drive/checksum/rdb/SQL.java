@@ -88,9 +88,10 @@ public class SQL {
         return "CREATE TABLE directoryChecksums (" +
             "uuid BINARY(16) NOT NULL," +
             "cid INT4 UNSIGNED NOT NULL," +
-            "user INT4 UNSIGNED," +
+            "user INT4 UNSIGNED DEFAULT NULL," +
             "folder VARCHAR(512) NOT NULL," +
-            "sequence BIGINT(20) NOT NULL," +
+            "sequence BIGINT(20) DEFAULT NULL," +
+            "etag VARCHAR(255) DEFAULT NULL," +
             "checksum BINARY(16) NOT NULL," +
             "PRIMARY KEY (cid, uuid)," +
             "INDEX (folder, cid)," +

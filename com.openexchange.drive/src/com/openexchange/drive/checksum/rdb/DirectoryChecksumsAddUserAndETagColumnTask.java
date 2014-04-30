@@ -65,13 +65,18 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DirectoryChecksumsAddUserColumnTask}
+ * {@link DirectoryChecksumsAddUserAndETagColumnTask}
  *
- * Deletes all existing directory checksums and adds the column <code>user INT4 UNSIGNED</code> afterwards.
+ * Deletes all existing directory checksums if the <code>user</code> column not yet exists, then
+ * <ul>
+ * <li>modifies the column <code>sequence</code> to <code>sequence BIGINT(20) DEFAULT NULL</code></li>
+ * <li>adds the column <code>user INT4 UNSIGNED DEFAULT NULL</code></li>
+ * <li>adds the column <code>etag VARCHAR(255) DEFAULT NULL</code></li>
+ * </ul>
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryChecksumsAddUserColumnTask extends UpdateTaskAdapter {
+public class DirectoryChecksumsAddUserAndETagColumnTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
@@ -84,15 +89,18 @@ public class DirectoryChecksumsAddUserColumnTask extends UpdateTaskAdapter {
         DatabaseService dbService = DriveServiceLookup.getService(DatabaseService.class);
         Connection connection = dbService.getForUpdateTask(contextID);
         boolean committed = false;
-        Column userColumn = new Column("user", "INT4 UNSIGNED");
         try {
             connection.setAutoCommit(false);
-            if (false == Tools.columnExists(connection, "directoryChecksums", userColumn.getName())) {
+            if (false == Tools.columnExists(connection, "directoryChecksums", "user")) {
                 deleteDirectoryChecksums(connection);
-                Tools.addColumns(connection, "directoryChecksums", userColumn);
-                connection.commit();
-                committed = true;
             }
+            if (false == Tools.isNullable(connection, "directoryChecksums", "sequence")) {
+                Tools.modifyColumns(connection, "directoryChecksums", new Column("sequence", "BIGINT(20) DEFAULT NULL"));
+            }
+            Tools.checkAndAddColumns(connection, "directoryChecksums",
+                new Column("user", "INT4 UNSIGNED DEFAULT NULL"), new Column("etag", "VARCHAR(255) DEFAULT NULL"));
+            connection.commit();
+            committed = true;
         } catch (SQLException e) {
             rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
