@@ -112,8 +112,6 @@ public enum Attribute {
     // Archive
     ARCHIVE_LITERAL(MailAccountFields.ARCHIVE, 1041),
     ARCHIVE_FULLNAME_LITERAL(MailAccountFields.ARCHIVE_FULLNAME, 1042),
-    // Transport credentials
-    TRANSPORT_CREDENTIALS_LITERAL(MailAccountFields.TRANSPORT_CREDENTIALS, 1043);
 
     ;
 
@@ -253,8 +251,6 @@ public enum Attribute {
         case META:
             // Ignore for virtual attribute
             return null;
-        case TRANSPORT_CREDENTIALS_LITERAL:
-            return switcher.transportCredentials();
         default:
             throw new IllegalArgumentException(getName());
         }

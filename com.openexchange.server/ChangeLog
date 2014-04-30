@@ -1,3 +1,7 @@
+* 2014-04-30 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32036: Use 'transport_auth' for setting SMTP credentials usage. 
+
 * 2014-04-29 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32221: Supply reference to old parent folder ID in folder update event

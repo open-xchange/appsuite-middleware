@@ -230,7 +230,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         return success;
     }
 
-    static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
+    protected static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
         // Now check transport server URL, if a transport server is present
         if (isEmpty(accountDescription.getTransportServer())) {
             return true;
@@ -247,12 +247,12 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         final TransportConfig transportConfig = mailTransport.getTransportConfig();
         // Set login and password
         try {
-            fillTransportServerCredentials(accountDescription, session, transportConfig, false);
+            fillTransportServerCredentials(accountDescription, session, false);
         } catch (OXException e) {
             if (!CryptoErrorMessage.BadPassword.equals(e)) {
                 throw e;
             }
-            fillTransportServerCredentials(accountDescription, session, transportConfig, true);
+            fillTransportServerCredentials(accountDescription, session, true);
         }
         transportConfig.setLogin(accountDescription.getTransportLogin());
         transportConfig.setPassword(accountDescription.getTransportPassword());
@@ -292,33 +292,33 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         }
         return validated;
     }
-    
+
     private static void fillMailServerCredentials(MailAccountDescription accountDescription, ServerSession session, boolean invalidate) throws OXException {
         int accountId = accountDescription.getId();
         String login = accountDescription.getLogin();
         String password = accountDescription.getPassword();
-        
+
         if (accountId >= 0 && (isEmpty(login) || isEmpty(password))) {
             /* ID is delivered, but password not set. Thus load from storage version.*/
-           final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-           final MailAccount mailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
-           
-           if (invalidate) {
-               storageService.invalidateMailAccounts(session.getUserId(), session.getContextId());
-           }
-           accountDescription.setLogin(mailAccount.getLogin());
-           String encPassword = mailAccount.getPassword();
-           accountDescription.setPassword(MailPasswordUtil.decrypt(encPassword, session, accountId, accountDescription.getLogin(), accountDescription.getMailServer()));
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            final MailAccount mailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
+
+            if (invalidate) {
+                storageService.invalidateMailAccounts(session.getUserId(), session.getContextId());
+            }
+            accountDescription.setLogin(mailAccount.getLogin());
+            String encPassword = mailAccount.getPassword();
+            accountDescription.setPassword(MailPasswordUtil.decrypt(encPassword, session, accountId, accountDescription.getLogin(), accountDescription.getMailServer()));
         }
-        
+
         checkNeededFields(accountDescription);
     }
 
-    private static void fillTransportServerCredentials(MailAccountDescription accountDescription, ServerSession session, TransportConfig transportConfig, boolean invalidate) throws OXException {
+    private static void fillTransportServerCredentials(MailAccountDescription accountDescription, ServerSession session, boolean invalidate) throws OXException {
         int accountId = accountDescription.getId();
         String login = accountDescription.getTransportLogin();
         String password = accountDescription.getTransportPassword();
-        
+
         if (accountId >= 0 && (isEmpty(login) || isEmpty(password))) {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             final MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());

@@ -276,10 +276,4 @@ public class GetSwitch implements AttributeSwitch {
     public Object addresses() {
         return desc.getProperties().get("addresses");
     }
-
-    @Override
-    public Object transportCredentials() {
-        return desc.getTransportProperties().get("transport_credentials");
-    }
-
 }

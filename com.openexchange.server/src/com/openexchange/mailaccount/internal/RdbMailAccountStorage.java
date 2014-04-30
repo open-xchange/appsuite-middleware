@@ -1534,11 +1534,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (attributes.contains(Attribute.POP3_PATH_LITERAL)) {
                     updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), false, con);
                 }
-
-                properties = mailAccount.getTransportProperties();
-                if (attributes.contains(Attribute.TRANSPORT_CREDENTIALS_LITERAL)) {
-                    updateProperty(cid, user, mailAccount.getId(), "transport_credentials", properties.get("transport_credentials"), true, con);
-                }
             } catch (final SQLException e) {
                 if (null != stmt) {
                     final String sql = stmt.toString();
@@ -1888,10 +1883,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             if (properties.containsKey("pop3.path")) {
                 updateProperty(cid, user, accountId, "pop3.path", properties.get("pop3.path"), false, con);
             }
-            properties = mailAccount.getTransportProperties();
-            if (properties.containsKey("transport_credentials")) {
-                updateProperty(cid, user, accountId, "transport_credentials", properties.get("transport_credentials"), true, con);
-            }
 
             final MailAccount retval = getMailAccount(accountId, user, cid, con);
 
@@ -2106,12 +2097,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
                 if (properties.containsKey("pop3.path")) {
                     updateProperty(cid, user, id, "pop3.path", properties.get("pop3.path"), false, con);
-                }
-            }
-            properties = mailAccount.getTransportProperties();
-            if (!properties.isEmpty()) {
-                if (properties.containsKey("transport_credentials")) {
-                    updateProperty(cid, user, id, "transport_credentials", properties.get("transport_credentials"), true, con);
                 }
             }
         } catch (final SQLException e) {
