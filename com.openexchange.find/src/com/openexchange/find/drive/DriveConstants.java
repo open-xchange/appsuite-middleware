@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,50 +47,21 @@
  *
  */
 
-package com.openexchange.find.basic.drive;
-
-import java.util.Arrays;
-import java.util.List;
+package com.openexchange.find.drive;
 
 
 /**
- * {@link Constants}
+ * Provides constants for "Drive" driver for find module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.0
  */
-public final class Constants {
+public class DriveConstants {
 
-    /**
-     * Initializes a new {@link Constants}.
-     */
-    private Constants() {
-        super();
-    }
+    public final static String FACET_VALUE_LAST_WEEK = "last_week";
 
-    /** The virtual "global" field for file name, title and description */
-    public static final String FIELD_GLOBAL = "global";
+    public final static String FACET_VALUE_LAST_MONTH = "last_month";
 
-    /** The field for file name */
-    public static final String FIELD_FILE_NAME = "filename";
-
-    /** The field for file description */
-    public static final String FIELD_FILE_DESC = "description";
-
-    /** The field for file content */
-    public static final String FIELD_FILE_CONTENT = "content";
-
-    /** The field for file MIME type */
-    public static final String FIELD_FILE_TYPE = "file_mimetype";
-
-    /** The field for file size */
-    public static final String FIELD_FILE_SIZE = "file_size";
-
-    /** The field for time */
-    public final static String FIELD_TIME = "time";
-
-    // ---------------------------------------------------------------------------------------------------------- //
-
-    /** The fields to query for */
-    public static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_FILE_NAME, FIELD_FILE_DESC });
+    public final static String FACET_VALUE_LAST_YEAR = "last_year";
 
 }

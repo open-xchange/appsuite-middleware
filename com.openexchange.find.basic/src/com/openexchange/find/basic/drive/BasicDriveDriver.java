@@ -102,6 +102,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
+    static enum Comparison {
+        GREATER_THAN, GREATER_EQUALS, EQUALS, LOWER_THAN, LOWER_EQUALS;
+    }
+
     private final Field[] fields = new File.Field[] { Field.ID, Field.MODIFIED_BY, Field.LAST_MODIFIED, Field.FOLDER_ID, Field.TITLE,
         Field.FILENAME, Field.FILE_MIMETYPE, Field.FILE_SIZE, Field.VERSION, Field.LOCKED_UNTIL, Field.CREATED_BY, Field.CREATED,
         Field.DESCRIPTION };

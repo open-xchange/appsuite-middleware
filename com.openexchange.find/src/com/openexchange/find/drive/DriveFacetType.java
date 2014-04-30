@@ -70,7 +70,8 @@ public enum DriveFacetType implements FacetType {
     FILE_TYPE(DriveStrings.FACET_FILE_TYPE),
     FILE_DESCRIPTION(null, true),
     FILE_CONTENT(null, true),
-    FILE_SIZE(DriveStrings.FACET_FILE_SIZE, false, true)
+    FILE_SIZE(DriveStrings.FACET_FILE_SIZE, false, true),
+    TIME(DriveStrings.FACET_TIME, false, true),
     ;
 
     private static final Map<String, DriveFacetType> typesById = new HashMap<String, DriveFacetType>();

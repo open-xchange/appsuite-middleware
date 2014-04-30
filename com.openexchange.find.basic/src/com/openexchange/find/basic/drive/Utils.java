@@ -52,8 +52,10 @@ package com.openexchange.find.basic.drive;
 import static com.openexchange.java.Strings.isEmpty;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,13 +70,19 @@ import com.openexchange.file.storage.search.DescriptionTerm;
 import com.openexchange.file.storage.search.FileMimeTypeTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.FileSizeTerm;
+import com.openexchange.file.storage.search.LastModifiedTerm;
 import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.search.TitleTerm;
 import com.openexchange.file.storage.search.VersionCommentTerm;
 import com.openexchange.find.FindExceptionCode;
+import com.openexchange.find.basic.drive.BasicDriveDriver.Comparison;
+import com.openexchange.find.drive.DriveConstants;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
+import com.openexchange.java.util.TimeZones;
 
 
 /**
@@ -104,7 +112,7 @@ public final class Utils {
             return null;
         }
 
-        if ("global".equals(field)) {
+        if (Constants.FIELD_GLOBAL.equals(field)) {
             final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(3);
             terms.add(new FileNameTerm(query));
             terms.add(new TitleTerm(query, true, true));
@@ -127,7 +135,7 @@ public final class Utils {
         } else if (Constants.FIELD_FILE_SIZE.equals(field)) {
             final long bytes = parseFilesizeQuery(query);
             final ComparisonType comparison = parseComparisonType(query);
-            ComparablePattern<Number> term = new ComparablePattern<Number>() {
+            final ComparablePattern<Number> pattern = new ComparablePattern<Number>() {
 
                 @Override
                 public ComparisonType getComparisonType() {
@@ -136,11 +144,14 @@ public final class Utils {
 
                 @Override
                 public Number getPattern() {
-                    return bytes;
+                    return Long.valueOf(bytes);
                 }
 
             };
-            return new FileSizeTerm(term);
+            return new FileSizeTerm(pattern);
+        } else if (Constants.FIELD_TIME.equals(field)) {
+            final Pair<Comparison, Long> pair = parseTimeQuery(query);
+            return buildTimeTerm(pair.getFirst(), pair.getSecond().longValue());
         }
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
     }
@@ -532,7 +543,7 @@ public final class Utils {
         throw FindExceptionCode.PARSING_ERROR.create(query);
     }
 
-    private static ComparisonType parseComparisonType(String query) throws OXException {
+    private static ComparisonType parseComparisonType(final String query) throws OXException {
         Matcher matcher = pattern.matcher(query);
         if (matcher.find()) {
             String comparison = matcher.group(1);
@@ -545,6 +556,157 @@ public final class Utils {
             }
         }
         throw FindExceptionCode.PARSING_ERROR.create(query);
+    }
+
+    private static Pair<Comparison, Long> parseTimeQuery(final String query) throws OXException {
+        if (Strings.isEmpty(query)) {
+            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, Constants.FIELD_TIME);
+        }
+
+        Comparison comparison;
+        long timestamp;
+        Calendar cal = new GregorianCalendar(TimeZones.UTC);
+        if (DriveConstants.FACET_VALUE_LAST_WEEK.equals(query)) {
+            cal.add(Calendar.WEEK_OF_YEAR, -1);
+            comparison = Comparison.GREATER_EQUALS;
+            timestamp = cal.getTime().getTime();
+        } else if (DriveConstants.FACET_VALUE_LAST_MONTH.equals(query)) {
+            cal.add(Calendar.MONTH, -1);
+            comparison = Comparison.GREATER_EQUALS;
+            timestamp = cal.getTime().getTime();
+        } else if (DriveConstants.FACET_VALUE_LAST_YEAR.equals(query)) {
+            cal.add(Calendar.YEAR, -1);
+            comparison = Comparison.GREATER_EQUALS;
+            timestamp = cal.getTime().getTime();
+        } else {
+            /*
+             * This block just preserves the code, as we likely have to implement
+             * custom time ranges in the future. Currently this else path should
+             * never be called.
+             *
+             * Idea: Introduce an additional custom time facet that might be set,
+             * but is not part of autocomplete responses. If it is set, we also
+             * should not deliver the normal time facet in autocomplete responses.
+             *
+             * {
+             *   'facet':'time_custom',
+             *   'value':'>=12345678900'
+             * }
+             */
+            char[] chars = query.toCharArray();
+            String sTimestamp;
+            if (chars.length > 1) {
+                int offset = 0;
+                if (chars[0] == '<') {
+                    offset = 1;
+                    comparison = Comparison.LOWER_THAN;
+                    if (chars[1] == '=') {
+                        offset = 2;
+                        comparison = Comparison.LOWER_EQUALS;
+                    }
+                } else if (chars[0] == '>') {
+                    offset = 1;
+                    comparison = Comparison.GREATER_THAN;
+                    if (chars[1] == '=') {
+                        offset = 2;
+                        comparison = Comparison.GREATER_EQUALS;
+                    }
+                } else {
+                    comparison = Comparison.EQUALS;
+                }
+
+                sTimestamp = String.copyValueOf(chars, offset, chars.length);
+            } else {
+                comparison = Comparison.EQUALS;
+                sTimestamp = query;
+            }
+
+            try {
+                timestamp = Long.parseLong(sTimestamp);
+            } catch (NumberFormatException e) {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, Constants.FIELD_TIME);
+            }
+        }
+
+        return new Pair<Comparison, Long>(comparison, Long.valueOf(timestamp));
+    }
+
+    private static SearchTerm<?> buildTimeTerm(final Comparison comparison, final long timestamp) {
+        ComparablePattern<Date> pattern = null;
+        switch (comparison) {
+        case EQUALS:
+            pattern = new ComparablePattern<Date>() {
+
+                @Override
+                public Date getPattern() {
+                    return new Date(timestamp);
+                }
+
+                @Override
+                public ComparisonType getComparisonType() {
+                    return ComparisonType.EQUALS;
+                }
+            };
+            break;
+        case GREATER_THAN:
+            pattern = new ComparablePattern<Date>() {
+
+                @Override
+                public Date getPattern() {
+                    return new Date(timestamp);
+                }
+
+                @Override
+                public ComparisonType getComparisonType() {
+                    return ComparisonType.GREATER_THAN;
+                }
+            };
+            break;
+        case LOWER_THAN:
+            pattern = new ComparablePattern<Date>() {
+
+                @Override
+                public Date getPattern() {
+                    return new Date(timestamp);
+                }
+
+                @Override
+                public ComparisonType getComparisonType() {
+                    return ComparisonType.LESS_THAN;
+                }
+            };
+            break;
+        case GREATER_EQUALS:
+            pattern = new ComparablePattern<Date>() {
+
+                @Override
+                public Date getPattern() {
+                    return new Date(timestamp - 1);
+                }
+
+                @Override
+                public ComparisonType getComparisonType() {
+                    return ComparisonType.GREATER_THAN;
+                }
+            };
+            break;
+        case LOWER_EQUALS:
+            pattern = new ComparablePattern<Date>() {
+
+                @Override
+                public Date getPattern() {
+                    return new Date(timestamp + 1);
+                }
+
+                @Override
+                public ComparisonType getComparisonType() {
+                    return ComparisonType.LESS_THAN;
+                }
+            };
+            break;
+        }
+
+        return null == pattern ? null : new LastModifiedTerm(pattern);
     }
 
 }

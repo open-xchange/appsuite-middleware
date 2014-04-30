@@ -62,10 +62,4 @@ public enum ComparisonType {
     EQUALS,
     GREATER_THAN;
 
-    /**
-     * Initializes a new {@link ComparisonType}.
-     */
-    private ComparisonType() {
-    }
-
 }

@@ -76,6 +76,8 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.FormattableDisplayItem;
+import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.drive.DriveConstants;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.drive.FileDocument;
@@ -239,82 +241,91 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
     @Override
     protected AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
 
-        String prefix = autocompleteRequest.getPrefix();
+        final String prefix = autocompleteRequest.getPrefix();
 
         // List of supported facets
         final List<Facet> facets = new LinkedList<Facet>();
 
         if (!prefix.isEmpty()) {
             // Add field factes
-            FieldFacet filenameFacet = new FieldFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(
-                DriveStrings.SEARCH_IN_FILE_NAME,
-                prefix), Field.FILENAME.getName(), prefix);
-            FieldFacet descriptionFacet = new FieldFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(
-                DriveStrings.SEARCH_IN_FILE_DESC,
-                prefix), Field.DESCRIPTION.getName(), prefix);
-            FieldFacet contentFacet = new FieldFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(
-                DriveStrings.SEARCH_IN_FILE_CONTENT,
-                prefix), Field.CONTENT.getName(), prefix);
+            final FieldFacet filenameFacet =
+                new FieldFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix), Field.FILENAME.getName(), prefix);
+            final FieldFacet descriptionFacet =
+                new FieldFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix), Field.DESCRIPTION.getName(), prefix);
+            final FieldFacet contentFacet =
+                new FieldFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix), Field.CONTENT.getName(), prefix);
             facets.add(filenameFacet);
             facets.add(descriptionFacet);
             facets.add(contentFacet);
         }
         // Add static file type facet
-        final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
-        final String fieldFileType = Constants.FIELD_FILE_TYPE;
-        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.AUDIO.getIdentifier(), new FileTypeDisplayItem(
-            DriveStrings.FILE_TYPE_AUDIO,
-            FileTypeDisplayItem.Type.AUDIO), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileType),
-            FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
-        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier(), new FileTypeDisplayItem(
-            DriveStrings.FILE_TYPE_DOCUMENTS,
-            FileTypeDisplayItem.Type.DOCUMENTS), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileType),
-            FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
-        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.IMAGES.getIdentifier(), new FileTypeDisplayItem(
-            DriveStrings.FILE_TYPE_IMAGES,
-            FileTypeDisplayItem.Type.IMAGES), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileType),
-            FileTypeDisplayItem.Type.IMAGES.getIdentifier())));
-        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.OTHER.getIdentifier(), new FileTypeDisplayItem(
-            DriveStrings.FILE_TYPE_OTHER,
-            FileTypeDisplayItem.Type.OTHER), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileType),
-            FileTypeDisplayItem.Type.OTHER.getIdentifier())));
-        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.VIDEO.getIdentifier(), new FileTypeDisplayItem(
-            DriveStrings.FILE_TYPE_VIDEO,
-            FileTypeDisplayItem.Type.VIDEO), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileType),
-            FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
-        final Facet fileTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
-        facets.add(fileTypeFacet);
+        {
+            final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
+            final String fieldFileType = Constants.FIELD_FILE_TYPE;
+            fileTypes.add(new FacetValue(
+                FileTypeDisplayItem.Type.AUDIO.getIdentifier(),
+                new FileTypeDisplayItem(DriveStrings.FILE_TYPE_AUDIO, FileTypeDisplayItem.Type.AUDIO),
+                FacetValue.UNKNOWN_COUNT,
+                new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier(), new FileTypeDisplayItem(
+                DriveStrings.FILE_TYPE_DOCUMENTS,
+                FileTypeDisplayItem.Type.DOCUMENTS), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldFileType),
+                FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
+            fileTypes.add(new FacetValue(
+                FileTypeDisplayItem.Type.IMAGES.getIdentifier(),
+                new FileTypeDisplayItem(DriveStrings.FILE_TYPE_IMAGES, FileTypeDisplayItem.Type.IMAGES),
+                FacetValue.UNKNOWN_COUNT,
+                new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.IMAGES.getIdentifier())));
+            fileTypes.add(new FacetValue(
+                FileTypeDisplayItem.Type.OTHER.getIdentifier(),
+                new FileTypeDisplayItem(DriveStrings.FILE_TYPE_OTHER, FileTypeDisplayItem.Type.OTHER),
+                FacetValue.UNKNOWN_COUNT,
+                new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.OTHER.getIdentifier())));
+            fileTypes.add(new FacetValue(
+                FileTypeDisplayItem.Type.VIDEO.getIdentifier(),
+                new FileTypeDisplayItem(DriveStrings.FILE_TYPE_VIDEO, FileTypeDisplayItem.Type.VIDEO),
+                FacetValue.UNKNOWN_COUNT,
+                new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
+            final Facet fileTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
+            facets.add(fileTypeFacet);
+        }
 
         // Add static file size facet
-        List<FacetValue> fileSize = new ArrayList<FacetValue>(5);
-        String fieldFileSize = Constants.FIELD_FILE_SIZE;
-        fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB1.getSize(), new FileSizeDisplayItem(
-            Size.MB1.getSize(),
-            Size.MB1), FacetValue.UNKNOWN_COUNT, new Filter(
+        {
+            final List<FacetValue> fileSize = new ArrayList<FacetValue>(5);
+            final String fieldFileSize = Constants.FIELD_FILE_SIZE;
+            fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB1.getSize(), new FileSizeDisplayItem(Size.MB1.getSize(), Size.MB1), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singletonList(fieldFileSize),
                 FileSizeDisplayItem.Size.MB1.getSize())));
-        fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB10.getSize(), new FileSizeDisplayItem(
-            Size.MB10.getSize(),
-            Size.MB10), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileSize),
-            FileSizeDisplayItem.Size.MB10.getSize())));
-        fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB100.getSize(), new FileSizeDisplayItem(
-            Size.MB100.getSize(),
-            Size.MB100), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileSize),
-            FileSizeDisplayItem.Size.MB100.getSize())));
-        fileSize.add(new FacetValue(FileSizeDisplayItem.Size.GB1.getSize(), new FileSizeDisplayItem(
-            Size.GB1.getSize(),
-            Size.GB1), FacetValue.UNKNOWN_COUNT, new Filter(
+            fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB10.getSize(), new FileSizeDisplayItem(Size.MB10.getSize(), Size.MB10), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldFileSize),
+                FileSizeDisplayItem.Size.MB10.getSize())));
+            fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB100.getSize(), new FileSizeDisplayItem(Size.MB100.getSize(), Size.MB100), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldFileSize),
+                FileSizeDisplayItem.Size.MB100.getSize())));
+            fileSize.add(new FacetValue(FileSizeDisplayItem.Size.GB1.getSize(), new FileSizeDisplayItem(Size.GB1.getSize(), Size.GB1), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singletonList(fieldFileSize),
                 FileSizeDisplayItem.Size.GB1.getSize())));
-        Facet fileSizeFacet = new Facet(DriveFacetType.FILE_SIZE, fileSize);
-        facets.add(fileSizeFacet);
+            final Facet fileSizeFacet = new Facet(DriveFacetType.FILE_SIZE, fileSize);
+            facets.add(fileSizeFacet);
+        }
+
+        // Add static time facet
+        {
+            final List<FacetValue> values = new ArrayList<FacetValue>(3);
+            final String fieldTime = Constants.FIELD_TIME;
+            values.add(new FacetValue(DriveConstants.FACET_VALUE_LAST_WEEK, new SimpleDisplayItem(DriveStrings.LAST_WEEK, true), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldTime),
+                DriveConstants.FACET_VALUE_LAST_WEEK)));
+            values.add(new FacetValue(DriveConstants.FACET_VALUE_LAST_MONTH, new SimpleDisplayItem(DriveStrings.LAST_MONTH, true), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldTime),
+                DriveConstants.FACET_VALUE_LAST_MONTH)));
+            values.add(new FacetValue(DriveConstants.FACET_VALUE_LAST_YEAR, new SimpleDisplayItem(DriveStrings.LAST_YEAR, true), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldTime),
+                DriveConstants.FACET_VALUE_LAST_YEAR)));
+            facets.add(new Facet(DriveFacetType.TIME, values));
+        }
 
         return new AutocompleteResult(facets);
     }
