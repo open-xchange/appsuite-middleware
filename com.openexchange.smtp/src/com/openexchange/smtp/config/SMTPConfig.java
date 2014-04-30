@@ -53,10 +53,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.SMTPExceptionCode;
@@ -169,16 +169,8 @@ public final class SMTPConfig extends TransportConfig {
     @Override
     protected boolean doCustomParsing(MailAccount account, Session session) throws OXException {
         if (!account.isDefaultAccount()) {
-            login = account.getLogin();
-            password = account.getPassword();
-
-            String auth = account.getTransportProperties().get("transport_auth");
-            if (Boolean.parseBoolean(auth)) {
-                if (!Strings.isEmpty(account.getTransportLogin()) && !Strings.isEmpty(account.getTransportPassword())) {
-                    login = account.getTransportLogin();
-                    password = account.getTransportPassword();
-                }
-            }
+            login = account.getTransportLogin();
+            password = MailPasswordUtil.decrypt(account.getTransportPassword(), session, account.getId(), login, account.getTransportServer());
             return true;
         }
         return false;
