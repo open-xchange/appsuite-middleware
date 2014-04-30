@@ -48,26 +48,25 @@
 #
 #
 
+set -e
 OXFUNCTIONS=@oxfunctions@
-TAR=$(type -P tar)
-BZIP2=$(type -P bzip2)
-
 test -f ${OXFUNCTIONS} || {
     echo "missing common shell functions file"
     exit 1
 }
 
-# check for "tar" executable
-[ -x "${TAR}" ] || {
-	echo "missing needed command tar"
-	exit 1
+check_on_needed() {
+    local path=$(type -P ${1})
+    if [ -z "${path}" ]; then
+        echo "missing needed command ${1}" >&2
+        exit 1
+    fi
+    echo ${path}
 }
 
-# check for "bzip2" executable
-[ -x "${BZIP2}" ] || {
-   echo "missing needed command bzip2"
-   exit 1
-   }
+TAR=$(check_on_needed tar)
+BZIP2=$(check_on_needed bzip2)
+
 . ${OXFUNCTIONS}
 
 export PATH="${PATH}:/opt/open-xchange/sbin"
