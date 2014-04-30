@@ -284,60 +284,6 @@ public class NotificationMail {
 		return attachmentUpdate;
 	}
 
-    public boolean _shouldBeSent() {
-    	if (endsInPast(appointment)) {
-    		return false;
-    	}
-        LOG.debug("1: User: {}, {} {}", recipient.getEmail(), recipient.getConfiguration().forceCancelMails(), isCancelMail());
-    	if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
-    		return true;
-    	}
-    	if (appointment != null) {
-            LOG.debug("2: User: {}, {} {}", recipient.getEmail(), appointment.containsNotification(), appointment.getNotification());
-        	if (appointment.containsNotification() && !appointment.getNotification()) {
-        		return false;
-        	}
-    	}
-    	if (appointment != null) {
-            LOG.debug("3: User: {}, {} {}", recipient.getEmail(), stateType.name(), endsInPast(appointment));
-        	if (stateType.equals(Type.NEW) && endsInPast(appointment)) {
-        	    return false;
-        	}
-    	}
-    	if (appointment != null && original != null) {
-            LOG.debug("4: User: {}, {} {}", recipient.getEmail(), stateType.name(), isNotWorthUpdateNotification(original, appointment));
-        	if (stateType.equals(Type.MODIFIED)  && isNotWorthUpdateNotification(original, appointment)) {
-        	    return false;
-        	}
-    	}
-        LOG.debug("5: User: {}, {}", recipient.getEmail(), stateType.name());
-    	if (appointment != null && stateType.equals(Type.DELETED)) {
-    	    return false;
-    	}
-        LOG.debug("6: User: {}, {}", recipient.getEmail(), anInterestingFieldChanged());
-    	if (! anInterestingFieldChanged()) {
-    		return false;
-    	}
-        LOG.debug("7: User: {}, {} {}", recipient.getEmail(), stateType.name(), onlyPseudoChangesOnParticipants());
-        if (stateType == Type.MODIFIED && onlyPseudoChangesOnParticipants()) {
-            return false;
-        }
-        LOG.debug("8: User: {}, {}", recipient.getEmail(), getRecipient().getConfiguration().sendITIP());
-        if (getRecipient().getConfiguration().sendITIP() && itipMessage != null) {
-            return true;
-        }
-        LOG.debug("9: User: {}, {}", recipient.getEmail(), getRecipient().getConfiguration().interestedInChanges());
-        if (!getRecipient().getConfiguration().interestedInChanges()) {
-            return false;
-        }
-        LOG.debug("10: User: {}, {} {}", recipient.getEmail(), getRecipient().getConfiguration().interestedInStateChanges(), isAboutStateChangesOnly(true));
-        if (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly(true)) {
-            return false;
-        }
-        LOG.debug("11: User: {}", recipient.getEmail());
-        return true;
-    }
-
     public boolean shouldBeSent() {
         if (endsInPast(appointment)) {
             return false;
@@ -370,7 +316,7 @@ public class NotificationMail {
         if (!getRecipient().getConfiguration().interestedInChanges()) {
             return false;
         }
-        if (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly(true)) {
+        if (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly()) {
             return false;
         }
         return true;
@@ -507,29 +453,19 @@ public class NotificationMail {
     	return getDiff().anyFieldChangedOf(FIELDS_TO_REPORT);
     }
 
-	public boolean isAboutStateChangesOnly(boolean log) {
+	public boolean isAboutStateChangesOnly() {
         if (getDiff() == null) {
-            if (log) {
-                LOG.debug("12: User: {}", recipient.getEmail());
-            }
             return false;
         }
 
         if (isAttachmentUpdate()) {
-            if (log) {
-                LOG.debug("13: User: {}", recipient.getEmail());
-            }
         	return false;
-        }
-
-        if (log) {
-            LOG.debug("14: User: {} {}", recipient.getEmail(), diff.getDifferingFieldNames());
         }
         return diff.isAboutStateChangesOnly();
     }
 
 	public boolean isAboutActorsStateChangeOnly() {
-    	if (!isAboutStateChangesOnly(false)) {
+    	if (!isAboutStateChangesOnly()) {
     		return false;
     	}
 		return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(actor.getIdentifier()));
@@ -543,7 +479,7 @@ public class NotificationMail {
 	}
 
     private boolean isAboutRecipientsStateChangeOnly() {
-    	if (!isAboutStateChangesOnly(false)) {
+    	if (!isAboutStateChangesOnly()) {
     		return false;
     	}
 		return diff.isAboutCertainParticipantsStateChangeOnly(recipient.getEmail());
