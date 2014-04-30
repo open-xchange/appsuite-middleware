@@ -79,6 +79,19 @@ check_argument() {
     fi
 }
 
+warning_heap_dump() {
+cat << EOF
+###############################################################################
+                                  WARNING
+While creating Java heap dumps your JVM will be stopped and the OX Service is
+not functional. This step may take several minutes and it can happen that you
+have to restart the open-xchange service afterwards by hand again.
+
+###############################################################################
+Creating Heap-Dumps will stop
+EOF
+read -p "Press any key to continue or [ctrl+c] to cancel..."
+}
 
 TAR=$(check_on_needed tar)
 BZIP2=$(check_on_needed bzip2)
@@ -101,6 +114,9 @@ KEEP_TMP_VALUES="true false"
 CREATE_THREAD_DUMP=false
 CREATE_THREAD_DUMP_LONG=thread-dump
 CREATE_THREAD_DUMP_VALUES="true false"
+CREATE_HEAP_DUMP=false
+CREATE_HEAP_DUMP_LONG=heap-dump
+CREATE_HEAP_DUMP_VALUES="true false"
 
 # NOTE: Do not add arbitrary directories here!
 OX_LOG_DIR=/var/log/open-xchange
@@ -109,7 +125,7 @@ ARCHIVE_DIRS="/opt/open-xchange/etc ${OX_LOG_DIR}"
 PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf'
 
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
-LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:'
+LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:'
 
 usage() {
     echo
@@ -172,6 +188,12 @@ while true; do
             shift 2
             KILL=$(check_on_needed kill)
             TOP=$(check_on_needed top)
+        ;;
+        --${CREATE_HEAP_DUMP_LONG})
+            HEAP_DUMP=$(check_argument ${1} ${2})
+            shift 2
+            JMAP=$(check_on_needed jmap)
+            warning_heap_dump
         ;;
         -h|--help)
             usage
@@ -312,12 +334,20 @@ create_thread_dumps() {
     echo
 }
 
+create_heap_dump() {
+   local _jmap_cmd="jmap -F -dump:file"
+   ${_jmap_cmd}=${TMP}/${LOGDIR}/commands/"${_jmap_cmd} (heap-dump)" $(get_ox_pid)
+}
+
 trap "rm -f ${LOGARC}; clean_up; exit 1" SIGINT SIGSEGV SIGQUIT SIGTERM
 
 echo creating logdir ${TMP}/${LOGDIR}
 mkdir -p ${TMP}/${LOGDIR}/commands/
 if [ 'true' == "${THREAD_DUMP}" ]; then
     create_thread_dumps
+fi
+if [ 'true' == "${HEAP_DUMP}" ]; then
+    create_heap_dump
 fi
 echo collecting files into ${TMP}/${LOGDIR}/ox_files_and_logs.tar.bz2
 collect_files
