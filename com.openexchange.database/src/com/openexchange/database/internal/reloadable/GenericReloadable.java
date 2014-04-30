@@ -47,66 +47,65 @@
  *
  */
 
-package com.openexchange.database.osgi;
+package com.openexchange.database.internal.reloadable;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.internal.Initialization;
-import com.openexchange.exception.OXException;
+import com.openexchange.config.Reloadable;
 
 /**
- * Injects the {@link ConfigurationService} and publishes the DatabaseService.
+ * {@link GenericReloadable} - Collects contributed reloadables for server bundle.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
-public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
+public final class GenericReloadable implements Reloadable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseServiceRegisterer.class);
+    private static final GenericReloadable INSTANCE = new GenericReloadable();
 
-    private final BundleContext context;
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static GenericReloadable getInstance() {
+        return INSTANCE;
+    }
 
-    private ServiceRegistration<DatabaseService> serviceRegistration;
+    // --------------------------------------------------------------------------------------------------- //
 
-    public DatabaseServiceRegisterer(final BundleContext context) {
+    private final List<Reloadable> reloadables;
+
+    /**
+     * Initializes a new {@link GenericReloadable}.
+     */
+    private GenericReloadable() {
         super();
-        this.context = context;
+        reloadables = new CopyOnWriteArrayList<Reloadable>();
+    }
+
+    /**
+     * Adds given {@link Reloadable} instance.
+     *
+     * @param reloadable The instance to add
+     */
+    public void addReloadable(final Reloadable reloadable) {
+        reloadables.add(reloadable);
     }
 
     @Override
-    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
-        if (Initialization.getInstance().isStarted()) {
-            // No reconfiguration;
-            return null;
+    public void reloadConfiguration(final ConfigurationService configService) {
+        for (final Reloadable reloadable : reloadables) {
+            reloadable.reloadConfiguration(configService);
         }
-        final ConfigurationService configuration = context.getService(reference);
-        try {
-            Initialization.setConfigurationService(configuration);
-            final DatabaseService service = Initialization.getInstance().start(configuration);
-            LOG.info("Publishing DatabaseService.");
-            serviceRegistration = context.registerService(DatabaseService.class, service, null);
-        } catch (final OXException e) {
-            LOG.error("Publishing the DatabaseService failed.", e);
-        }
-        return configuration;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
-        // Nothing to do.
+    public Map<String, String[]> getConfigFileNames() {
+        return Collections.emptyMap();
     }
 
-    @Override
-    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
-        if (null != serviceRegistration) {
-            LOG.info("Unpublishing DatabaseService.");
-            serviceRegistration.unregister();
-            Initialization.getInstance().stop();
-            Initialization.setConfigurationService(null);
-            context.ungetService(reference);
-        }
-    }
 }

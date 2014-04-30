@@ -52,6 +52,7 @@ package com.openexchange.database.internal;
 import static com.openexchange.database.internal.Configuration.Property.CHECK_WRITE_CONS;
 import static com.openexchange.database.internal.Configuration.Property.REPLICATION_MONITOR;
 import static com.openexchange.java.Autoboxing.I;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -67,6 +68,28 @@ public final class Initialization {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Initialization.class);
     private static final Initialization SINGLETON = new Initialization();
+
+    private static final AtomicReference<ConfigurationService> CONF_REF = new AtomicReference<ConfigurationService>();
+
+    /**
+     * Sets the configuration service.
+     *
+     * @param configurationService The configuration service
+     */
+    public static void setConfigurationService(final ConfigurationService configurationService) {
+        CONF_REF.set(configurationService);
+    }
+
+    /**
+     * Gets the configuration service.
+     *
+     * @return The configuration service or <code>null</code> if absent
+     */
+    public static ConfigurationService getConfigurationService() {
+        return CONF_REF.get();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------- //
 
     private final Management management = new Management();
     private final Timer timer = new Timer();
