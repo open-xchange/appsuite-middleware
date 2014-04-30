@@ -212,25 +212,21 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
 
         for (ActiveFacet toRemove : active) {
             FacetType type = toRemove.getType();
-            if (type == CommonFacetType.FOLDER) {
-                typeMap.remove(CommonFacetType.FOLDER);
-                typeMap.remove(CommonFacetType.FOLDER_TYPE);
-                continue;
-            } else if (type == CommonFacetType.FOLDER_TYPE) {
-                typeMap.remove(CommonFacetType.FOLDER);
-                typeMap.remove(CommonFacetType.FOLDER_TYPE);
-                continue;
-            } else if (!type.isFieldFacet()) {
+            List<FacetType> conflictingFacets = type.conflictingFacets();
+            for (FacetType conflicting : conflictingFacets) {
+                typeMap.remove(conflicting);
+            }
+
+            if (!type.isFieldFacet()) {
                 if (type.appliesOnce()) {
                     typeMap.remove(type);
-                    continue;
-                }
-
-                Map<String, FacetValue> valueMap = typeMap.get(type);
-                if (valueMap != null) {
-                    valueMap.remove(toRemove.getValueId());
-                    if (valueMap.isEmpty()) {
-                        typeMap.remove(toRemove.getType());
+                } else {
+                    Map<String, FacetValue> valueMap = typeMap.get(type);
+                    if (valueMap != null) {
+                        valueMap.remove(toRemove.getValueId());
+                        if (valueMap.isEmpty()) {
+                            typeMap.remove(toRemove.getType());
+                        }
                     }
                 }
             }
