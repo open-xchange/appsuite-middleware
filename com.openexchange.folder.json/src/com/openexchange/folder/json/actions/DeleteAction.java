@@ -155,10 +155,11 @@ public final class DeleteAction extends AbstractFolderAction {
                     foldersWithError.put(folderId, e);
                 }
             }
-            if (1 == foldersWithError.size()) {
-                throw foldersWithError.values().iterator().next();
-            }
-            if (1 < foldersWithError.size()) {
+            final int size = foldersWithError.size();
+            if (size > 0) {
+                if (1 == size) {
+                    throw foldersWithError.values().iterator().next();
+                }
                 final StringBuilder sb = new StringBuilder(64);
                 Iterator<String> iterator = foldersWithError.keySet().iterator();
                 sb.append(getFolderNameSafe(folderService, iterator.next(), treeId, session));
