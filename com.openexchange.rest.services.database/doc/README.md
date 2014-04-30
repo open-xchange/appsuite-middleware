@@ -1,5 +1,5 @@
 # Introduction
-The OX DB Service aims to give access to OX SQL databases by way of an http based API. Using a PUT request, clients can query or update the OX user data databases or the configdb. Additionally, this service contains a mechanism for updating a database with new tables. Usually this service listens at an OX host port 8009 under /rest/database, but this can vary depending on the network setup, so its best to keep this value in a configuration option for your service.
+The OX DB Service aims to give access to OX SQL databases by way of an http based API. Using a PUT request, clients can query or update the OX user data databases or the configdb. Additionally, this service contains a mechanism for updating a database with new tables. Usually this service listens at an OX host port 8009 under /preliminary/database, but this can vary depending on the network setup, so its best to keep this value in a configuration option for your service.
 
 # Reading from the databases
 
@@ -10,7 +10,7 @@ Databases in an OX setup are usually set up in a master/slave setup. This means 
 Let's select some metadata about the first 3 contexts from the database:
 
 Query:
-PUT http://localhost:8009/rest/database/configdb/readOnly
+PUT http://localhost:8009/preliminary/database/v1/configdb/readOnly
 
 SELECT * FROM context ORDER BY cid LIMIT 3;
 
@@ -57,7 +57,7 @@ Response:
     }
 }
 
-The query is addressed to /rest/database/configdb/readOnly, meaning we want the slave (the 'readOnly' part of the URL) for the configdb. The query is simply PUT verbatim as a string. Note though, that for using substitutions – and that's something you want to use for parameters from the scary internet to avoid SQL Injection – you'll have to send a more complex JSON structure as a query. We'll talk about that later. 
+The query is addressed to /preliminary/database/v1/configdb/readOnly, meaning we want the slave (the 'readOnly' part of the URL) for the configdb. The query is simply PUT verbatim as a string. Note though, that for using substitutions – and that's something you want to use for parameters from the scary internet to avoid SQL Injection – you'll have to send a more complex JSON structure as a query. We'll talk about that later. 
 
 The response contains all rows as JSON objects with the columns as keys, and the values as values, somewhat deeply nested in response.results.result.rows. 
 
@@ -65,7 +65,7 @@ The response contains all rows as JSON objects with the columns as keys, and the
 
 Let's query an OX DB: 
 
-PUT http://localhost:8009/rest/database/oxdb/1/readOnly
+PUT http://localhost:8009/preliminary/database/v1/oxdb/1/readOnly
 
 SELECT id, mail, preferredLanguage FROM user WHERE cid=1;
 
@@ -95,14 +95,14 @@ Response:
     }
 }
 
-The query this time is addressed to /rest/database/oxdb/1/readOnly. "oxdb" in the URL denotes that we want to query the OX user data database, the "1" is the contextId whose database we want to connect to, "readOnly" again means, we want to talk to the reading slave.
+The query this time is addressed to /preliminary/database/v1/oxdb/1/readOnly. "oxdb" in the URL denotes that we want to query the OX user data database, the "1" is the contextId whose database we want to connect to, "readOnly" again means, we want to talk to the reading slave.
 
 ## Using Substitutions and Prepared Statements
 
 As said before, when adding variables to a query, it's best to use the built-in features of JDBC and use substitutions and prepared statements. Let's do this with the above query and use a substitution for the cid:
 
 
-PUT http://localhost:8009/rest/database/oxdb/1/readOnly
+PUT http://localhost:8009/preliminary/database/v1/oxdb/1/readOnly
 
 {
 	"allUsers": {
@@ -143,7 +143,7 @@ In the response, the query name ("allUsers") appears as the key containing the r
 
 Let's try a more complex query, with more substitutions. This time we're selecting all aliases of user 3:
 
-PUT http://localhost:8009/rest/database/oxdb/1/readOnly
+PUT http://localhost:8009/preliminary/database/v1/oxdb/1/readOnly
 
 {
 	"aliases": {
@@ -173,7 +173,7 @@ Responds with:
 
 We can send multiple queries (and updates) in the same request:
 
-PUT http://localhost:8009/rest/database/oxdb/1/readOnly
+PUT http://localhost:8009/preliminary/database/v1/oxdb/1/readOnly
 
 {
     "allUsers": {
@@ -228,7 +228,7 @@ The response then contains two keys, one for each query.
 
 Errors in the SQL syntax, or connection problems will cancel all requests and return the error: 
 
-PUT http://localhost:8009/rest/database/oxdb/1/readOnly
+PUT http://localhost:8009/preliminary/database/v1/oxdb/1/readOnly
 
 {
     "allUsers": {
@@ -278,7 +278,7 @@ A typo in the second query aborted the request and returns the error, as seen in
 
 The DatabaseService imposes some limits on clients. A client can only issue 100 statements in a single request and a result can only contain 1000 rows, the system tells us about it when it shortens the response:
 
-PUT http://localhost:8009/rest/database/configdb/readOnly
+PUT http://localhost:8009/preliminary/database/v1/configdb/readOnly
 
 SELECT * FROM context ORDER BY cid LIMIT 2000;
 
@@ -324,7 +324,7 @@ The "result" object (or the object named after our query, "result" is just the d
 
 The equivalent to "readOnly" for querying the database is "writable" for issuing updates and inserts. Obviously you'll have to exercise caution when updating our tables. We'll look at how you can set up your own tables in the OX DBs later in this guide. For now let's insert an arbitrary value into the user_attribute table: 
 
-PUT http://localhost:8009/rest/database/oxdb/1/writable
+PUT http://localhost:8009/preliminary/database/v1/oxdb/1/writable
 
 {
 	"insertAttribute": {
@@ -376,7 +376,7 @@ Responds with:
 
 And, for fun, let's retrieve the values:
 
-PUT http://localhost:8009/rest/database/oxdb/1/readOnly
+PUT http://localhost:8009/preliminary/database/v1/oxdb/1/readOnly
 
 {
   "exampleAttributes": {
@@ -409,7 +409,7 @@ Response:
 
 Let's see an automatic rollback:
 
-PUT http://localhost:8009/rest/database/oxdb/1/
+PUT http://localhost:8009/preliminary/database/v1/oxdb/1/writable
 {
   "exampleAttributes": {
     "query": "DELETE FROM user_attribute WHERE cid = ? AND id = ? AND name LIKE 'com.openexchange.example%'",
@@ -442,7 +442,7 @@ Since also the DELETE was rolled back, when we reissue the select from above, al
 
 You can keep a transaction open at the end of an request to get a transaction that spans multiple requests. This is useful, if, for example, you have to retrieve a value, to a computation on it, and then write it back. A transaction will be kept open, if you set the "keepOpen" parameter to "true" in your request: 
 
-PUT http://localhost:8009/rest/database/oxdb/1/writable?keepOpen=true
+PUT http://localhost:8009/preliminary/database/v1/oxdb/1/writable?keepOpen=true
 
 {
   "exampleAttributes": {
@@ -464,7 +464,7 @@ Returns:
 
 As you can see, apart from the result of the query, it also contains a transaction id as the "tx" attribute. We can use this to do further queries or updates in the same transaction:
 
-PUT http://localhost:8009/rest/database/transaction/b693848c1f534cde94c439a4abe2dbfc?keepOpen=true
+PUT http://localhost:8009/preliminary/database/v1/transaction/b693848c1f534cde94c439a4abe2dbfc?keepOpen=true
 
 {
   "exampleAttributes": {
@@ -488,7 +488,7 @@ Since the transaction was started on a write connection, we have to include the 
 
 Let's finish off the transaction by issuing an INSERT and leaving off the keepOpen parameter. The transaction is then committed. 
 
-PUT http://localhost:8009/rest/database/transaction/b693848c1f534cde94c439a4abe2dbfc
+PUT http://localhost:8009/preliminary/database/v1/transaction/b693848c1f534cde94c439a4abe2dbfc
 
 {
 	"insertAttribute": {
@@ -524,7 +524,7 @@ X-OX-DB-VERSION: 1
 
 to have the system check for a valid version. If, as will happen on first contact, the schema does not have the correct version for your module, the PUT request will fail with a status code of 409 (Conflict) and the header X-OX-DB-VERSION of the response will be set to the current version of the schema/module combination. Now it's up to you to migrate from the given version to your target version. If X-OX-DB-VERSION is the empty String, this means the system was never touched by your module before and you have to create all tables. 
 
-PUT http://localhost:8009/rest/database/oxdb/1/writable
+PUT http://localhost:8009/preliminary/database/v1/oxdb/1/writable
 X-OX-DB-MODULE: com.openexchange.myModule
 X-OX-DB-VERSION: 1
 
@@ -541,7 +541,7 @@ Returns a 409 with X-OX-DB-VERSION set to the empty string.
 ## Updating a schema
 So let's update the schema. For that, we need to issue a special call to state our intent to update the schema. Apart from wrapping everything in a transaction, this will also lock the schema, so no one interferes with our update. This is the request we have to issue:
 
-PUT http://localhost:8009/rest/database/migration/for/1/to/1/forModule/com.openexchange.myModule
+PUT http://localhost:8009/preliminary/database/v1/migration/for/1/to/1/forModule/com.openexchange.myModule
 
 {
   "createGreetingTable": {
@@ -562,7 +562,7 @@ The URL is structured like this: /migration/for/[ctxId]/to/[newVersionId]/forMod
 
 Now we can issue our original request and save that greeting:
 
-PUT http://localhost:8009/rest/database/oxdb/1/writable
+PUT http://localhost:8009/preliminary/database/v1/oxdb/1/writable
 X-OX-DB-MODULE: com.openexchange.myModule
 X-OX-DB-VERSION: 1
 
@@ -595,7 +595,7 @@ You can spread a schema update across multiple requests (but one transaction and
 
 First let's create the new table
 
-PUT http://localhost:8009/rest/database/migration/for/1/from/1/to/2/forModule/com.openexchange.myModule?keepOpen=true
+PUT http://localhost:8009/preliminary/database/v1/migration/for/1/from/1/to/2/forModule/com.openexchange.myModule?keepOpen=true
 
 {
   "createGreetingTable": {
@@ -615,7 +615,7 @@ Response:
 
 Then let's select the entries, 1000 at a time to stay within limits, notice we have to change the values in every context that share this schema, as this migration will only be done *once per schema* which could contain the data of any number of contexts. So we have to handle all of it.
 
-PUT http://localhost:8009/rest/database/transaction/d759a07e6de34890a37ea9885fc48ad7?keepOpen=true
+PUT http://localhost:8009/preliminary/database/v1/transaction/d759a07e6de34890a37ea9885fc48ad7?keepOpen=true
 
 {
   "selectGreetings": {
@@ -641,7 +641,7 @@ Response:
 }
 Phew, only one to handle, alright, let's insert that in the new table and update the old table
 
-PUT http://localhost:8009/rest/database/transaction/d759a07e6de34890a37ea9885fc48ad7?keepOpen=true
+PUT http://localhost:8009/preliminary/database/v1/transaction/d759a07e6de34890a37ea9885fc48ad7?keepOpen=true
 
 {
   "insertGreetingEntry": {
@@ -669,11 +669,11 @@ Response:
 
 And, for style points, issue a commit. We could have simply left the "keepOpen" parameter off in the last call to get the same result.
 
-GET http://localhost:8009/rest/database/transaction/d759a07e6de34890a37ea9885fc48ad7/commit
+GET http://localhost:8009/preliminary/database/v1/transaction/d759a07e6de34890a37ea9885fc48ad7/commit
 
 Let's issue a query in this new version of our schema:
 
-PUT http://localhost:8009/rest/database/oxdb/1/readOnly
+PUT http://localhost:8009/preliminary/database/v1/oxdb/1/readOnly
 X-OX-DB-MODULE: com.openexchange.myModule
 X-OX-DB-VERSION: 1
 
@@ -702,7 +702,7 @@ And we can select the greeting, now via a join.
 
 You can unlock a schema forcibly without waiting for the expiry of the lock by issuing a GET request:
 
-GET http://localhost:8009/rest/database//unlock/for/1/andModule/com.openexchange.myModule
+GET http://localhost:8009/preliminary/database/v1//unlock/for/1/andModule/com.openexchange.myModule
 
 specifying the context name and module in the URL.
 
@@ -743,31 +743,31 @@ For reading, the replication monitor checks the transaction counter on the slave
 
 If parts of your database are completely independent of one another, you can partition the database with partitionIds. We use the contextId for this. Clearly this is an optimization strategy, so you might well not need this. In that case just omit the partitionId (it will then default to "0"). If you want to use a partitionId, you have to register it first. Let's register a couple of partitionIds: 
 
-PUT http://localhost:8009/rest/database/pool/w/[writeId]/[schemaName]/partitions
+PUT http://localhost:8009/preliminary/database/v1/pool/w/[writeId]/[schemaName]/partitions
 
 With the body consisting of a JSONArray with the IDs you need registered. For example:
 
-PUT http://localhost:8009/rest/database/pool/w/2/myCustomSchema/partitions
+PUT http://localhost:8009/preliminary/database/v1/pool/w/2/myCustomSchema/partitions
 [1,2,3,4,5]
 
 Which responds with a 200 (OK).
 
 All these parts, the readId of the slave, the writeId of the master, the schema and optionally the partitionId make up the address of your database: 
 
-PUT http://localhost:8009/rest/database/pool/r/[readId]/w/[writeId]/[schema]/[partitionId]
+PUT http://localhost:8009/preliminary/database/v1/pool/r/[readId]/w/[writeId]/[schema]/[partitionId]
 
 Add /writable or /readOnly to it to get the address to do updates and queries. If you need to do a schema migration the URL looks like this:
 
-PUT http://localhost:8009/rest/database/migration/for/pool/r/[readId]/w/[writeId]/[schema]/[partitionId]/from/[oldVersion]/to/[toVersion]/forModule/[module]
+PUT http://localhost:8009/preliminary/database/v1/migration/for/pool/r/[readId]/w/[writeId]/[schema]/[partitionId]/from/[oldVersion]/to/[toVersion]/forModule/[module]
 
 Optional parts are again the partitionId and the /from/[oldVersion] part for the initial update. 
 
 This is the address to unlock a locked schema
-GET http://localhost:8009/rest/database/unlock/pool/r/[readId]/w/[writeId]/[schema]/[partitionId]/andModule/[module]
+GET http://localhost:8009/preliminary/database/v1/unlock/pool/r/[readId]/w/[writeId]/[schema]/[partitionId]/andModule/[module]
 
 There are some tables that need to exist for the replication monitor and the migration system to work. So for every schema that you want to access via our service, you have to issue a call like this: 
 
-http://localhost:8009/rest/database/init/w/[writeId]/[schema]
+http://localhost:8009/preliminary/database/v1/init/w/[writeId]/[schema]
 
 Let's walk through a typical interaction with the database, including the creation of the DB schema.
 
@@ -779,7 +779,7 @@ In this example I will use an existing and already registered database server (i
 
 Before using the schema at all, we have to initialize the database:
 
-GET http://localhost:8009/rest/database/init/w/2/myCustomSchema
+GET http://localhost:8009/preliminary/database/v1/init/w/2/myCustomSchema
 
 which responds with a 200 (OK). Now we're ready to use the schema with our service. 
 
@@ -787,7 +787,7 @@ which responds with a 200 (OK). Now we're ready to use the schema with our servi
 
 So let's try inserting into the greetings table. "Which greetings table?", you ask. It's not there yet, but the migration system will tell us about it: 
 
-PUT http://localhost:8009/rest/database/pool/r/2/w/2/myCustomSchema/writable
+PUT http://localhost:8009/preliminary/database/v1/pool/r/2/w/2/myCustomSchema/writable
 X-OX-DB-MODULE: com.openexchange.myModule
 X-OX-DB-VERSION: 1
 
@@ -804,7 +804,7 @@ To which the server responds with a 409 (Conflict) to tell us, the schema is not
 
 So, let's do the migration on this database:
 
-PUT http://localhost:8009/rest/database//migration/for/pool/r/2/w/2/myCustomSchema/to/1/forModule/com.openexchange.myModule
+PUT http://localhost:8009/preliminary/database/v1//migration/for/pool/r/2/w/2/myCustomSchema/to/1/forModule/com.openexchange.myModule
 {
   "createGreetingTable": {
     "query": "CREATE TABLE greetings (cid INT(10), uid INT(10), greeting VARCHAR(128))"
@@ -824,7 +824,7 @@ Which garners this response:
 
 Alright, the table is there and our versioning constraint is met, so the insert goes through:
 
-PUT http://localhost:8009/rest/database/pool/r/2/w/2/myCustomSchema/writable
+PUT http://localhost:8009/preliminary/database/v1/pool/r/2/w/2/myCustomSchema/writable
 X-OX-DB-MODULE: com.openexchange.myModule
 X-OX-DB-VERSION: 1
 
@@ -848,7 +848,7 @@ To which the server responds:
 
 Let's query the table for the greeting: 
 
-PUT http://localhost:8009/rest/database/pool/r/2/w/2/myCustomSchema/readOnly
+PUT http://localhost:8009/preliminary/database/v1/pool/r/2/w/2/myCustomSchema/readOnly
 X-OX-DB-MODULE: com.openexchange.myModule
 X-OX-DB-VERSION: 1
 
@@ -878,4 +878,3 @@ Transactions work exactly the same as with the other database types. Just includ
 
 # TODOs
 JSON Parser Errors don't show up nicely in responses!!!!!
-Add partition ids

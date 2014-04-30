@@ -77,7 +77,7 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
 
     private static final long serialVersionUID = -1956702653546932381L;
 
-    private static final String PREFIX = "/rest";
+    private static final String PREFIX = "/preliminary";
 
     /**
      * The OX REST registry instance.
@@ -141,6 +141,7 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
         for(Map.Entry<String, String> entry: response.getHeaders().entrySet()) {
             resp.setHeader(entry.getKey(), entry.getValue());
         }
+        resp.setHeader("X-OX-ACHTUNG", "This is an internal API that may change without notice.");
         // TODO: Allow for binary streams
         Iterable<String> body = response.getBody();
         if (body != null) {

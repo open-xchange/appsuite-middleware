@@ -87,7 +87,7 @@ import static com.openexchange.java.util.NativeBuilders.*;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@ROOT("/database")
+@ROOT("/database/v1")
 public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
     
     private static final int MAX_ROWS = 1000;
@@ -539,7 +539,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         }
         String conflictingVersion = context.versions.isUpToDate(id, con, module, version);
         if (conflictingVersion != null) {
-            postProcessor = oldPostProcessor;
+            if (oldPostProcessor != null) {
+                postProcessor = oldPostProcessor;
+            }
             header("X-OX-DB-VERSION", conflictingVersion);
             halt(409);
         }

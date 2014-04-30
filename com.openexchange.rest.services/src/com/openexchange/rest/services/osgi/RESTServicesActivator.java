@@ -81,7 +81,7 @@ public class RESTServicesActivator extends HousekeepingActivator {
         openTrackers();
 
         HttpService httpService = getService(HttpService.class);
-        httpService.registerServlet("/rest", new OXRESTServlet(), null, null);
+        httpService.registerServlet("/preliminary", new OXRESTServlet(), null, null);
     }
 
     @Override
