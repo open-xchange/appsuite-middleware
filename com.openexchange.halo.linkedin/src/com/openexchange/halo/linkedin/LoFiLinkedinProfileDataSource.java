@@ -153,21 +153,18 @@ public class LoFiLinkedinProfileDataSource extends AbstractLinkedinDataSource im
         return emails;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.halo.HaloContactImageSource#getPriority()
-     */
     @Override
     public int getPriority() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.halo.HaloContactImageSource#getPicture(com.openexchange.halo.HaloContactQuery, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public Picture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
-        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getPictureETag(HaloContactQuery contactQuery, ServerSession session) throws OXException {
         return null;
     }
 
