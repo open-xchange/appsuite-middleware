@@ -52,25 +52,25 @@ OXFUNCTIONS=@oxfunctions@
 TAR=$(type -P tar)
 BZIP2=$(type -P bzip2)
 
-test -f $OXFUNCTIONS || {
-        echo "missing common shell functions file"
-        exit 1
+test -f ${OXFUNCTIONS} || {
+    echo "missing common shell functions file"
+    exit 1
 }
 
 # check for "tar" executable
-[ -x "$TAR" ] || {
+[ -x "${TAR}" ] || {
 	echo "missing needed command tar"
 	exit 1
 }
 
 # check for "bzip2" executable
-[ -x "$BZIP2" ] || {
+[ -x "${BZIP2}" ] || {
    echo "missing needed command bzip2"
    exit 1
    }
-. $OXFUNCTIONS
+. ${OXFUNCTIONS}
 
-export PATH="$PATH:/opt/open-xchange/sbin"
+export PATH="${PATH}:/opt/open-xchange/sbin"
 
 # some defaults
 PATH="${PATH}:/opt/open-xchange/sbin"
@@ -78,7 +78,7 @@ TMP=/tmp
 TMP_LONG=tempdir
 LOGDIR=ox_support_infos-$(date +%Y%m%d-%H%M%S)
 LOGDIR_LONG=logdir
-LOGARC=$TMP/$LOGDIR.tar.gz
+LOGARC=${TMP}/${LOGDIR}.tar.gz
 LOGARC_LONG=log-archive
 KEEP_TMP=false
 KEEP_TMP_LONG=keep-tmp-files
@@ -94,75 +94,74 @@ LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:'
 
 usage() {
     echo
-    echo "$0 currently knows the following parameters:"
+    echo "${0} currently knows the following parameters:"
     echo
-    local lopts=$(echo $LONGOPTS | sed -e 's/[:,]/ /g')
+    local lopts=$(echo ${LONGOPTS} | sed -e 's/[:,]/ /g')
     printf '%-22s | %-45s | %-s\n' "Parameter" "Default value" "Possible values"
     echo "--------------------------------------------------------------------------------------------"
-    for opt in $lopts; do
-	local rvar=${opt%_LONG}
-	GLOBIGNORE='*'
-	local default="$(eval echo "$rvar")"
-	local possible=$(eval echo ${opt%_LONG}_VALUES)
-	local lopt=$(eval echo $opt)
+    for opt in ${lopts}; do
+        local rvar=${opt%_LONG}
+        GLOBIGNORE='*'
+        local default="$(eval echo "${rvar}")"
+        local possible=$(eval echo ${opt%_LONG}_VALUES)
+        local lopt=$(eval echo ${opt})
         # echo $opt $rvar $default $lopt
-	printf '%-22s | %-45s | %-s\n' "--$lopt" $default "$possible"
-	GLOBIGNORE=
+        printf '%-22s | %-45s | %-s\n' "--${lopt}" ${default} "${possible}"
+        GLOBIGNORE=
     done
 cat<<EOF
 
 Example:
 
-  $0 
+  ${0}
 
 use -D for Debug mode
 
 EOF
     echo
-#    exit 1
 }
 
 
-TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:hD --long "$(eval echo $LONGOPTS),help" -- "$@") \
-	|| die "exiting"
+TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:hD --long "$(eval echo ${LONGOPTS}),help" -- "${@}") \
+    || die "exiting"
 
-eval set -- "$TEMP"
+eval set -- "${TEMP}"
 
 while true; do
-    case "$1" in
-        --$TMP_LONG)
-	    TMP=$2
-	    shift 2
-	    ;;
-	--$LOGDIR_LONG)
-	    LOGDIR=$2
-	    shift 2
-	    ;;
-	--$KEEP_TMP_LONG)
-	    KEEP_TMP=$2
-	    shift 2
-	    ;;
-	--$LOGARC_LONG)
-	    LOGARC=$2
-	    shift 2
-	    ;;
-	-h|--help)
-	    usage
-	    exit
-	    shift
-	    ;;
-	-D)
-	    set -x
-	    shift
-	    ;;
-	--)
-	    shift
-	    break
-	    ;;
-	*)
-	    die "Internal error!"
-	    exit 1
-	    ;;
+    case "${1}" in
+        --${TMP_LONG})
+            TMP=${2}
+            shift 2
+        ;;
+        --${LOGDIR_LONG})
+            LOGDIR=${2}
+            shift 2
+        ;;
+        --${KEEP_TMP_LONG})
+            KEEP_TMP=${2}
+            shift 2
+        ;;
+        --${LOGARC_LONG})
+            LOGARC=${2}
+            shift 2
+        ;;
+        -h|--help)
+            usage
+            exit
+            shift
+        ;;
+        -D)
+            set -x
+            shift
+        ;;
+        --)
+            shift
+            break
+        ;;
+        *)
+            die "Internal error!"
+            exit 1
+        ;;
     esac
 done
 
@@ -172,88 +171,88 @@ fi
 
 
 # generic parameter checking
-for opt in $MUSTOPTS; do
-    opt_var=$(eval echo \$$opt)
+for opt in ${MUSTOPTS}; do
+    opt_var=$(eval echo \$${opt})
     opt_var_long=$(eval echo \$${opt}_LONG)
-    if [ -z "$opt_var" ]; then
-        usage;
-	    die "missing required option --$opt_var_long"
+    if [ -z "${opt_var}" ]; then
+    usage;
+         die "missing required option --${opt_var_long}"
     fi
 done
 
 # generic option checking
-ALLOPTS=$(echo $LONGOPTS | sed -e 's/[$:,]/ /g' -e 's/_LONG//g')
-for opt in $ALLOPTS; do
-    opt_var=$(eval echo \$$opt)
+ALLOPTS=$(echo ${LONGOPTS} | sed -e 's/[$:,]/ /g' -e 's/_LONG//g')
+for opt in ${ALLOPTS}; do
+    opt_var=$(eval echo \$${opt})
     opt_var_long=$(eval echo \$${opt}_LONG)
     opt_var_values=$(eval echo \$${opt}_VALUES)
-    if [ -n "$opt_var_values" ]; then
-	found=
-	for val in $opt_var_values; do
-	    if [ "$val" == "$opt_var" ]; then
-		found=$val
-	    fi
-	done
-	if [ -z "$found" ]; then
-	    die "\"$opt_var\" is not a valid option to --$opt_var_long"
-	fi
+    if [ -n "${opt_var_values}" ]; then
+        found=
+        for val in ${opt_var_values}; do
+            if [ "${val}" == "${opt_var}" ]; then
+                found=${val}
+            fi
+        done
+        if [ -z "${found}" ]; then
+            die "\"${opt_var}\" is not a valid option to --${opt_var_long}"
+        fi
     fi
 done
 
 # distribution depending staff should go here
 
 ox_system_type
-DIST=$?
+DIST=${?}
 
-if [ $(( $DIST & $DEBIAN )) -eq $DEBIAN ]; then
+if [ $(( ${DIST} & ${DEBIAN} )) -eq ${DEBIAN} ]; then
      echo Debian system detected
-     ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/debian_version"
+     ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/debian_version"
      PROCS=${PROCS}';dpkg -l'
-     test -f /etc/mysql/my.cnf && ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/mysql/my.cnf"
-elif [ $(( $DIST & $UCS )) -eq $UCS ]; then
+     test -f /etc/mysql/my.cnf && ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/mysql/my.cnf"
+elif [ $(( ${DIST} & ${UCS} )) -eq ${UCS} ]; then
      echo "Univention system detected"
-     ARCHIVE_DIRS="$ARCHIVE_DIRS /var/log/univention*"
+     ARCHIVE_DIRS="${ARCHIVE_DIRS} /var/log/univention*"
      PROCS=${PROCS}';dpkg -l;ucr dump'
-     test -f /etc/mysql/my.cnf && ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/mysql/my.cnf"
-elif [ $(( $DIST & $SUSE )) -eq $SUSE ]; then
+     test -f /etc/mysql/my.cnf && ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/mysql/my.cnf"
+elif [ $(( ${DIST} & ${SUSE} )) -eq ${SUSE} ]; then
      echo SuSE system detected
-     ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/SuSE-release"
+     ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/SuSE-release"
      PROCS=${PROCS}';rpm -qa --last'
-     test -f /etc/my.cnf && ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/my.cnf"
-elif [ $(( $DIST & $REDHAT )) -eq $REDHAT ]; then
+     test -f /etc/my.cnf && ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/my.cnf"
+elif [ $(( ${DIST} & ${REDHAT} )) -eq ${REDHAT} ]; then
      echo Redhat system detected
-     ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/redhat-release"
+     ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/redhat-release"
      PROCS=${PROCS}';rpm -qa --last'
-     test -f /etc/my.cnf && ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/my.cnf"
+     test -f /etc/my.cnf && ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/my.cnf"
 else
      echo Distribution not detected
 fi
 
 collect_files() {
-   $TAR cvf /$TMP/$LOGDIR/ox_files_and_logs.tar --ignore-failed-read ${ARCHIVE_DIRS} > /dev/null 2>&1
-   OIFS=$IFS
+   ${TAR} cvf /${TMP}/${LOGDIR}/ox_files_and_logs.tar --ignore-failed-read ${ARCHIVE_DIRS} > /dev/null 2>&1
+   OIFS=${IFS}
    IFS=$'\n'
    # be very selective on what to add to the archive (Bug#28830)
    for dir in /etc/httpd /etc/apache*; do
-       test -d $dir || continue
-       for file in $(find $dir -type f \
-                               -regex '^.*\.conf$' -o \
-			       -regex '^.*-\(enabled\|availabled\)\/.*$'); do
-           ALLFILES="$ALLFILES $file"
+       test -d ${dir} || continue
+       for file in $(find ${dir} -type f \
+                   -regex '^.*\.conf$' -o \
+                   -regex '^.*-\(enabled\|availabled\)\/.*$'); do
+       ALLFILES="${ALLFILES} ${file}"
        done
    done
-   IFS=$OIFS
-   $TAR rvf /$TMP/$LOGDIR/ox_files_and_logs.tar --ignore-failed-read $ALLFILES > /dev/null 2>&1
-   bzip2 -9 /$TMP/$LOGDIR/ox_files_and_logs.tar
+   IFS=${OIFS}
+   ${TAR} rvf /${TMP}/${LOGDIR}/ox_files_and_logs.tar --ignore-failed-read ${ALLFILES} > /dev/null 2>&1
+   bzip2 -9 /${TMP}/${LOGDIR}/ox_files_and_logs.tar
 }
 
 
 collect_output(){
-   cd /$TMP
+   cd /${TMP}
    IFS=";"
-   for i in $PROCS; do
+   for i in ${PROCS}; do
        unset IFS
-       $i > "/$TMP/$LOGDIR/commands/$i" 2>&1
+       ${i} > "/${TMP}/${LOGDIR}/commands/${i}" 2>&1
        IFS=";"
    done
    unset IFS
@@ -261,17 +260,17 @@ collect_output(){
 }
 
 clean_up(){
-   test "$KEEP_TMP" = "true" || rm -rf $TMP/$LOGDIR
+   test "${KEEP_TMP}" = "true" || rm -rf ${TMP}/${LOGDIR}
 }
 
-trap "rm -f $LOGARC; clean_up; exit 1" SIGINT SIGSEGV SIGQUIT SIGTERM
+trap "rm -f ${LOGARC}; clean_up; exit 1" SIGINT SIGSEGV SIGQUIT SIGTERM
 
-echo creating logdir $TMP/$LOGDIR
-mkdir -p $TMP/$LOGDIR/commands/
-echo collecting files into $TMP/$LOGDIR/ox_files_and_logs.tar.bz2 
+echo creating logdir ${TMP}/${LOGDIR}
+mkdir -p ${TMP}/${LOGDIR}/commands/
+echo collecting files into ${TMP}/${LOGDIR}/ox_files_and_logs.tar.bz2 
 collect_files
-echo collecting system data into $TMP/$LOGDIR
+echo collecting system data into ${TMP}/${LOGDIR}
 collect_output
-echo creating archive $LOGARC
-$TAR cvfz $LOGARC -C $TMP $LOGDIR > /dev/null 2>&1
+echo creating archive ${LOGARC}
+${TAR} cvfz ${LOGARC} -C ${TMP} ${LOGDIR} > /dev/null 2>&1
 clean_up
