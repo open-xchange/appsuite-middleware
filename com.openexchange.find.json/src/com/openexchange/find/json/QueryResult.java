@@ -47,57 +47,47 @@
  *
  */
 
-package com.openexchange.find.json.actions;
+package com.openexchange.find.json;
 
-import java.util.List;
-import java.util.Map;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.find.Module;
-import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
-import com.openexchange.find.SearchService;
-import com.openexchange.find.facet.ActiveFacet;
-import com.openexchange.find.json.FindRequest;
-import com.openexchange.find.json.QueryResult;
-import com.openexchange.find.json.Offset;
-import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link QueryAction}
+ * Encapsulates a {@link SearchResult} and additional attributes that are needed
+ * to create a JSON response object.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public class QueryAction extends AbstractFindAction {
+public class QueryResult {
+
+    private final SearchResult searchResult;
+
+    private final int[] columns;
 
     /**
-     * Initializes a new {@link QueryAction}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link QueryResult}.
+     * @param searchResult The search result object; never <code>null</code>.
+     * @param columns The requested response columns; possibly <code>null</code>.
      */
-    public QueryAction(final ServiceLookup services) {
-        super(services);
+    public QueryResult(SearchResult searchResult, int[] columns) {
+        super();
+        this.searchResult = searchResult;
+        this.columns = columns;
     }
 
-    @Override
-    protected AJAXRequestResult doPerform(final FindRequest request) throws OXException, JSONException {
-        final SearchService searchService = getSearchService();
-        final int[] columns = request.getColumns();
-        final Module module = request.requireModule();
-        final Offset offset = request.getOffset();
-        if (offset.len <= 0) {
-            return new AJAXRequestResult(SearchResult.EMPTY, SearchResult.class.getName());
-        }
-
-        final List<ActiveFacet> activeFacets = request.getActiveFacets();
-        Map<String, String> options = request.getOptions();
-        final SearchRequest searchRequest = new SearchRequest(offset.off, offset.len, activeFacets, options, columns);
-        final SearchResult result = searchService.search(searchRequest, module, request.getServerSession());
-        return new AJAXRequestResult(new QueryResult(result, columns), QueryResult.class.getName());
+    /**
+     * @return The search result object; never <code>null</code>.
+     */
+    public SearchResult getSearchResult() {
+        return searchResult;
     }
 
+    /**
+     * @return The requested response columns; possibly <code>null</code>.
+     */
+    public int[] getColumns() {
+        return columns;
+    }
 
 }

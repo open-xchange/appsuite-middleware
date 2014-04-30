@@ -307,6 +307,31 @@ public enum MailField {
     }
 
     /**
+     * Creates an array of {@link MailField} corresponding to given <code>int</code> values.
+     * <p>
+     * Guarantees not to return any null values.
+     *
+     * @see #getField(int)
+     * @param fields The <code>int</code> values
+     * @return The array of {@link MailField} containing all fields that match a given <code>int</code> value.
+     */
+    public static final MailField[] getMatchingFields(final int[] fields) {
+        if ((fields == null) || (fields.length == 0)) {
+            return EMPTY_FIELDS;
+        }
+
+        List<MailField> rawFields = new ArrayList<MailField>(fields.length);
+        for (int i = 0; i < fields.length; i++) {
+            MailField field = getField(fields[i]);
+            if (field != null) {
+                rawFields.add(field);
+            }
+        }
+
+        return rawFields.toArray(new MailField[rawFields.size()]);
+    }
+
+    /**
      * Maps specified <code>int</code> value to a mail field. A negative <code>int</code> value is mapped to {@link MailField#BODY}.
      * <p>
      * Mail fields which do not hold a corresponding list field are not mappable to an <code>int</code> value; in consequence they are

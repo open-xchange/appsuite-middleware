@@ -57,42 +57,44 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Document;
 import com.openexchange.find.SearchResult;
+import com.openexchange.find.json.QueryResult;
 import com.openexchange.find.json.osgi.ResultConverterRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SearchResultJSONConverter}
+ * {@link QueryResultJSONConverter}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class SearchResultJSONConverter extends AbstractJSONConverter {
+public class QueryResultJSONConverter extends AbstractJSONConverter {
 
     private final ResultConverterRegistry converterRegistry;
 
-    public SearchResultJSONConverter(final StringTranslator translator, final ResultConverterRegistry converterRegistry) {
+    public QueryResultJSONConverter(final StringTranslator translator, final ResultConverterRegistry converterRegistry) {
         super(translator);
         this.converterRegistry = converterRegistry;
     }
 
     @Override
     public String getInputFormat() {
-        return SearchResult.class.getName();
+        return QueryResult.class.getName();
     }
 
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         Object resultObject = result.getResultObject();
-        if (resultObject instanceof SearchResult) {
-            SearchResult searchResult = (SearchResult) resultObject;
+        if (resultObject instanceof QueryResult) {
+            QueryResult queryResult = (QueryResult) resultObject;
+            SearchResult searchResult = queryResult.getSearchResult();
             JSONObject json = new JSONObject();
             try {
                 json.put("num_found", searchResult.getNumFound());
                 json.put("start", searchResult.getStart());
                 json.put("size", searchResult.getSize());
 
-                JSONResponseVisitor visitor = new JSONResponseVisitor(session, converterRegistry);
+                JSONResponseVisitor visitor = new JSONResponseVisitor(session, converterRegistry, queryResult.getColumns());
                 for (Document document : searchResult.getDocuments()) {
                     document.accept(visitor);
                 }
@@ -101,28 +103,11 @@ public class SearchResultJSONConverter extends AbstractJSONConverter {
                 json.put("results", jsonDocuments);
                 result.addWarnings(visitor.getErrors());
 
-                // TODO: remove if not needed by UI
-                // json.put("facets", convertActiveFacets(session.getUser().getLocale(), searchResult.getActiveFacets()));
                 result.setResultObject(json, "json");
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
             }
         }
     }
-
-    /* TODO: remove if not needed by UI
-    private JSONArray convertActiveFacets(Locale locale, List<ActiveFacet> activeFacets) throws JSONException {
-        JSONArray jFacets = new JSONArray(activeFacets.size());
-        for (ActiveFacet facet : activeFacets) {
-            JSONObject jFacet = new JSONObject(3);
-            jFacet.put("facet", facet.getType().getId());
-            jFacet.put("value", facet.getValueId());
-            jFacet.put("filter", convertFilter(facet.getFilter()));
-            jFacets.put(jFacet);
-        }
-
-        return jFacets;
-    }
-    */
 
 }

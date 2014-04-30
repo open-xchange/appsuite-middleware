@@ -148,6 +148,27 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     }
 
     /**
+     * Performs a query request using the supplied active facets.
+     *
+     * @param module The module
+     * @param facets The active facets
+     * @param columns The columns
+     * @return The found documents
+     * @throws Exception
+     */
+    protected List<PropDocument> query(Module module, List<ActiveFacet> facets, int[] columns) throws Exception {
+        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, module.getIdentifier(), columns);
+        QueryResponse queryResponse = client.execute(queryRequest);
+        SearchResult result = queryResponse.getSearchResult();
+        List<PropDocument> propDocuments = new ArrayList<PropDocument>();
+        List<Document> documents = result.getDocuments();
+        for (Document document : documents) {
+            propDocuments.add((PropDocument) document);
+        }
+        return propDocuments;
+    }
+
+    /**
      * Performs an autocomplete request and returns the facets.
      *
      * @param module The module

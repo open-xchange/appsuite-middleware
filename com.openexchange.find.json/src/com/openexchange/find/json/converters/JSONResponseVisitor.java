@@ -83,14 +83,14 @@ public class JSONResponseVisitor implements DocumentVisitor {
 
     private static final Logger LOG = LoggerFactory.getLogger(JSONResponseVisitor.class);
 
-    private static final MailFieldWriter[] MAIL_WRITERS;
+    private static final MailFieldWriter[] DEFAULT_MAIL_WRITERS;
     static {
         final MailListField[] listFields = new MailListField[MailField.FIELDS_LOW_COST.length];
         for (int i = 0; i < MailField.FIELDS_LOW_COST.length; i++) {
             final MailField mailField = MailField.FIELDS_LOW_COST[i];
             listFields[i] = mailField.getListField();
         }
-        MAIL_WRITERS = MessageWriter.getMailFieldWriter(listFields);
+        DEFAULT_MAIL_WRITERS = MessageWriter.getMailFieldWriter(listFields);
     }
 
     // ------------------------------------------------------------------------------------------------- //
@@ -99,23 +99,40 @@ public class JSONResponseVisitor implements DocumentVisitor {
     private final List<OXException> errors;
     private final JSONArray json;
     private final ResultConverterRegistry converterRegistry;
+    private final int[] columns;
 
-    public JSONResponseVisitor(final ServerSession session, final ResultConverterRegistry converterRegistry) {
+    /**
+     * @param session The session; never <code>null</code>.
+     * @param converterRegistry The converter registry; never <code>null</code>.
+     * @param columns The requested response columns; possibly <code>null</code>.
+     */
+    public JSONResponseVisitor(final ServerSession session, final ResultConverterRegistry converterRegistry, int[] columns) {
         super();
         this.converterRegistry = converterRegistry;
         this.session = session;
+        this.columns = columns;
         errors = new LinkedList<OXException>();
         json = new JSONArray();
     }
 
+    private MailFieldWriter[] mailFieldWriters = null;
+
     @Override
     public void visit(final MailDocument mailDocument) {
+        if (mailFieldWriters == null) {
+            if (columns == null) {
+                mailFieldWriters = DEFAULT_MAIL_WRITERS;
+            } else {
+                mailFieldWriters = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+            }
+        }
+
         final MailMessage mailMessage = mailDocument.getMailMessage();
         try {
-            final JSONObject jsonMessage = new JSONObject(MAIL_WRITERS.length);
+            final JSONObject jsonMessage = new JSONObject(mailFieldWriters.length);
             final int contextId = session.getContextId();
             final int userId = session.getUserId();
-            for (final MailFieldWriter writer : MAIL_WRITERS) {
+            for (final MailFieldWriter writer : mailFieldWriters) {
                 writer.writeField(
                     jsonMessage,
                     mailMessage,

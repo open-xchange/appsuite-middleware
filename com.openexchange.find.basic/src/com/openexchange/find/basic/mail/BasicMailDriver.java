@@ -188,6 +188,12 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             folderName = virtualAllMessagesFolder;
         }
 
+        int[] requestedColumns = searchRequest.getColumns();
+        MailField[] mailFields = MailField.FIELDS_LOW_COST;
+        if (requestedColumns != null) {
+            mailFields = MailField.getMatchingFields(requestedColumns);
+        }
+
         FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folderName);
         int accountId = fullnameArgument.getAccountId();
         MailService mailService = Services.getMailService();
@@ -205,6 +211,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 messageStorage,
                 folder,
                 searchTerm,
+                mailFields,
                 searchRequest.getStart(),
                 searchRequest.getSize());
             List<Document> documents = new ArrayList<Document>(messages.size());
@@ -296,7 +303,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             filters);
     }
 
-    private static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, int start, int size) throws OXException {
+    private static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, int start, int size) throws OXException {
         MailSortField sortField = folder.isSent() ? MailSortField.SENT_DATE : MailSortField.RECEIVED_DATE;
         MailMessage[] messages = messageStorage.searchMessages(
             folder.getFullname(),
@@ -304,7 +311,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             sortField,
             OrderDirection.DESC,
             searchTerm,
-            MailField.FIELDS_LOW_COST);
+            fields);
 
         List<MailMessage> resultMessages = new ArrayList<MailMessage>(messages.length);
         Collections.addAll(resultMessages, messages);
