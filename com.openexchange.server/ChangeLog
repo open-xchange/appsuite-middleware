@@ -1,3 +1,7 @@
+* 2014-04-30 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32036: Use 'transport_auth' for setting SMTP credentials usage. 
+
 * 2014-04-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 32239: Filter associated account's address from recipient list
