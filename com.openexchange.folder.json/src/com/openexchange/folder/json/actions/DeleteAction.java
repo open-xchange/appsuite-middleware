@@ -51,8 +51,11 @@ package com.openexchange.folder.json.actions;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -68,7 +71,7 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.java.StringAllocator;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -133,8 +136,7 @@ public final class DeleteAction extends AbstractFolderAction {
         final AJAXRequestResult result;
         if (failOnError) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
-            final List<String> foldersWithError = new LinkedList<String>();
-            boolean errorOccurred = false;
+            Map<String, OXException> foldersWithError = new HashMap<String, OXException>();
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
                 try {
@@ -146,16 +148,18 @@ public final class DeleteAction extends AbstractFolderAction {
                 } catch (final OXException e) {
                     e.setCategory(Category.CATEGORY_ERROR);
                     log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
-                    errorOccurred = true;
-                    foldersWithError.add(folderId);
+                    foldersWithError.put(folderId, e);
                 }
             }
-            if (errorOccurred) {
-                final StringAllocator sb = new StringAllocator(64);
-                sb.append(foldersWithError.get(0));
-                final int size = foldersWithError.size();
-                for (int i = 1; i < size; i++) {
-                    sb.append(", ").append(foldersWithError.get(i));
+            if (1 == foldersWithError.size()) {
+                throw foldersWithError.values().iterator().next();
+            }
+            if (1 < foldersWithError.size()) {
+                final StringBuilder sb = new StringBuilder(64);
+                Iterator<String> iterator = foldersWithError.keySet().iterator();
+                sb.append(getFolderNameSafe(folderService, iterator.next(), treeId, session));
+                while (iterator.hasNext()) {
+                    sb.append(", ").append(getFolderNameSafe(folderService, iterator.next(), treeId, session));
                 }
                 throw FolderExceptionErrorMessage.FOLDER_DELETION_FAILED.create(sb.toString());
             }
@@ -181,6 +185,27 @@ public final class DeleteAction extends AbstractFolderAction {
          * Return appropriate result
          */
         return result;
+    }
+
+    /**
+     * Tries to get the name of a folder, not throwing an exception in case retrieval fails, but falling back to the folder identifier.
+     *
+     * @param folderService The folder service
+     * @param folderId The ID of the folder to get the name for
+     * @param treeId The folder tree
+     * @param session the session
+     * @return The folder name, or the passed folder ID as fallback
+     */
+    private static String getFolderNameSafe(FolderService folderService, String folderId, String treeId, ServerSession session) {
+        try {
+            UserizedFolder folder = folderService.getFolder(treeId, folderId, session, null);
+            if (null != folder) {
+                return folder.getLocalizedName(session.getUser().getLocale());
+            }
+        } catch (OXException e) {
+            org.slf4j.LoggerFactory.getLogger(DeleteAction.class).debug("Error getting folder name for {}", folderId, e);
+        }
+        return folderId;
     }
 
 }
