@@ -95,11 +95,18 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver {
 
-    //private final static int TASKS_FIELDS[] = {DataObject.OBJECT_ID, DataObject.CREATED_BY, Task.TITLE, Task.STATUS, Task.NOTE};
-
-    private final static int TASKS_FIELDS[] = new int[] { Task.FOLDER_ID, Task.OBJECT_ID, Task.LAST_MODIFIED, Task.CREATED_BY, Task.CREATION_DATE,
-                                                        Task.RECURRENCE_TYPE, Task.PERCENT_COMPLETED, Task.PRIVATE_FLAG, Task.TITLE, Task.PRIORITY,
-                                                        Task.START_DATE, Task.END_DATE, Task.COLOR_LABEL, Task.STATUS, Task.NOTE };
+    private final static int DEFAULT_TASKS_FIELDS[] = new int[] {
+        Task.OBJECT_ID,
+        Task.FOLDER_ID,
+        Task.PRIVATE_FLAG,
+        Task.TITLE,
+        Task.END_DATE,
+        Task.NOTE,
+        Task.PARTICIPANTS,
+        Task.STATUS,
+        Task.PERCENT_COMPLETED,
+        Task.PRIORITY
+    };
 
     /**
      * Initializes a new {@link BasicTasksDriver}.
@@ -133,8 +140,13 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         searchObject.setStart(searchRequest.getStart());
         searchObject.setSize(searchRequest.getSize());
 
+        int[] fields = searchRequest.getColumns();
+        if (fields == null) {
+            fields = DEFAULT_TASKS_FIELDS;
+        }
+
         final TasksSQLInterface tasksSQL = new TasksSQLImpl(session);
-        SearchIterator<Task> si = tasksSQL.findTask(searchObject, Task.TITLE, Order.ASCENDING, TASKS_FIELDS);
+        SearchIterator<Task> si = tasksSQL.findTask(searchObject, Task.TITLE, Order.ASCENDING, fields);
         List<Document> documents = new ArrayList<Document>();
         while(si.hasNext()) {
             documents.add(new TasksDocument(si.next()));
