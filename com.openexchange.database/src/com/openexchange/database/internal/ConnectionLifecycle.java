@@ -59,9 +59,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.internal.reloadable.GenericReloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
@@ -174,6 +177,21 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
             }
         }
         return tmp.intValue();
+    }
+
+    static {
+        GenericReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                usageThreshold = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
     }
 
     @Override
