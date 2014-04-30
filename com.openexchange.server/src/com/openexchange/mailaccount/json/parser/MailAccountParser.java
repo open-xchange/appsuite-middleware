@@ -428,7 +428,7 @@ public class MailAccountParser extends DataParser {
 
     /**
      * Parses the transport credentials based on 'transport_auth' param and if credentials are set within the json request.
-     * 
+     *
      * @param account
      * @param json
      * @param attributes
@@ -437,23 +437,20 @@ public class MailAccountParser extends DataParser {
         String login = account.getLogin();
         String password = account.getPassword();
 
-        if (json.hasAndNotNull(MailAccountFields.TRANSPORT_AUTH)) {
-            final boolean transportAuth = json.optBoolean(MailAccountFields.TRANSPORT_AUTH, true);
-            if (transportAuth) {
-                if (json.hasAndNotNull(MailAccountFields.TRANSPORT_LOGIN) || json.hasAndNotNull(MailAccountFields.TRANSPORT_PASSWORD)) {
-                    login = parseString(json, MailAccountFields.TRANSPORT_LOGIN);
-                    password = parseString(json, MailAccountFields.TRANSPORT_PASSWORD);
-                }
-            } else {
-                login = parseString(json, MailAccountFields.TRANSPORT_LOGIN);
-                password = parseString(json, MailAccountFields.TRANSPORT_PASSWORD);
+        final boolean transportAuth = json.optBoolean(MailAccountFields.TRANSPORT_AUTH, true);
+        if (transportAuth) {
+            String transLogin = json.optString(MailAccountFields.TRANSPORT_LOGIN, null);
+            String transPassw = json.optString(MailAccountFields.TRANSPORT_PASSWORD, null);
+            if (!Strings.isEmpty(transLogin) || !Strings.isEmpty(transPassw)) {
+                // Either one is not empty
+                login = transLogin;
+                password = transPassw;
             }
         } else {
-            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_LOGIN) || json.hasAndNotNull(MailAccountFields.TRANSPORT_PASSWORD)) {
-                login = parseString(json, MailAccountFields.TRANSPORT_LOGIN);
-                password = parseString(json, MailAccountFields.TRANSPORT_PASSWORD);
-            }
+            login = null;
+            password = null;
         }
+
         account.setTransportLogin(login);
         attributes.add(Attribute.TRANSPORT_LOGIN_LITERAL);
         account.setTransportPassword(password);

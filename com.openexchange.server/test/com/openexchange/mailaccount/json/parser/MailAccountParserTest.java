@@ -14,7 +14,7 @@ import com.openexchange.mailaccount.json.fields.MailAccountFields;
 
 /**
  * {@link MailAccountParserTest}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.0
  */
@@ -22,13 +22,13 @@ public class MailAccountParserTest {
 
     private MailAccountDescription mailAccountDescription;
 
-    private String transportLogin = "ewaldbartkowiak@transport.com";
+    private final String transportLogin = "ewaldbartkowiak@transport.com";
 
-    private String transportPassword = "myTransportPassword";
+    private final String transportPassword = "myTransportPassword";
 
-    private String imapLogin = "ewaldbartkowiak@gmail.com";
+    private final String imapLogin = "ewaldbartkowiak@gmail.com";
 
-    private String imapPassword = "myPassword";
+    private final String imapPassword = "myPassword";
 
     private Set<Attribute> attributes;
 
@@ -108,8 +108,8 @@ public class MailAccountParserTest {
 
         MailAccountParser.getInstance().parseTransportCredentials(mailAccountDescription, json, attributes);
 
-        Assert.assertEquals(transportLogin, mailAccountDescription.getTransportLogin());
-        Assert.assertEquals(transportPassword, mailAccountDescription.getTransportPassword());
+        Assert.assertEquals(null, mailAccountDescription.getTransportLogin());
+        Assert.assertEquals(null, mailAccountDescription.getTransportPassword());
         Assert.assertEquals(2, attributes.size());
     }
 
