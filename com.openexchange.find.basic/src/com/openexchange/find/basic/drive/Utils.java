@@ -597,14 +597,15 @@ public final class Utils {
             String sTimestamp;
             if (chars.length > 1) {
                 int offset = 0;
-                if (chars[0] == '<') {
+                final char firstChar = chars[0];
+                if (firstChar == '<') {
                     offset = 1;
                     comparison = Comparison.LOWER_THAN;
                     if (chars[1] == '=') {
                         offset = 2;
                         comparison = Comparison.LOWER_EQUALS;
                     }
-                } else if (chars[0] == '>') {
+                } else if (firstChar == '>') {
                     offset = 1;
                     comparison = Comparison.GREATER_THAN;
                     if (chars[1] == '=') {
