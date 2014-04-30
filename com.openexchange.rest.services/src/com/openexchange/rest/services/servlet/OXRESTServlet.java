@@ -50,6 +50,7 @@
 package com.openexchange.rest.services.servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Map;
 import javax.servlet.Servlet;
@@ -143,9 +144,11 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
         // TODO: Allow for binary streams
         Iterable<String> body = response.getBody();
         if (body != null) {
+            PrintWriter writer = resp.getWriter();
             for (String chunk : body) {
-                resp.getWriter().print(chunk);
+                writer.print(chunk);
             }
+            writer.flush();
         }
     }
 
