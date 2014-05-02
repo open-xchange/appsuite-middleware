@@ -64,7 +64,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -81,31 +80,6 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class RequestTools {
-
-    public static int[] getColumnsAsIntArray(final AJAXRequestData request) throws OXException {
-        final String valueStr = request.getParameter("columns");
-        if (null == valueStr) {
-        	return null;
-        }
-        if (valueStr.equals("all")) {
-            return ContactAction.COLUMNS_ALIAS_ALL;
-        }
-        if (valueStr.equals("list")) {
-            return ContactAction.COLUMNS_ALIAS_LIST;
-        }
-        final String[] valueStrArr = valueStr.split(",");
-
-        final int[] values = new int[valueStrArr.length];
-        for (int i = 0; i < values.length; i++) {
-            try {
-                // Fix for bug 25300: Exchange column ids (610-615) with new ids (616-621) to keep backward compatibility.
-                values[i] = exchangeDuplicateColumnIds(Integer.parseInt(valueStrArr[i].trim()));
-            } catch (final NumberFormatException e) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "columns", valueStr);
-            }
-        }
-        return values;
-    }
 
     public static int getNullableIntParameter(final AJAXRequestData request, final String parameter) throws OXException {
         Integer intParam = null;
@@ -264,24 +238,6 @@ public class RequestTools {
         // Throw an exception
         final String readableType = null == contentType ? (null == mimeType ? "application/unknown" : mimeType) : contentType;
         throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
-    }
-
-    private static int exchangeDuplicateColumnIds(final int field) {
-        int ret = field;
-        if (610 == field) {
-            ret = Contact.YOMI_FIRST_NAME;
-        } else if (611 == field) {
-            ret = Contact.YOMI_LAST_NAME;
-        } else if (612 == field) {
-            ret = Contact.YOMI_COMPANY;
-        } else if (613 == field) {
-            ret = Contact.ADDRESS_HOME;
-        } else if (614 == field) {
-            ret = Contact.ADDRESS_BUSINESS;
-        } else if (615 == field) {
-            ret = Contact.ADDRESS_OTHER;
-        }
-        return ret;
     }
 
     private static boolean isImageContentType(final String contentType) {
