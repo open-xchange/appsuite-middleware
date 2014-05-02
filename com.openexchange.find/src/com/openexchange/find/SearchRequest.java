@@ -49,17 +49,19 @@
 package com.openexchange.find;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
  * Encapsulates a search request.
@@ -75,7 +77,7 @@ public class SearchRequest extends AbstractFindRequest {
 
     private final int size;
 
-    private final Map<FacetType, List<ActiveFacet>> facetMap;
+    private final int[] columns;
 
     private List<Filter> filters;
 
@@ -89,22 +91,13 @@ public class SearchRequest extends AbstractFindRequest {
      * @param size The max. number of documents to return
      * @param activeFacets The list of currently active facets; must not be <code>null</code>
      * @param options A map containing client and module specific options; must not be <code>null</code>
+     * @param columns The columns that shall be returned in the response items or <code>null</code> to use the modules default
      */
-    public SearchRequest(final int start, final int size, final List<ActiveFacet> activeFacets, final Map<String, String> options) {
+    public SearchRequest(final int start, final int size, final List<ActiveFacet> activeFacets, final Map<String, String> options, final int[] columns) {
         super(activeFacets, options);
         this.start = start;
         this.size = size;
-        facetMap = new HashMap<FacetType, List<ActiveFacet>>(activeFacets.size());
-        for (ActiveFacet facet : activeFacets) {
-            FacetType type = facet.getType();
-            List<ActiveFacet> facetList = facetMap.get(type);
-            if (facetList == null) {
-                facetList = new LinkedList<ActiveFacet>();
-                facetMap.put(type, facetList);
-            }
-
-            facetList.add(facet);
-        }
+        this.columns = columns;
     }
 
     /**
@@ -125,6 +118,15 @@ public class SearchRequest extends AbstractFindRequest {
      */
     public int getSize() {
         return size;
+    }
+
+    /**
+     * Gets the columns that shall be returned in the response items.
+     *
+     * @return An array of columns or <code>null</code> if not present.
+     */
+    public int[] getColumns() {
+        return columns;
     }
 
     /**
@@ -150,9 +152,9 @@ public class SearchRequest extends AbstractFindRequest {
 
     /**
      * A list of filters to be applied on the search results based
-     * on the currently active facets. {@link CommonFacetType#GLOBAL}
-     * and {@link CommonFacetType#FOLDER} are always ignored when
-     * constructing the filters.
+     * on the currently active facets. {@link CommonFacetType#GLOBAL},
+     * {@link CommonFacetType#FOLDER} and {@link CommonFacetType#FOLDER_TYPE}
+     * are always ignored when constructing the filters.
      *
      * @return May be empty but never <code>null</code>.
      */
@@ -162,6 +164,7 @@ public class SearchRequest extends AbstractFindRequest {
             Set<FacetType> exclude = new HashSet<FacetType>(2);
             exclude.add(CommonFacetType.GLOBAL);
             exclude.add(CommonFacetType.FOLDER);
+            exclude.add(CommonFacetType.FOLDER_TYPE);
             for (Entry<FacetType, List<ActiveFacet>> entry : facetMap.entrySet()) {
                 FacetType type = entry.getKey();
                 if (!exclude.contains(type)) {
@@ -179,6 +182,28 @@ public class SearchRequest extends AbstractFindRequest {
     }
 
     /**
+     * Gets the folder type set via a present facet of type {@link CommonFacetType#FOLDER_TYPE}.
+     * @return The folder type as specified in {@link FolderObject} or <code>-1</code>.
+     */
+    public int getFolderType() throws OXException {
+        List<ActiveFacet> facets = facetMap.get(CommonFacetType.FOLDER_TYPE);
+        if (facets == null || facets.isEmpty()) {
+            return -1;
+        }
+
+        String type = facets.get(0).getValueId();
+        if (FolderTypeDisplayItem.Type.PRIVATE.getIdentifier().equals(type)) {
+            return FolderObject.PRIVATE;
+        } else if (FolderTypeDisplayItem.Type.PUBLIC.getIdentifier().equals(type)) {
+            return FolderObject.PUBLIC;
+        } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(type)) {
+            return FolderObject.SHARED;
+        } else {
+            throw FindExceptionCode.INVALID_FOLDER_TYPE.create(type == null ? "null" : type);
+        }
+    }
+
+    /**
      * Gets the folder id set via a present facet of type {@link CommonFacetType#FOLDER}.
      * @return The folder id or <code>null</code> if folder facet is not present.
      */
@@ -189,22 +214,6 @@ public class SearchRequest extends AbstractFindRequest {
         }
 
         return facets.get(0).getValueId();
-    }
-
-    /**
-     * Gets the active facet for the given type if and only if
-     * {@link FacetType#appliesOnce()} is <code>true</code>.
-     * @return The facet or <code>null</code> if not present.
-     */
-    public ActiveFacet getActiveFacet(FacetType type) {
-        if (type.appliesOnce()) {
-            List<ActiveFacet> list = facetMap.get(type);
-            if (list != null) {
-                return list.get(0);
-            }
-        }
-
-        return null;
     }
 
     @Override

@@ -67,6 +67,9 @@ public final class Constants {
         super();
     }
 
+    /** The virtual "global" field for file name, title and description */
+    public static final String FIELD_GLOBAL = "global";
+
     /** The field for file name */
     public static final String FIELD_FILE_NAME = "filename";
 
@@ -82,8 +85,8 @@ public final class Constants {
     /** The field for file size */
     public static final String FIELD_FILE_SIZE = "file_size";
 
-    /** The field for folder type */
-    public static final String FIELD_FOLDER_TYPE = "folder_type";
+    /** The field for time */
+    public final static String FIELD_TIME = "time";
 
     // ---------------------------------------------------------------------------------------------------------- //
 

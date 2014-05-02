@@ -175,9 +175,43 @@ public class XMLModifierCLT {
         return 0;
     }
 
+    private static Node findParentNode(Document document, XPathExpression expression, Document insert) throws XPathExpressionException {
+        NodeList insertList = (NodeList) expression.evaluate(insert, XPathConstants.NODESET);
+        final Node insertParentNode;
+        if (insertList.getLength() > 0) {
+            insertParentNode = insertList.item(0).getParentNode();
+        } else {
+            return null;
+        }
+        XPathExpression parentExpression = xf.newXPath().compile(getXPathFromParents(insertParentNode));
+        NodeList parentList = (NodeList) parentExpression.evaluate(document, XPathConstants.NODESET);
+        if (parentList.getLength() == 0 || parentList.getLength() > 1) {
+            return null;
+        }
+        return parentList.item(0);
+    }
+
+    private static String getXPathFromParents(Node node) {
+        String retval = "";
+        if (null == node.getParentNode() || node.getParentNode().isEqualNode(node) || node.getOwnerDocument().getDocumentElement().equals(node)) {
+            retval = "";
+        } else {
+            retval = getXPathFromParents(node.getParentNode());
+        }
+        return retval + "/" + node.getNodeName();
+    }
+
     private static void doAdd(Document document, XPathExpression expression, Document add) throws XPathExpressionException {
         NodeList origList = (NodeList) expression.evaluate(document, XPathConstants.NODESET);
-        Node parentNode = origList.item(0).getParentNode();
+        final Node parentNode;
+        if (origList.getLength() > 0) {
+            parentNode = origList.item(0).getParentNode();
+        } else {
+            parentNode = findParentNode(document, expression, add);
+        }
+        if (null == parentNode) {
+            throw new XPathExpressionException("Can not find any parent node to attach the new nodes to.");
+        }
         NodeList toAddList = (NodeList) expression.evaluate(add, XPathConstants.NODESET);
         for (int i = 0; i < toAddList.getLength(); i++) {
             Node toAdd = toAddList.item(i);
@@ -206,9 +240,13 @@ public class XMLModifierCLT {
             }
             if (!found) {
                 Node imported = document.importNode(toReplace, true);
+                final Node parentNode;
                 if (origList.getLength() > 0) {
-                    origList.item(0).getParentNode().appendChild(imported);
+                    parentNode = origList.item(0).getParentNode();
+                } else {
+                    parentNode = findParentNode(document, expression, replace);
                 }
+                parentNode.appendChild(imported);
             }
         }
     }

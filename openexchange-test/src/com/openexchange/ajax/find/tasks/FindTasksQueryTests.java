@@ -74,7 +74,7 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
     public FindTasksQueryTests(String name) {
         super(name);
     }
-    
+
     /**
      * Test with simple query with no filters
      * Should find 30 tasks.
@@ -89,10 +89,10 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
     public void testWithSimpleQuery() throws OXException, IOException, JSONException {
         assertResults(30, Collections.<ActiveFacet>emptyList(), -1, 30);
     }
-    
+
     /**
-     * Test pagination 
-     * 
+     * Test pagination
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException
@@ -101,10 +101,10 @@ public class FindTasksQueryTests extends AbstractFindTasksTest {
     public void testPagination() throws OXException, IOException, JSONException {
         assertResults(5, Collections.<ActiveFacet>emptyList(), 5, 10);
     }
-    
+
     /**
      * Test query attachment name
-     * 
+     *
      * @throws OXException
      * @throws IOException
      * @throws JSONException

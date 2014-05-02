@@ -240,6 +240,8 @@ public class APIResponseRenderer implements ResponseRenderer {
             }
         } catch (final IOException e) {
             LOG.error("", e);
+        } catch (final IllegalStateException e) {
+            LOG.error("", e);
         }
     }
 

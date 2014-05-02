@@ -50,6 +50,8 @@
 package com.openexchange.find.tasks;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.java.Strings;
@@ -62,7 +64,6 @@ import com.openexchange.java.Strings;
 public enum TasksFacetType implements FacetType {
 
     TASK_PARTICIPANTS(TasksStrings.FACET_TASK_PARTICIPANTS,false),
-    TASK_FOLDERS(TasksStrings.FACET_TASK_FOLDERS, false),
     TASK_TITLE(TasksStrings.FACET_TASK_TITLE, true),
     TASK_DESCRIPTION(TasksStrings.FACET_TASK_DESCRIPTION, true),
     TASK_ATTACHMENT_NAME(TasksStrings.FACET_TASK_ATTACHMENT_NAME, true),
@@ -78,6 +79,7 @@ public enum TasksFacetType implements FacetType {
 
     private final String displayName;
     private final boolean isFieldFacet;
+    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
 
     private TasksFacetType(final String displayName, final boolean isFieldFacet) {
         this.displayName = displayName;
@@ -102,6 +104,11 @@ public enum TasksFacetType implements FacetType {
     @Override
     public boolean appliesOnce() {
         return false;
+    }
+
+    @Override
+    public List<FacetType> conflictingFacets() {
+        return conflictingFacets;
     }
 
     /**

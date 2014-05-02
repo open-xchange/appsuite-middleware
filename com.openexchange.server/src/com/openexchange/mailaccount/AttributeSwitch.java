@@ -100,5 +100,4 @@ public interface AttributeSwitch {
     public Object pop3Path();
     public Object addresses();
     public Object replyTo();
-    public Object transportCredentials();
 }

@@ -47,60 +47,30 @@
  *
  */
 
-package com.openexchange.find.common;
+package com.openexchange.find.facet;
 
-import com.openexchange.find.facet.DefaultDisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
-import com.openexchange.mail.dataobjects.MailFolderInfo;
 
 /**
+ * A display item that is meant to be ignored (e.g. not written out in API responses).
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class FolderDisplayItem extends DefaultDisplayItem {
+public class NoDisplayItem extends DefaultDisplayItem {
 
-    private final MailFolderInfo folder;
-    private final DefaultFolderType defaultFolderType;
-    private final String accountName;
-    private final boolean isDefaultAccount;
-
-    public FolderDisplayItem(final MailFolderInfo folder, final String accountName, final boolean isDefaultAccount) {
-        this(folder, DefaultFolderType.NONE, accountName, isDefaultAccount);
+    @Override
+    public String getDefaultValue() {
+        return "";
     }
 
-    public FolderDisplayItem(final MailFolderInfo folder, final DefaultFolderType defaultFolderType, final String accountName, final boolean isDefaultAccount) {
-        super();
-        this.folder = folder;
-        this.defaultFolderType = defaultFolderType;
-        this.accountName = accountName;
-        this.isDefaultAccount = isDefaultAccount;
+    @Override
+    public Object getItem() {
+        return null;
     }
 
     @Override
     public void accept(DisplayItemVisitor visitor) {
         visitor.visit(this);
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return folder.getName();
-    }
-
-    public DefaultFolderType getDefaultType() {
-        return defaultFolderType;
-    }
-
-    @Override
-    public MailFolderInfo getItem() {
-        return folder;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public boolean isDefaultAccount() {
-        return isDefaultAccount;
     }
 
 }

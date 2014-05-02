@@ -47,59 +47,19 @@
  *
  */
 
-package com.openexchange.find.calendar;
+package com.openexchange.find.mail;
 
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
 
 /**
- * {@link RecurringTypeDisplayItem}
- *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public class RecurringTypeDisplayItem implements DisplayItem {
+public class MailFacetValues {
 
-    public static enum RecurringType {
-        SINGLE("single"), SERIES("series");
+    public final static String FACET_VALUE_LAST_WEEK = "last_week";
 
-        private String identifier;
+    public final static String FACET_VALUE_LAST_MONTH = "last_month";
 
-        private RecurringType(String identifier) {
-            this.identifier = identifier;
-        }
-
-        public String getIdentifier() {
-            return identifier;
-        }
-    }
-
-    private String displayName;
-
-    private RecurringType type;
-
-    public RecurringTypeDisplayItem(String displayName, RecurringType type) {
-        this.displayName = displayName;
-        this.type = type;
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return displayName;
-    }
-
-    @Override
-    public RecurringType getItem() {
-        return type;
-    }
-
-    @Override
-    public boolean isLocalizable() {
-        return true;
-    }
-
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
-    }
+    public final static String FACET_VALUE_LAST_YEAR = "last_year";
 
 }

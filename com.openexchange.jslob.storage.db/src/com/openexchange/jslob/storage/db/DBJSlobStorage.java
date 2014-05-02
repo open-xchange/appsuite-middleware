@@ -102,6 +102,8 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
  */
 public final class DBJSlobStorage implements JSlobStorage {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBJSlobStorage.class);
+
     private static final String ID = "io.ox.wd.jslob.storage.db";
 
     private final ServiceLookup services;
@@ -815,7 +817,10 @@ public final class DBJSlobStorage implements JSlobStorage {
             } catch (final DataTruncation e) {
                 // A BLOB can be 65535 bytes maximum.
                 // If you need more consider using a MEDIUMBLOB for 16777215 bytes or a LONGBLOB for 4294967295
-                throw JSlobExceptionCodes.JSLOB_TOO_BIG.create(e, id.getId());
+                OXException x = JSlobExceptionCodes.JSLOB_TOO_BIG.create(
+                    e, id.getId(), Integer.valueOf(contextId), Integer.valueOf(id.getUser()));
+                LOG.debug("The following JSlob is too big:\n{}", jslob.getJsonObject());
+                throw x;
             } catch (final SQLException e) {
                 throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {

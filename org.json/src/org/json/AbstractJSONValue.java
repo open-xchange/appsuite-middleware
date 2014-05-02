@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.reflect.Constructor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonGenerator.Feature;
@@ -71,19 +70,6 @@ import com.fasterxml.jackson.core.util.MinimalPrettyPrinter;
 abstract class AbstractJSONValue implements JSONValue {
 
     private static final long serialVersionUID = -1594307735237035381L;
-
-    private static final Constructor<String> STRING_CONSTRUCTOR;
-    static {
-        try {
-            final Constructor<String> strConstructor = String.class.getDeclaredConstructor(int.class, int.class, char[].class);
-            strConstructor.setAccessible(true);
-            STRING_CONSTRUCTOR = strConstructor;
-        } catch (final SecurityException e) {
-            throw new IllegalStateException("CharArray initialization failed.", e);
-        } catch (final NoSuchMethodException e) {
-            throw new IllegalStateException("CharArray initialization failed.", e);
-        }
-    }
 
     /**
      * 2K buffer
@@ -227,7 +213,7 @@ abstract class AbstractJSONValue implements JSONValue {
      */
     protected static String directString(final int off, final int len, final char[] chars) {
         try {
-            return STRING_CONSTRUCTOR.newInstance(Integer.valueOf(off), Integer.valueOf(len), chars);
+            return new String(chars, off, len);
         } catch (final Exception e) {
             return new String(chars, off, len);
         }

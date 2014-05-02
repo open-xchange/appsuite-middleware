@@ -70,6 +70,7 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
     private final boolean failOnError;
 
     private Boolean hardDelete;
+    private Boolean failOnErrorParam;
 
     public DeleteRequest(final API api, final String[] folderIds, final Date lastModified, final boolean failOnError) {
         super(api);
@@ -116,12 +117,22 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         this(api, true, folder);
     }
 
-    public void setHardDelete(Boolean hardDelete) {
+    public DeleteRequest setHardDelete(Boolean hardDelete) {
         this.hardDelete = hardDelete;
+        return this;
     }
 
     public Boolean isHardDelete() {
         return hardDelete;
+    }
+
+    public DeleteRequest setFailOnErrorParam(Boolean failOnError) {
+        this.failOnErrorParam = failOnError;
+        return this;
+    }
+
+    public Boolean isFailOnErrorParam() {
+        return failOnErrorParam;
     }
 
     @Override
@@ -144,6 +155,9 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified.getTime()));
         if (null != hardDelete) {
             params.add(new Parameter("hardDelete", String.valueOf(hardDelete)));
+        }
+        if (null != failOnErrorParam) {
+            params.add(new Parameter("failOnError", String.valueOf(failOnErrorParam)));
         }
     }
 

@@ -64,6 +64,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -103,11 +104,11 @@ public final class CreateAction extends AbstractFolderAction {
             treeId = getDefaultTreeIdentifier();
         }
         String parentId = request.getParameter("folder_id");
-        if (null == parentId) {
+        if (Strings.isEmpty(parentId)) {
         	parentId = request.getParameter("folder");
-        }
-        if (null == parentId) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("folder");
+        	if (Strings.isEmpty(parentId)) {
+        	    throw AjaxExceptionCodes.MISSING_PARAMETER.create("folder");
+        	}
         }
         /*
          * Parse folder object

@@ -51,6 +51,9 @@ package com.openexchange.ajax.find.drive;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -64,12 +67,17 @@ import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.find.Document;
+import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.drive.Constants;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -135,14 +143,8 @@ public class BasicDriveTest extends AbstractFindTest {
         assertTrue("Nothing found in BasicDriveTest", result.getSize() > 0);
     }
 
-    public void testAutocompletion() throws Exception {
-        AutocompleteRequest request = new AutocompleteRequest(SEARCH.substring(0, 3), Module.DRIVE.getIdentifier());
-        AutocompleteResponse response = client.execute(request);
-        assertNotNull("Autocompletion failed in BasicDriveTest", response.getFacets());
-    }
-
     public void testSizeFacet() throws Exception {
-        ActiveFacet fileSizeFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(
+        ActiveFacet fileSizeFacet = new ActiveFacet(DriveFacetType.FILE_SIZE, FileSizeDisplayItem.Size.MB1.getSize(), new Filter(
             Collections.singletonList(Constants.FIELD_FILE_SIZE),
             FileSizeDisplayItem.Size.MB1.getSize()));
         QueryRequest request = new QueryRequest(0, 10, Collections.singletonList(fileSizeFacet), Module.DRIVE.getIdentifier());
@@ -154,6 +156,61 @@ public class BasicDriveTest extends AbstractFindTest {
             PropDocument file = (PropDocument) d;
             assertTrue("File is too small", (Integer)file.getProps().get("file_size")  >= 1024*1024);
         }
+    }
+
+    public void testExclusiveFacetValues() throws Exception {
+        List<Facet> facets = autocomplete("");
+        Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
+        assertNotNull("Missing folder type facet", folderTypeFacet);
+        assertEquals("Expected all 3 folder types", 3, folderTypeFacet.getValues().size());
+
+        FacetValue chosenType = folderTypeFacet.getValues().get(0);
+        facets = autocomplete("", Collections.singletonList(createFolderTypeFacet(FolderTypeDisplayItem.Type.getByIdentifier(chosenType.getId()))));
+        assertNull("Folder type facet was returned", findByType(CommonFacetType.FOLDER_TYPE, facets));
+    }
+
+    public void testExclusiveFacets() throws Exception {
+        List<Facet> facets = autocomplete("");
+        Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
+        assertNotNull("Missing folder type facet", folderTypeFacet);
+        assertEquals("Expected all 3 folder types", 3, folderTypeFacet.getValues().size());
+        facets = autocomplete("", Collections.singletonList(createActiveFacet(CommonFacetType.FOLDER, client.getValues().getPrivateInfostoreFolder(), Filter.NO_FILTER)));
+        assertNull("Folder type facet was returned", findByType(CommonFacetType.FOLDER_TYPE, facets));
+    }
+
+    public void testConflictsFolderFlag() throws Exception {
+        List<Facet> facets = autocomplete("");
+        Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
+        assertNotNull("Missing folder type facet", folderTypeFacet);
+        boolean found = false;
+        String prefix = "conflicts:";
+        for (String flag : folderTypeFacet.getFlags()) {
+            int index = flag.indexOf(prefix);
+            if (index > -1) {
+                if (CommonFacetType.FOLDER.getId().equals(flag.substring(index + prefix.length()))) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        assertTrue("Flag not found", found);
+    }
+
+    public void testConflictingFacetsCauseException() throws Exception {
+        List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
+        facets.add(createActiveFacet(CommonFacetType.FOLDER, client.getValues().getPrivateInfostoreFolder(), Filter.NO_FILTER));
+        facets.add(createFolderTypeFacet(FolderTypeDisplayItem.Type.PRIVATE));
+        AutocompleteRequest autocompleteRequest = new AutocompleteRequest("", Module.DRIVE.getIdentifier(), facets, (Map<String, String>) null, false);
+        AutocompleteResponse resp = client.execute(autocompleteRequest);
+        assertTrue("Wrong exception", FindExceptionCode.FACET_CONFLICT.equals(resp.getException()));
+    }
+
+    protected List<Facet> autocomplete(String prefix) throws Exception {
+        return autocomplete(Module.DRIVE, prefix);
+    }
+
+    protected List<Facet> autocomplete(String prefix, List<ActiveFacet> facets) throws Exception {
+        return autocomplete(Module.DRIVE, prefix, facets);
     }
 
 }

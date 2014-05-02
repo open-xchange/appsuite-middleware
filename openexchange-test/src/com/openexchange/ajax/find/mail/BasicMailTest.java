@@ -59,6 +59,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
@@ -77,6 +78,8 @@ import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailListField;
 import com.openexchange.mail.utils.DateUtils;
 import com.openexchange.test.ContactTestManager;
 
@@ -343,6 +346,67 @@ public class BasicMailTest extends AbstractFindTest {
         assertEquals("Prefix item is at wrong position in result set", prefix, last.getId());
     }
 
+    public void testQueryActionWithColumns() throws Exception {
+        /*
+         * Import test mail
+         */
+        String[][] mailIds = importMail(defaultAddress, "Find me", "");
+        assertNotNull("mail was not imported", mailIds);
+
+        List<ActiveFacet> facets = prepareFacets();
+        facets.add(createQuery("Find me"));
+
+        // list request columns from /ui/apps/io.ox/mail/api.js + account id
+        int[] columns = new int[] {102,600,601,602,603,604,605,607,608,610,611,614,652,653};
+        MailListField[] fields = MailListField.getFields(columns);
+        List<PropDocument> documents = query(facets, columns);
+        assertTrue("Did not find mail", documents.size() > 0);
+        PropDocument document = documents.get(0);
+
+        List<String> jsonFields = new LinkedList<String>();
+        for (MailListField field : fields) {
+            jsonFields.add(field.getKey());
+        }
+
+        Map<String, Object> props = document.getProps();
+        for (String jsonField :jsonFields) {
+            Object value = props.remove(jsonField);
+            assertNotNull("Missing field " + jsonField, value);
+        }
+
+        assertTrue("Document contained more fields than requested: " + props.keySet(), props.size() == 0);
+    }
+
+    public void testQueryActionWithoutColumns() throws Exception {
+        /*
+         * Import test mail
+         */
+        String[][] mailIds = importMail(defaultAddress, "Find me", "");
+        assertNotNull("mail was not imported", mailIds);
+
+        List<ActiveFacet> facets = prepareFacets();
+        facets.add(createQuery("Find me"));
+
+
+        MailListField[] fields = MailField.toListFields(MailField.FIELDS_LOW_COST);
+        List<PropDocument> documents = query(facets);
+        assertTrue("Did not find mail", documents.size() > 0);
+        PropDocument document = documents.get(0);
+
+        List<String> jsonFields = new LinkedList<String>();
+        for (MailListField field : fields) {
+            jsonFields.add(field.getKey());
+        }
+
+        Map<String, Object> props = document.getProps();
+        for (String jsonField :jsonFields) {
+            Object value = props.remove(jsonField);
+            assertNotNull("Missing field " + jsonField, value);
+        }
+
+        assertTrue("Document contained more fields than requested: " + props.keySet(), props.size() == 0);
+    }
+
     private void findContactsInValues(List<Contact> contacts, List<FacetValue> values) {
         for (Contact contact : contacts) {
             boolean found = false;
@@ -379,6 +443,10 @@ public class BasicMailTest extends AbstractFindTest {
 
     private List<PropDocument> query(List<ActiveFacet> facets) throws Exception {
         return query(Module.MAIL, facets);
+    }
+
+    private List<PropDocument> query(List<ActiveFacet> facets, int[] columns) throws Exception {
+        return query(Module.MAIL, facets, columns);
     }
 
     private String[][] importMails(int num, String fromHeader, String toHeader) throws OXException, IOException, JSONException {
@@ -437,8 +505,12 @@ public class BasicMailTest extends AbstractFindTest {
     private static final String MAIL =
         "From: #FROM#\n" +
         "To: #TO#\n" +
+        "CC: #TO#\n" +
+        "BCC: #TO#\n" +
         "Received: from ox.open-xchange.com;#DATE#\n" +
+        "Date: #DATE#\n" +
         "Subject: #SUBJECT#\n" +
+        "Disposition-Notification-To: #FROM#\n" +
         "Mime-Version: 1.0\n" +
         "Content-Type: text/plain; charset=\"UTF-8\"\n" +
         "Content-Transfer-Encoding: 8bit\n" +

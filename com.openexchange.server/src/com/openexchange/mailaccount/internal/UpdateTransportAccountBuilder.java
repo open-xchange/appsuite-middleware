@@ -314,10 +314,4 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
     public Object addresses() {
         return null;
     }
-
-    @Override
-    public Object transportCredentials() {
-        return null;
-    }
-
 }

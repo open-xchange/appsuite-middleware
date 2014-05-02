@@ -50,8 +50,9 @@
 package com.openexchange.find.contacts;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.java.Strings;
 
@@ -80,10 +81,6 @@ public enum ContactsFacetType implements FacetType {
      */
     ADDRESS("address", null, false, true),
     /**
-     * The "folder type" facet
-     */
-    FOLDER_TYPE("folder_type", CommonStrings.FACET_TYPE_FOLDER_TYPE, true, false),
-    /**
      * The "contact type" facet
      */
     CONTACT_TYPE("contact_type", ContactsStrings.FACET_TYPE_CONTACT_TYPE, true, false),
@@ -97,6 +94,7 @@ public enum ContactsFacetType implements FacetType {
     private final String displayName;
     private final boolean once;
     private final boolean fieldFacet;
+    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
 
     /**
      * Initializes a new {@link ContactsFacetType}.
@@ -131,6 +129,11 @@ public enum ContactsFacetType implements FacetType {
     @Override
     public boolean appliesOnce() {
         return once;
+    }
+
+    @Override
+    public List<FacetType> conflictingFacets() {
+        return conflictingFacets;
     }
 
     /**

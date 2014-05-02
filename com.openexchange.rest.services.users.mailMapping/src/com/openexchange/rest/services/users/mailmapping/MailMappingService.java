@@ -67,7 +67,7 @@ import static com.openexchange.java.util.NativeBuilders.*;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@ROOT("/utilities/mailResolver")
+@ROOT("/utilities/mailResolver/v1")
 public class MailMappingService extends OXRESTService<MailResolver> {
     
     /**

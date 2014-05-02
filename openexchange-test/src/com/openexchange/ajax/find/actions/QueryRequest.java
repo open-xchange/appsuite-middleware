@@ -78,24 +78,30 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
     private final int size;
     private final List<ActiveFacet> activeFacets;
     private final String module;
+    private final int[] columns;
 
     /**
      * Initializes a new {@link QueryRequest}.
      */
     public QueryRequest(int start, int size, List<ActiveFacet> activeFacets, String module) {
-        this(true, start, size, activeFacets, null, module);
+        this(true, start, size, activeFacets, null, module, null);
+    }
+
+    public QueryRequest(int start, int size, List<ActiveFacet> activeFacets, String module, int[] columns) {
+        this(true, start, size, activeFacets, null, module, columns);
     }
 
     /**
      * Initializes a new {@link QueryRequest}.
      */
-    public QueryRequest(boolean failOnError, int start, int size, List<ActiveFacet> activeFacets, Map<String, String> options, String module) {
+    public QueryRequest(boolean failOnError, int start, int size, List<ActiveFacet> activeFacets, Map<String, String> options, String module, int[] columns) {
         super(options);
         this.failOnError = failOnError;
         this.start = start;
         this.size = size;
         this.activeFacets = activeFacets;
         this.module = module;
+        this.columns = columns;
     }
 
     @Override
@@ -108,6 +114,9 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
         final List<Parameter> list = new LinkedList<Parameter>();
         list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "query"));
         list.add(new Parameter("module", module));
+        if (columns != null) {
+            list.add(new Parameter("columns", columns));
+        }
         return list.toArray(new Parameter[0]);
     }
 

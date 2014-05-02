@@ -47,19 +47,47 @@
  *
  */
 
-package com.openexchange.find.mail;
+package com.openexchange.find.json;
+
+import com.openexchange.find.SearchResult;
 
 
 /**
+ * Encapsulates a {@link SearchResult} and additional attributes that are needed
+ * to create a JSON response object.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class MailConstants {
+public class QueryResult {
 
-    public final static String FACET_VALUE_LAST_WEEK = "last_week";
+    private final SearchResult searchResult;
 
-    public final static String FACET_VALUE_LAST_MONTH = "last_month";
+    private final int[] columns;
 
-    public final static String FACET_VALUE_LAST_YEAR = "last_year";
+    /**
+     * Initializes a new {@link QueryResult}.
+     * @param searchResult The search result object; never <code>null</code>.
+     * @param columns The requested response columns; possibly <code>null</code>.
+     */
+    public QueryResult(SearchResult searchResult, int[] columns) {
+        super();
+        this.searchResult = searchResult;
+        this.columns = columns;
+    }
+
+    /**
+     * @return The search result object; never <code>null</code>.
+     */
+    public SearchResult getSearchResult() {
+        return searchResult;
+    }
+
+    /**
+     * @return The requested response columns; possibly <code>null</code>.
+     */
+    public int[] getColumns() {
+        return columns;
+    }
 
 }

@@ -950,8 +950,20 @@ ox_set_property com.openexchange.jolokia.restrict.to.localhost "$VALUE" /opt/ope
 # SoftwareChange_Request-1985
 ox_remove_property com.openexchange.log.propertyNames /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-1987
+cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/define -d @name -r -
+<configuration>
+    <define name="syslogPatternLayoutActivator" class="com.openexchange.logback.extensions.SyslogPatternLayoutActivator"/>
+</configuration>
+EOF
+cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+rm -f /opt/open-xchange/etc/logback.xml.new
+
 # SoftwareChange_Request-1990
 ox_add_property com.openexchange.quota.attachment -1 /opt/open-xchange/etc/quota.properties
+
+# SoftwareChagne_Request-2002
+ox_add_property com.openexchange.infostore.zipDocumentsCompressionLevel -1 /opt/open-xchange/etc/infostore.properties
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT

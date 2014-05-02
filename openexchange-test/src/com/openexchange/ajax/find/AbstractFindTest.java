@@ -50,6 +50,7 @@
 package com.openexchange.ajax.find;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -62,6 +63,7 @@ import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
@@ -135,6 +137,27 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected List<PropDocument> query(Module module, List<ActiveFacet> facets, int start, int size) throws Exception {
         QueryRequest queryRequest = new QueryRequest(start, size, facets, module.getIdentifier());
+        QueryResponse queryResponse = client.execute(queryRequest);
+        SearchResult result = queryResponse.getSearchResult();
+        List<PropDocument> propDocuments = new ArrayList<PropDocument>();
+        List<Document> documents = result.getDocuments();
+        for (Document document : documents) {
+            propDocuments.add((PropDocument) document);
+        }
+        return propDocuments;
+    }
+
+    /**
+     * Performs a query request using the supplied active facets.
+     *
+     * @param module The module
+     * @param facets The active facets
+     * @param columns The columns
+     * @return The found documents
+     * @throws Exception
+     */
+    protected List<PropDocument> query(Module module, List<ActiveFacet> facets, int[] columns) throws Exception {
+        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, module.getIdentifier(), columns);
         QueryResponse queryResponse = client.execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
@@ -258,6 +281,13 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
             }
         }
         return null;
+    }
+
+    protected static ActiveFacet createFolderTypeFacet(FolderTypeDisplayItem.Type type) {
+        return createActiveFacet(
+            CommonFacetType.FOLDER_TYPE,
+            type.getIdentifier(),
+            new Filter(Collections.singletonList(CommonFacetType.FOLDER_TYPE.getId()), type.getIdentifier()));
     }
 
     protected static ActiveFacet createQuery(String query) {

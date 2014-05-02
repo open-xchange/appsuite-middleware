@@ -50,22 +50,18 @@
 package com.openexchange.find.json.converters;
 
 import java.util.Locale;
-import com.openexchange.find.calendar.RecurringTypeDisplayItem;
-import com.openexchange.find.calendar.RelativeDateDisplayItem;
-import com.openexchange.find.calendar.StatusDisplayItem;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.ContactTypeDisplayItem;
-import com.openexchange.find.common.FolderDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.drive.FileDisplayItem;
 import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.drive.FileTypeDisplayItem;
-import com.openexchange.find.drive.FileDisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
+import com.openexchange.find.facet.NoDisplayItem;
 import com.openexchange.find.tasks.TaskStatusDisplayItem;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
-import com.openexchange.mail.dataobjects.MailFolderInfo;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -83,16 +79,6 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         super();
         this.translator = translator;
         this.locale = locale;
-    }
-
-    @Override
-    public void visit(FolderDisplayItem item) {
-        MailFolderInfo folder = item.getItem();
-        if (!item.isDefaultAccount()) {
-            result = folder.getDisplayName() + " (" + item.getAccountName() + ")";
-        } else {
-            result = folder.getDisplayName();
-        }
     }
 
     @Override
@@ -125,27 +111,12 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
     }
 
     @Override
-    public void visit(StatusDisplayItem item) {
-        result = translator.translate(locale, item.getDefaultValue());
-    }
-
-    @Override
     public void visit(TaskTypeDisplayItem item) {
         result = translator.translate(locale, item.getDefaultValue());
     }
 
     @Override
-    public void visit(RelativeDateDisplayItem item) {
-        result = translator.translate(locale, item.getDefaultValue());
-    }
-
-    @Override
     public void visit(ContactTypeDisplayItem item) {
-        result = translator.translate(locale, item.getDefaultValue());
-    }
-
-    @Override
-    public void visit(RecurringTypeDisplayItem item) {
         result = translator.translate(locale, item.getDefaultValue());
     }
 
@@ -161,12 +132,24 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         result = String.format(locale, defaultValue, args);
     }
 
-    public String getResult() {
-        return result;
-    }
-
     @Override
     public void visit(FileSizeDisplayItem item) {
         result = item.getDefaultValue();
+    }
+
+    @Override
+    public void visit(NoDisplayItem noDisplayItem) {
+        result = null;
+    }
+
+    /**
+     * Gets the value to set for the 'display_name' attribute. This value
+     * is only valid if DisplayItem.accept(visitor) has been called.
+     *
+     * @return The display name or <code>null</code> if it should
+     * not be included in the response object.
+     */
+    public String getDisplayName() {
+        return result;
     }
 }

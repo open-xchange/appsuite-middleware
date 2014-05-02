@@ -51,6 +51,7 @@ package com.openexchange.find.facet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -70,10 +71,11 @@ public class Facet implements Serializable {
 
     private final FacetType type;
     private final List<FacetValue> values;
+    private final List<String> flags;
 
     /**
      * Initializes a new {@link Facet}.
-     * 
+     *
      * @param type The type
      * @param values The values
      * @throws NullPointerException If one of given parameters is <code>null</code>
@@ -86,6 +88,10 @@ public class Facet implements Serializable {
         checkArgument(!values.isEmpty());
         this.type = type;
         this.values = values;
+        flags = new LinkedList<String>();
+        for (FacetType conflicting : type.conflictingFacets()) {
+            flags.add("conflicts:" + conflicting.getId());
+        }
     }
 
     /**
@@ -101,6 +107,24 @@ public class Facet implements Serializable {
      */
     public List<FacetValue> getValues() {
         return values;
+    }
+
+    /**
+     * Gets the facets flags.
+     *
+     * @return A list of flags; never <code>null</code> but possibly empty.
+     */
+    public List<String> getFlags() {
+        return flags;
+    }
+
+    /**
+     * Adds a flag to this facet.
+     *
+     * @param flag The flag.
+     */
+    public void addFlag(String flag) {
+        flags.add(flag);
     }
 
     @Override

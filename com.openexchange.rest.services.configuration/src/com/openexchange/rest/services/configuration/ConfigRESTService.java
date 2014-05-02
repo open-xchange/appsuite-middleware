@@ -65,7 +65,7 @@ import com.openexchange.rest.services.annotations.ROOT;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@ROOT("/configuration")
+@ROOT("/configuration/v1")
 public class ConfigRESTService extends OXRESTService<Void>{
     
     /**
@@ -107,7 +107,6 @@ public class ConfigRESTService extends OXRESTService<Void>{
      * GET /rest/configuration/withPrefix/com.openexchange.mymodule/[contextId]/[userId]
      * Retrieves all properties with a given prefix for a given context and user, e.g. all properties starting with com.openexchange.mymodule as an Object.
      */
-    
     @GET("/withPrefix/:prefix/:context/:user")
     public Map<String, Object> getWithPrefix(String prefix, int context, int user) throws OXException {
         ConfigViewFactory factory = services.getService(ConfigViewFactory.class);

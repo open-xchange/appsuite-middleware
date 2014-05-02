@@ -50,6 +50,7 @@
 package com.openexchange.rest.services.servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Map;
 import javax.servlet.Servlet;
@@ -76,7 +77,7 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
 
     private static final long serialVersionUID = -1956702653546932381L;
 
-    private static final String PREFIX = "/rest";
+    private static final String PREFIX = "/preliminary";
 
     /**
      * The OX REST registry instance.
@@ -140,12 +141,15 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
         for(Map.Entry<String, String> entry: response.getHeaders().entrySet()) {
             resp.setHeader(entry.getKey(), entry.getValue());
         }
+        resp.setHeader("X-OX-ACHTUNG", "This is an internal API that may change without notice.");
         // TODO: Allow for binary streams
         Iterable<String> body = response.getBody();
         if (body != null) {
+            PrintWriter writer = resp.getWriter();
             for (String chunk : body) {
-                resp.getWriter().print(chunk);
+                writer.print(chunk);
             }
+            writer.flush();
         }
     }
 

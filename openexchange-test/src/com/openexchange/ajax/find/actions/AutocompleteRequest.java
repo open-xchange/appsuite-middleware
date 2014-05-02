@@ -185,7 +185,12 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
                 values.add(parseJFacetValue(jFacetValues.getJSONObject(i)));
             }
 
-            return new Facet(facetType, values);
+            Facet facet = new Facet(facetType, values);
+            JSONArray jFlags = jFacet.getJSONArray("flags");
+            for (int i = 0; i < jFlags.length(); i++) {
+                facet.addFlag(jFlags.getString(i));
+            }
+            return facet;
         }
 
         private FacetValue parseJFacetValue(final JSONObject jFacetValue) throws JSONException {

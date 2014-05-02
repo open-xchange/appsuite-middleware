@@ -1,22 +1,22 @@
 
 Name:           open-xchange-drive
-BuildArch:	    noarch
+BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
-BuildRequires: ant
-BuildRequires: ant-nodeps
-BuildRequires: open-xchange-core
-BuildRequires: java-devel >= 1.6.0
-Version:	@OXVERSION@
-%define		ox_release 1
-Release:	%{ox_release}_<CI_CNT>.<B_CNT>
+BuildRequires:  ant
+BuildRequires:  ant-nodeps
+BuildRequires:  open-xchange-core
+BuildRequires:  java-devel >= 1.6.0
+Version:        @OXVERSION@
+%define         ox_release 1
+Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:           http://www.open-xchange.com/
+URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Server module for Open-Xchange Drive file synchronization
-Autoreqprov:   no
-Requires:      open-xchange-core >= @OXVERSION@
+Autoreqprov:    no
+Requires:       open-xchange-core >= @OXVERSION@
 
 %description
 Server module for Open-Xchange Drive file synchronization
@@ -36,6 +36,15 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %clean
 %{__rm} -rf %{buildroot}
+
+%post
+. /opt/open-xchange/lib/oxfunctions.sh
+
+# prevent bash from expanding, see bug 13316
+GLOBIGNORE='*'
+
+# SoftwareChange_Request-1992
+ox_set_property com.openexchange.capability.drive false /opt/open-xchange/etc/drive.properties
 
 %files
 %defattr(-,root,root)

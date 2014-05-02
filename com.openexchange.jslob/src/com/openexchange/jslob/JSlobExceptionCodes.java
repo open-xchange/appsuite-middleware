@@ -101,9 +101,9 @@ public enum JSlobExceptionCodes implements DisplayableOXExceptionCode {
      */
     RESERVED_IDENTIFIER("\"%1$s\" is a reserved identifier. Please choose a different one.", EnumCategory.CATEGORY_USER_INPUT, 9, null),
     /**
-     * The JSlob %1$s is too big.
+     * The JSlob %1$s is too big in context %2$d for user %3$d.
      */
-    JSLOB_TOO_BIG("The JSlob %1$s is too big.", EnumCategory.CATEGORY_USER_INPUT, 10, null)
+    JSLOB_TOO_BIG("The JSlob %1$s is too big in context %2$d for user %3$d.", EnumCategory.CATEGORY_USER_INPUT, 10, null)
 
     ;
 
@@ -117,7 +117,7 @@ public enum JSlobExceptionCodes implements DisplayableOXExceptionCode {
     private final int number;
 
     private final String message;
-    
+
     private String displayMessage;
 
 
@@ -147,7 +147,7 @@ public enum JSlobExceptionCodes implements DisplayableOXExceptionCode {
     public int getNumber() {
         return number;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

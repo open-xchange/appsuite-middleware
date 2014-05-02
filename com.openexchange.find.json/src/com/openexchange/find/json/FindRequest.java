@@ -57,6 +57,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
@@ -300,6 +301,29 @@ public class FindRequest {
      */
     public <T> T getParameter(final String name, final Class<T> coerceTo) throws OXException {
         return request.getParameter(name, coerceTo);
+    }
+
+    /**
+     * Gets the requested columns that shall be filled in the response items.
+     *
+     * @return An array of columns or <code>null</code>.
+     */
+    public int[] getColumns() throws OXException {
+        String valueStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
+        if (null == valueStr) {
+            return null;
+        }
+
+        String[] valueStrArr = valueStr.split(",");
+        int[] values = new int[valueStrArr.length];
+        for (int i = 0; i < values.length; i++) {
+            try {
+                values[i] = Integer.parseInt(valueStrArr[i].trim());
+            } catch (final NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "columns", valueStr);
+            }
+        }
+        return values;
     }
 
     private static Filter parseFilter(JSONObject jFilter) throws JSONException {

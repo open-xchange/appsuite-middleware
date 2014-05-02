@@ -51,12 +51,12 @@ package com.openexchange.find.basic.drive;
 
 import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
 import static com.openexchange.java.Autoboxing.I2i;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -66,22 +66,24 @@ import com.openexchange.file.storage.infostore.ToInfostoreTermVisitor;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.AndTerm;
 import com.openexchange.file.storage.search.SearchTerm;
+import com.openexchange.file.storage.search.TitleTerm;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
+import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
-import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
+import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.drive.DriveConstants;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.drive.FileSizeDisplayItem.Size;
 import com.openexchange.find.drive.FileTypeDisplayItem;
-import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FieldFacet;
@@ -95,7 +97,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -147,8 +149,12 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
-        int userId = session.getUserId();
+    protected Set<Integer> getSupportedFolderTypes() {
+        return ALL_FOLDER_TYPES;
+    }
+
+    @Override
+    public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
         InfostoreSearchEngine searchEngine = Services.getInfostoreSearchEngine();
         if (null == searchEngine) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreFacade.class.getName());
@@ -157,77 +163,13 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         if (null == folderAccessFactory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFolderAccessFactory.class.getName());
         }
-        SearchTerm<?> term = null;
-        List<SearchTerm<?>> terms = null;
-        List<Integer> folderIds = new ArrayList<Integer>();
-        List<ActiveFacet> facets = searchRequest.getActiveFacets();
-        if (facets.size() > 1) {
-            terms = new ArrayList<SearchTerm<?>>(facets.size());
-        }
-        for (ActiveFacet facet : facets) {
-            Filter filter = facet.getFilter();
-            if (filter.getFields().contains(Constants.FIELD_FOLDER_TYPE)) {
-                String query = "";
-                for (int i = 0; i < filter.getFields().size(); i++) {
-                    if (filter.getFields().get(i).equals(Constants.FIELD_FOLDER_TYPE)) {
-                        query = filter.getQueries().get(i);
-                        break;
-                    }
-                }
-                OXFolderAccess access = new OXFolderAccess(session.getContext());
-                FolderObject defaultFolder = access.getDefaultFolder(userId, FolderObject.INFOSTORE);
-                folderIds.add(defaultFolder.getObjectID());
-                List<Integer> subfolders = new LinkedList<Integer>();
-                if (defaultFolder.hasSubfolders()) {
-                    try {
-                        subfolders.addAll(defaultFolder.getSubfolderIds(true, session.getContext()));
-                    } catch (SQLException e) {
-                        // should not happen?
-                    }
-                }
-                if (query.equals(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())) {
-                    for (int folder : subfolders) {
-                        if (access.getFolderType(folder, userId) != FolderObject.PUBLIC) {
-                            folderIds.add(folder);
-                        }
-                    }
-                }
-                if (query.equals(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())) {
-                    for (int folder : subfolders) {
-                        if (access.getFolderType(folder, userId) != FolderObject.PRIVATE) {
-                            folderIds.add(folder);
-                        }
-                    }
-                }
-                if (query.equals(FolderTypeDisplayItem.Type.SHARED.getIdentifier())) {
-                    for (int folder : subfolders) {
-                        if (access.getFolderType(folder, userId) != FolderObject.SHARED) {
-                            folderIds.add(folder);
-                        }
-                    }
-                }
 
-            }
-            term = Utils.termFor(filter);
-            if (null != terms) {
-                terms.add(term);
-            }
-        }
-        if (null != terms) {
-            term = new AndTerm(terms);
-        }
-        if (null == term) {
-            term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
+        List<Integer> folderIds = determineFolderIds(searchRequest, session);
+        SearchTerm<?> term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
+        if (term == null) {
+            term = new TitleTerm("*", true, true);
         }
 
-        final String folderId = searchRequest.getFolderId();
-        if (folderIds.size() == 0 && null != folderId) {
-            folderIds = Collections.singletonList(Integer.valueOf(folderId));
-        } else {
-            if (folderId != null) {
-                folderIds.add(Integer.valueOf(folderId));
-            }
-        }
         ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
         term.visit(visitor);
 
@@ -256,6 +198,41 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         }
     }
 
+    private List<Integer> determineFolderIds(SearchRequest searchRequest, ServerSession session) throws OXException {
+        List<Integer> folderIds;
+        String requestFolderId = searchRequest.getFolderId();
+        if (requestFolderId == null) {
+            int folderType = searchRequest.getFolderType();
+            if (folderType == FolderObject.PRIVATE || folderType == FolderObject.PUBLIC || folderType == FolderObject.SHARED) {
+                folderIds = new LinkedList<Integer>();
+                int userId = session.getUser().getId();
+                SearchIterator<FolderObject> visibleFolders = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                    userId,
+                    session.getUserConfiguration().getGroups(),
+                    session.getUserConfiguration().getAccessibleModules(),
+                    FolderObject.INFOSTORE,
+                    session.getContext());
+
+                while (visibleFolders.hasNext()) {
+                    FolderObject folder = visibleFolders.next();
+                    if (folder.getType(userId) == folderType) {
+                        folderIds.add(folder.getObjectID());
+                    }
+                }
+            } else {
+                folderIds = Collections.emptyList();
+            }
+        } else {
+            try {
+                folderIds = Collections.singletonList(Integer.valueOf(requestFolderId));
+            } catch (NumberFormatException e) {
+                throw FindExceptionCode.INVALID_FOLDER_ID.create(requestFolderId, Module.DRIVE.getIdentifier());
+            }
+        }
+
+        return folderIds;
+    }
+
     @Override
     protected String getFormatStringForGlobalFacet() {
         return DriveStrings.FACET_GLOBAL;
@@ -264,103 +241,90 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
     @Override
     protected AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
 
-        String prefix = autocompleteRequest.getPrefix();
+        final String prefix = autocompleteRequest.getPrefix();
 
         // List of supported facets
         final List<Facet> facets = new LinkedList<Facet>();
 
         if (!prefix.isEmpty()) {
             // Add field factes
-            FieldFacet filenameFacet = new FieldFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(
-                DriveStrings.SEARCH_IN_FILE_NAME,
-                prefix), Field.FILENAME.getName(), prefix);
-            FieldFacet descriptionFacet = new FieldFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(
-                DriveStrings.SEARCH_IN_FILE_DESC,
-                prefix), Field.DESCRIPTION.getName(), prefix);
-            FieldFacet contentFacet = new FieldFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(
-                DriveStrings.SEARCH_IN_FILE_CONTENT,
-                prefix), Field.CONTENT.getName(), prefix);
+            final FieldFacet filenameFacet =
+                new FieldFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix), Field.FILENAME.getName(), prefix);
+            final FieldFacet descriptionFacet =
+                new FieldFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix), Field.DESCRIPTION.getName(), prefix);
+            final FieldFacet contentFacet =
+                new FieldFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix), Field.CONTENT.getName(), prefix);
             facets.add(filenameFacet);
             facets.add(descriptionFacet);
             facets.add(contentFacet);
         }
         // Add static file type facet
-        final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
-        final String fieldFileType = Constants.FIELD_FILE_TYPE;
-        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.AUDIO.getIdentifier(), new FileTypeDisplayItem(
-            DriveStrings.FILE_TYPE_AUDIO,
-            FileTypeDisplayItem.Type.AUDIO), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileType),
-            FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
-        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier(), new FileTypeDisplayItem(
-            DriveStrings.FILE_TYPE_DOCUMENTS,
-            FileTypeDisplayItem.Type.DOCUMENTS), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileType),
-            FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
-        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.IMAGES.getIdentifier(), new FileTypeDisplayItem(
-            DriveStrings.FILE_TYPE_IMAGES,
-            FileTypeDisplayItem.Type.IMAGES), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileType),
-            FileTypeDisplayItem.Type.IMAGES.getIdentifier())));
-        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.OTHER.getIdentifier(), new FileTypeDisplayItem(
-            DriveStrings.FILE_TYPE_OTHER,
-            FileTypeDisplayItem.Type.OTHER), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileType),
-            FileTypeDisplayItem.Type.OTHER.getIdentifier())));
-        fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.VIDEO.getIdentifier(), new FileTypeDisplayItem(
-            DriveStrings.FILE_TYPE_VIDEO,
-            FileTypeDisplayItem.Type.VIDEO), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileType),
-            FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
-        final Facet fileTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
-        facets.add(fileTypeFacet);
-
-        // Add static folder type facets
-        String fieldFolderType = Constants.FIELD_FOLDER_TYPE;
-        final List<FacetValue> folderTypes = new ArrayList<FacetValue>(4);
-        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
-            DriveStrings.FOLDER_TYPE_PUBLIC,
-            FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFolderType),
-            FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
-        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
-            DriveStrings.FOLDER_TYPE_PRIVATE,
-            FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFolderType),
-            FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
-        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
-            DriveStrings.FOLDER_TYPE_SHARED,
-            FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFolderType),
-            FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
-        final Facet folderTypeFacet = new Facet(DriveFacetType.FOLDER_TYPE, folderTypes);
-        facets.add(folderTypeFacet);
+        {
+            final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
+            final String fieldFileType = Constants.FIELD_FILE_TYPE;
+            fileTypes.add(new FacetValue(
+                FileTypeDisplayItem.Type.AUDIO.getIdentifier(),
+                new FileTypeDisplayItem(DriveStrings.FILE_TYPE_AUDIO, FileTypeDisplayItem.Type.AUDIO),
+                FacetValue.UNKNOWN_COUNT,
+                new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
+            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier(),
+                new FileTypeDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS, FileTypeDisplayItem.Type.DOCUMENTS),
+                FacetValue.UNKNOWN_COUNT,
+                new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
+            fileTypes.add(new FacetValue(
+                FileTypeDisplayItem.Type.IMAGES.getIdentifier(),
+                new FileTypeDisplayItem(DriveStrings.FILE_TYPE_IMAGES, FileTypeDisplayItem.Type.IMAGES),
+                FacetValue.UNKNOWN_COUNT,
+                new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.IMAGES.getIdentifier())));
+            fileTypes.add(new FacetValue(
+                FileTypeDisplayItem.Type.OTHER.getIdentifier(),
+                new FileTypeDisplayItem(DriveStrings.FILE_TYPE_OTHER, FileTypeDisplayItem.Type.OTHER),
+                FacetValue.UNKNOWN_COUNT,
+                new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.OTHER.getIdentifier())));
+            fileTypes.add(new FacetValue(
+                FileTypeDisplayItem.Type.VIDEO.getIdentifier(),
+                new FileTypeDisplayItem(DriveStrings.FILE_TYPE_VIDEO, FileTypeDisplayItem.Type.VIDEO),
+                FacetValue.UNKNOWN_COUNT,
+                new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
+            final Facet fileTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
+            facets.add(fileTypeFacet);
+        }
 
         // Add static file size facet
-        List<FacetValue> fileSize = new ArrayList<FacetValue>(5);
-        String fieldFileSize = Constants.FIELD_FILE_SIZE;
-        fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB1.getSize(), new FileSizeDisplayItem(
-            Size.MB1.getSize(),
-            Size.MB1), FacetValue.UNKNOWN_COUNT, new Filter(
+        {
+            final List<FacetValue> fileSize = new ArrayList<FacetValue>(5);
+            final String fieldFileSize = Constants.FIELD_FILE_SIZE;
+            fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB1.getSize(), new FileSizeDisplayItem(Size.MB1.getSize(), Size.MB1), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singletonList(fieldFileSize),
                 FileSizeDisplayItem.Size.MB1.getSize())));
-        fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB10.getSize(), new FileSizeDisplayItem(
-            Size.MB10.getSize(),
-            Size.MB10), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileSize),
-            FileSizeDisplayItem.Size.MB10.getSize())));
-        fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB100.getSize(), new FileSizeDisplayItem(
-            Size.MB100.getSize(),
-            Size.MB100), FacetValue.UNKNOWN_COUNT, new Filter(
-            Collections.singletonList(fieldFileSize),
-            FileSizeDisplayItem.Size.MB100.getSize())));
-        fileSize.add(new FacetValue(FileSizeDisplayItem.Size.GB1.getSize(), new FileSizeDisplayItem(
-            Size.GB1.getSize(),
-            Size.GB1), FacetValue.UNKNOWN_COUNT, new Filter(
+            fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB10.getSize(), new FileSizeDisplayItem(Size.MB10.getSize(), Size.MB10), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldFileSize),
+                FileSizeDisplayItem.Size.MB10.getSize())));
+            fileSize.add(new FacetValue(FileSizeDisplayItem.Size.MB100.getSize(), new FileSizeDisplayItem(Size.MB100.getSize(), Size.MB100), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldFileSize),
+                FileSizeDisplayItem.Size.MB100.getSize())));
+            fileSize.add(new FacetValue(FileSizeDisplayItem.Size.GB1.getSize(), new FileSizeDisplayItem(Size.GB1.getSize(), Size.GB1), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singletonList(fieldFileSize),
                 FileSizeDisplayItem.Size.GB1.getSize())));
-        Facet fileSizeFacet = new Facet(DriveFacetType.FILE_SIZE, fileSize);
-        facets.add(fileSizeFacet);
+            final Facet fileSizeFacet = new Facet(DriveFacetType.FILE_SIZE, fileSize);
+            facets.add(fileSizeFacet);
+        }
+
+        // Add static time facet
+        {
+            final List<FacetValue> values = new ArrayList<FacetValue>(3);
+            final String fieldTime = Constants.FIELD_TIME;
+            values.add(new FacetValue(DriveConstants.FACET_VALUE_LAST_WEEK, new SimpleDisplayItem(DriveStrings.LAST_WEEK, true), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldTime),
+                DriveConstants.FACET_VALUE_LAST_WEEK)));
+            values.add(new FacetValue(DriveConstants.FACET_VALUE_LAST_MONTH, new SimpleDisplayItem(DriveStrings.LAST_MONTH, true), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldTime),
+                DriveConstants.FACET_VALUE_LAST_MONTH)));
+            values.add(new FacetValue(DriveConstants.FACET_VALUE_LAST_YEAR, new SimpleDisplayItem(DriveStrings.LAST_YEAR, true), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singletonList(fieldTime),
+                DriveConstants.FACET_VALUE_LAST_YEAR)));
+            facets.add(new Facet(DriveFacetType.TIME, values));
+        }
 
         return new AutocompleteResult(facets);
     }

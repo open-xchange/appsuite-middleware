@@ -66,10 +66,6 @@ public class Constants {
 
     public final static String FIELD_DESCRIPTION = "description";
 
-    public final static String FIELD_FOLDER = "folder";
-    
-    public final static String FIELD_FOLDER_TYPE = "folder_type";
-
     public final static String FIELD_STATUS = "status";
 
     public final static String FIELD_LOCATION ="location";
@@ -77,12 +73,10 @@ public class Constants {
     public final static String FIELD_ATTACHMENT_NAME = "attachment_name";
 
     public final static String FIELD_TYPE = "type";
-    
-    public final static String FIELD_PARTICIPANT = "participant";
-    
-    public final static List<String> PARTICIPANTS = Collections.singletonList(FIELD_PARTICIPANT);
 
-    public static final Set<String> FOLDERS_FILTER_FIELDS = createStringSet(FIELD_FOLDER);
+    public final static String FIELD_PARTICIPANT = "participant";
+
+    public final static List<String> PARTICIPANTS = Collections.singletonList(FIELD_PARTICIPANT);
 
     public static final Set<String> QUERY_FIELDS = createStringSet(FIELD_TITLE, FIELD_DESCRIPTION, FIELD_ATTACHMENT_NAME);
 

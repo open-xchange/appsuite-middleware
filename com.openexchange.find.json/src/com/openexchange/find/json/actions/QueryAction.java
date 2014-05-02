@@ -60,6 +60,7 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.json.FindRequest;
+import com.openexchange.find.json.QueryResult;
 import com.openexchange.find.json.Offset;
 import com.openexchange.server.ServiceLookup;
 
@@ -84,6 +85,7 @@ public class QueryAction extends AbstractFindAction {
     @Override
     protected AJAXRequestResult doPerform(final FindRequest request) throws OXException, JSONException {
         final SearchService searchService = getSearchService();
+        final int[] columns = request.getColumns();
         final Module module = request.requireModule();
         final Offset offset = request.getOffset();
         if (offset.len <= 0) {
@@ -92,9 +94,10 @@ public class QueryAction extends AbstractFindAction {
 
         final List<ActiveFacet> activeFacets = request.getActiveFacets();
         Map<String, String> options = request.getOptions();
-        final SearchRequest searchRequest = new SearchRequest(offset.off, offset.len, activeFacets, options);
+        final SearchRequest searchRequest = new SearchRequest(offset.off, offset.len, activeFacets, options, columns);
         final SearchResult result = searchService.search(searchRequest, module, request.getServerSession());
-        return new AJAXRequestResult(result, SearchResult.class.getName());
+        return new AJAXRequestResult(new QueryResult(result, columns), QueryResult.class.getName());
     }
+
 
 }

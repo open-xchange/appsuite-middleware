@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindActionFactory;
 import com.openexchange.find.json.converters.AutocompleteResultJSONConverter;
-import com.openexchange.find.json.converters.SearchResultJSONConverter;
+import com.openexchange.find.json.converters.QueryResultJSONConverter;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -97,7 +97,7 @@ public class FindJsonActivator extends AJAXModuleActivator {
         openTrackers();
 
         registerService(ResultConverter.class, new AutocompleteResultJSONConverter(translator));
-        registerService(ResultConverter.class, new SearchResultJSONConverter(translator, converterRegistry));
+        registerService(ResultConverter.class, new QueryResultJSONConverter(translator, converterRegistry));
         registerModule(new FindActionFactory(this), "find");
 
         final String sCapability = "search";

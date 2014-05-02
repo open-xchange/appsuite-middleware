@@ -59,8 +59,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.internal.reloadable.GenericReloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
@@ -154,6 +158,42 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         }
     }
 
+    private static volatile Integer usageThreshold;
+    private static int usageThreshold() {
+        Integer tmp = usageThreshold;
+        if (null == tmp) {
+            synchronized (ConnectionLifecycle.class) {
+                tmp = usageThreshold;
+                if (null == tmp) {
+                    final int defaultValue = 2000;
+                    final ConfigurationService confService = Initialization.getConfigurationService();
+                    if (null == confService) {
+                        return defaultValue;
+                    }
+
+                    tmp = Integer.valueOf(confService.getIntProperty("com.openexchange.database.usageThreshold", defaultValue));
+                    usageThreshold = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    static {
+        GenericReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                usageThreshold = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
+    }
+
     @Override
     public boolean validate(final PooledData<Connection> data) {
         final Connection con = data.getPooled();
@@ -184,7 +224,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                 ConnectionPool.LOG.error("", e);
             }
             // Write warning if using this connection was longer than 2 seconds.
-            if (data.getTimeDiff() > 2000) {
+            if (data.getTimeDiff() > usageThreshold()) {
                 final OXException dbe = DBPoolingExceptionCodes.TOO_LONG.create(L(data.getTimeDiff()));
                 addTrace(dbe, data);
                 ConnectionPool.LOG.warn("", dbe);

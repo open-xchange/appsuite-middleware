@@ -86,6 +86,9 @@ public class DriveStrings implements LocalizableStrings {
     // Search in file size
     public static final String FACET_FILE_SIZE = "File size";
 
+    // Search criteria time
+    public static final String FACET_TIME = "Time";
+
     // -------------------------- i18n strings for file types ---------------------------- //
 
     public static final String FILE_TYPE_IMAGES = "Images";
@@ -117,5 +120,16 @@ public class DriveStrings implements LocalizableStrings {
 
     // Search in file field file content.
     public static final String SEARCH_IN_FILE_CONTENT = "%1$s <i>in file content</i>";
+
+    // ------------------------------- Time --------------------------------------------- //
+
+    // Search mails from last week
+    public static final String LAST_WEEK = "last week";
+
+    // Search mails from last month
+    public static final String LAST_MONTH = "last month";
+
+    // Search mails from last year
+    public static final String LAST_YEAR = "last year";
 
 }

@@ -50,6 +50,8 @@
 package com.openexchange.find.drive;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.java.Strings;
@@ -65,11 +67,11 @@ public enum DriveFacetType implements FacetType {
     CONTACTS(DriveStrings.FACET_CONTACTS),
     FOLDERS(DriveStrings.FACET_FOLDERS),
     FILE_NAME(null, true),
-    FILE_TYPE(DriveStrings.FACET_FILE_TYPE),
+    FILE_TYPE(DriveStrings.FACET_FILE_TYPE, false, true),
     FILE_DESCRIPTION(null, true),
     FILE_CONTENT(null, true),
-    FILE_SIZE(DriveStrings.FACET_FILE_SIZE),
-    FOLDER_TYPE(DriveStrings.FACET_FOLDER_TYPE)
+    FILE_SIZE(DriveStrings.FACET_FILE_SIZE, false, true),
+    TIME(DriveStrings.FACET_TIME, false, true),
     ;
 
     private static final Map<String, DriveFacetType> typesById = new HashMap<String, DriveFacetType>();
@@ -83,13 +85,22 @@ public enum DriveFacetType implements FacetType {
 
     private final boolean fieldFacet;
 
-    private DriveFacetType(final String displayName, final boolean fieldFacet) {
-        this.displayName = displayName;
-        this.fieldFacet = fieldFacet;
-    }
+    private final boolean appliesOnce;
+
+    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
 
     private DriveFacetType(final String displayName) {
         this(displayName, false);
+    }
+
+    private DriveFacetType(final String displayName, final boolean fieldFacet) {
+        this(displayName, fieldFacet, false);
+    }
+
+    private DriveFacetType(final String displayName, final boolean fieldFacet, final boolean appliesOnce) {
+        this.displayName = displayName;
+        this.fieldFacet = fieldFacet;
+        this.appliesOnce = appliesOnce;
     }
 
     @Override
@@ -109,7 +120,12 @@ public enum DriveFacetType implements FacetType {
 
     @Override
     public boolean appliesOnce() {
-        return false;
+        return appliesOnce;
+    }
+
+    @Override
+    public List<FacetType> conflictingFacets() {
+        return conflictingFacets;
     }
 
     /**

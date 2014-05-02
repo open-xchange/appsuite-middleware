@@ -69,9 +69,9 @@ public class FindTasksAutocompleteTests extends AbstractFindTasksTest {
     public FindTasksAutocompleteTests(String n) {
         super(n);
     }
-    
+
     /**
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -79,7 +79,7 @@ public class FindTasksAutocompleteTests extends AbstractFindTasksTest {
         String prefix = client.getValues().getDefaultAddress().substring(0, 3);
         AutocompleteRequest request = new AutocompleteRequest(prefix, Module.TASKS.getIdentifier());
         AutocompleteResponse response = client.execute(request);
-        
+
         assertNotNull(findByDisplayName(response.getFacets(), prefix + TasksStrings.FACET_GLOBAL.substring(4)));
         assertNotNull(findByDisplayName(response.getFacets(), prefix + TasksStrings.FACET_TASK_TITLE.substring(4)));
         assertNotNull(findByDisplayName(response.getFacets(), prefix + TasksStrings.FACET_TASK_DESCRIPTION.substring(4)));

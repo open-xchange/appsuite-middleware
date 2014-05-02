@@ -158,7 +158,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
     protected List<PropDocument> query(List<ActiveFacet> facets, boolean showAdmin) throws Exception {
         Map<String, String> options = new HashMap<String, String>();
         options.put("admin", Boolean.toString(showAdmin));
-        QueryRequest queryRequest = new QueryRequest(true, 0, Integer.MAX_VALUE, facets, options, Module.CONTACTS.getIdentifier());
+        QueryRequest queryRequest = new QueryRequest(true, 0, Integer.MAX_VALUE, facets, options, Module.CONTACTS.getIdentifier(), null);
         QueryResponse queryResponse = client.execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();

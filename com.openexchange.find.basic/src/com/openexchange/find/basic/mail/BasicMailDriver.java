@@ -49,16 +49,7 @@
 
 package com.openexchange.find.basic.mail;
 
-import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
-import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
-import static com.openexchange.find.basic.mail.Constants.FIELD_FROM;
-import static com.openexchange.find.basic.mail.Constants.FIELD_SUBJECT;
-import static com.openexchange.find.basic.mail.Constants.FIELD_TIME;
-import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
-import static com.openexchange.find.basic.mail.Constants.RECIPIENT_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.SENDER_AND_RECIPIENT_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.SENDER_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.asList;
+import static com.openexchange.find.basic.mail.Constants.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -66,6 +57,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -87,7 +79,7 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.mail.MailConstants;
+import com.openexchange.find.mail.MailFacetValues;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.mail.MailStrings;
@@ -166,6 +158,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     @Override
+    protected Set<Integer> getSupportedFolderTypes() {
+        return FOLDER_TYPE_NOT_SUPPORTED;
+    }
+
+    @Override
     protected AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         String prefix = autocompleteRequest.getPrefix();
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
@@ -182,13 +179,19 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     @Override
-    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
+    public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
         String folderName = searchRequest.getFolderId();
         if (folderName == null && Strings.isEmpty(virtualAllMessagesFolder)) {
             throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
         }
         if (folderName == null) {
             folderName = virtualAllMessagesFolder;
+        }
+
+        int[] requestedColumns = searchRequest.getColumns();
+        MailField[] mailFields = MailField.FIELDS_LOW_COST;
+        if (requestedColumns != null) {
+            mailFields = MailField.getMatchingFields(requestedColumns);
         }
 
         FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folderName);
@@ -208,6 +211,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 messageStorage,
                 folder,
                 searchTerm,
+                mailFields,
                 searchRequest.getStart(),
                 searchRequest.getSize());
             List<Document> documents = new ArrayList<Document>(messages.size());
@@ -243,20 +247,20 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     private static void addTimeFacet(List<Facet> facets) {
         List<FacetValue> values = new ArrayList<FacetValue>(3);
         values.add(new FacetValue(
-            MailConstants.FACET_VALUE_LAST_WEEK,
+            MailFacetValues.FACET_VALUE_LAST_WEEK,
             new SimpleDisplayItem(MailStrings.LAST_WEEK, true),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(asList(FIELD_TIME), MailConstants.FACET_VALUE_LAST_WEEK)));
+            new Filter(asList(FIELD_TIME), MailFacetValues.FACET_VALUE_LAST_WEEK)));
         values.add(new FacetValue(
-            MailConstants.FACET_VALUE_LAST_MONTH,
+            MailFacetValues.FACET_VALUE_LAST_MONTH,
             new SimpleDisplayItem(MailStrings.LAST_MONTH, true),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(asList(FIELD_TIME), MailConstants.FACET_VALUE_LAST_MONTH)));
+            new Filter(asList(FIELD_TIME), MailFacetValues.FACET_VALUE_LAST_MONTH)));
         values.add(new FacetValue(
-            MailConstants.FACET_VALUE_LAST_YEAR,
+            MailFacetValues.FACET_VALUE_LAST_YEAR,
             new SimpleDisplayItem(MailStrings.LAST_YEAR, true),
             FacetValue.UNKNOWN_COUNT,
-            new Filter(asList(FIELD_TIME), MailConstants.FACET_VALUE_LAST_YEAR)));
+            new Filter(asList(FIELD_TIME), MailFacetValues.FACET_VALUE_LAST_YEAR)));
         facets.add(new Facet(MailFacetType.TIME, values));
     }
 
@@ -299,7 +303,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             filters);
     }
 
-    private static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, int start, int size) throws OXException {
+    private static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, int start, int size) throws OXException {
         MailSortField sortField = folder.isSent() ? MailSortField.SENT_DATE : MailSortField.RECEIVED_DATE;
         MailMessage[] messages = messageStorage.searchMessages(
             folder.getFullname(),
@@ -307,7 +311,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             sortField,
             OrderDirection.DESC,
             searchTerm,
-            MailField.FIELDS_LOW_COST);
+            fields);
 
         List<MailMessage> resultMessages = new ArrayList<MailMessage>(messages.length);
         Collections.addAll(resultMessages, messages);
@@ -474,44 +478,35 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     private static SearchTerm<?> buildTimeTerm(Comparison comparison, long timestamp, boolean isOutgoingFolder) {
-        Date date = new Date(timestamp);
         SearchTerm<?> term = null;
         switch (comparison) {
             case EQUALS:
             {
-                term = dateTermFor(ComparisonType.EQUALS, date, isOutgoingFolder);
+                term = dateTermFor(ComparisonType.EQUALS, new Date(timestamp), isOutgoingFolder);
                 break;
             }
 
             case GREATER_THAN:
             {
-                term = dateTermFor(ComparisonType.GREATER_THAN, date, isOutgoingFolder);
+                term = dateTermFor(ComparisonType.GREATER_THAN, new Date(timestamp), isOutgoingFolder);
                 break;
             }
 
             case LOWER_THAN:
             {
-                term = dateTermFor(ComparisonType.LESS_THAN, date, isOutgoingFolder);
+                term = dateTermFor(ComparisonType.LESS_THAN, new Date(timestamp), isOutgoingFolder);
                 break;
             }
 
             case GREATER_EQUALS:
             {
-                SearchTerm<ComparablePattern<Date>> equals =
-                    dateTermFor(ComparisonType.EQUALS, date, isOutgoingFolder);
-                SearchTerm<ComparablePattern<Date>> greater =
-                    dateTermFor(ComparisonType.GREATER_THAN, date, isOutgoingFolder);
-                term = new ORTerm(equals, greater);
+                term = dateTermFor(ComparisonType.GREATER_THAN, new Date(timestamp - 1), isOutgoingFolder);
                 break;
             }
 
             case LOWER_EQUALS:
             {
-                SearchTerm<ComparablePattern<Date>> equals =
-                    dateTermFor(ComparisonType.EQUALS, date, isOutgoingFolder);
-                SearchTerm<ComparablePattern<Date>> lower =
-                    dateTermFor(ComparisonType.LESS_THAN, date, isOutgoingFolder);
-                term = new ORTerm(equals, lower);
+                term = dateTermFor(ComparisonType.LESS_THAN, new Date(timestamp + 1), isOutgoingFolder);
                 break;
             }
         }
@@ -535,15 +530,15 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         Comparison comparison;
         long timestamp;
         Calendar cal = new GregorianCalendar(TimeZones.UTC);
-        if (MailConstants.FACET_VALUE_LAST_WEEK.equals(query)) {
+        if (MailFacetValues.FACET_VALUE_LAST_WEEK.equals(query)) {
             cal.add(Calendar.WEEK_OF_YEAR, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
-        } else if (MailConstants.FACET_VALUE_LAST_MONTH.equals(query)) {
+        } else if (MailFacetValues.FACET_VALUE_LAST_MONTH.equals(query)) {
             cal.add(Calendar.MONTH, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
-        } else if (MailConstants.FACET_VALUE_LAST_YEAR.equals(query)) {
+        } else if (MailFacetValues.FACET_VALUE_LAST_YEAR.equals(query)) {
             cal.add(Calendar.YEAR, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();

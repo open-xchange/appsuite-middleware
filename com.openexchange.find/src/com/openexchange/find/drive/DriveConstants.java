@@ -47,59 +47,21 @@
  *
  */
 
-package com.openexchange.find.calendar;
+package com.openexchange.find.drive;
 
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
 
 /**
- * {@link RelativeDateDisplayItem}
+ * Provides constants for "Drive" driver for find module.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.0
  */
-public class RelativeDateDisplayItem implements DisplayItem {
+public class DriveConstants {
 
-    public static enum RelativeDate {
-        COMING("coming"), PAST("past");
+    public final static String FACET_VALUE_LAST_WEEK = "last_week";
 
-        private String identifier;
+    public final static String FACET_VALUE_LAST_MONTH = "last_month";
 
-        private RelativeDate(String identifier) {
-            this.identifier = identifier;
-        }
-
-        public String getIdentifier() {
-            return identifier;
-        }
-    }
-
-    private final String displayName;
-
-    private final RelativeDate date;
-
-    public RelativeDateDisplayItem(String displayName, RelativeDate date) {
-        this.displayName = displayName;
-        this.date = date;
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return displayName;
-    }
-
-    @Override
-    public RelativeDate getItem() {
-        return date;
-    }
-
-    @Override
-    public boolean isLocalizable() {
-        return true;
-    }
-
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
-    }
+    public final static String FACET_VALUE_LAST_YEAR = "last_year";
 
 }

@@ -49,16 +49,9 @@
 
 package com.openexchange.file.storage.infostore.folder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFileStorageFolder;
-import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 
 /**
@@ -87,102 +80,10 @@ public final class FolderWriter {
             return null;
         }
         try {
-            final DefaultFileStorageFolder ret = new DefaultFileStorageFolder();
-            ret.setCreationDate(folder.getCreationDateUTC());
-            ret.setDefaultFolder(folder.isDefault());
-            ret.setExists(true);
-            ret.setId(folder.getID());
-            ret.setLastModifiedDate(folder.getLastModifiedUTC());
-            ret.setName(folder.getName());
-            ret.setParentId(folder.getParentID());
-            ret.setPermissions(parsePermission(folder.getPermissions()));
-            ret.setOwnPermission(parsePermission(folder.getOwnPermission()));
-            ret.setRootFolder(folder.getParentID() == null);
-            ret.setSubscribed(folder.isSubscribed());
-            {
-                final String[] subfolderIDs = folder.getSubfolderIDs();
-                ret.setSubfolders(subfolderIDs != null && subfolderIDs.length > 0);
-            }
-            ret.setCapabilities(FileStorageFolder.ALL_CAPABILITIES);
-            return ret;
+            return new UserizedFileStorageFolder(folder);
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    /**
-     * Parses given permission.
-     *
-     * @param permission The permission to parse
-     * @return The parsed permission
-     * @throws OXException If parsing fails
-     */
-    public static FileStoragePermission parsePermission(final Permission permission) throws OXException {
-        if (null == permission) {
-            return null;
-        }
-        try {
-            final int entity = permission.getEntity();
-            final DefaultFileStoragePermission oclPerm = DefaultFileStoragePermission.newInstance();
-            oclPerm.setEntity(entity);
-            oclPerm.setGroup(permission.isGroup());
-            oclPerm.setAdmin(permission.isAdmin());
-            oclPerm.setAllPermissions(
-                permission.getFolderPermission(),
-                permission.getReadPermission(),
-                permission.getWritePermission(),
-                permission.getDeletePermission());
-                return (oclPerm);
-        } catch (final RuntimeException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Parses given permissions.
-     *
-     * @param permissions The permissions to parse
-     * @return The parsed permissions
-     * @throws OXException If parsing fails
-     */
-    public static List<FileStoragePermission> parsePermission(final Permission[] permissions) throws OXException {
-        if (null == permissions) {
-            return Collections.emptyList();
-        }
-        try {
-            final int numberOfPermissions = permissions.length;
-            final List<FileStoragePermission> perms = new ArrayList<FileStoragePermission>(numberOfPermissions);
-            for (int i = 0; i < numberOfPermissions; i++) {
-                final Permission elem = permissions[i];
-                final int entity = elem.getEntity();
-                final DefaultFileStoragePermission oclPerm = DefaultFileStoragePermission.newInstance();
-                oclPerm.setEntity(entity);
-                oclPerm.setGroup(elem.isGroup());
-                oclPerm.setAdmin(elem.isAdmin());
-                oclPerm.setAllPermissions(
-                    elem.getFolderPermission(),
-                    elem.getReadPermission(),
-                    elem.getWritePermission(),
-                    elem.getDeletePermission());
-                perms.add(oclPerm);
-            }
-            return perms;
-        } catch (final RuntimeException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /** Checks for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
 }

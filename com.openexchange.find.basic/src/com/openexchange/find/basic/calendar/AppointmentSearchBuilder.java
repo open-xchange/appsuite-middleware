@@ -49,6 +49,14 @@
 
 package com.openexchange.find.basic.calendar;
 
+import static com.openexchange.find.calendar.CalendarFacetValues.RECURRING_TYPE_SERIES;
+import static com.openexchange.find.calendar.CalendarFacetValues.RECURRING_TYPE_SINGLE;
+import static com.openexchange.find.calendar.CalendarFacetValues.RELATIVE_DATE_COMING;
+import static com.openexchange.find.calendar.CalendarFacetValues.RELATIVE_DATE_PAST;
+import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_ACCEPTED;
+import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_DECLINED;
+import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_NONE;
+import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_TENTATIVE;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -57,13 +65,9 @@ import java.util.Set;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
+import com.openexchange.find.Module;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.calendar.CalendarFacetType;
-import com.openexchange.find.calendar.RecurringTypeDisplayItem;
-import com.openexchange.find.calendar.RelativeDateDisplayItem;
-import com.openexchange.find.calendar.StatusDisplayItem;
-import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderStorage;
@@ -74,6 +78,7 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.java.SearchStrings;
 import com.openexchange.java.Strings;
@@ -147,8 +152,6 @@ public class AppointmentSearchBuilder {
                 applyStatus(filter.getQueries());
             } else if (CalendarFacetType.RECURRING_TYPE.getId().equals(field)) {
                 applyRecurringType(filter.getQueries());
-            } else if (CalendarFacetType.FOLDER_TYPE.getId().equals(field)) {
-                applyFolderType(filter.getQueries());
             } else if ("participants".equals(field)) {
                 applyParticipants(filter.getQueries());
             } else if ("users".equals(field)) {
@@ -202,20 +205,53 @@ public class AppointmentSearchBuilder {
     }
 
     /**
-     * Applies a specific folder ID to the search.
+     * Applies folder IDs to the search, depending on the existence of a specific
+     * folder ID or a folder type.
      *
      * @param folderID The folder ID to apply, or <code>null</code> if not specified
+     * @param folderType The folder type for that all folder shall be applied. -1 if not specified.
      * @return The builder
      * @throws OXException
      */
-    public AppointmentSearchBuilder applyFolder(String folderID) throws OXException {
-        if (null != folderID) {
+    public AppointmentSearchBuilder applyFolders(String folderID, int folderType) throws OXException {
+        final Set<Integer> folderIDs;
+        if (null == folderID) {
+            Type type = null;
+            if (FolderObject.PRIVATE == folderType) {
+                type = PrivateType.getInstance();
+            } else if (FolderObject.PUBLIC == folderType) {
+                type = PublicType.getInstance();
+            } else if (FolderObject.SHARED == folderType) {
+                type = SharedType.getInstance();
+            }
+
+            if (type == null) {
+                folderIDs = null;
+            } else {
+                hasFolderFilter = true;
+                folderIDs = new HashSet<Integer>();
+                FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
+                    FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session, null);
+                UserizedFolder[] folders = visibleFolders.getResponse();
+                if (null != folders && 0 < folders.length) {
+                    for (UserizedFolder folder : folders) {
+                        try {
+                            folderIDs.add(Integer.valueOf(folder.getID()));
+                        } catch (NumberFormatException e) {
+                            throw FindExceptionCode.INVALID_FOLDER_ID.create(folder.getID(), Module.CALENDAR.getIdentifier());
+                        }
+                    }
+                }
+            }
+        } else {
             try {
-                appointmentSearch.setFolderIDs(Collections.singleton(Integer.valueOf(folderID)));
+                folderIDs = Collections.singleton(Integer.valueOf(folderID));
             } catch (NumberFormatException e) {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, folderID, CommonFacetType.FOLDER.getId());
+                throw FindExceptionCode.INVALID_FOLDER_ID.create(folderID, Module.CALENDAR.getIdentifier());
             }
         }
+
+        appointmentSearch.setFolderIDs(folderIDs);
         return this;
     }
 
@@ -251,39 +287,6 @@ public class AppointmentSearchBuilder {
         appointmentSearch.setUserIDs(userIDs);
     }
 
-    private void applyFolderType(List<String> queries) throws OXException {
-        Set<Integer> folderIDs = appointmentSearch.getFolderIDs();
-        if (null == folderIDs) {
-            folderIDs = new HashSet<Integer>();
-        }
-        for (String query : queries) {
-            Type type;
-            if (FolderTypeDisplayItem.Type.PRIVATE.getIdentifier().equals(query)) {
-                type = PrivateType.getInstance();
-            } else if (FolderTypeDisplayItem.Type.PUBLIC.getIdentifier().equals(query)) {
-                type = PublicType.getInstance();
-            } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(query)) {
-                type = SharedType.getInstance();
-            } else {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query);
-            }
-            FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
-                FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session, null);
-            UserizedFolder[] folders = visibleFolders.getResponse();
-            if (null != folders && 0 < folders.length) {
-                for (UserizedFolder folder : folders) {
-                    try {
-                        folderIDs.add(Integer.valueOf(folder.getID()));
-                    } catch (NumberFormatException e) {
-                        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, query, CommonFacetType.FOLDER_TYPE.getId());
-                    }
-                }
-            }
-        }
-        appointmentSearch.setFolderIDs(folderIDs);
-        hasFolderFilter = true;
-    }
-
     private void applyStatus(List<String> queries) throws OXException {
         Set<Integer> ownStatus = appointmentSearch.getOwnStatus();
         if (null == ownStatus) {
@@ -291,13 +294,13 @@ public class AppointmentSearchBuilder {
         }
         for (String query : queries) {
             int status;
-            if (StatusDisplayItem.Status.ACCEPTED.getIdentifier().equals(query)) {
+            if (STATUS_ACCEPTED.equals(query)) {
                 status = CalendarDataObject.ACCEPT;
-            } else if (StatusDisplayItem.Status.NONE.getIdentifier().equals(query)) {
+            } else if (STATUS_NONE.equals(query)) {
                 status = CalendarDataObject.NONE;
-            } else if (StatusDisplayItem.Status.TENTATIVE.getIdentifier().equals(query)) {
+            } else if (STATUS_TENTATIVE.equals(query)) {
                 status = CalendarDataObject.TENTATIVE;
-            } else if (StatusDisplayItem.Status.DECLINED.getIdentifier().equals(query)) {
+            } else if (STATUS_DECLINED.equals(query)) {
                 status = CalendarDataObject.DECLINE;
             } else {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.STATUS.getId());
@@ -309,9 +312,9 @@ public class AppointmentSearchBuilder {
 
     private void applyRecurringType(List<String> queries) throws OXException {
         for (String query : queries) {
-            if (RecurringTypeDisplayItem.RecurringType.SERIES.getIdentifier().equals(query)) {
+            if (RECURRING_TYPE_SERIES.equals(query)) {
                 appointmentSearch.setExcludeNonRecurringAppointments(true);
-            } else if (RecurringTypeDisplayItem.RecurringType.SINGLE.getIdentifier().equals(query)) {
+            } else if (RECURRING_TYPE_SINGLE.equals(query)) {
                 appointmentSearch.setExcludeRecurringAppointments(true);
             } else {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RECURRING_TYPE.getId());
@@ -321,9 +324,9 @@ public class AppointmentSearchBuilder {
 
     private void applyRelativeDate(List<String> queries) throws OXException {
         for (String query : queries) {
-            if (RelativeDateDisplayItem.RelativeDate.COMING.getIdentifier().equals(query)) {
+            if (RELATIVE_DATE_COMING.equals(query)) {
                 appointmentSearch.setMinimumEndDate(new Date());
-            } else if (RelativeDateDisplayItem.RelativeDate.PAST.getIdentifier().equals(query)) {
+            } else if (RELATIVE_DATE_PAST.equals(query)) {
                 appointmentSearch.setMaximumStartDate(new Date());
             } else {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RELATIVE_DATE.getId());

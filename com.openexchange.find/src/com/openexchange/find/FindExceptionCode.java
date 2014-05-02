@@ -109,11 +109,23 @@ public enum FindExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Could not parse \"%1$s\".
      */
-    PARSING_ERROR(FindExceptionMessages.PARSING_ERROR_MSG, Category.CATEGORY_USER_INPUT, 12, FindExceptionMessages.PARSING_ERROR_MSG),
+    PARSING_ERROR(FindExceptionMessages.PARSING_ERROR, Category.CATEGORY_USER_INPUT, 12, FindExceptionMessages.PARSING_ERROR),
     /**
      * An error occurred: %1$s
      */
     UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 13, OXExceptionStrings.MESSAGE),
+    /**
+     * The folder id \"%1$s\" is invalid for module \"%2$s\".
+     */
+    INVALID_FOLDER_ID(FindExceptionMessages.INVALID_FOLDER_ID, Category.CATEGORY_USER_INPUT, 14, FindExceptionMessages.INVALID_FOLDER_ID),
+    /**
+     * The folder type \"%1$s\" is not supported.
+     */
+    INVALID_FOLDER_TYPE(FindExceptionMessages.INVALID_FOLDER_TYPE, Category.CATEGORY_USER_INPUT, 15, FindExceptionMessages.INVALID_FOLDER_TYPE),
+    /**
+     * The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.
+     */
+    FACET_CONFLICT(FindExceptionMessages.FACET_CONFLICT, Category.CATEGORY_USER_INPUT, 16, FindExceptionMessages.FACET_CONFLICT),
 
     ;
 

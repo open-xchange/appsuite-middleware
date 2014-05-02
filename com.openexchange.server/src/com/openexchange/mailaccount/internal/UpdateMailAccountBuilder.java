@@ -327,10 +327,4 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     public Object addresses() {
         return null;
     }
-
-    @Override
-    public Object transportCredentials() {
-        return null;
-    }
-
 }

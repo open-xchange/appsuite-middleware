@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -101,6 +102,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
+    static enum Comparison {
+        GREATER_THAN, GREATER_EQUALS, EQUALS, LOWER_THAN, LOWER_EQUALS;
+    }
+
     private final Field[] fields = new File.Field[] { Field.ID, Field.MODIFIED_BY, Field.LAST_MODIFIED, Field.FOLDER_ID, Field.TITLE,
         Field.FILENAME, Field.FILE_MIMETYPE, Field.FILE_SIZE, Field.VERSION, Field.LOCKED_UNTIL, Field.CREATED_BY, Field.CREATED,
         Field.DESCRIPTION };
@@ -123,7 +128,12 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    public SearchResult search(final SearchRequest searchRequest, final ServerSession session) throws OXException {
+    protected Set<Integer> getSupportedFolderTypes() {
+        return FOLDER_TYPE_NOT_SUPPORTED;
+    }
+
+    @Override
+    public SearchResult doSearch(final SearchRequest searchRequest, final ServerSession session) throws OXException {
         final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
         if (null == fileAccessFactory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
@@ -133,7 +143,10 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
 
         // Yield search term from search request
-        final SearchTerm<?> term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
+        SearchTerm<?> term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
+        if (term == null) {
+            term = new TitleTerm("*", true, true);
+        }
 
         // Folder identifiers
         final String folderId = searchRequest.getFolderId();
