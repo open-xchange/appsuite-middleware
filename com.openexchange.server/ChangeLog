@@ -40,6 +40,10 @@
 
  - Fix for bug 32296: Do not use proxy authentication for external mail accounts
 
+* 2014-05-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32267: Translate subscription display name when serializing subscription sources
+  
 * 2014-05-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 32044: Update the reminder's folderID for all accessing users, if there are no participants. Check additionally permissions
