@@ -268,9 +268,11 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         /*
          * Ask hostname service if available
          */
-        HostnameService hostnameService = Services.getService(HostnameService.class);
-        if (null != hostnameService) {
-            hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+        {
+            final HostnameService hostnameService = Services.getService(HostnameService.class);
+            if (null != hostnameService) {
+                hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+            }
         }
         /*
          * Get hostname from request
