@@ -443,6 +443,33 @@ public class FileResponseRendererTest extends TestCase {
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         assertEquals("Unexpected status code.", 500, resp.getStatus());
     }
+    
+    public void testBug26995() throws IOException {
+        final File file = new File(TEST_DATA_DIR, "26995");
+        final InputStream is = new FileInputStream(file);
+        final byte[] bytes = IOUtils.toByteArray(is);
+        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+        {
+            fileHolder.setContentType("application/octet-stream");
+            fileHolder.setDelivery("view");
+            fileHolder.setDisposition("attachment");
+            fileHolder.setName(file.getName());
+        }
+
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+        final AJAXRequestData requestData = new AJAXRequestData();
+        requestData.setSession(new SimServerSession(1, 1));
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        
+        assertEquals("Wrong Content-Type", "image/jpeg", resp.getContentType());
+    }
 
     public void testChunkRead() {
         try {
