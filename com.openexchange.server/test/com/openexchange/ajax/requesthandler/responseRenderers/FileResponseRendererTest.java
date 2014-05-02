@@ -52,6 +52,7 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.http.sim.SimHttpServletRequest;
@@ -373,6 +374,32 @@ public class FileResponseRendererTest extends TestCase {
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         final String expectedCT = "application/octet-stream"; // force download
         assertEquals("Wrong Content-Type", expectedCT, resp.getContentType());
+    }
+
+    public void testBug31714() throws IOException {
+        final File file = new File(TEST_DATA_DIR, "31714.jpg");
+        final InputStream is = new FileInputStream(file);
+        final byte[] bytes = IOUtils.toByteArray(is);
+        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+        {
+            fileHolder.setContentType("image/jpeg");
+            fileHolder.setDelivery("view");
+            fileHolder.setDisposition("inline");
+            fileHolder.setName(file.getName());
+        }
+
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+        final AJAXRequestData requestData = new AJAXRequestData();
+        requestData.putParameter("width", "1000000");
+        requestData.putParameter("height", "1000000");
+        requestData.setSession(new SimServerSession(1, 1));
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        assertEquals("Unexpected status code.", 500, resp.getStatus());
     }
 
     public void testChunkRead() {
