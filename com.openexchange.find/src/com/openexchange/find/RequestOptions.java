@@ -70,7 +70,7 @@ public class RequestOptions {
     public RequestOptions(final Map<String, String> optionMap) {
         super();
         this.optionMap = optionMap;
-        this.includeContextAdmin = getBoolOption(INCLUDE_CONTEXT_ADMIN, false);
+        this.includeContextAdmin = getBoolOption(INCLUDE_CONTEXT_ADMIN, true);
     }
 
     /**
