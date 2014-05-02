@@ -534,16 +534,25 @@ public class GroupDispatcher implements ComponentHandle {
         LOG.error("Couldn't find matching handler for {}. \nUse default", stanza);
     }
 
-    public void handleInactivityNotice(Stanza stanza) throws OXException {
-        Optional<ID> inactiveClient = stanza.getSinglePayload(new ElementPath("com.openexchange.realtime", "client"), ID.class);
-        Optional<Duration> inactivityDuration = stanza.getSinglePayload(
-            new ElementPath("com.openexchange.realtime.client", "inactivity"),
-            Duration.class);
-
-        if (inactiveClient.isPresent() && inactivityDuration.isPresent()) {
-            LOG.info("User {} was inactive for {} ", inactiveClient.get(), inactivityDuration.get());
-        }
-    }
+    /**
+     * Handle notifications about inactivity durations of members.
+     * Override this method to handle notifications in your GroupDispatcher specialization.
+     * <code>
+     * <pre>
+     * Optional<ID> inactiveClient = stanza.getSinglePayload(new ElementPath("com.openexchange.realtime", "client"), ID.class);
+     * Optional<Duration> inactivityDuration = stanza.getSinglePayload(new ElementPath("com.openexchange.realtime.client", "inactivity"), Duration.class);
+     *
+     * if (inactiveClient.isPresent() && inactivityDuration.isPresent()) {
+     *      LOG.info("User {} was inactive for {} ", inactiveClient.get(), inactivityDuration.get());
+     * }
+     * </pre>
+     * </code>
+     *  
+     * @param stanza The Stanza containing the inactive client identified by {@link ElementPath} 'com.openexchange.realtime.client' and the {@link Duration} of inactivity identified by 
+     * 'com.openexchange.realtime.client.inactivity'. 
+     * @throws OXException
+     */
+    public void handleInactivityNotice(Stanza stanza) throws OXException {}
 
     @Override
     public boolean shouldBeDoneInGlobalThread(Stanza stanza) {
