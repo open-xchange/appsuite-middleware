@@ -55,33 +55,37 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
-import com.openexchange.realtime.group.GroupManager;
 import com.openexchange.realtime.group.conversion.GroupCommand2JSON;
 import com.openexchange.realtime.group.conversion.JSON2GroupCommand;
+import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
+import com.openexchange.realtime.util.Duration;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.threadpool.ThreadPoolService;
 
 
 public class RTGroupActivator extends HousekeepingActivator implements BundleActivator {
 
-    private GroupManager groupManager;
-    
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{MessageDispatcher.class, PayloadTreeConverter.class, ThreadPoolService.class, GlobalRealtimeCleanup.class};
+        return new Class[] {
+            MessageDispatcher.class, PayloadTreeConverter.class, ThreadPoolService.class, GlobalRealtimeCleanup.class,
+            DistributedGroupManager.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         GroupServiceRegistry.SERVICES.set(this);
-        groupManager = new GroupManager();
-        GroupDispatcher.GROUPMANAGER_REF.set(groupManager);
-        getService(PayloadTreeConverter.class).declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
+        GroupDispatcher.GROUPMANAGER_REF.set(GroupServiceRegistry.getInstance().getService(DistributedGroupManager.class));
+        PayloadTreeConverter treeConverter = getService(PayloadTreeConverter.class);
+        treeConverter.declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
         registerService(SimplePayloadConverter.class, new GroupCommand2JSON());
         registerService(SimplePayloadConverter.class, new JSON2GroupCommand());
+        treeConverter.declarePreferredFormat(new ElementPath("com.openexchange.realtime.client","inactivity"), Duration.class.getName());
+        treeConverter.declarePreferredFormat(new ElementPath("com.openexchange.realtime","client"), ID.class.getName());
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
             registerService(RealtimeJanitor.class, realtimeJanitor);
         }

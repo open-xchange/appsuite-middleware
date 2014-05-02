@@ -47,64 +47,70 @@
  *
  */
 
-package com.openexchange.realtime.json.payload.converter;
+package com.openexchange.realtime.group;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import java.util.Collection;
+import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.json.payload.converter.StackTraceElementToJSONConverter;
-import com.openexchange.realtime.json.payload.converter.ThrowableToJSONConverter;
-import com.openexchange.realtime.payload.converter.sim.SimpleConverterSim;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.util.Duration;
 
 
 /**
- * {@link ThrowableToJSONConverterTest}
+ * {@link DistributedGroupManager} - Allows acces to the distributed group infos stored in Hazelcast.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.0
  */
-public class ThrowableToJSONConverterTest {
+public interface DistributedGroupManager {
 
-    ThrowableToJSONConverter converter = null;
-    SimpleConverterSim simpleConverter = null;
-    Throwable throwable = null;
+    /**
+     * Adds a client <-> group mapping to this manager
+     * 
+     * @param client The {@link ID} of the client that joined a group.
+     * @param group The {@link ID} of the group that client joined.
+     * @return True if the mapping was added to the manager, false otherwise.
+     */
+    boolean add(ID client, ID group)  throws OXException;
 
-    @Before
-    public void setUp() throws Exception {
-        converter = new ThrowableToJSONConverter();
-        simpleConverter = new SimpleConverterSim();
-        simpleConverter.registerConverter(new StackTraceElementToJSONConverter());
-        throwable = new Throwable("First throwable");
-    }
-
-    @Test
-    public void testGetInputFormat() {
-        assertEquals(Throwable.class.getSimpleName(), converter.getInputFormat());
-    }
+    /**
+     * Remove all client <-> group mappings for a given client {@link ID}.
+     * 
+     * @param client The client {@link ID}
+     * @return A {@link Collection} of groups {@link ID}s that the client was member of
+     */
+    Collection<ID> remove(ID client)  throws OXException;
     
-    @Test
-    public void testConvert() throws OXException, JSONException {
-        Object object = converter.convert(throwable, null, simpleConverter);
-        assertNotNull(object);
-        assertTrue(object instanceof JSONObject);
-        JSONObject throwableJSON = JSONObject.class.cast(object);
-        assertEquals(throwableJSON.optString("message"), "First throwable");
-        JSONArray jsonArray = throwableJSON.getJSONArray("stackTrace");
-        JSONObject stackTraceElement = JSONObject.class.cast(jsonArray.get(0));
-        assertEquals("ThrowableToJSONConverterTest.java", stackTraceElement.getString("fileName"));
-        assertEquals("82", stackTraceElement.getString("lineNumber"));
-        assertEquals("com.openexchange.realtime.json.payload.converter.ThrowableToJSONConverterTest", stackTraceElement.getString("className"));
-        assertEquals("setUp", stackTraceElement.getString("methodName"));
-    }
+    /**
+     * Remove a single client <-> group mapping.
+     * 
+     * @param client The client {@link ID}.
+     * @return true if the client <-> group mapping was removed from the manager, false otherwise.
+     */
+    boolean remove(ID client, ID group) throws OXException;
+    
+    /**
+     * Get the Groups that a given client is a member of.
+     * @param id The client {@link ID}
+     * @return The Groups that a given client is a member of.
+     */
+    Set<ID> getGroups(ID id) throws OXException;
 
-    @Test
-    public void testGetOutputFormat() {
-        assertEquals("json", converter.getOutputFormat());
-    }
+    /**
+     * Get the current members of a given GroupDispatcher.
+     * 
+     * @param id The {@link GroupDispatcher}'s {@link ID}
+     * @return The current members of a given GroupDispatcher.
+     */
+    Set<ID> getMembers(ID id)  throws OXException;
+
+    /**
+     * Set the duration of inactivity for a given client. The GroupManagerService will inform all Groups the client had joined previously
+     * about the inactivity of the client.
+     * 
+     * @param id The client {@link ID}
+     * @param duration The {@link Duration} of inactivity
+     */
+    void setInactivity(ID id, Duration duration) throws OXException;
 
 }

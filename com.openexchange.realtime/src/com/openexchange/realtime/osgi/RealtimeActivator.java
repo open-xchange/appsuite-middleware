@@ -51,9 +51,13 @@ package com.openexchange.realtime.osgi;
 
 import java.util.concurrent.TimeUnit;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -71,6 +75,8 @@ import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.realtime.payload.converter.impl.DefaultPayloadTreeConverter;
+import com.openexchange.realtime.payload.converter.impl.DurationToJSONConverter;
+import com.openexchange.realtime.payload.converter.impl.JSONToDurationConverter;
 import com.openexchange.realtime.synthetic.DevNullChannel;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -85,6 +91,7 @@ import com.openexchange.user.UserService;
  */
 public class RealtimeActivator extends HousekeepingActivator {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RealtimeActivator.class);
     private SyntheticChannel synth;
     private RealtimeConfig realtimeConfig;
 
@@ -153,6 +160,8 @@ public class RealtimeActivator extends HousekeepingActivator {
         registerService(PayloadTreeConverter.class, converter);
 
         registerService(Channel.class, new DevNullChannel());
+        registerService(SimplePayloadConverter.class, new DurationToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToDurationConverter());
 
         //Register all RealtimeJanitors
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
@@ -160,7 +169,11 @@ public class RealtimeActivator extends HousekeepingActivator {
         }
 
         //Expose all ManagementObjects for this bundle
-        managementHouseKeeper.exposeManagementObjects();
+        try {
+            managementHouseKeeper.exposeManagementObjects();
+        } catch (OXException oxe) {
+            LOG.error("Failed to expose ManagementObjects", oxe);
+        }
         openTrackers();
     }
 

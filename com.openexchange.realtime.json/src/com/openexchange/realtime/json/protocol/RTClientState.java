@@ -52,6 +52,7 @@ package com.openexchange.realtime.json.protocol;
 import java.util.List;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.Duration;
 
 /**
  * {@link RTClientState} - The {@link RTClientState} encapsulates the state of a connected client by keeping track of the sequenced and
@@ -96,7 +97,7 @@ public interface RTClientState {
     public abstract void touch();
 
     /**
-     * Retrieves the timestamp for when this user was last seen
+     * Retrieves the timestamp for when this user was last seen in milliseconds
      */
     public abstract long getLastSeen();
 
@@ -106,6 +107,15 @@ public interface RTClientState {
      * @return true if the timestamp is more than thirty minutes ahead of the lastSeen timestamp, false otherwise
      */
     public abstract boolean isTimedOut(long timestamp);
+
+    /**
+     * Retrieve the duration of inactivity for this RTCLientState. Inactivity is defined as time the state wasn't actively touched by the
+     * associated client. This combines calls to {@link RTClientState#getLastSeen()} and creating the nearest Duration via
+     * {@link Duration#roundDownTo(long, java.util.concurrent.TimeUnit)}
+     * 
+     * @return the duration of inactivity for this RTCLientState
+     */
+    public abstract Duration getInactivityDuration();
 
     /**
      * Resets the state by clearing out sequenced and unsequenced stanzas. This is needed when a client wants to trigger a reset e.g. via

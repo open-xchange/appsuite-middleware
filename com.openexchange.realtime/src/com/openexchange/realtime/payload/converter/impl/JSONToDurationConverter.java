@@ -47,64 +47,45 @@
  *
  */
 
-package com.openexchange.realtime.json.payload.converter;
+package com.openexchange.realtime.payload.converter.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import org.json.JSONArray;
-import org.json.JSONException;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import com.openexchange.conversion.DataExceptionCodes;
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.json.payload.converter.StackTraceElementToJSONConverter;
-import com.openexchange.realtime.json.payload.converter.ThrowableToJSONConverter;
-import com.openexchange.realtime.payload.converter.sim.SimpleConverterSim;
+import com.openexchange.realtime.payload.converter.AbstractGoodQualityConverter;
+import com.openexchange.realtime.util.Duration;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ThrowableToJSONConverterTest}
+ * {@link JSONToDurationConverter}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.0
  */
-public class ThrowableToJSONConverterTest {
+public class JSONToDurationConverter extends AbstractGoodQualityConverter {
 
-    ThrowableToJSONConverter converter = null;
-    SimpleConverterSim simpleConverter = null;
-    Throwable throwable = null;
-
-    @Before
-    public void setUp() throws Exception {
-        converter = new ThrowableToJSONConverter();
-        simpleConverter = new SimpleConverterSim();
-        simpleConverter.registerConverter(new StackTraceElementToJSONConverter());
-        throwable = new Throwable("First throwable");
+    @Override
+    public String getInputFormat() {
+        return "json";
     }
 
-    @Test
-    public void testGetInputFormat() {
-        assertEquals(Throwable.class.getSimpleName(), converter.getInputFormat());
-    }
-    
-    @Test
-    public void testConvert() throws OXException, JSONException {
-        Object object = converter.convert(throwable, null, simpleConverter);
-        assertNotNull(object);
-        assertTrue(object instanceof JSONObject);
-        JSONObject throwableJSON = JSONObject.class.cast(object);
-        assertEquals(throwableJSON.optString("message"), "First throwable");
-        JSONArray jsonArray = throwableJSON.getJSONArray("stackTrace");
-        JSONObject stackTraceElement = JSONObject.class.cast(jsonArray.get(0));
-        assertEquals("ThrowableToJSONConverterTest.java", stackTraceElement.getString("fileName"));
-        assertEquals("82", stackTraceElement.getString("lineNumber"));
-        assertEquals("com.openexchange.realtime.json.payload.converter.ThrowableToJSONConverterTest", stackTraceElement.getString("className"));
-        assertEquals("setUp", stackTraceElement.getString("methodName"));
+    @Override
+    public String getOutputFormat() {
+        return Duration.class.getName();
     }
 
-    @Test
-    public void testGetOutputFormat() {
-        assertEquals("json", converter.getOutputFormat());
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        try {
+            JSONObject durationObject = (JSONObject) data;
+            long durationInS = durationObject.getLong("durationInSeconds");
+            return Duration.roundDownTo(durationInS, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
+        }
     }
 
 }

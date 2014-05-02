@@ -47,84 +47,79 @@
  *
  */
 
-package com.openexchange.realtime.json.payload.converter.sim;
+package com.openexchange.realtime.hazelcast.management;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.management.ManagementObject;
+import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
+import com.openexchange.realtime.packet.ID;
 
 
 /**
- * {@link SimpleConverterSim} Adapts AbstractPOJOConverters and AbstractJSONConverters to ease simulation of the DefaultConverter service.
+ * {@link DistributedGroupManagerManagement}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.0
  */
-public class SimpleConverterSim implements SimpleConverter {
-    
-    private Map<String, List<ConverterBox>> converterMap;
-    
-    public SimpleConverterSim() {
-        converterMap = new HashMap<String, List<ConverterBox>>();
+public class DistributedGroupManagerManagement extends ManagementObject<DistributedGroupManagerMBean> implements DistributedGroupManagerMBean {
+
+    private ObjectName objectName;
+    private String clientMapName;
+
+    public DistributedGroupManagerManagement(String clientMapName) {
+        super(DistributedGroupManagerMBean.class);
+        this.clientMapName = clientMapName;
     }
-    
-    public void registerConverter(SimplePayloadConverter payloadConverter) {
-        String inputFormat = payloadConverter.getInputFormat();
-        List<ConverterBox> converters = converterMap.get(inputFormat);
-        if(converters == null) {
-            converters = new ArrayList<ConverterBox>();
-            converterMap.put(inputFormat, converters);
-        }
-        converters.add(new ConverterBox(payloadConverter.getOutputFormat(), adaptPayloadConverter(payloadConverter, this)));
-    }
-    
+
     @Override
-    public Object convert(String from, String to, Object data, ServerSession session) throws OXException {
-        List<ConverterBox> list = converterMap.get(from);
-        SimpleConverter converter = null;
-        for (ConverterBox converterBox : list) {
-            if(converterBox.getOutPutFormat().equals(to)) {
-                converter = converterBox.getSimpleConverter();
+    public Map<String, List<String>> getClientMapping() throws OXException {
+        Map<String, List<String>> jmxMap = new HashMap<String, List<String>>();
+        MultiMap<ID, ID> clientToGroupsMapping = getClientToGroupsMapping();
+        Set<Entry<ID,ID>> entrySet = clientToGroupsMapping.entrySet();
+        for (Entry<ID, ID> entry : entrySet) {
+            String client = entry.getKey().toString();
+            String group = entry.getValue().toString();
+            List<String> groups = jmxMap.get(client);
+            if(groups == null) {
+                groups = new ArrayList<String>();
+                jmxMap.put(client, groups);
             }
+            groups.add(group);
         }
-        return converter.convert(from, to, data, session);
-    }
-    
-    private SimpleConverter adaptPayloadConverter(final SimplePayloadConverter payloadConverter, final SimpleConverter simpleConverter) {
-        return new SimpleConverter() {
-            
-            SimpleConverter collectingSimpleConverter = simpleConverter;
-            
-            @Override
-            public Object convert(String from, String to, Object data, ServerSession session) throws OXException {
-                return payloadConverter.convert(data, null, collectingSimpleConverter);
-            }
-        };
+        return jmxMap;
     }
 
-    private class ConverterBox {
-
-        String to;
-
-        SimpleConverter converter;
-
-        public ConverterBox(String to, SimpleConverter converter) {
-            super();
-            this.to = to;
-            this.converter = converter;
+    public ObjectName getObjectName() {
+        if (objectName == null) {
+            String directoryName = "DistributedGroupManger";
+            try {
+                objectName = new ObjectName("com.openexchange.realtime", "name", directoryName);
+            } catch (MalformedObjectNameException e) {
+                // can't happen: valid domain and no missing parameters
+            } catch (NullPointerException e) {
+                // can't happen: valid domain and no missing parameters
+            }
         }
+        return objectName;
+    }
 
-        public String getOutPutFormat() {
-            return to;
-        }
-
-        public SimpleConverter getSimpleConverter() {
-            return converter;
-        }
-
+    /**
+     * Get mapping of one client to many groups
+     * 
+     * @return A {@link MultiMap} of one client to many groups
+     */
+    private MultiMap<ID, ID> getClientToGroupsMapping() throws OXException {
+        HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
+        return hazelcast.getMultiMap(clientMapName);
     }
 }

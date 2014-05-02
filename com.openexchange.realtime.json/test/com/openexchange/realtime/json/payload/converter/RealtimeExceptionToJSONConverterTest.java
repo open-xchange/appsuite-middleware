@@ -62,7 +62,7 @@ import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.payload.converter.RealtimeExceptionToJSONConverter;
 import com.openexchange.realtime.json.payload.converter.StackTraceElementToJSONConverter;
 import com.openexchange.realtime.json.payload.converter.ThrowableToJSONConverter;
-import com.openexchange.realtime.json.payload.converter.sim.SimpleConverterSim;
+import com.openexchange.realtime.payload.converter.sim.SimpleConverterSim;
 
 /**
  * {@link RealtimeExceptionToJSONConverterTest}

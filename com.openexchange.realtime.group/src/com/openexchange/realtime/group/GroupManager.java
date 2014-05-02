@@ -50,6 +50,9 @@
 package com.openexchange.realtime.group;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.HashMultimap;
@@ -64,6 +67,8 @@ import com.openexchange.realtime.group.osgi.GroupServiceRegistry;
 import com.openexchange.realtime.group.osgi.RealtimeJanitors;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.Duration;
+import com.openexchange.realtime.util.IDMap;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -72,12 +77,13 @@ import com.openexchange.server.ServiceExceptionCode;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class GroupManager implements RealtimeJanitor {
+public class GroupManager implements RealtimeJanitor, GroupManagerService {
 
 
     private static final Logger LOG = LoggerFactory.getLogger(GroupManager.class);
 
     private Multimap<ID, ID> clientMap;
+    private IDMap<Duration> inactivityMap;
 
     /**
      * Initializes a new {@link GroupManager}.
@@ -85,6 +91,7 @@ public class GroupManager implements RealtimeJanitor {
     public GroupManager() {
         super();
         clientMap = Multimaps.synchronizedMultimap(HashMultimap.<ID, ID> create());
+        inactivityMap = new IDMap<Duration>(true);
         RealtimeJanitors.getInstance().addJanitor(this);
     }
 
@@ -148,7 +155,43 @@ public class GroupManager implements RealtimeJanitor {
     @Override
     public void cleanupForId(ID id) {
         Collection<ID> removed = remove(id);
+        inactivityMap.remove(id);
         LOG.debug("Cleanup for ID: {}. Removed from groups: {}", id, removed);
+    }
+
+    
+    public void setInactivity(ID id, Duration duration) {
+        Validate.notNull(id, "ID must not be null");
+        Validate.notNull(duration, "Duration must not be null");
+        Duration old = inactivityMap.put(id, duration);
+        if(!duration.equals(old)) {
+            informGroupDispatchers(id, duration);
+        }
+    }
+    
+    /**
+     * Get the Groups a client is member of.
+     * @param id the client {@link ID}
+     * @return the Groups a client is member of.
+     */
+    public Set<ID> getGroups(ID id) {
+        return new HashSet<ID>(clientMap.get(id));
+    }
+
+    private void informGroupDispatchers(ID id, Duration duration) {
+        MessageDispatcher dispatcher = GroupServiceRegistry.getInstance().getService(MessageDispatcher.class);
+        if (dispatcher == null) {
+            LOG.error("Unable to inform GroupDispatchers.", ServiceExceptionCode.serviceUnavailable(MessageDispatcher.class));
+            return;
+        }
+        for(ID group : getGroups(id)) {
+            try {
+                LOG.debug("Informing GroupDispatcher {} about inactivity of client {} with Duration of {} seconds.", group, id, duration.getValueInS());
+                dispatcher.send(new InactivityNotice(group, id, duration));
+            } catch (OXException e) {
+                LOG.error("Unable to inform GroupDispatcher {} about inactivity of client {} with Duration of {} seconds.", group, id, duration.getValueInS(), e);
+            }
+        }
     }
 
 }

@@ -55,6 +55,7 @@ import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -66,10 +67,12 @@ import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.handle.StanzaStorage;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.cleanup.GlobalRealtimeCleanupImpl;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
+import com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.hazelcast.impl.HazelcastStanzaStorage;
 import com.openexchange.realtime.hazelcast.management.ManagementHouseKeeper;
@@ -150,8 +153,18 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         registerService(Channel.class, globalDispatcher.getChannel());
         registerService(GlobalRealtimeCleanup.class, globalCleanup);
         
+        String client_map = discoverMapName(config, "rtClientMapping-");
+        String group_map = discoverMapName(config, "rtGroupMapping-");
+        DistributedGroupManagerImpl distributedGroupManager = new DistributedGroupManagerImpl(globalDispatcher, client_map, group_map);
+        registerService(DistributedGroupManager.class, distributedGroupManager);
+//        managementHouseKeeper.addManagementObject(distributedGroupManager.getManagementObject());
+        
         directory.addChannel(globalDispatcher.getChannel());
-        managementHouseKeeper.exposeManagementObjects();
+        try {
+            managementHouseKeeper.exposeManagementObjects();
+        } catch (OXException oxe) {
+            LOG.error("Failed to expose ManagementObjects", oxe);
+        }
     }
 
     @Override

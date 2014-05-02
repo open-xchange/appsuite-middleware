@@ -50,11 +50,14 @@
 package com.openexchange.realtime.json.osgi;
 
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
@@ -62,11 +65,14 @@ import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.json.actions.RealtimeActions;
 import com.openexchange.realtime.json.impl.JSONChannel;
 import com.openexchange.realtime.json.impl.RTJSONHandler;
 import com.openexchange.realtime.json.management.ManagementHouseKeeper;
+import com.openexchange.realtime.json.payload.converter.IDToJSONConverter;
+import com.openexchange.realtime.json.payload.converter.JSONToIDConverter;
 import com.openexchange.realtime.json.payload.converter.JSONToRealtimeExceptionConverter;
 import com.openexchange.realtime.json.payload.converter.JSONToStackTraceElementConverter;
 import com.openexchange.realtime.json.payload.converter.JSONToThrowableConverter;
@@ -89,6 +95,7 @@ import com.openexchange.timer.TimerService;
 
 public class RTJSONActivator extends AJAXModuleActivator {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RTJSONActivator.class);
     private RealtimeActions realtimeActions;
     private RTJSONHandler handler;
 
@@ -97,7 +104,7 @@ public class RTJSONActivator extends AJAXModuleActivator {
         return new Class<?>[] {
             ConfigurationService.class, SessiondService.class, MessageDispatcher.class, SimpleConverter.class,
             ResourceDirectory.class, StanzaQueueService.class, PayloadTreeConverter.class, CapabilityService.class, TimerService.class,
-            ThreadPoolService.class, ManagementService.class, GlobalRealtimeCleanup.class};
+            ThreadPoolService.class, ManagementService.class, GlobalRealtimeCleanup.class, DistributedGroupManager.class};
     }
 
     @Override
@@ -128,6 +135,8 @@ public class RTJSONActivator extends AJAXModuleActivator {
         registerService(SimplePayloadConverter.class, new ThrowableToJSONConverter());
         registerService(SimplePayloadConverter.class, new JSONToRealtimeExceptionConverter());
         registerService(SimplePayloadConverter.class, new RealtimeExceptionToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToIDConverter());
+        registerService(SimplePayloadConverter.class, new IDToJSONConverter());
 
         // Add Transformers using Converters
         PayloadTreeConverter converter = getService(PayloadTreeConverter.class);
@@ -139,7 +148,11 @@ public class RTJSONActivator extends AJAXModuleActivator {
         registerModule(realtimeActions, "rt");
 
         getService(CapabilityService.class).declareCapability("rt");
-        managementHouseKeeper.exposeManagementObjects();
+        try {
+            managementHouseKeeper.exposeManagementObjects();
+        } catch (OXException oxe) {
+            LOG.error("Failed to expose ManagementObjects", oxe);
+        }
 
         /*
          * Register all RealtimeJanitor services contained in this bundle
