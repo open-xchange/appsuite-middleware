@@ -80,9 +80,11 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -852,8 +854,8 @@ public class DriveStorage {
     }
 
     /**
-     * Adds all found subfolders of the supplied parent folder recursively. The "temp" folder, as well as the trash folder including all
-     * subfolders are ignored implicitly.
+     * Adds all found subfolders of the supplied parent folder recursively. The "temp" folder, as well as the trash folder(s) including
+     * all subfolders are ignored implicitly.
      *
      * @param folders The map to add the subfolders
      * @param parent The parent folder
@@ -861,16 +863,37 @@ public class DriveStorage {
      * @throws OXException
      */
     private void addSubfolders(Map<String, FileStorageFolder> folders, FileStorageFolder parent, String path) throws OXException {
-        String trashFolderID = hasTrashFolder() && null != getTrashFolder() ? getTrashFolder().getId() : null;
         FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(parent.getId(), false);
         for (FileStorageFolder subfolder : subfolders) {
             String subPath = path + PathNormalizer.normalize(subfolder.getName());
             knownFolders.remember(subPath, subfolder);
-            if (false == TEMP_PATH.equals(subPath) && (null == trashFolderID || false == trashFolderID.equals(subfolder.getId()))) {
+            if (false == isExcludedSubfolder(subfolder, subPath)) {
                 folders.put(subPath, subfolder);
                 addSubfolders(folders, subfolder, subPath + PATH_SEPARATOR);
             }
         }
+    }
+
+    /**
+     * Gets a value indicating whether the supplied folder is excluded or not, i.e. it is the temp- or a trash-folder.
+     *
+     * @param folder The folder to check
+     * @param path The folder path to check
+     * @return <code>true</code> if the folder is excluded, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    private boolean isExcludedSubfolder(FileStorageFolder folder, String path) throws OXException {
+        if (TEMP_PATH.equals(path)) {
+            return true;
+        }
+        if (TypeAware.class.isInstance(folder) && FileStorageFolderType.TRASH_FOLDER.equals(((TypeAware)folder).getType())) {
+            return true;
+        }
+        String trashFolderID = hasTrashFolder() && null != getTrashFolder() ? getTrashFolder().getId() : null;
+        if (null != trashFolderID && trashFolderID.equals(folder.getId())) {
+            return true;
+        }
+        return false;
     }
 
     private FileStorageFolder getRootFolder() throws OXException {

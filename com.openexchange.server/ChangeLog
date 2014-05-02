@@ -1,3 +1,7 @@
+* 2014-05-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32259: Exclude folders with files storage type TRASH_FOLDER
+
 * 2014-04-30 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29904: Throw "FILE_STORAGE-0017" in case of empty or missing "folder" parameter
