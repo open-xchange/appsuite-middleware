@@ -2,6 +2,7 @@
 
  - Fix for bug 32259: Exclude folders with files storage type TRASH_FOLDER
  - Fix for bug 32267: Translate subscription display name when serializing subscription sources
+ - Fix for bug 32260: Reworked search term construction for file type facet
 
 * 2014-04-30 - tobias.friedrich@open-xchange.com
 

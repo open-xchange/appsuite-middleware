@@ -51,6 +51,7 @@ package com.openexchange.find.basic.drive;
 
 import java.util.Arrays;
 import java.util.List;
+import com.openexchange.find.drive.FileTypeDisplayItem.Type;
 
 
 /**
@@ -92,5 +93,36 @@ public final class Constants {
 
     /** The fields to query for */
     public static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_FILE_NAME, FIELD_FILE_DESC });
+
+    /** The patterns used match {@link Type#DOCUMENTS}. */
+    public static final String[] FILETYPE_PATTERNS_DOCUMENTS = {
+        "text/*plain*",
+        "text/*rtf*",
+        "application/*ms-word*",
+        "application/*ms-excel*",
+        "application/*ms-powerpoint*",
+        "application/*msword*",
+        "application/*msexcel*",
+        "application/*mspowerpoint*",
+        "application/*openxmlformats*",
+        "application/*opendocument*",
+        "application/*pdf*",
+        "application/*rtf*"
+    };
+
+    /** The patterns used match {@link Type#IMAGES}. */
+    public static final String[] FILETYPE_PATTERNS_IMAGES = {
+        "image/*"
+    };
+
+    /** The patterns used match {@link Type#AUDIO}. */
+    public static final String[] FILETYPE_PATTERNS_AUDIO = {
+        "audio/*"
+    };
+
+    /** The patterns used match {@link Type#VIDEO}. */
+    public static final String[] FILETYPE_PATTERNS_VIDEO = {
+        "video/*"
+    };
 
 }

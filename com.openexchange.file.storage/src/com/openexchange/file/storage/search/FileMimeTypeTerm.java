@@ -69,7 +69,18 @@ public class FileMimeTypeTerm extends AbstractStringSearchTerm {
      * @param mimeType The MIME type to look for
      */
     public FileMimeTypeTerm(final String mimeType) {
-        super(mimeType, true, true);
+        this(mimeType, true, true);
+    }
+
+    /**
+     * Initializes a new {@link FileMimeTypeTerm}.
+     *
+     * @param mimeType The MIME type to look for
+     * @param ignoreCase <code>true</code> to perform a case-insensitive search, <code>false</code>, otherwise
+     * @param substringSearch <code>true</code> to perform a substring search, <code>false</code>, otherwise
+     */
+    public FileMimeTypeTerm(final String mimeType, final boolean ignoreCase, final boolean substringSearch) {
+        super(mimeType, ignoreCase, substringSearch);
     }
 
     @Override
