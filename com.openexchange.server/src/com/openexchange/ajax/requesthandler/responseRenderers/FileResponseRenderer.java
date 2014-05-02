@@ -853,7 +853,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             final byte[] transformed;
             try {
-                TransformedImage transformedImage = transformations.getTransformedImage(file.getContentType());
+                TransformedImage transformedImage = transformations.getTransformedImage(fileContentType);
                 int expenses = transformedImage.getTransformationExpenses();
                 if (expenses >= ImageTransformations.HIGH_EXPENSE) {
                     cachingAdvised = true;
