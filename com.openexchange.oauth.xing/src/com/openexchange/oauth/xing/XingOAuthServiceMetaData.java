@@ -54,7 +54,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
-import com.openexchange.ajax.AJAXUtilis;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -206,7 +206,7 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             return url;
         }
         // Return deferred URL
-        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXUtilis.encodeUrl(url, false, false)).toString();
+        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXUtility.encodeUrl(url, false, false)).toString();
     }
 
     private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL, final String path) {

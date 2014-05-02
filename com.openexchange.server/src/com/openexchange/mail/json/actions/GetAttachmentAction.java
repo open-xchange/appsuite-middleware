@@ -61,7 +61,7 @@ import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.AJAXUtilis;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
@@ -349,7 +349,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
     private String getFileName(final String fileNameFromRequest, final String mailPartFileName, final String baseType) {
         if (!isEmpty(fileNameFromRequest)) {
-            return AJAXUtilis.encodeUrl(fileNameFromRequest, true);
+            return AJAXUtility.encodeUrl(fileNameFromRequest, true);
         }
         if (!isEmpty(mailPartFileName)) {
             return mailPartFileName;
