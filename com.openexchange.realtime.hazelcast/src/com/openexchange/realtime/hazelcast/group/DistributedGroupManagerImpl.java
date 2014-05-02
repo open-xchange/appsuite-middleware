@@ -58,12 +58,16 @@ import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.management.ManagementAware;
+import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.group.InactivityNotice;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
+import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerMBean;
+import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerManagement;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.util.Duration;
 import com.openexchange.realtime.util.IDMap;
@@ -75,13 +79,14 @@ import com.openexchange.realtime.util.IDMap;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
-public class DistributedGroupManagerImpl implements DistributedGroupManager, RealtimeJanitor {
+public class DistributedGroupManagerImpl implements ManagementAware<DistributedGroupManagerMBean>, DistributedGroupManager, RealtimeJanitor {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedGroupManagerImpl.class);
     private final MessageDispatcher globalMessageDispatcher;
     private final String client_map;
     private final String group_map;
     private final IDMap<Duration> inactivityMap;
+    private final DistributedGroupManagerManagement managementObject;
 
     /**
      * Initializes a new {@link DistributedGroupManagerImpl}.
@@ -91,7 +96,9 @@ public class DistributedGroupManagerImpl implements DistributedGroupManager, Rea
         this.globalMessageDispatcher = globalMessageDispatcher;
         this.client_map=client_map;
         this.group_map=group_map;
-        inactivityMap = new IDMap<Duration>(true);
+        this.inactivityMap = new IDMap<Duration>(true);
+        this.managementObject = new DistributedGroupManagerManagement(client_map);
+        
     }
 
     public boolean add(ID client, ID group) throws OXException {
@@ -159,6 +166,11 @@ public class DistributedGroupManagerImpl implements DistributedGroupManager, Rea
     private MultiMap<ID, ID> getGroupToMembersMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMultiMap(group_map);
+    }
+
+    @Override
+    public ManagementObject<DistributedGroupManagerMBean> getManagementObject() {
+        return managementObject;
     }
 
 }

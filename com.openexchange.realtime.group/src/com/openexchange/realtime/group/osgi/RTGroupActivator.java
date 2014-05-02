@@ -58,8 +58,6 @@ import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
-import com.openexchange.realtime.group.GroupManager;
-import com.openexchange.realtime.group.GroupManagerService;
 import com.openexchange.realtime.group.conversion.GroupCommand2JSON;
 import com.openexchange.realtime.group.conversion.JSON2GroupCommand;
 import com.openexchange.realtime.packet.ID;
@@ -71,8 +69,6 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 public class RTGroupActivator extends HousekeepingActivator implements BundleActivator {
 
-    private GroupManager groupManager;
-    
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {

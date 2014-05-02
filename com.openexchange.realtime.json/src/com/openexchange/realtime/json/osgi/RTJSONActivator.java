@@ -50,11 +50,14 @@
 package com.openexchange.realtime.json.osgi;
 
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
@@ -92,6 +95,7 @@ import com.openexchange.timer.TimerService;
 
 public class RTJSONActivator extends AJAXModuleActivator {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RTJSONActivator.class);
     private RealtimeActions realtimeActions;
     private RTJSONHandler handler;
 
@@ -144,7 +148,11 @@ public class RTJSONActivator extends AJAXModuleActivator {
         registerModule(realtimeActions, "rt");
 
         getService(CapabilityService.class).declareCapability("rt");
-        managementHouseKeeper.exposeManagementObjects();
+        try {
+            managementHouseKeeper.exposeManagementObjects();
+        } catch (OXException oxe) {
+            LOG.error("Failed to expose ManagementObjects", oxe);
+        }
 
         /*
          * Register all RealtimeJanitor services contained in this bundle

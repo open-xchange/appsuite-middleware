@@ -51,10 +51,13 @@ package com.openexchange.realtime.osgi;
 
 import java.util.concurrent.TimeUnit;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -88,6 +91,7 @@ import com.openexchange.user.UserService;
  */
 public class RealtimeActivator extends HousekeepingActivator {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RealtimeActivator.class);
     private SyntheticChannel synth;
     private RealtimeConfig realtimeConfig;
 
@@ -165,7 +169,11 @@ public class RealtimeActivator extends HousekeepingActivator {
         }
 
         //Expose all ManagementObjects for this bundle
-        managementHouseKeeper.exposeManagementObjects();
+        try {
+            managementHouseKeeper.exposeManagementObjects();
+        } catch (OXException oxe) {
+            LOG.error("Failed to expose ManagementObjects", oxe);
+        }
         openTrackers();
     }
 

@@ -55,6 +55,7 @@ import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -154,10 +155,16 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         
         String client_map = discoverMapName(config, "rtClientMapping-");
         String group_map = discoverMapName(config, "rtGroupMapping-");
-        registerService(DistributedGroupManager.class, new DistributedGroupManagerImpl(globalDispatcher, client_map, group_map));
+        DistributedGroupManagerImpl distributedGroupManager = new DistributedGroupManagerImpl(globalDispatcher, client_map, group_map);
+        registerService(DistributedGroupManager.class, distributedGroupManager);
+//        managementHouseKeeper.addManagementObject(distributedGroupManager.getManagementObject());
         
         directory.addChannel(globalDispatcher.getChannel());
-        managementHouseKeeper.exposeManagementObjects();
+        try {
+            managementHouseKeeper.exposeManagementObjects();
+        } catch (OXException oxe) {
+            LOG.error("Failed to expose ManagementObjects", oxe);
+        }
     }
 
     @Override
