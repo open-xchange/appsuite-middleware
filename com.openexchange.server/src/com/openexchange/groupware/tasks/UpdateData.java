@@ -753,7 +753,7 @@ class UpdateData {
 
     void updateReminder() throws OXException, OXException {
         if (isMove() && getUpdatedParticipants().isEmpty()) {
-            Reminder.updateReminderOnMove(ctx, getUpdated().getObjectID(), getFolderId(), getDestFolderId());
+            Reminder.updateReminderOnMove(ctx, getUpdated().getObjectID(), getFolderId(), getDestFolderId(), getUpdated().getPrivateFlag());
         }
         updateReminder(ctx, getUpdated(), user, isMove(), getRemoved(), getDestFolder(), getUpdatedParticipants(), getUpdatedFolder());
     }

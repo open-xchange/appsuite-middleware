@@ -105,16 +105,16 @@ public class Create {
 
     /**
      * Creates a task for a given folder and with a given title.
-     * @param folder prefill parent folder field.
+     * @param folder pre-fill parent folder field.
      * @param title title of the task.
      */
-    public static final Task createWithDefaults(final int folder, final String title) {
+    public static final Task createWithDefaults(int folder, String title) {
         final Task task = createWithDefaults();
         task.setParentFolderID(folder);
         task.setTitle(title);
         return task;
     }
-    
+
     /**
      * Creates a task with the specified title, description status and folder
      * @param title task's title
@@ -123,10 +123,18 @@ public class Create {
      * @param folder task's parent folder
      * @return the task
      */
-    public static final Task createWithDefaults(final String title, final String description, final int status, final int folder) {
+    public static final Task createWithDefaults(String title, String description, int status, int folder) {
         Task task = createWithDefaults(folder, title);
         task.setNote(description);
         task.setStatus(status);
         return task;
+    }
+
+    public static final Task cloneForUpdate(Task task) {
+        Task retval = new Task();
+        retval.setObjectID(task.getObjectID());
+        retval.setParentFolderID(task.getParentFolderID());
+        retval.setLastModified(task.getLastModified());
+        return retval;
     }
 }

@@ -1,3 +1,8 @@
+* 2014-05-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 32044: Update the reminder's folderID for all accessing users, if there are no participants. Check additionally permissions
+   on the destination folder for all reminder.
+
 * 2014-05-02 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32259: Exclude folders with files storage type TRASH_FOLDER
@@ -27,10 +32,6 @@
 * 2014-04-28 - martin.herfurth@open-xchange.com
 
  - Fix for bug 32059: Added port to connection string for distributed files.
-
-* 2014-04-28 - marcus.klein@open-xchange.com
-
- - Fix for bug 32044: Update the reminder's folderID for all accessing users, if there are no participants.
 
 * 2014-04-28 - ioannis.chouklis@open-xchange.com
 
