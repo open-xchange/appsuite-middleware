@@ -49,45 +49,68 @@
 
 package com.openexchange.realtime.group;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.Test;
-import com.google.common.base.Optional;
+import java.util.Collection;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.util.Duration;
-import com.openexchange.realtime.util.ElementPath;
 
 
 /**
- * {@link InactivityNoticeTest}
+ * {@link DistributedGroupManager} - Allows acces to the distributed group infos stored in Hazelcast.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.x.y
+ * @since 7.6.0
  */
-public class InactivityNoticeTest {
+public interface DistributedGroupManager {
 
     /**
-     * @throws java.lang.Exception
+     * Adds a client <-> group mapping to this manager
+     * 
+     * @param client The {@link ID} of the client that joined a group.
+     * @param group The {@link ID} of the group that client joined.
+     * @return True if the mapping was added to the manager, false otherwise.
      */
-    @Before
-    public void setUp() throws Exception {
-    }
+    boolean add(ID client, ID group)  throws OXException;
 
-    @Test
-    public void test() throws OXException {
-        ID group = new ID("synthetic.office://operations@premium/66499.62446");
-        ID member = new ID("ox://francisco.laguna@internal/20d39asd9da93249f009d");
-        ID inactivityBot = new ID("inactivityBot@internal");
-        InactivityNotice ian = new InactivityNotice(group, member, Duration.THIRTY_SECONDS);
-        Optional<ID> inactiveClient = ian.getSinglePayload(new ElementPath("com.openexchange.realtime", "client"), ID.class);
-        Optional<Duration> inactivityDuration = ian.getSinglePayload(
-            new ElementPath("com.openexchange.realtime.client", "inactivity"),
-            Duration.class);
-        assertEquals(inactivityBot, ian.getFrom());
-        assertEquals(member, inactiveClient.orNull());
-        assertEquals(Duration.THIRTY_SECONDS, inactivityDuration.orNull());
+    /**
+     * Remove all client <-> group mappings for a given client {@link ID}.
+     * 
+     * @param client The client {@link ID}
+     * @return A {@link Collection} of groups {@link ID}s that the client was member of
+     */
+    Collection<ID> remove(ID client)  throws OXException;
+    
+    /**
+     * Remove a single client <-> group mapping.
+     * 
+     * @param client The client {@link ID}.
+     * @return true if the client <-> group mapping was removed from the manager, false otherwise.
+     */
+    boolean remove(ID client, ID group) throws OXException;
+    
+    /**
+     * Get the Groups that a given client is a member of.
+     * @param id The client {@link ID}
+     * @return The Groups that a given client is a member of.
+     */
+    Set<ID> getGroups(ID id) throws OXException;
 
-    }
+    /**
+     * Get the current members of a given GroupDispatcher.
+     * 
+     * @param id The {@link GroupDispatcher}'s {@link ID}
+     * @return The current members of a given GroupDispatcher.
+     */
+    Set<ID> getMembers(ID id)  throws OXException;
+
+    /**
+     * Set the duration of inactivity for a given client. The GroupManagerService will inform all Groups the client had joined previously
+     * about the inactivity of the client.
+     * 
+     * @param id The client {@link ID}
+     * @param duration The {@link Duration} of inactivity
+     */
+    void setInactivity(ID id, Duration duration) throws OXException;
 
 }

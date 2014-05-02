@@ -124,7 +124,7 @@ public class Duration {
      * @return The nearest predefined Duration found by rounding down.
      */
     public static Duration roundDownTo(long value, TimeUnit unit) {
-        Validate.isTrue(value > 0, "Duration value must be > 0.");
+        Validate.isTrue(value >= 0, "Duration value must be >= 0.");
         Validate.notNull(unit, "Duration TimeUnit must not be null.");
         long incomingInS = unit.toSeconds(value);
         

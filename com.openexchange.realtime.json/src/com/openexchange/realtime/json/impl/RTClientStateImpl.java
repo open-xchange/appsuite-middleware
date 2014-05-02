@@ -222,7 +222,9 @@ public class RTClientStateImpl implements RTClientState {
 
     @Override
     public Duration getInactivityDuration() {
-        return Duration.roundDownTo(System.currentTimeMillis() - this.lastSeen, MILLISECONDS);
+        long diff = System.currentTimeMillis() - this.lastSeen;
+        diff = diff < 0 ? 0 : diff;
+        return Duration.roundDownTo(diff, MILLISECONDS);
     }
 
 }

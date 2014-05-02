@@ -65,6 +65,7 @@ import com.openexchange.realtime.util.Duration;
 public class InactivityNotice extends Message {
 
     private static final long serialVersionUID = 1L;
+    private static final ID inactivityBot = new ID(null, "inactivityBot", ID.INTERNAL_CONTEXT, null);
 
     /**
      * Initializes a new {@link InactivityNotice}.
@@ -76,7 +77,7 @@ public class InactivityNotice extends Message {
     public InactivityNotice(ID group, ID member, Duration inactivity) {
         super();
         setTo(group);
-        setFrom(member);
+        setFrom(inactivityBot);
         addPayload(new PayloadTree(PayloadTreeNode.builder()
         .withPayload(
             "inactivityNotice",
@@ -88,6 +89,11 @@ public class InactivityNotice extends Message {
             Duration.class.getName(),
             "com.openexchange.realtime.client",
             "inactivity")
+        .andChild(
+            member,
+            ID.class.getName(),
+            "com.openexchange.realtime",
+            "client")
         .build()));
     }
 }

@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.realtime.group
 Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.google.common.collect,
+Import-Package: com.google.common.base,
+ com.google.common.collect,
  com.openexchange.conversion.simple,
  com.openexchange.exception,
  com.openexchange.log,

@@ -53,8 +53,10 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.group.GroupManagerService;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.RTClientState;
@@ -124,13 +126,17 @@ public class StateManager implements RealtimeJanitor {
      */
     public void timeOutStaleStates(long timestamp) {
         GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
-        GroupManagerService groupManager = JSONServiceRegistry.getInstance().getService(GroupManagerService.class);
+        DistributedGroupManager groupManager = JSONServiceRegistry.getInstance().getService(DistributedGroupManager.class);
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
             ID client = state.getId();
             Duration inactivity = state.getInactivityDuration();
             LOG.debug("Client {} is inactive since {} seconds", client, inactivity.getValueInS());
             if(groupManager != null) {
-                groupManager.setInactivity(client, inactivity);
+                try {
+                    groupManager.setInactivity(client, inactivity);
+                } catch(OXException oxe) {
+                    LOG.error("Error while trying to set inactivity of client {}", client, oxe);
+                }
             } else {
                 LOG.error("Unable to inform GroupManager about inactivity duration. GroupManagerService is missing!");
             }

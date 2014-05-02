@@ -62,6 +62,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.base.Optional;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.Component.EvictionPolicy;
@@ -78,6 +79,7 @@ import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ActionHandler;
 import com.openexchange.realtime.util.Duration;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -95,7 +97,7 @@ public class GroupDispatcher implements ComponentHandle {
     /** The logger constant. */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupDispatcher.class);
 
-    public static final AtomicReference<GroupManager> GROUPMANAGER_REF = new AtomicReference<GroupManager>();
+    public static final AtomicReference<DistributedGroupManager> GROUPMANAGER_REF = new AtomicReference<DistributedGroupManager>();
 
     /** The collection of IDs that might be concurrently accessed */
     private final AtomicReference<Set<ID>> idsRef = new AtomicReference<Set<ID>>(Collections.<ID> emptySet());
@@ -302,8 +304,9 @@ public class GroupDispatcher implements ComponentHandle {
      *
      * @param id The id of the client joining the the Group
      * @param stamp The selector used in the Stanza to join the group
+     * @throws OXException 
      */
-    public void join(ID id, String stamp) {
+    public void join(ID id, String stamp) throws OXException {
         if (idsRef.get().contains(id)) {
             LOG.info("{} is already a member of {}.", id, groupId);
             return;
@@ -337,7 +340,7 @@ public class GroupDispatcher implements ComponentHandle {
             firstJoined(id);
         }
         if (added) {
-            GroupManager groupManager = GROUPMANAGER_REF.get();
+            DistributedGroupManager groupManager = GROUPMANAGER_REF.get();
             if(groupManager == null) {
                 LOG.error("GroupManager reference unset.");
             } else {
@@ -372,7 +375,7 @@ public class GroupDispatcher implements ComponentHandle {
         stamps.remove(id);
 
         if (removed) {
-            GroupManager groupManager = GROUPMANAGER_REF.get();
+            DistributedGroupManager groupManager = GROUPMANAGER_REF.get();
             if (groupManager == null) {
                 LOG.error("GroupManager reference unset.");
             } else {
@@ -532,13 +535,13 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     public void handleInactivityNotice(Stanza stanza) throws OXException {
-        Collection<PayloadElement> inactivityDurations = stanza.filterPayloadElements(new com.openexchange.realtime.util.ElementPath("com.openexchange.realtime.client", "inactivity"));
-        if(inactivityDurations.size() != 1) {
-            LOG.warn("Was expecting a single 'com.openexchange.realtime.client.inactivity' payload but can't find it in the Stanza.");
-        } else {
-            Duration inactivity = (Duration) inactivityDurations.iterator().next().getData();
-            ID inactiveUser = stanza.getFrom();
-            LOG.info("User {} was inactive for {} ",inactiveUser, inactivity);
+        Optional<ID> inactiveClient = stanza.getSinglePayload(new ElementPath("com.openexchange.realtime", "client"), ID.class);
+        Optional<Duration> inactivityDuration = stanza.getSinglePayload(
+            new ElementPath("com.openexchange.realtime.client", "inactivity"),
+            Duration.class);
+
+        if (inactiveClient.isPresent() && inactivityDuration.isPresent()) {
+            LOG.info("User {} was inactive for {} ", inactiveClient.get(), inactivityDuration.get());
         }
     }
 

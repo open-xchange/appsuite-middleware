@@ -6,7 +6,8 @@ Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.realtime.json.osgi.RTJSONActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax,
+Import-Package: com.google.common.base,
+ com.openexchange.ajax,
  com.openexchange.ajax.login,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,

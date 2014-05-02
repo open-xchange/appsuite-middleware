@@ -66,10 +66,12 @@ import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.handle.StanzaStorage;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.cleanup.GlobalRealtimeCleanupImpl;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
+import com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.hazelcast.impl.HazelcastStanzaStorage;
 import com.openexchange.realtime.hazelcast.management.ManagementHouseKeeper;
@@ -149,6 +151,10 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         registerService(StanzaStorage.class, new HazelcastStanzaStorage());
         registerService(Channel.class, globalDispatcher.getChannel());
         registerService(GlobalRealtimeCleanup.class, globalCleanup);
+        
+        String client_map = discoverMapName(config, "rtClientMapping-");
+        String group_map = discoverMapName(config, "rtGroupMapping-");
+        registerService(DistributedGroupManager.class, new DistributedGroupManagerImpl(globalDispatcher, client_map, group_map));
         
         directory.addChannel(globalDispatcher.getChannel());
         managementHouseKeeper.exposeManagementObjects();
