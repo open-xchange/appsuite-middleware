@@ -189,7 +189,7 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             return retval;
         }
 
-        final String retval = deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost).toString());
+        final String retval = deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost).append('/').toString());
         LOGGER.debug("Initializing XING OAuth account for user {} in context {} with call-back URL: {}", session.getUserId(), session.getContextId(), retval);
         return retval;
     }
