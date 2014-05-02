@@ -189,7 +189,7 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             return retval;
         }
 
-        final String retval = deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost).append('/').toString());
+        final String retval = deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost).toString());
         LOGGER.debug("Initializing XING OAuth account for user {} in context {} with call-back URL: {}", session.getUserId(), session.getContextId(), retval);
         return retval;
     }
@@ -207,7 +207,10 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
         }
         String deferrerURL = domain.trim();
         final DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-        final String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
+        String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
+        if (!path.startsWith("/")) {
+            path = new StringBuilder(path.length() + 1).append('/').append(path).toString();
+        }
         if (seemsAlreadyDeferred(url, deferrerURL, path)) {
             // Already deferred
             return url;
