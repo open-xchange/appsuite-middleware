@@ -1,6 +1,7 @@
 * 2014-05-02 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32259: Exclude folders with files storage type TRASH_FOLDER
+ - Fix for bug 32267: Translate subscription display name when serializing subscription sources
 
 * 2014-04-30 - tobias.friedrich@open-xchange.com
 
