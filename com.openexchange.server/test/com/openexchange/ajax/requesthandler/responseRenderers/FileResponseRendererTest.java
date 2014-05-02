@@ -375,6 +375,48 @@ public class FileResponseRendererTest extends TestCase {
         final String expectedCT = "application/octet-stream"; // force download
         assertEquals("Wrong Content-Type", expectedCT, resp.getContentType());
     }
+    
+    public void testXSSVuln_Bug26373_view() throws IOException {
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+
+        final File file = new File(TEST_DATA_DIR, "26237.html");
+        final InputStream is = new FileInputStream(file);
+        final byte[] bytes = IOUtils.toByteArray(is);
+        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+        fileHolder.setName(file.getName());
+
+        final AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        req.setParameter("content_disposition", "view");
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        
+        assertEquals("Wrong Content-Type", "application/octet-stream", resp.getContentType());
+    }
+    
+    public void testXSSVuln_Bug26237_inline() throws IOException {
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+
+        final File file = new File(TEST_DATA_DIR, "26237.html");
+        final InputStream is = new FileInputStream(file);
+        final byte[] bytes = IOUtils.toByteArray(is);
+        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+        fileHolder.setName(file.getName());
+
+        final AJAXRequestData requestData = new AJAXRequestData();
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        req.setParameter("content_disposition", "inline");
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        
+        assertEquals("Wrong Content-Type", "application/octet-stream", resp.getContentType());
+    }
 
     public void testBug31714() throws IOException {
         final File file = new File(TEST_DATA_DIR, "31714.jpg");
