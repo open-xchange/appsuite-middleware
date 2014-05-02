@@ -167,7 +167,7 @@ public final class SMTPConfig extends TransportConfig {
      * {@inheritDoc}
      */
     @Override
-    protected boolean doCustomParsing(MailAccount account, Session session) throws OXException {
+    protected boolean doCustomParsing(final MailAccount account, final Session session) throws OXException {
         if (!account.isDefaultAccount()) {
             login = account.getTransportLogin();
             password = MailPasswordUtil.decrypt(account.getTransportPassword(), session, account.getId(), login, account.getTransportServer());

@@ -427,11 +427,11 @@ public class MailAccountParser extends DataParser {
     }
 
     /**
-     * Parses the transport credentials based on 'transport_auth' param and if credentials are set within the json request.
+     * Parses the transport credentials based on <tt>'transport_auth'</tt> parameter and if credentials are set within the mail account JSON representation.
      *
-     * @param account
-     * @param json
-     * @param attributes
+     * @param account The mail account to fill
+     * @param json The mail account JSON representation
+     * @param attributes The parsed attributes
      */
     protected void parseTransportCredentials(final MailAccountDescription account, final JSONObject json, final Set<Attribute> attributes) {
         String login = account.getLogin();
