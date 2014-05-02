@@ -68,6 +68,8 @@ import com.openexchange.realtime.json.actions.RealtimeActions;
 import com.openexchange.realtime.json.impl.JSONChannel;
 import com.openexchange.realtime.json.impl.RTJSONHandler;
 import com.openexchange.realtime.json.management.ManagementHouseKeeper;
+import com.openexchange.realtime.json.payload.converter.IDToJSONConverter;
+import com.openexchange.realtime.json.payload.converter.JSONToIDConverter;
 import com.openexchange.realtime.json.payload.converter.JSONToRealtimeExceptionConverter;
 import com.openexchange.realtime.json.payload.converter.JSONToStackTraceElementConverter;
 import com.openexchange.realtime.json.payload.converter.JSONToThrowableConverter;
@@ -129,6 +131,8 @@ public class RTJSONActivator extends AJAXModuleActivator {
         registerService(SimplePayloadConverter.class, new ThrowableToJSONConverter());
         registerService(SimplePayloadConverter.class, new JSONToRealtimeExceptionConverter());
         registerService(SimplePayloadConverter.class, new RealtimeExceptionToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToIDConverter());
+        registerService(SimplePayloadConverter.class, new IDToJSONConverter());
 
         // Add Transformers using Converters
         PayloadTreeConverter converter = getService(PayloadTreeConverter.class);

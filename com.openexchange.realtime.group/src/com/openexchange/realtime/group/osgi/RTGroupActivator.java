@@ -86,11 +86,10 @@ public class RTGroupActivator extends HousekeepingActivator implements BundleAct
         GroupDispatcher.GROUPMANAGER_REF.set(GroupServiceRegistry.getInstance().getService(DistributedGroupManager.class));
         PayloadTreeConverter treeConverter = getService(PayloadTreeConverter.class);
         treeConverter.declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
-        treeConverter.declarePreferredFormat(new ElementPath("com.openexchange.realtime.client","inactivity"), Duration.class.getName());
-        treeConverter.declarePreferredFormat(new ElementPath("com.openexchange.realtime","client"), ID.class.getName());
         registerService(SimplePayloadConverter.class, new GroupCommand2JSON());
         registerService(SimplePayloadConverter.class, new JSON2GroupCommand());
-        
+        treeConverter.declarePreferredFormat(new ElementPath("com.openexchange.realtime.client","inactivity"), Duration.class.getName());
+        treeConverter.declarePreferredFormat(new ElementPath("com.openexchange.realtime","client"), ID.class.getName());
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
             registerService(RealtimeJanitor.class, realtimeJanitor);
         }

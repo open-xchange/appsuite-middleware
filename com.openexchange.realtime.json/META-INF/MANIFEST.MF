@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Atmosphere Realtime Channel Implementation
+Bundle-Name: Open-Xchange JSON Realtime Channel Implementation
 Bundle-SymbolicName: com.openexchange.realtime.json
 Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.realtime.json.osgi.RTJSONActivator

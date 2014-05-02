@@ -124,7 +124,7 @@ public enum JSONExceptionCode implements DisplayableOXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "ATMOSPHERE";
+        return "RTJSON";
     }
 
     @Override
