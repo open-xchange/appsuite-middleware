@@ -52,7 +52,6 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.http.sim.SimHttpServletRequest;
@@ -66,6 +65,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTools.Delivery;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTools.Disposition;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
@@ -117,12 +118,7 @@ public class FileResponseRendererTest extends TestCase {
             final String html = "foo\n" + "<object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"></object>\n" + "bar";
             final byte[] bytes = html.getBytes("ISO-8859-1");
             final int length = bytes.length;
-
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-            fileHolder.setContentType("text/html; charset=ISO-8859-1");
-            fileHolder.setDelivery("view");
-            fileHolder.setDisposition("inline");
-            fileHolder.setName("document.html");
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "text/html; charset=ISO-8859-1", Delivery.view, Disposition.inline, "document.html");
 
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
@@ -147,16 +143,8 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testContentLengthMailAttachments_Bug26926() {
         try {
-            final File file = new File(TEST_DATA_DIR, "26926_27394.pdf");
-            final InputStream is = new FileInputStream(file);
-            final byte[] bytes = IOUtils.toByteArray(is);
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-            {
-                fileHolder.setContentType("application/pdf");
-                fileHolder.setDelivery("download");
-                fileHolder.setDisposition("attachment");
-                fileHolder.setName(file.getName());
-            }
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("26926_27394.pdf", "application/pdf", Delivery.download, Disposition.attachment, "26926_27394.pdf");
+            
             final AJAXRequestData requestData = new AJAXRequestData();
             requestData.setSession(new SimServerSession(1, 1));
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
@@ -168,7 +156,6 @@ public class FileResponseRendererTest extends TestCase {
             }
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
-            System.out.println("break");
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -177,16 +164,7 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testZeroByteTransformation_Bug28429() {
         try {
-            final File file = new File(TEST_DATA_DIR, "28429.jpg");
-            final InputStream is = new FileInputStream(file);
-            final byte[] bytes = IOUtils.toByteArray(is);
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-            {
-                fileHolder.setContentType("image/jpeg");
-                fileHolder.setDelivery("view");
-                fileHolder.setDisposition("inline");
-                fileHolder.setName(file.getName());
-            }
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("28429.jpg", "image/jpeg", Delivery.view, Disposition.inline, "28429.jpg");
             final AJAXRequestData requestData = new AJAXRequestData();
             {
                 requestData.setSession(new SimServerSession(1, 1));
@@ -201,7 +179,7 @@ public class FileResponseRendererTest extends TestCase {
                 resp.setOutputStream(servletOutputStream);
             }
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
-            fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
+            fileResponseRenderer.setScaler(new TestableImageTransformationService(IOUtils.toByteArray(fileHolder.getStream()), ImageTransformations.HIGH_EXPENSE));
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
             assertFalse("Got an error status: " + resp.getStatus(), resp.getStatus() >= 400);
         } catch (final Exception e) {
@@ -212,16 +190,7 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testContentTypeByFileName_Bug31648() {
         try {
-            final File file = new File(TEST_DATA_DIR, "31648.png");
-            final InputStream is = new FileInputStream(file);
-            final byte[] bytes = IOUtils.toByteArray(is);
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-            {
-                fileHolder.setContentType("application/binary");
-                fileHolder.setDelivery("view");
-                fileHolder.setDisposition("inline");
-                fileHolder.setName(file.getName());
-            }
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("31648.png", "application/binary", Delivery.view, Disposition.inline, "31648.png");
             final AJAXRequestData requestData = new AJAXRequestData();
             {
                 requestData.setSession(new SimServerSession(1, 1));
@@ -237,7 +206,7 @@ public class FileResponseRendererTest extends TestCase {
             MimeType2ExtMap.addMimeType("image/png", "png");
 
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
-            fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
+            fileResponseRenderer.setScaler(new TestableImageTransformationService(IOUtils.toByteArray(fileHolder.getStream()), ImageTransformations.HIGH_EXPENSE));
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
             final String expectedContentType = "image/png";
             final String currentContentType = resp.getContentType();
@@ -250,16 +219,7 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testRangeHeader_Bug27394() {
         try {
-            final File file = new File(TEST_DATA_DIR, "26926_27394.pdf");
-            final InputStream is = new FileInputStream(file);
-            final byte[] bytes = IOUtils.toByteArray(is);
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-            {
-                fileHolder.setContentType("application/pdf");
-                fileHolder.setDelivery("view");
-                fileHolder.setDisposition("inline");
-                fileHolder.setName(file.getName());
-            }
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("26926_27394.pdf", "application/pdf", Delivery.view, Disposition.inline, "26926_27394.pdf");
             final AJAXRequestData requestData = new AJAXRequestData();
             {
                 requestData.setSession(new SimServerSession(1, 1));
@@ -275,7 +235,7 @@ public class FileResponseRendererTest extends TestCase {
             final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
             resp.setOutputStream(servletOutputStream);
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
-            fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
+            fileResponseRenderer.setScaler(new TestableImageTransformationService(IOUtils.toByteArray(fileHolder.getStream()), ImageTransformations.HIGH_EXPENSE));
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
             System.out.println("break");
             assertTrue("HTTP header \"accept-ranges\" is missing", resp.containsHeader("accept-ranges"));
@@ -302,12 +262,7 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong status code", 404, resp.getStatus());
 
         // test with empty filename
-        final byte[] bytes = new byte[0];
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-        fileHolder.setContentType("application/octet-stream");
-        fileHolder.setDelivery("download");
-        fileHolder.setDisposition("attachment");
-        fileHolder.setName("");
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(new byte[0], "application/octet-stream", Delivery.download, Disposition.attachment, "");
 
         resp = new SimHttpServletResponse();
         servletOutputStream = new ByteArrayServletOutputStream();
@@ -332,11 +287,7 @@ public class FileResponseRendererTest extends TestCase {
     public void testXSSVuln_Bug26244() throws IOException {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
-        final File file = new File(TEST_DATA_DIR, "xss_utf16.html");
-        final InputStream is = new FileInputStream(file);
-        final byte[] bytes = IOUtils.toByteArray(is);
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-        fileHolder.setName(file.getName());
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("xss_utf16.html");
 
         final AJAXRequestData requestData = new AJAXRequestData();
         final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
@@ -353,18 +304,7 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testXSSVuln_Bug29147() throws IOException {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
-
-        final File file = new File(TEST_DATA_DIR, "29147.svg");
-        final InputStream is = new FileInputStream(file);
-        final byte[] bytes = IOUtils.toByteArray(is);
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-        {
-            fileHolder.setContentType("image/svg+xml");
-            fileHolder.setDelivery("view");
-            fileHolder.setDisposition("inline");
-            fileHolder.setName(file.getName());
-        }
-
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("29147.svg", "image/svg+xml", Delivery.view, Disposition.inline, "29147.svg");
         final AJAXRequestData requestData = new AJAXRequestData();
         final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         final SimHttpServletRequest req = new SimHttpServletRequest();
@@ -379,12 +319,8 @@ public class FileResponseRendererTest extends TestCase {
     public void testXSSVuln_Bug26373_view() throws IOException {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
-        final File file = new File(TEST_DATA_DIR, "26237.html");
-        final InputStream is = new FileInputStream(file);
-        final byte[] bytes = IOUtils.toByteArray(is);
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-        fileHolder.setName(file.getName());
-
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("26237.html");
+        
         final AJAXRequestData requestData = new AJAXRequestData();
         final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         final SimHttpServletRequest req = new SimHttpServletRequest();
@@ -400,11 +336,7 @@ public class FileResponseRendererTest extends TestCase {
     public void testXSSVuln_Bug26237_inline() throws IOException {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
-        final File file = new File(TEST_DATA_DIR, "26237.html");
-        final InputStream is = new FileInputStream(file);
-        final byte[] bytes = IOUtils.toByteArray(is);
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-        fileHolder.setName(file.getName());
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("26237.html");
 
         final AJAXRequestData requestData = new AJAXRequestData();
         final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
@@ -421,11 +353,7 @@ public class FileResponseRendererTest extends TestCase {
     public void testXSSVuln_Bug26243() throws IOException {
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
-        final File file = new File(TEST_DATA_DIR, "31714.jpg");
-        final InputStream is = new FileInputStream(file);
-        final byte[] bytes = IOUtils.toByteArray(is);
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-        fileHolder.setName(file.getName());
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("31714.jpg");
 
         final AJAXRequestData requestData = new AJAXRequestData();
         final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
@@ -441,16 +369,7 @@ public class FileResponseRendererTest extends TestCase {
     }
 
     public void testBug31714() throws IOException {
-        final File file = new File(TEST_DATA_DIR, "31714.jpg");
-        final InputStream is = new FileInputStream(file);
-        final byte[] bytes = IOUtils.toByteArray(is);
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-        {
-            fileHolder.setContentType("image/jpeg");
-            fileHolder.setDelivery("view");
-            fileHolder.setDisposition("inline");
-            fileHolder.setName(file.getName());
-        }
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("31714.jpg", "image/jpeg", Delivery.view, Disposition.inline, "31714.jpg");
 
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -461,22 +380,13 @@ public class FileResponseRendererTest extends TestCase {
 
         final SimHttpServletRequest req = new SimHttpServletRequest();
         final SimHttpServletResponse resp = new SimHttpServletResponse();
-        fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
+        fileResponseRenderer.setScaler(new TestableImageTransformationService(IOUtils.toByteArray(fileHolder.getStream()), ImageTransformations.HIGH_EXPENSE));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         assertEquals("Unexpected status code.", 500, resp.getStatus());
     }
 
     public void testBug26995() throws IOException {
-        final File file = new File(TEST_DATA_DIR, "26995");
-        final InputStream is = new FileInputStream(file);
-        final byte[] bytes = IOUtils.toByteArray(is);
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-        {
-            fileHolder.setContentType("application/octet-stream");
-            fileHolder.setDelivery("view");
-            fileHolder.setDisposition("attachment");
-            fileHolder.setName(file.getName());
-        }
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("26995", "application/octet-stream", Delivery.view, Disposition.attachment, "26995");
 
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -487,30 +397,18 @@ public class FileResponseRendererTest extends TestCase {
         final SimHttpServletResponse resp = new SimHttpServletResponse();
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
-        fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
+        fileResponseRenderer.setScaler(new TestableImageTransformationService(IOUtils.toByteArray(fileHolder.getStream()), ImageTransformations.HIGH_EXPENSE));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
 
         assertEquals("Wrong Content-Type", "image/jpeg", resp.getContentType());
     }
 
-    public void testBug29438() {
-        
-    }
-    
     public void testChunkRead() {
         try {
-            final int length = 2048;
-            final byte[] bytes = new byte[length];
-            for (int i = 0; i < length; i++) {
-                bytes[i] = (byte) i;
-            }
+            byte[] bytes = FileResponseRendererTools.newByteArray(2048);
             bytes[256] = 120;
-
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-            fileHolder.setContentType("application/octet-stream");
-            fileHolder.setDelivery("download");
-            fileHolder.setDisposition("attachment");
-            fileHolder.setName("bin.dat");
+            
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "application/octet-stream", Delivery.download, Disposition.attachment, "bin.data");
 
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
@@ -552,17 +450,9 @@ public class FileResponseRendererTest extends TestCase {
 
     public void testChunkReadOutOfRange() {
         try {
-            final int length = 2048;
-            final byte[] bytes = new byte[length];
-            for (int i = 0; i < length; i++) {
-                bytes[i] = (byte) i;
-            }
-
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-            fileHolder.setContentType("application/octet-stream");
-            fileHolder.setDelivery("download");
-            fileHolder.setDisposition("attachment");
-            fileHolder.setName("bin.dat");
+            byte[] bytes = FileResponseRendererTools.newByteArray(2048);
+            
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "application/octet-stream", Delivery.download, Disposition.attachment, "bin.data");
 
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
@@ -585,17 +475,9 @@ public class FileResponseRendererTest extends TestCase {
     }
 
     public void testResourceCacheIsDisabled() throws Exception {
-        final int length = 2048;
-        final byte[] bytes = new byte[length];
-        for (int i = 0; i < length; i++) {
-            bytes[i] = (byte) i;
-        }
-
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-        fileHolder.setContentType("image/jpeg");
-        fileHolder.setDelivery("view");
-        fileHolder.setDisposition("inline");
-        fileHolder.setName("someimage.jpg");
+        byte[] bytes = FileResponseRendererTools.newByteArray(2048);
+        
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "image/jpeg", Delivery.view, Disposition.inline, "someimage.jpg");
 
         final TestableResourceCache resourceCache = new TestableResourceCache(false);
         ResourceCaches.setResourceCache(resourceCache);
@@ -616,17 +498,10 @@ public class FileResponseRendererTest extends TestCase {
     }
 
     public void testResourceCacheIsDisabled2() throws Exception {
-        final int length = 2048;
-        final byte[] bytes = new byte[length];
-        for (int i = 0; i < length; i++) {
-            bytes[i] = (byte) i;
-        }
+        byte[] bytes = FileResponseRendererTools.newByteArray(2048);
+        
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "image/jpeg", Delivery.view, Disposition.inline, "someimage.jpg");
 
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-        fileHolder.setContentType("image/jpeg");
-        fileHolder.setDelivery("view");
-        fileHolder.setDisposition("inline");
-        fileHolder.setName("someimage.jpg");
         ServerServiceRegistry.getInstance().addService(StringParser.class, new BasicTypesStringParser());
         final TestableResourceCache resourceCache = new TestableResourceCache(true);
         ResourceCaches.setResourceCache(resourceCache);
@@ -648,17 +523,9 @@ public class FileResponseRendererTest extends TestCase {
     }
 
     public void testNoCachingOnCheapTransformations() throws Exception {
-        final int length = 2048;
-        final byte[] bytes = new byte[length];
-        for (int i = 0; i < length; i++) {
-            bytes[i] = (byte) i;
-        }
+        byte[] bytes = FileResponseRendererTools.newByteArray(2048);
 
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-        fileHolder.setContentType("image/jpeg");
-        fileHolder.setDelivery("view");
-        fileHolder.setDisposition("inline");
-        fileHolder.setName("someimage.jpg");
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "image/jpeg", Delivery.view, Disposition.inline, "someimage.jpg");
 
         final TestableResourceCache resourceCache = new TestableResourceCache(true);
         ResourceCaches.setResourceCache(resourceCache);
@@ -678,17 +545,10 @@ public class FileResponseRendererTest extends TestCase {
     }
 
     public void testCachingOnExpensiveTransformations() throws Exception {
-        final int length = 2048;
-        final byte[] bytes = new byte[length];
-        for (int i = 0; i < length; i++) {
-            bytes[i] = (byte) i;
-        }
+        byte[] bytes = FileResponseRendererTools.newByteArray(2048);
+        
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "image/jpeg", Delivery.view, Disposition.inline, "someimage.jpg");
 
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
-        fileHolder.setContentType("image/jpeg");
-        fileHolder.setDelivery("view");
-        fileHolder.setDisposition("inline");
-        fileHolder.setName("someimage.jpg");
         ServerServiceRegistry.getInstance().addService(StringParser.class, new BasicTypesStringParser());
         final TestableResourceCache resourceCache = new TestableResourceCache(true);
         ResourceCaches.setResourceCache(resourceCache);
