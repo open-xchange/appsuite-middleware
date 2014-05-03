@@ -231,6 +231,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
                 }
             }
 
+            // Update of image bytes w/o MIME type will fail...
             if (origContact.getImage1() != null) {
                 if (origContact.getImageContentType() == null) {
                     String imageContentType = update.getImageContentType();
