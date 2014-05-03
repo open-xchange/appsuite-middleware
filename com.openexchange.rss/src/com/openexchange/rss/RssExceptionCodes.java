@@ -73,8 +73,11 @@ public enum RssExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
      */
-    INVALID_RSS("Invalid RSS URL or not well-formed XML content provided by URL: %1$s", RssExceptionMessages.INVALID_RSS_MSG,
-        CATEGORY_USER_INPUT, 3),
+    INVALID_RSS("Invalid RSS URL or not well-formed XML content provided by URL: %1$s", RssExceptionMessages.INVALID_RSS_MSG, CATEGORY_USER_INPUT, 3),
+    /**
+     * HTTP error %1$s while loading RSS feed from URL: %2$s.
+     */
+    RSS_HTTP_ERROR("HTTP error %1$s while loading RSS feed from URL: %2$s.", RssExceptionMessages.RSS_HTTP_ERROR_MSG, CATEGORY_SERVICE_DOWN, 4),
 
     ;
 
@@ -82,7 +85,7 @@ public enum RssExceptionCodes implements DisplayableOXExceptionCode {
      * The error code prefix for RSS module.
      */
     public static String PREFIX = "RSS";
-    
+
     private String displayMessage;
 
     private Category category;
@@ -97,7 +100,7 @@ public enum RssExceptionCodes implements DisplayableOXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

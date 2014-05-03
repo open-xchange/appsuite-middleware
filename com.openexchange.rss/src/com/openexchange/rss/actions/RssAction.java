@@ -156,6 +156,13 @@ public class RssAction implements AJAXActionService {
                         }
                         if (NOT_FOUND == responseCode) {
                             LOG.debug("Resource could not be found: {}", url, e);
+                        } else if (responseCode >= 500 && responseCode < 600) {
+                            final OXException oxe = RssExceptionCodes.RSS_HTTP_ERROR.create(e, Integer.valueOf(responseCode), url);
+                            if (1 == urls.size()) {
+                                throw oxe;
+                            }
+                            oxe.setCategory(Category.CATEGORY_WARNING);
+                            warnings.add(oxe);
                         } else {
                             LOG.warn("Could not load RSS feed from: {}", url, e);
                         }
