@@ -338,8 +338,7 @@ public class FacebookServiceImpl implements FacebookService {
     protected void setEmail(Contact contact, String email) {
         if (null != email) {
             try {
-                InternetAddress emailAddr = new InternetAddress(email);
-                emailAddr.validate();
+                new InternetAddress(email).validate();
                 contact.setEmail1(email);
             } catch (AddressException addressException) {
                 LOG.info(
