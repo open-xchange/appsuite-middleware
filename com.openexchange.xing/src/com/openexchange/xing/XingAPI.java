@@ -258,7 +258,7 @@ public class XingAPI<S extends Session> {
         return sb.deleteCharAt(sb.length() - 1).toString();
     }
 
-    
+
     /**
      * Looks up a user by specified E-Mail address.
      *
@@ -308,7 +308,7 @@ public class XingAPI<S extends Session> {
             throw new XingException(e);
         }
     }
-    
+
     /**
      * Looks up a user and returns all attributes from XING.
      *
@@ -967,7 +967,7 @@ public class XingAPI<S extends Session> {
 
     /**
      * Revokes a contact request between the current user (<code>userId</code>) and the specified user (<code>recipientUserId</code>).
-     * 
+     *
      * @param userId The identifier of the user
      * @param recipientUserId The identifier of the recipient
      * @throws XingException If contact request fails
@@ -1543,6 +1543,9 @@ public class XingAPI<S extends Session> {
             }
             if (isValidImage(bytes)) {
                 // Mime type should be of image type. Otherwise web server send some error page instead of 404 error code.
+                if (null == mimeType) {
+                    mimeType = "image/jpeg";
+                }
                 fileHolder.setContentType(mimeType);
             }
             return fileHolder;
