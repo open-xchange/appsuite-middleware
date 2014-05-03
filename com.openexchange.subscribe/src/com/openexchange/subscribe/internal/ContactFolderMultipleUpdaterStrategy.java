@@ -211,11 +211,11 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     @Override
     public void update(final Contact original, final Contact update, final Object session) throws OXException {
-        ContactService contactService = (ContactService)getFromSession(SQL_INTERFACE, session);
-        TargetFolderSession targetFolderSession = (TargetFolderSession)getFromSession(SESSION, session);
+        final ContactService contactService = (ContactService)getFromSession(SQL_INTERFACE, session);
+        final TargetFolderSession targetFolderSession = (TargetFolderSession)getFromSession(SESSION, session);
 
-        String folderId = Integer.toString(original.getParentFolderID());
-        String contactId = Integer.toString(original.getObjectID());
+        final String folderId = Integer.toString(original.getParentFolderID());
+        final String contactId = Integer.toString(original.getObjectID());
 
         Contact origContact = original;
         for (int retry = 2; retry-- > 0;) {
@@ -228,6 +228,16 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
                     if (newValue != null){
                         origContact.set(field, newValue);
                     }
+                }
+            }
+
+            if (origContact.getImage1() != null) {
+                if (origContact.getImageContentType() == null) {
+                    String imageContentType = update.getImageContentType();
+                    if (null == imageContentType) {
+                        imageContentType = "image/jpeg";
+                    }
+                    origContact.setImageContentType(imageContentType);
                 }
             }
 
