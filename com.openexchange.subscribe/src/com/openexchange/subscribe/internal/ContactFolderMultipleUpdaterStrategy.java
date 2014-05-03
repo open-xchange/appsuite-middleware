@@ -211,19 +211,47 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     @Override
     public void update(final Contact original, final Contact update, final Object session) throws OXException {
-        //This may only fill up fields NEVER overwrite them. Original should be used as base and filled up as needed
-        //ALL Content Columns need to be considered here
-        final int[] columns = Contact.CONTENT_COLUMNS;
-        for (final int field : columns){
-            if (original.get(field) == null){
-                if (update.get(field) != null){
-                    original.set(field, update.get(field));
+        final ContactService contactService = (ContactService)getFromSession(SQL_INTERFACE, session);
+        final TargetFolderSession targetFolderSession = (TargetFolderSession)getFromSession(SESSION, session);
+
+        final String folderId = Integer.toString(original.getParentFolderID());
+        final String contactId = Integer.toString(original.getObjectID());
+
+        Contact origContact = original;
+        for (int retry = 2; retry-- > 0;) {
+            //This may only fill up fields NEVER overwrite them. Original should be used as base and filled up as needed
+            //ALL Content Columns need to be considered here
+            final int[] columns = Contact.CONTENT_COLUMNS;
+            for (final int field : columns){
+                if (origContact.get(field) == null){
+                    final Object newValue = update.get(field);
+                    if (newValue != null){
+                        origContact.set(field, newValue);
+                    }
                 }
             }
+
+            // Update of image bytes w/o MIME type will fail...
+            if (origContact.getImage1() != null) {
+                if (origContact.getImageContentType() == null) {
+                    String imageContentType = update.getImageContentType();
+                    if (null == imageContentType) {
+                        imageContentType = "image/jpeg";
+                    }
+                    origContact.setImageContentType(imageContentType);
+                }
+            }
+
+            try {
+                contactService.updateContact(targetFolderSession, folderId, contactId, origContact, origContact.getLastModified());
+            } catch (final OXException e) {
+                if (!ContactExceptionCodes.OBJECT_HAS_CHANGED.equals(e) || retry <= 0) {
+                    throw e;
+                }
+
+                // Retry...
+                origContact = contactService.getContact(targetFolderSession, folderId, contactId, COMPARISON_FIELDS);
+            }
         }
-        ContactService contactService = (ContactService)getFromSession(SQL_INTERFACE, session);
-        TargetFolderSession targetFolderSession = (TargetFolderSession)getFromSession(SESSION, session);
-        contactService.updateContact(targetFolderSession, String.valueOf(original.getParentFolderID()),
-            String.valueOf(original.getObjectID()), original, original.getLastModified());
     }
 }
