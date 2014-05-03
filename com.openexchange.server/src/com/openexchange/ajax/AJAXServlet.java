@@ -757,7 +757,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     characterEncoding = "ISO-8859-1";
                 }
             }
-            uri = AJAXUtilis.decodeUrl(req.getRequestURI(), characterEncoding);
+            uri = AJAXUtility.decodeUrl(req.getRequestURI(), characterEncoding);
         }
         final String path = new StringBuilder(req.getContextPath()).append(req.getServletPath()).toString();
         final int pos = uri.indexOf(path);
@@ -771,11 +771,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * URL encodes given string.
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
-     * @deprecated Use {@link AJAXUtilis#encodeUrl(String)} instead
+     * @deprecated Use {@link AJAXUtility#encodeUrl(String)} instead
      */
     @Deprecated
     public static String encodeUrl(final String s) {
-        return AJAXUtilis.encodeUrl(s);
+        return AJAXUtility.encodeUrl(s);
     }
 
     /**
@@ -783,11 +783,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      * @throws IllegalArgumentException If URL is invalid
-     * @deprecated Use {@link AJAXUtilis#encodeUrl(String,boolean)} instead
+     * @deprecated Use {@link AJAXUtility#encodeUrl(String,boolean)} instead
      */
     @Deprecated
     public static String encodeUrl(final String s, final boolean forAnchor) {
-        return AJAXUtilis.encodeUrl(s, forAnchor);
+        return AJAXUtility.encodeUrl(s, forAnchor);
     }
 
     /**
@@ -795,11 +795,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      * @throws IllegalArgumentException If URL is invalid
-     * @deprecated Use {@link AJAXUtilis#encodeUrl(String,boolean,boolean)} instead
+     * @deprecated Use {@link AJAXUtility#encodeUrl(String,boolean,boolean)} instead
      */
     @Deprecated
     public static String encodeUrl(final String s, final boolean forAnchor, final boolean forLocation) {
-        return AJAXUtilis.encodeUrl(s, forAnchor, forLocation);
+        return AJAXUtility.encodeUrl(s, forAnchor, forLocation);
     }
 
     /**
@@ -807,11 +807,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      * @throws IllegalArgumentException If URL is invalid
-     * @deprecated Use {@link AJAXUtilis#encodeUrl(String,boolean,boolean,String)} instead
+     * @deprecated Use {@link AJAXUtility#encodeUrl(String,boolean,boolean,String)} instead
      */
     @Deprecated
     public static String encodeUrl(final String s, final boolean forAnchor, final boolean forLocation, final String charsetName) {
-        return AJAXUtilis.encodeUrl(s, forAnchor, forLocation, charsetName);
+        return AJAXUtility.encodeUrl(s, forAnchor, forLocation, charsetName);
     }
 
     /**
@@ -825,22 +825,22 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      *
      * @param sInput The input to sanitize
      * @return The sanitized input
-     * @deprecated Use {@link AJAXUtilis#sanitizeParam(String)} instead
+     * @deprecated Use {@link AJAXUtility#sanitizeParam(String)} instead
      */
     @Deprecated
     public static String sanitizeParam(String sInput) {
-        return AJAXUtilis.sanitizeParam(sInput);
+        return AJAXUtility.sanitizeParam(sInput);
     }
 
     /**
      * URL decodes given string.
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
-     * @deprecated Use {@link AJAXUtilis#decodeUrl(String,String)} instead
+     * @deprecated Use {@link AJAXUtility#decodeUrl(String,String)} instead
      */
     @Deprecated
     public static String decodeUrl(final String s, final String charset) {
-        return AJAXUtilis.decodeUrl(s, charset);
+        return AJAXUtility.decodeUrl(s, charset);
     }
 
     /**

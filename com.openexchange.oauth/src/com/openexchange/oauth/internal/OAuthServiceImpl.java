@@ -282,7 +282,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             final DeferringURLService ds = Services.getService(DeferringURLService.class);
             {
-                if (null != ds && ds.isDeferrerURLAvailable(userId, contextId)) {
+                if (isDeferrerAvailable(ds, userId, contextId)) {
                     final String deferredURL = ds.getDeferredURL(cbUrl, userId, contextId);
                     if (deferredURL != null) {
                         cbUrl = deferredURL;
@@ -313,7 +313,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             if (metaData.registerTokenBasedDeferrer() && null != scribeToken) {
                 // Is only applicable if call-back URL is deferred; e.g. /ajax/defer?redirect=http:%2F%2Fmy.host.com%2Fpath...
-                if (null != ds && ds.isDeferrerURLAvailable(userId, contextId)) {
+                if (isDeferrerAvailable(ds, userId, contextId)) {
                     if (ds.seemsDeferred(cbUrl, userId, contextId)) {
                         callbackRegistry.add(scribeToken.getToken(), cbUrl);
                     } else {
@@ -336,6 +336,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } catch (final Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private boolean isDeferrerAvailable(final DeferringURLService ds, final int userId, final int contextId) {
+        return null != ds && ds.isDeferrerURLAvailable(userId, contextId);
     }
 
     private static String urlEncode(final String s) {

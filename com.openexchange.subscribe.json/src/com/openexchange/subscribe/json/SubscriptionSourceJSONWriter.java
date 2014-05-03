@@ -104,7 +104,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
                 if(ID.equals(field)) {
                     row.put(source.getId());
                 } else if (DISPLAY_NAME.equals(field)) {
-                    row.put(source.getDisplayName());
+                    row.put(null != translator ? translator.translate(source.getDisplayName()) : source.getDisplayName());
                 } else if (ICON.equals(field)) {
                     row.put(source.getIcon());
                 } else if (FORM_DESCRIPTION.equals(field)) {

@@ -71,6 +71,7 @@ import com.openexchange.file.storage.search.FileMimeTypeTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.FileSizeTerm;
 import com.openexchange.file.storage.search.LastModifiedTerm;
+import com.openexchange.file.storage.search.NotTerm;
 import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.search.TitleTerm;
@@ -78,6 +79,7 @@ import com.openexchange.file.storage.search.VersionCommentTerm;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.basic.drive.BasicDriveDriver.Comparison;
 import com.openexchange.find.drive.DriveConstants;
+import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.java.Strings;
@@ -131,7 +133,7 @@ public final class Utils {
         } else if (Constants.FIELD_FILE_CONTENT.equals(field)) {
             return new ContentTerm(query, true, true);
         } else if (Constants.FIELD_FILE_TYPE.equals(field)) {
-            return new FileMimeTypeTerm(query);
+            return buildFileTypeTerm(query);
         } else if (Constants.FIELD_FILE_SIZE.equals(field)) {
             final long bytes = parseFilesizeQuery(query);
             final ComparisonType comparison = parseComparisonType(query);
@@ -708,6 +710,53 @@ public final class Utils {
         }
 
         return null == pattern ? null : new LastModifiedTerm(pattern);
+    }
+
+    /**
+     * Builds a search term to match the file type based on the supplied query.
+     *
+     * @param query The query to use, i.e. the type's ID
+     * @return The search term
+     */
+    private static SearchTerm<?> buildFileTypeTerm(String query) {
+        String[] patterns;
+        if (FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier().equals(query)) {
+            patterns = Constants.FILETYPE_PATTERNS_DOCUMENTS;
+        } else if (FileTypeDisplayItem.Type.IMAGES.getIdentifier().equals(query)) {
+            patterns = Constants.FILETYPE_PATTERNS_IMAGES;
+        } else if (FileTypeDisplayItem.Type.VIDEO.getIdentifier().equals(query)) {
+            patterns = Constants.FILETYPE_PATTERNS_VIDEO;
+        } else if (FileTypeDisplayItem.Type.AUDIO.getIdentifier().equals(query)) {
+            patterns = Constants.FILETYPE_PATTERNS_AUDIO;
+        } else if (FileTypeDisplayItem.Type.OTHER.getIdentifier().equals(query)) {
+            // negate all other patterns
+            String[][] patternsToNegate = {
+                Constants.FILETYPE_PATTERNS_DOCUMENTS,
+                Constants.FILETYPE_PATTERNS_IMAGES,
+                Constants.FILETYPE_PATTERNS_VIDEO,
+                Constants.FILETYPE_PATTERNS_AUDIO
+            };
+            List<SearchTerm<?>> searchTerms = new ArrayList<SearchTerm<?>>();
+            for (String[] toNegate : patternsToNegate) {
+                for (String pattern : toNegate) {
+                    searchTerms.add(new FileMimeTypeTerm(pattern, true, false));
+                }
+            }
+            return new NotTerm(new OrTerm(searchTerms));
+        } else {
+            patterns = null;
+        }
+        if (null == patterns || 0 == patterns.length) {
+            return new FileMimeTypeTerm(query); // fall back to query
+        } else if (1 == patterns.length) {
+            return new FileMimeTypeTerm(patterns[0], true, false);
+        } else {
+            List<SearchTerm<?>> searchTerms = new ArrayList<SearchTerm<?>>(patterns.length);
+            for (String pattern : patterns) {
+                searchTerms.add(new FileMimeTypeTerm(pattern, true, false));
+            }
+            return new OrTerm(searchTerms);
+        }
     }
 
 }

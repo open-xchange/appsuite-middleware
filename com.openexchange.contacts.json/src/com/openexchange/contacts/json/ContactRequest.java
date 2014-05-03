@@ -66,14 +66,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
-import com.openexchange.contacts.json.actions.ContactAction;
+import com.openexchange.contacts.json.mapping.ColumnParser;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -210,10 +209,7 @@ public class ContactRequest {
         /*
          * get requested column IDs
          */
-        int[] columnIDs = RequestTools.getColumnsAsIntArray(request);
-        if (null == columnIDs) {
-            throw OXJSONExceptionCodes.MISSING_FIELD.create("columns");
-        }
+        int[] columnIDs = ColumnParser.parseColumns(request.requireParameter("columns"));
         /*
          * determine mandatory fields
          */
@@ -230,19 +226,9 @@ public class ContactRequest {
     		fields = Arrays.add(fields, mandatoryFields);
     	}
     	/*
-    	 * check for special handling
-    	 */
-    	for (int i = 0; i < columnIDs.length; i++) {
-    	    if (Contact.IMAGE1_URL == columnIDs[i] || Contact.IMAGE1 == columnIDs[i]) {
-    	        columnIDs[i] = Contact.NUMBER_OF_IMAGES; // query NUMBER_OF_IMAGES to set image URL afterwards
-    	    } else if (DataObject.LAST_MODIFIED_UTC == columnIDs[i]) {
-                columnIDs[i] = DataObject.LAST_MODIFIED; // query LAST_MODIFIED to set LAST_MODIFIED_UTC afterwards
-    	    }
-    	}
-    	/*
     	 * get mapped fields
     	 */
-    	return ContactMapper.getInstance().getFields(columnIDs, ContactAction.VIRTUAL_FIELDS, fields);
+    	return ColumnParser.getFieldsToQuery(columnIDs, mandatoryFields);
     }
 
     /**

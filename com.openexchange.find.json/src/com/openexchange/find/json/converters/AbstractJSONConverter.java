@@ -54,7 +54,7 @@ import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXUtilis;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
@@ -97,7 +97,7 @@ public abstract class AbstractJSONConverter implements ResultConverter {
             if (type.isFieldFacet()) {
                 jFacet.put("field_facet", true);
             } else {
-                jFacet.put("display_name", AJAXUtilis.sanitizeParam(translator.translate(locale, type.getDisplayName())));
+                jFacet.put("display_name", AJAXUtility.sanitizeParam(translator.translate(locale, type.getDisplayName())));
             }
 
             // Facet values
@@ -141,7 +141,7 @@ public abstract class AbstractJSONConverter implements ResultConverter {
                 filterJSON.put("id", filter.getId());
                 // TODO: introduce boolean if "display_name" is localizable or state in JavaDoc
                 // that it has to be always localizable
-                filterJSON.put("display_name", AJAXUtilis.sanitizeParam(translator.translate(locale, filter.getDisplayName())));
+                filterJSON.put("display_name", AJAXUtility.sanitizeParam(translator.translate(locale, filter.getDisplayName())));
                 filterJSON.put("filter", convertFilter(filter));
                 filtersJSON.put(filterJSON);
             }

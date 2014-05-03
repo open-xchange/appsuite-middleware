@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contacts.json.mapping.ColumnParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
@@ -104,19 +105,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriver {
-
-    /**
-     * Defines the contact fields that are available in a {@link ContactsDocument}. Matches the fields typically fetched from the
-     * storage when serving the "list" request.
-     */
-    private static final ContactField[] CONTACT_FIELDS = {
-        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.PRIVATE_FLAG, ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME,
-        ContactField.SUR_NAME, ContactField.TITLE, ContactField.POSITION, ContactField.INTERNAL_USERID, ContactField.EMAIL1,
-        ContactField.EMAIL2, ContactField.EMAIL3, ContactField.COMPANY, ContactField.DISTRIBUTIONLIST,
-        ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.NUMBER_OF_IMAGES, ContactField.LAST_MODIFIED, ContactField.YOMI_LAST_NAME,
-        ContactField.SUR_NAME, ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, ContactField.DISPLAY_NAME,
-        ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.USE_COUNT
-    };
 
     static final ContactField[] ADDRESSBOOK_FIELDS = merge(
         AddressFacet.ADDRESS_FIELDS, EmailFacet.EMAIL_FIELDS, NameFacet.NAME_FIELDS, PhoneFacet.PHONE_FIELDS,
@@ -199,15 +187,25 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             return SearchResult.EMPTY;
         }
         /*
+         * extract requested contact fields
+         */
+        boolean excludeAdmin = false == searchRequest.getOptions().includeContextAdmin();
+        ContactField[] contactFields;
+        int[] columnIDs = searchRequest.getColumns();
+        if (null == columnIDs || 0 == columnIDs.length) {
+            columnIDs = ColumnParser.parseColumns("list");
+        }
+        contactFields = excludeAdmin ?
+            ColumnParser.getFieldsToQuery(columnIDs, ContactField.INTERNAL_USERID) : ColumnParser.getFieldsToQuery(columnIDs);
+        /*
          * search
          */
-        boolean includeAdmin = searchRequest.getOptions().includeContextAdmin();
         List<Document> contactDocuments = new ArrayList<Document>();
         SortOptions sortOptions = new SortOptions(searchRequest.getStart(), searchRequest.getSize());
-        int excludedAdminID = !includeAdmin ? session.getContext().getMailadmin() : -1;
+        int excludedAdminID = excludeAdmin ? session.getContext().getMailadmin() : -1;
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = Services.getContactService().searchContacts(session, searchTerm, CONTACT_FIELDS, sortOptions);
+            searchIterator = Services.getContactService().searchContacts(session, searchTerm, contactFields, sortOptions);
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
                 if (excludedAdminID != contact.getInternalUserId()) {

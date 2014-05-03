@@ -62,7 +62,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXUtilis;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -229,7 +229,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         if (isEmpty(site)) {
             return site;
         }
-        return AJAXUtilis.encodeUrl(site, true, false);
+        return AJAXUtility.encodeUrl(site, true, false);
     }
 
     protected String normalizeSiteName(final String siteName) {

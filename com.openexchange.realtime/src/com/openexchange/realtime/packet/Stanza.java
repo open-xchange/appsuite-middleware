@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -431,6 +432,59 @@ public abstract class Stanza implements Serializable {
             }
         }
         return matchingElements;
+    }
+
+    /**
+     * Filter a single payload from this {@link Stanza} based only on the {@link ElementPath} of the wanted payload. This will search in all
+     * of
+     * this {@link Stanza}'s {@link PayloadTree}s.
+     * 
+     * @param elementPath The {@link ElementPath} of the wanted payload
+     * @param clazz The {@link Class} of the wanted Payload
+     * @return An {@link Optional} containing the single Payload or an empty {@link Optional} if the Stanza did contain exactly one matching
+     *         Payload.
+     */
+    public <T> Optional<T> getSinglePayload(ElementPath elementPath, Class<T> clazz) {
+        return getSinglePayload0(null, elementPath, clazz);
+    }
+
+    /**
+     * Filter a single Payload from this {@link Stanza}'s {@link PayloadTree} based on the {@link ElementPath}s of the wanted Payload and
+     * the {@link PayloadTree} to search.
+     * 
+     * @param treePath The {@link ElementPath} identifying a {@link PayloadTree} within this {@link Stanza} that should be searched
+     * @param elementPath The {@link ElementPath} of the wanted Payload
+     * @param clazz The {@link Class} of the wanted Payload
+     * @return An {@link Optional} containing the single Payload or an empty {@link Optional} if the Stanza did contain exactly one matching
+     *         Payload.
+     */
+    public <T> Optional<T> getSinglePayload(ElementPath treePath, ElementPath elementPath, Class<T> clazz) {
+        return getSinglePayload0(treePath, elementPath, clazz);
+    }
+
+    private <T> Optional<T> getSinglePayload0(ElementPath treePath, ElementPath elementPath, Class<T> clazz) {
+        Optional<T> retval = Optional.absent();
+
+        Collection<PayloadElement> filteredPayloadElements = null;
+        if(treePath == null) {
+            filteredPayloadElements = filterPayloadElements(elementPath);
+        } else {
+            filteredPayloadElements = filterPayloadElements(getPayloadTrees(treePath), elementPath);
+        }
+        int numResults = filteredPayloadElements.size();
+        if (numResults != 1) {
+            LOG.warn("Was expecting a single " + elementPath + " payload but found " + numResults 
+                + " within the Stanza. Returning absent Optional instead.");
+            return retval;
+        }
+        Object data = filteredPayloadElements.iterator().next().getData();
+        if (clazz.isInstance(data)) {
+            retval = Optional.of(clazz.cast(data));
+        } else {
+            LOG.warn("Was expecting a payload  of class " + clazz + " but found " + data == null ? "null" : data.getClass().getName() 
+                + " within the Stanza. Returning absent Optional instead.");
+        }
+        return retval;
     }
 
     /**

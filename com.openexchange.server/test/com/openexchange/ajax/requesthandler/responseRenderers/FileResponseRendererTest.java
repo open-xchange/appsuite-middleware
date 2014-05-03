@@ -237,7 +237,6 @@ public class FileResponseRendererTest extends TestCase {
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
             fileResponseRenderer.setScaler(new TestableImageTransformationService(IOUtils.toByteArray(fileHolder.getStream()), ImageTransformations.HIGH_EXPENSE));
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
-            System.out.println("break");
             assertTrue("HTTP header \"accept-ranges\" is missing", resp.containsHeader("accept-ranges"));
             assertTrue("HTTP header \"content-range\" is missing", resp.containsHeader("content-range"));
             assertEquals("bytes", resp.getHeaders().get("accept-ranges"));
@@ -282,6 +281,36 @@ public class FileResponseRendererTest extends TestCase {
         result = new AJAXRequestResult(fileHolder, "file");
         fileResponseRenderer.write(requestData, result, req, resp);
         assertEquals("Wrong status code", 404, resp.getStatus());
+    }
+
+    public void testShouldDetectVulnerableHtmlTags_Bug25133() {
+        final File file = new File(TEST_DATA_DIR, "plain.htm");
+        InputStream is;
+        try {
+            is = new FileInputStream(file);
+            final byte[] bytes = IOUtils.toByteArray(is);
+            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+            {
+                fileHolder.setContentType("text/htm");
+                fileHolder.setDelivery("view");
+                fileHolder.setDisposition("inline");
+                fileHolder.setName(file.getName());
+            }
+            AJAXRequestData requestData = new AJAXRequestData();
+            AJAXRequestResult result = new AJAXRequestResult();
+            SimHttpServletRequest req = new SimHttpServletRequest();
+            SimHttpServletResponse resp = new SimHttpServletResponse();
+            ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+            resp.setOutputStream(servletOutputStream);
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+            fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+            assertNotNull("No output stream found" + servletOutputStream.toString());
+            final String outputString = servletOutputStream.toString();
+            assertFalse("Output stream contains vulnerable '<script>' tag", outputString.contains("<script>"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
     public void testXSSVuln_Bug26244() throws IOException {

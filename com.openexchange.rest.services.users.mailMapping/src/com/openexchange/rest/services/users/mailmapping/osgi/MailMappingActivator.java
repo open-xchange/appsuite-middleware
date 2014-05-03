@@ -1,4 +1,4 @@
-/*-
+/*
  *
  *    OPEN-XCHANGE legal information
  *

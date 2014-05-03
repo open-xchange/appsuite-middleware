@@ -75,7 +75,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.AJAXUtilis;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -1014,7 +1014,7 @@ public final class HtmlProcessing {
                     if (mailId.indexOf('%') >= 0) {
                         final int unifiedINBOXAccountID = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
                         if (unifiedINBOXAccountID < 0 || msgUID.getAccountId() != unifiedINBOXAccountID) {
-                            String tmp = AJAXUtilis.decodeUrl(mailId, null);
+                            String tmp = AJAXUtility.decodeUrl(mailId, null);
                             if (tmp.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
                                 // Expect mail path; e.g. "default0/INBOX/123"
                                 try {

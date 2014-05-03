@@ -49,12 +49,13 @@
 
 package com.openexchange.oauth.xing;
 
-import static com.openexchange.ajax.AJAXServlet.encodeUrl;
 import java.util.HashMap;
 import java.util.Map;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
-import com.openexchange.ajax.AJAXUtilis;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -71,6 +72,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(XingOAuthServiceMetaData.class);
 
     private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.xing.apiKey",
         "com.openexchange.oauth.xing.apiSecret", "com.openexchange.oauth.xing.consumerKey", "com.openexchange.oauth.xing.consumerSecret"};
@@ -181,10 +184,14 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
 
         final DeferringURLService deferrer = services.getService(DeferringURLService.class);
         if (null != deferrer && deferrer.isDeferrerURLAvailable(session.getUserId(), session.getContextId())) {
-            return deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
+            final String retval = deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
+            LOGGER.debug("Initializing XING OAuth account for user {} in context {} with call-back URL: {}", session.getUserId(), session.getContextId(), retval);
+            return retval;
         }
 
-        return deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost).toString());
+        final String retval = deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost).append('/').toString());
+        LOGGER.debug("Initializing XING OAuth account for user {} in context {} with call-back URL: {}", session.getUserId(), session.getContextId(), retval);
+        return retval;
     }
 
     private String extractProtocol(final String url) {
@@ -200,13 +207,16 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
         }
         String deferrerURL = domain.trim();
         final DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-        final String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
+        String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
+        if (!path.startsWith("/")) {
+            path = new StringBuilder(path.length() + 1).append('/').append(path).toString();
+        }
         if (seemsAlreadyDeferred(url, deferrerURL, path)) {
             // Already deferred
             return url;
         }
         // Return deferred URL
-        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXUtilis.encodeUrl(url, false, false)).toString();
+        return new StringBuilder(deferrerURL).append(path).append("?redirect=").append(AJAXUtility.encodeUrl(url, false, false)).toString();
     }
 
     private static boolean seemsAlreadyDeferred(final String url, final String deferrerURL, final String path) {

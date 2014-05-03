@@ -49,19 +49,26 @@
 
 package com.openexchange.realtime.json.impl;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import com.openexchange.realtime.group.DistributedGroupManager;
+import com.openexchange.realtime.group.GroupManagerService;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.util.Duration;
 
 /**
  * The {@link StateManager} manages the state of connected clients.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class StateManager implements RealtimeJanitor {
 
@@ -118,7 +125,21 @@ public class StateManager implements RealtimeJanitor {
      * @param timestamp - The timestamp to compare the lastSeen value to
      */
     public void timeOutStaleStates(long timestamp) {
+        GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
+        DistributedGroupManager groupManager = JSONServiceRegistry.getInstance().getService(DistributedGroupManager.class);
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
+            ID client = state.getId();
+            Duration inactivity = state.getInactivityDuration();
+            LOG.debug("Client {} is inactive since {} seconds", client, inactivity.getValueInS());
+            if(groupManager != null) {
+                try {
+                    groupManager.setInactivity(client, inactivity);
+                } catch(OXException oxe) {
+                    LOG.error("Error while trying to set inactivity of client {}", client, oxe);
+                }
+            } else {
+                LOG.error("Unable to inform GroupManager about inactivity duration. GroupManagerService is missing!");
+            }
             if (state.isTimedOut(timestamp)) {
                 /*
                  * The client timed out: if he'd be still active and was just rerouted to another backend the cleanup would have already
@@ -126,8 +147,11 @@ public class StateManager implements RealtimeJanitor {
                  * it cluster-wide.
                  */
                 LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
-                GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
-                globalRealtimeCleanup.cleanForId(state.getId());
+                if(globalRealtimeCleanup != null) {
+                    globalRealtimeCleanup.cleanForId(state.getId());
+                } else {
+                    LOG.error("Unable to cleanup for id {}. GLobalRealtimeCleanupService is missing!", client);
+                }
             } else {
                 try {
                     state.getId().trigger(ID.Events.REFRESH, this);

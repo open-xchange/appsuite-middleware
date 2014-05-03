@@ -1,0 +1,18 @@
+Source: open-xchange-rest
+Section: web
+Priority: optional
+Maintainer: Francisco Laguna <francisco.laguna@open-xchange.com>
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), ant-optional (>= 1.7.0), default-jdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-rest
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Description: Micro services REST API
+ This package adds the bundles to the backend that provide the internal REST
+ API for the micro services architecture. Currently it contains the REST API
+ HTTP interface and some core services. These are services for accessing the
+ configuration, the database and for mapping email addresses to specific users
+ of certain contexts.

@@ -60,7 +60,7 @@ import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.json.payload.converter.StackTraceElementToJSONConverter;
 import com.openexchange.realtime.json.payload.converter.ThrowableToJSONConverter;
-import com.openexchange.realtime.json.payload.converter.sim.SimpleConverterSim;
+import com.openexchange.realtime.payload.converter.sim.SimpleConverterSim;
 
 
 /**

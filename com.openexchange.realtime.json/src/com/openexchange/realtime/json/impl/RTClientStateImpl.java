@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.json.impl;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -61,6 +62,7 @@ import com.openexchange.realtime.json.actions.SendAction;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.Duration;
 
 
 /**
@@ -216,6 +218,13 @@ public class RTClientStateImpl implements RTClientState {
 
     public void setLastSeen(long lastSeen) {
         this.lastSeen = lastSeen;
+    }
+
+    @Override
+    public Duration getInactivityDuration() {
+        long diff = System.currentTimeMillis() - this.lastSeen;
+        diff = diff < 0 ? 0 : diff;
+        return Duration.roundDownTo(diff, MILLISECONDS);
     }
 
 }

@@ -70,13 +70,13 @@ import com.openexchange.java.Strings;
 
 
 /**
- * {@link AJAXUtilis} - A utility class for AJAX components/communication.
+ * {@link AJAXUtility} - A utility class for AJAX components/communication.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJAXUtilis {
+public final class AJAXUtility {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJAXUtilis.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJAXUtility.class);
 
     // ------------------------------------- START Helper classes-------------------------------------------- //
 
@@ -96,7 +96,7 @@ public final class AJAXUtilis {
     /**
      * No instance.
      */
-    private AJAXUtilis() {
+    private AJAXUtility() {
         super();
     }
 

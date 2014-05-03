@@ -1,0 +1,5 @@
+open-xchange-rest (7.6.0-0) stable; urgency=low
+
+  * initial packaging for internal REST services API
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 02 May 2014 09:11:39 +0200

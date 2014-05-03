@@ -103,7 +103,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     /**
      * The calendar fields that are requested when searching.
      */
-    private static final int[] FIELDS = {
+    private static final int[] DEFAULT_COLUMN_IDS = {
         DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
         FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION,
         CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
@@ -236,11 +236,15 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * perform search
          */
+        int[] columnIDs = searchRequest.getColumns();
+        if (null == columnIDs || 0 == columnIDs.length) {
+            columnIDs = DEFAULT_COLUMN_IDS;
+        }
         List<Appointment> appointments = new ArrayList<Appointment>();
         AppointmentSQLInterface appointmentSql = Services.requireService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
         SearchIterator<Appointment> searchIterator = null;
         try {
-            searchIterator = appointmentSql.searchAppointments(appointmentSearch, Appointment.START_DATE, Order.ASCENDING, FIELDS);
+            searchIterator = appointmentSql.searchAppointments(appointmentSearch, Appointment.START_DATE, Order.ASCENDING, columnIDs);
             while (searchIterator.hasNext()) {
                 appointments.add(getBestMatchingOccurrence(searchIterator.next(), appointmentSearch.getMinimumEndDate(), appointmentSearch.getMaximumStartDate()));
             }
@@ -380,16 +384,6 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             }
         }
         return contactFacets;
-    }
-
-    private List<FacetValue> getAutocompleteResources(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
-        //TODO
-        return Collections.emptyList();
-    }
-
-    private List<FacetValue> getAutocompleteGroups(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
-        //TODO
-        return Collections.emptyList();
     }
 
     private static Set<String> extractEmailAddresses(Contact contact) {

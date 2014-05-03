@@ -91,7 +91,7 @@ import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
-import com.openexchange.ajax.AJAXUtilis;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
@@ -1850,7 +1850,7 @@ public class MimeMessageFiller {
 
     private static String urlDecode(final String s) {
         try {
-            return AJAXUtilis.decodeUrl(replaceURLCodePoints(s), "ISO-8859-1");
+            return AJAXUtility.decodeUrl(replaceURLCodePoints(s), "ISO-8859-1");
         } catch (final RuntimeException e) {
             return s;
         }
