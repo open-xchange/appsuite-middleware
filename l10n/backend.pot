@@ -4087,6 +4087,11 @@ msgstr ""
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
 msgstr ""
 
+#. HTTP error %1$s while loading RSS feed from URL: %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:66
+msgid "HTTP error %1$s while loading RSS feed from URL: %2$s."
+msgstr ""
+
 #. *
 #. * The value you inserted for %2$s is not correct
 #.

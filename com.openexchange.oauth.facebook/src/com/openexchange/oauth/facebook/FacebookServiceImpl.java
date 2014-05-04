@@ -336,18 +336,19 @@ public class FacebookServiceImpl implements FacebookService {
      * @param email - the string the email is included in
      */
     protected void setEmail(Contact contact, String email) {
-        try {
-            InternetAddress emailAddr = new InternetAddress(email);
-            emailAddr.validate();
-
-            contact.setEmail1(email);
-        } catch (AddressException addressException) {
-            LOG.info(
-                "Email address for facebook user '{} {}' is not valid and cannot be imported! Tried to import {}.",
-                contact.getGivenName(),
-                contact.getSurName(),
-                email,
-                addressException);
+        if (null != email) {
+            try {
+                new InternetAddress(email).validate();
+                contact.setEmail1(email);
+            } catch (AddressException addressException) {
+                LOG.info(
+                    "Email address for facebook user '{} {}' is not valid and cannot be imported! Tried to import {}.",
+                    contact.getGivenName(),
+                    contact.getSurName(),
+                    email,
+                    addressException);
+            }
         }
     }
+
 }

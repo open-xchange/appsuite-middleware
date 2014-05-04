@@ -228,7 +228,7 @@ public class ContactRequest {
     	/*
     	 * get mapped fields
     	 */
-    	return ColumnParser.getFieldsToQuery(columnIDs, mandatoryFields);
+    	return ColumnParser.getFieldsToQuery(columnIDs, fields);
     }
 
     /**
