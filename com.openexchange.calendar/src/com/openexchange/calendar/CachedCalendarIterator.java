@@ -270,13 +270,15 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 
             // Security check for bug 10836
             if (CACHED_ITERATOR_FAST_FETCH && (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED)) {
-            	final UserParticipant up[] = cdao.getUsers();
             	boolean found = false;
-            	for (int a = 0; a < up.length; a++) {
-            		if (up[a].getPersonalFolderId() == cdao.getParentFolderID()) {
-            			found = true;
-            			break;
-            		}
+            	final UserParticipant[] up = cdao.getUsers();
+            	if (null != up) {
+                	for (int a = 0; a < up.length; a++) {
+                		if (up[a].getPersonalFolderId() == cdao.getParentFolderID()) {
+                			found = true;
+                			break;
+                		}
+                	}
             	}
             	if (!found) {
             		throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(I(cdao.getObjectID()));
