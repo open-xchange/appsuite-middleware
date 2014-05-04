@@ -1144,6 +1144,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 throw OXCalendarExceptionCodes.SEARCH_ITERATOR_NULL.create();
             }
             try {
+                final boolean fastFetch = CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH.get();
                 for (int col : cols) {
                     final FieldFiller ff = FILLERS.get(I(col));
                     if (null == ff) {
@@ -1151,7 +1152,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                          * Fields not covered by FieldFiller: USERS, PARTICIPANTS, and FOLDER_ID
                          */
                         if (CalendarObject.USERS == col) {
-                            if (cdao.containsUserParticipants() || CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                            if (cdao.containsUserParticipants() || fastFetch) {
                                 cdao.setFillUserParticipants();
                             } else {
                                 final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
@@ -1159,14 +1160,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                 bbs = true;
                             }
                         } else if (CalendarObject.PARTICIPANTS == col) {
-                            if (CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                            if (fastFetch) {
                                 cdao.setFillParticipants();
                             } else {
                                 final Participants participants = cimp.getParticipants(cdao, readcon);
                                 cdao.setParticipants(participants.getList());
                             }
                         } else if (CalendarObject.CONFIRMATIONS == col) {
-                            if (CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                            if (fastFetch) {
                                 cdao.setFillConfirmations();
                             } else {
                                 final ExternalUserParticipant[] externals =
@@ -1184,7 +1185,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                         } else {
                                             if (bbs) {
                                                 cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
-                                            } else if (!CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                                            } else if (!fastFetch) {
                                                 final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
                                                 cdao.setUsers(users.getUsers());
                                                 cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
@@ -1220,7 +1221,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                 }
                             }
                         } else if (CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT == col) {
-                            if (CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                            if (fastFetch) {
                                 cdao.setFillLastModifiedOfNewestAttachment(true);
                             } else {
                                 setAttachmentLastModified(readcon, c, cdao);

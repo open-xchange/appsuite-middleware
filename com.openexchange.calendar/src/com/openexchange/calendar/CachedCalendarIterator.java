@@ -57,6 +57,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -85,6 +87,12 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachedCalendarIterator.class);
 
+    /** Whether fast fetch is enabled */
+    public static final AtomicBoolean CACHED_ITERATOR_FAST_FETCH = new AtomicBoolean(true);
+
+    /** The max. number of items to pre-fetch */
+    public static final AtomicInteger MAX_PRE_FETCH = new AtomicInteger(20);
+
 	private final List<OXException> warnings;
     private final List<CalendarDataObject> list;
     private final SearchIterator<CalendarDataObject> non_cached_iterator;
@@ -96,9 +104,6 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
     private int cc;
     private boolean oxonfe;
     protected final int uid;
-
-    public static boolean CACHED_ITERATOR_FAST_FETCH = true;
-    public static int MAX_PRE_FETCH = 20;
     private int pre_fetch;
 
     private CalendarFolderObject visibleFolders;
@@ -111,8 +116,8 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         this.c = c;
         this.uid = uid;
         cache = ServerConfig.getBoolean(Property.PrefetchEnabled);
-        CACHED_ITERATOR_FAST_FETCH = CalendarConfig.isCACHED_ITERATOR_FAST_FETCH();
-        MAX_PRE_FETCH = CalendarConfig.getMAX_PRE_FETCH();
+        CACHED_ITERATOR_FAST_FETCH.set(CalendarConfig.isCACHED_ITERATOR_FAST_FETCH());
+        MAX_PRE_FETCH.set(CalendarConfig.getMAX_PRE_FETCH());
         if (cache) {
             fillCachedResultSet();
         }
@@ -133,8 +138,8 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         this.uid = uid;
         this.oids = oids;
         cache = ServerConfig.getBoolean(Property.PrefetchEnabled);
-        CACHED_ITERATOR_FAST_FETCH = CalendarConfig.isCACHED_ITERATOR_FAST_FETCH();
-        MAX_PRE_FETCH = CalendarConfig.getMAX_PRE_FETCH();
+        CACHED_ITERATOR_FAST_FETCH.set(CalendarConfig.isCACHED_ITERATOR_FAST_FETCH());
+        MAX_PRE_FETCH.set(CalendarConfig.getMAX_PRE_FETCH());
         if (cache) {
             fillCachedResultSet();
         }
@@ -224,14 +229,15 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         CalendarDataObject cdao;
         try {
             cdao = list.get(counter++);
-            if (CACHED_ITERATOR_FAST_FETCH && pre_fetch < counter) {
+            if (CACHED_ITERATOR_FAST_FETCH.get() && pre_fetch < counter) {
 			    if ((cdao.fillParticipants() || cdao.fillUserParticipants() || cdao.fillFolderID() || cdao.fillConfirmations())) {
 			        readcon = DBPool.pickup(c);
 			    }
 
-			    int mn = MAX_PRE_FETCH;
+			    final int maxPreFetch = MAX_PRE_FETCH.get();
+                int mn = maxPreFetch;
 			    if (mn+pre_fetch > list.size()) {
-			        mn = list.size()%MAX_PRE_FETCH;
+			        mn = list.size() % maxPreFetch;
 			    }
 			    final int arr[] = new int[mn];
 
@@ -269,7 +275,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
             }
 
             // Security check for bug 10836
-            if (CACHED_ITERATOR_FAST_FETCH && (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED)) {
+            if (CACHED_ITERATOR_FAST_FETCH.get() && (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED)) {
             	boolean found = false;
             	final UserParticipant[] up = cdao.getUsers();
             	if (null != up) {
