@@ -749,13 +749,14 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Extracts the secret string from specified cookies using given hash string.
      *
-     * @param req the HTTP servlet request object.
-     * @param hash remembered hash from session.
-     * @param client the remembered client from the session.
-     * @param originalUserAgent The original User-Agent associated with session
-     * @return The secret string or <code>null</code>
+     * @param hashSource The hash source for the secret cookie
+     * @param req The HTTP Servlet request object.
+     * @param hash The remembered hash from session.
+     * @param client The remembered client from the session.
+     * @param originalUserAgent The original <tt>'User-Agent'</tt> associated with session
+     * @return The secret string or <tt>null</tt>
      */
-    public static String extractSecret(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client, final String originalUserAgent) {
+    public static String extractSecret(final CookieHashSource hashSource, final HttpServletRequest req, final String hash, final String client, final String originalUserAgent) {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
             if (cookies.isEmpty()) {
@@ -763,7 +764,7 @@ public abstract class SessionServlet extends AJAXServlet {
             } else {
                 final String secretPrefix = SECRET_PREFIX;
                 final StringBuilder tmp = new StringBuilder(256);
-                final String expectedSecretCookieName = tmp.append(secretPrefix).append(getHash(cookieHash, req, hash, client)).toString();
+                final String expectedSecretCookieName = tmp.append(secretPrefix).append(getHash(hashSource, req, hash, client)).toString();
 
                 // Look-up Cookie by expected name
                 Cookie cookie = cookies.get(expectedSecretCookieName);
@@ -790,9 +791,9 @@ public abstract class SessionServlet extends AJAXServlet {
                 final int hlen = tmp.length();
                 if (hlen > 0) {
                     tmp.setLength(hlen - 2);
-                    LOG.info("Didn't find an appropriate Cookie for expected name \"{}\" (CookieHashSource={}) which provides the session secret. Remembered hash: {}. Available hashes: {}", expectedSecretCookieName, cookieHash.toString(), hash, tmp.toString());
+                    LOG.info("Didn't find an appropriate Cookie for expected name \"{}\" (CookieHashSource={}) which provides the session secret. Remembered hash: {}. Available hashes: {}", expectedSecretCookieName, hashSource.toString(), hash, tmp.toString());
                 } else {
-                    LOG.info("Didn't find an appropriate Cookie for expected name \"{}\" (CookieHashSource={}) which provides the session secret. Remembered hash={}. No available hashes.", expectedSecretCookieName, cookieHash.toString(), hash);
+                    LOG.info("Didn't find an appropriate Cookie for expected name \"{}\" (CookieHashSource={}) which provides the session secret. Remembered hash={}. No available hashes.", expectedSecretCookieName, hashSource.toString(), hash);
                 }
             }
         } else {
@@ -819,14 +820,14 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Gets the appropriate hash for specified request.
      *
-     * @param cookieHash defines how the cookie should be found.
+     * @param hashSource Specifies how the cookie should be found.
      * @param req The HTTP request
      * @param hash The previously remembered hash
      * @param client The client identifier
      * @return The appropriate hash
      */
-    public static String getHash(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
-        if (CookieHashSource.REMEMBER == cookieHash) {
+    public static String getHash(final CookieHashSource hashSource, final HttpServletRequest req, final String hash, final String client) {
+        if (CookieHashSource.REMEMBER == hashSource) {
             return hash;
         }
         // Default is calculate
