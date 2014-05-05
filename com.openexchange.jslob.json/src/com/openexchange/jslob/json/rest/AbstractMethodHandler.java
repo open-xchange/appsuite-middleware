@@ -132,6 +132,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
             final String eTag = req.getHeader("If-None-Match");
             if (null != eTag) {
                 requestData.setETag(eTag);
+                requestData.setHeader("If-None-Match", eTag);
             }
         }
         /*

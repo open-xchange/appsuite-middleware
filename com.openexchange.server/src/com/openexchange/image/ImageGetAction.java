@@ -136,16 +136,20 @@ public class ImageGetAction implements AJAXActionService {
             /*
              * Check for ETag headers
              */
-            String eTag = requestData.getHeader("If-None-Match");
-            if (null != eTag && dataSource.getETag(imageLocation, session).equals(eTag)) {
+            final String dataETag = dataSource.getETag(imageLocation, session);
+            final String clientETag = requestData.getHeader("If-None-Match");
+            if (null != clientETag && clientETag.equals(dataETag)) {
                 requestResult.setType(AJAXRequestResult.ResultType.ETAG);
-                if (requestData.getExpires() > 0) {
-                    requestResult.setExpires(requestData.getExpires());
-                }
+                requestResult.setExpires(1000L);
+                requestResult.setFormat("file");
                 return requestResult;
             }
             requestResult = new AJAXRequestResult();
             obtainImageData(dataSource, imageLocation, session, requestResult);
+            if (null != dataETag) {
+                requestResult.setHeader("ETag", dataETag);
+                requestResult.setExpires(1000L);
+            }
         } catch (OXException e) {
             LOG.warn("Retrieving image failed.", e);
 
