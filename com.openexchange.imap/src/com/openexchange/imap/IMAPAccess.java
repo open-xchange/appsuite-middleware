@@ -608,7 +608,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             if (certainPassword) {
                 tmpPass = "secret";
             }
-            final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
+            final String proxyDelimiter = MailAccount.DEFAULT_ID == accountId ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
             /*
              * Check for already failed authentication
              */

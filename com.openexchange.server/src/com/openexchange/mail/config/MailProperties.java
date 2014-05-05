@@ -954,6 +954,15 @@ public final class MailProperties implements IMailProperties {
     }
 
     /**
+     * Sets the authProxyDelimiter
+     *
+     * @param authProxyDelimiter The authProxyDelimiter to set
+     */
+    public void setAuthProxyDelimiter(String authProxyDelimiter) {
+        this.authProxyDelimiter = authProxyDelimiter;
+    }
+
+    /**
      * Signals if MSISDN addresses are supported or not.
      *
      * @return <code>true</code>, if MSISDN addresses are supported; otherwise <code>false</code>
