@@ -60,7 +60,6 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogProperties;
 import com.openexchange.pooling.PoolingException;
 
 /**
@@ -89,13 +88,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     private Connection get(final AssignmentImpl assign, final boolean write, final boolean noTimeout) throws OXException {
-        LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, assign.getSchema());
         return monitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
 
     private static void back(final Connection con) {
         if (null == con) {
-            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error("", e);
             return;
@@ -105,14 +102,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
         } catch (final SQLException e) {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error("", e1);
-        } finally {
-            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
     }
 
     private static void backFromReading(Connection con) {
         if (null == con) {
-            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error("", e);
             return;
@@ -126,8 +120,6 @@ public final class DatabaseServiceImpl implements DatabaseService {
         } catch (final SQLException e) {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error("", e1);
-        } finally {
-            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
     }
 

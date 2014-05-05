@@ -84,6 +84,7 @@ import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
@@ -333,6 +334,17 @@ public abstract class SessionServlet extends AJAXServlet {
             session = getSessionObject(req, true);
             if (null != session) {
                 /*
+                 * Track DB schema
+                 */
+                String dbSchema = (String) session.getParameter(LogProperties.Name.DATABASE_SCHEMA.getName());
+                if (dbSchema == null) {
+                    DatabaseService dbService = ServerServiceRegistry.getServize(DatabaseService.class, true);
+                    dbSchema = dbService.getSchemaName(session.getContextId());
+                    session.setParameter(LogProperties.Name.DATABASE_SCHEMA.getName(), dbSchema);
+                }
+                LogProperties.put(LogProperties.Name.DATABASE_SCHEMA, dbSchema);
+
+                /*
                  * Check max. concurrent AJAX requests
                  */
                 final int maxConcurrentRequests = getMaxConcurrentRequests(session);
@@ -391,6 +403,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
             ThreadLocalSessionHolder.getInstance().setSession(null);
             LogProperties.removeSessionProperties();
+            LogProperties.removeProperty(LogProperties.Name.DATABASE_SCHEMA);
             if (null != counter) {
                 counter.getAndDecrement();
             }
