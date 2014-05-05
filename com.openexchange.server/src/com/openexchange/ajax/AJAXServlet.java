@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -1054,7 +1055,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                             // E.g. Max. byte count of 10240 exceeded.
                             final int pos = message.indexOf(" exceeded", 19 + 1);
                             final String limit = message.substring(19, pos);
-                            throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
+                            throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true));
                         }
                     } else if (cause instanceof EOFException) {
                         // Stream closed/ended unexpectedly
