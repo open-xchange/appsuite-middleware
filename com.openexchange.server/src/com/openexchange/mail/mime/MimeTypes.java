@@ -104,12 +104,6 @@ public final class MimeTypes {
      * multipart/mixed
      */
     public static final String MIME_MULTIPART_MIXED = "multipart/mixed";
-    
-    /**
-     * multipart/octet-stream
-     */
-    public static final String MIME_MULTIPART_OCTET = "multipart/octet-stream";
-
 
     /**
      * multipart/alternative

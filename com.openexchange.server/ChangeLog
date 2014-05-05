@@ -1,7 +1,6 @@
 * 2014-05-04 - ioannis.chouklis@open-xchange.com
 
- - Fix for bug 30647: Display the maximum allowed size of an attachment in a human readable format
- - Fix for bug 31454: Consider multipart/octet-stream alongside with application/octet-stream content type for e-mail attachments
+ - Fix for bug 30647: Display the maximum allowed size of an attachment in a human readable format. 
 
 * 2014-05-04 - thorben.betten@open-xchange.com
 
