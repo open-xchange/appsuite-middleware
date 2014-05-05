@@ -86,7 +86,7 @@ public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
         VEvent event = null;
         if (message.getAppointment() != null) {
         	appt = message.getAppointment();
-        	event = createEvent(mode, 0, message.getAppointment(), ctx, errors, warnings);
+        	event = createEvent(mode, 0, message.getAppointment(), ctx, errors, warnings, new ITipContainer());
             if (message.getComment() != null && !message.getComment().trim().equals("")) {
                 event.getProperties().add(new Comment(message.getComment()));
                 consumedComment = true;
