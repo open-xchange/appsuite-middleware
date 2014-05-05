@@ -109,7 +109,6 @@ public class FileResponseRendererTools {
         fileHolder.setDelivery(delivery.toString());
         fileHolder.setDisposition(disposition.toString());
         fileHolder.setName(filename);
-
         return fileHolder;
     }
 
