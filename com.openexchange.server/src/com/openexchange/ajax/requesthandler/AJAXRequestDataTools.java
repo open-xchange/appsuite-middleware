@@ -186,6 +186,7 @@ public class AJAXRequestDataTools {
             final String eTag = req.getHeader("If-None-Match");
             if (null != eTag) {
                 retval.setETag(eTag);
+                retval.setHeader("If-None-Match", eTag);
             }
         }
         /*
