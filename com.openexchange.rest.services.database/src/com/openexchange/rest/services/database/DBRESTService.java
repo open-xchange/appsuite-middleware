@@ -773,7 +773,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         }
 
         public PreparedStatement prepareFor(Connection con) throws SQLException {
-            PreparedStatement stmt = con.prepareStatement(query, wantsGeneratedKeys ? Statement.RETURN_GENERATED_KEYS : 0);
+            PreparedStatement stmt = wantsGeneratedKeys ? con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS) : con.prepareStatement(query);
             if (values == null) {
                 return stmt;
             }
