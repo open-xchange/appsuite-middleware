@@ -965,7 +965,11 @@ public final class MailProperties implements IMailProperties {
     }
 
     /**
-     * @return the authProxyDelimiter
+     * Gets the proxy authentication delimiter.
+     * <p>
+     * <b>Note</b>: Applies only to primary mail account
+     *
+     * @return The proxy authentication delimiter or <code>null</code> if not set
      */
     public final String getAuthProxyDelimiter() {
         return authProxyDelimiter;
