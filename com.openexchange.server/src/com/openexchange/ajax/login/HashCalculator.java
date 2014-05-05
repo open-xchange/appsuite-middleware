@@ -90,12 +90,12 @@ public class HashCalculator {
     // -------------------------------    MEMBER STUFF    -------------------------------------------- //
 
     private volatile String[] fields;
-    private volatile String salt;
+    private volatile byte[] salt;
 
     private HashCalculator() {
         super();
         fields = new String[0];
-        salt = "";
+        salt = new byte[0];
     }
 
     /**
@@ -103,11 +103,11 @@ public class HashCalculator {
      *
      * @param service The configuration service
      */
-    public void configure(ConfigurationService service) {
+    public void configure(final ConfigurationService service) {
         if (null != service) {
             final String fieldList = service.getProperty("com.openexchange.cookie.hash.fields", "");
             fields = Pattern.compile("\\s*,\\s*").split(fieldList, 0);
-            salt = service.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890");
+            salt = service.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes();
         }
     }
 
@@ -132,6 +132,8 @@ public class HashCalculator {
      */
     public String getHash(final HttpServletRequest req, final String userAgent, final String client) {
         try {
+            long st = System.currentTimeMillis();
+
             final MessageDigest md = MessageDigest.getInstance("MD5");
             md.update((null == userAgent ? parseClientUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
             if (null != client) {
@@ -146,9 +148,9 @@ public class HashCalculator {
                     }
                 }
             }
-            final String salt = this.salt;
+            final byte[] salt = this.salt;
             if (null != salt) {
-                md.update(salt.getBytes());
+                md.update(salt);
             }
             return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
         } catch (final NoSuchAlgorithmException e) {

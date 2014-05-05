@@ -62,6 +62,9 @@ public final class RssExceptionMessages implements LocalizableStrings {
     // Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
     public static final String INVALID_RSS_MSG = "Invalid RSS URL or not well-formed XML content provided by URL: %1$s";
 
+    // HTTP error %1$s while loading RSS feed from URL: %2$s.
+    public static final String RSS_HTTP_ERROR_MSG = "HTTP error %1$s while loading RSS feed from URL: %2$s.";
+
     /**
      * Initializes a new {@link RssExceptionMessages}.
      */

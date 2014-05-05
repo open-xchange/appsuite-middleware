@@ -1,3 +1,15 @@
+* 2014-05-04 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 30647: Display the maximum allowed size of an attachment in a human readable format. 
+
+* 2014-05-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32265: Check for possible absent user participant prior to checking appointment's permissions
+
+* 2014-05-03 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32288: Pass the correct mandatory contact fields
+
 * 2014-05-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 32044: Update the reminder's folderID for all accessing users, if there are no participants. Check additionally permissions

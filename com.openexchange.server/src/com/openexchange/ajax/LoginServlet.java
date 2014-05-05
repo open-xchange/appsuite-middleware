@@ -917,12 +917,7 @@ public class LoginServlet extends AJAXServlet {
         configureCookie(cookie, secure, serverName, conf);
         resp.addCookie(cookie);
 
-        final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
-        if (null != altId) {
-            cookie = new Cookie(getPublicSessionCookieName(req), altId);
-            configureCookie(cookie, secure, serverName, conf);
-            resp.addCookie(cookie);
-        }
+        writePublicSessionCookie(req, resp, session, secure, serverName, conf);
     }
 
     /**
@@ -939,14 +934,14 @@ public class LoginServlet extends AJAXServlet {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
             final Cookie cookie = new Cookie(getPublicSessionCookieName(req), altId);
-            LoginServlet.configureCookie(cookie, secure, serverName, conf);
+            configureCookie(cookie, secure, serverName, conf);
             resp.addCookie(cookie);
             return true;
         }
         return false;
     }
 
-    public static void configureCookie(final Cookie cookie, final boolean secure, final String serverName, LoginConfiguration conf) {
+    public static void configureCookie(final Cookie cookie, final boolean secure, final String serverName, final LoginConfiguration conf) {
         cookie.setPath("/");
         if (secure || (conf.isCookieForceHTTPS() && !Cookies.isLocalLan(serverName))) {
             cookie.setSecure(true);

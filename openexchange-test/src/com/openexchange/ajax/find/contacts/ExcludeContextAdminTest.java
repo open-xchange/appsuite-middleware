@@ -84,30 +84,6 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
     }
 
     /*
-     * Perform autocomplete and query on contacts without any options and
-     * expect the context admin to be excluded.
-     */
-    public void testAdminIsExcludedPerDefault() throws Exception {
-        AJAXClient adminClient = new AJAXClient(User.OXAdmin);
-        int adminId = adminClient.getValues().getUserId();
-        adminClient.logout();
-
-        Contact adminContact = client.execute(new GetRequest(adminId, TimeZones.UTC)).getContact();
-        assertNotNull("admin contact was null", adminContact);
-
-        String prefix = adminContact.getDisplayName().substring(0, 3);
-        List<Facet> facets = autocomplete(Module.CONTACTS, prefix);
-        FacetValue found = findByDisplayName(facets, adminContact.getDisplayName());
-        assertNull("admin contact was included in autocomplete response", found);
-
-        List<ActiveFacet> activeFacets = new LinkedList<ActiveFacet>();
-        activeFacets.add(createQuery(adminContact.getDisplayName()));
-        List<PropDocument> documents = query(Module.CONTACTS, activeFacets);
-        PropDocument adminDoc = findByProperty(documents, "display_name", adminContact.getDisplayName());
-        assertNull("admin contact was included in query response", adminDoc);
-    }
-
-    /*
      * Perform autocomplete and query on contacts with showAdmin=false and
      * expect the context admin to be excluded.
      */
