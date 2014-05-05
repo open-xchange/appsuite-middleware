@@ -108,10 +108,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
 
-    private final Metadata[] fields = new Metadata[] {
-        Metadata.ID_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.LAST_MODIFIED_LITERAL, Metadata.FOLDER_ID_LITERAL,
+    private static final Metadata[] DEFAULT_FIELDS = new Metadata[] {
+        Metadata.FOLDER_ID_LITERAL, Metadata.META_LITERAL, Metadata.ID_LITERAL, Metadata.LAST_MODIFIED_LITERAL,
         Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL, Metadata.FILE_MIMETYPE_LITERAL, Metadata.FILE_SIZE_LITERAL,
-        Metadata.VERSION_LITERAL, Metadata.LOCKED_UNTIL_LITERAL };
+        Metadata.LOCKED_UNTIL_LITERAL, Metadata.MODIFIED_BY_LITERAL };
 
     /**
      * Initializes a new {@link BasicInfostoreDriver}.
@@ -165,6 +165,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         }
 
         List<Integer> folderIds = determineFolderIds(searchRequest, session);
+        Metadata[] fields = getFields(searchRequest);
         SearchTerm<?> term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
         if (term == null) {
             term = new TitleTerm("*", true, true);
@@ -327,6 +328,23 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         }
 
         return new AutocompleteResult(facets);
+    }
+
+    private static Metadata[] getFields(SearchRequest searchRequest) {
+        Metadata[] fields = DEFAULT_FIELDS;
+        int[] columns = searchRequest.getColumns();
+        if (columns != null) {
+            List<Metadata> tmp = new ArrayList<Metadata>(columns.length);
+            for (int c : columns) {
+                Metadata field = Metadata.get(c);
+                if (field != null) {
+                    tmp.add(field);
+                }
+            }
+            fields = tmp.toArray(new Metadata[tmp.size()]);
+        }
+
+        return fields;
     }
 
     private static SearchTerm<?> prepareSearchTerm(final List<String> queries, final List<Filter> filters) throws OXException {

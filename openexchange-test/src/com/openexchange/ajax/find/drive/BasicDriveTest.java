@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONObject;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -63,9 +64,13 @@ import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.ListInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
+import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.configuration.MailConfig;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.find.Document;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
@@ -79,6 +84,7 @@ import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 
@@ -91,6 +97,8 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 public class BasicDriveTest extends AbstractFindTest {
 
     private DocumentMetadata metadata;
+
+    private FolderObject testFolder;
 
     private static final String SEARCH = "BasicDriveTest";
 
@@ -110,10 +118,19 @@ public class BasicDriveTest extends AbstractFindTest {
         MailConfig.init();
         String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
         File file = new File(testDataDir, "BasicDriveTest.tmp");
+
+        String folderName = "findApiDriveTestFolder_" + System.currentTimeMillis();
+        testFolder = folderManager.generatePrivateFolder(folderName,
+            FolderObject.INFOSTORE,
+            client.getValues().getPrivateInfostoreFolder(),
+            client.getValues().getUserId());
+        testFolder = folderManager.insertFolderOnServer(testFolder);
+
         metadata = new DocumentMetadataImpl();
         metadata.setFileName(file.getName());
         metadata.setDescription("Test file for testing new find api");
-        metadata.setFolderId(client.getValues().getPrivateInfostoreFolder());
+        metadata.setFolderId(testFolder.getObjectID());
+        metadata.setMeta(Collections.singletonMap("key", (Object) "value"));
         NewInfostoreRequest request = new NewInfostoreRequest(metadata, file);
         NewInfostoreResponse response = client.execute(request);
         assertFalse("Could not create test file for BasicDriveTest", response.hasError());
@@ -194,6 +211,63 @@ public class BasicDriveTest extends AbstractFindTest {
             }
         }
         assertTrue("Flag not found", found);
+    }
+
+    public void testDefaultColumnsAreEquivalentToListRequest() throws Exception {
+        // 20,23,1,5,700,702,703,704,707,3 from api.js
+        Field[] fields = new Field[] {Field.FOLDER_ID, Field.META, Field.ID, Field.LAST_MODIFIED,
+        Field.TITLE, Field.FILENAME, Field.FILE_MIMETYPE, Field.FILE_SIZE,
+        Field.LOCKED_UNTIL, Field.MODIFIED_BY};
+        testWithFields(fields, false);
+    }
+
+    public void testWithExplicitColumns1() throws Exception {
+        // 20,23,1,5,700,702,703,704,707,3 from api.js
+        Field[] fields = new Field[] {Field.FOLDER_ID, Field.META, Field.ID, Field.LAST_MODIFIED,
+        Field.TITLE, Field.FILENAME, Field.FILE_MIMETYPE, Field.FILE_SIZE,
+        Field.LOCKED_UNTIL, Field.MODIFIED_BY};
+        testWithFields(fields, true);
+    }
+
+    public void testWithExplicitColumns2() throws Exception {
+        Field[] fields = new Field[] {Field.FOLDER_ID, Field.ID, Field.META, Field.LAST_MODIFIED,
+        Field.TITLE, Field.FILENAME };
+        testWithFields(fields, true);
+    }
+
+    private void testWithFields(Field fields[], boolean withColumns) throws Exception {
+        int columns[] = new int[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            columns[i] = fields[i].getNumber();
+        }
+
+        ListInfostoreRequest listRequest = new ListInfostoreRequest(columns);
+        listRequest.addItem(new ListItem(metadata));
+        ListInfostoreResponse listResponse = client.execute(listRequest);
+        Object[] listDocument = listResponse.getArray()[0];
+
+        // Search the same item and compare fields
+        List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
+        facets.add(createActiveFieldFacet(DriveFacetType.FILE_NAME, Constants.FIELD_FILE_NAME, SEARCH));
+        facets.add(createActiveFacet(CommonFacetType.FOLDER, testFolder.getObjectID(), Filter.NO_FILTER));
+        QueryRequest queryRequest;
+        if (withColumns) {
+            queryRequest = new QueryRequest(true, 0, 10, facets, null, Module.DRIVE.getIdentifier(), columns);
+        } else {
+            queryRequest = new QueryRequest(0, 10, facets, Module.DRIVE.getIdentifier());
+        }
+        QueryResponse queryResponse = client.execute(queryRequest);
+        PropDocument queryDocument = (PropDocument) queryResponse.getSearchResult().getDocuments().get(0);
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
+            Object listValue = listDocument[i];
+            if (field == Field.META) {
+                Map<String, Object> asMap = ((JSONObject)listValue).asMap();
+                assertTrue(asMap.equals(queryDocument.getProps().get(field.getName())));
+            } else {
+                assertEquals("Unexpected value for field " + field.getName(), listValue, queryDocument.getProps().get(field.getName()));
+            }
+        }
     }
 
     public void testConflictingFacetsCauseException() throws Exception {
