@@ -1,3 +1,7 @@
+* 2014-05-05 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 32250: Changed yahoo api access to https further added error message on receiving invalid response
+
 * 2014-05-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 32296: Do not use proxy authentication for external mail accounts
