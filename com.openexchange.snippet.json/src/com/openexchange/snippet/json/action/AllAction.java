@@ -89,7 +89,7 @@ public final class AllAction extends SnippetAction {
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
         final String[] types;
         {
-            final String tmp = snippetRequest.getParameter("type", String.class);
+            final String tmp = snippetRequest.getParameter("type", String.class, true);
             types = isEmpty(tmp) ? new String[0] : SPLIT_CSV.split(tmp);
         }
         final SnippetService snippetService = getSnippetService(snippetRequest.getSession());

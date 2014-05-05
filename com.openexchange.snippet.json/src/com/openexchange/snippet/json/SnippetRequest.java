@@ -111,11 +111,12 @@ public class SnippetRequest {
      *
      * @param name The parameter name
      * @param coerceTo The type the parameter should be interpreted as
+     * @param optional Whether or not the parameter to retrieve is optional 
      * @return The coerced value
      * @throws OXException if coercion fails
      */
-    public <T> T getParameter(final String name, final Class<T> coerceTo) throws OXException {
-        return requestData.getParameter(name, coerceTo);
+    public <T> T getParameter(final String name, final Class<T> coerceTo, final boolean optional) throws OXException {
+        return requestData.getParameter(name, coerceTo, optional);
     }
 
     /**
