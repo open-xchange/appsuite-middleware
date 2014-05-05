@@ -71,7 +71,6 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.Resolved;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.webdav.URLCache;
-import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.webdav.protocol.WebdavPath;
 
@@ -163,7 +162,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
             }
             thePath.append(folderName);
             final WebdavPath current = thePath.dup();
-            cache.put(Integer.valueOf(folder.getObjectID()), current);
+            cache.put(folder.getObjectID(), current);
             resCache.put(current, new ResolvedImpl(current, folder.getObjectID(), false));
         }
 
