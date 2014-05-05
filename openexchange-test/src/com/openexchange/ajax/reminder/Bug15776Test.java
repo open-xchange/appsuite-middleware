@@ -108,10 +108,10 @@ public class Bug15776Test extends AbstractAJAXSession {
         UpdateResponse updateResp = client.execute(updateReq);
         updateResp.fillObject(appointment);
 
-        // Request the reminder
-        Calendar cal = (Calendar) calendar.clone();
-        int diff = 24 - cal.get(Calendar.HOUR_OF_DAY);
-        cal.add(Calendar.HOUR_OF_DAY, diff);
+        // Request all upcoming reminders until the end of the appointments current occurrence and look for the desired one
+        Calendar cal = Calendar.getInstance(timezone);
+        cal.setTime(appointment.getEndDate());
+        cal.set(Calendar.YEAR, calendar.get(Calendar.YEAR));
         RangeRequest rangeReq = new RangeRequest(cal.getTime());
         RangeResponse rangeResp = client.execute(rangeReq);
         ReminderObject reminder = ReminderTools.searchByTarget(rangeResp.getReminder(timezone), appointment.getObjectID());
