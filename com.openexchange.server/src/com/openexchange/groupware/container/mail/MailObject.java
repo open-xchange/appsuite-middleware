@@ -212,7 +212,7 @@ public class MailObject {
         final String fileName = file.getName();
         final ContentType ct = new ContentType();
         ct.setContentType(contentType);
-        if (ct.startsWith(MimeTypes.MIME_APPL_OCTET)) {
+        if (ct.startsWith(MimeTypes.MIME_APPL_OCTET) || ct.startsWith(MimeTypes.MIME_MULTIPART_OCTET)) {
             /*
              * Try to determine MIME type
              */
@@ -286,7 +286,7 @@ public class MailObject {
          */
         final ContentType ct = new ContentType();
         ct.setContentType(contentType);
-        if (ct.startsWith(MimeTypes.MIME_APPL_OCTET) && fileName != null) {
+        if ((ct.startsWith(MimeTypes.MIME_APPL_OCTET) || ct.startsWith(MimeTypes.MIME_MULTIPART_OCTET)) && fileName != null) {
             /*
              * Try to determine MIME type
              */

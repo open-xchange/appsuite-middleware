@@ -109,6 +109,11 @@ public final class MimeTypes {
      * multipart/alternative
      */
     public static final String MIME_MULTIPART_ALTERNATIVE = "multipart/alternative";
+    
+    /**
+     * multipart/octet-stream
+     */
+    public static final String MIME_MULTIPART_OCTET = "multipart/octet-stream";
 
     /**
      * multipart/related
