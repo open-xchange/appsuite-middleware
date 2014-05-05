@@ -76,6 +76,7 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -443,7 +444,7 @@ public final class SessionHandler {
         if (null == clientToken) {
             addedSession = sessionData.addSession(session, noLimit).getSession();
             // store session if not marked as transient
-            if (false == session.isTransient()) {
+            if (useSessionStorage(session)) {
                 final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
                 if (sessionStorageService != null) {
                     if (asyncPutToSessionStorage) {
@@ -1174,7 +1175,7 @@ public final class SessionHandler {
     }
 
     static void postSessionRemoval(final SessionImpl session) {
-        if (false == session.isTransient()) {
+        if (useSessionStorage(session)) {
             // Asynchronous remove from session storage
             final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
@@ -1234,7 +1235,7 @@ public final class SessionHandler {
                         try {
                             for (final SessionControl sessionControl : tSessionControls) {
                                 SessionImpl session = sessionControl.getSession();
-                                if (null != session && false == session.isTransient()) {
+                                if (useSessionStorage(session)) {
                                     try {
                                         sessionStorageService.removeSession(session.getSessionID());
                                     } catch (final OXException e) {
@@ -1555,6 +1556,31 @@ public final class SessionHandler {
         } catch (final CancellationException e) {
             return defaultValue;
         }
+    }
+
+    /**
+     * Gets a value indicating whether a session qualifies for being put in the distributed session storage or not. This includes a check
+     * for the "transient" flag, as well as other relevant session properties.
+     *
+     * @param session The session to check
+     * @return <code>true</code> if session should be put to storage, <code>false</code>, otherwise
+     */
+    private static boolean useSessionStorage(SessionImpl session) {
+        return null != session && false == session.isTransient() && false == isUsmEas(session.getClient());
+    }
+
+    /**
+     * Gets a value indicating whether the supplied client identifier indicates an USM session or not.
+     *
+     * @param clientId the client ID to check
+     * @return <code>true</code> if the client denotes an USM client, <code>false</code>, otherwise
+     */
+    private static boolean isUsmEas(final String clientId) {
+        if (Strings.isEmpty(clientId)) {
+            return false;
+        }
+        final String uc = Strings.toUpperCase(clientId);
+        return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
     }
 
     private static final class UserKey {

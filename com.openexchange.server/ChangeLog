@@ -1,3 +1,7 @@
+* 2014-05-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32292: Prevent USM-JSON* and USM-EAS* sessions from being put to distributed storage 
+
 * 2014-05-04 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 30647: Display the maximum allowed size of an attachment in a human readable format. 
