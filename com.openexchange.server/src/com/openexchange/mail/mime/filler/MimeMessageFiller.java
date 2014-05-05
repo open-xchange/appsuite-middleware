@@ -1447,7 +1447,7 @@ public class MimeMessageFiller {
          */
         final String fileName = part.getFileName();
         final ContentType ct = part.getContentType();
-        if (ct.startsWith(MimeTypes.MIME_APPL_OCTET) && fileName != null) {
+        if ((ct.startsWith(MimeTypes.MIME_APPL_OCTET) || ct.startsWith(MimeTypes.MIME_MULTIPART_OCTET)) && fileName != null) {
             /*
              * Try to determine MIME type
              */
