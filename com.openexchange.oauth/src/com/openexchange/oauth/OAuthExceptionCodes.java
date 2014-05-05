@@ -137,6 +137,10 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
      */
     CANCELED_BY_USER("The OAuth authentication process has been canceled.", CATEGORY_USER_INPUT, 16,
         OAuthExceptionMessages.CANCELED_BY_USER_MSG),
+    /**
+     * Could not get a valid response from the associated OAuth provider.
+     */
+    NOT_A_VALID_RESPONSE("Could not get a valid response from the associated OAuth provider.", CATEGORY_ERROR, 17, OAuthExceptionMessages.NOT_A_VALID_RESPONSE_MSG)
     ;
 
     private final Category category;
