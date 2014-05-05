@@ -91,9 +91,9 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public class YahooServiceImpl implements YahooService {
 
-    private static final String ALL_CONTACT_IDS_URL = "http://social.yahooapis.com/v1/user/GUID/contacts?format=json";
+    private static final String ALL_CONTACT_IDS_URL = "https://social.yahooapis.com/v1/user/GUID/contacts?format=json";
 
-    private static final String SINGLE_CONTACT_URL = "http://social.yahooapis.com/v1/user/GUID/contact/CONTACT_ID?format=json";
+    private static final String SINGLE_CONTACT_URL = "https://social.yahooapis.com/v1/user/GUID/contact/CONTACT_ID?format=json";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(YahooServiceImpl.class);
 
@@ -131,17 +131,25 @@ public class YahooServiceImpl implements YahooService {
         // Get the GUID of the current user from yahoo. This is needed for later requests
         final String guid;
         {
-            final OAuthRequest guidRequest = new OAuthRequest(Verb.GET, "http://social.yahooapis.com/v1/me/guid?format=xml");
+            final OAuthRequest guidRequest = new OAuthRequest(Verb.GET, "https://social.yahooapis.com/v1/me/guid?format=xml");
             service.signRequest(accessToken, guidRequest);
             final Response guidResponse = guidRequest.send();
-
+            final String contentType = guidResponse.getHeader("Content-Type");
+            if (null == contentType || false == contentType.toLowerCase().contains("application/xml")) {
+                throw OAuthExceptionCodes.NOT_A_VALID_RESPONSE.create();
+            }
             final Matcher matcher = patternGuid.matcher(guidResponse.getBody());
             guid = matcher.find() ? matcher.group(1) : "";
         }
+
         // Now get the ids of all the users contacts
         OAuthRequest request = new OAuthRequest(Verb.GET, ALL_CONTACT_IDS_URL.replace("GUID", guid));
         service.signRequest(accessToken, request);
         final Response response = request.send();
+        final String contentType = response.getHeader("Content-Type");
+        if (null == contentType || false == contentType.toLowerCase().contains("application/json")) {
+            throw OAuthExceptionCodes.NOT_A_VALID_RESPONSE.create();
+        }
         request = null;
         try {
             final JSONObject allContactsWholeResponse = extractJson(response);

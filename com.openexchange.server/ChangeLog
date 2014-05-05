@@ -1,7 +1,3 @@
-* 2014-06-11 - tobias.friedrich@open-xchange.com
-
- - Fix for bug 33066: Fall back to an empty JSON object on encountered exceptions during deserialization  
-
 * 2014-06-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32865: Don't anticipate upcoming ACKNOWLEDGE for the new version of server-side executed EDIT action 
@@ -47,6 +43,14 @@
 * 2014-05-07 - ioannis.chouklis@open-xchange.com
 
  -Fix for bug 31253: Escape the 'OK' literal at the beginning of each newline with '_OK_'
+
+* 2014-05-05 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 32250: Changed yahoo api access to https further added error message on receiving invalid response
+
+* 2014-05-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33066: Fall back to an empty JSON object on encountered exceptions during deserialization  
 
 * 2014-05-05 - thorben.betten@open-xchange.com
 
