@@ -156,11 +156,11 @@ public class SQL {
         "WHERE cid=? AND checksum=UNHEX(?);";
 
     public static final String INSERT_DIRECTORY_CHECKSUM_STMT =
-        "INSERT INTO directoryChecksums (uuid,cid,user,folder,sequence,checksum) " +
-        "VALUES (UNHEX(?),?,?,REVERSE(?),?,UNHEX(?));";
+        "INSERT INTO directoryChecksums (uuid,cid,user,folder,sequence,etag,checksum) " +
+        "VALUES (UNHEX(?),?,?,REVERSE(?),?,?,UNHEX(?));";
 
     public static final String UPDATE_DIRECTORY_CHECKSUM_STMT =
-        "UPDATE directoryChecksums SET folder=REVERSE(?),sequence=?,checksum=UNHEX(?) " +
+        "UPDATE directoryChecksums SET folder=REVERSE(?),sequence=?,etag=?,checksum=UNHEX(?) " +
         "WHERE cid=? AND uuid=UNHEX(?);";
 
     public static final String UPDATE_DIRECTORY_CHECKSUM_FOLDER_STMT =
@@ -194,13 +194,13 @@ public class SQL {
     }
 
     /**
-     * SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,checksum FROM directoryChecksums
+     * SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,LOWER(HEX(checksum)) FROM directoryChecksums
      * WHERE cid=? AND user=? AND folder IN (?,?,...);"
      * @throws OXException
      */
     public static final String SELECT_DIRECTORY_CHECKSUMS_STMT(int length) throws OXException {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,LOWER(HEX(checksum)) FROM directoryChecksums ");
+        stringBuilder.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,LOWER(HEX(checksum)) FROM directoryChecksums ");
         stringBuilder.append("WHERE cid=? AND user=? AND folder");
         return appendPlaceholders(stringBuilder, length).append(';').toString();
     }
