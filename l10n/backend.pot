@@ -3442,6 +3442,11 @@ msgstr ""
 msgid "The OAuth authentication process has been canceled."
 msgstr ""
 
+#. Could not get a valid response from the associated OAuth provider.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:91
+msgid "Could not get a valid response from the associated OAuth provider."
+msgstr ""
+
 #. *
 #. * New password too short.
 #.
