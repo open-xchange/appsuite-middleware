@@ -42,6 +42,17 @@ public class ListValueDefinitionTest {
         Assert.assertEquals(text, join);
     }
 
+    @Test
+    public void testCreateValue_adressWithEscaeRProvided_returnLineWithEscapedR() throws IOException {
+        String text = ";;c/o BESSY\r\nAlbert-Einstein-Straße 15;Berlin;;12489;Deutschland";
+
+        List<String> createValue = (List<String>) this.listValueDefinition.createValue(new StringScanner(new ReaderScanner(new InputStreamReader(new ByteArrayInputStream(text.getBytes()))), text), new Property("ADR"));
+
+        String join = StringUtils.join(createValue, ';');
+
+        Assert.assertTrue(join.contains("\r"));
+    }
+
     @Test (expected=VersitException.class)
     public void testCreateValue_invalidEscapeSequence_throwException() throws IOException {
         String text = ";;c/o BESSY\\z\nAlbert-Einstein-Straße 15;Berlin;;12489;Deutschland";
