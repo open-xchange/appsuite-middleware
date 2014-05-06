@@ -225,9 +225,7 @@ public class ReplicationMonitor {
                 if (state.isUsedForUpdate()) {
                     // Data on the master has been changed without using a transaction, so we need to increment the counter here.
                     // If a transaction was used the JDBC Connection wrapper incremented the counter in the commit phase.
-                    if (active) {
-                        increaseTransactionCounter(assign, con);
-                    }
+                    increaseTransactionCounter(assign, con);
                 } else {
                     // Initialize counter as early as possible.
                     if (active && poolId != assign.getReadPoolId() && !assign.isTransactionInitialized()) {
@@ -380,7 +378,7 @@ public class ReplicationMonitor {
 
     void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
         try {
-            if (con.isClosed()) {
+            if (!active || con.isClosed()) {
                 return;
             }
         } catch (SQLException e) {
