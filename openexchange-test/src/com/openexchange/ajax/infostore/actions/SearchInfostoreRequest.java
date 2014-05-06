@@ -126,6 +126,7 @@ public class SearchInfostoreRequest extends AbstractInfostoreRequest<SearchInfos
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
         if (null != order) {
             params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
             params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields.write(order)));
