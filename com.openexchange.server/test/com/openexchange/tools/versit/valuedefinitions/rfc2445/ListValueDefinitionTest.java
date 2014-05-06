@@ -33,7 +33,7 @@ public class ListValueDefinitionTest {
 
     @Test
     public void testCreateValue_adressLineProvided_returnLine() throws IOException {
-        String text = ";;c/o BESSY\r\nAlbert-Einstein-Straße 15;Berlin;;12489;Deutschland";
+        String text = ";;c/o BESSY\r\nAlbert-Einstein-Strasse 15;Berlin;;12489;Deutschland";
 
         List<String> createValue = (List<String>) this.listValueDefinition.createValue(new StringScanner(new ReaderScanner(new InputStreamReader(new ByteArrayInputStream(text.getBytes()))), text), new Property("ADR"));
 
@@ -44,7 +44,7 @@ public class ListValueDefinitionTest {
 
     @Test
     public void testCreateValue_adressWithEscaeRProvided_returnLineWithEscapedR() throws IOException {
-        String text = ";;c/o BESSY\r\nAlbert-Einstein-Straße 15;Berlin;;12489;Deutschland";
+        String text = ";;c/o BESSY\r\nAlbert-Einstein-Strasse 15;Berlin;;12489;Deutschland";
 
         List<String> createValue = (List<String>) this.listValueDefinition.createValue(new StringScanner(new ReaderScanner(new InputStreamReader(new ByteArrayInputStream(text.getBytes()))), text), new Property("ADR"));
 
@@ -55,7 +55,7 @@ public class ListValueDefinitionTest {
 
     @Test (expected=VersitException.class)
     public void testCreateValue_invalidEscapeSequence_throwException() throws IOException {
-        String text = ";;c/o BESSY\\z\nAlbert-Einstein-Straße 15;Berlin;;12489;Deutschland";
+        String text = ";;c/o BESSY\\z\nAlbert-Einstein-Strasse 15;Berlin;;12489;Deutschland";
         this.listValueDefinition.createValue(new StringScanner(new ReaderScanner(new InputStreamReader(new ByteArrayInputStream(text.getBytes()))), text), new Property("ADR"));
     }
 }
