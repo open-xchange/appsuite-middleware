@@ -460,7 +460,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         {
             final String s = xingUser.getOrganisationMember();
             if (isNotNull(s)) {
-                oxContact.setUserField04(s);
+                oxContact.setUserField04(Strings.abbreviate(s, 64));
             }
         }
         {
