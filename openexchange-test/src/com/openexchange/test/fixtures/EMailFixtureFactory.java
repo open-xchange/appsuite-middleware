@@ -65,8 +65,8 @@ import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.test.fixtures.transformators.BooleanTransformator;
 import com.openexchange.test.fixtures.transformators.EMailFlagsTransformator;
@@ -162,7 +162,11 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             if (values.containsKey("to")) { mail.removeTo(); }
             if (values.containsKey("cc")) { mail.removeCc(); }
             if (values.containsKey("bcc")) { mail.removeBcc(); }
-            if (values.containsKey("from")) { mail.removeFrom(); }
+            if (values.containsKey("from")) {
+                mail.removeFrom();
+                mail.removeHeader(MessageHeaders.HDR_RETURN_PATH);
+                mail.removeHeader(MessageHeaders.HDR_REPLY_TO);
+            }
             if (values.containsKey("sent_date")) { mail.removeSentDate(); }
             if (values.containsKey("received_date")) {
             	mail.removeReceivedDate();
