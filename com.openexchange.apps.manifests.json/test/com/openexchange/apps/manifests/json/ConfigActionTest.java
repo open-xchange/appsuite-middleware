@@ -70,6 +70,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.mock.InjectionFieldConstants;
 import com.openexchange.test.mock.MockUtils;
@@ -117,17 +119,27 @@ public class ConfigActionTest {
     private ConfigurationService configurationService;
 
     @Mock
+    private ConfigViewFactory configViewFactory;
+
+    @Mock
+    private ConfigView configView;
+
+    @Mock
     private Properties properties;
 
     /**
      * {@inheritDoc}
+     * 
+     * @throws OXException
      */
     @Before
-    public void setUp() {
+    public void setUp() throws OXException {
         MockitoAnnotations.initMocks(this);
 
         // SERVICES
         Mockito.when(this.serviceLookup.getService(ConfigurationService.class)).thenReturn(this.configurationService);
+        Mockito.when(this.serviceLookup.getService(ConfigViewFactory.class)).thenReturn(this.configViewFactory);
+        Mockito.when(this.configViewFactory.getView(Matchers.anyInt(), Matchers.anyInt())).thenReturn(this.configView);
         PowerMockito.when(configurationService.getPropertiesInFolder(Matchers.anyString())).thenReturn(this.properties);
         Map<String, Object> defaultMap = new HashMap<String, Object>();
         Map<String, Object> map = new HashMap<String, Object>();

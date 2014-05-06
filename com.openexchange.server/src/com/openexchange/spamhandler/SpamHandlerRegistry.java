@@ -188,10 +188,10 @@ public final class SpamHandlerRegistry {
         }
         handler = getSpamHandler0(mailAccount, mailProviderGetter);
         //if (!SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName())) {
-            /*
-             * Cache in session
-             */
-            mailSessionCache.putParameter(accountId, key, handler);
+        /*
+         * Cache in session
+         */
+        mailSessionCache.putParameter(accountId, key, handler);
         //}
         return handler;
     }
@@ -218,8 +218,8 @@ public final class SpamHandlerRegistry {
             /*
              * No spam handler for external accounts
              */
+            LOG.debug("No spam handler for the external account with login {} (user {}) available per design.", mailAccount.getLogin(), mailAccount.getUserId());
             return NoSpamHandler.getInstance();
-            //spamHandlerName = mailAccount.getSpamHandler();
         }
         SpamHandler handler;
         if (null != spamHandlerName && spamHandlerName.length() > 0) {

@@ -457,9 +457,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     Tools.setETag(eTag, expires > 0 ? expires : -1L, resp);
                 } else {
                     final long expires = result.getExpires();
-                    if (expires < 0) {
-                        Tools.setDefaultExpiry(resp);
-                    } else if (expires > 0) {
+                    if (expires > 0) {
                         Tools.setExpires(new Date(System.currentTimeMillis() + expires), resp);
                     }
                 }

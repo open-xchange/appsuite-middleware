@@ -388,6 +388,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                     for(int i = 1, size = metaData.getColumnCount(); i <= size; i++) {
                         columns.add(metaData.getColumnName(i));
                     }
+                    
                     while(rs.next() && count < MAX_ROWS) {
                         Map<String, Object> row = new HashMap<String, Object>();
                         for(String colName: columns) {
@@ -400,10 +401,22 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                         result.put("exceeded", true);
                     }
                     result.put("rows", rows);
+                    
                     results.put(question.getKey(), result);
                 } else {
                     int rows = stmt.executeUpdate();
-                    results.put(question.getKey(), map().put("updated", rows).build());
+                    MapBuilder<Object, Object> res = map().put("updated", rows);
+                    
+                    if (query.wantsGeneratedKeys()) {
+                        ResultSet rs = stmt.getGeneratedKeys();
+                        this.resultSets.add(rs);
+                        JSONArray keys = new JSONArray();
+                        while(rs.next()) {
+                            keys.put(rs.getObject(1));
+                        }
+                        res.put("generatedKeys", keys);
+                    }
+                    results.put(question.getKey(), res.build());
                 }
                 success = true;
             } catch (SQLException x) {
@@ -444,13 +457,13 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         try {
             Object data = request.getData();
             if (data instanceof String) {
-                queries.put("result", new Query((String)data, Collections.emptyList(), accessType == AccessType.READ));
+                queries.put("result", new Query((String)data, Collections.emptyList(), accessType == AccessType.READ, false));
             } else if (data instanceof JSONObject) {
                 JSONObject queryMap = (JSONObject) data;
                 for(String queryName: queryMap.keySet()) {
                     Object queryObj = queryMap.get(queryName);
                     if (queryObj instanceof String) {
-                        queries.put(queryName, new Query((String)queryObj, Collections.emptyList(), accessType == AccessType.READ));
+                        queries.put(queryName, new Query((String)queryObj, Collections.emptyList(), accessType == AccessType.READ, false));
                     } else if (queryObj instanceof JSONObject) {
                         JSONObject querySpec = (JSONObject) queryObj;
                         String q = querySpec.getString("query");
@@ -463,7 +476,11 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                         if (querySpec.has("resultSet")) {
                             wantsResultSet = querySpec.getBoolean("resultSet");
                         }
-                        queries.put(queryName, new Query(q, params, wantsResultSet));
+                        boolean wantsGeneratedKeys = false;
+                        if (querySpec.has("generatedKeys")) {
+                            wantsGeneratedKeys = querySpec.getBoolean("generatedKeys");
+                        }
+                        queries.put(queryName, new Query(q, params, wantsResultSet, wantsGeneratedKeys));
                     }
                 }
             }
@@ -742,15 +759,21 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         private String query;
         private List<Object> values;
         private boolean wantsResultSet = false;
-        
-        public Query(String query, List<Object> values, boolean wantsResultSet) {
+        private boolean wantsGeneratedKeys = false;
+               
+        public Query(String query, List<Object> values, boolean wantsResultSet, boolean wantsGeneratedKeys) {
             this.query = query;
             this.values = values;
             this.wantsResultSet = wantsResultSet;
+            this.wantsGeneratedKeys = wantsGeneratedKeys;
         }
         
+        public boolean wantsGeneratedKeys() {
+            return wantsGeneratedKeys;
+        }
+
         public PreparedStatement prepareFor(Connection con) throws SQLException {
-            PreparedStatement stmt = con.prepareStatement(query);
+            PreparedStatement stmt = wantsGeneratedKeys ? con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS) : con.prepareStatement(query);
             if (values == null) {
                 return stmt;
             }

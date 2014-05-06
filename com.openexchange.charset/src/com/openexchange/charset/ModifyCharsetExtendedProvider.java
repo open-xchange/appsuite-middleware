@@ -60,6 +60,7 @@ import java.nio.charset.spi.CharsetProvider;
 public final class ModifyCharsetExtendedProvider {
 
     private static volatile Field extendedProviderField;
+    private static volatile Boolean isFinal;
 
     /**
      * Initializes a new {@link ModifyCharsetExtendedProvider}.
@@ -85,6 +86,7 @@ public final class ModifyCharsetExtendedProvider {
          * Modify java.nio.charset.Charset class
          */
         Field extendedProviderField = null;
+        boolean isFinal = false;
         try {
             extendedProviderField = java.nio.charset.Charset.class.getDeclaredField("extendedProvider");
         } catch (final java.lang.NoSuchFieldException e) {
@@ -101,9 +103,11 @@ public final class ModifyCharsetExtendedProvider {
                 throw e;
             }
             extendedProviderField = extendedProviderHolderClass.getDeclaredField("extendedProvider");
+            isFinal = true;
         }
         extendedProviderField.setAccessible(true);
         ModifyCharsetExtendedProvider.extendedProviderField = extendedProviderField;
+        ModifyCharsetExtendedProvider.isFinal = Boolean.valueOf(isFinal);
         /*
          * Backup old charset provider
          */
@@ -120,7 +124,11 @@ public final class ModifyCharsetExtendedProvider {
         /*
          * Reinitialize field
          */
-        extendedProviderField.set(null, collectionCharsetProvider);
+        if (isFinal) {
+            ReflectionHelper.setStaticFinalField(extendedProviderField, collectionCharsetProvider);
+        } else {
+            extendedProviderField.set(null, collectionCharsetProvider);
+        }
         return new CharsetProvider[] { backupCharsetProvider, collectionCharsetProvider };
     }
 
@@ -139,8 +147,17 @@ public final class ModifyCharsetExtendedProvider {
             /*
              * Assign previously remembered charset provider
              */
-            extendedProviderField.set(null, provider);
+            if (ModifyCharsetExtendedProvider.isFinal.booleanValue()) {
+                try {
+                    ReflectionHelper.setStaticFinalField(extendedProviderField, provider);
+                } catch (final NoSuchFieldException e) {
+                    // Cannot occur
+                }
+            } else {
+                extendedProviderField.set(null, provider);
+            }
             ModifyCharsetExtendedProvider.extendedProviderField = null;
+            ModifyCharsetExtendedProvider.isFinal = null;
         }
     }
 

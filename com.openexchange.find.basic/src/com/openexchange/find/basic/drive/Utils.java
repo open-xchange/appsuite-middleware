@@ -53,7 +53,6 @@ import static com.openexchange.java.Strings.isEmpty;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -243,6 +242,8 @@ public final class Utils {
 
     public static File documentMetadata2File(final DocumentMetadata doc) {
         File file = new File() {
+
+
 
             @Override
             public String getProperty(String key) {
@@ -466,12 +467,12 @@ public final class Utils {
 
             @Override
             public Map<String, Object> getMeta() {
-                return Collections.emptyMap();
+                return doc.getMeta();
             }
 
             @Override
             public void setMeta(Map<String, Object> properties) {
-                // nothing to do
+                doc.setMeta(properties);
             }
 
             @Override

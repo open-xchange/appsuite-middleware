@@ -1,6 +1,22 @@
+* 2014-05-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31391: Register push certificate provider for Mac OS under the correct class  
+
+* 2014-05-05 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 32250: Changed yahoo api access to https further added error message on receiving invalid response
+
+* 2014-05-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32296: Do not use proxy authentication for external mail accounts
+
+* 2014-05-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32292: Prevent USM-JSON* and USM-EAS* sessions from being put to distributed storage 
+
 * 2014-05-04 - ioannis.chouklis@open-xchange.com
 
- - Fix for bug 30647: Display the maximum allowed size of an attachment in a human readable format
+ - Fix for bug 30647: Display the maximum allowed size of an attachment in a human readable format. 
  - Fix for bug 31454: Consider multipart/octet-stream alongside with application/octet-stream content type for e-mail attachments
 
 * 2014-05-04 - thorben.betten@open-xchange.com

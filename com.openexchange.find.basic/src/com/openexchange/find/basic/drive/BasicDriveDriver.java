@@ -106,9 +106,13 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         GREATER_THAN, GREATER_EQUALS, EQUALS, LOWER_THAN, LOWER_EQUALS;
     }
 
-    private final Field[] fields = new File.Field[] { Field.ID, Field.MODIFIED_BY, Field.LAST_MODIFIED, Field.FOLDER_ID, Field.TITLE,
-        Field.FILENAME, Field.FILE_MIMETYPE, Field.FILE_SIZE, Field.VERSION, Field.LOCKED_UNTIL, Field.CREATED_BY, Field.CREATED,
-        Field.DESCRIPTION };
+    private static final List<Field> DEFAULT_FIELDS = new ArrayList<Field>(10);
+    static {
+        Collections.addAll(DEFAULT_FIELDS,
+            Field.FOLDER_ID, Field.META, Field.ID, Field.LAST_MODIFIED,
+            Field.TITLE, Field.FILENAME, Field.FILE_MIMETYPE, Field.FILE_SIZE,
+            Field.LOCKED_UNTIL, Field.MODIFIED_BY);
+    }
 
     /**
      * Initializes a new {@link BasicDriveDriver}.
@@ -157,11 +161,18 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             folderIds = Collections.singletonList(folderId);
         }
 
+        // Fields
+        List<Field> fields = DEFAULT_FIELDS;
+        int[] columns = searchRequest.getColumns();
+        if (columns != null) {
+            fields = Field.get(columns);
+        }
+
         // Search...
         SearchIterator<File> it = null;
         try {
             final int start = searchRequest.getStart();
-            it = fileAccess.search(folderIds, term, Arrays.asList(fields), File.Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
+            it = fileAccess.search(folderIds, term, fields, File.Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
             final List<Document> results = new LinkedList<Document>();
             while (it.hasNext()) {
                 final File file = it.next();
@@ -277,7 +288,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // Fire search
         SearchIterator<File> it = null;
         try {
-            it = access.search(Collections.<String> emptyList(), orTerm, Arrays.asList(fields), Field.TITLE, SortDirection.ASC, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+            it = access.search(Collections.<String> emptyList(), orTerm, DEFAULT_FIELDS, Field.TITLE, SortDirection.ASC, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
             List<FacetValue> facets = new LinkedList<FacetValue>();
             while (it.hasNext()) {
                 File file = it.next();

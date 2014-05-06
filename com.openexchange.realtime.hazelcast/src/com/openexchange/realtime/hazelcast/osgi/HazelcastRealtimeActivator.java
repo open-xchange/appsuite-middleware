@@ -80,7 +80,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link HazelcastRealtimeActivator}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -98,13 +98,13 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: {}", getClass().getCanonicalName());
         Services.setServiceLookup(this);
-        
+
         ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
         managementHouseKeeper.initialize(this);
 
         HazelcastInstance hazelcastInstance = getService(HazelcastInstance.class);
         HazelcastAccess.setHazelcastInstance(hazelcastInstance);
-        
+
         // either track Hazelcast for HazelcasAccess or get it via Services each time
         track(HazelcastInstance.class, new SimpleRegistryListener<HazelcastInstance>() {
 
@@ -118,7 +118,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
                 HazelcastAccess.setHazelcastInstance(null);
             }
         });
-        
+
         Config config = hazelcastInstance.getConfig();
         String id_map = discoverMapName(config, "rtIDMapping-");
         String resource_map = discoverMapName(config, "rtResourceDirectory-");
@@ -128,10 +128,10 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         }
         final HazelcastResourceDirectory directory = new HazelcastResourceDirectory(id_map, resource_map);
         managementHouseKeeper.addManagementObject(directory.getManagementObject());
-        
+
         GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
         GlobalRealtimeCleanup globalCleanup = new GlobalRealtimeCleanupImpl(directory);
-        
+
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 
             @Override
@@ -144,7 +144,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
                 directory.removeChannel(service);
             }
         });
-        
+
         openTrackers();
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
@@ -152,13 +152,13 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         registerService(StanzaStorage.class, new HazelcastStanzaStorage());
         registerService(Channel.class, globalDispatcher.getChannel());
         registerService(GlobalRealtimeCleanup.class, globalCleanup);
-        
+
         String client_map = discoverMapName(config, "rtClientMapping-");
         String group_map = discoverMapName(config, "rtGroupMapping-");
         DistributedGroupManagerImpl distributedGroupManager = new DistributedGroupManagerImpl(globalDispatcher, client_map, group_map);
         registerService(DistributedGroupManager.class, distributedGroupManager);
 //        managementHouseKeeper.addManagementObject(distributedGroupManager.getManagementObject());
-        
+
         directory.addChannel(globalDispatcher.getChannel());
         try {
             managementHouseKeeper.exposeManagementObjects();
@@ -170,14 +170,14 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
-        super.stopBundle();
-        Services.setServiceLookup(null);
         ManagementHouseKeeper.getInstance().cleanup();
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
 
     /**
      * Discovers map names in the supplied hazelcast configuration based on the map prefix.
-     * 
+     *
      * @param config The config object
      * @return The prefix of the map name
      */

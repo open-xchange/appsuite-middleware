@@ -161,7 +161,7 @@ public class ConfigAction implements AJAXActionService {
                 debugOut("as-config-defaults.yml", defaults);
             }
         }
-
+        
         // Find other applicable brands/server configurations
         if (configurations != null) {
             boolean empty = true;
@@ -185,6 +185,27 @@ public class ConfigAction implements AJAXActionService {
                     }
                 }
             }
+
+            Map<String, Object> ccValues = new HashMap<String, Object>();
+            ConfigView view = null;
+            if (session.isAnonymous()) {
+                view = services.getService(ConfigViewFactory.class).getView();
+            } else {
+                view = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
+                
+            }
+            Map<String, ComposedConfigProperty<String>> allProperties = view.all();
+            for(Map.Entry<String, ComposedConfigProperty<String>> entry: allProperties.entrySet()) {
+                String propName = entry.getKey();
+                if (propName.startsWith("com.openexchange.appsuite.serverConfig.")) {
+                    String value = entry.getValue().get();
+                    if (!value.equals("<as-config>")) {
+                        ccValues.put(propName.substring(39), value);
+                    }
+                }
+            }
+            applicableConfigs.add(ccValues);
+            
             if (!empty) {
                 for (Map<String, Object> config : applicableConfigs) {
                     serverConfiguration.putAll(config);

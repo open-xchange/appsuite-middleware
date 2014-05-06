@@ -49,3 +49,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon May 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.6.0
+* Fri May 02 2014 Marcus Klein <marcus.klein@open-xchange.com>
+initial packaging for internal REST services API

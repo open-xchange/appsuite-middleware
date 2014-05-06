@@ -368,5 +368,20 @@ public interface File {
             return retval;
         }
 
+        public static Field get(final int number) {
+            return byNumber.get(number);
+        }
+
+        public static List<Field> get(final int[] numbers) {
+            final List<Field> fields = new ArrayList<Field>(numbers.length);
+            for (int number : numbers) {
+                Field field = byNumber.get(number);
+                if (field != null) {
+                    fields.add(field);
+                }
+            }
+            return fields;
+        }
+
     }
 }

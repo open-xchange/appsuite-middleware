@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore.search.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,6 +64,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
@@ -81,6 +84,8 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -555,6 +560,9 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             case Metadata.COLOR_LABEL:
                 retval.add("infostore.color_label");
                 break Metadata2DBSwitch;
+            case Metadata.META:
+                retval.add("infostore_document.meta");
+                break Metadata2DBSwitch;
             }
         }
         return (retval.toArray(new String[0]));
@@ -665,7 +673,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         }
 
         @Override
-        public DocumentMetadata next() throws OXException, OXException {
+        public DocumentMetadata next() throws OXException {
             if (null != delegate) {
                 return delegate.next();
             }
@@ -757,7 +765,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             return !warnings.isEmpty();
         }
 
-        private DocumentMetadataImpl fillDocumentMetadata(final DocumentMetadataImpl retval, final Metadata[] columns, final ResultSet result) throws SQLException {
+        private DocumentMetadataImpl fillDocumentMetadata(final DocumentMetadataImpl retval, final Metadata[] columns, final ResultSet result) throws SQLException, OXException {
             for (int i = 0; i < columns.length; i++) {
                 FillDocumentMetadata: switch (columns[i].getId()) {
                 default:
@@ -828,6 +836,17 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 case Metadata.COLOR_LABEL:
                     retval.setColorLabel(result.getInt(i + 1));
                     break FillDocumentMetadata;
+                case Metadata.META:
+                    final InputStream jsonBlobStream = rs.getBinaryStream(i + 1);
+                    if (!rs.wasNull() && null != jsonBlobStream) {
+                        try {
+                            retval.setMeta(new JSONObject(new AsciiReader(jsonBlobStream)).asMap());
+                        } catch (final JSONException e) {
+                            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+                        } finally {
+                            Streams.close(jsonBlobStream);
+                        }
+                    }
                 }
             }
             retval.setIsCurrentVersion(true);
