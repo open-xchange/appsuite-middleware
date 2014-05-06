@@ -101,7 +101,8 @@ import com.openexchange.tools.session.ServerSession;
 public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriver {
 
     /**
-     * The calendar fields that are requested when searching.
+     * The calendar fields that are requested when searching. They should be used regardless which columns are set by the client in the
+     * search request - those columns are only considered for writing the JSON result.
      */
     private static final int[] DEFAULT_COLUMN_IDS = {
         DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
@@ -236,15 +237,11 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * perform search
          */
-        int[] columnIDs = searchRequest.getColumns();
-        if (null == columnIDs || 0 == columnIDs.length) {
-            columnIDs = DEFAULT_COLUMN_IDS;
-        }
         List<Appointment> appointments = new ArrayList<Appointment>();
         AppointmentSQLInterface appointmentSql = Services.requireService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
         SearchIterator<Appointment> searchIterator = null;
         try {
-            searchIterator = appointmentSql.searchAppointments(appointmentSearch, Appointment.START_DATE, Order.ASCENDING, columnIDs);
+            searchIterator = appointmentSql.searchAppointments(appointmentSearch, Appointment.START_DATE, Order.ASCENDING, DEFAULT_COLUMN_IDS);
             while (searchIterator.hasNext()) {
                 appointments.add(getBestMatchingOccurrence(searchIterator.next(), appointmentSearch.getMinimumEndDate(), appointmentSearch.getMaximumStartDate()));
             }

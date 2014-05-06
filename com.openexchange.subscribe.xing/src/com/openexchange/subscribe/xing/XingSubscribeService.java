@@ -388,10 +388,12 @@ public class XingSubscribeService extends AbstractSubscribeService {
             return null;
         }
         final Contact oxContact = new Contact();
+        boolean email1Set = false;
         {
             final String s = xingUser.getActiveMail();
             if (isNotNull(s)) {
                 oxContact.setEmail1(s);
+                email1Set = true;
             }
         }
         {
@@ -437,9 +439,28 @@ public class XingSubscribeService extends AbstractSubscribeService {
             }
         }
         {
+            final Map<String, Object> m = xingUser.getProfessionalExperience();
+            if (null != m && !m.isEmpty()) {
+                final Map<String, Object> primaryCompany = (Map<String, Object>) m.get("primary_company");
+                if (null != primaryCompany && !primaryCompany.isEmpty()) {
+                    // Name
+                    String s = (String) primaryCompany.get("name");
+                    if (isNotNull(s)) {
+                        oxContact.setCompany(s);
+                    }
+
+                    // Title
+                    s = (String) primaryCompany.get("title");
+                    if (isNotNull(s)) {
+                        oxContact.setPosition(s);
+                    }
+                }
+            }
+        }
+        {
             final String s = xingUser.getOrganisationMember();
             if (isNotNull(s)) {
-                oxContact.setPosition(s);
+                oxContact.setUserField04(Strings.abbreviate(s, 64));
             }
         }
         {
@@ -454,47 +475,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 oxContact.setBirthday(d);
             }
         }
-        {
-            final Address a = xingUser.getPrivateAddress();
-            if (null != a) {
-                String s = a.getCity();
-                if (isNotNull(s)) {
-                    oxContact.setCityHome(s);
-                }
-                s = a.getCountry();
-                if (isNotNull(s)) {
-                    oxContact.setCountryHome(s);
-                }
-                s = a.getEmail();
-                if (isNotNull(s)) {
-                    oxContact.setEmail3(s);
-                }
-                s = a.getFax();
-                if (isNotNull(s)) {
-                    oxContact.setFaxHome(s);
-                }
-                s = a.getMobilePhone();
-                if (isNotNull(s)) {
-                    oxContact.setCellularTelephone2(s);
-                }
-                s = a.getPhone();
-                if (isNotNull(s)) {
-                    oxContact.setTelephoneHome1(s);
-                }
-                s = a.getProvince();
-                if (isNotNull(s)) {
-                    oxContact.setStateHome(s);
-                }
-                s = a.getStreet();
-                if (isNotNull(s)) {
-                    oxContact.setStreetHome(s);
-                }
-                s = a.getZipCode();
-                if (isNotNull(s)) {
-                    oxContact.setPostalCodeHome(s);
-                }
-            }
-        }
+        boolean email2Set = false;
         {
             final Address a = xingUser.getBusinessAddress();
             if (null != a) {
@@ -508,7 +489,13 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 }
                 s = a.getEmail();
                 if (isNotNull(s)) {
-                    oxContact.setEmail2(s);
+                    if (email1Set) {
+                        oxContact.setEmail2(s);
+                        email2Set = true;
+                    } else {
+                        oxContact.setEmail1(s);
+                        email1Set = true;
+                    }
                 }
                 s = a.getFax();
                 if (isNotNull(s)) {
@@ -533,6 +520,57 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 s = a.getZipCode();
                 if (isNotNull(s)) {
                     oxContact.setPostalCodeBusiness(s);
+                }
+            }
+        }
+        {
+            final Address a = xingUser.getPrivateAddress();
+            if (null != a) {
+                String s = a.getCity();
+                if (isNotNull(s)) {
+                    oxContact.setCityHome(s);
+                }
+                s = a.getCountry();
+                if (isNotNull(s)) {
+                    oxContact.setCountryHome(s);
+                }
+                s = a.getEmail();
+                if (isNotNull(s)) {
+                    if (email1Set) {
+                        if (email2Set) {
+                            oxContact.setEmail3(s);
+                        } else {
+                            oxContact.setEmail2(s);
+                            email2Set = true;
+                        }
+                    } else {
+                        oxContact.setEmail1(s);
+                        email1Set = true;
+                    }
+                }
+                s = a.getFax();
+                if (isNotNull(s)) {
+                    oxContact.setFaxHome(s);
+                }
+                s = a.getMobilePhone();
+                if (isNotNull(s)) {
+                    oxContact.setCellularTelephone2(s);
+                }
+                s = a.getPhone();
+                if (isNotNull(s)) {
+                    oxContact.setTelephoneHome1(s);
+                }
+                s = a.getProvince();
+                if (isNotNull(s)) {
+                    oxContact.setStateHome(s);
+                }
+                s = a.getStreet();
+                if (isNotNull(s)) {
+                    oxContact.setStreetHome(s);
+                }
+                s = a.getZipCode();
+                if (isNotNull(s)) {
+                    oxContact.setPostalCodeHome(s);
                 }
             }
         }

@@ -47,77 +47,67 @@
  *
  */
 
-package com.openexchange.tools.versit.valuedefinitions.rfc2445;
+package com.openexchange.ajax.appointment.bugtests;
 
-import java.io.IOException;
-import com.openexchange.tools.versit.Property;
-import com.openexchange.tools.versit.StringScanner;
-import com.openexchange.tools.versit.ValueDefinition;
-import com.openexchange.tools.versit.VersitException;
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.List;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.CalendarTestManager;
 
-public class TextValueDefinition extends ValueDefinition {
+/**
+ * {@link Bug32278Test}
+ *
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ */
+public class Bug32278Test extends AbstractAJAXSession {
 
-    public static final ValueDefinition Default = new TextValueDefinition();
+    private Appointment appointment;
 
-    @Override
-    public Object createValue(final StringScanner s, final Property property) throws IOException {
-        final StringBuilder sb = new StringBuilder();
-        while (s.peek >= 0 && s.peek != ',' && s.peek != ';') {
-            if (s.peek == '\\') {
-                s.read();
-                switch (s.peek) {
-                case '\\':
-                case ';':
-                case ',':
-                case ':':
-                    sb.append((char) s.read());
-                    break;
-                case 'r':
-                case 'R':
-                    s.read();
-                    sb.append('\r');
-                    break;
-                case 'n':
-                case 'N':
-                    s.read();
-                    sb.append('\n');
-                    break;
-                default:
-                    throw new VersitException(s, "Invalid ecape sequence");
-                }
-            } else {
-                sb.append((char) s.read());
-            }
-        }
-        return sb.length() == 0 ? null : sb.toString();
+    private CalendarTestManager ctm;
+
+    public Bug32278Test(String name) {
+        super(name);
     }
 
     @Override
-    public String writeValue(final Object value) {
-        final String str = (String) value;
-        final int length = str.length();
-        final StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = str.charAt(i);
-            switch (c) {
-            case '\r':
-                if (i+1 < length && str.charAt(i + 1) == '\n') {
-                    i++;
-                }
-                // no break;
-            case '\n':
-                sb.append("\\n");
-                break;
-            case '\\':
-            case ';':
-            case ',':
-                sb.append('\\');
-                // no break;
-            default:
-                sb.append(c);
-            }
+    public void setUp() throws Exception {
+        super.setUp();
+
+        ctm = new CalendarTestManager(getClient());
+        appointment = new Appointment();
+        appointment.setTitle("Bug 32278 Test");
+        appointment.setStartDate(D("01.05.2014 08:00"));
+        appointment.setEndDate(D("01.05.2014 09:00"));
+        appointment.setRecurrenceType(Appointment.DAILY);
+        appointment.setInterval(1);
+        appointment.setOccurrence(3);
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        appointment.setIgnoreConflicts(true);
+    }
+
+    @Test
+    public void testBug() throws Exception {
+        ctm.insert(appointment);
+        appointment.setRecurrenceType(Appointment.NO_RECURRENCE);
+        appointment.removeInterval();
+        appointment.removeOccurrence();
+
+        ctm.update(appointment);
+
+        List<Appointment> list = ctm.list(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] { Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION });
+        for (Appointment app : list) {
+            assertFalse("No recurrence ID expected.", app.containsRecurrenceID());
+            assertFalse("No recurrence position expected.", app.containsRecurrencePosition());
         }
-        return sb.toString();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ctm.cleanUp();
+        super.tearDown();
     }
 
 }
