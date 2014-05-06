@@ -1,6 +1,7 @@
 * 2014-05-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31391: Register push certificate provider for Mac OS under the correct class  
+ - Fix for bug 32298: Really skip trash folders when listing WebDAV resource collections   
 
 * 2014-05-05 - lars.hoogestraat@open-xchange.com
 

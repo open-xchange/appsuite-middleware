@@ -51,9 +51,7 @@ package com.openexchange.webdav.xml.resources;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.jdom2.Element;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
@@ -73,7 +71,8 @@ public class RecursiveMarshaller implements ResourceMarshaller {
 	@Override
     public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException  {
 		final List<Element> list = new ArrayList<Element>();
-		final List<Element> delegateMarshal = delegate.marshal(resource);
+		final ResourceMarshaller delegate = this.delegate;
+        final List<Element> delegateMarshal = delegate.marshal(resource);
 		list.addAll(delegateMarshal);
 		if(resource.isCollection()) {
 			try {

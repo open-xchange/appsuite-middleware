@@ -49,12 +49,16 @@
 
 package com.openexchange.tools.iterator;
 
+import org.slf4j.Logger;
+
 /**
  * {@link SearchIterators} - Utility class for {@link SearchIterator}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchIterators {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SearchIterators.class);
 
     /**
      * Initializes a new {@link SearchIterators}.
@@ -74,6 +78,7 @@ public final class SearchIterators {
                 iterator.close();
             } catch (final Exception e) {
                 // Ignore
+                LOGGER.error("Closing SearchIterator instance failed", e);
             }
         }
     }

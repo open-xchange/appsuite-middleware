@@ -526,7 +526,7 @@ public class JsonMessageHandlerTest extends TestCase {
             assertTrue("Unexpected content", jAttachment2.getString("content_type").startsWith("text/calendar"));
             assertTrue("Unexpected content", jAttachment3.getString("content_type").startsWith("application/ics"));
 
-            assertTrue("Unexpected Content-Dispostion for " + jAttachment2.getString("id"), jAttachment2.getString("disp").startsWith("none"));
+            assertTrue("Unexpected Content-Dispostion for " + jAttachment2.getString("id"), jAttachment2.getString("disp").startsWith("attachment"));
 
             // System.out.println(jAttachment2.toString(2));
 

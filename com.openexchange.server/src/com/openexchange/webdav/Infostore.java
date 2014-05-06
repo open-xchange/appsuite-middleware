@@ -154,14 +154,12 @@ public class Infostore extends OXServlet {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
-        final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-            session.getUserId(),
-            session.getContext());
-        if ((uc.hasWebDAV() && uc.hasInfostore())) {
-            InfostorePerformer.getInstance().doIt(req, resp, action, session);
-        } else {
+        final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
+        if (!uc.hasWebDAV() || !uc.hasInfostore()) {
             resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+            return;
         }
+        InfostorePerformer.getInstance().doIt(req, resp, action, session);
     }
 
 }
