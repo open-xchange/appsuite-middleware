@@ -630,26 +630,28 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		}
 		loadedChildren = true;
 		SearchIterator<FolderObject> iter = null;
-		try {
-			if(folder==null) {
-				loadFolder();
-			}
-			final ServerSession session = getSession();
-			final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContext());
-			final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContext());
-			final Context ctx = session.getContext();
+        try {
+            if (folder == null) {
+                loadFolder();
+            }
+            final ServerSession session = getSession();
+            final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContext());
+            final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContext());
+            final Context ctx = session.getContext();
 
-			iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(id, user.getId(),user.getGroups(), ctx, userPermissionBits, new Timestamp(0));
-			while (iter.hasNext()) {
+            iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(id, user.getId(), user.getGroups(), ctx, userPermissionBits, new Timestamp(0));
+            while (iter.hasNext()) {
                 final FolderObject folder = iter.next();
                 if (FolderObject.TRASH == folder.getType()) {
                     continue; // skip trash folder
                 }
-				final WebdavPath newUrl = getUrl().dup().append(getFolderName(folder));
+                final WebdavPath newUrl = getUrl().dup().append(getFolderName(folder));
                 children.add(new FolderCollection(newUrl, factory, folder));
-			}
-			children.addAll(factory.getResourcesInFolder(this, folder.getObjectID()));
-		} catch (final Exception e) {
+            }
+            children.addAll(factory.getResourcesInFolder(this, folder.getObjectID()));
+        } catch (final WebdavProtocolException e) {
+            throw e;
+        } catch (final Exception e) {
 		    throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 		    SearchIterators.close(iter);
