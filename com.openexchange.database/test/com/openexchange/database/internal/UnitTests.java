@@ -47,27 +47,28 @@
  *
  */
 
-package com.openexchange.database.internal.wrapping;
+package com.openexchange.database.internal;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest;
+import com.openexchange.database.internal.wrapping.UpdateFlagTest;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    JDBC4ConnectionReturnerTest.class,
+    UpdateFlagTest.class,
+    ReplicationMonitorTest.class
+})
 public class UnitTests {
 
-    private UnitTests() {
+    public UnitTests() {
         super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest.class));
-        tests.addTest(new JUnit4TestAdapter(UpdateFlagTest.class));
-        return tests;
     }
 }
