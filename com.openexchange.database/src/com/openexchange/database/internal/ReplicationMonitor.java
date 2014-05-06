@@ -372,7 +372,7 @@ public class ReplicationMonitor {
         return masterInsteadOfSlaveFetched.get();
     }
 
-    private void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
+    void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
         try {
             if (con.isClosed()) {
                 return;
