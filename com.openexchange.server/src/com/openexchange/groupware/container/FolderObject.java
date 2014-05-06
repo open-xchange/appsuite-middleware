@@ -71,6 +71,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.OXCloneable;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -890,13 +891,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (iter != null) {
-                try {
-                    iter.close();
-                } catch (final OXException e) {
-                    LOG.error("SearchIterator cannot be closed", e);
-                }
-            }
+            SearchIterators.close(iter);
         }
     }
 
@@ -979,10 +974,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             }
             return retval;
         } finally {
-            if (iter != null) {
-                iter.close();
-                iter = null;
-            }
+            SearchIterators.close(iter);
         }
     }
 
