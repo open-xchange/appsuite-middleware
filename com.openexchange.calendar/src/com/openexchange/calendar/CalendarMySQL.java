@@ -363,7 +363,11 @@ public class CalendarMySQL implements CalendarSqlImp {
 
             @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws OXException, SQLException {
-                stmt.setInt(pos, cdao.getRecurrenceID());
+                if (cdao.getRecurrenceID() > 0) {
+                    stmt.setInt(pos, cdao.getRecurrenceID());
+                } else {
+                    stmt.setNull(pos, java.sql.Types.INTEGER);
+                }
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(CalendarObject.DELETE_EXCEPTIONS), new StatementFiller() {
@@ -391,7 +395,11 @@ public class CalendarMySQL implements CalendarSqlImp {
 
             @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws OXException, SQLException {
-                stmt.setInt(pos, cdao.getRecurrencePosition());
+                if (cdao.getRecurrencePosition() >= 0) {
+                    stmt.setInt(pos, cdao.getRecurrencePosition());
+                } else {
+                    stmt.setNull(pos, java.sql.Types.INTEGER);
+                }
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(CommonObject.NUMBER_OF_ATTACHMENTS), new StatementFiller() {
@@ -2745,6 +2753,10 @@ public class CalendarMySQL implements CalendarSqlImp {
         if (rec_action == CalendarCollectionService.CHANGE_RECURRING_TYPE || changeMasterTime) {
             if (edao.getRecurrenceID() > 0 && edao.getObjectID() != edao.getRecurrenceID()) {
                 throw OXCalendarExceptionCodes.INVALID_RECURRENCE_TYPE_CHANGE.create(new Object[0]);
+            }
+            if (cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE) {
+                cdao.setRecurrenceID(0);
+                cdao.setRecurrencePosition(-1);
             }
             final List<Integer> exceptions = getExceptionList(null, ctx, edao.getRecurrenceID());
             if (exceptions != null && !exceptions.isEmpty()) {
