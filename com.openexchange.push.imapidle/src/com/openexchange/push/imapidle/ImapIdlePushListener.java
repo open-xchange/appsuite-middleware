@@ -58,6 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
+import com.google.common.util.concurrent.RateLimiter;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.exception.OXException;
@@ -453,8 +454,12 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         try {
             Run: while (!shutdown) {
                 try {
-                    while (checkNewMail()) {
-                        // Nothing...
+                    // Checks for new mails with a rate of 1 permit per 5 seconds
+                    final RateLimiter rateLimiter = RateLimiter.create(0.2); // rate is "0.2 permits per second"
+                    boolean keepOnChecking = true;
+                    while (keepOnChecking) {
+                        rateLimiter.acquire(); // may wait
+                        keepOnChecking = checkNewMail();
                     }
                 } catch (final MissingSessionException e) {
                     LOG.info(e.getMessage());

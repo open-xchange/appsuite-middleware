@@ -72,6 +72,11 @@ public class TextValueDefinition extends ValueDefinition {
                 case ':':
                     sb.append((char) s.read());
                     break;
+                case 'r':
+                case 'R':
+                    s.read();
+                    sb.append('\r');
+                    break;
                 case 'n':
                 case 'N':
                     s.read();

@@ -47,27 +47,67 @@
  *
  */
 
-package com.openexchange.database.internal.wrapping;
+package com.openexchange.ajax.appointment.bugtests;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.List;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.CalendarTestManager;
 
 /**
- * {@link UnitTests}
+ * {@link Bug32278Test}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class UnitTests {
+public class Bug32278Test extends AbstractAJAXSession {
 
-    private UnitTests() {
-        super();
+    private Appointment appointment;
+
+    private CalendarTestManager ctm;
+
+    public Bug32278Test(String name) {
+        super(name);
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest.class));
-        tests.addTest(new JUnit4TestAdapter(UpdateFlagTest.class));
-        return tests;
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        ctm = new CalendarTestManager(getClient());
+        appointment = new Appointment();
+        appointment.setTitle("Bug 32278 Test");
+        appointment.setStartDate(D("01.05.2014 08:00"));
+        appointment.setEndDate(D("01.05.2014 09:00"));
+        appointment.setRecurrenceType(Appointment.DAILY);
+        appointment.setInterval(1);
+        appointment.setOccurrence(3);
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        appointment.setIgnoreConflicts(true);
     }
+
+    @Test
+    public void testBug() throws Exception {
+        ctm.insert(appointment);
+        appointment.setRecurrenceType(Appointment.NO_RECURRENCE);
+        appointment.removeInterval();
+        appointment.removeOccurrence();
+
+        ctm.update(appointment);
+
+        List<Appointment> list = ctm.list(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] { Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION });
+        for (Appointment app : list) {
+            assertFalse("No recurrence ID expected.", app.containsRecurrenceID());
+            assertFalse("No recurrence position expected.", app.containsRecurrencePosition());
+        }
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ctm.cleanUp();
+        super.tearDown();
+    }
+
 }

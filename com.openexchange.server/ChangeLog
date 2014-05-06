@@ -1,7 +1,16 @@
+* 2014-05-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 32272: Java must be installed completely before open-xchange-core post installation scripts are executed.
+ - Fix for bug 32102: Only increment transaction counter if replication monitor is enabled.
+
 * 2014-05-06 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 31391: Register push certificate provider for Mac OS under the correct class  
- - Fix for bug 32298: Really skip trash folders when listing WebDAV resource collections   
+ - Fix for bug 31391: Register push certificate provider for Mac OS under the correct class
+ - Fix for bug 32298: Really skip trash folders when listing WebDAV resource collections
+
+* 2014-05-06 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32301: Also accept '\r' as escape sequence in vcard text value fields
 
 * 2014-05-05 - lars.hoogestraat@open-xchange.com
 

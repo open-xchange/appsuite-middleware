@@ -47,11 +47,13 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.database.internal;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest;
+import com.openexchange.database.internal.wrapping.UpdateFlagTest;
 
 /**
  * {@link UnitTests}
@@ -60,48 +62,13 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    com.openexchange.ajax.ProcessUploadStaticTest.class,
-    com.openexchange.ajax.parser.TaskLastModifiedTest.class,
-    com.openexchange.ajax.LoginAddFragmentTest.class,
-    com.openexchange.groupware.ldap.UserAttributeDiffTest.class,
-    com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest.class,
-    com.openexchange.i18n.tools.replacement.FormatLocalizedStringReplacementTest.class,
-    com.openexchange.login.internal.LoginPerformerTest.class,
-    com.openexchange.tools.collections.OXCollectionsTest.class,
-    com.openexchange.tools.versit.valuedefinitions.rfc2445.ListValueDefinitionTest.class,
-    com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class,
-    com.openexchange.tools.net.URIParserTest.class,
-    com.openexchange.mail.utils.MsisdnUtilityTest.class,
-    com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class,
-    com.openexchange.ajax.MailAttachmentTest.class,
-    com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
-    com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
-    com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
-    com.openexchange.mail.api.MailConfigTest.class,
-    com.openexchange.mail.mime.ContentDispositionTest.class,
-    com.openexchange.mail.mime.ContentTypeTest.class,
-    com.openexchange.mail.mime.MimeUtilityTest.class,
-    com.openexchange.mail.mime.MimeStructureFixerTest.class,
-    com.openexchange.mail.mime.MimeSmilFixerTest.class,
-    com.openexchange.mail.parser.handlers.JsonMessageHandlerTest.class,
-    com.openexchange.groupware.notify.ParticipantNotifyTest.class,
-    com.openexchange.mail.json.actions.GetAttachmentActionTest.class,
-    com.openexchange.ajax.requesthandler.converters.preview.cache.FileStoreResourceCacheImplTest.class,
-    com.openexchange.server.services.SharedInfostoreJSlobTest.class,
-    com.openexchange.groupware.upload.quotachecker.MailUploadQuotaCheckerTest.class,
-    com.openexchange.mail.text.TextProcessingTest.class,
-    com.openexchange.login.internal.format.CompositeLoginFormatterTest.class,
-    com.openexchange.user.UserServiceInterceptorRegistryTest.class,
-    com.openexchange.groupware.infostore.search.impl.ToMySqlQueryVisitorTest.class,
-    com.openexchange.mailaccount.json.parser.MailAccountParserTest.class
+    JDBC4ConnectionReturnerTest.class,
+    UpdateFlagTest.class,
+    ReplicationMonitorTest.class
 })
 public class UnitTests {
 
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
     public UnitTests() {
         super();
     }
-
 }
