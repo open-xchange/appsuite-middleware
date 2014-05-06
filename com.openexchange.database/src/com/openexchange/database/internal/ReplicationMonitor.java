@@ -225,7 +225,9 @@ public class ReplicationMonitor {
                 if (state.isUsedForUpdate()) {
                     // Data on the master has been changed without using a transaction, so we need to increment the counter here.
                     // If a transaction was used the JDBC Connection wrapper incremented the counter in the commit phase.
-                    increaseTransactionCounter(assign, con);
+                    if (active) {
+                        increaseTransactionCounter(assign, con);
+                    }
                 } else {
                     // Initialize counter as early as possible.
                     if (active && poolId != assign.getReadPoolId() && !assign.isTransactionInitialized()) {
@@ -297,7 +299,7 @@ public class ReplicationMonitor {
         try {
             // Using Mysql specific functions like LAST_INSERT_ID() do not reveal any performance improvement compared to this transaction.
             // UPDATE replicationMonitor SET transaction=LAST_INSERT_ID(transaction+1) WHERE cid=?
-            // There we stick with this simple transaction, UPDATE and SELECT statement for better compatibility.
+            // Therefore we stick with this simple transaction, UPDATE and SELECT statement for better compatibility.
             stmt = con.prepareStatement("UPDATE replicationMonitor SET transaction=transaction+1 WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.execute();
