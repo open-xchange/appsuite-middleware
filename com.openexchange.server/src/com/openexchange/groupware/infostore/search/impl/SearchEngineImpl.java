@@ -143,6 +143,11 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 ctx,
                 con)).asQueue();
             for (final FolderObject folder : queue) {
+                // Exclude trash folder if not set explicitly
+                if (folder.getType() == FolderObject.TRASH) {
+                    continue;
+                }
+
                 final EffectivePermission perm = folder.getEffectiveUserPermission(user.getId(), userPermissions);
                 if (perm.canReadAllObjects()) {
                     all.add(Integer.valueOf(folder.getObjectID()));
@@ -218,6 +223,11 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                         ctx,
                         con)).asQueue();
                     for (final FolderObject folder : queue) {
+                        // Exclude trash folder if not set explicitly
+                        if (folder.getType() == FolderObject.TRASH) {
+                            continue;
+                        }
+
                         final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userPermissions);
                         if (perm.canReadAllObjects()) {
                             all.add(Integer.valueOf(folder.getObjectID()));
