@@ -58,6 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
+import com.google.common.util.concurrent.RateLimiter;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.exception.OXException;
