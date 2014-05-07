@@ -1,3 +1,7 @@
+* 2014-05-07 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32263: Set transport password instead of IMAP password for account update
+
 * 2014-05-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 32339: Drop comments in advance
