@@ -109,7 +109,7 @@ public enum DispatchExceptionCode implements DisplayableOXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "ATMOSPHERE";
+        return "RT_DISPATCH";
     }
 
     @Override
