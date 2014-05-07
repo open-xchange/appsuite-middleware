@@ -1,3 +1,7 @@
+* 2014-05-07 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32369: Use the correct HTTP method, i.e. POST and the correct response code from Xing, i.e. 201.
+
 * 2014-05-07 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 32351: Fix for bug 32351: Throwing error message if mail is expunged in the meantime
