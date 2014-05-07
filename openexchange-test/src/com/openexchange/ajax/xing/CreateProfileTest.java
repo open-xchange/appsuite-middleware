@@ -50,7 +50,9 @@
 package com.openexchange.ajax.xing;
 
 import java.io.IOException;
+import java.util.UUID;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.xing.actions.CreateRequest;
 import com.openexchange.ajax.xing.actions.CreateResponse;
@@ -79,9 +81,21 @@ public class CreateProfileTest extends AbstractAJAXSession {
      * @throws JSONException
      */
     public void testCreateCoReg() throws OXException, IOException, JSONException {
-        final CreateRequest request = new CreateRequest("testing.tester@open-xchange.com", true, "testing", "tester", "en", true);
+        final String name = UUID.randomUUID().toString().replaceAll("-", "");
+        final StringBuilder builder = new StringBuilder();
+        builder.append(name).append("@").append("open-xchange.com");
+        final CreateRequest request = new CreateRequest(builder.toString(), true, "testing", "tester", "en", true);
         final CreateResponse response = client.execute(request);
+        
         assertNotNull(response);
+        Object data = response.getData();
+        if (data instanceof JSONObject) {
+            JSONObject jsonData = (JSONObject) data;
+            assertNotNull("The lead_id is missing from the response payload", jsonData.getString("lead_id"));
+            assertNotNull("The user_id is missing from the response payload", jsonData.has("user_id"));
+        } else {
+            fail("Invalid response object. Should be of type JSONObject");
+        }
     }
 
 }
