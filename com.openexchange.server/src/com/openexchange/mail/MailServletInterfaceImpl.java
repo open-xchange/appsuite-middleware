@@ -2128,7 +2128,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage getReplyMessageForDisplay(final String folder, final String replyMsgUID, final boolean replyToAll, final UserSettingMail usm) throws OXException {
+    public MailMessage getReplyMessageForDisplay(final String folder, final String replyMsgUID, final boolean replyToAll, final UserSettingMail usm, final boolean setFrom) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -2137,7 +2137,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (null == originalMail) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(replyMsgUID, fullName);
         }
-        return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll, usm);
+        return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll, usm, setFrom);
     }
 
     @Override

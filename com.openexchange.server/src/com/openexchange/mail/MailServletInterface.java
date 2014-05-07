@@ -402,7 +402,7 @@ public abstract class MailServletInterface implements Closeable {
      * <code>replyMsgUID</code>. <code>replyToAll</code> defines whether to reply to all involved entities or just to main sender.
      * <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send the reply.
      */
-    public abstract MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm) throws OXException;
+    public abstract MailMessage getReplyMessageForDisplay(String folder, String replyMsgUID, boolean replyToAll, UserSettingMail usm, boolean setFrom) throws OXException;
 
     /**
      * Creates an instance of <code>JSONMessageObject</code> which contains the initial forward content of the message identifed through

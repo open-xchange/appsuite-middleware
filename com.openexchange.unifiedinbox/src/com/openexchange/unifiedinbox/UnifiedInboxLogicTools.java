@@ -214,8 +214,8 @@ public final class UnifiedInboxLogicTools extends MailLogicTools {
     }
 
     @Override
-    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll) throws OXException {
-        final MailMessage mail = super.getReplyMessage(originalMail, replyAll);
+    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final boolean setFrom) throws OXException {
+        final MailMessage mail = super.getReplyMessage(originalMail, replyAll, setFrom);
         try {
             final UnifiedInboxUID uid = new UnifiedInboxUID(originalMail.getMailId());
             mail.setAccountId(uid.getAccountId());
@@ -238,8 +238,8 @@ public final class UnifiedInboxLogicTools extends MailLogicTools {
     }
 
     @Override
-    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final UserSettingMail usm) throws OXException {
-        final MailMessage mail = super.getReplyMessage(originalMail, replyAll, usm);
+    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final UserSettingMail usm, final boolean setFrom) throws OXException {
+        final MailMessage mail = super.getReplyMessage(originalMail, replyAll, usm, setFrom);
         try {
             final UnifiedInboxUID uid = new UnifiedInboxUID(originalMail.getMailId());
             mail.setAccountId(uid.getAccountId());

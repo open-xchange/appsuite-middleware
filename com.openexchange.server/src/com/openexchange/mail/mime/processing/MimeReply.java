@@ -131,8 +131,7 @@ import com.openexchange.tools.regex.MatcherReplacer;
  */
 public final class MimeReply {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(MimeReply.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeReply.class);
 
     private static final String PREFIX_RE = "Re: ";
 
@@ -154,7 +153,22 @@ public final class MimeReply {
      * @throws OXException If reply mail cannot be composed
      */
     public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId) throws OXException {
-        return getReplyMail(originalMail, replyAll, session, accountId, null);
+        return getReplyMail(originalMail, replyAll, session, accountId, null, false);
+    }
+
+    /**
+     * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
+     *
+     * @param originalMail The referenced original mail
+     * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
+     * @param session The session containing needed user data
+     * @param accountId The account ID
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
+     * @return An instance of {@link MailMessage} representing an user-editable reply mail
+     * @throws OXException If reply mail cannot be composed
+     */
+    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final boolean setFrom) throws OXException {
+        return getReplyMail(originalMail, replyAll, session, accountId, null, setFrom);
     }
 
     /**
@@ -169,6 +183,22 @@ public final class MimeReply {
      * @throws OXException If reply mail cannot be composed
      */
     public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final UserSettingMail usm) throws OXException {
+        return getReplyMail(originalMail, replyAll, session, accountId, usm, false);
+    }
+
+    /**
+     * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
+     *
+     * @param originalMail The referenced original mail
+     * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
+     * @param session The session containing needed user data
+     * @param accountId The account ID
+     * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
+     * @return An instance of {@link MailMessage} representing an user-editable reply mail
+     * @throws OXException If reply mail cannot be composed
+     */
+    public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session, final int accountId, final UserSettingMail usm, final boolean setFrom) throws OXException {
         boolean preferToAsRecipient = false;
         final String originalMailFolder = originalMail.getFolder();
         MailPath msgref = null;
@@ -205,7 +235,7 @@ public final class MimeReply {
             session,
             accountId,
             MimeDefaultSession.getDefaultSession(),
-            usm);
+            usm, setFrom);
     }
 
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
@@ -236,10 +266,11 @@ public final class MimeReply {
      * @param accountId The account ID
      * @param mailSession The mail session
      * @param userSettingMail The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws OXException If reply mail cannot be composed
      */
-    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail) throws OXException {
+    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail, final boolean setFrom) throws OXException {
         try {
             originalMsg.setAccountId(accountId);
             final MailMessage origMsg;
@@ -278,6 +309,22 @@ public final class MimeReply {
                     newSubject = new StringBuilder().append(PREFIX_RE).append(decodedSubject).toString();
                 }
                 replyMsg.setSubject(newSubject, MailProperties.getInstance().getDefaultMimeCharset());
+            }
+            /*
+             * Set "From"
+             */
+            if (setFrom) {
+                final String hdrVal = origMsg.getHeader(MessageHeaders.HDR_FROM, MessageHeaders.HDR_ADDR_DELIM);
+                if (null != hdrVal) {
+                    try {
+                        final InternetAddress[] al = parseAddressList(hdrVal, true);
+                        if (null != al && al.length > 0) {
+                            replyMsg.setFrom(al[0]);
+                        }
+                    } catch (final Exception e) {
+                        LOG.warn("Could not set 'From' header to \"{}\"", hdrVal, e);
+                    }
+                }
             }
             /*
              * Set the appropriate recipients. Taken from RFC 822 section 4.4.4: If the "Reply-To" field exists, then the reply should go to
