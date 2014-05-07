@@ -60,7 +60,6 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.SimpleMode;
 import com.openexchange.data.conversion.ical.ZoneInfo;
-import com.openexchange.data.conversion.ical.itip.ITipContainer;
 import com.openexchange.data.conversion.ical.itip.ITipEmitter;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
@@ -86,8 +85,7 @@ public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
         VEvent event = null;
         if (message.getAppointment() != null) {
         	appt = message.getAppointment();
-        	ITipContainer itip = new ITipContainer(message.getMethod(), null, -1);
-        	event = createEvent(mode, 0, message.getAppointment(), ctx, errors, warnings, itip);
+        	event = createEvent(mode, 0, message.getAppointment(), ctx, errors, warnings);
             if (message.getComment() != null && !message.getComment().trim().equals("")) {
                 event.getProperties().add(new Comment(message.getComment()));
                 consumedComment = true;
