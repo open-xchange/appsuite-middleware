@@ -79,6 +79,9 @@ public class CSSMatcherTest {
             droppedComments = CSSMatcher.dropComments(css);
             Assert.assertEquals("Unexpected CSS snippet", "body, table { font-size: 9pt; font-family: 'Courier New'; font-style: normal; }", droppedComments.trim());
 
+            css = "/* blah */ body, table /* Some comment */{ font-size: 9pt; font-family: 'Courier New'; font-style: normal; } /* blubb */";
+            droppedComments = CSSMatcher.dropComments(css);
+            Assert.assertEquals("Unexpected CSS snippet", "body, table { font-size: 9pt; font-family: 'Courier New'; font-style: normal; }", droppedComments.trim());
         } catch (final Exception e) {
             Assert.fail(e.getMessage());
         }

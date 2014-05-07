@@ -357,15 +357,21 @@ public final class CSSMatcher {
      */
     protected static String dropComments(final String cssSnippet) {
         // Check for comment
-        String tmp = cssSnippet;
-        int cstart = tmp.indexOf("/*");
-        int cend = tmp.indexOf("*/");
-        while (cstart >= 0 && cend > 0 && cend > cstart) {
-            tmp = new StringBuilder(tmp.length()).append(tmp.substring(0, cstart)).append(tmp.substring(cend + 2)).toString();
-            cstart = tmp.indexOf("/*");
-            cend = tmp.indexOf("*/");
+        int cstart = cssSnippet.indexOf("/*");
+        if (cstart < 0) {
+            return cssSnippet;
         }
-        return tmp;
+        int cend = cssSnippet.indexOf("*/");
+        if (cend <= 0 || cend <= cstart) {
+            return cssSnippet;
+        }
+        final StringBuilder hlp = new StringBuilder(cssSnippet);
+        do {
+            hlp.delete(cstart, cend + 2);
+            cstart = hlp.indexOf("/*");
+            cend = hlp.indexOf("*/");
+        } while (cstart >= 0 && cend > 0 && cend > cstart);
+        return hlp.toString();
     }
 
     /**
