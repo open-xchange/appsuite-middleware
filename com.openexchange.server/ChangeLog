@@ -1,3 +1,8 @@
+* 2014-05-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32339: Drop comments in advance
+ - Fix for bug 32350: Deal with empty array on mailbox append operation
+
 * 2014-05-06 - marcus.klein@open-xchange.com
 
  - Fix for bug 32272: Java must be installed completely before open-xchange-core post installation scripts are executed.
