@@ -70,6 +70,8 @@ import com.openexchange.data.conversion.ical.ical4j.internal.calendar.LastModifi
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Note;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Recurrence;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.ReplyParticipants;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.RequestParticipants;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Sequence;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Start;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Title;
@@ -87,15 +89,29 @@ public final class AppointmentConverters {
 
     public static final List<AttributeConverter<VEvent, Appointment>> ALL_ITIP;
 
+    public static final List<AttributeConverter<VEvent, Appointment>> REQUEST;
+
+    public static final List<AttributeConverter<VEvent, Appointment>> REPLY;
+
+    public static final List<AttributeConverter<VEvent, Appointment>> CANCEL;
+
+    public static final List<AttributeConverter<VEvent, Appointment>> REFRESH;
+
+    public static final List<AttributeConverter<VEvent, Appointment>> DECLINE_COUNTER;
+
     private static AttributeConverter<VEvent, Appointment> title = new Title<VEvent, Appointment>();
 
     private static AttributeConverter<VEvent, Appointment> note = new Note<VEvent, Appointment>();
+
+    private static AttributeConverter<VEvent, Appointment> start = new Start<VEvent, Appointment>();
 
     private static AbstractVerifyingAttributeConverter<VEvent, Appointment> verifyingStart = new Start<VEvent, Appointment>();
 
     private static AttributeConverter<VEvent, Appointment> end = new End<VEvent, Appointment>();
     
     private static AttributeConverter<VEvent, Appointment> xMicrosoftCdoAlldayEvent = new XMicrosoftCdoAlldayEvent<VEvent, Appointment>();
+
+    private static AttributeConverter<VEvent, Appointment> duration = new Duration<VEvent, Appointment>();
 
     private static AbstractVerifyingAttributeConverter<VEvent, Appointment> verifyingDuration = new Duration<VEvent, Appointment>();
 
@@ -129,6 +145,10 @@ public final class AppointmentConverters {
 
     private static AbstractVerifyingAttributeConverter<VEvent, Appointment> participants = new Participants<VEvent, Appointment>();
 
+    private static AbstractVerifyingAttributeConverter<VEvent, Appointment> requestParticipants = new RequestParticipants<VEvent, Appointment>();
+
+    private static AbstractVerifyingAttributeConverter<VEvent, Appointment> replyParticipants = new ReplyParticipants<VEvent, Appointment>();
+
     /**
      * Prevent instantiation.
      */
@@ -142,6 +162,11 @@ public final class AppointmentConverters {
 
         ALL = getAll();
         ALL_ITIP = getAllItip();
+        REQUEST = getRequest();
+        REPLY = getReply();
+        CANCEL = getCancel();
+        REFRESH = getRefresh();
+        DECLINE_COUNTER = getDeclineCounter();
     }
     
     private static List<AttributeConverter<VEvent, Appointment>> getAll() {
@@ -196,8 +221,107 @@ public final class AppointmentConverters {
         return tmp;
     }
 
+    private static List<AttributeConverter<VEvent, Appointment>> getRequest() {
+        List<AttributeConverter<VEvent, Appointment>> tmp = new ArrayList<AttributeConverter<VEvent, Appointment>>();
+        tmp.add(title);
+        tmp.add(note);
+        tmp.add(verifyingStart);
+        tmp.add(end);
+        tmp.add(verifyingDuration);
+        tmp.add(klass);
+        tmp.add(location);
+        tmp.add(categories);
+        tmp.add(recurrence);
+        tmp.add(deleteExcetions);
+        tmp.add(changeExceptions);
+        tmp.add(alarm);
+        tmp.add(ignoreConflicts);
+        tmp.add(uid);
+        tmp.add(createdAndDTStamp);
+        tmp.add(lastModified);
+        tmp.add(createdBy);
+        tmp.add(sequence);
+        tmp.add(requestParticipants);
+        tmp.add(xMicrosoftCdoAlldayEvent);
+
+        return tmp;
+    }
+
+    private static List<AttributeConverter<VEvent, Appointment>> getReply() {
+        List<AttributeConverter<VEvent, Appointment>> tmp = new ArrayList<AttributeConverter<VEvent, Appointment>>();
+        tmp.add(title);
+        tmp.add(note);
+        tmp.add(start);
+        tmp.add(end);
+        tmp.add(duration);
+        tmp.add(klass);
+        tmp.add(location);
+        tmp.add(categories);
+        tmp.add(recurrence);
+        tmp.add(deleteExcetions);
+        tmp.add(changeExceptions);
+        tmp.add(alarm);
+        tmp.add(ignoreConflicts);
+        tmp.add(uid);
+        tmp.add(createdAndDTStamp);
+        tmp.add(lastModified);
+        tmp.add(createdBy);
+        tmp.add(sequence);
+        tmp.add(replyParticipants);
+        tmp.add(xMicrosoftCdoAlldayEvent);
+
+        return tmp;
+    }
+
+    private static List<AttributeConverter<VEvent, Appointment>> getCancel() {
+        List<AttributeConverter<VEvent, Appointment>> tmp = new ArrayList<AttributeConverter<VEvent, Appointment>>();
+        tmp.add(title);
+        tmp.add(note);
+        tmp.add(start);
+        tmp.add(end);
+        tmp.add(duration);
+        tmp.add(klass);
+        tmp.add(location);
+        tmp.add(categories);
+        tmp.add(recurrence);
+        tmp.add(deleteExcetions);
+        tmp.add(changeExceptions);
+        tmp.add(alarm);
+        tmp.add(ignoreConflicts);
+        tmp.add(uid);
+        tmp.add(createdAndDTStamp);
+        tmp.add(lastModified);
+        tmp.add(createdBy);
+        tmp.add(sequence);
+        tmp.add(participants);
+        tmp.add(xMicrosoftCdoAlldayEvent);
+
+        return tmp;
+    }
+
+    private static List<AttributeConverter<VEvent, Appointment>> getRefresh() {
+        return getCancel();
+    }
+
+    private static List<AttributeConverter<VEvent, Appointment>> getDeclineCounter() {
+        return getCancel();
+    }
+
     public static List<AttributeConverter<VEvent, Appointment>> getConverters(ITipMethod method) {
-        return method == null ? ALL : ALL_ITIP;
+        switch (method) {
+        case REQUEST:
+            return AppointmentConverters.REQUEST;
+        case REPLY:
+            return AppointmentConverters.REPLY;
+        case CANCEL:
+            return AppointmentConverters.CANCEL;
+        case REFRESH:
+            return AppointmentConverters.REFRESH;
+        case DECLINECOUNTER:
+            return AppointmentConverters.DECLINE_COUNTER;
+        default:
+            return AppointmentConverters.ALL_ITIP;
+        }
     }
 
 }
