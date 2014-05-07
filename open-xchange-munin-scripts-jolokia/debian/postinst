@@ -33,7 +33,7 @@ init_plugins() {
         else
 		echo "nothing to do...."
         fi
-        if [ -f /etc/munin/plugins/ox_* ] ; then
+        if [ -e /etc/munin/plugins/ox_* ] ; then
             find -L /etc/munin/plugins/ox_* -type l -delete
         fi
         echo "done."

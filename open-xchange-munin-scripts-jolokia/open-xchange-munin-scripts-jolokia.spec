@@ -50,7 +50,7 @@ if [ -f $TMPFILE ] ; then
   sh < $TMPFILE
   rm -f $TMPFILE
 fi
-if [ -f /etc/munin/plugins/ox_* ] ; then
+if [ -e /etc/munin/plugins/ox_* ] ; then
   find -L /etc/munin/plugins/ox_* -type l -delete
 fi
 /etc/init.d/munin-node restart || :
