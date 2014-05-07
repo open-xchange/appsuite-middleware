@@ -92,7 +92,7 @@ public class LeaveCommand implements GroupCommand {
                 doSignOff(stanza, groupDispatcher);
             }
         } else {
-            groupDispatcher.leave(stanza.getFrom());
+            groupDispatcher.leave(stanza.getFrom(), stanza);
         }
     }
 
@@ -101,7 +101,7 @@ public class LeaveCommand implements GroupCommand {
         signOffMessage.setFrom(groupDispatcher.getId());
         signOffMessage.setTo(stanza.getFrom());
 
-        groupDispatcher.leave(stanza.getOnBehalfOf());
+        groupDispatcher.leave(stanza.getOnBehalfOf(), stanza);
             
         GroupServiceRegistry.getInstance().getService(MessageDispatcher.class).send(signOffMessage);
     }
