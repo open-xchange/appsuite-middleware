@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,66 +50,21 @@
 package com.openexchange.realtime.group.commands;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
-import com.openexchange.realtime.group.osgi.GroupServiceRegistry;
-import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.ActionHandler;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
- * {@link JoinCommand}
+ * {@link PingCommand}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class JoinCommand implements GroupCommand {
+public class PingCommand implements GroupCommand {
 
     @Override
-    public void perform(final Stanza stanza, final GroupDispatcher groupDispatcher) throws OXException {
-        if (isSynchronous(stanza)) {
-            if (shouldExecuteAsynchronously(groupDispatcher)) {
-                GroupServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(new AbstractTask<Void>() {
-
-                    @Override
-                    public Void call() throws Exception {
-                        doWelcome(stanza, groupDispatcher);
-                        return null;
-                    }
-                });
-            } else {
-                doWelcome(stanza, groupDispatcher);
-            }
-        } else {
-            groupDispatcher.join(stanza.getFrom(), stanza.getSelector(), stanza);
-        }
-    }
-
-    private void doWelcome(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        groupDispatcher.join(stanza.getOnBehalfOf(), stanza.getSelector(), stanza);
-        Stanza welcomeMessage = groupDispatcher.getWelcomeMessage(stanza.getOnBehalfOf());
-        welcomeMessage.setFrom(groupDispatcher.getId());
-        welcomeMessage.setTo(stanza.getFrom());
-         
-        GroupServiceRegistry.getInstance().getService(MessageDispatcher.class).send(welcomeMessage);
-    }
-
-    private boolean isSynchronous(Stanza stanza) {
-        return stanza.getFrom().getProtocol().equals("call");
-    }
-    
-    private boolean shouldExecuteAsynchronously(GroupDispatcher groupDispatcher) {
-        try {
-            return ActionHandler.isAsynchronous(groupDispatcher.getClass().getMethod("getWelcomeMessage", ID.class));
-        } catch (SecurityException e) {
-            return false;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
+    public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
+        // Just consume this
     }
 
 }
