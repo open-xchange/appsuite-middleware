@@ -1,3 +1,7 @@
+* 2014-05-07 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 32351: Fix for bug 32351: Throwing error message if mail is expunged in the meantime
+
 * 2014-05-07 - martin.schneider@open-xchange.com
 
  - Fix for bug 32263: Set transport password instead of IMAP password for account update
