@@ -122,19 +122,5 @@ public class Bug31253Test extends AbstractMailFilterTest {
 
         final Rule loadRule = loadRules(client.getValues().getDefaultAddress(), id, ajaxSession);
         compareRule(rule, loadRule);
-        
-        final TestMail testMail = new TestMail();
-        testMail.setSubject("Test mail for bug 3.1253");
-        testMail.setTo(Arrays.asList(new String[] { client.getValues().getSendAddress() }));
-        testMail.setFrom(client.getValues().getSendAddress());
-        testMail.setContentType(MailContentType.PLAIN.toString());
-        testMail.setBody("Move me...");
-        testMail.sanitize();
-        final MailTestManager mtm = new MailTestManager(client, true);
-        mtm.send(testMail);
-
-        final List<TestMail> mails = mtm.findAndLoadSimilarMails(testMail, client, folder.getFullName());
-
-        assertFalse("No mail was found", null == mails);
     }
 }
