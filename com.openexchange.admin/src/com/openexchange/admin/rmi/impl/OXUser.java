@@ -511,17 +511,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
 
-            UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
+            UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim(), tool.getAdminForContext(ctx) == user_id);
             if(access==null){
                 // no such access combination name defined in configuration
                 // throw error!
                 throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
             }
             access = access.clone();
-            if (access.isPublicFolderEditable() && user_id != tool.getAdminForContext(ctx)) {
-                // publicFolderEditable can only be applied to the context administrator.
-                access.setPublicFolderEditable(false);
-            }
 
             // Change module access
             oxu.changeModuleAccess(ctx, user_id, access);
@@ -631,7 +627,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         basicauth.doAuthentication(auth, ctx);
 
 
-        UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
+        UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim(), false);
         if(access==null){
             // no such access combination name defined in configuration
             // throw error!
@@ -639,10 +635,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         access = access.clone();
 
-        if (access.isPublicFolderEditable()) {
-            // publicFolderEditable can only be applied to the context administrator.
-            access.setPublicFolderEditable(false);
-        }
         // Call main create user method with resolved access rights
         return createUserCommon(ctx, usrdata, access, auth);
     }

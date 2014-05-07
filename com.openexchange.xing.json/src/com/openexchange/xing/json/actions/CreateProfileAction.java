@@ -52,7 +52,6 @@ package com.openexchange.xing.json.actions;
 import java.util.Map;
 import javax.mail.internet.AddressException;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
@@ -61,7 +60,6 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.xing.Language;
 import com.openexchange.xing.LeadDescription;
 import com.openexchange.xing.XingAPI;
@@ -88,23 +86,14 @@ public class CreateProfileAction extends AbstractXingAction {
 
     @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
-        Object objData = req.getRequest().getData();
-        if (objData == null) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-        }
-
-        if (!(objData instanceof JSONObject)) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
+        final String firstName = getMandatoryStringParameter(req, "first_name");
+        final String lastName = getMandatoryStringParameter(req, "last_name");
+        String email = getMandatoryStringParameter(req, "email");
+        final String language = getMandatoryStringParameter(req, "language");
+        final String tandc = getMandatoryStringParameter(req, "tandc_check");
 
         LeadDescription leadDescription = new LeadDescription();
-        JSONObject jsonData = (JSONObject) objData;
 
-        //email
-        String email = jsonData.optString("email", null);
-        if (email == null) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
         try {
             final QuotedInternetAddress addr = new QuotedInternetAddress(email, false);
             email = QuotedInternetAddress.toIDN(addr.getAddress());
@@ -113,16 +102,10 @@ public class CreateProfileAction extends AbstractXingAction {
             throw MimeMailException.handleMessagingException(e);
         }
 
-        //tandc
-        String tandc = jsonData.optString("tandc_check", null);
-        if (tandc == null) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
         leadDescription.setTandcCheck(Boolean.parseBoolean(tandc));
-
-        leadDescription.setFirstName(jsonData.optString("first_name", null));
-        leadDescription.setLastName(jsonData.optString("last_name", null));
-        leadDescription.setLanguage(Language.valueOf(jsonData.optString("language", Language.DE.getLangId()).toUpperCase()));
+        leadDescription.setFirstName(firstName);
+        leadDescription.setLastName(lastName);
+        leadDescription.setLanguage(Language.valueOf((language != null ? language : Language.DE.getLangId()).toUpperCase()));
 
         OAuthService oauthService = getService(OAuthService.class);
         OAuthServiceMetaData m = oauthService.getMetaDataRegistry().getService("com.openexchange.oauth.xing", req.getSession().getUserId(), req.getSession().getContextId());

@@ -612,6 +612,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 final MailMessage[] messages = mailAccess.getMessageStorage().getMessages(sourceFullname, ids, FIELDS_FULL);
                 // Append them to destination folder
                 final String[] destIds = destAccess.getMessageStorage().appendMessages(destFullname, messages);
+                if (null == destIds || 0 == destIds.length) {
+                    return new String[0];
+                }
                 // Delete source messages if a move shall be performed
                 if (move) {
                     mailAccess.getMessageStorage().deleteMessages(sourceFullname, messages2ids(messages), true);

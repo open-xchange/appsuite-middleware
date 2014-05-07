@@ -47,68 +47,28 @@
  *
  */
 
-package com.openexchange.xing.json.osgi;
+package com.openexchange.database.internal;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.xing.access.XingOAuthAccessProvider;
-import com.openexchange.xing.json.XingActionFactory;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest;
+import com.openexchange.database.internal.wrapping.UpdateFlagTest;
 
 /**
- * {@link XingJsonActivator}
+ * {@link UnitTests}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class XingJsonActivator extends AJAXModuleActivator {
+@RunWith(Suite.class)
+@SuiteClasses({
+    JDBC4ConnectionReturnerTest.class,
+    UpdateFlagTest.class,
+    ReplicationMonitorTest.class
+})
+public class UnitTests {
 
-    /**
-     * Initializes a new {@link XingJsonActivator}.
-     */
-    public XingJsonActivator() {
+    public UnitTests() {
         super();
     }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, CapabilityService.class, XingOAuthAccessProvider.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        // Register AJAX module
-        registerModule(new XingActionFactory(this), "xing");
-
-        // Register capability
-        final String sCapability = "xingjson";
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
-        registerService(CapabilityChecker.class, new CapabilityChecker() {
-            @Override
-            public boolean isEnabled(String capability, Session ses) throws OXException {
-                if (sCapability.equals(capability)) {
-                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                    if (session.isAnonymous()) {
-                        return false;
-                    }
-
-                    // Maybe perform permission check here
-                    return true;
-                }
-
-                return true;
-            }
-        }, properties);
-
-
-        getService(CapabilityService.class).declareCapability(sCapability);
-    }
-
 }

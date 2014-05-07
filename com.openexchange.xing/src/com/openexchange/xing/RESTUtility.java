@@ -146,7 +146,7 @@ public class RESTUtility {
         case POST: {
             final HttpPost post = new HttpPost(url);
             if (null != requestInformation) {
-                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"),requestInformation.toString().length(),ContentType.APPLICATION_JSON));
+                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"),requestInformation.toString().getBytes().length, ContentType.APPLICATION_JSON));
             }
             req = post;
         }

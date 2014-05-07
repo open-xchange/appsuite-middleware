@@ -47,27 +47,64 @@
  *
  */
 
-package com.openexchange.database.internal.wrapping;
+package com.openexchange.ajax.jslob.actions;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link UnitTests}
+ * {@link SetRequest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
-public class UnitTests {
+public class SetRequest extends AbstractJSlobRequest<SetResponse> {
 
-    private UnitTests() {
+    private final String identifier;
+
+    private final String value;
+
+    private final boolean failOnError;
+
+    /**
+     * Initializes a new {@link SetRequest}.
+     */
+    public SetRequest(final String identifier, final String value) {
+        this(identifier, value, true);
+    }
+
+    /**
+     * Initializes a new {@link SetRequest}.
+     */
+    public SetRequest(final String identifier, final String value, final boolean failOnError) {
         super();
+        this.identifier = identifier;
+        this.value = value;
+        this.failOnError = failOnError;
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest.class));
-        tests.addTest(new JUnit4TestAdapter(UpdateFlagTest.class));
-        return tests;
+    @Override
+    public Method getMethod() {
+        return Method.PUT;
     }
+
+    @Override
+    public Parameter[] getParameters() {
+        final List<Parameter> list = new LinkedList<Parameter>();
+        list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "set"));
+        list.add(new Parameter(AJAXServlet.PARAMETER_ID, identifier));
+        return list.toArray(new Parameter[list.size()]);
+    }
+
+    @Override
+    public Object getBody() {
+        return null == value ? JSONObject.NULL : value;
+    }
+
+    public AbstractAJAXParser<? extends SetResponse> getParser() {
+        return new SetParser(failOnError);
+    }
+
 }

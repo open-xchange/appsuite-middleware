@@ -467,7 +467,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Wrong number of rows changed. Expected %1$d but was %2$d.
      */
-    WRONG_ROW_COUNT(OXCalendarExceptionCodes.WRONG_ROW_COUNT_MSG, OXExceptionStrings.SQL_ERROR_MSG, 102, Category.CATEGORY_ERROR),
+    WRONG_ROW_COUNT(OXCalendarExceptionCodes.WRONG_ROW_COUNT_MSG, OXExceptionStrings.SQL_ERROR_MSG, 102, Category.CATEGORY_WARNING),
     /**
      * Unable to find a participant for a specified object.
      */

@@ -15,7 +15,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open-Xchange Munin scripts
 Autoreqprov:   no
-Requires:      munin-node
+Requires:      munin-node, perl-JSON, perl-libwww-perl
 Conflicts:     open-xchange-munin-scripts
 
 %description
@@ -50,7 +50,7 @@ if [ -f $TMPFILE ] ; then
   sh < $TMPFILE
   rm -f $TMPFILE
 fi
-find -L /etc/munin/plugins/ox_* -type l -delete
+find -L /etc/munin/plugins -name 'ox_*' -type l -delete
 /etc/init.d/munin-node restart || :
 exit 0
 

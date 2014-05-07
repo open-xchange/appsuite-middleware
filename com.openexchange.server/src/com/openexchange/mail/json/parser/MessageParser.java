@@ -420,7 +420,7 @@ public final class MessageParser {
                         final TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
                         final String contentType = parseContentType(tmp.getString(CONTENT_TYPE));
                         part.setContentType(contentType);
-                        if (contentType.startsWith("text/plain") && tmp.hasAndNotNull("raw") && tmp.getBoolean("raw")) {
+                        if (contentType.startsWith("text/plain") && tmp.optBoolean("raw", false)) {
                             part.setPlainText(sContent);
                         }
                         transportMail.setContentType(part.getContentType());

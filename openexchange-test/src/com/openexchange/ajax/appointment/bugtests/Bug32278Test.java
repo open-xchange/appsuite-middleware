@@ -47,68 +47,67 @@
  *
  */
 
-package com.openexchange.xing.json.osgi;
+package com.openexchange.ajax.appointment.bugtests;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.xing.access.XingOAuthAccessProvider;
-import com.openexchange.xing.json.XingActionFactory;
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.List;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.CalendarTestManager;
 
 /**
- * {@link XingJsonActivator}
+ * {@link Bug32278Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class XingJsonActivator extends AJAXModuleActivator {
+public class Bug32278Test extends AbstractAJAXSession {
 
-    /**
-     * Initializes a new {@link XingJsonActivator}.
-     */
-    public XingJsonActivator() {
-        super();
+    private Appointment appointment;
+
+    private CalendarTestManager ctm;
+
+    public Bug32278Test(String name) {
+        super(name);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, CapabilityService.class, XingOAuthAccessProvider.class };
+    public void setUp() throws Exception {
+        super.setUp();
+
+        ctm = new CalendarTestManager(getClient());
+        appointment = new Appointment();
+        appointment.setTitle("Bug 32278 Test");
+        appointment.setStartDate(D("01.05.2014 08:00"));
+        appointment.setEndDate(D("01.05.2014 09:00"));
+        appointment.setRecurrenceType(Appointment.DAILY);
+        appointment.setInterval(1);
+        appointment.setOccurrence(3);
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        appointment.setIgnoreConflicts(true);
+    }
+
+    @Test
+    public void testBug() throws Exception {
+        ctm.insert(appointment);
+        appointment.setRecurrenceType(Appointment.NO_RECURRENCE);
+        appointment.removeInterval();
+        appointment.removeOccurrence();
+
+        ctm.update(appointment);
+
+        List<Appointment> list = ctm.list(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] { Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION });
+        for (Appointment app : list) {
+            assertFalse("No recurrence ID expected.", app.containsRecurrenceID());
+            assertFalse("No recurrence position expected.", app.containsRecurrencePosition());
+        }
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        // Register AJAX module
-        registerModule(new XingActionFactory(this), "xing");
-
-        // Register capability
-        final String sCapability = "xingjson";
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
-        registerService(CapabilityChecker.class, new CapabilityChecker() {
-            @Override
-            public boolean isEnabled(String capability, Session ses) throws OXException {
-                if (sCapability.equals(capability)) {
-                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                    if (session.isAnonymous()) {
-                        return false;
-                    }
-
-                    // Maybe perform permission check here
-                    return true;
-                }
-
-                return true;
-            }
-        }, properties);
-
-
-        getService(CapabilityService.class).declareCapability(sCapability);
+    public void tearDown() throws Exception {
+        ctm.cleanUp();
+        super.tearDown();
     }
 
 }
