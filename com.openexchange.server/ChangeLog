@@ -20,6 +20,7 @@
  - Fix for bug 32339: Drop comments in advance
  - Fix for bug 32350: Deal with empty array on mailbox append operation
  - Fix for bug 32361: Introduced capability "xingjson" to signal presence of XING JSON bundle
+ - Fix for bug 32285: More resource-reluctant approach when performing an IMAP FETCH command
 
 * 2014-05-06 - marcus.klein@open-xchange.com
 
