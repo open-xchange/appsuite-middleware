@@ -350,6 +350,31 @@ public final class CSSMatcher {
     }
 
     /**
+     * Drops comments from given CSS snippet.
+     *
+     * @param cssSnippet The CSS snippet
+     * @return The CSS snippet cleansed by comments
+     */
+    protected static String dropComments(final String cssSnippet) {
+        // Check for comment
+        int cstart = cssSnippet.indexOf("/*");
+        if (cstart < 0) {
+            return cssSnippet;
+        }
+        int cend = cssSnippet.indexOf("*/");
+        if (cend <= 0 || cend <= cstart) {
+            return cssSnippet;
+        }
+        final StringBuilder hlp = new StringBuilder(cssSnippet);
+        do {
+            hlp.delete(cstart, cend + 2);
+            cstart = hlp.indexOf("/*");
+            cend = hlp.indexOf("*/");
+        } while (cstart >= 0 && cend > 0 && cend > cstart);
+        return hlp.toString();
+    }
+
+    /**
      * Checks the CSS provided by given <code>Stringer</code>.
      *
      * @param cssBuilder The CSS content
@@ -374,7 +399,7 @@ public final class CSSMatcher {
                 if (cssBld.indexOf("{") < 0) {
                     return Boolean.valueOf(checkCSSElements(cssBld, styleMap, removeIfAbsent));
                 }
-                final String css = CRLF.matcher(cssBld).replaceAll(" ");
+                final String css = dropComments(CRLF.matcher(cssBld).replaceAll(" "));
                 final int length = css.length();
                 cssBld.setLength(0);
                 final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(length));
@@ -401,22 +426,7 @@ public final class CSSMatcher {
                         final String prefix;
                         if (cssElemsBuffer.length() > 0) {
                             modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-                            String tmp = cssElemsBuffer.toString();
-                            Matcher matcher = PATTERN_TAG_COMMENT_LINE.matcher(tmp);
-                            if (matcher.find()) {
-                                StringBuilder helper = new StringBuilder();
-                                int b = 0;
-                                int e = 0;
-                                while (e < tmp.length()) {
-                                    b = tmp.indexOf("/*");
-                                    e = tmp.indexOf("*/");
-                                    helper.append(tmp.substring(1, b));
-                                    tmp = tmp.substring(e + 1);
-                                }
-                                prefix = prefixBlock(helper.toString(), cssPrefix);
-                            } else {
-                                prefix = cssElemsBuffer.toString();
-                            }
+                            prefix = cssElemsBuffer.toString();
                         } else {
                             prefix = "";
                         }
@@ -960,7 +970,5 @@ public final class CSSMatcher {
         }
         return PATTERN_STYLE_LINE.matcher(css).find();
     }
-
-    private static final Pattern PATTERN_TAG_COMMENT_LINE = Pattern.compile("(([a-zA-Z]+((\\s*)([,]?|\\.)(\\s*)))+)(\\s*)(\\r?\\n)*(\\/\\*(.|[\\r\\n])*?\\*\\/)(\\r?\\n)*");
 
 }
