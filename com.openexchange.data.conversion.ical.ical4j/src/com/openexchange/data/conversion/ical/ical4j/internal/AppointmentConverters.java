@@ -87,8 +87,6 @@ public final class AppointmentConverters {
 
     public static final List<AttributeConverter<VEvent, Appointment>> ALL;
 
-    public static final List<AttributeConverter<VEvent, Appointment>> ALL_ITIP;
-
     public static final List<AttributeConverter<VEvent, Appointment>> REQUEST;
 
     public static final List<AttributeConverter<VEvent, Appointment>> REPLY;
@@ -161,41 +159,14 @@ public final class AppointmentConverters {
         verifyingDuration.setVerifier(new RequireEndDate());
 
         ALL = getAll();
-        ALL_ITIP = getAllItip();
         REQUEST = getRequest();
         REPLY = getReply();
         CANCEL = getCancel();
         REFRESH = getRefresh();
         DECLINE_COUNTER = getDeclineCounter();
     }
-    
-    private static List<AttributeConverter<VEvent, Appointment>> getAll() {
-        List<AttributeConverter<VEvent, Appointment>> tmp = new ArrayList<AttributeConverter<VEvent, Appointment>>();
-        tmp.add(title);
-        tmp.add(note);
-        tmp.add(verifyingStart);
-        tmp.add(end);
-        tmp.add(verifyingDuration);
-        tmp.add(klass);
-        tmp.add(location);
-        tmp.add(transparency);
-        tmp.add(categories);
-        tmp.add(recurrence);
-        tmp.add(deleteExcetions);
-        tmp.add(changeExceptions);
-        tmp.add(alarm);
-        tmp.add(ignoreConflicts);
-        tmp.add(uid);
-        tmp.add(createdAndDTStamp);
-        tmp.add(lastModified);
-        tmp.add(createdBy);
-        tmp.add(sequence);
-        tmp.add(participants);
-        tmp.add(xMicrosoftCdoAlldayEvent);
-        return tmp;
-    }
 
-    private static List<AttributeConverter<VEvent, Appointment>> getAllItip() {
+    private static List<AttributeConverter<VEvent, Appointment>> getAll() {
         List<AttributeConverter<VEvent, Appointment>> tmp = new ArrayList<AttributeConverter<VEvent, Appointment>>();
         tmp.add(title);
         tmp.add(note);
@@ -320,7 +291,7 @@ public final class AppointmentConverters {
         case DECLINECOUNTER:
             return AppointmentConverters.DECLINE_COUNTER;
         default:
-            return AppointmentConverters.ALL_ITIP;
+            return AppointmentConverters.ALL;
         }
     }
 
