@@ -73,6 +73,7 @@ public class FetchResponse extends IMAPResponse {
 	super(p);
 	fitems = null;
 	parse();
+	buffer = null; // Not needed anymore as completely parsed by now
     }
 
     public FetchResponse(IMAPResponse r)
@@ -90,6 +91,7 @@ public class FetchResponse extends IMAPResponse {
 	super(r);
 	this.fitems = fitems;
 	parse();
+	buffer = null; // Not needed anymore as completely parsed by now
     }
 
     public int getItemCount() {
