@@ -1,3 +1,7 @@
+* 2014-05-07 - marc.arens@open-xchange.com
+
+ - Fix for bug 32326: Send proper exception when non-member tries to send to GroupDispatcher
+ 
 * 2014-05-07 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 32369: Use the correct HTTP method, i.e. POST and the correct response code from Xing, i.e. 201.
@@ -54,6 +58,10 @@
 
  - Fix for bug 32288: Pass the correct mandatory contact fields
 
+* 2014-05-02 - marc.arens@open-xchange.com
+
+ - Fix for bug 31833: Add DistributedGroupManager and inform GroupDispatchers about client inactivity
+   
 * 2014-05-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 32044: Update the reminder's folderID for all accessing users, if there are no participants. Check additionally permissions
