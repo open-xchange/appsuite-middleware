@@ -376,7 +376,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         LOGGER.debug("{} - {} - {} - {}", ctx, admin_user, access_combination_name, auth);
 
-        UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
+        UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim(), true);
         if(access==null){
             // no such access combination name defined in configuration
             // throw error!
@@ -1098,10 +1098,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         // If not defined or access combination name does NOT exist, use hardcoded fallback!
         UserModuleAccess createaccess = null;
         if( access == null ) {
-            if(DEFAULT_ACCESS_COMBINATION_NAME.equals("NOT_DEFINED") || ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME) == null){
+            if(DEFAULT_ACCESS_COMBINATION_NAME.equals("NOT_DEFINED") || ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true) == null){
                 createaccess = ClientAdminThread.cache.getDefaultUserModuleAccess();
             }else{
-                createaccess = ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME);
+                createaccess = ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true);
             }
         } else {
             createaccess = access;
@@ -1251,13 +1251,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
-            if(access==null){
+            UserModuleAccess accessAdmin = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim(), true);
+            UserModuleAccess accessUser = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim(), false);
+            if (null == accessAdmin || null == accessUser) {
                 // no such access combination name defined in configuration
                 // throw error!
                 throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
             }
-            access = access.clone();
+            accessAdmin = accessAdmin.clone();
+            accessUser = accessUser.clone();
 
             // Trigger plugin extensions
             {
@@ -1272,17 +1274,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
 
             // change rights for all users in context to specified one in access combination name
-            if (access.isPublicFolderEditable()) {
-                // publicFolderEditable can only be applied to the context administrator.
-                Integer[] userIds = i2I(oxu.getAll(ctx));
-                final int adminId = tool.getAdminForContext(ctx);
-                userIds = com.openexchange.tools.arrays.Arrays.remove(userIds, I(adminId));
-                oxu.changeModuleAccess(ctx, adminId, access);
-                access.setPublicFolderEditable(false);
-                oxu.changeModuleAccess(ctx, I2i(userIds), access);
-            } else {
-                oxu.changeModuleAccess(ctx, oxu.getAll(ctx), access);
-            }
+            Integer[] userIds = i2I(oxu.getAll(ctx));
+            final int adminId = tool.getAdminForContext(ctx);
+            userIds = com.openexchange.tools.arrays.Arrays.remove(userIds, I(adminId));
+            oxu.changeModuleAccess(ctx, adminId, accessAdmin);
+            oxu.changeModuleAccess(ctx, I2i(userIds), accessUser);
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;

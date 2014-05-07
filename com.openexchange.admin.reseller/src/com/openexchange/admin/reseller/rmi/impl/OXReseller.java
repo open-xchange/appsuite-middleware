@@ -215,6 +215,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 oxresell.checkPerSubadminRestrictions(
                     creds,
                     null,
+                    true,
                     Restriction.SUBADMIN_CAN_CREATE_SUBADMINS,
                     Restriction.MAX_SUBADMIN_PER_SUBADMIN
                 );
