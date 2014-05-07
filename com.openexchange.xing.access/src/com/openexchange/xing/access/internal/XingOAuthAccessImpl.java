@@ -58,6 +58,7 @@ import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.exception.XingException;
+import com.openexchange.xing.exception.XingServerException;
 import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.session.AccessTokenPair;
 import com.openexchange.xing.session.AppKeyPair;
@@ -149,6 +150,11 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
             xingUserName = accountInfo.getDisplayName();
         } catch (final XingUnlinkedException e) {
             throw XingExceptionCodes.UNLINKED_ERROR.create();
+        } catch (final XingServerException e) {
+            if (e.getError() == XingServerException._404_NOT_FOUND) {
+                throw XingExceptionCodes.XING_SERVER_UNAVAILABLE.create(e, new Object[0]);
+            }
+            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
         } catch (final XingException e) {
             throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -169,6 +175,11 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
             xingUserName = accountInfo.getDisplayName();
         } catch (final XingUnlinkedException e) {
             throw XingExceptionCodes.UNLINKED_ERROR.create();
+        } catch (final XingServerException e) {
+            if (e.getError() == XingServerException._404_NOT_FOUND) {
+                throw XingExceptionCodes.XING_SERVER_UNAVAILABLE.create(e, new Object[0]);
+            }
+            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
         } catch (final XingException e) {
             throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
