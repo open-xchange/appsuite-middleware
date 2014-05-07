@@ -175,6 +175,7 @@ public final class AppointmentConverters {
         tmp.add(verifyingDuration);
         tmp.add(klass);
         tmp.add(location);
+        tmp.add(transparency);
         tmp.add(categories);
         tmp.add(recurrence);
         tmp.add(deleteExcetions);
