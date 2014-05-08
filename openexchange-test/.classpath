@@ -34,6 +34,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.i18n"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.imap"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.smtp"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.push.udp"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.spamhandler.default"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.spamhandler.spamassassin"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sessiond"/>

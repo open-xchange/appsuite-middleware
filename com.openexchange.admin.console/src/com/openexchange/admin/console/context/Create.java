@@ -84,12 +84,16 @@ public class Create extends CreateCore {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-    	 parser.setExtendedOptions();
-    	 ctxabs.setAddMappingOption(parser, false);
-    	 ctxabs.setDestinationStoreIdOption(parser, false);
-    	 ctxabs.setDestinationDatabaseIdOption(parser, false);
-    	 setAddAccessRightCombinationNameOption(parser);
-    	 setModuleAccessOptions(parser);
+        parser.setExtendedOptions();
+        ctxabs.setAddMappingOption(parser, false);
+        ctxabs.setDestinationStoreIdOption(parser, false);
+        ctxabs.setDestinationDatabaseIdOption(parser, false);
+
+        setConfigOption(parser);
+        setRemoveConfigOption(parser);
+
+        setAddAccessRightCombinationNameOption(parser);
+        setModuleAccessOptions(parser);
 
     }
 
@@ -127,18 +131,18 @@ public class Create extends CreateCore {
         String accessCombinationName = parseAndSetAccessCombinationName(parser);
 
         if(!parsed_access.equals(NO_RIGHTS_ACCESS) && null != accessCombinationName){
-        	// BOTH WAYS TO SPECIFY ACCESS RIGHTS ARE INVALID!
-        	throw new InvalidDataException(ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);
+            // BOTH WAYS TO SPECIFY ACCESS RIGHTS ARE INVALID!
+            throw new InvalidDataException(ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);
         }
 
         if (null != accessCombinationName ) {
-        	// Client supplied access combination name. create context with this name
-        	createdctx = oxctx.create(ctx, usr, accessCombinationName, auth);
+            // Client supplied access combination name. create context with this name
+            createdctx = oxctx.create(ctx, usr, accessCombinationName, auth);
         }else if(!parsed_access.equals(NO_RIGHTS_ACCESS)){
-        	// Client supplied access attributes
-        	createdctx = oxctx.create(ctx, usr,parsed_access, auth);
+            // Client supplied access attributes
+            createdctx = oxctx.create(ctx, usr,parsed_access, auth);
         }else{
-        	createdctx = oxctx.create(ctx, usr, auth);
+            createdctx = oxctx.create(ctx, usr, auth);
         }
 
         // TODO: We have to add a cleanup here. If creation of mappings fails the context should be deleted
