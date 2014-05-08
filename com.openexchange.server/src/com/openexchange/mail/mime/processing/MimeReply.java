@@ -270,7 +270,8 @@ public final class MimeReply {
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws OXException If reply mail cannot be composed
      */
-    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail, final boolean setFrom) throws OXException {
+    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail, final boolean setFrom2) throws OXException {
+        boolean setFrom = true;
         try {
             originalMsg.setAccountId(accountId);
             final MailMessage origMsg;
@@ -314,16 +315,63 @@ public final class MimeReply {
              * Set "From"
              */
             if (setFrom) {
-                final String hdrVal = origMsg.getHeader(MessageHeaders.HDR_FROM, MessageHeaders.HDR_ADDR_DELIM);
-                if (null != hdrVal) {
-                    try {
-                        final InternetAddress[] al = parseAddressList(hdrVal, true);
-                        if (null != al && al.length > 0) {
-                            replyMsg.setFrom(al[0]);
-                        }
-                    } catch (final Exception e) {
-                        LOG.warn("Could not set 'From' header to \"{}\"", hdrVal, e);
+                final Set<InternetAddress> fromCandidates = new HashSet<InternetAddress>(8);
+                if (accountId == MailAccount.DEFAULT_ID) {
+                    addUserAliases(fromCandidates, session, ctx);
+                } else {
+                    final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                    if (null == mass) {
+                        addUserAliases(fromCandidates, session, ctx);
+                    } else {
+                        fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
                     }
+                }
+                /*
+                 * Check if present anywhere
+                 */
+                InternetAddress from = null;
+                {
+                    String hdrVal = origMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
+                    InternetAddress[] toAddrs = null;
+                    if (hdrVal != null) {
+                        toAddrs = parseAddressList(hdrVal, true);
+                        for (final InternetAddress addr : toAddrs) {
+                            if (fromCandidates.contains(addr)) {
+                                from = addr;
+                                break;
+                            }
+                        }
+                    }
+                    if (null == from) {
+                        hdrVal = origMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
+                        if (hdrVal != null) {
+                            toAddrs = parseAddressList(unfold(hdrVal), true);
+                            for (final InternetAddress addr : toAddrs) {
+                                if (fromCandidates.contains(addr)) {
+                                    from = addr;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (null == from) {
+                        hdrVal = origMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
+                        if (hdrVal != null) {
+                            toAddrs = parseAddressList(unfold(hdrVal), true);
+                            for (final InternetAddress addr : toAddrs) {
+                                if (fromCandidates.contains(addr)) {
+                                    from = addr;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                /*
+                 * Set if a "From" candidate applies
+                 */
+                if (null != from) {
+                    replyMsg.setFrom(from);
                 }
             }
             /*
@@ -636,6 +684,13 @@ public final class MimeReply {
         /*
          * Add user's aliases to filter
          */
+        addUserAliases(filter, session, ctx);
+    }
+
+    private static void addUserAliases(final Set<InternetAddress> set, final Session session, final Context ctx) throws OXException {
+        /*
+         * Add user's aliases to set
+         */
         final String[] userAddrs = UserStorage.getInstance().getUser(session.getUserId(), ctx).getAliases();
         if (userAddrs != null && userAddrs.length > 0) {
             final StringBuilder addrBuilder = new StringBuilder();
@@ -643,7 +698,7 @@ public final class MimeReply {
             for (int i = 1; i < userAddrs.length; i++) {
                 addrBuilder.append(',').append(userAddrs[i]);
             }
-            filter.addAll(Arrays.asList(parseAddressList(addrBuilder.toString(), false)));
+            set.addAll(Arrays.asList(parseAddressList(addrBuilder.toString(), false)));
         }
     }
 
