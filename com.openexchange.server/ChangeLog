@@ -1,3 +1,7 @@
+* 2014-05-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32358: Do not append references to inline image for modifiable message content
+
 * 2014-05-08 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 32392: Do not throw an exception when the request body is null; the null value is interpreted as a remove operation
