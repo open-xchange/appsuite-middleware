@@ -151,6 +151,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.quota.Resource;
@@ -842,6 +843,7 @@ public final class Init {
                 }
             });
             TestServiceRegistry.getInstance().addService(EventAdmin.class, TestEventAdmin.getInstance());
+            PushServiceRegistry.getServiceRegistry().addService(EventAdmin.class, TestEventAdmin.getInstance());
         }
     }
 
