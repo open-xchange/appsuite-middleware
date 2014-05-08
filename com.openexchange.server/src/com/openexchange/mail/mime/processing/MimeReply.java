@@ -270,8 +270,7 @@ public final class MimeReply {
      * @return An instance of {@link MailMessage} representing an user-editable reply mail
      * @throws OXException If reply mail cannot be composed
      */
-    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail, final boolean setFrom2) throws OXException {
-        boolean setFrom = true;
+    private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail, final boolean setFrom) throws OXException {
         try {
             originalMsg.setAccountId(accountId);
             final MailMessage origMsg;
