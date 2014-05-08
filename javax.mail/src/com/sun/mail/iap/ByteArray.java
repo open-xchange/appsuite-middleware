@@ -110,6 +110,13 @@ public class ByteArray {
      */
     public void setCount(int count) {
 	this.count = count;
+	if (bytes.length - count > 4096) {
+	    // Shrink to fitting size
+	    byte[] b = new byte[count];
+	    System.arraycopy(bytes, start, b, 0, count);
+	    bytes = b;
+	    start = 0;
+    }
     }
 
     /**
