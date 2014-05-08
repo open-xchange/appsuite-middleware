@@ -87,7 +87,8 @@ public interface MailAccountFields {
     public static final String TRANSPORT_PASSWORD = "transport_password";
 
     /**
-     * Specifies if transport authentication is supposed being performed (with either dedicate credentials or the ones from mail services) or not (for transport services w/o authentication capability)
+     * Specifies if transport authentication is supposed being performed (with either dedicate credentials or the ones from mail services)
+     * or not (for transport services w/o authentication capability)
      */
     public static final String TRANSPORT_AUTH = "transport_auth";
 

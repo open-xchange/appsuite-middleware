@@ -861,7 +861,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         boolean cachingAdvised = false;
         try {
             String fileContentType = file.getContentType();
-            if (!Strings.toLowerCase(fileContentType).startsWith("image/")) {
+            if (null == fileContentType || !Strings.toLowerCase(fileContentType).startsWith("image/")) {
                 final String contentTypeByFileName = getContentTypeByFileName(file.getName());
                 if (null != contentTypeByFileName) {
                     fileContentType = contentTypeByFileName;
