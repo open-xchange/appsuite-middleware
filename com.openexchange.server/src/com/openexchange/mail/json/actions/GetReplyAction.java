@@ -152,11 +152,12 @@ public final class GetReplyAction extends AbstractMailAction {
             if (AJAXRequestDataTools.parseBoolParameter(req.getParameter("attachOriginalMessage"))) {
                 usmNoSave.setAttachOriginalMessage(true);
             }
+            final boolean setFrom = AJAXRequestDataTools.parseBoolParameter(req.getParameter("setFrom"));
             /*
              * Get mail interface
              */
             final MailServletInterface mailInterface = getMailInterface(req);
-            final MailMessage mail = mailInterface.getReplyMessageForDisplay(folderPath, uid, false, usmNoSave);
+            final MailMessage mail = mailInterface.getReplyMessageForDisplay(folderPath, uid, false, usmNoSave, setFrom);
             if (!mail.containsAccountId()) {
                 mail.setAccountId(mailInterface.getAccountID());
             }

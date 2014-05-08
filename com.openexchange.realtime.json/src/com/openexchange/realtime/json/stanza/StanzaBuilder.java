@@ -63,9 +63,9 @@ import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link StanzaBuilder} - Abstract StanzaBuilder class. StanzaBuilders take incoming AtmosphereRequest and are responsible for building the
+ * {@link StanzaBuilder} - Abstract StanzaBuilder class. StanzaBuilders take incoming Request and are responsible for building the
  * appropriate Stanza Objects from them. Tis includes filling the Stanza with basic attributes from the JSONObject transported in the
- * AtmosphereRequest and transforming payload arrays found in the JSON Object into PayloadTrees without actually transforming any Payload
+ * Request and transforming payload arrays found in the JSON Object into PayloadTrees without actually transforming any Payload
  * data.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>

@@ -58,7 +58,7 @@ import com.openexchange.realtime.packet.Message;
  * {@link NotMember} Message to inform the sending client that he is no member of the {@link GroupDispatcher} he is trying to reach.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.x.y
+ * @since 7.6.0
  */
 public class NotMember extends Message {
 

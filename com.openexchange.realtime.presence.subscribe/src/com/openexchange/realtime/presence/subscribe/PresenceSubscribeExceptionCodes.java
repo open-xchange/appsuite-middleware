@@ -92,7 +92,7 @@ public enum PresenceSubscribeExceptionCodes implements DisplayableOXExceptionCod
 
     @Override
     public String getPrefix() {
-        return "RT";
+        return "RT_PRESENCE_SUBSCRIBE";
     }
 
     @Override

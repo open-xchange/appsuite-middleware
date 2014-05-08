@@ -2758,6 +2758,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Mark first message for later lookup
                  */
                 final List<Message> filteredMsgs = filterNullElements(msgs);
+                if (filteredMsgs.isEmpty()) {
+                    return new String[0];
+                }
                 final String hash = randomUUID();
                 /*
                  * Try to set marker header
@@ -2948,6 +2951,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Mark first message for later lookup
                  */
                 final List<Message> filteredMsgs = filterNullElements(msgs);
+                if (filteredMsgs.isEmpty()) {
+                    return new long[0];
+                }
                 final String hash = randomUUID();
                 filteredMsgs.get(0).setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
                 /*

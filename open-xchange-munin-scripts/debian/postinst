@@ -33,7 +33,7 @@ init_plugins() {
         else
 		echo "nothing to do...."
         fi
-        find -L /etc/munin/plugins/ox_* -type l -delete
+        find -L /etc/munin/plugins -name 'ox_*' -type l -delete
         echo "done."
         rm -f $TMPFILE
 	/etc/init.d/munin-node restart

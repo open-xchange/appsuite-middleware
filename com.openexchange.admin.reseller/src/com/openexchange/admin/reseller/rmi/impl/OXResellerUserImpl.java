@@ -114,7 +114,7 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
                 return;
             }
             //long tstart = System.currentTimeMillis();
-            oxresell.checkPerContextRestrictions(ctx, access,
+            oxresell.checkPerContextRestrictions(ctx, access, false,
                 Restriction.MAX_USER_PER_CONTEXT,
                 Restriction.MAX_OVERALL_USER_PER_SUBADMIN,
                 Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX,

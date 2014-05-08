@@ -7694,6 +7694,11 @@ msgstr ""
 msgid "The mandatory parameter \"%1$s\" is missing in the request body"
 msgstr ""
 
+#. The XING server is not available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:113
+msgid "The XING server is not available."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
 msgstr ""

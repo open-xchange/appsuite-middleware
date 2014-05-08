@@ -222,8 +222,21 @@ public class AdminCache {
         return named_access_combinations;
     }
 
+    /**
+     * @deprecated use {@link #getNamedAccessCombination(String, boolean)}
+     */
+    @Deprecated
     public synchronized UserModuleAccess getNamedAccessCombination(String name) {
-        return named_access_combinations.get(name);
+        return getNamedAccessCombination(name, true);
+    }
+
+    public synchronized UserModuleAccess getNamedAccessCombination(String name, boolean contextAdmin) {
+        UserModuleAccess retval = named_access_combinations.get(name);
+        if (!contextAdmin) {
+            // publicFolderEditable can only be applied to the context administrator.
+            retval.setPublicFolderEditable(false);
+        }
+        return retval;
     }
 
     public synchronized boolean existsNamedAccessCombination(String name) {

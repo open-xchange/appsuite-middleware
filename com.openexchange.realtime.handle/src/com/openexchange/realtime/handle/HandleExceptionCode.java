@@ -100,7 +100,7 @@ public enum HandleExceptionCode implements DisplayableOXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "ATMOSPHERE";
+        return "RT_HANDLE";
     }
 
     @Override

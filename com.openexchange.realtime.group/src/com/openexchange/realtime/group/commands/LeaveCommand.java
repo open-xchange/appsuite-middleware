@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
+import com.openexchange.realtime.group.NotMember;
 import com.openexchange.realtime.group.osgi.GroupServiceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
@@ -67,6 +68,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  * {@link LeaveCommand}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class LeaveCommand implements GroupCommand {
 
@@ -74,7 +76,13 @@ public class LeaveCommand implements GroupCommand {
     
     @Override
     public void perform(final Stanza stanza, final GroupDispatcher groupDispatcher) throws OXException {
-        if (isSynchronous(stanza) && groupDispatcher.isMember(stanza.getOnBehalfOf())) {
+        ID realSender = getRealSender(stanza);
+        if(!groupDispatcher.isMember(realSender)) {
+            LOG.info("Refusing to send leave to GroupDispatcher. {} is no member of the GroupDispatcher {}.", realSender, groupDispatcher.getId());
+            doNotifyNotMember(stanza, groupDispatcher);
+            return;
+        }
+        if (isSynchronous(stanza)) { // call:// surrogate sender in from, use getOnBehalf for real sender
             if (shouldExecuteAsynchronously(groupDispatcher)) {
                 GroupServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(new AbstractTask<Void>() {
 
@@ -91,8 +99,8 @@ public class LeaveCommand implements GroupCommand {
             } else {
                 doSignOff(stanza, groupDispatcher);
             }
-        } else {
-            groupDispatcher.leave(stanza.getFrom());
+        } else { // real sender in from
+            groupDispatcher.leave(stanza.getFrom(), stanza);
         }
     }
 
@@ -100,15 +108,13 @@ public class LeaveCommand implements GroupCommand {
         Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf());
         signOffMessage.setFrom(groupDispatcher.getId());
         signOffMessage.setTo(stanza.getFrom());
-
-        groupDispatcher.leave(stanza.getOnBehalfOf());
-            
+        groupDispatcher.leave(stanza.getOnBehalfOf(), stanza);
         GroupServiceRegistry.getInstance().getService(MessageDispatcher.class).send(signOffMessage);
     }
-    
+
     private boolean shouldExecuteAsynchronously(GroupDispatcher groupDispatcher) {
         try {
-            return ActionHandler.isAsynchronous(groupDispatcher.getClass().getMethod("getSignOffMessage", ID.class));            
+            return ActionHandler.isAsynchronous(groupDispatcher.getClass().getMethod("getSignOffMessage", ID.class));
         } catch (SecurityException e) {
             return false;
         } catch (NoSuchMethodException e) {
@@ -118,6 +124,33 @@ public class LeaveCommand implements GroupCommand {
 
     private boolean isSynchronous(Stanza stanza) {
         return stanza.getFrom().getProtocol().equals("call");
+    }
+
+    /**
+     * During synchronous calls the real sender gets moved to Stanza's onBehalfOf and is replaced by a surrogate sender, a UUID (see
+     * com.openexchange.realtime.hazelcast.impl.ResponseChannel.setUp(String, Stanza)). We have to find out who actually wants to leave the
+     * GroupDispatcher.
+     * 
+     * @param stanza the {@link Stanza} representing the LeaveCommand. 
+     * @return the real sender
+     */
+    private ID getRealSender(Stanza stanza) {
+        if(isSynchronous(stanza)) {
+            return stanza.getOnBehalfOf();
+        }
+        return stanza.getFrom();
+    }
+
+    /**
+     * Notify the sender of the {@link Stanza} that we refuse to execute the {@link LeaveCommand} as he is no member of the addressed
+     * {@link GroupDispatcher}
+     * 
+     * @param leaveCommand
+     * @throws OXException
+     */
+    private void doNotifyNotMember(Stanza leaveCommand, GroupDispatcher groupDispatcher) throws OXException {
+        Stanza notMemberMessage = new NotMember(groupDispatcher.getId(), leaveCommand.getFrom(), leaveCommand.getSelector());
+        GroupServiceRegistry.getInstance().getService(MessageDispatcher.class).send(notMemberMessage);
     }
 
 }

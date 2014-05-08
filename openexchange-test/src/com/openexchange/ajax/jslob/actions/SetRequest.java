@@ -47,68 +47,64 @@
  *
  */
 
-package com.openexchange.xing.json.osgi;
+package com.openexchange.ajax.jslob.actions;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.xing.access.XingOAuthAccessProvider;
-import com.openexchange.xing.json.XingActionFactory;
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link XingJsonActivator}
+ * {@link SetRequest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
-public class XingJsonActivator extends AJAXModuleActivator {
+public class SetRequest extends AbstractJSlobRequest<SetResponse> {
+
+    private final String identifier;
+
+    private final String value;
+
+    private final boolean failOnError;
 
     /**
-     * Initializes a new {@link XingJsonActivator}.
+     * Initializes a new {@link SetRequest}.
      */
-    public XingJsonActivator() {
+    public SetRequest(final String identifier, final String value) {
+        this(identifier, value, true);
+    }
+
+    /**
+     * Initializes a new {@link SetRequest}.
+     */
+    public SetRequest(final String identifier, final String value, final boolean failOnError) {
         super();
+        this.identifier = identifier;
+        this.value = value;
+        this.failOnError = failOnError;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, CapabilityService.class, XingOAuthAccessProvider.class };
+    public Method getMethod() {
+        return Method.PUT;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        // Register AJAX module
-        registerModule(new XingActionFactory(this), "xing");
+    public Parameter[] getParameters() {
+        final List<Parameter> list = new LinkedList<Parameter>();
+        list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "set"));
+        list.add(new Parameter(AJAXServlet.PARAMETER_ID, identifier));
+        return list.toArray(new Parameter[list.size()]);
+    }
 
-        // Register capability
-        final String sCapability = "xingjson";
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
-        registerService(CapabilityChecker.class, new CapabilityChecker() {
-            @Override
-            public boolean isEnabled(String capability, Session ses) throws OXException {
-                if (sCapability.equals(capability)) {
-                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                    if (session.isAnonymous()) {
-                        return false;
-                    }
+    @Override
+    public Object getBody() {
+        return null == value ? JSONObject.NULL : value;
+    }
 
-                    // Maybe perform permission check here
-                    return true;
-                }
-
-                return true;
-            }
-        }, properties);
-
-
-        getService(CapabilityService.class).declareCapability(sCapability);
+    public AbstractAJAXParser<? extends SetResponse> getParser() {
+        return new SetParser(failOnError);
     }
 
 }

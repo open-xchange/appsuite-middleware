@@ -195,6 +195,7 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
             oxresell.checkPerSubadminRestrictions(
                 auth,
                 access,
+                true,
                 Restriction.MAX_CONTEXT_PER_SUBADMIN,
                 Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN,
                 Restriction.MAX_OVERALL_USER_PER_SUBADMIN,

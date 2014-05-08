@@ -52,7 +52,6 @@ package com.openexchange.ajax.xing.actions;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -63,8 +62,6 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class CreateRequest extends AbstractXingRequest<CreateResponse> {
     
-    private final JSONObject body;
-
     private final String firstName;
 
     private final String lastName;
@@ -80,7 +77,6 @@ public class CreateRequest extends AbstractXingRequest<CreateResponse> {
      */
     public CreateRequest(final String email, final boolean tandc, final String fname, final String lname, final String language, final boolean foe) {
         super(foe);
-        body = new JSONObject();
         firstName = fname;
         lastName = lname;
         this.tandc = tandc;
@@ -93,7 +89,7 @@ public class CreateRequest extends AbstractXingRequest<CreateResponse> {
      */
     @Override
     public Method getMethod() {
-        return Method.PUT;
+        return Method.POST;
     }
 
     /* (non-Javadoc)
@@ -109,20 +105,7 @@ public class CreateRequest extends AbstractXingRequest<CreateResponse> {
      */
     @Override
     public Object getBody() throws IOException, JSONException {
-        if (firstName != null) {
-            body.put("first_name", firstName);
-        }
-        if (lastName != null) {
-            body.put("last_name", lastName);
-        }
-        if (language != null) {
-            body.put("language", language);
-        }
-        
-        body.put("email", email);
-        body.put("tandc_check", tandc);
-        
-        return body;
+        return null;
     }
 
     /*
@@ -131,6 +114,11 @@ public class CreateRequest extends AbstractXingRequest<CreateResponse> {
      */
     @Override
     protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "create"));
+        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "create"));
+        params.add(new URLParameter("tandc_check", tandc));
+        params.add(new URLParameter("email", email));
+        params.add(new URLParameter("first_name", firstName));
+        params.add(new URLParameter("last_name", lastName));
+        params.add(new URLParameter("language", language));
     }
 }

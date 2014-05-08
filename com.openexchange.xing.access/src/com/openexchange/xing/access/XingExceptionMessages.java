@@ -109,6 +109,9 @@ public final class XingExceptionMessages implements LocalizableStrings {
     // The mandatory parameter \"%1$s\ is missing in the request body.
     public static final String MANDATORY_PARAMETER_MISSING_MSG = "The mandatory parameter \"%1$s\" is missing in the request body";
 
+    // The XING server is not available.
+    public static final String XING_SERVER_UNAVAILABLE_MSG = "The XING server is not available.";
+
     /**
      * Initializes a new {@link XingExceptionMessages}.
      */

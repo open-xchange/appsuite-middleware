@@ -1454,7 +1454,7 @@ public class XingAPI<S extends Session> {
                 url,
                 jLeadDesc,
                 session,
-                Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT)).toObject();
+                Arrays.asList(XingServerException._201_CREATED)).toObject();
             return jResponse.asMap();
         } catch (final JSONException e) {
             throw new XingException(e);

@@ -142,8 +142,6 @@ public enum RealtimeExceptionCodes implements DisplayableOXExceptionCode {
 
     STANZA_UNEXPECTED_REQUEST("", CATEGORY_SERVICE_DOWN, 23, null),
 
-    // Atmosphere
-
     // Generic (start with code 1000)
     /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
     NO_APPROPRIATE_CHANNEL("No appropriate channel found for recipient %1$s with payload namespace %2$s", CATEGORY_CONNECTIVITY, 1000,

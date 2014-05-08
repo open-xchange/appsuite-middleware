@@ -133,8 +133,10 @@ public class StanzaWriter {
      * @param stanza The Stanza conaining the PayloadTrees that have to be written as JSON
      * @param jsonStanza The Stanza as JSONObject
      * @throws JSONException If writing the PayloadTrees fails
+     * @throws OXException 
      */
-    private void writePayloadTrees(final Stanza stanza, final JSONObject jsonStanza) throws JSONException {
+    private void writePayloadTrees(final Stanza stanza, final JSONObject jsonStanza) throws JSONException, OXException {
+        stanza.transformPayloads("json");
         Collection<PayloadTree> payloadTrees = stanza.getPayloadTrees();
         JSONArray payloadArray = new JSONArray();
         for (PayloadTree payloadTree : payloadTrees) {
