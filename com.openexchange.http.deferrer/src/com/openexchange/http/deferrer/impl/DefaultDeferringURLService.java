@@ -49,7 +49,6 @@
 
 package com.openexchange.http.deferrer.impl;
 
-import static com.openexchange.ajax.AJAXServlet.encodeUrl;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
@@ -132,11 +131,10 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
 
     @Override
     public String getBasicDeferrerURL(int userId, int contextId) {
-    	final String deferrerURL = getDeferrerURL(userId, contextId);
+        final String deferrerURL = getDeferrerURL(userId, contextId);
         if (deferrerURL == null) {
             return new StringBuilder(PREFIX.get().getPrefix()).append("defer").toString();
         }
         return new StringBuilder(deferrerURL).append(PREFIX.get().getPrefix()).append("defer").toString();
     }
-
 }

@@ -54,7 +54,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * {@link UnitTests}
+ * Suite for integrated unit tests of the com.openexchange.server bundle.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
@@ -97,9 +97,6 @@ import org.junit.runners.Suite.SuiteClasses;
 })
 public class UnitTests {
 
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
     public UnitTests() {
         super();
     }

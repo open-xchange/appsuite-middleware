@@ -161,7 +161,7 @@ public class ConfigAction implements AJAXActionService {
                 debugOut("as-config-defaults.yml", defaults);
             }
         }
-        
+
         // Find other applicable brands/server configurations
         if (configurations != null) {
             boolean empty = true;
