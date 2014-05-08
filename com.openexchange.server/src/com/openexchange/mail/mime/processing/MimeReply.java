@@ -87,6 +87,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSessionCache;
@@ -245,7 +246,7 @@ public final class MimeReply {
         final MatcherReplacer mr = new MatcherReplacer(m, html);
         final StringBuilder replaceBuffer = new StringBuilder(html.length());
         if (m.find()) {
-            replaceBuffer.append("<meta http-equiv=\"Content-Type\" content=\"").append(contentType.getBaseType().toLowerCase(Locale.ENGLISH));
+            replaceBuffer.append("<meta http-equiv=\"Content-Type\" content=\"").append(Strings.toLowerCase(contentType.getBaseType()));
             replaceBuffer.append("; charset=").append(contentType.getCharsetParameter()).append("\" />");
             final String replacement = replaceBuffer.toString();
             replaceBuffer.setLength(0);
