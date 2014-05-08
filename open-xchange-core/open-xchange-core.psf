@@ -108,6 +108,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.publish.online.infostore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.push"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.push.ms"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.push.udp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.quartz"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.quota"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.report.appsuite"/>
