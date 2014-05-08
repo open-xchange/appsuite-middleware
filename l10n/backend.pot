@@ -5786,6 +5786,13 @@ msgstr ""
 msgid "New file versions can't be saved with an offset."
 msgstr ""
 
+#. This folder is a virtual folder that cannot contain documents. Please choose another folder.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:122
+msgid ""
+"This folder is a virtual folder that cannot contain documents. Please choose "
+"another folder."
+msgstr ""
+
 #. *
 #. * Problem putting an object into the cache.
 #.

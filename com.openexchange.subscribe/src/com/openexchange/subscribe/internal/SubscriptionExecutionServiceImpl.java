@@ -69,6 +69,7 @@ import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.TargetFolderSession;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -144,7 +145,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                 throw INACTIVE_SOURCE.create();
             }
             subscribeService.touch(session.getContext(), subscriptionId);
-            final Collection<?> data = subscribeService.getContent(subscription);
+            final SearchIterator<?> data = subscribeService.loadContent(subscription);
             storeData(data, subscription);
             return data.size();
         } finally {
@@ -157,7 +158,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
      * @param subscription
      * @throws OXException
      */
-    protected void storeData(final Collection<?> data, final Subscription subscription) throws OXException {
+    protected void storeData(final SearchIterator<?> data, final Subscription subscription) throws OXException {
         getFolderUpdater(subscription).save(data, subscription);
     }
 
@@ -219,7 +220,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                 throw INACTIVE_SOURCE.create();
             }
             subscribeService.touch(session.getContext(), subscriptionId);
-            final Collection<?> data = subscribeService.getContent(subscription);
+            final SearchIterator<?> data = subscribeService.loadContent(subscription);
             storeData(data, subscription);
             return data.size();
         } finally {
@@ -244,7 +245,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                         }
                         final SubscribeService subscribeService = source.getSubscribeService();
                         subscribeService.touch(session.getContext(), subscriptionId);
-                        final Collection<?> data = subscribeService.getContent(subscription);
+                        final SearchIterator<?> data = subscribeService.loadContent(subscription);
                         storeData(data, subscription);
                         sum += data.size();
                     } finally {

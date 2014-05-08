@@ -90,6 +90,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -225,13 +226,13 @@ public class CSVContactImporter extends AbstractImporter {
             if (folderUpdater == null) {
                 throw ImportExportExceptionCodes.CANNOT_IMPORT.create();
             }
+            SearchIteratorDelegator<Contact> searchIterator = new SearchIteratorDelegator<Contact>(contacts);
             if (folderUpdater instanceof FolderUpdaterServiceV2) {
-                ((FolderUpdaterServiceV2<Contact>) folderUpdater).save(contacts, target, errors);
+                ((FolderUpdaterServiceV2<Contact>) folderUpdater).save(searchIterator, target, errors);
             } else {
-                folderUpdater.save(contacts, target);
+                folderUpdater.save(searchIterator, target);
             }
         }
-
 
         // Build result list
         final List<ImportResult> results = new ArrayList<ImportResult>(intentions.size());

@@ -102,11 +102,11 @@ public class DefaultDeferringURLServiceTest extends TestCase {
     }
 
     public void testNull() {
-        assertTrue(null == service.getDeferredURL(null));
+        assertTrue(null == service.getDeferredURL(null, 0, 0));
     }
 
     public void assertTransformed(final String url, final String expectedTransformation) {
-        final String deferredURL = service.getDeferredURL(url);
+        final String deferredURL = service.getDeferredURL(url, 0, 0);
         assertNotNull("URL was null: ", deferredURL);
         assertEquals(expectedTransformation, deferredURL);
     }
@@ -120,7 +120,7 @@ public class DefaultDeferringURLServiceTest extends TestCase {
         }
 
         @Override
-        public String getDeferrerURL() {
+        public String getDeferrerURL(int userId, int contextId) {
             return url;
         }
 

@@ -57,7 +57,68 @@ package com.openexchange.http.deferrer;
  */
 public interface DeferringURLService {
 
-    public String getDeferredURL(String url);
+    /**
+     * Generates a deferred URL for specified URL. Useful for a multi-domain setup to allow certain operations to jump to an extra step in a
+     * singular domain; e.g. certain OAuth provider require a single domain for call-back actions.
+     * <p>
+     * If a single domain is configured through <code>com.openexchange.http.deferrer.url</code> property (<i>deferrer.properties</i>), the
+     * resulting URL looks like:
+     * <p>
+     * &lt;deferrer-url&gt; + <code>"ajax/defer?redirect="</code> + <i>URLENC</i>(&lt;url&gt;)
+     * <p>
+     * If no such property is set, passed URL is returned unchanged
+     *
+     * @param url The URL to defer
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The deferred URL
+     */
+    String getDeferredURL(String url, int userId, int contextId);
 
-    public String getBasicDeferrerURL();
+    /**
+     * Generates a deferred URL for specified URL using given <code>domain</code>.
+     *
+     * @param url The URL to defer
+     * @param domain The singular domain to use
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The deferred URL
+     */
+    String deferredURLUsing(String url, String domain, int userId, int contextId);
+
+    /**
+     * Gets the basic defer URL.
+     * <p>
+     * If a single domain is configured through <code>com.openexchange.http.deferrer.url</code> property (<i>deferrer.properties</i>), the
+     * resulting basic URL looks like:
+     * <p>
+     * &lt;deferrer-url&gt; + <code>"ajax/defer"</code>
+     * <p>
+     * If no such property is set, return value is a relative one according to <code>"ajax/defer"</code>.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The basic defer URL
+     */
+    String getBasicDeferrerURL(int userId, int contextId);
+
+    /**
+     * Performs a check if passed URL seems to be deferred.
+     *
+     * @param url The URL to check if deferred
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if deferred; otherwise <code>false</code>
+     */
+    boolean seemsDeferred(String url, int userId, int contextId);
+
+    /**
+     * Signals if a deferred URL is available.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if a deferred URL is available; otherwise <code>false</code>
+     */
+    boolean isDeferrerURLAvailable(int userId, int contextId);
+
 }

@@ -1,11 +1,27 @@
-* 2014-04-25 - marc.arens@open-xchange.com
+* 2014-04-30 - martin.schneider@open-xchange.com
 
- - Fix for bug 32127: Don't send keepalive pings/processing while reading data from upstream
- 
+ - Fix for bug 32036: Use 'transport_auth' for setting SMTP credentials usage. 
+
+* 2014-04-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32239: Filter associated account's address from recipient list
+
+* 2014-04-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31684: Prefer look-up by user identifier over look-up by object/folder identifier pair
+
+* 2014-04-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32076: Process images of imported contacts in a serialized way
+  
 * 2014-04-10 - marc.arens@open-xchange.com
 
  - Fix for bug 31942: Fix for unconsumed request remainders and configure that we want to accept payloads for methods where a payload is currently undefined but not forbidden.
  
+* 2014-04-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31685: Added displayable exception message for IFO-1700
+
 * 2014-04-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31912: Don't apply personal reminder setting for appointments in shared folders  
@@ -17,6 +33,22 @@
 * 2014-04-02 - ioannis.chouklis@open-xchange.com
 
  - Fix for Bug 31855: [L3] email cannot be displayed and customer gets only a MSG-0020
+
+* 2014-03-30 - martin.schneider@open-xchange.com
+
+ - Fix for bug 31443: Do not autorename folders equal to default folder names while creation. Throw exception instead.
+
+* 2014-03-27 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31525: Removed shown_as field (ical: transparency) from emmitted ical to suppress unnecessary changes.
+
+* 2014-03-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31770: Retrieve deferrer URL from config-cascade look-up
+
+* 2014-03-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31684: Prefer look-up by user identifier over look-up by object/folder identifier pair
 
 * 2014-03-14 - thorben.betten@open-xchange.com
 

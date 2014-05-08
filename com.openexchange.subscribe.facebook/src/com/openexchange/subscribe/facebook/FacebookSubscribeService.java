@@ -50,7 +50,6 @@
 package com.openexchange.subscribe.facebook;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -63,6 +62,8 @@ import com.openexchange.oauth.facebook.FacebookService;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link FacebookSubscribeService}
@@ -96,12 +97,17 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
 
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
+        return SearchIteratorAdapter.toList(loadContent(subscription));
+    }
+
+    @Override
+    public SearchIterator<?> loadContent(Subscription subscription) throws OXException {
         if (null == subscription) {
-            return Collections.emptyList();
+            return SearchIteratorAdapter.emptyIterator();
         }
         final FacebookService facebookService = this.facebookService;
         if (null == facebookService) {
-            return Collections.emptyList();
+            return SearchIteratorAdapter.emptyIterator();
         }
         return facebookService.getContacts(
             subscription.getSession(),

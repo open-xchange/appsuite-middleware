@@ -126,7 +126,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
         if (deferrer == null) {
             return callbackUrl;
         }
-        return deferrer.getDeferredURL(callbackUrl);
+        return deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
     }
 
     @Override

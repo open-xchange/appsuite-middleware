@@ -106,7 +106,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
     public OAuthInteraction initOAuth(String callbackUrl, Session session) throws OXException {
         try {
             if (deferrer != null) {
-                callbackUrl = deferrer.getDeferredURL(callbackUrl);
+                callbackUrl = deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
             }
             // https://login.live.com/oauth20_authorize.srf?client_id=CLIENT_ID&scope=wl.signin&response_type=RESPONSE_TYPE&redirect_uri=REDIRECT_URL
             final String authUrl = new StringBuilder("https://login.live.com/oauth20_authorize.srf?client_id=")
@@ -147,7 +147,8 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             LOG.error("No wrap_verification_code present.");
         }
         arguments.put(OAuthConstants.ARGUMENT_PIN, verifier);
-        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, deferrer.getDeferredURL((String) state.get(OAuthConstants.ARGUMENT_CALLBACK)));
+        final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, deferrer.getDeferredURL((String) state.get(OAuthConstants.ARGUMENT_CALLBACK), null == session ? 0 : session.getUserId(), null == session ? 0 : session.getContextId()));
         super.processArguments(arguments, parameter, state);
     }
 

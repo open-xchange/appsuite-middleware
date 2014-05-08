@@ -51,7 +51,10 @@ package com.openexchange.http.deferrer.osgi;
 
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.http.deferrer.DeferringURLService;
@@ -69,19 +72,33 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, HttpService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, HttpService.class, DispatcherPrefixService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(HTTPDeferrerActivator.class);
+        logger.info("Starting bundle com.openexchange.http.deferrer");
+
         final DispatcherPrefixService prefixService = getService(DispatcherPrefixService.class);
         DefaultDeferringURLService.PREFIX.set(prefixService);
         getService(HttpService.class).registerServlet(prefixService.getPrefix() + "defer", new DeferrerServlet(), null, null);
         registerService(DeferringURLService.class, new DefaultDeferringURLService() {
 
             @Override
-            public String getDeferrerURL() {
-                return getService(ConfigurationService.class).getProperty("com.openexchange.http.deferrer.url");
+            protected String getDeferrerURL(final int userId, final int contextId) {
+                if (userId <= 0 || contextId <= 0) {
+                    return getService(ConfigurationService.class).getProperty("com.openexchange.http.deferrer.url");
+                }
+                // Valid user/context identifiers
+                try {
+                    final ConfigView view = getService(ConfigViewFactory.class).getView(userId, contextId);
+                    return view.get("com.openexchange.http.deferrer.url", String.class);
+                } catch (final Exception e) {
+                    final String url = getService(ConfigurationService.class).getProperty("com.openexchange.http.deferrer.url");
+                    logger.error("Failed to retrieve deferrer URL via config-cascade look-up. Using global one instead: {}", null == url ? "null" : url, e);
+                    return url;
+                }
             }
 
         });

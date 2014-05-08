@@ -57,6 +57,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.lang.Validate;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -239,19 +240,18 @@ public abstract class AbstractPerformer {
             return null;
         }
         /*
-         * Check for duplicate (if not real tree)
+         * Check for duplicate
          */
         final Locale locale = storageParameters.getUser().getLocale();
-        final String lcName = name.toLowerCase(locale);
-        if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
-            for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true, true)) {
-                final String localizedName = userizedFolder.getLocalizedName(locale);
-                if (localizedName.toLowerCase(locale).equals(lcName) && (null == excludee || !excludee.equals(userizedFolder.getID()))) {
-                    final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
-                    checkOpenedStorage(realStorage, openedStorages);
-                    final OXException e = FolderExceptionErrorMessage.EQUAL_NAME.create(name, realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale), treeId);
-                    return new CheckForDuplicateResult(userizedFolder.getID(), e);
-                }
+        final String lcName = name.toLowerCase(locale).trim();
+        for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true, true)) {
+            final String localizedName = userizedFolder.getLocalizedName(locale);
+            if (localizedName.toLowerCase(locale).equals(lcName) && (null == excludee || !excludee.equals(userizedFolder.getID()))) {
+                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
+                checkOpenedStorage(realStorage, openedStorages);
+                final OXException e = FolderExceptionErrorMessage.EQUAL_NAME.create(
+                    name, realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale), treeId);
+                return new CheckForDuplicateResult(userizedFolder.getID(), e);
             }
         }
         /*
@@ -501,6 +501,8 @@ public abstract class AbstractPerformer {
 
         protected CheckForDuplicateResult(final String optFolderId, final OXException error) {
             super();
+            Validate.notNull(error, "OXException must not be null!");
+
             this.optFolderId = optFolderId;
             this.error = error;
         }

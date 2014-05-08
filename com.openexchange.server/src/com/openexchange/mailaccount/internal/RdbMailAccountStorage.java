@@ -1802,8 +1802,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             if (properties.containsKey("pop3.path")) {
                 updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
             }
+
             con.commit();
             autocommit(con);
+
             /*
              * Automatically check Unified Mail existence
              */

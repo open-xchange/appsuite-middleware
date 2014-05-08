@@ -454,12 +454,10 @@ public class FileResponseRenderer implements ResponseRenderer {
                 final String eTag = result.getHeader("ETag");
                 if (null != eTag) {
                     final long expires = result.getExpires();
-                    Tools.setETag(eTag, expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, resp);
+                    Tools.setETag(eTag, expires > 0 ? expires : -1L, resp);
                 } else {
                     final long expires = result.getExpires();
-                    if (expires < 0) {
-                        Tools.setExpiresInOneYear(resp);
-                    } else if (expires > 0) {
+                    if (expires > 0) {
                         Tools.setExpires(new Date(System.currentTimeMillis() + expires), resp);
                     }
                 }
@@ -844,9 +842,16 @@ public class FileResponseRenderer implements ResponseRenderer {
          */
         boolean cachingAdvised = false;
         try {
+            String fileContentType = file.getContentType();
+            if (null == fileContentType || !Strings.toLowerCase(fileContentType).startsWith("image/")) {
+                final String contentTypeByFileName = getContentTypeByFileName(file.getName());
+                if (null != contentTypeByFileName) {
+                    fileContentType = contentTypeByFileName;
+                }
+            }
             final byte[] transformed;
             try {
-                TransformedImage transformedImage = transformations.getTransformedImage(file.getContentType());
+                TransformedImage transformedImage = transformations.getTransformedImage(fileContentType);
                 int expenses = transformedImage.getTransformationExpenses();
                 if (expenses >= ImageTransformations.HIGH_EXPENSE) {
                     cachingAdvised = true;

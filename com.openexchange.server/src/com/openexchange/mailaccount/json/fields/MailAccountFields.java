@@ -86,6 +86,11 @@ public interface MailAccountFields {
 
     public static final String TRANSPORT_PASSWORD = "transport_password";
 
+    /**
+     * Defines if IMAP credentials should be used for authentication
+     */
+    public static final String TRANSPORT_AUTH = "transport_auth";
+
     public static final String NAME = "name";
 
     public static final String PRIMARY_ADDRESS = "primary_address";

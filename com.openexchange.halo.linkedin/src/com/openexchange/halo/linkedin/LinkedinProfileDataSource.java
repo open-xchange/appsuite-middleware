@@ -131,4 +131,10 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
     public Picture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
         return null;
     }
+
+    @Override
+    public String getPictureETag(HaloContactQuery contactQuery, ServerSession session) throws OXException {
+        return null;
+    }
+
 }
