@@ -1,3 +1,7 @@
+* 2014-05-08 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32392: Do not throw an exception when the request body is null; the null value is interpreted as a remove operation
+
 * 2014-05-07 - ioannis.chouklis@open-xchange.com
 
  -Fix for bug 31253: Escape the 'OK' literal at the beginning of each newline with '_OK_'

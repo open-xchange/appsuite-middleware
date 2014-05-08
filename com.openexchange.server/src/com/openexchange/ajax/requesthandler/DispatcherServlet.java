@@ -54,10 +54,12 @@ import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -73,10 +75,12 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -322,6 +326,26 @@ public class DispatcherServlet extends SessionServlet {
     private static final AJAXRequestResult.ResultType DIRECT = AJAXRequestResult.ResultType.DIRECT;
 
     /**
+     * A set of those {@link OXExceptionCode} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
+     */
+    private static final Set<OXExceptionCode> IGNOREES = Collections.unmodifiableSet(new HashSet<OXExceptionCode>(Arrays.<OXExceptionCode> asList(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND)));
+
+    /**
+     * Checks if passed {@code OXException} instance should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
+     *
+     * @param e The {@code OXException} instance to check
+     * @return <code>true</code> to ignore; otherwise <code>false</code> for common error handling
+     */
+    private static boolean ignore(final OXException e) {
+        for (final OXExceptionCode code : IGNOREES) {
+            if (code.equals(e)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
      *
      * @param httpRequest The HTTP request to handle
@@ -410,7 +434,7 @@ public class DispatcherServlet extends SessionServlet {
                 LOG.error("Unexpected error", e);
             } else {
                 // Ignore special "folder not found" error
-                if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                if (ignore(e)) {
                     logException(e, LogLevel.DEBUG, -1);
                 } else {
                     logException(e);
