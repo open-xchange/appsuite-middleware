@@ -1,3 +1,7 @@
+* 2014-05-08 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32378: Add config cascade parameters to --help and --extendedoptions
+
 * 2014-04-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 31831: Consequently parse user attributes throughout offered SOAP interfaces

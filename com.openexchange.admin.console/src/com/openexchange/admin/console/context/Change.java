@@ -132,9 +132,11 @@ public class Change extends ChangeCore {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-    	parser.setExtendedOptions();
+        parser.setExtendedOptions();
         ctxabs.setAddMappingOption(parser, false);
         ctxabs.setRemoveMappingOption(parser, false);
+        setConfigOption(parser);
+        setRemoveConfigOption(parser);
         setAddAccessRightCombinationNameOption(parser);
         setModuleAccessOptions(parser);
         setCapsToAdd(parser);
