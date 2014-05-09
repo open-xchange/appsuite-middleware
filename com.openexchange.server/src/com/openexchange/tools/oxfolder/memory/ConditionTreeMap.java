@@ -554,7 +554,10 @@ public final class ConditionTreeMap {
         /*
          * Iterate visible sets
          */
-        final TIntSet set = getFrom(f).getVisibleFolderIds(condition);
+        TIntSet set = getFrom(f).getVisibleFolderIds(condition);
+        if (null == set) {
+            set = new TIntHashSet();
+        }
         if (null != groups) {
             for (final int group : groups) {
                 f = entity2tree.get(Integer.valueOf(group));
@@ -566,7 +569,10 @@ public final class ConditionTreeMap {
                         f = ft;
                     }
                 }
-                set.addAll(getFrom(f).getVisibleFolderIds(condition));
+                final ConditionTree ct = getFrom(f);
+                if (null != ct) {
+                    set.addAll(ct.getVisibleFolderIds(condition));
+                }
             }
         }
         /*
