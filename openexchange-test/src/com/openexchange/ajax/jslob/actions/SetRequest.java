@@ -51,7 +51,6 @@ package com.openexchange.ajax.jslob.actions;
 
 import java.util.LinkedList;
 import java.util.List;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -100,7 +99,7 @@ public class SetRequest extends AbstractJSlobRequest<SetResponse> {
 
     @Override
     public Object getBody() {
-        return null == value ? JSONObject.NULL : value;
+        return value;
     }
 
     public AbstractAJAXParser<? extends SetResponse> getParser() {
