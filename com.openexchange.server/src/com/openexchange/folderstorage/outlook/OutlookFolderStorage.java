@@ -1214,8 +1214,10 @@ public final class OutlookFolderStorage implements FolderStorage {
                         outlookFolder.setName(defaultAccount.getDisplayName());
                     }
                 }
-                // Force invocation of getSubfolders() through setting to null
-                outlookFolder.setSubfolderIDs(null);
+                if (!INFOSTORE_PUBLIC.equals(folderId)) {
+                    // Force invocation of getSubfolders() through setting to null
+                    outlookFolder.setSubfolderIDs(null);
+                }
             } else {
                 setSubfolders(treeId, folderId, storageParameters, user, tree, contextId, outlookFolder, realFolder);
             }
