@@ -3,6 +3,7 @@
  - Fix for bug 32358: Drop any inline information on plain/text forward; such as "Content-Id" header
  - Fix for bug 32413: Added null guard
  - Fix for bug 32415/32417: Several null guard to deal with possible null return value
+ - Fix for bug 32017: Keep subfolder information intact for "Public files" (15) folder
 
 * 2014-05-08 - thorben.betten@open-xchange.com
 
