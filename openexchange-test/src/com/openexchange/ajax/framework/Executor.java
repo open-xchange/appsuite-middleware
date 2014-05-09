@@ -181,9 +181,12 @@ public class Executor extends Assert {
             break;
         case PUT:
             final HttpPut httpPut = new HttpPut(urlString + getURLParameter(session, request, false));
-            final ByteArrayEntity entity = new ByteArrayEntity(createBodyBytes(request.getBody()));
-            entity.setContentType("text/javascript; charset=UTF-8");
-            httpPut.setEntity(entity);
+            Object body = request.getBody();
+            if (null != body) {
+                final ByteArrayEntity entity = new ByteArrayEntity(createBodyBytes(body));
+                entity.setContentType("text/javascript; charset=UTF-8");
+                httpPut.setEntity(entity);
+            }
             httpRequest = httpPut;
             break;
         default:
@@ -252,7 +255,7 @@ public class Executor extends Assert {
 
         return null;
     }
-    
+
     private static boolean isEmpty(final String string) {
         if (null == string) {
             return true;
