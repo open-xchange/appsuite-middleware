@@ -1,3 +1,7 @@
+* 2014-05-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32358: Drop any inline information on plain/text forward; such as "Content-Id" header
+
 * 2014-05-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 32358: Do not append references to inline image for modifiable message content

@@ -333,6 +333,7 @@ public final class MimeForward {
         if (originalContentType.startsWith(MULTIPART)) {
             final Multipart multipart = new MimeMultipart();
             List<String> contentIds = null;
+            final boolean isHtml;
             {
                 /*
                  * Grab first seen text from original message
@@ -345,7 +346,7 @@ public final class MimeForward {
                         contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                     }
                 }
-                final boolean isHtml = contentType.startsWith(TEXT_HTM);
+                isHtml = contentType.startsWith(TEXT_HTM);
                 if (null == firstSeenText) {
                     firstSeenText = "";
                     contentType.setPrimaryType("text").setSubType("plain");
@@ -359,11 +360,7 @@ public final class MimeForward {
                  */
                 final MimeBodyPart textPart = new MimeBodyPart();
                 final String txt =
-                    usm.isDropReplyForwardPrefix() ? firstSeenText : generateForwardText(
-                        firstSeenText,
-                        new LocaleAndTimeZone(getUser(session, ctx)),
-                        originalMsg,
-                        isHtml);
+                    usm.isDropReplyForwardPrefix() ? firstSeenText : generateForwardText(firstSeenText, new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, isHtml);
                 {
                     final String cs = contentType.getCharsetParameter();
                     if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
@@ -377,7 +374,7 @@ public final class MimeForward {
                 textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
                 multipart.addBodyPart(textPart);
                 MessageUtility.setContent(multipart, forwardMsg);
-                //forwardMsg.setContent(multipart);
+                // forwardMsg.setContent(multipart);
                 forwardMsg.saveChanges();
                 // Remove generated Message-Id header
                 forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
@@ -394,6 +391,11 @@ public final class MimeForward {
             new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMsg, handler);
             for (final MailPart mailPart : handler.getNonInlineParts()) {
                 mailPart.getContentDisposition().setDisposition(Part.ATTACHMENT);
+                if (!isHtml) {
+                    // Drop any inline information; such as "Content-Id" header
+                    mailPart.removeContentId();
+                    mailPart.removeHeader(MessageHeaders.HDR_CONTENT_ID);
+                }
                 mailPart.getFileName(); // Enforce to set file name possibly extracted from Content-Type header
                 mailPart.getContentType().removeNameParameter(); // Remove name parameter
                 compositeMail.addAdditionalParts(mailPart);
