@@ -157,7 +157,8 @@ public final class ConditionTreeMap {
         for (final Iterator<Future<ConditionTree>> it = entity2tree.values().iterator(); it.hasNext();) {
             final Future<ConditionTree> f = it.next();
             try {
-                if (getFrom(f).isElapsed(stamp)) {
+                final ConditionTree conditionTree = getFrom(f);
+                if (null == conditionTree || conditionTree.isElapsed(stamp)) {
                     it.remove();
                 }
             } catch (final Exception e) {
@@ -292,7 +293,10 @@ public final class ConditionTreeMap {
             }
         }
         // Insert into tree
-        getFrom(f).insert(permission);
+        final ConditionTree conditionTree = getFrom(f);
+        if (null != conditionTree) {
+            conditionTree.insert(permission);
+        }
     }
 
     /**
@@ -318,7 +322,10 @@ public final class ConditionTreeMap {
         /*
          * Iterate visible sets
          */
-        final TIntSet set = getFrom(f).getVisibleFolderIds(condition);
+        TIntSet set = getFrom(f).getVisibleFolderIds(condition);
+        if (null == set) {
+            set = new TIntHashSet();
+        }
         if (null != groups) {
             for (final int group : groups) {
                 f = entity2tree.get(Integer.valueOf(group));
@@ -330,7 +337,10 @@ public final class ConditionTreeMap {
                         f = ft;
                     }
                 }
-                set.addAll(getFrom(f).getVisibleFolderIds(condition));
+                final ConditionTree conditionTree = getFrom(f);
+                if (null != conditionTree) {
+                    set.addAll(conditionTree.getVisibleFolderIds(condition));
+                }
             }
         }
         /*
@@ -362,7 +372,10 @@ public final class ConditionTreeMap {
         /*
          * Iterate visible sets
          */
-        final TIntSet set = getFrom(f).getVisibleFolderIds(condition);
+        TIntSet set = getFrom(f).getVisibleFolderIds(condition);
+        if (null == set) {
+            set = new TIntHashSet();
+        }
         if (null != groups) {
             for (final int group : groups) {
                 f = entity2tree.get(Integer.valueOf(group));
@@ -374,7 +387,10 @@ public final class ConditionTreeMap {
                         f = ft;
                     }
                 }
-                set.addAll(getFrom(f).getVisibleFolderIds(condition));
+                final ConditionTree conditionTree = getFrom(f);
+                if (null != conditionTree) {
+                    set.addAll(conditionTree.getVisibleFolderIds(condition));
+                }
             }
         }
         /*
@@ -454,7 +470,7 @@ public final class ConditionTreeMap {
          * Iterate visible sets
          */
         TIntSet set = getFrom(f).getVisibleFolderIds(condition);
-        if (!set.isEmpty()) {
+        if (null != set && !set.isEmpty()) {
             return true;
         }
         if (null != groups) {
@@ -469,7 +485,8 @@ public final class ConditionTreeMap {
                     }
                 }
 
-                if (!getFrom(f).getVisibleFolderIds(condition).isEmpty()) {
+                ConditionTree conditionTree = getFrom(f);
+                if (null != conditionTree && !conditionTree.getVisibleFolderIds(condition).isEmpty()) {
                     return true;
                 }
             }
@@ -500,7 +517,10 @@ public final class ConditionTreeMap {
         /*
          * Iterate visible sets
          */
-        final TIntSet set = getFrom(f).getVisibleFolderIds(condition);
+        TIntSet set = getFrom(f).getVisibleFolderIds(condition);
+        if (null == set) {
+            set = new TIntHashSet();
+        }
         if (null != groups) {
             for (final int group : groups) {
                 f = entity2tree.get(Integer.valueOf(group));
@@ -513,7 +533,10 @@ public final class ConditionTreeMap {
                     }
                 }
 
-                set.addAll(getFrom(f).getVisibleFolderIds(condition));
+                final ConditionTree conditionTree = getFrom(f);
+                if (null != conditionTree) {
+                    set.addAll(conditionTree.getVisibleFolderIds(condition));
+                }
             }
         }
         /*
@@ -614,7 +637,10 @@ public final class ConditionTreeMap {
         /*
          * Iterate visible sets
          */
-        final TIntSet set = getFrom(f).getVisibleFolderIds(condition);
+        TIntSet set = getFrom(f).getVisibleFolderIds(condition);
+        if (null == set) {
+            set = new TIntHashSet();
+        }
         if (null != groups) {
             for (final int group : groups) {
                 f = entity2tree.get(Integer.valueOf(group));
@@ -626,7 +652,10 @@ public final class ConditionTreeMap {
                         f = ft;
                     }
                 }
-                set.addAll(getFrom(f).getVisibleFolderIds(condition));
+                final ConditionTree conditionTree = getFrom(f);
+                if (null != conditionTree) {
+                    set.addAll(conditionTree.getVisibleFolderIds(condition));
+                }
             }
         }
         /*
