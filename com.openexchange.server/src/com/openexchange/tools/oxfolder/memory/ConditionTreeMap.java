@@ -1014,15 +1014,15 @@ public final class ConditionTreeMap {
         }
 
         @Override
-        public ConditionTree call() {
+        public ConditionTree call() throws OXException {
             try {
                 return newTreeForEntity(entity);
             } catch (final OXException e) {
                 logger.warn("", e);
-                return null;
-            } catch (final Exception e) {
+                throw e;
+            } catch (final RuntimeException e) {
                 logger.error("", e);
-                return null;
+                throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, e.getMessage());
             }
         }
     } // End of InitEntityCallable class
