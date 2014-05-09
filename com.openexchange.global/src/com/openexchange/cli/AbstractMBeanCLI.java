@@ -243,6 +243,33 @@ public abstract class AbstractMBeanCLI<R> {
     }
 
     /**
+     * Parses & validates the <code>int</code> value for given option.
+     * <p>
+     * Exits gracefully if <code>int</code> value is invalid.
+     *
+     * @param opt The option name
+     * @param defaultValue The default value
+     * @param cmd The command line
+     * @param options The options
+     * @return The <code>int</code> value
+     */
+    protected int parseInt(final char opt, final int defaultValue, final CommandLine cmd, final Options options) {
+        int i = defaultValue;
+        // Check option & parse if present
+        final String sInt = cmd.getOptionValue(opt);
+        if (null != sInt) {
+            try {
+                i = Integer.parseInt(sInt.trim());
+            } catch (final NumberFormatException e) {
+                System.err.println("Integer parameter is not a number: " + sInt);
+                printHelp(options);
+                System.exit(1);
+            }
+        }
+        return i;
+    }
+
+    /**
      * Prints the <code>--help</code> text.
      *
      * @param options The help output
@@ -260,7 +287,7 @@ public abstract class AbstractMBeanCLI<R> {
      * @throws MalformedObjectNameException If generating object name fails
      */
     protected AuthenticatorMBean authenticatorMBean(final MBeanServerConnection mbsc) throws MalformedObjectNameException {
-        return getMBean(mbsc, AuthenticatorMBean.class);
+        return getMBean(mbsc, AuthenticatorMBean.class, AuthenticatorMBean.DOMAIN);
     }
 
     /**
@@ -335,12 +362,13 @@ public abstract class AbstractMBeanCLI<R> {
      *
      * @param mbsc The MBean server connection
      * @param clazz The MBean class
+     * @param domain The MBean's domain
      * @return The MBean instance
      * @throws MalformedObjectNameException If generating object name fails
      * @see #getObjectName(String, String)
      */
-    protected static <MBean> MBean getMBean(final MBeanServerConnection mbsc, final Class<? extends MBean> clazz) throws MalformedObjectNameException {
-        return MBeanServerInvocationHandler.newProxyInstance(mbsc, getObjectName(clazz.getName(), AuthenticatorMBean.DOMAIN), clazz, false);
+    protected static <MBean> MBean getMBean(final MBeanServerConnection mbsc, final Class<? extends MBean> clazz, final String domain) throws MalformedObjectNameException {
+        return MBeanServerInvocationHandler.newProxyInstance(mbsc, getObjectName(clazz.getName(), domain), clazz, false);
     }
 
     /**
