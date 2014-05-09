@@ -62,6 +62,8 @@ import com.openexchange.user.UserServiceInterceptorRegistry;
 
 
 /**
+ * A bridge that delegates call-backs to {@link OXUserPluginInterface} to tracked instances of {@link UserServiceInterceptor}.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
