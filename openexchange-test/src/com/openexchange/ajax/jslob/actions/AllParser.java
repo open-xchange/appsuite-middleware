@@ -49,61 +49,41 @@
 
 package com.openexchange.ajax.jslob.actions;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.ajax.AJAXServlet;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.jslob.DefaultJSlob;
+import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSlobId;
 
 /**
- * {@link SetRequest}
- *
  * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
-public class SetRequest extends AbstractJSlobRequest<SetResponse> {
-
-    private final String identifier;
-
-    private final String value;
-
-    private final boolean failOnError;
+public final class AllParser extends AbstractAJAXParser<AllResponse> {
 
     /**
-     * Initializes a new {@link SetRequest}.
+     * Initializes a new {@link ListParser}.
      */
-    public SetRequest(final String identifier, final String value) {
-        this(identifier, value, true);
-    }
-
-    /**
-     * Initializes a new {@link SetRequest}.
-     */
-    public SetRequest(final String identifier, final String value, final boolean failOnError) {
-        super();
-        this.identifier = identifier;
-        this.value = value;
-        this.failOnError = failOnError;
+    protected AllParser(boolean failOnError) {
+        super(failOnError);
     }
 
     @Override
-    public Method getMethod() {
-        return Method.PUT;
+    protected AllResponse createResponse(Response response) throws JSONException {
+        final JSONArray jArray = (JSONArray) response.getData();
+        final int length = jArray.length();
+        final List<JSlob> jSlobs = new ArrayList<JSlob>(length);
+        for (int i = 0; i < length; i++) {
+            final JSONObject jObject = jArray.getJSONObject(i);
+            final DefaultJSlob jSlob = new DefaultJSlob(jObject.getJSONObject("tree"));
+            jSlob.setMetaObject(jObject.optJSONObject("meta"));
+            jSlob.setId(new JSlobId(null, jObject.getString("id"), 0, 0));
+            jSlobs.add(jSlob);
+        }
+        return new AllResponse(response, jSlobs);
     }
-
-    @Override
-    public Parameter[] getParameters() {
-        final List<Parameter> list = new LinkedList<Parameter>();
-        list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "set"));
-        list.add(new Parameter(AJAXServlet.PARAMETER_ID, identifier));
-        return list.toArray(new Parameter[list.size()]);
-    }
-
-    @Override
-    public Object getBody() {
-        return value;
-    }
-
-    public AbstractAJAXParser<? extends SetResponse> getParser() {
-        return new SetParser(failOnError);
-    }
-
 }

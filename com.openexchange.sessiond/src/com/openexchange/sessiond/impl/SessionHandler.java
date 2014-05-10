@@ -756,7 +756,15 @@ public final class SessionHandler {
 
                         @Override
                         public Void call() throws Exception {
-                            sessionStorageService.setLocalIp(session.getSessionID(), localIp);
+                            try {
+                                sessionStorageService.setLocalIp(session.getSessionID(), localIp);
+                            } catch (final OXException e) {
+                                if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                                    throw e;
+                                }
+                                // No such session held in session storage
+                                LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                            }
                             return null;
                         }
                     };

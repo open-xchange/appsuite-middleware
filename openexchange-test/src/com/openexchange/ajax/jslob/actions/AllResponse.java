@@ -49,61 +49,38 @@
 
 package com.openexchange.ajax.jslob.actions;
 
-import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.jslob.JSlob;
 
 /**
- * {@link SetRequest}
+ * {@link AllResponse}
  *
  * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
-public class SetRequest extends AbstractJSlobRequest<SetResponse> {
+public class AllResponse extends AbstractAJAXResponse {
 
-    private final String identifier;
-
-    private final String value;
-
-    private final boolean failOnError;
+    private final List<JSlob> jSlobs;
 
     /**
-     * Initializes a new {@link SetRequest}.
+     * Initializes a new {@link AllResponse}.
+     *
+     * @param response The response
+     * @param jSlobs The JSLob list
      */
-    public SetRequest(final String identifier, final String value) {
-        this(identifier, value, true);
+    public AllResponse(final Response response, final List<JSlob> jSlobs) {
+        super(response);
+        this.jSlobs = jSlobs;
     }
 
     /**
-     * Initializes a new {@link SetRequest}.
+     * Gets the jSlobs
+     *
+     * @return The jSlobs
      */
-    public SetRequest(final String identifier, final String value, final boolean failOnError) {
-        super();
-        this.identifier = identifier;
-        this.value = value;
-        this.failOnError = failOnError;
-    }
-
-    @Override
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    @Override
-    public Parameter[] getParameters() {
-        final List<Parameter> list = new LinkedList<Parameter>();
-        list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "set"));
-        list.add(new Parameter(AJAXServlet.PARAMETER_ID, identifier));
-        return list.toArray(new Parameter[list.size()]);
-    }
-
-    @Override
-    public Object getBody() {
-        return value;
-    }
-
-    public AbstractAJAXParser<? extends SetResponse> getParser() {
-        return new SetParser(failOnError);
+    public List<JSlob> getJSlobs() {
+        return jSlobs;
     }
 
 }

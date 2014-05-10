@@ -55,55 +55,42 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link SetRequest}
+ * {@link AllRequest}
  *
  * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
-public class SetRequest extends AbstractJSlobRequest<SetResponse> {
-
-    private final String identifier;
-
-    private final String value;
+public class AllRequest extends AbstractJSlobRequest<AllResponse> {
 
     private final boolean failOnError;
 
     /**
-     * Initializes a new {@link SetRequest}.
+     * Initializes a new {@link AllRequest}.
      */
-    public SetRequest(final String identifier, final String value) {
-        this(identifier, value, true);
-    }
-
-    /**
-     * Initializes a new {@link SetRequest}.
-     */
-    public SetRequest(final String identifier, final String value, final boolean failOnError) {
+    public AllRequest(final boolean failOnError) {
         super();
-        this.identifier = identifier;
-        this.value = value;
         this.failOnError = failOnError;
     }
 
     @Override
     public Method getMethod() {
-        return Method.PUT;
+        return Method.GET;
     }
 
     @Override
     public Parameter[] getParameters() {
         final List<Parameter> list = new LinkedList<Parameter>();
-        list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "set"));
-        list.add(new Parameter(AJAXServlet.PARAMETER_ID, identifier));
+        list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
         return list.toArray(new Parameter[list.size()]);
     }
 
     @Override
+    public AbstractAJAXParser<? extends AllResponse> getParser() {
+        return new AllParser(failOnError);
+    }
+
+    @Override
     public Object getBody() {
-        return value;
+        // the all get has no body
+        return null;
     }
-
-    public AbstractAJAXParser<? extends SetResponse> getParser() {
-        return new SetParser(failOnError);
-    }
-
 }

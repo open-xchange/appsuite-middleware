@@ -111,7 +111,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
     private static final Metadata[] DEFAULT_FIELDS = new Metadata[] {
         Metadata.FOLDER_ID_LITERAL, Metadata.META_LITERAL, Metadata.ID_LITERAL, Metadata.LAST_MODIFIED_LITERAL,
         Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL, Metadata.FILE_MIMETYPE_LITERAL, Metadata.FILE_SIZE_LITERAL,
-        Metadata.LOCKED_UNTIL_LITERAL, Metadata.MODIFIED_BY_LITERAL };
+        Metadata.LOCKED_UNTIL_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.VERSION_LITERAL };
 
     /**
      * Initializes a new {@link BasicInfostoreDriver}.

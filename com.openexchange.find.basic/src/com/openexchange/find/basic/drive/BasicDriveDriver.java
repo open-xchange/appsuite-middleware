@@ -111,7 +111,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         Collections.addAll(DEFAULT_FIELDS,
             Field.FOLDER_ID, Field.META, Field.ID, Field.LAST_MODIFIED,
             Field.TITLE, Field.FILENAME, Field.FILE_MIMETYPE, Field.FILE_SIZE,
-            Field.LOCKED_UNTIL, Field.MODIFIED_BY);
+            Field.LOCKED_UNTIL, Field.MODIFIED_BY, Field.VERSION);
     }
 
     /**
