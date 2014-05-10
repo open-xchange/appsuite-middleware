@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/brownies-collections-0.9.6.jar" sourcepath="lib/source/brownies-collections-0.9.6-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ical4j-1.0.4.jar" sourcepath="lib/source/ical4j-1.0.4-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/concurrentlinkedhashmap-1.0.1-custom.jar" sourcepath="lib/concurrentlinkedhashmap-1.0.1-custom.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-examples-0.7.2.jar" sourcepath="lib/source/apache-mime4j-examples-0.7.2-sources.jar"/>
