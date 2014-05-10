@@ -318,9 +318,8 @@ public class FacebookServiceImpl implements FacebookService {
                     cal.set(Calendar.YEAR, year);
                     contact.setBirthday(cal.getTime());
                 }
-            }
-            else {
-                LOG.info(
+            } else {
+                LOG.debug(
                     "Unable to parse birthday string for facebook user '{} {}' because pattern did not match! Tried to parse {}.",
                     contact.getGivenName(),
                     contact.getSurName(),
@@ -336,12 +335,12 @@ public class FacebookServiceImpl implements FacebookService {
      * @param email - the string the email is included in
      */
     protected void setEmail(Contact contact, String email) {
-        if (null != email) {
+        if (isValid(email)) {
             try {
                 new InternetAddress(email).validate();
                 contact.setEmail1(email);
             } catch (AddressException addressException) {
-                LOG.info(
+                LOG.debug(
                     "Email address for facebook user '{} {}' is not valid and cannot be imported! Tried to import {}.",
                     contact.getGivenName(),
                     contact.getSurName(),
