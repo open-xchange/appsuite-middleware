@@ -5,9 +5,9 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.logging"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-classic-1.0.13.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-core-1.0.13.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.5.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201205030909.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201205030909.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-classic-1.1.2.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-core-1.1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
