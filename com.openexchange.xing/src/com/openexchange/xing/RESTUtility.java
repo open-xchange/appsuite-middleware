@@ -123,14 +123,19 @@ public class RESTUtility {
 
     /**
      * Creates and sends a basic request to the XING API, without building the url, parses the response as JSON, and returns the result.
-     * 
-     * @param method GET or POST. - * @param url the URL to use. - * @param requestInformation The request's JSON object - * @param session
-     *            the {@link Session} to use for this request. - * @param expectedStatusCode the expected status code which should be
-     *            returned on success. - * @return a parsed JSON object, typically a Map or a JSONArray. - * @throws XingServerException if
-     *            the server responds with an error code. See the constants in {@link XingServerException} for the - * meaning of each error
-     *            code. - * @throws XingIOException if any network-related error occurs. - * @throws XingUnlinkedException if the user has
-     *            revoked access. - * @throws XingException for any other unknown errors. This is also a superclass of all other XING
-     *            exceptions, so you may want to only - * catch this exception which signals that some kind of error occurred.
+     *
+     * @param method GET or POST
+     * @param url the URL to use.
+     * @param requestInformation The request's JSON object
+     * @param session the {@link Session} to use for this request
+     * @param expectedStatusCode the expected status code which should be returned on success
+     * @return a parsed JSON object, typically a Map or a JSONArray
+     * @throws XingServerException if the server responds with an error code. See the constants in {@link XingServerException} for the
+     *             meaning of each error code
+     * @throws XingIOException if any network-related error occurs
+     * @throws XingUnlinkedException if the user has revoked access
+     * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
+     *             catch this exception which signals that some kind of error occurred.
      */
     public static JSONValue basicRequest(final Method method, final String url, final JSONObject requestInformation, final Session session, final List<Integer> expectedStatusCode) throws XingException {
         final HttpRequestBase req;
@@ -167,7 +172,7 @@ public class RESTUtility {
 
     /**
      * Creates and sends a request to the XING API, parses the response as JSON, and returns the result.
-     * 
+     *
      * @param method GET or POST.
      * @param host the hostname to use. Should be either api server, content server, or web server.
      * @param path the URL path, starting with a '/'.
@@ -214,7 +219,7 @@ public class RESTUtility {
 
     /**
      * Creates and sends a request to the XING API, parses the response as JSON, and returns the result.
-     * 
+     *
      * @param method GET or POST.
      * @param host the hostname to use. Should be either api server, content server, or web server.
      * @param path the URL path, starting with a '/'.
@@ -240,7 +245,7 @@ public class RESTUtility {
     /**
      * Creates and sends a request to the XING API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
      * {@link HttpResponse}.
-     * 
+     *
      * @param method GET or POST.
      * @param host the hostname to use. Should be either api server, content server, or web server.
      * @param path the URL path, starting with a '/'.
@@ -272,7 +277,7 @@ public class RESTUtility {
     /**
      * Creates and sends a request to the XING API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
      * {@link HttpResponse}.
-     * 
+     *
      * @param method GET or POST.
      * @param host the hostname to use. Should be either api server, content server, or web server.
      * @param path the URL path, starting with a '/'.
@@ -297,7 +302,7 @@ public class RESTUtility {
     /**
      * Creates and sends a request to the XING API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
      * {@link HttpResponse}.
-     * 
+     *
      * @param method GET or POST.
      * @param host the hostname to use. Should be either api server, content server, or web server.
      * @param path the URL path, starting with a '/'.
@@ -330,7 +335,7 @@ public class RESTUtility {
     /**
      * Creates and sends a request to the XING API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
      * {@link HttpResponse}.
-     * 
+     *
      * @param method GET or POST.
      * @param host the hostname to use. Should be either api server, content server, or web server.
      * @param path the URL path, starting with a '/'.
@@ -387,7 +392,7 @@ public class RESTUtility {
 
     /**
      * Reads in content from an {@link HttpResponse} and parses it as JSON.
-     * 
+     *
      * @param response the {@link HttpResponse}.
      * @param expectedStatusCode - Contains the expected status code on successful response
      * @return a parsed JSON object, typically a Map or a JSONArray.
@@ -492,7 +497,7 @@ public class RESTUtility {
 
     /**
      * Executes an {@link HttpUriRequest} with the given {@link Session} and returns an {@link HttpResponse}.
-     * 
+     *
      * @param session The session to use.
      * @param req The request to execute.
      * @param expectedStatusCode the expected status code which should be returned on success.
@@ -510,7 +515,7 @@ public class RESTUtility {
 
     /**
      * Executes an {@link HttpUriRequest} with the given {@link Session} and returns an {@link HttpResponse}.
-     * 
+     *
      * @param session The session to use.
      * @param req The request to execute.
      * @param socketTimeoutOverrideMs If >= 0, the socket timeout to set on this request. Does nothing if set to a negative number.
