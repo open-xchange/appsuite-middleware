@@ -49,61 +49,35 @@
 
 package com.openexchange.find.internal;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.find.internal.SearchDriverManager.CachedConfig;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.java.Strings;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 
 
 /**
- * Injects a setting into the configuration tree that denotes which find modules
- * require the folder facet to be set.
+ * Abstract class for find settings that automagically provides a {@link ConfigTreeEquivalent}
+ * for a {@link PreferencesItemService} implementation.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class MandatoryFolders extends FindSetting {
+public abstract class FindSetting implements PreferencesItemService, ConfigTreeEquivalent {
 
-    private final SearchDriverManager driverManager;
+    private final String configPath = Strings.join(getPath(), "/");
 
-    public MandatoryFolders(final SearchDriverManager driverManager) {
-        super();
-        this.driverManager = driverManager;
+    @Override
+    public String getConfigTreePath() {
+        return configPath;
     }
 
     @Override
-    public String[] getPath() {
-        return new String[] { "search", "mandatory", "folder" };
+    public String getJslobPath() {
+        return "io.ox/core//" + getConfigTreePath();
     }
 
     @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-
-            @Override
-            public boolean isAvailable(UserConfiguration userConfig) {
-                return true;
-            }
-
-            @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                ServerSessionAdapter serverSession = new ServerSessionAdapter(session, ctx, user, userConfig);
-                List<CachedConfig> configs = driverManager.getConfigurations(serverSession);
-                setting.setEmptyMultiValue();
-                for (CachedConfig config : configs) {
-                    if (config.getSearchConfig().requiresFolder()) {
-                        setting.addMultiValue(config.getModule().getIdentifier());
-                    }
-                }
-            }
-        };
+    public String toString() {
+        return getConfigTreePath() + " > " + getJslobPath();
     }
 
 }

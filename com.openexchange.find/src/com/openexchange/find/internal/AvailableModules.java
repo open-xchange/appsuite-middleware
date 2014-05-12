@@ -51,7 +51,7 @@ package com.openexchange.find.internal;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.find.internal.SearchDriverManager.CachedConfig;
+import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -64,23 +64,23 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Injects a setting into the configuration tree that denotes which find modules
- * require the folder facet to be set.
+ * are available for the given user.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class MandatoryFolders extends FindSetting {
+public class AvailableModules extends FindSetting {
 
     private final SearchDriverManager driverManager;
 
-    public MandatoryFolders(final SearchDriverManager driverManager) {
+    public AvailableModules(final SearchDriverManager driverManager) {
         super();
         this.driverManager = driverManager;
     }
 
     @Override
     public String[] getPath() {
-        return new String[] { "search", "mandatory", "folder" };
+        return new String[] { "search", "modules" };
     }
 
     @Override
@@ -94,13 +94,10 @@ public class MandatoryFolders extends FindSetting {
 
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                ServerSessionAdapter serverSession = new ServerSessionAdapter(session, ctx, user, userConfig);
-                List<CachedConfig> configs = driverManager.getConfigurations(serverSession);
+                List<ModuleSearchDriver> available = driverManager.determineDrivers(new ServerSessionAdapter(session, ctx, user, userConfig));
                 setting.setEmptyMultiValue();
-                for (CachedConfig config : configs) {
-                    if (config.getSearchConfig().requiresFolder()) {
-                        setting.addMultiValue(config.getModule().getIdentifier());
-                    }
+                for (ModuleSearchDriver driver : available) {
+                    setting.addMultiValue(driver.getModule().getIdentifier());
                 }
             }
         };
