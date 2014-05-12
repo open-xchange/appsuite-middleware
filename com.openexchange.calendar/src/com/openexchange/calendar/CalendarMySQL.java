@@ -1447,54 +1447,52 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
             }
 
-            // Look into folders that are shared to the user
-            // where he can read all objects
-            for (final TIntIterator iter = cfo.getSharedReadableAll().iterator(); iter.hasNext();) {
-                final int folder = iter.next();
-                final int owner = folderAccess.getFolderOwner(folder);
-                if (first) {
-                    sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + ")");
-                    first = false;
-                } else {
-                    sb.append(" OR (NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + ")");
+            if (!searchObj.isOnlyPrivateAppointments()) {
+                // Look into folders that are shared to the user
+                // where he can read all objects
+                for (final TIntIterator iter = cfo.getSharedReadableAll().iterator(); iter.hasNext();) {
+                    final int folder = iter.next();
+                    final int owner = folderAccess.getFolderOwner(folder);
+                    if (first) {
+                        sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + ")");
+                        first = false;
+                    } else {
+                        sb.append(" OR (NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + ")");
+                    }
+                }
+                // where he can read own objects
+                for (final TIntIterator iter = cfo.getSharedReadableOwn().iterator(); iter.hasNext();) {
+                    final int folder = iter.next();
+                    final int owner = folderAccess.getFolderOwner(folder);
+                    if (first) {
+                        sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
+                        first = false;
+                    } else {
+                        sb.append(" OR (NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
+                    }
+                }
+                // Look into public folders
+                // where the user can read all objects
+                for (final TIntIterator iter = cfo.getPublicReadableAll().iterator(); iter.hasNext();) {
+                    final int folder = iter.next();
+                    if (first) {
+                        sb.append("(pd.fid = " + folder + ")");
+                        first = false;
+                    } else {
+                        sb.append(" OR (pd.fid = " + folder + ")");
+                    }
+                }
+                // where the user can read own objects
+                for (final TIntIterator iter = cfo.getPublicReadableOwn().iterator(); iter.hasNext();) {
+                    final int folder = iter.next();
+                    if (first) {
+                        sb.append("(pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
+                        first = false;
+                    } else {
+                        sb.append(" OR (pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
+                    }
                 }
             }
-
-            // where he can read own objects
-            for (final TIntIterator iter = cfo.getSharedReadableOwn().iterator(); iter.hasNext();) {
-                final int folder = iter.next();
-                final int owner = folderAccess.getFolderOwner(folder);
-                if (first) {
-                    sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
-                    first = false;
-                } else {
-                    sb.append(" OR (NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
-                }
-            }
-
-            // Look into public folders
-            // where the user can read all objects
-            for (final TIntIterator iter = cfo.getPublicReadableAll().iterator(); iter.hasNext();) {
-                final int folder = iter.next();
-                if (first) {
-                    sb.append("(pd.fid = " + folder + ")");
-                    first = false;
-                } else {
-                    sb.append(" OR (pd.fid = " + folder + ")");
-                }
-            }
-
-            // where the user can read own objects
-            for (final TIntIterator iter = cfo.getPublicReadableOwn().iterator(); iter.hasNext();) {
-                final int folder = iter.next();
-                if (first) {
-                    sb.append("(pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
-                    first = false;
-                } else {
-                    sb.append(" OR (pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
-                }
-            }
-
             sb.append(')');
         }
         /*
