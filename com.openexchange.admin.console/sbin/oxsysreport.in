@@ -93,9 +93,6 @@ EOF
 read -p "Press any key to continue or [ctrl+c] to cancel..."
 }
 
-TAR=$(check_on_needed tar)
-BZIP2=$(check_on_needed bzip2)
-
 . ${OXFUNCTIONS}
 
 export PATH="${PATH}:/opt/open-xchange/sbin"
@@ -169,6 +166,8 @@ eval set -- "${TEMP}"
 
 # needed to catch the exit from a sub shell
 set -e
+TAR=$(check_on_needed tar)
+BZIP2=$(check_on_needed bzip2)
 
 while true; do
     case "${1}" in
@@ -205,7 +204,7 @@ while true; do
             shift 2
             unset LOGARC_SUFFIX
             unset LOGS_AND_FILES_SUFFIX
-        ;;        
+        ;;
         -h|--help)
             usage
             exit
