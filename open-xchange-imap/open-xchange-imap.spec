@@ -74,6 +74,9 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-1953
     VALUE=$(ox_read_property com.openexchange.imap.imapSearch $PFILE)
     ox_set_property com.openexchange.imap.imapSearch "$VALUE" $PFILE
+
+    # SoftwareChange_Request-2016
+    ox_add_property com.openexchange.imap.ssl.ciphersuites "" $PFILE
 fi
 
 %clean
