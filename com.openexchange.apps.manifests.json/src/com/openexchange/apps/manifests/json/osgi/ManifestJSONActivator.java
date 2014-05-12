@@ -95,6 +95,12 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
         return new Class<?>[]{ConfigurationService.class, CapabilityService.class, SimpleConverter.class, ConfigViewFactory.class};
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        UIVersion.UIVERSION.set("");
+        super.stopBundle();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -102,7 +108,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         final BundleContext context = this.context;
 
-        UIVersion.UIVERSION = context.getBundle().getVersion().toString();
+        UIVersion.UIVERSION.set(context.getBundle().getVersion().toString());
 
         // Add tracker to identify if a PasswordChangeService was registered. If so, add to PermissionAvailabilityService
         rememberTracker(new PermissionRelevantServiceAddedTracker<PasswordChangeService>(context, PasswordChangeService.class));
@@ -116,13 +122,13 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
             context,
             ComputedServerConfigValueService.class);
         rememberTracker(computedValueTracker);
-        
+
         final NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker = new NearRegistryServiceTracker<ManifestContributor>(
             context,
             ManifestContributor.class
         );
         rememberTracker(manifestContributorTracker);
-        
+
         registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
 
             @Override
@@ -134,7 +140,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
             public List<ComputedServerConfigValueService> getComputed() {
                 return Collections.unmodifiableList(computedValueTracker.getServiceList());
             }
-            
+
             @Override
             public List<ManifestContributor> getContributors() {
                 return Collections.unmodifiableList(manifestContributorTracker.getServiceList());

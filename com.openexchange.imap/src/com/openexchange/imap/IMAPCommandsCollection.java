@@ -2503,6 +2503,46 @@ public final class IMAPCommandsCollection {
     private static final String TEMPL_UID_FETCH_UID = "UID FETCH %s (UID)";
 
     /**
+     * Checks there is such a message with specified UID in given IMAP folder.
+     *
+     * @param imapFolder The IMAP folder
+     * @param uid The UID to check
+     * @return <code>true</code> if such a message exists; otherwise <code>false</code>
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static boolean existsMessage(final IMAPFolder imapFolder, final long uid) throws MessagingException {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount <= 0) {
+            return false;
+        }
+        if (uid <= 0) {
+            return false;
+        }
+        return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                final String command = String.format(TEMPL_UID_FETCH_UID, Long.toString(uid));
+                final Response[] r = performCommand(p, command);
+                final int len = r.length - 1;
+                final Response response = r[len];
+                r[len] = null;
+                if (response.isOK()) {
+                    return Boolean.valueOf(len > 0);
+                } else if (response.isBAD()) {
+                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                } else {
+                    p.handleResult(response);
+                }
+                return Boolean.FALSE;
+            }
+
+        }))).booleanValue();
+    }
+
+    /**
      * Maps specified UIDs to current corresponding sequence numbers.
      *
      * @param imapFolder The IMAP folder

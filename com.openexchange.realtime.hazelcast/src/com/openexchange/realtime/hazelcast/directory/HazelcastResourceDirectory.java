@@ -95,10 +95,10 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     /** The logger */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastResourceDirectory.class);
 
-    /** Mapping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premuim/random. */
+    /** Mapping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premium/random. */
     private final String id_map;
 
-    /** Mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap */
+    /** Mapping of full IDs to the Resource e.g. ox://marc.arens@premium/random <-> ResourceMap */
     private final String resource_map;
 
     private final HazelcastResourceDirectoryManagement managementObject;
@@ -109,8 +109,8 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     /**
      * Initializes a new {@link HazelcastResourceDirectory}.
      *
-     * @param id_map the name of the apping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premuim/random
-     * @param resource_map the name of the mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap
+     * @param id_map the name of the apping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premium/random
+     * @param resource_map the name of the mapping of full IDs to the Resource e.g. ox://marc.arens@premium/random <-> ResourceMap
      * @throws OXException
      */
     public HazelcastResourceDirectory(String id_map, String resource_map) throws OXException {
@@ -461,7 +461,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     }
 
     /**
-     * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap.
+     * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premium/random <-> ResourceMap.
      *
      * @return the map used for mapping full IDs to ResourceMaps.
      * @throws OXException if the map couldn't be fetched from hazelcast

@@ -58,7 +58,7 @@ import com.openexchange.realtime.packet.Presence.Type;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PresenceBuilder} - Parse an atmosphere request and build a Presence Stanza from it by adding the recipients ID.
+ * {@link PresenceBuilder} - Parse a request and build a Presence Stanza from it by adding the recipients ID.
  * Building includes transformation from JSON to POJO and Initialization from the PayloadTree.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>

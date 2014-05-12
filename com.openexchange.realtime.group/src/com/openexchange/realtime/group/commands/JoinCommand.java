@@ -85,12 +85,12 @@ public class JoinCommand implements GroupCommand {
                 doWelcome(stanza, groupDispatcher);
             }
         } else {
-            groupDispatcher.join(stanza.getFrom(), stanza.getSelector());
+            groupDispatcher.join(stanza.getFrom(), stanza.getSelector(), stanza);
         }
     }
 
     private void doWelcome(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        groupDispatcher.join(stanza.getOnBehalfOf(), stanza.getSelector());
+        groupDispatcher.join(stanza.getOnBehalfOf(), stanza.getSelector(), stanza);
         Stanza welcomeMessage = groupDispatcher.getWelcomeMessage(stanza.getOnBehalfOf());
         welcomeMessage.setFrom(groupDispatcher.getId());
         welcomeMessage.setTo(stanza.getFrom());

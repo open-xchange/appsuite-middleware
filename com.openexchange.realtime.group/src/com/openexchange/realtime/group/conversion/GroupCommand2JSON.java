@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.commands.JoinCommand;
 import com.openexchange.realtime.group.commands.LeaveCommand;
+import com.openexchange.realtime.group.commands.PingCommand;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -87,6 +88,9 @@ public class GroupCommand2JSON implements SimplePayloadConverter {
         }
         if (LeaveCommand.class.isInstance(data)) {
             return "leave";
+        }
+        if (PingCommand.class.isInstance(data)) {
+            return "ping";
         }
         return "unknown: " + data.getClass().getSimpleName();
     }

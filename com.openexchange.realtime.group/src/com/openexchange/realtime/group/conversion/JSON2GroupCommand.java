@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.commands.JoinCommand;
 import com.openexchange.realtime.group.commands.LeaveCommand;
+import com.openexchange.realtime.group.commands.PingCommand;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -89,6 +90,9 @@ public class JSON2GroupCommand implements SimplePayloadConverter {
         }
         if (command.equalsIgnoreCase("leave")) {
             return new LeaveCommand();
+        }
+        if (command.equalsIgnoreCase("ping")) {
+            return new PingCommand();
         }
         throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("command", command);
     }

@@ -265,7 +265,18 @@ public class ContactHaloImpl implements ContactHalo {
     }
 
     private boolean checkEmails(Contact c, String email1) {
-        return (email1.equalsIgnoreCase(c.getEmail1()) || email1.equalsIgnoreCase(c.getEmail2()) || email1.equalsIgnoreCase(c.getEmail3()));
+        if (c.getEmail1() != null && c.getEmail1().equalsIgnoreCase(email1)) {
+            return true;
+        }
+
+        if (c.getEmail2() != null && c.getEmail2().equalsIgnoreCase(email1)) {
+            return true;
+        }
+        if (c.getEmail3() != null && c.getEmail3().equalsIgnoreCase(email1)) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override

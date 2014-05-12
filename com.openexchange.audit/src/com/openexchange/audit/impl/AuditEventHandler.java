@@ -323,10 +323,32 @@ public class AuditEventHandler implements EventHandler {
         appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
         log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
         log.append("OBJECT ID: ").append(appointment.getObjectID()).append("; ");
-        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(appointment.getCreatedBy(), context).getDisplayName()).append(
-            "; ");
-        log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(appointment.getModifiedBy(), context).getDisplayName()).append(
-            "; ");
+        {
+            int createdBy = appointment.getCreatedBy();
+            if (createdBy > 0) {
+                try {
+                    log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(createdBy, context).getDisplayName()).append("; ");
+                } catch (OXException e) {
+                    LOG.debug("Failed to load user {} in context {}", createdBy, context.getContextId(), e);
+                    log.append("CREATED BY: <unknown>; ");
+                }
+            } else {
+                log.append("CREATED BY: <unknown>; ");
+            }
+        }
+        {
+            int modifiedBy = appointment.getModifiedBy();
+            if (modifiedBy > 0) {
+                try {
+                    log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(modifiedBy, context).getDisplayName()).append("; ");
+                } catch (OXException e) {
+                    LOG.debug("Failed to load user {} in context {}", modifiedBy, context.getContextId(), e);
+                    log.append("MODIFIED BY: <unknown>; ");
+                }
+            } else {
+                log.append("MODIFIED BY: <unknown>; ");
+            }
+        }
         log.append("TITLE: ").append(appointment.getTitle()).append("; ");
         log.append("START DATE: ").append(appointment.getStartDate()).append("; ");
         log.append("END DATE: ").append(appointment.getEndDate()).append("; ");

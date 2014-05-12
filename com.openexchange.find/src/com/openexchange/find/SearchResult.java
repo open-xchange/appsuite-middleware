@@ -69,14 +69,18 @@ public class SearchResult implements Serializable {
     private static final long serialVersionUID = -4937862789320521401L;
 
     private final int numFound;
-
     private final int start;
-
     private final List<Document> documents;
-
     private final List<ActiveFacet> facets;
 
-
+    /**
+     * Initializes a new {@link SearchResult}.
+     *
+     * @param numFound The total number of found documents.
+     * @param start The start index within the set of total results
+     * @param documents The resulting documents
+     * @param facets The active facets
+     */
     public SearchResult(int numFound, int start, List<Document> documents, List<ActiveFacet> facets) {
         super();
         this.numFound = numFound;
@@ -140,27 +144,36 @@ public class SearchResult implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SearchResult other = (SearchResult) obj;
         if (documents == null) {
-            if (other.documents != null)
+            if (other.documents != null) {
                 return false;
-        } else if (!documents.equals(other.documents))
+            }
+        } else if (!documents.equals(other.documents)) {
             return false;
+        }
         if (facets == null) {
-            if (other.facets != null)
+            if (other.facets != null) {
                 return false;
-        } else if (!facets.equals(other.facets))
+            }
+        } else if (!facets.equals(other.facets)) {
             return false;
-        if (numFound != other.numFound)
+        }
+        if (numFound != other.numFound) {
             return false;
-        if (start != other.start)
+        }
+        if (start != other.start) {
             return false;
+        }
         return true;
     }
 

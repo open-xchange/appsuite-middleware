@@ -2,7 +2,6 @@
 Name:           open-xchange-drive
 BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
-BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  java-devel >= 1.6.0
@@ -57,6 +56,8 @@ ox_set_property com.openexchange.capability.drive false /opt/open-xchange/etc/dr
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed May 07 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2014-05-05
 * Mon May 05 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Second release candidate for 7.6.0
 * Fri Apr 25 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>

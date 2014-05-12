@@ -229,6 +229,15 @@ public class XingServerException extends XingException {
     }
 
     /**
+     * Gets the HTTP error code
+     *
+     * @return The HTTP error code
+     */
+    public int getError() {
+        return error;
+    }
+
+    /**
      * Whether the given response is valid when it has no body (only some error
      * codes are allowed without a reason, currently 302 and 304).
      */

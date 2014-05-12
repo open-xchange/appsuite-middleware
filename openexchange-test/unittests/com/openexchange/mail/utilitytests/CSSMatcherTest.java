@@ -326,7 +326,7 @@ public class CSSMatcherTest extends TestCase {
         {
             String line = lines[0];
             line = line.replaceAll("\\s+", "");
-            assertTrue("Unexpected CSS: "+line, line.startsWith("/*common--------------------------------------------------*/#test{"));
+            assertTrue("Unexpected CSS: "+line, line.startsWith("#test{"));
         }
 
         {

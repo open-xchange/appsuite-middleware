@@ -51,6 +51,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc datare
 %config(noreplace) /opt/open-xchange/etc/dataretention.properties
 
 %changelog
+* Wed May 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-05-05
 * Mon May 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.6.0
 * Fri Apr 25 2014 Marcus Klein <marcus.klein@open-xchange.com>

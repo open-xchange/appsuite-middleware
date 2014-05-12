@@ -330,9 +330,7 @@ public final class QuotaActivator extends HousekeepingActivator {
                 try {
                     return new AmountOnlyQuota(Long.parseLong(property.get().trim()));
                 } catch (final RuntimeException e) {
-                    log.warn(
-                        "Couldn't detect quota for " + resource.toString() + " (user=" + session.getUserId() + ", context=" + session.getContextId() + ")",
-                        e);
+                    log.warn("Couldn''t detect quota for {} (user={}, context={})", resource.toString(), session.getUserId(), session.getContextId(), e);
                     return UnlimitedQuota.getInstance();
                 }
             }

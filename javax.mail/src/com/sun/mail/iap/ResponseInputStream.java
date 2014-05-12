@@ -82,7 +82,7 @@ public class ResponseInputStream {
      */
     public ByteArray readResponse(ByteArray ba) throws IOException {
 	if (ba == null)
-	    ba = new ByteArray(new byte[8192], 0, 8192);
+	    ba = new ByteArray(new byte[4096], 0, 4096);
 
 	byte[] buffer = ba.getBytes();
 	int idx = 0;

@@ -50,6 +50,7 @@
 package com.openexchange.realtime.example.chineseRoom;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Asynchronous;
@@ -122,10 +123,17 @@ public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements Compo
     }
     
     @Override
-    protected void onJoin(ID id) {
+    protected void onJoin(ID id, Stanza stanza) {
         System.out.println("JOIN: "+id);
+        if (stanza != null) {
+            Collection<PayloadTree> configs = stanza.getPayloadTrees(new ElementPath("chinese", "config"));
+            for (PayloadTree payloadTree : configs) {
+                Object data = payloadTree.getRoot().getData();
+                System.out.println(data);
+            }
+        }
     }
-    
+
     @Override
     protected void onLeave(ID id) {
         System.out.println("LEAVE: "+id);

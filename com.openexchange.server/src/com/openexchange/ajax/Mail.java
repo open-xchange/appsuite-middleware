@@ -898,7 +898,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 data = MessageWriter.writeMailMessage(
                     mailInterface.getAccountID(),
-                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave),
+                    mailInterface.getReplyMessageForDisplay(folderPath, uid, reply2all, usmNoSave, false),
                     displayMode,
                     false,
                     session,

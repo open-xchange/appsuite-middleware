@@ -116,7 +116,12 @@ public enum PushUDPExceptionCode implements DisplayableOXExceptionCode {
     /**
      * No UDP channel is configured.
      */
-    NO_CHANNEL("No UDP channel is configured.", 15, CATEGORY_ERROR, null);
+    NO_CHANNEL("No UDP channel is configured.", 15, CATEGORY_ERROR, null),
+    /**
+     * Unable to resolve the specified hostname '%1$s' to an IP address.
+     */
+    UNRESOLVABLE_HOSTNAME("Unable to resolve the specified hostname '%1$s' to an IP address.", 16, CATEGORY_ERROR, null);
+    ;
 
     /**
      * Message of the exception.

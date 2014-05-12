@@ -438,8 +438,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final char OPT_ALIASES_SHORT = 'a';
     protected static final String OPT_ALIASES_LONG = "aliases";
 
-    protected static final String OPT_EXTENDED_LONG = "extendedoptions";
-
     protected static final String OPT_ACCESSRIGHTS_COMBINATION_NAME = "access-combination-name";
 
     protected static final String OPT_CAPABILITIES_TO_ADD = "capabilities-to-add";
@@ -673,9 +671,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     // non-generic extended option
     protected CLIOption addGUISettingOption = null;
     protected CLIOption removeGUISettingOption = null;
-
     protected static final String OPT_ADD_GUI_SETTING_LONG = "addguipreferences";
     protected static final String OPT_REMOVE_GUI_SETTING_LONG = "removeguipreferences";
+
+    protected CLIOption configOption = null;
+    protected CLIOption removeConfigOption = null;
+    protected static final String OPT_CONFIG_LONG = "config";
+    protected static final String OPT_REMOVE_CONFIG_LONG = "remove-config";
 
     // For right error output
     protected String username = null;
@@ -784,30 +786,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private CLIOption positionOption;
 
     protected HashMap<String, CSVConstants> constantsMap;
-
-//    /**
-//     * This field holds all the options which are displayed by default. So this options can be
-//     * deducted from the other dynamically created options
-//     */
-//    public static final HashSet<String> standardoptions = new HashSet<String>(15);
-//
-//    static {
-//        // Here we define those getter which shouldn't be listed in the extendedoptions
-//        standardoptions.add("id");
-//        standardoptions.add("name");
-//        standardoptions.add("display_name");
-//        standardoptions.add(OPT_PASSWORD_LONG);
-//        standardoptions.add("given_name");
-//        standardoptions.add("sur_name");
-//        standardoptions.add(OPT_LANGUAGE_LONG);
-//        standardoptions.add("primaryemail");
-//        standardoptions.add(OPT_DEPARTMENT_LONG);
-//        standardoptions.add(OPT_COMPANY_LONG);
-//        standardoptions.add(OPT_ALIASES_LONG);
-//        standardoptions.add("gui_spam_filter_capabilities_enabled");
-//        standardoptions.add("gui_spam_filter_enabled");
-//
-//    }
 
     protected static UserModuleAccess getUserModuleAccess(final String[] nextLine, final int[] idarray) {
         final UserModuleAccess moduleaccess = new UserModuleAccess();
@@ -1888,6 +1866,14 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.removeGUISettingOption = setLongOpt(admp,OPT_REMOVE_GUI_SETTING_LONG,"Remove a GUI setting", true, false);
     }
 
+    protected final void setConfigOption(final AdminParser adminParser){
+        this.configOption = setLongOpt(adminParser, OPT_CONFIG_LONG, "Add user/context specific configuration, e. g. '--config/com.openexchange.oauth.facebook=false|true'", false, false);
+    }
+
+    protected final void setRemoveConfigOption(final AdminParser adminParser){
+        this.removeConfigOption = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.facebook'", false, false);
+    }
+
     /**
      * @param theMethods
      * @param notallowedOrReplace Here we define the methods we don't want or want to replace. The name is the name of method without the prefix.
@@ -2258,12 +2244,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             changed = true;
         }
         if((String) parser.getOptionValue(this.accessActiveSync) != null) {
-        	access.setActiveSync(accessOption2BooleanCreate(parser, this.accessActiveSync));
-        	changed = true;
+            access.setActiveSync(accessOption2BooleanCreate(parser, this.accessActiveSync));
+            changed = true;
         }
         if((String) parser.getOptionValue(this.accessUSM) != null) {
-        	access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
-        	changed = true;
+            access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
+            changed = true;
         }
         if((String) parser.getOptionValue(this.accessOLOX20) != null) {
             access.setOLOX20(accessOption2BooleanCreate(parser, this.accessOLOX20));
@@ -2398,9 +2384,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected void setExtendedOptions(final AdminParser parser) {
         setAddGuiSettingOption(parser);
+
         if( this.getClass().getName().endsWith("Change") ) {
             setRemoveGuiSettingOption(parser);
         }
+
+        setConfigOption(parser);
+        setRemoveConfigOption(parser);
 
         this.email1Option = setLongOpt(parser, OPT_EMAIL1_LONG, "stringvalue", "Email1", true, false, true);
         this.mailenabledOption = setSettableBooleanLongOpt(parser, OPT_MAILENABLED_LONG, "true / false", "Mailenabled", true, false, true);
@@ -2505,76 +2495,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.defaultsenderaddressOption = setLongOpt(parser, OPT_DEFAULTSENDERADDRESS_LONG, "stringvalue", "DefaultSenderAddress", true, false, true);
         this.foldertreeOption = setIntegerLongOpt(parser, OPT_FOLDERTREE_LONG, "intvalue", "FolderTree", true, false, true);
 
-//        final Method[] methods = User.class.getMethods();
-//        final ArrayList<MethodAndNames> methArrayList = getSetters(methods);
-//
-//        for (final MethodAndNames methodandnames : methArrayList) {
-//            if (!standardoptions.contains(methodandnames.getName().toLowerCase())) {
-//                if (methodandnames.getReturntype().equals(JAVA_LANG_STRING)) {
-//                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), setLongOpt(parser, methodandnames.getName().toLowerCase(), "stringvalue", methodandnames.getName(), true, false, true), methodandnames.getReturntype()));
-//                    System.err.println("this." + methodandnames.getName().toLowerCase() + "Option = setLongOpt(parser, OPT_" + methodandnames.getName().toUpperCase() + "_LONG, \"stringvalue\", \"" + methodandnames.getName() + "\", true, false, true);");
-////                    System.err.println("protected static final String OPT_" + methodandnames.getName().toUpperCase() + "_LONG = \"" + methodandnames.getName().toLowerCase() + "\";");
-//
-////                    System.err.println("                {");
-////                    System.err.println("                String value = (String)parser.getOptionValue(" + methodandnames.getName().toLowerCase() + "Option);");
-////                    System.err.println("                if (null != value) {");
-////                    System.err.println("                    // On the command line an empty string can be used to clear that specific attribute.");
-////                    System.err.println("                    if (\"\".equals(value)) { value = null; }");
-////                    System.err.println("                    usr." + methodandnames.getMethod().getName() + "(value);");
-////                    System.err.println("                }");
-////                    System.err.println("                }");
-//                } else if (methodandnames.getReturntype().equals(JAVA_LANG_INTEGER)) {
-//                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), setIntegerLongOpt(parser, methodandnames.getName().toLowerCase(), "intvalue", methodandnames.getName(), true, false, true), methodandnames.getReturntype()));
-//                    System.err.println("this." + methodandnames.getName().toLowerCase() + "Option = setIntegerLongOpt(parser, OPT_" + methodandnames.getName().toUpperCase() + "_LONG, \"intvalue\", \"" + methodandnames.getName() + "\", true, false, true);");
-////                    System.err.println("protected static final String OPT_" + methodandnames.getName().toUpperCase() + "_LONG = \"" + methodandnames.getName().toLowerCase() + "\";");
-//
-////                    System.err.println("                {");
-////                    System.err.println("                final Integer value = (Integer)parser.getOptionValue(" + methodandnames.getName().toLowerCase() + "Option);");
-////                    System.err.println("                if (null != value) {");
-////                    System.err.println("                    usr." + methodandnames.getMethod().getName() + "(value);");
-////                    System.err.println("                }");
-////                    System.err.println("                }");
-//                } else if (methodandnames.getReturntype().equals(JAVA_LANG_BOOLEAN)) {
-//                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), setSettableBooleanLongOpt(parser, methodandnames.getName().toLowerCase(), "true / false", methodandnames.getName(), true, false, true), methodandnames.getReturntype()));
-//                    System.err.println("this." + methodandnames.getName().toLowerCase() + "Option = setSettableBooleanLongOpt(parser, OPT_" + methodandnames.getName().toUpperCase() + "_LONG, \"true / false\", \"" + methodandnames.getName() + "\", true, false, true)");
-////                    System.err.println("protected static final String OPT_" + methodandnames.getName().toUpperCase() + "_LONG = \"" + methodandnames.getName().toLowerCase() + "\";");
-//
-////                    System.err.println("                {");
-////                    System.err.println("                final Boolean value = (Boolean)parser.getOptionValue(" + methodandnames.getName().toLowerCase() + "Option());");
-////                    System.err.println("                if (null != value) {");
-////                    System.err.println("                    usr." + methodandnames.getMethod().getName() + "(value);");
-////                    System.err.println("                }");
-////                    System.err.println("                }");
-//                } else if (methodandnames.getReturntype().equals(JAVA_UTIL_DATE)) {
-//                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), setLongOpt(parser, methodandnames.getName().toLowerCase(), "datevalue", methodandnames.getName(), true, false, true), methodandnames.getReturntype()));
-//                    System.err.println("this." + methodandnames.getName().toLowerCase() + "Option = setLongOpt(parser, OPT_" + methodandnames.getName().toUpperCase() + "_LONG, \"datevalue\", \"" + methodandnames.getName() + "\", true, false, true)");
-////                    System.err.println("protected static final String OPT_" + methodandnames.getName().toUpperCase() + "_LONG = \"" + methodandnames.getName().toLowerCase() + "\";");
-//
-////                    System.err.println("                {");
-////                    System.err.println("                final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);");
-////                    System.err.println("                sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));");
-////                    System.err.println("                try {");
-////                    System.err.println("                    final String date = (String)parser.getOptionValue(" + methodandnames.getName().toLowerCase() + "Option);");
-////                    System.err.println("                    if( date != null ) {");
-////                    System.err.println("                        final Date value = sdf.parse(date);");
-////                    System.err.println("                        if (null != value) {");
-////                    System.err.println("                            usr." + methodandnames.getMethod().getName() + "(value);");
-////                    System.err.println("                        }");
-////                    System.err.println("                    }");
-////                    System.err.println("                } catch (final ParseException e) {");
-////                    System.err.println("                    throw new InvalidDataException(\"Wrong dateformat, use \\\"\" + sdf.toPattern() + \"\\\"\");");
-////                    System.err.println("                }");
-////                    System.err.println("                }");
-////                } else if (methodandnames.getReturntype().equals(PASSWORDMECH_CLASS)) {
-////                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), setLongOpt(parser, methodandnames.getName().toLowerCase(), "CRYPT/SHA", methodandnames.getName(), true, false, true), methodandnames.getReturntype()));
-////                    //System.err.println("this." + methodandnames.getName().toLowerCase() + "Option = setLongOpt(parser, \"" + methodandnames.getName().toLowerCase() + "\", \"CRYPT/SHA\", \"" + methodandnames.getName() + "\", true, false, true)");
-////                    System.err.println("                    final HashSet<?> value = (HashSet<?>)parser.getOptionValue(optionAndMethod.getOption());");
-////                    System.err.println("                    if (null != value) {");
-////                    System.err.println("                        optionAndMethod.getMethod().invoke(usr, value);");
-////                    System.err.println("                    }");
-//                }
-//            }
-//        }
         setGui_Spam_option(parser);
         setModuleAccessOptions(parser);
     }
@@ -3457,45 +3377,45 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
 
-//        for (final OptionAndMethod optionAndMethod : optionsandmethods) {
-//            if (optionAndMethod.getReturntype().equals(JAVA_LANG_STRING)) {
-//                String value = (String)parser.getOptionValue(optionAndMethod.getOption());
-//                if (null != value) {
-//                    // On the command line an empty string can be used to clear that specific attribute.
-//                    if ("".equals(value)) { value = null; }
-//                    optionAndMethod.getMethod().invoke(usr, value);
-//                }
-//            } else if (optionAndMethod.getReturntype().equals(JAVA_LANG_INTEGER)) {
-//                final Integer value = (Integer)parser.getOptionValue(optionAndMethod.getOption());
-//                if (null != value) {
-//                    optionAndMethod.getMethod().invoke(usr, value);
-//                }
-//            } else if (optionAndMethod.getReturntype().equals(JAVA_LANG_BOOLEAN)) {
-//                final Boolean value = (Boolean)parser.getOptionValue(optionAndMethod.getOption());
-//                if (null != value) {
-//                    optionAndMethod.getMethod().invoke(usr, value);
-//                }
-//            } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_DATE)) {
-//                final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
-//                sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
-//                try {
-//                    final String date = (String)parser.getOptionValue(optionAndMethod.getOption());
-//                    if( date != null ) {
-//                        final Date value = sdf.parse(date);
-//                        if (null != value) {
-//                            optionAndMethod.getMethod().invoke(usr, value);
-//                        }
-//                    }
-//                } catch (final ParseException e) {
-//                    throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"");
-//                }
-//            } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_HASH_SET)) {
-//                final HashSet<?> value = (HashSet<?>)parser.getOptionValue(optionAndMethod.getOption());
-//                if (null != value) {
-//                    optionAndMethod.getMethod().invoke(usr, value);
-//                }
-//            }
-//        }
+        //        for (final OptionAndMethod optionAndMethod : optionsandmethods) {
+        //            if (optionAndMethod.getReturntype().equals(JAVA_LANG_STRING)) {
+        //                String value = (String)parser.getOptionValue(optionAndMethod.getOption());
+        //                if (null != value) {
+        //                    // On the command line an empty string can be used to clear that specific attribute.
+        //                    if ("".equals(value)) { value = null; }
+        //                    optionAndMethod.getMethod().invoke(usr, value);
+        //                }
+        //            } else if (optionAndMethod.getReturntype().equals(JAVA_LANG_INTEGER)) {
+        //                final Integer value = (Integer)parser.getOptionValue(optionAndMethod.getOption());
+        //                if (null != value) {
+        //                    optionAndMethod.getMethod().invoke(usr, value);
+        //                }
+        //            } else if (optionAndMethod.getReturntype().equals(JAVA_LANG_BOOLEAN)) {
+        //                final Boolean value = (Boolean)parser.getOptionValue(optionAndMethod.getOption());
+        //                if (null != value) {
+        //                    optionAndMethod.getMethod().invoke(usr, value);
+        //                }
+        //            } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_DATE)) {
+        //                final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
+        //                sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
+        //                try {
+        //                    final String date = (String)parser.getOptionValue(optionAndMethod.getOption());
+        //                    if( date != null ) {
+        //                        final Date value = sdf.parse(date);
+        //                        if (null != value) {
+        //                            optionAndMethod.getMethod().invoke(usr, value);
+        //                        }
+        //                    }
+        //                } catch (final ParseException e) {
+        //                    throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"");
+        //                }
+        //            } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_HASH_SET)) {
+        //                final HashSet<?> value = (HashSet<?>)parser.getOptionValue(optionAndMethod.getOption());
+        //                if (null != value) {
+        //                    optionAndMethod.getMethod().invoke(usr, value);
+        //                }
+        //            }
+        //        }
     }
 
     protected void applyDynamicOptionsToUser(final AdminParser parser, final User usr) {

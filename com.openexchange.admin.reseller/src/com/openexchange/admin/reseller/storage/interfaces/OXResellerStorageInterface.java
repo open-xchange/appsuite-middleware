@@ -265,18 +265,20 @@ public abstract class OXResellerStorageInterface {
      *
      * @param creds
      * @param access
+     * @param contextAdmin
      * @param restriction_types
      * @throws StorageException
      */
-    public abstract void checkPerSubadminRestrictions(final Credentials creds, final UserModuleAccess access, final String... restriction_types) throws StorageException;
+    public abstract void checkPerSubadminRestrictions(final Credentials creds, final UserModuleAccess access, boolean contextAdmin, final String... restriction_types) throws StorageException;
 
     /**
      * @param ctx
      * @param access
+     * @param contextAdmin
      * @param restriction_types
      * @throws StorageException
      */
-    public abstract void checkPerContextRestrictions(final Context ctx, final UserModuleAccess access, final String... restriction_types) throws StorageException;
+    public abstract void checkPerContextRestrictions(final Context ctx, final UserModuleAccess access, boolean contextAdmin, final String... restriction_types) throws StorageException;
 
     /**
      * @param creds

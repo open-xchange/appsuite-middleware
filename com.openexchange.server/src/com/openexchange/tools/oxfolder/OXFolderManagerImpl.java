@@ -447,6 +447,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         try {
             OXFolderSQL.insertFolderSQL(fuid, user.getId(), folderObj, createTime, ctx, writeCon);
             folderObj.setObjectID(fuid);
+            if (null != writeCon && !writeCon.getAutoCommit()) {
+                writeCon.commit();
+            }
         } catch (final DataTruncation e) {
             throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
         } catch (final SQLException e) {

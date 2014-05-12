@@ -258,6 +258,15 @@ public class DefaultDispatcher implements Dispatcher {
             }
             return result;
         } catch (final RuntimeException e) {
+            if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
+                // Handle special Rhino wrapper error
+                final Throwable wrapped = e.getCause();
+                if (wrapped instanceof OXException) {
+                    throw (OXException) wrapped;
+                }
+            }
+
+            // Wrap unchecked exception
             addLogProperties(requestData, true);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

@@ -1428,7 +1428,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             final Object value = attribute.doSwitch(getter);
                             if (Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
                                 if (encryptedPassword == null) {
-                                    encryptedPassword = encrypt(mailAccount.getPassword(), session);
+                                    encryptedPassword = encrypt(mailAccount.getTransportPassword(), session);
                                 }
                                 setOptionalString(stmt, pos++, encryptedPassword);
                             } else if (Attribute.TRANSPORT_LOGIN_LITERAL == attribute) {
@@ -1476,7 +1476,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             if (session == null) {
                                 encryptedTransportPassword = null;
                             } else {
-                                encryptedTransportPassword = encrypt(mailAccount.getPassword(), session);
+                                encryptedTransportPassword = encrypt(mailAccount.getTransportPassword(), session);
                             }
                             // cid, id, user, name, url, login, password, send_addr, default_flag
                             stmt = con.prepareStatement(INSERT_TRANSPORT_ACCOUNT);

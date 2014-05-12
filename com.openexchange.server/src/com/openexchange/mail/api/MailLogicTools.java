@@ -98,8 +98,27 @@ public class MailLogicTools {
      * @throws OXException If reply message cannot be generated
      */
     public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll) throws OXException {
-        return MimeReply.getReplyMail(originalMail, replyAll, session, accountId);
+        return getReplyMessage(originalMail, replyAll, false);
     }
+
+    /**
+     * Creates a reply message for the message specified by <code>originalMail</code>.
+     * <p>
+     * If mailing system deals with common RFC822 messages, this convenience method only delegates its request to
+     * {@link MimeReply#getReplyMail(MailMessage, boolean, Session)} and can be left unchanged. Otherwise an message data specific
+     * implementation is needed.
+     *
+     * @param originalMail The original mail
+     * @param replyAll <code>true</code> to reply to all recipients; otherwise <code>false</code>
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
+     * @return An instance of {@link MailMessage} representing the reply message
+     * @throws OXException If reply message cannot be generated
+     */
+    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final boolean setFrom) throws OXException {
+        return MimeReply.getReplyMail(originalMail, replyAll, session, accountId, setFrom);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Creates a reply message for the message specified by <code>originalMail</code>.
@@ -115,8 +134,28 @@ public class MailLogicTools {
      * @throws OXException If reply message cannot be generated
      */
     public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final UserSettingMail usm) throws OXException {
-        return MimeReply.getReplyMail(originalMail, replyAll, session, accountId, usm);
+        return getReplyMessage(originalMail, replyAll, usm, false);
     }
+
+    /**
+     * Creates a reply message for the message specified by <code>originalMail</code>.
+     * <p>
+     * If mailing system deals with common RFC822 messages, this convenience method only delegates its request to
+     * {@link MimeReply#getReplyMail(MailMessage, boolean, Session)} and can be left unchanged. Otherwise an message data specific
+     * implementation is needed.
+     *
+     * @param originalMail The original mail
+     * @param replyAll <code>true</code> to reply to all recipients; otherwise <code>false</code>
+     * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
+     * @return An instance of {@link MailMessage} representing the reply message
+     * @throws OXException If reply message cannot be generated
+     */
+    public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final UserSettingMail usm, final boolean setFrom) throws OXException {
+        return MimeReply.getReplyMail(originalMail, replyAll, session, accountId, usm, setFrom);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Creates a forward message for the messages specified by <code>originalMails</code>. If multiple messages are specified then these
@@ -134,6 +173,8 @@ public class MailLogicTools {
         return MimeForward.getFowardMail(originalMails, session, accountId);
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------------- //
+
     /**
      * Creates a forward message for the messages specified by <code>originalMails</code>. If multiple messages are specified then these
      * messages are forwarded as <b>attachment</b> since no inline forward is possible.
@@ -150,4 +191,5 @@ public class MailLogicTools {
     public MailMessage getFowardMessage(final MailMessage[] originalMails, final UserSettingMail usm) throws OXException {
         return MimeForward.getFowardMail(originalMails, session, accountId, usm);
     }
+
 }

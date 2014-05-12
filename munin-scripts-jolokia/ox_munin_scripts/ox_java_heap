@@ -83,7 +83,8 @@ sub callUrlForUsageUsed {
 	if ($response->is_success) {
 		my $json = decode_json($response->decoded_content);
 		if (defined $json->{value}){
-			foreach my $val (values $json->{value}){
+			my $jsonValues = $json->{value};
+			foreach my $val (values %$jsonValues){
 				print "$_[0]".".value ";
 				print $val->{Usage}{used},"\n";
 			}

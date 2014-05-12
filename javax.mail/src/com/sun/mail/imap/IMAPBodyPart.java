@@ -227,12 +227,20 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 		    int seqnum = message.getSequenceNumber();
 		    BODY b = p.peekBody(seqnum, sectionId + ".MIME");
 
-		    if (b == null)
-			throw new MessagingException("Failed to fetch headers");
+		    if (b == null) {
+                if (!checkExists(message, p)) {
+                    throw new MessageRemovedException("Message "+seqnum+" has been removed");
+                }
+                throw new MessagingException("Failed to fetch headers");
+            }
 
 		    ByteArrayInputStream bis = b.getByteArrayInputStream();
-		    if (bis == null)
-			throw new MessagingException("Failed to fetch headers");
+		    if (bis == null) {
+                if (!checkExists(message, p)) {
+                    throw new MessageRemovedException("Message "+seqnum+" has been removed");
+                }
+                throw new MessagingException("Failed to fetch headers");
+            }
 		    return bis;
 
 		} else {
@@ -396,12 +404,20 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 		    int seqnum = message.getSequenceNumber();
 		    BODY b = p.peekBody(seqnum, sectionId + ".MIME");
 
-		    if (b == null)
-			throw new MessagingException("Failed to fetch headers");
+		    if (b == null) {
+                if (!checkExists(message, p)) {
+                    throw new MessageRemovedException("Message "+seqnum+" has been removed");
+                }
+                throw new MessagingException("Failed to fetch headers");
+            }
 
 		    ByteArrayInputStream bis = b.getByteArrayInputStream();
-		    if (bis == null)
-			throw new MessagingException("Failed to fetch headers");
+		    if (bis == null) {
+                if (!checkExists(message, p)) {
+                    throw new MessageRemovedException("Message "+seqnum+" has been removed");
+                }
+                throw new MessagingException("Failed to fetch headers");
+            }
 
 		    headers.load(bis);
 
@@ -435,4 +451,27 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 	}
 	headersLoaded = true;
     }
+
+    protected boolean checkExists(IMAPMessage message, IMAPProtocol p) throws ProtocolException, MessagingException {
+        long uid = message.getUID();
+        if (uid < 0) {
+            uid = ((IMAPFolder) message.getFolder()).getUID(message);
+            if (uid < 0) {
+                return false;
+            }
+        }
+        return checkExists(uid, p);
+    }
+
+    protected boolean checkExists(long uid, IMAPProtocol p) throws ProtocolException {
+        final Response[] r = p.fetch(uid, "UID");
+        final int len = r.length - 1;
+        final Response response = r[len];
+        if (response.isOK()) {
+            return (len > 0);
+        }
+        p.handleResult(response);
+        return false;
+    }
+
 }

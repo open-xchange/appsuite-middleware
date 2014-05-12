@@ -427,7 +427,8 @@ public class MailAccountParser extends DataParser {
     }
 
     /**
-     * Parses the transport credentials based on <tt>'transport_auth'</tt> parameter and if credentials are set within the mail account JSON representation.
+     * Parses the transport credentials based on <tt>'transport_auth'</tt> parameter and if credentials are set within the mail account JSON
+     * representation.
      *
      * @param account The mail account to fill
      * @param json The mail account JSON representation
