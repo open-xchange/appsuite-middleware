@@ -63,6 +63,7 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.Transport;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.smtp.SMTPTransport;
 
@@ -100,6 +101,13 @@ public class MailValidator {
                     final ConfigurationService configuration = Services.getService(ConfigurationService.class);
                     final String sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
                     props.put("mail.imap.ssl.protocols", sslProtocols);
+                }
+                {
+                    final ConfigurationService configuration = Services.getService(ConfigurationService.class);
+                    final String cipherSuites = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
+                    if (!Strings.isEmpty(cipherSuites)) {
+                        props.put("mail.imap.ssl.ciphersuites", cipherSuites);
+                    }
                 }
             }
             props.put("mail.imap.socketFactory.fallback", "false");
@@ -145,6 +153,13 @@ public class MailValidator {
                     final ConfigurationService configuration = Services.getService(ConfigurationService.class);
                     final String sslProtocols = configuration.getProperty("com.openexchange.pop3.ssl.protocols", "SSLv3 TLSv1").trim();
                     props.put("mail.pop3.ssl.protocols", sslProtocols);
+                }
+                {
+                    final ConfigurationService configuration = Services.getService(ConfigurationService.class);
+                    final String cipherSuites = configuration.getProperty("com.openexchange.pop3.ssl.ciphersuites", "").trim();
+                    if (!Strings.isEmpty(cipherSuites)) {
+                        props.put("mail.pop3.ssl.ciphersuites", cipherSuites);
+                    }
                 }
             }
             props.put("mail.pop3.socketFactory.fallback", "false");
@@ -205,6 +220,13 @@ public class MailValidator {
                     final ConfigurationService configuration = Services.getService(ConfigurationService.class);
                     final String sslProtocols = configuration.getProperty("com.openexchange.smtp.ssl.protocols", "SSLv3 TLSv1").trim();
                     props.put("mail.smtp.ssl.protocols", sslProtocols);
+                }
+                {
+                    final ConfigurationService configuration = Services.getService(ConfigurationService.class);
+                    final String cipherSuites = configuration.getProperty("com.openexchange.smtp.ssl.ciphersuites", "").trim();
+                    if (!Strings.isEmpty(cipherSuites)) {
+                        props.put("mail.smtp.ssl.ciphersuites", cipherSuites);
+                    }
                 }
             }
             props.put("mail.smtp.socketFactory.port", port);

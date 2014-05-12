@@ -53,6 +53,7 @@ import static com.openexchange.pop3.services.POP3ServiceRegistry.getServiceRegis
 import java.nio.charset.Charset;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.config.MailProperties;
@@ -99,6 +100,8 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
     private String spamHandlerName;
 
     private String sslProtocols;
+
+    private String cipherSuites;
 
     /**
      * Initializes a new {@link POP3Properties}
@@ -198,6 +201,12 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
         sslProtocols = configuration.getProperty("com.openexchange.pop3.ssl.protocols", "SSLv3 TLSv1").trim();
         logBuilder.append("\tSupported SSL protocols: ").append(sslProtocols).append("\n");
 
+        {
+            final String tmp = configuration.getProperty("com.openexchange.pop3.ssl.ciphersuites", "").trim();
+            this.cipherSuites = Strings.isEmpty(tmp) ? null : tmp;
+            logBuilder.append("\tSupported SSL cipher suites: ").append(null == this.cipherSuites ? "<default>" : cipherSuites).append("\n");
+        }
+
         logBuilder.append("Global POP3 properties successfully loaded!");
         LOG.info(logBuilder.toString());
     }
@@ -211,7 +220,8 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
         pop3AuthEnc = null;
         spamHandlerName = null;
         pop3BlockSize = 100;
-        sslProtocols = null;
+        sslProtocols = "SSLv3 TLSv1";
+        cipherSuites = null;
     }
 
     @Override
@@ -321,6 +331,11 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
     @Override
     public String getSSLProtocols() {
         return sslProtocols;
+    }
+
+    @Override
+    public String getSSLCipherSuites() {
+        return cipherSuites;
     }
 
 }
