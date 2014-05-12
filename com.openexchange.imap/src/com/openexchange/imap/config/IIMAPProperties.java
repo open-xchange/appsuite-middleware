@@ -190,9 +190,18 @@ public interface IIMAPProperties extends IMailProperties {
 
     /**
      * Gets supported SSL protocols
+     *
      * @return Supported SSL protocols
      */
     public String getSSLProtocols();
+
+    /**
+     * Gets the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens
+     * acceptable to the <code>javax.net.ssl.SSLSocket.setEnabledProtocols</code> method.
+     *
+     * @return The SSL cipher suites
+     */
+    public String getSSLCipherSuites();
 
     /**
      * Gets the map holding IMAP servers with new ACL Extension.

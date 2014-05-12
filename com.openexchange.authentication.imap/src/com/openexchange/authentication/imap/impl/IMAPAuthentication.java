@@ -75,6 +75,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
@@ -300,6 +301,24 @@ public class IMAPAuthentication implements AuthenticationService {
                  * Needed for JavaMail >= 1.4
                  */
                 // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+                /*
+                 * Specify SSL protocols
+                 */
+                {
+                    final ConfigurationService configuration = services.getService(ConfigurationService.class);
+                    final String sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
+                    imapprops.put("mail.imap.ssl.protocols", sslProtocols);
+                }
+                /*
+                 * Specify SSL cipher suites
+                 */
+                {
+                    final ConfigurationService configuration = services.getService(ConfigurationService.class);
+                    final String cipherSuites = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
+                    if (false == Strings.isEmpty(cipherSuites)) {
+                        imapprops.put("mail.imap.ssl.ciphersuites", cipherSuites);
+                    }
+                }
             } else {
                 /*
                  * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
@@ -320,6 +339,16 @@ public class IMAPAuthentication implements AuthenticationService {
                     final ConfigurationService configuration = services.getService(ConfigurationService.class);
                     final String sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
                     imapprops.put("mail.imap.ssl.protocols", sslProtocols);
+                }
+                /*
+                 * Specify SSL cipher suites
+                 */
+                {
+                    final ConfigurationService configuration = services.getService(ConfigurationService.class);
+                    final String cipherSuites = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
+                    if (false == Strings.isEmpty(cipherSuites)) {
+                        imapprops.put("mail.imap.ssl.ciphersuites", cipherSuites);
+                    }
                 }
                 // imapProps.put("mail.imap.ssl.enable", "true");
                 /*

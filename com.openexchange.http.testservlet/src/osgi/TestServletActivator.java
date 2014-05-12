@@ -2,6 +2,7 @@
 package osgi;
 
 import org.osgi.service.http.HttpService;
+import com.openexchange.http.testservlet.DiagnosticServlet;
 import com.openexchange.http.testservlet.PingServlet;
 import com.openexchange.http.testservlet.TestServlet;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -27,6 +28,7 @@ public class TestServletActivator extends HousekeepingActivator {
         }
         service.registerServlet("/servlet/TestServlet", new TestServlet(), null, null);
         service.registerServlet("/servlet/Ping", new PingServlet(), null, null);
+        service.registerServlet("/stats/diagnostic", new DiagnosticServlet(), null, null);
     }
 
     @Override
@@ -35,6 +37,7 @@ public class TestServletActivator extends HousekeepingActivator {
         if (service != null) {
             service.unregister("/servlet/TestServlet");
             service.unregister("/servlet/Ping");
+            service.unregister("/servlet/Diagnostic");
         }
         super.stopBundle();
     }
