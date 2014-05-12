@@ -67,6 +67,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-1668
     ox_add_property com.openexchange.imap.storeContainerType boundary-aware $PFILE
+
+    # SoftwareChange_Request-2016
+    ox_add_property com.openexchange.imap.ssl.ciphersuites "" $PFILE
 fi
 
 %clean

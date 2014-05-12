@@ -42,8 +42,13 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    PFILE=/opt/open-xchange/etc/smtp.properties
+
     # SoftwareChange_Request-1795
     ox_add_property com.openexchange.smtp.logTransport false /opt/open-xchange/etc/smtp.properties
+
+    # SoftwareChange_Request-2016
+    ox_add_property com.openexchange.smtp.ssl.ciphersuites "" $PFILE
 fi
 
 %clean
