@@ -107,7 +107,12 @@ public abstract class AbstractJSONConverter implements ResultConverter {
                 JSONObject valueJSON = convertFacetValue(locale, value);
                 jValues.put(valueJSON);
             }
-            jFacet.put("values", jValues);
+
+            if (type.appliesOnce()) {
+                jFacet.put("options", jValues);
+            } else {
+                jFacet.put("values", jValues);
+            }
 
             // Flags
             JSONArray jFlags = new JSONArray();
