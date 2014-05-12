@@ -181,4 +181,14 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         return tmp.trim();
     }
 
+    @Override
+    public String getSSLCipherSuites() {
+        final String tmp = properties.get("com.openexchange.smtp.ssl.ciphersuites");
+        if (null == tmp) {
+            return SMTPProperties.getInstance().getSSLCipherSuites();
+        }
+
+        return tmp.trim();
+    }
+
 }

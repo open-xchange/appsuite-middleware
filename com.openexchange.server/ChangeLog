@@ -1,3 +1,7 @@
+* 2014-05-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30843: Introduced properties for IMAP, POP3, and SMTP to specify the SSL cipher suites that will be enabled for SSL connections
+
 * 2014-05-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 32044: Update the reminder's folderID for all accessing users, if there are no participants. Check additionally permissions

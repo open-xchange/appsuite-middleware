@@ -178,4 +178,14 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         return tmp.trim();
     }
 
+    @Override
+    public String getSSLCipherSuites() {
+        final String tmp = properties.get("com.openexchange.pop3.ssl.ciphersuites");
+        if (null == tmp) {
+            return POP3Properties.getInstance().getSSLCipherSuites();
+        }
+
+        return tmp.trim();
+    }
+
 }

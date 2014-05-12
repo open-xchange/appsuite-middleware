@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.Services;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
@@ -137,6 +138,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     private String sContainerType;
 
     private String sslProtocols;
+
+    private String cipherSuites;
 
     /**
      * Initializes a new {@link IMAPProperties}
@@ -386,6 +389,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
         logBuilder.append("\tSupported SSL protocols: ").append(sslProtocols).append("\n");
 
+        {
+            final String tmp = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
+            this.cipherSuites = Strings.isEmpty(tmp) ? null : tmp;
+            logBuilder.append("\tSupported SSL cipher suites: ").append(null == this.cipherSuites ? "<default>" : cipherSuites).append("\n");
+        }
+
         logBuilder.append("Global IMAP properties successfully loaded!");
 
         LOG.info(logBuilder.toString());
@@ -412,7 +421,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         notifyRecent = false;
         notifyFrequencySeconds = 300;
         notifyFullNames = "INBOX";
-        sslProtocols = null;
+        sslProtocols = "SSLv3 TLSv1";
+        cipherSuites = null;
     }
 
     @Override
@@ -601,4 +611,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     public String getSSLProtocols() {
         return sslProtocols;
     }
+
+    @Override
+    public String getSSLCipherSuites() {
+        return cipherSuites;
+    }
+
 }
