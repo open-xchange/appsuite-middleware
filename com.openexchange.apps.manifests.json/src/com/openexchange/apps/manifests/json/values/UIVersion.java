@@ -49,6 +49,7 @@
 
 package com.openexchange.apps.manifests.json.values;
 
+import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -65,7 +66,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class UIVersion implements ComputedServerConfigValueService {
 
-    public static String UIVERSION = "";
+    /** The UI version reference */
+    public static final AtomicReference<String> UIVERSION = new AtomicReference<String>("");
 
     @Override
     public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
