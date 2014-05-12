@@ -733,7 +733,7 @@ public final class MessageUtility {
         if (com.openexchange.java.Strings.isEmpty(html)) {
             return html;
         }
-        final String lc = html.toLowerCase();
+        final String lc = com.openexchange.java.Strings.toLowerCase(html);
         final String sub = "<html>";
         {
             int count = 0;
