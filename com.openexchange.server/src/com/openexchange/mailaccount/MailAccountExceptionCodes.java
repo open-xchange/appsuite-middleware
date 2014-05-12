@@ -89,7 +89,11 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Denied update of default mail account of user %1$s in context %2$s.
      */
-    NO_DEFAULT_UPDATE(MailAccountExceptionCodes.NO_DEFAULT_UPDATE_MSG, CATEGORY_PERMISSION_DENIED, 7, MailAccountExceptionStrings.NO_DEFAULT_UPDATE_MSG_DISPLAY),
+    NO_DEFAULT_UPDATE("Denied update of default mail account of user %1$s in context %2$s.", CATEGORY_PERMISSION_DENIED, 7, MailAccountExceptionStrings.NO_DEFAULT_UPDATE_MSG_DISPLAY),
+    /**
+     * Denied update of attribute %1$s for default mail account of user %2$s in context %3$s.
+     */
+    NO_DEFAULT_UPDATE_ATTR("Denied update of attribute %1$s for default mail account of user %2$s in context %3$s.", CATEGORY_PERMISSION_DENIED, 7, MailAccountExceptionStrings.NO_DEFAULT_UPDATE_MSG_DISPLAY),
     /**
      * No duplicate default account allowed.
      */
@@ -192,8 +196,6 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
     private static final String UNKNOWN_HOST_ERROR_MSG = "A host could not be resolved: %1$s.";
 
     private static final String NO_DEFAULT_DELETE_MSG = "Denied deletion of default mail account of user %1$s in context %2$s.";
-
-    private static final String NO_DEFAULT_UPDATE_MSG = "Denied update of default mail account of user %1$s in context %2$s.";
 
     private static final String NO_DUPLICATE_DEFAULT_MSG = "No duplicate default account allowed.";
 

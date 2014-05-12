@@ -5,6 +5,7 @@
 * 2014-05-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 30843: Introduced properties for IMAP, POP3, and SMTP to specify the SSL cipher suites that will be enabled for SSL connections
+ - Fix for bug 32466: Ignore transport credentials on primary mail account update
 
 * 2014-05-09 - thorben.betten@open-xchange.com
 
