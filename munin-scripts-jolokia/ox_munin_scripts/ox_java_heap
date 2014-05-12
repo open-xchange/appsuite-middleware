@@ -47,7 +47,7 @@ callUrl("d","/read/java.lang:name=Java heap,type=MemoryPool/Usage/used");
 
 sub callUrl {
 	my $ua = LWP::UserAgent->new();
-	my $req = HTTP::Request->new(GET => "$url"."$_[1]");
+	my $req = HTTP::Request->new(GET => "$url$_[1]");
 	$req->authorization_basic($username,$password);
 	
 	$req->header('Accept', => 'text/html');
@@ -57,7 +57,7 @@ sub callUrl {
 	if ($response->is_success) {
 		my $json = decode_json($response->decoded_content);
 		if (defined $json->{value}){
-			print "$_[0]".".value ";
+			print "$_[0].value ";
 			print $json->{value},"\n";
 		}
 	}
@@ -72,14 +72,12 @@ sub callUrl {
 		else {
 			die "Something went wrong:\n",$status;
 		}
-
-		print STDERR $response->status_line, "\n";
 	}
 }
 
 sub callUrlForUsageUsed {
 	my $ua = LWP::UserAgent->new();
-	my $req = HTTP::Request->new(GET => "$url"."$_[1]");
+	my $req = HTTP::Request->new(GET => "$url$_[1]");
 	$req->authorization_basic($username,$password);
 	
 	$req->header('Accept', => 'text/html');
@@ -91,7 +89,7 @@ sub callUrlForUsageUsed {
 		if (defined $json->{value}){
 			my $jsonValues = $json->{value};
 			foreach my $val (values %$jsonValues){
-				print "$_[0]".".value ";
+				print "$_[0].value ";
 				print $val->{Usage}{used},"\n";
 			}
 		}
@@ -107,14 +105,12 @@ sub callUrlForUsageUsed {
 		else {
 			die "Something went wrong:\n",$status;
 		}
-
-		print STDERR $response->status_line, "\n";
 	}
 }
 
 sub callUrlForConfig {
 	my $ua = LWP::UserAgent->new();
-	my $req = HTTP::Request->new(GET => "$url"."$_[2]");
+	my $req = HTTP::Request->new(GET => "$url$_[2]");
 	$req->authorization_basic($username,$password);
 	
 	$req->header('Accept', => 'text/html');
@@ -140,7 +136,5 @@ sub callUrlForConfig {
 		else {
 			die "Something went wrong:\n",$status;
 		}
-
-		print STDERR $response->status_line, "\n";
 	}
 }
