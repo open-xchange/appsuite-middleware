@@ -46,13 +46,11 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.find.facet;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import java.io.Serializable;
-import java.util.LinkedList;
 import java.util.List;
+
 
 /**
  * {@link Facet}s are used to refine a search by filtering results based
@@ -63,104 +61,36 @@ import java.util.List;
  * A possible {@link FacetValue} might be "John Doe".
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public class Facet implements Serializable {
-
-    private static final long serialVersionUID = -8445505622030799014L;
-
-    private final FacetType type;
-    private final List<FacetValue> values;
-    private final List<String> flags;
+public interface Facet {
 
     /**
-     * Initializes a new {@link Facet}.
+     * Gets the facets style.
      *
-     * @param type The type
-     * @param values The values
-     * @throws NullPointerException If one of given parameters is <code>null</code>
-     * @throws IllegalArgumentException If values is empty
+     * @return The style, never <code>null</code>.
      */
-    public Facet(final FacetType type, final List<FacetValue> values) {
-        super();
-        checkNotNull(type);
-        checkNotNull(values);
-        checkArgument(!values.isEmpty());
-        this.type = type;
-        this.values = values;
-        flags = new LinkedList<String>();
-        for (FacetType conflicting : type.conflictingFacets()) {
-            flags.add("conflicts:" + conflicting.getId());
-        }
-    }
+    String getStyle();
 
     /**
-     * @return The facets type, never <code>null</code>.
+     * Gets the facet type.
+     *
+     * @return The type, never <code>null</code>.
      */
-    public FacetType getType() {
-        return type;
-    }
-
-    /**
-     * Returns a list of possible values.
-     * E.g. "John Doe", "Jane Doe".
-     */
-    public List<FacetValue> getValues() {
-        return values;
-    }
+    FacetType getType();
 
     /**
      * Gets the facets flags.
      *
      * @return A list of flags; never <code>null</code> but possibly empty.
      */
-    public List<String> getFlags() {
-        return flags;
-    }
+    List<String> getFlags();
 
     /**
-     * Adds a flag to this facet.
+     * Accepts a {@link FacetVisitor}.
      *
-     * @param flag The flag.
+     * @param visitor The visitor, never <code>null</code>.
      */
-    public void addFlag(String flag) {
-        flags.add(flag);
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
-        result = prime * result + ((values == null) ? 0 : values.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Facet other = (Facet) obj;
-        if (type == null) {
-            if (other.type != null)
-                return false;
-        } else if (!type.equals(other.type))
-            return false;
-        if (values == null) {
-            if (other.values != null)
-                return false;
-        } else if (!values.equals(other.values))
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "Facet [type=" + type + ", values=" + values + "]";
-    }
+    void accept(FacetVisitor visitor);
 
 }

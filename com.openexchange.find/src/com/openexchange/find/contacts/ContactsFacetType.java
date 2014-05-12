@@ -67,33 +67,31 @@ public enum ContactsFacetType implements FacetType {
     /**
      * The "name" field facet
      */
-    NAME("name", null, false, true),
+    NAME("name", null),
     /**
      * The "email" field facet
      */
-    EMAIL("email", null, false, true),
+    EMAIL("email", null),
     /**
      * The "phone" field facet
      */
-    PHONE("phone", null, false, true),
+    PHONE("phone", null),
     /**
      * The "address" field facet
      */
-    ADDRESS("address", null, false, true),
+    ADDRESS("address", null),
     /**
      * The "contact type" facet
      */
-    CONTACT_TYPE("contact_type", ContactsStrings.FACET_TYPE_CONTACT_TYPE, true, false),
+    CONTACT_TYPE("contact_type", ContactsStrings.FACET_TYPE_CONTACT_TYPE),
     /**
      * The "contact" facet
      */
-    CONTACT("contact", ContactsStrings.FACET_TYPE_CONTACT, true, false),
+    CONTACT("contact", ContactsStrings.FACET_TYPE_CONTACT),
     ;
 
     private final String id;
     private final String displayName;
-    private final boolean once;
-    private final boolean fieldFacet;
     private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
 
     /**
@@ -101,14 +99,10 @@ public enum ContactsFacetType implements FacetType {
      *
      * @param id The identifier of this facet
      * @param displayName The display name, or <code>null</code> if not relevant.
-     * @param once <code>true</code> if this filter can be applied only once, <code>false</code>, otherwise
-     * @param fieldFacet <code>true</code> if this facet denotes a field facet, <code>false</code>, otherwise
      */
-    private ContactsFacetType(String id, String displayName, boolean once, boolean fieldFacet) {
+    private ContactsFacetType(String id, String displayName) {
         this.id = id;
         this.displayName = displayName;
-        this.once = once;
-        this.fieldFacet = fieldFacet;
     }
 
     @Override
@@ -122,17 +116,7 @@ public enum ContactsFacetType implements FacetType {
     }
 
     @Override
-    public boolean isFieldFacet() {
-        return fieldFacet;
-    }
-
-    @Override
-    public boolean appliesOnce() {
-        return once;
-    }
-
-    @Override
-    public List<FacetType> conflictingFacets() {
+    public List<FacetType> getConflictingFacets() {
         return conflictingFacets;
     }
 

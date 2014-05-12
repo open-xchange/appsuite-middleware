@@ -117,22 +117,6 @@ public abstract class AbstractFindRequest implements Serializable {
     }
 
     /**
-     * Gets the active facet for the given type if and only if
-     * {@link FacetType#appliesOnce()} is <code>true</code>.
-     * @return The facet or <code>null</code> if not present.
-     */
-    public ActiveFacet getActiveFacet(FacetType type) {
-        if (type.appliesOnce()) {
-            List<ActiveFacet> list = facetMap.get(type);
-            if (list != null) {
-                return list.get(0);
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Gets the active facets for the given type.
      * @return The facets or <code>null</code> if not present.
      */

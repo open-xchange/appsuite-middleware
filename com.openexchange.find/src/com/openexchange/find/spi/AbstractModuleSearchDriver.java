@@ -69,11 +69,13 @@ import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.DefaultFacet;
+import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
@@ -106,26 +108,24 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
     public final AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         checkActiveFacets(autocompleteRequest);
         AutocompleteResult autocompleteResult = doAutocomplete(autocompleteRequest, session);
-        List<Facet> modifiedFacets = new LinkedList<Facet>();
-        List<Facet> resultFacets = new LinkedList<Facet>();
+
+        LinkedList<Facet> modifiedFacets = new LinkedList<Facet>(autocompleteResult.getFacets());
         if (!autocompleteRequest.getPrefix().isEmpty()) {
-            Facet globalFacet = new FieldFacet(
+            Facet globalFacet = new SimpleFacet(
                 CommonFacetType.GLOBAL,
                 new FormattableDisplayItem(getFormatStringForGlobalFacet(), autocompleteRequest.getPrefix()),
                 new Filter(Collections.singletonList(CommonFacetType.GLOBAL.getId()),
                     Collections.singletonList(autocompleteRequest.getPrefix())));
-            modifiedFacets.add(globalFacet);
+            modifiedFacets.addFirst(globalFacet);
         }
 
-        modifiedFacets.addAll(autocompleteResult.getFacets());
         Facet folderTypeFacet = getFolderTypeFacet(getSupportedFolderTypes());
         if (folderTypeFacet != null) {
-            modifiedFacets.add(folderTypeFacet);
+            modifiedFacets.addLast(folderTypeFacet);
         }
 
-
-        filterFacets(modifiedFacets, autocompleteRequest.getActiveFacets(), resultFacets);
-        autocompleteResult.setFacets(resultFacets);
+        LinkedList<Facet> filteredFacets = filterFacets(modifiedFacets, autocompleteRequest.getActiveFacets());
+        autocompleteResult.setFacets(filteredFacets);
         return autocompleteResult;
     }
 
@@ -143,7 +143,7 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
     private void checkActiveFacets(AbstractFindRequest req) throws OXException {
         List<ActiveFacet> facets = req.getActiveFacets();
         for (ActiveFacet facet : facets) {
-            for (FacetType conflictingType : facet.getType().conflictingFacets()) {
+            for (FacetType conflictingType : facet.getType().getConflictingFacets()) {
                 List<ActiveFacet> conflicts = req.getActiveFacets(conflictingType);
                 if (conflicts != null && !conflicts.isEmpty()) {
                     throw FindExceptionCode.FACET_CONFLICT.create(facet.getType().getId(), conflicts.get(0).getType().getId());
@@ -180,71 +180,60 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
      */
     protected abstract Set<Integer> getSupportedFolderTypes();
 
-    /**
-     * Removes the currently active facets (respectively their values) from the ones returned from an autocomplete request.
-     * Empty facets will be removed completely from the result. The original list stays unmodified.
-     * All remaining facets are added to the result list.
-     * @param facets The list to remove facets from.
-     * @param active The facets (values) to remove.
-     * @param results The list to append the filtered facets to.
-     * @return The modified facet list.
-     */
-    protected void filterFacets(List<Facet> facets, List<ActiveFacet> active, List<Facet> results) {
-        if (facets.isEmpty()) {
-            return;
+    protected LinkedList<Facet> filterFacets(List<Facet> facets, List<ActiveFacet> active) {
+        if (facets.isEmpty() || active.isEmpty()) {
+            return new LinkedList<Facet>(facets);
         }
 
-        if (active.isEmpty()) {
-            for (Facet facet : facets) {
-                results.add(facet);
+        Map<FacetType, List<ActiveFacet>> type2active = new HashMap<FacetType, List<ActiveFacet>>(active.size());
+        for (ActiveFacet activeFacet : active) {
+            FacetType type = activeFacet.getType();
+            List<ActiveFacet> list = type2active.get(type);
+            if (list == null) {
+                list = new LinkedList<ActiveFacet>();
+                type2active.put(type, list);
             }
-            return;
+
+            list.add(activeFacet);
         }
 
-        Map<FacetType, Map<String, FacetValue>> typeMap = new HashMap<FacetType, Map<String, FacetValue>>(facets.size());
-        for (Facet facet : facets) {
-            Map<String, FacetValue> valueMap = new HashMap<String, FacetValue>(facet.getValues().size());
-            typeMap.put(facet.getType(), valueMap);
-            for (FacetValue value : facet.getValues()) {
-                valueMap.put(value.getId(), value);
-            }
-        }
-
-        for (ActiveFacet toRemove : active) {
-            FacetType type = toRemove.getType();
-            List<FacetType> conflictingFacets = type.conflictingFacets();
+        LinkedList<Facet> filtered = new LinkedList<Facet>();
+        outer: for (Facet facet : facets) {
+            List<FacetType> conflictingFacets = facet.getType().getConflictingFacets();
             for (FacetType conflicting : conflictingFacets) {
-                typeMap.remove(conflicting);
+                if (type2active.containsKey(conflicting)) {
+                    continue outer;
+                }
             }
 
-            if (!type.isFieldFacet()) {
-                if (type.appliesOnce()) {
-                    typeMap.remove(type);
-                } else {
-                    Map<String, FacetValue> valueMap = typeMap.get(type);
-                    if (valueMap != null) {
-                        valueMap.remove(toRemove.getValueId());
-                        if (valueMap.isEmpty()) {
-                            typeMap.remove(toRemove.getType());
+            if (facet instanceof SimpleFacet) {
+                filtered.add(facet);
+            } else if (facet instanceof ExclusiveFacet) {
+                if (!type2active.containsKey(facet.getType())) {
+                    filtered.add(facet);
+                }
+            } else if (facet instanceof DefaultFacet) {
+                DefaultFacet defaultFacet = (DefaultFacet) facet;
+                List<ActiveFacet> activeFacets = type2active.get(facet.getType());
+                if (activeFacets != null) {
+                    List<FacetValue> filteredValues = new LinkedList<FacetValue>();
+                    Set<String> valuesToRemove = new HashSet<String>(activeFacets.size());
+                    for (ActiveFacet activeFacet : activeFacets) {
+                        valuesToRemove.add(activeFacet.getValueId());
+                    }
+
+                    for (FacetValue value : defaultFacet.getValues()) {
+                        if (!valuesToRemove.contains(value.getId())) {
+                            filteredValues.add(new FacetValue(value.getId(), value.getDisplayItem(), FacetValue.UNKNOWN_COUNT, value.getFilters()));
                         }
                     }
+
+                    filtered.add(new DefaultFacet(defaultFacet.getType(), filteredValues));
                 }
             }
         }
 
-        for (Facet facet : facets) {
-            Map<String, FacetValue> map = typeMap.get(facet.getType());
-            if (map != null) {
-                List<FacetValue> values = new LinkedList<FacetValue>();
-                for (FacetValue value : facet.getValues()) {
-                    if (map.containsKey(value.getId())) {
-                        values.add(value);
-                    }
-                }
-
-                results.add(new Facet(facet.getType(), values));
-            }
-        }
+        return filtered;
     }
 
     protected static String prepareFacetValueId(String prefix, int contextId, String objectId) {
@@ -276,7 +265,7 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
                 new Filter(fields, FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
         }
 
-        Facet facet = new Facet(CommonFacetType.FOLDER_TYPE, folderValues);
+        Facet facet = new ExclusiveFacet(CommonFacetType.FOLDER_TYPE, folderValues);
         return facet;
     }
 }

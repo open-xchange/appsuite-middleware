@@ -49,22 +49,19 @@
 
 package com.openexchange.find.mail;
 
-import com.openexchange.find.common.DefaultFolderType;
+import com.openexchange.find.facet.DefaultFacet;
 
 
 /**
- * {@link DefaultMailFolderType}
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public enum DefaultMailFolderType implements DefaultFolderType {
+public class ContactsFacet extends DefaultFacet {
 
-    INBOX, SENT, TRASH, DRAFTS, SPAM;
+    private static final long serialVersionUID = 4892954333920389367L;
 
-    @Override
-    public String getTypeName() {
-        return toString().toLowerCase();
+    public ContactsFacet() {
+        super(MailFacetType.CONTACTS);
     }
 
 }
