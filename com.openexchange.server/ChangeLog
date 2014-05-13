@@ -2,6 +2,7 @@
 
  - Fix for bug 32409: Assign a new identifier to items that get moved to trash folder
  - Fix for bug 32226: Do not specify any cache-controlling HTTP header for "file" HTTP-API module
+ - Fix for bug 32534: Drop FOREIGN KEY restriction from "infostore_document" table
 
 * 2014-05-12 - martin.herfurth@open-xchange.com
 
