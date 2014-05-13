@@ -119,6 +119,10 @@ CREATE_HEAP_DUMP_VALUES="true false"
 SKIP_COMPRESSION=false
 SKIP_COMPRESSION_LONG=skip-compression
 SKIP_COMPRESSION_VALUES="true false"
+DROP_OLDER_LOGS_THAN=disabled
+DROP_OLDER_LOGS_THAN_LONG=drop-older-logs-than
+DROP_OLDER_LOGS_THAN_VALUES="0 ... n Days"
+DROP_OLDER_LOGS_THAN_KEEP_ALWAYS="open-xchange.log.0 open-xchange-console.log open-xchange-osgi.log"
 
 # NOTE: Do not add arbitrary directories here!
 OX_LOG_DIR=/var/log/open-xchange
@@ -127,7 +131,7 @@ ARCHIVE_DIRS="/opt/open-xchange/etc ${OX_LOG_DIR}"
 PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf'
 
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
-LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:'
+LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$DROP_OLDER_LOGS_THAN_LONG:'
 
 usage() {
     echo
@@ -205,6 +209,15 @@ while true; do
             unset LOGARC_SUFFIX
             unset LOGS_AND_FILES_SUFFIX
         ;;
+        --${DROP_OLDER_LOGS_THAN_LONG})
+            if [ '0' -le "${2}" ] 2> /dev/null ; then
+                DROP_OLDER_LOGS_THAN=${2}
+            else
+                echo "${0}: Error, option '${1}' requires positive numbers" >&2
+                exit 1
+            fi
+            shift 2
+       ;;
         -h|--help)
             usage
             exit
@@ -252,6 +265,10 @@ for opt in ${ALLOPTS}; do
             if [ "${val}" == "${opt_var}" ]; then
                 found=${val}
             fi
+            # Accept any value in case '...' is defined in this option <name>_VALUES
+            if [ '...' == "${val}" ]; then
+                found=${opt_var}
+            fi
         done
         if [ -z "${found}" ]; then
             die "\"${opt_var}\" is not a valid option to --${opt_var_long}"
@@ -288,7 +305,22 @@ else
 fi
 
 collect_files() {
-   ${TAR} cvf /${TMP}/${LOGDIR}/ox_files_and_logs.tar --ignore-failed-read ${ARCHIVE_DIRS} > /dev/null 2>&1
+   if [ 'disabled' == "${DROP_OLDER_LOGS_THAN}" ]; then
+       ${TAR} cvf /${TMP}/${LOGDIR}/ox_files_and_logs.tar \
+           --ignore-failed-read ${ARCHIVE_DIRS} > /dev/null 2>&1
+   else
+       # find files which should be excluded by --drop-older-logs-than option
+       find ${OX_LOG_DIR} \
+           -mtime +${DROP_OLDER_LOGS_THAN} \
+           -type f > /${TMP}/${LOGDIR}/${DROP_OLDER_LOGS_THAN_LONG}-exclude
+       # remove mandatory files from exclusion list if listed
+       for keep in ${DROP_OLDER_LOGS_THAN_KEEP_ALWAYS}; do
+           sed -i "/${keep}$/d" /${TMP}/${LOGDIR}/${DROP_OLDER_LOGS_THAN_LONG}-exclude
+       done
+       ${TAR} cvf /${TMP}/${LOGDIR}/ox_files_and_logs.tar \
+           --ignore-failed-read ${ARCHIVE_DIRS} \
+           --exclude-from=/${TMP}/${LOGDIR}/${DROP_OLDER_LOGS_THAN_LONG}-exclude > /dev/null 2>&1
+   fi
    OIFS=${IFS}
    IFS=$'\n'
    # be very selective on what to add to the archive (Bug#28830)
