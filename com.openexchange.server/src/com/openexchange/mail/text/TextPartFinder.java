@@ -89,10 +89,23 @@ public final class TextPartFinder {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TextPartFinder.class);
 
+    private static final TextPartFinder INSTANCE = new TextPartFinder();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static TextPartFinder getInstance() {
+        return INSTANCE;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------- //
+
     /**
      * Initializes a new {@link TextPartFinder}.
      */
-    public TextPartFinder() {
+    private TextPartFinder() {
         super();
     }
 
