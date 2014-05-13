@@ -729,9 +729,6 @@ public final class InternalList {
         // Adds (cid,changing_date) index to calendar tables if missing
         list.add(new com.openexchange.groupware.update.tasks.CalendarAddChangingDateIndexTask());
 
-        // Finally drops the "FOREIGN KEY (cid, infostore_id) REFERENCES infostore (cid, id)" from "infostore_document" table.
-        list.add(new com.openexchange.groupware.update.tasks.InfostoreDocumentFinallyDropForeignKeyUpdateTask());
-
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }

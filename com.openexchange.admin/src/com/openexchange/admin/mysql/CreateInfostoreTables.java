@@ -105,6 +105,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`file_version_comment` text,"
       + "`meta` BLOB default NULL,"
       + "PRIMARY KEY (`cid`,`infostore_id`,`version_number`),"
+      + "FOREIGN KEY (cid, infostore_id) REFERENCES infostore (cid, id),"
       + "INDEX `md5sum` (`cid`, `file_md5sum`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
