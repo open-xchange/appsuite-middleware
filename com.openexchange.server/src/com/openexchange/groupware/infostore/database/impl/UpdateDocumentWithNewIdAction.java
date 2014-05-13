@@ -51,12 +51,34 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
-public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
+/**
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class UpdateDocumentWithNewIdAction extends AbstractDocumentUpdateAction {
+
+    private Map<DocumentMetadata, Integer> newIdentifiers;
+
+    /**
+     * Initializes a new {@link UpdateDocumentWithNewIdAction}.
+     */
+    public UpdateDocumentWithNewIdAction() {
+        super();
+    }
+
+    /**
+     * Sets the new identifiers
+     *
+     * @param newIds The new identifiers to set
+     */
+    public void setNewIdentifiers(final Map<DocumentMetadata, Integer> newIds) {
+        this.newIdentifiers = newIds;
+    }
 
     @Override
     protected void undoAction() throws OXException {
@@ -73,8 +95,8 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
             InfostoreQueryCatalog queryCatalog = getQueryCatalog();
             // Determine modifiable fields
             Metadata[] fields = queryCatalog.filterWritable(queryCatalog.filterForDocument(getModified()));
-            // Do the update
-            counter = doUpdates(queryCatalog.getDocumentUpdate(fields), fields, getDocuments());
+            // Create update statement & do the update
+            counter = doUpdates(queryCatalog.getDocumentUpdateWithId(fields), fields, getDocuments());
         }
 
         setTimestamp(System.currentTimeMillis());
@@ -85,6 +107,14 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 
     @Override
     protected Object[] getAdditionals(final DocumentMetadata doc) {
+        if (null != newIdentifiers) {
+            Integer newId = newIdentifiers.get(doc);
+            if (null != newId) {
+                return new Object[] { newId, newId, I(getContext().getContextId()), I(doc.getId()), L(getTimestamp()) };
+            }
+        }
+
         return new Object[] { I(getContext().getContextId()), I(doc.getId()), L(getTimestamp()) };
     }
+
 }

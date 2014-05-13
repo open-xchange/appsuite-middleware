@@ -281,6 +281,26 @@ public final class OXFolderSQL {
         }
     }
 
+    /**
+     * Gets the specified user's default folder of given module and type
+     *
+     * @param userId The user ID
+     * @param module The module
+     * @param type The type
+     * @param ctx The context
+     * @return The folder ID of user's default folder of given module, or <code>-1</code> if not found
+     * @throws OXException If a pooling error occurs
+     * @throws SQLException If a SQL error occurs
+     */
+    public static int getUserDefaultFolder(final int userId, final int module, final int type, final Context ctx) throws OXException, SQLException {
+        Connection readCon = DBPool.pickup(ctx);
+        try {
+            return getUserDefaultFolder(userId, module, type, readCon, ctx);
+        } finally {
+            DBPool.closeReaderSilent(ctx, readCon);
+        }
+    }
+
     private static final String SQL_DEFAULTFLDTYPE = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.created_from = ? AND ot.module = ? AND ot.type = ? AND ot.default_flag = 1";
 
     /**
@@ -296,16 +316,14 @@ public final class OXFolderSQL {
      * @throws SQLException If a SQL error occurs
      */
     public static int getUserDefaultFolder(final int userId, final int module, final int type, final Connection readCon, final Context ctx) throws OXException, SQLException {
-        Connection rc = readCon;
-        boolean closeReadCon = false;
+        if (null == readCon) {
+            return getUserDefaultFolder(userId, module, type, ctx);
+        }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            if (rc == null) {
-                rc = DBPool.pickup(ctx);
-                closeReadCon = true;
-            }
-            stmt = rc.prepareStatement(SQL_DEFAULTFLDTYPE);
+            stmt = readCon.prepareStatement(SQL_DEFAULTFLDTYPE);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, userId);
             stmt.setInt(3, module);
@@ -316,7 +334,7 @@ public final class OXFolderSQL {
             }
             return -1;
         } finally {
-            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+            closeSQLStuff(rs, stmt);
         }
     }
 

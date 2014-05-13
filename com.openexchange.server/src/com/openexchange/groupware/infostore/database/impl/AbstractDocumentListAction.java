@@ -67,8 +67,8 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
 
     public int doUpdates(final String query, final Metadata[] fields, final List<DocumentMetadata> docs) throws OXException {
         final UpdateBlock[] updates = new UpdateBlock[docs.size()];
-        int i = 0;
 
+        int i = 0;
         for (final DocumentMetadata doc : docs) {
             updates[i++] = new Update(query) {
 

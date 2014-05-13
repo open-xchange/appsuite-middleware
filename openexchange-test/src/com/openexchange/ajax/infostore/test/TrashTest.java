@@ -60,9 +60,12 @@ import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreResponse;
+import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
@@ -210,7 +213,7 @@ public class TrashTest extends AbstractInfostoreTest {
          * check source & trash folder contents
          */
         assertFileNotExistsInFolder(testFolder.getObjectID(), file.getId());
-        assertFileExistsInFolder(trashFolderID, file.getId());
+        assertFileExistsInFolder(trashFolderID, file.getFileName());
     }
 
     public void testDefaultDeleteFile() throws Exception {
@@ -223,7 +226,7 @@ public class TrashTest extends AbstractInfostoreTest {
          * check source & trash folder contents
          */
         assertFileNotExistsInFolder(testFolder.getObjectID(), file.getId());
-        assertFileExistsInFolder(trashFolderID, file.getId());
+        assertFileExistsInFolder(trashFolderID, file.getFileName());
     }
 
     public void testDeleteDeletedFile() throws Exception {
@@ -236,7 +239,7 @@ public class TrashTest extends AbstractInfostoreTest {
          * check source & trash folder contents
          */
         assertFileNotExistsInFolder(testFolder.getObjectID(), file.getId());
-        assertFileExistsInFolder(trashFolderID, file.getId());
+        assertFileExistsInFolder(trashFolderID, file.getFileName());
         /*
          * delete file again
          */
@@ -254,19 +257,23 @@ public class TrashTest extends AbstractInfostoreTest {
          * soft-delete first file
          */
         DocumentMetadataImpl file1 = createRandomFile(testFolder.getObjectID(), filename);
+        DocumentMetadata fetchedFile = getFile(file1.getId());
+        file1.setLastModified(fetchedFile.getLastModified());
         deleteFile(file1, null);
         /*
          * soft-delete first file
          */
         DocumentMetadataImpl file2 = createRandomFile(testFolder.getObjectID(), filename);
+        fetchedFile = getFile(file2.getId());
+        file2.setLastModified(fetchedFile.getLastModified());
         deleteFile(file2, null);
         /*
          * check source & trash folder contents
          */
         assertFileNotExistsInFolder(testFolder.getObjectID(), file1.getId());
         assertFileNotExistsInFolder(testFolder.getObjectID(), file2.getId());
-        assertFileExistsInFolder(trashFolderID, file1.getId());
-        assertFileExistsInFolder(trashFolderID, file2.getId());
+        assertFileExistsInFolder(trashFolderID, filename);
+        assertFileExistsInFolder(trashFolderID, filename + " (1)");
     }
 
     private void deleteFolder(FolderObject folder, Boolean hardDelete) throws Exception {
@@ -285,6 +292,7 @@ public class TrashTest extends AbstractInfostoreTest {
         deleteRequest.setHardDelete(hardDelete);
         DeleteInfostoreResponse deleteResponse = client.execute(deleteRequest);
         JSONArray json = (JSONArray) deleteResponse.getData();
+        assertNull("An error occurred during delete attempt: " + deleteResponse.getResponse().getException(), deleteResponse.getResponse().getException());
         assertEquals("file not deleted", 0, json.length());
         file.setLastModified(deleteResponse.getTimestamp());
     }
@@ -299,6 +307,18 @@ public class TrashTest extends AbstractInfostoreTest {
             }
         }
         fail("File " + objectID + " not found in folder: " + folderID);
+    }
+
+    private void assertFileExistsInFolder(int folderID, String fileName) throws Exception {
+        AllInfostoreRequest allRequest = new AllInfostoreRequest(folderID, COLUMNS, Metadata.ID, Order.ASCENDING);
+        AbstractColumnsResponse allResponse = client.execute(allRequest);
+        for (Object[] object : allResponse) {
+            String fn = object[1].toString();
+            if (fileName.equals(fn)) {
+                return;
+            }
+        }
+        fail("File " + fileName + " not found in folder: " + folderID);
     }
 
     private void assertFolderExistsInFolder(int folderID, int objectID) throws Exception {
@@ -325,6 +345,11 @@ public class TrashTest extends AbstractInfostoreTest {
         for (FolderObject folder : folders) {
             assertFalse("Folder " + objectID + " found in folder: " + folderID, objectID ==  folder.getObjectID());
         }
+    }
+
+    private DocumentMetadata getFile(int objectID) throws Exception {
+        GetInfostoreResponse getResponse = client.execute(new GetInfostoreRequest(objectID));
+        return getResponse.getDocumentMetadata();
     }
 
     private FolderObject createRandomFolder(int folderID) throws Exception {

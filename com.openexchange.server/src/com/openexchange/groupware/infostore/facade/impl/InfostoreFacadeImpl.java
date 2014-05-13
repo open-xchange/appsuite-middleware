@@ -76,6 +76,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
 import com.openexchange.groupware.attach.index.AttachmentUUID;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -104,6 +105,7 @@ import com.openexchange.groupware.infostore.database.impl.ReplaceDocumentIntoDel
 import com.openexchange.groupware.infostore.database.impl.SelectForUpdateFilenameReserver;
 import com.openexchange.groupware.infostore.database.impl.Tools;
 import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
+import com.openexchange.groupware.infostore.database.impl.UpdateDocumentWithNewIdAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.index.InfostoreUUID;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
@@ -148,6 +150,7 @@ import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
@@ -1234,16 +1237,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 rejectedDocuments.add(document);
             }
         }
-        if (0 < sourceDocuments.size()) {
+        int size = sourceDocuments.size();
+        if (0 < size) {
             /*
              * prepare move
              */
             Date now = new Date();
             BatchFilenameReserver filenameReserver = new BatchFilenameReserverImpl(session.getContext(), this);
             try {
-                List<DocumentMetadata> tombstoneDocuments = new ArrayList<DocumentMetadata>(sourceDocuments.size());
-                List<DocumentMetadata> documentsToUpdate = new ArrayList<DocumentMetadata>(sourceDocuments.size());
+                List<DocumentMetadata> tombstoneDocuments = new ArrayList<DocumentMetadata>(size);
+                List<DocumentMetadata> documentsToUpdate = new ArrayList<DocumentMetadata>(size);
                 List<DocumentMetadata> versionsToUpdate = new ArrayList<DocumentMetadata>();
+                boolean isMoveToTrash = destinationFolderID == getTrashFolderId(session);
+                Map<DocumentMetadata, DocumentMetadata> doc2src = isMoveToTrash ? new HashMap<DocumentMetadata, DocumentMetadata>(size) : null;
                 for (DocumentMetadata document : sourceDocuments) {
                     /*
                      * prepare updated document
@@ -1253,6 +1259,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     documentToUpdate.setModifiedBy(session.getUserId());
                     documentToUpdate.setFolderId(destinationFolderID);
                     documentsToUpdate.add(documentToUpdate);
+                    if (null != doc2src) {
+                        doc2src.put(documentToUpdate, document);
+                    }
                     /*
                      * prepare tombstone entry in del_infostore table for source document
                      */
@@ -1290,27 +1299,82 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 tombstoneAction.setProvider(this);
                 tombstoneAction.setQueryCatalog(QUERIES);
                 perform(tombstoneAction, true);
-                /*
+                /*-
                  * perform document move
+                 *
+                 * Check if a move to trash folder is performed
                  */
-                UpdateDocumentAction updateAction = new UpdateDocumentAction();
-                updateAction.setContext(session.getContext());
-                updateAction.setDocuments(documentsToUpdate);
-                updateAction.setOldDocuments(sourceDocuments);
-                updateAction.setProvider(this);
-                updateAction.setQueryCatalog(QUERIES);
-                updateAction.setModified(new Metadata[] {
-                    Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL
-                });
-                updateAction.setTimestamp(sequenceNumber);
-                perform(updateAction, true);
+                final Map<DocumentMetadata, Integer> newIds;
+                final UndoableAction effectiveUpdateAction;
+                if (isMoveToTrash) {
+                    UpdateDocumentWithNewIdAction updateAction = new UpdateDocumentWithNewIdAction();
+                    updateAction.setContext(session.getContext());
+                    updateAction.setDocuments(documentsToUpdate);
+                    // New identifiers
+                    {
+                        List<Integer> ids = getIds(session.getContext(), documentsToUpdate.size());
+                        newIds = new HashMap<DocumentMetadata, Integer>(documentsToUpdate.size());
+                        int i = 0;
+                        for (DocumentMetadata documentToUpdate : documentsToUpdate) {
+                            newIds.put(documentToUpdate, ids.get(i++));
+                        }
+                        updateAction.setNewIdentifiers(newIds);
+                    }
+                    updateAction.setOldDocuments(sourceDocuments);
+                    updateAction.setProvider(this);
+                    updateAction.setQueryCatalog(QUERIES);
+                    updateAction.setModified(new Metadata[] {
+                        Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL
+                    });
+                    updateAction.setTimestamp(sequenceNumber);
+                    effectiveUpdateAction = updateAction;
+                } else {
+                    newIds = null;
+                    UpdateDocumentAction updateAction = new UpdateDocumentAction();
+                    updateAction.setContext(session.getContext());
+                    updateAction.setDocuments(documentsToUpdate);
+                    updateAction.setOldDocuments(sourceDocuments);
+                    updateAction.setProvider(this);
+                    updateAction.setQueryCatalog(QUERIES);
+                    updateAction.setModified(new Metadata[] {
+                        Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL
+                    });
+                    updateAction.setTimestamp(sequenceNumber);
+                    effectiveUpdateAction = updateAction;
+                }
+                perform(effectiveUpdateAction, true);
+                /*
+                 * Align identifiers
+                 */
+                if (null != newIds && null != doc2src) {
+                    for (DocumentMetadata updatedDocument : documentsToUpdate) {
+                        DocumentMetadata sourceDocument = doc2src.get(updatedDocument);
+                        if (null != sourceDocument) {
+                            Integer newId = newIds.get(updatedDocument);
+                            if (null != newId) {
+                                sourceDocument.setId(newId.intValue());
+                                sourceDocument.setFolderId(destinationFolderID);
+                            }
+                        }
+                    }
+                }
                 /*
                  * perform version update (only required in case of adjusted filenames)
                  */
-                if (0 < versionsToUpdate.size()) {
+                if (!versionsToUpdate.isEmpty()) {
                     UpdateVersionAction updateVersionAction = new UpdateVersionAction();
                     updateVersionAction.setContext(session.getContext());
-                    updateVersionAction.setDocuments(versionsToUpdate);
+                    if (null != newIds) {
+                        for (DocumentMetadata document : versionsToUpdate) {
+                            Integer newId = newIds.get(document);
+                            if (null != newId) {
+                                document.setId(newId.intValue());
+                            }
+                        }
+                        updateVersionAction.setDocuments(versionsToUpdate);
+                    } else {
+                        updateVersionAction.setDocuments(versionsToUpdate);
+                    }
                     updateVersionAction.setOldDocuments(sourceDocuments);
                     updateVersionAction.setProvider(this);
                     updateVersionAction.setQueryCatalog(QUERIES);
@@ -1353,8 +1417,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         /*
          * perform move
          */
-        List<DocumentMetadata> rejectedDocuments = moveDocuments(
-            session, allDocuments, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
+        List<DocumentMetadata> rejectedDocuments = moveDocuments(session, allDocuments, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
         if (null == rejectedDocuments || 0 == rejectedDocuments.size()) {
             return new int[0];
         }
@@ -1868,6 +1931,41 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         db.removeUser(userId, ctx, session, lockManager);
     }
 
+    private List<Integer> getIds(final Context context, final int num) throws OXException {
+        Connection writeCon = null;
+        try {
+            startDBTransaction();
+            writeCon = getWriteConnection(context);
+            List<Integer> newIds = new ArrayList<Integer>(num);
+            for (int i = num; i-- > 0;) {
+                newIds.add(Integer.valueOf(getId(context, writeCon)));
+            }
+            commitDBTransaction();
+            return newIds;
+        } catch (final SQLException e) {
+            throw InfostoreExceptionCodes.NEW_ID_FAILED.create(e);
+        } finally {
+            releaseWriteConnection(context, writeCon);
+            finishDBTransaction();
+        }
+    }
+
+    private int getId(final Context context) throws OXException {
+        Connection writeCon = null;
+        try {
+            startDBTransaction();
+            writeCon = getWriteConnection(context);
+            int retval = getId(context, writeCon);
+            commitDBTransaction();
+            return retval;
+        } catch (final SQLException e) {
+            throw InfostoreExceptionCodes.NEW_ID_FAILED.create(e);
+        } finally {
+            releaseWriteConnection(context, writeCon);
+            finishDBTransaction();
+        }
+    }
+
     private int getId(final Context context, final Connection writeCon) throws SQLException {
         final boolean autoCommit = writeCon.getAutoCommit();
         if (autoCommit) {
@@ -1881,6 +1979,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 writeCon.setAutoCommit(true);
             }
         }
+    }
+
+    private int getTrashFolderId(final ServerSession session) throws OXException {
+        Integer trashFolderId = (Integer) session.getParameter("__infostore.trash");
+        if (null == trashFolderId) {
+            try {
+                trashFolderId = Integer.valueOf(OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.INFOSTORE, FolderObject.TRASH, session.getContext()));
+                session.setParameter("__infostore.trash", trashFolderId);
+            } catch (SQLException e) {
+                throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            }
+        }
+        return trashFolderId.intValue();
     }
 
     private Metadata[] addLastModifiedIfNeeded(final Metadata[] columns) {
