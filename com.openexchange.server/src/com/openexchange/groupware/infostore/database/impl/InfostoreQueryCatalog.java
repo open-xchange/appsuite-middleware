@@ -216,7 +216,7 @@ public class InfostoreQueryCatalog {
     }
 
     private static StringBuilder buildUpdateWithoutWhere(final Table table, final Metadata[] metadata, final MetadataSwitcher columnNames, final String... additionalFields) {
-        final StringBuilder builder = new StringBuilder(512);
+        final StringBuilder builder = new StringBuilder();
         builder.append("UPDATE ").append(table.getTablename()).append(" SET ");
         for (final Metadata m : metadata) {
             if (m == Metadata.VERSION_LITERAL && (table == Table.INFOSTORE_DOCUMENT || table == Table.DEL_INFOSTORE_DOCUMENT)) {
@@ -235,48 +235,6 @@ public class InfostoreQueryCatalog {
         for (final String s : additionalFields) {
             builder.append(s);
             builder.append(" = ?,");
-        }
-
-        builder.setLength(builder.length() - 1);
-        return builder;
-    }
-
-    private static StringBuilder buildJoinedUpdateWithoutWhere(final Metadata[] documentMetadata, final Metadata[] versionMetadata) {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("UPDATE ").append(Table.INFOSTORE.getTablename()).append(" AS i JOIN ").append(Table.INFOSTORE_DOCUMENT.getTablename()).append(" AS d ");
-        builder.append(" ON i.cid = d.cid AND i.id = d.infostore_id SET ");
-
-        {
-            MetadataSwitcher columnNames = Table.INFOSTORE.getFieldSwitcher();
-            for (final Metadata m : documentMetadata) {
-                if (IGNORE_ON_WRITE.contains(m)) {
-                    continue;
-                }
-
-                final String col = (String) m.doSwitch(columnNames);
-                if (col != null) {
-                    builder.append("i.").append(col);
-                    builder.append(" = ?,");
-                }
-            }
-        }
-
-        {
-            MetadataSwitcher columnNames = Table.INFOSTORE_DOCUMENT.getFieldSwitcher();
-            for (final Metadata m : versionMetadata) {
-                if (m == Metadata.VERSION_LITERAL) {
-                    continue;
-                }
-                if (IGNORE_ON_WRITE.contains(m)) {
-                    continue;
-                }
-
-                final String col = (String) m.doSwitch(columnNames);
-                if (col != null) {
-                    builder.append("d.").append(col);
-                    builder.append(" = ?,");
-                }
-            }
         }
 
         builder.setLength(builder.length() - 1);
@@ -392,38 +350,8 @@ public class InfostoreQueryCatalog {
     }
 
     public String getDocumentUpdate(final Metadata[] fields) {
-        return getDocumentUpdate(fields, new Metadata[0]);
-    }
-
-    public String getDocumentUpdate(final Metadata[] fields, final Metadata... additional) {
-        MetadataSwitcher columnNames = Table.INFOSTORE.getFieldSwitcher();
-
-        String[] additionalFields;
-        if (null != additional && additional.length > 0) {
-            additionalFields = new String[additional.length];
-            for (int i = 0; i < additionalFields.length; i++) {
-                additionalFields[i] = (String) additional[i].doSwitch(columnNames);
-            }
-        } else {
-            additionalFields = new String[0];
-        }
-
-        return buildUpdateWithoutWhere(Table.INFOSTORE, fields, columnNames, additionalFields).append(" WHERE cid = ? and id = ? and last_modified <= ?").toString();
-    }
-
-    /*
-     * return buildUpdateWithoutWhere(Table.INFOSTORE_DOCUMENT, fields, Table.INFOSTORE_DOCUMENT.getFieldSwitcher()).append(
-            " WHERE cid = ? and infostore_id = ? and version_number = ? and last_modified <= ?").toString();
-     */
-
-    private static final Metadata[] FIELDS_ID = new Metadata[] { Metadata.ID_LITERAL };
-
-    public String getDocumentUpdateWithId(final Metadata[] fields) {
-        Metadata[] documentMetadata = new Metadata[fields.length + 1];
-        System.arraycopy(fields, 0, documentMetadata, 0, fields.length);
-        documentMetadata[fields.length] = Metadata.ID_LITERAL;
-
-        return buildJoinedUpdateWithoutWhere(documentMetadata, FIELDS_ID).append(" WHERE i.cid = ? and i.id = ? and i.last_modified <= ?").toString();
+        return buildUpdateWithoutWhere(Table.INFOSTORE, fields, Table.INFOSTORE.getFieldSwitcher()).append(
+            " WHERE cid = ? and id = ? and last_modified <= ?").toString();
     }
 
     public String getNumberOfVersionsQueryForOneDocument() {

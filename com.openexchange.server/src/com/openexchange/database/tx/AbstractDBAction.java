@@ -145,7 +145,6 @@ public abstract class AbstractDBAction extends AbstractUndoable implements Undoa
 		protected String statementString;
 
 		public Update(final String sql) {
-		    super();
 			this.sql = sql;
 		}
 
@@ -165,12 +164,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements Undoa
 			return updated;
 		}
 
-		/**
-		 * Fills the <tt>stmt</tt> (<tt>PreparedStatement</tt>) member
-		 *
-		 * @throws SQLException If filling the statement fails
-		 */
-		protected abstract void fillStatement() throws SQLException;
+		public abstract void fillStatement() throws SQLException;
 
 		@Override
         public String getStatement() {

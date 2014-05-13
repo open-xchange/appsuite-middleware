@@ -70,11 +70,9 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
     public void perform() throws OXException {
         int counter = 0;
         {
-            InfostoreQueryCatalog queryCatalog = getQueryCatalog();
-            // Determine modifiable fields
-            Metadata[] fields = queryCatalog.filterWritable(queryCatalog.filterForDocument(getModified()));
-            // Do the update
-            counter = doUpdates(queryCatalog.getDocumentUpdate(fields), fields, getDocuments());
+            Metadata[] fields = getQueryCatalog().filterForDocument(getModified());
+            fields = getQueryCatalog().filterWritable(fields);
+            counter = doUpdates(getQueryCatalog().getDocumentUpdate(fields), fields, getDocuments());
         }
 
         setTimestamp(System.currentTimeMillis());
