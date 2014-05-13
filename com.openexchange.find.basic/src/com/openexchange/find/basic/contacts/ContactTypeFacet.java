@@ -58,6 +58,7 @@ import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.ContactTypeDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -74,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContactTypeFacet extends ContactSearchFacet {
+public class ContactTypeFacet extends ExclusiveFacet implements ContactSearchFacet {
 
     private static final long serialVersionUID = -9031103652463933032L;
 
@@ -128,6 +129,11 @@ public class ContactTypeFacet extends ContactSearchFacet {
             return searchTerm;
         }
         throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, getID());
+    }
+
+    @Override
+    public String getID() {
+        return getType().getId();
     }
 
 }

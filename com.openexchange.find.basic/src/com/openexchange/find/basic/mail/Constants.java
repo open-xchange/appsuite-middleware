@@ -74,8 +74,6 @@ public class Constants {
 
     final static String FIELD_FOLDER = "folder";
 
-    final static String FIELD_TIME = "time";
-
     static final List<String> SENDER_FIELDS = asList(FIELD_FROM);
 
     static final List<String> RECIPIENT_FIELDS = Arrays.asList(new String[] { FIELD_TO, FIELD_CC });

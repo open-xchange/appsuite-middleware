@@ -82,9 +82,10 @@ import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.drive.FileTypeDisplayItem;
+import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.FieldFacet;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
 import com.openexchange.server.ServiceExceptionCode;
@@ -195,19 +196,19 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         if (!prefix.isEmpty()) {
             // Add field factes
             {
-                final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(
+                final Facet fileNameFacet = new SimpleFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(
                     DriveStrings.SEARCH_IN_FILE_NAME,
                     prefix), Constants.FIELD_FILE_NAME, prefix);
                 facets.add(fileNameFacet);
             }
             {
-                final Facet fileDescFacet = new FieldFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(
+                final Facet fileDescFacet = new SimpleFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(
                     DriveStrings.SEARCH_IN_FILE_DESC,
                     prefix), Constants.FIELD_FILE_DESC, prefix);
                 facets.add(fileDescFacet);
             }
             {
-                final Facet fileContentFacet = new FieldFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(
+                final Facet fileContentFacet = new SimpleFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(
                     DriveStrings.SEARCH_IN_FILE_CONTENT,
                     prefix), Constants.FIELD_FILE_CONTENT, prefix);
                 facets.add(fileContentFacet);
@@ -222,7 +223,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.IMAGES.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_IMAGES, FileTypeDisplayItem.Type.IMAGES), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.IMAGES.getIdentifier())));
             fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.OTHER.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_OTHER, FileTypeDisplayItem.Type.OTHER), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.OTHER.getIdentifier())));
             fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.VIDEO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_VIDEO, FileTypeDisplayItem.Type.VIDEO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
-            final Facet folderTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
+            final Facet folderTypeFacet = new ExclusiveFacet(DriveFacetType.FILE_TYPE, fileTypes);
             facets.add(folderTypeFacet);
         }
 

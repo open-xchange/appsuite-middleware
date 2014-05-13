@@ -56,7 +56,7 @@ callUrl("e","/read/com.openexchange.pooling:name=DB Pool $Database/NumBrokenConn
 
 sub callUrl {
 	my $ua = LWP::UserAgent->new();
-	my $req = HTTP::Request->new(GET => "$url"."$_[1]");
+	my $req = HTTP::Request->new(GET => "$url$_[1]");
 	$req->authorization_basic($username,$password);
 	
 	$req->header('Accept', => 'text/html');
@@ -66,7 +66,7 @@ sub callUrl {
 	if ($response->is_success) {
 		my $json = decode_json($response->decoded_content);
 		if (defined $json->{value}){
-			print "$_[0]".".value ";
+			print "$_[0].value ";
 			print $json->{value},"\n";
 		}
 	}
@@ -81,14 +81,12 @@ sub callUrl {
 		else {
 			die "Something went wrong:\n",$status;
 		}
-
-		print STDERR $response->status_line, "\n";
 	}
 }
 
 sub callUrlForDatabase {
 	my $ua = LWP::UserAgent->new();
-	my $req = HTTP::Request->new(GET => "$url"."$_[0]");
+	my $req = HTTP::Request->new(GET => "$url$_[0]");
 	$req->authorization_basic($username,$password);
 	
 	$req->header('Accept', => 'text/html');
@@ -122,7 +120,5 @@ sub callUrlForDatabase {
 		else {
 			die "Something went wrong:\n",$status;
 		}
-
-		print STDERR $response->status_line, "\n";
 	}
 }

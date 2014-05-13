@@ -47,19 +47,87 @@
  *
  */
 
-package com.openexchange.find.mail;
+package com.openexchange.find.facet;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
+ * Abstract super class that proides some common logic for all {@link Facet}
+ * styles.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class MailFacetValues {
+public abstract class AbstractFacet implements Facet, Serializable {
 
-    public final static String FACET_VALUE_LAST_WEEK = "last_week";
+    private static final long serialVersionUID = 3011527528866807119L;
 
-    public final static String FACET_VALUE_LAST_MONTH = "last_month";
+    private final FacetType type;
 
-    public final static String FACET_VALUE_LAST_YEAR = "last_year";
+    private final List<String> flags;
+
+    protected AbstractFacet(final FacetType type) {
+        super();
+        checkNotNull(type);
+        this.type = type;
+        flags = new LinkedList<String>();
+        for (FacetType conflicting : type.getConflictingFacets()) {
+            flags.add("conflicts:" + conflicting.getId());
+        }
+    }
+
+    @Override
+    public FacetType getType() {
+        return type;
+    }
+
+    @Override
+    public List<String> getFlags() {
+        return flags;
+    }
+
+    /**
+     * Adds a flag to this facet.
+     *
+     * @param flag The flag.
+     */
+    public void addFlag(String flag) {
+        flags.add(flag);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((flags == null) ? 0 : flags.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AbstractFacet other = (AbstractFacet) obj;
+        if (flags == null) {
+            if (other.flags != null)
+                return false;
+        } else if (!flags.equals(other.flags))
+            return false;
+        if (type == null) {
+            if (other.type != null)
+                return false;
+        } else if (!type.equals(other.type))
+            return false;
+        return true;
+    }
 
 }

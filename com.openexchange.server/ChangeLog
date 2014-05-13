@@ -1,6 +1,12 @@
+* 2014-05-12 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 32385: New appointments request returns duplicate entries.
+
 * 2014-05-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 30843: Introduced properties for IMAP, POP3, and SMTP to specify the SSL cipher suites that will be enabled for SSL connections
+ - Fix for bug 32466: Ignore transport credentials on primary mail account update
+ - Fix for bug 32478: Orderly signal error exit code if MBean execution failed
 
 * 2014-05-09 - thorben.betten@open-xchange.com
 

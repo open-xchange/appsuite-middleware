@@ -55,12 +55,12 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import com.openexchange.find.SearchService;
+import com.openexchange.find.internal.AvailableModules;
 import com.openexchange.find.internal.MandatoryFolders;
 import com.openexchange.find.internal.SearchDriverManager;
 import com.openexchange.find.internal.SearchServiceImpl;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.java.Strings;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 
 /**
@@ -75,7 +75,9 @@ public class FindActivator implements BundleActivator {
     private volatile ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker;
     private volatile ServiceRegistration<SearchService> searchServiceRegistration;
     private volatile ServiceRegistration<PreferencesItemService> mandatoryFoldersRegistration;
-    private volatile ServiceRegistration<ConfigTreeEquivalent> foldersJSLob;
+    private volatile ServiceRegistration<ConfigTreeEquivalent> availableFoldersJSLob;
+    private volatile ServiceRegistration<PreferencesItemService> availableModulesRegistration;
+    private volatile ServiceRegistration<ConfigTreeEquivalent> availableModulesJSLob;
 
     /**
      * Initializes a new {@link FindActivator}.
@@ -99,23 +101,11 @@ public class FindActivator implements BundleActivator {
             final MandatoryFolders mandatoryFolders = new MandatoryFolders(driverManager);
             searchServiceRegistration = context.registerService(SearchService.class, searchService, null);
             mandatoryFoldersRegistration = context.registerService(PreferencesItemService.class, mandatoryFolders, null);
-            foldersJSLob = context.registerService(ConfigTreeEquivalent.class, new ConfigTreeEquivalent() {
-                private final String configPath = Strings.join(mandatoryFolders.getPath(), "/");
-                @Override
-                public String getConfigTreePath() {
-                    return configPath;
-                }
+            availableFoldersJSLob = context.registerService(ConfigTreeEquivalent.class, mandatoryFolders, null);
 
-                @Override
-                public String getJslobPath() {
-                    return "io.ox/core//search/mandatory/folder";
-                }
-
-                @Override
-                public String toString() {
-                    return getConfigTreePath() + " > " + getJslobPath();
-                }
-            }, null);
+            final AvailableModules availableModules = new AvailableModules(driverManager);
+            availableModulesRegistration = context.registerService(PreferencesItemService.class, availableModules, null);
+            availableModulesJSLob = context.registerService(ConfigTreeEquivalent.class, availableModules, null);
 
             logger.info("Bundle successfully started: com.openexchange.find");
         } catch (final Exception e) {
@@ -141,10 +131,22 @@ public class FindActivator implements BundleActivator {
                 this.mandatoryFoldersRegistration = null;
             }
 
-            final ServiceRegistration<ConfigTreeEquivalent> foldersJSLob = this.foldersJSLob;
-            if (foldersJSLob != null) {
-                foldersJSLob.unregister();
-                this.foldersJSLob = null;
+            final ServiceRegistration<ConfigTreeEquivalent> availableFoldersJSLob = this.availableFoldersJSLob;
+            if (availableFoldersJSLob != null) {
+                availableFoldersJSLob.unregister();
+                this.availableFoldersJSLob = null;
+            }
+
+            final ServiceRegistration<PreferencesItemService> availableModulesRegistration = this.availableModulesRegistration;
+            if (availableModulesRegistration != null) {
+                availableModulesRegistration.unregister();
+                this.availableModulesRegistration = null;
+            }
+
+            final ServiceRegistration<ConfigTreeEquivalent> availableModulesJSLob = this.availableModulesJSLob;
+            if (availableModulesJSLob != null) {
+                availableModulesJSLob.unregister();
+                this.availableModulesJSLob = null;
             }
 
             final ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker = this.driverTracker;

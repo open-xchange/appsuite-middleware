@@ -66,13 +66,17 @@ import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.drive.DriveFacetType;
+import com.openexchange.find.facet.AbstractFacet;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
+import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.tasks.TasksFacetType;
 
@@ -177,15 +181,32 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
             final String id = jFacet.getString("id");
             final FacetType facetType = facetTypeFor(Module.moduleFor(module), id);
 
-            // Facets
-            final JSONArray jFacetValues = jFacet.getJSONArray("values");
-            final int len = jFacetValues.length();
-            final List<FacetValue> values = new ArrayList<FacetValue>(len);
-            for (int i = 0; i < len; i++) {
-                values.add(parseJFacetValue(jFacetValues.getJSONObject(i)));
+            AbstractFacet facet = null;
+            if ("simple".equals(jFacet.getString("style"))) {
+                final JSONArray jFacetValues = jFacet.getJSONArray("values");
+                final int len = jFacetValues.length();
+                final FacetValue value = parseJFacetValue(jFacetValues.getJSONObject(0));
+                facet = new SimpleFacet(facetType, value.getDisplayItem(), value.getFilters().get(0));
+                // TODO: use after API change:
+                // facet = new FieldFacet(facetType, new SimpleDisplayItem(jFacet.getString("display_name")), parseJFilter(jFacet.getJSONObject("filter")));
+            } else if ("default".equals(jFacet.getString("style"))) {
+                final JSONArray jFacetValues = jFacet.getJSONArray("values");
+                final int len = jFacetValues.length();
+                final List<FacetValue> values = new ArrayList<FacetValue>(len);
+                for (int i = 0; i < len; i++) {
+                    values.add(parseJFacetValue(jFacetValues.getJSONObject(i)));
+                }
+                facet = new DefaultFacet(facetType, values);
+            } else if ("exclusive".equals(jFacet.getString("style"))) {
+                final JSONArray jFacetValues = jFacet.getJSONArray("options");
+                final int len = jFacetValues.length();
+                final List<FacetValue> values = new ArrayList<FacetValue>(len);
+                for (int i = 0; i < len; i++) {
+                    values.add(parseJFacetValue(jFacetValues.getJSONObject(i)));
+                }
+                facet = new ExclusiveFacet(facetType, values);
             }
 
-            Facet facet = new Facet(facetType, values);
             JSONArray jFlags = jFacet.getJSONArray("flags");
             for (int i = 0; i < jFlags.length(); i++) {
                 facet.addFlag(jFlags.getString(i));

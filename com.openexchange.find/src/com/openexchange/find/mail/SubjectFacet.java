@@ -47,30 +47,23 @@
  *
  */
 
-package com.openexchange.find.common;
+package com.openexchange.find.mail;
+
+import com.openexchange.find.common.FormattableDisplayItem;
+import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.SimpleFacet;
 
 
 /**
- * If the folder instance within an {@link FolderDisplayItem} is a default folder,
- * it might have a module specific default type (e.g. INBOX for mail folders).
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public interface DefaultFolderType {
+public class SubjectFacet extends SimpleFacet {
 
-    public static DefaultFolderType NONE = new DefaultFolderType() {
-        @Override
-        public String getTypeName() {
-            return "none";
-        }
-    };
+    private static final long serialVersionUID = 1893571237024869725L;
 
-    /**
-     * Gets the name of the default type.
-     * @return Never <code>null</code>. Might be {@link DefaultFolderType#NONE}
-     * if the folder is no default folder.
-     */
-    String getTypeName();
+    public SubjectFacet(String subject, Filter filter) {
+        super(MailFacetType.SUBJECT, new FormattableDisplayItem(MailStrings.FACET_SUBJECT, subject), filter);
+    }
 
 }

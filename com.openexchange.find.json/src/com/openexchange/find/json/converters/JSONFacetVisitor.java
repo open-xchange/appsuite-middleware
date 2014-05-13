@@ -49,48 +49,132 @@
 
 package com.openexchange.find.json.converters;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXUtility;
-import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.FacetVisitor;
 import com.openexchange.find.facet.Filter;
-
+import com.openexchange.find.facet.SimpleFacet;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public abstract class AbstractJSONConverter implements ResultConverter {
+public class JSONFacetVisitor implements FacetVisitor {
 
     private final StringTranslator translator;
 
-    protected AbstractJSONConverter(final StringTranslator translator) {
+    private final Locale locale;
+
+    private final JSONObject result;
+
+    private JSONException jsonException;
+
+    public JSONFacetVisitor(final StringTranslator translator, final Locale locale) {
         super();
         this.translator = translator;
+        this.locale = locale;
+        result = new JSONObject();
     }
 
     @Override
-    public String getOutputFormat() {
-        return "json";
+    public void visit(SimpleFacet facet) {
+        /*
+         * TODO: Discuss with UI team to simplify this type to
+         * {
+         *   "id":"facet_type_id",
+         *   "display_name":"...",
+         *   "filter":{
+         *     "fields":[], "queries":[]
+         *   },
+         *   "flags":[]
+         * }
+         */
+        try {
+            FacetType type = facet.getType();
+            result.put("id", type.getId());
+            result.put("style", facet.getStyle());
+            result.put("field_facet", true);
+
+            JSONObject jValue = new JSONObject();
+            jValue.put("id", type.getId());
+            jValue.put("display_name", convertDisplayItem(locale, facet.getDisplayItem()));
+            jValue.put("filter", convertFilter(facet.getFilter()));
+            result.put("values", new JSONArray(Collections.singletonList(jValue)));
+
+            addFlags(facet);
+        } catch (JSONException e) {
+            jsonException = e;
+        }
     }
 
     @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
+    public void visit(DefaultFacet facet) {
+        try {
+            FacetType type = facet.getType();
+            result.put("id", type.getId());
+            result.put("style", facet.getStyle());
+            result.put("display_name", AJAXUtility.sanitizeParam(translator.translate(locale, type.getDisplayName())));
+
+            List<FacetValue> values = facet.getValues();
+            JSONArray jValues = new JSONArray(values.size());
+            for (FacetValue value : values) {
+                JSONObject jValue = convertFacetValue(locale, value);
+                jValues.put(jValue);
+            }
+
+            result.put("values", jValues);
+
+            addFlags(facet);
+        } catch (JSONException e) {
+            jsonException = e;
+        }
     }
 
-    protected JSONArray convertFacets(Locale locale, List<Facet> facets) throws JSONException {
-        JSONArray result = new JSONArray(facets.size());
-        for (Facet facet : facets) {
-            JSONFacetVisitor facetVisitor = new JSONFacetVisitor(translator, locale);
-            facet.accept(facetVisitor);
-            result.put(facetVisitor.getResult());
+    @Override
+    public void visit(ExclusiveFacet facet) {
+        try {
+            FacetType type = facet.getType();
+            result.put("id", type.getId());
+            result.put("style", facet.getStyle());
+            result.put("display_name", AJAXUtility.sanitizeParam(translator.translate(locale, type.getDisplayName())));
+
+            List<FacetValue> values = facet.getValues();
+            JSONArray jValues = new JSONArray(values.size());
+            for (FacetValue value : values) {
+                JSONObject jValue = convertFacetValue(locale, value);
+                jValues.put(jValue);
+            }
+
+            result.put("options", jValues);
+
+            addFlags(facet);
+        } catch (JSONException e) {
+            jsonException = e;
+        }
+    }
+
+    private void addFlags(Facet facet) throws JSONException {
+        JSONArray jFlags = new JSONArray();
+        for (String flag : facet.getFlags()) {
+            jFlags.put(flag);
+        }
+        result.put("flags", jFlags);
+    }
+
+    public JSONObject getResult() throws JSONException {
+        if (jsonException != null) {
+            throw jsonException;
         }
 
         return result;
@@ -99,8 +183,7 @@ public abstract class AbstractJSONConverter implements ResultConverter {
     protected JSONObject convertFacetValue(Locale locale, FacetValue value) throws JSONException {
         JSONObject valueJSON = new JSONObject(4);
         valueJSON.put("id", value.getId());
-        String displayName = convertDisplayItem(locale, value.getDisplayItem());
-        valueJSON.put("display_name", displayName);
+        valueJSON.put("display_name", convertDisplayItem(locale, value.getDisplayItem()));
         int count = value.getCount();
         if (count >= 0) {
             valueJSON.put("count", value.getCount());

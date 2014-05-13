@@ -49,72 +49,51 @@
 
 package com.openexchange.find.mail;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import com.openexchange.find.facet.FacetType;
-import com.openexchange.java.Strings;
+import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.facet.ExclusiveFacet;
+import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Filter;
 
 
 /**
- * Facet types for the mail module.
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public enum MailFacetType implements FacetType {
+public class TimeFacet extends ExclusiveFacet {
 
-    SUBJECT,
-    MAIL_TEXT,
-    CONTACTS(MailStrings.FACET_SENDER_AND_RECIPIENT),
-    TIME(MailStrings.FACET_TIME);
+    private static final long serialVersionUID = -8066952323635426860L;
 
-    private static final Map<String, MailFacetType> typesById = new HashMap<String, MailFacetType>();
+    public final static String FILTER_FIELD = "time";
+
+    public final static String LAST_WEEK = "last_week";
+
+    public final static String LAST_MONTH = "last_month";
+
+    public final static String LAST_YEAR = "last_year";
+
+    private static List<FacetValue> DEFAULT_VALUES = new ArrayList<FacetValue>(3);
     static {
-        for (MailFacetType type : values()) {
-            typesById.put(type.getId(), type);
-        }
+        DEFAULT_VALUES.add(new FacetValue(
+            LAST_WEEK,
+            new SimpleDisplayItem(MailStrings.LAST_WEEK, true),
+            FacetValue.UNKNOWN_COUNT,
+            Filter.with(FILTER_FIELD, LAST_WEEK)));
+        DEFAULT_VALUES.add(new FacetValue(
+            LAST_MONTH,
+            new SimpleDisplayItem(MailStrings.LAST_MONTH, true),
+            FacetValue.UNKNOWN_COUNT,
+            Filter.with(FILTER_FIELD, LAST_MONTH)));
+        DEFAULT_VALUES.add(new FacetValue(
+            LAST_YEAR,
+            new SimpleDisplayItem(MailStrings.LAST_YEAR, true),
+            FacetValue.UNKNOWN_COUNT,
+            Filter.with(FILTER_FIELD, LAST_YEAR)));
     }
 
-
-    private final String displayName;
-
-    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
-
-    private MailFacetType() {
-        this(null);
-    }
-
-    private MailFacetType(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    @Override
-    public String getId() {
-        return toString().toLowerCase();
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    @Override
-    public List<FacetType> getConflictingFacets() {
-        return conflictingFacets;
-    }
-
-    /**
-     * Gets a {@link MailFacetType} by its id.
-     * @return The type or <code>null</code>, if the id is invalid.
-     */
-    public static MailFacetType getById(String id) {
-        if (Strings.isEmpty(id)) {
-            return null;
-        }
-
-        return typesById.get(id);
+    public TimeFacet() {
+        super(MailFacetType.TIME, DEFAULT_VALUES);
     }
 
 }

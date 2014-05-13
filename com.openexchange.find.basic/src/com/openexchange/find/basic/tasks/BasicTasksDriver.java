@@ -67,10 +67,11 @@ import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.FieldFacet;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.tasks.TaskStatusDisplayItem;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
@@ -167,9 +168,9 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
 
         //add field facets
         if (false == Strings.isEmpty(prefix)) {
-            facets.add(new FieldFacet(TasksFacetType.TASK_TITLE, new FormattableDisplayItem(TasksStrings.FACET_TASK_TITLE, prefix), Constants.FIELD_TITLE, prefix));
-            facets.add(new FieldFacet(TasksFacetType.TASK_DESCRIPTION, new FormattableDisplayItem(TasksStrings.FACET_TASK_DESCRIPTION,  prefix), Constants.FIELD_DESCRIPTION, prefix));
-            facets.add(new FieldFacet(TasksFacetType.TASK_ATTACHMENT_NAME, new FormattableDisplayItem(TasksStrings.FACET_TASK_ATTACHMENT_NAME,  prefix), Constants.FIELD_ATTACHMENT_NAME, prefix));
+            facets.add(new SimpleFacet(TasksFacetType.TASK_TITLE, new FormattableDisplayItem(TasksStrings.FACET_TASK_TITLE, prefix), Constants.FIELD_TITLE, prefix));
+            facets.add(new SimpleFacet(TasksFacetType.TASK_DESCRIPTION, new FormattableDisplayItem(TasksStrings.FACET_TASK_DESCRIPTION,  prefix), Constants.FIELD_DESCRIPTION, prefix));
+            facets.add(new SimpleFacet(TasksFacetType.TASK_ATTACHMENT_NAME, new FormattableDisplayItem(TasksStrings.FACET_TASK_ATTACHMENT_NAME,  prefix), Constants.FIELD_ATTACHMENT_NAME, prefix));
         }
 
         //add participant facets
@@ -182,7 +183,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         if (!prefix.isEmpty())
             participants.add(buildParticipantFacet(prefix, new SimpleDisplayItem(prefix), Collections.singletonList(prefix)));
         if (!participants.isEmpty())
-            facets.add(new Facet(TasksFacetType.TASK_PARTICIPANTS, participants));
+            facets.add(new DefaultFacet(TasksFacetType.TASK_PARTICIPANTS, participants));
 
         //add status facets
         final List<FacetValue> statusFacets = new ArrayList<FacetValue>(5);
@@ -191,13 +192,13 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.DONE, TasksStrings.TASK_STATUS_DONE);
         addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.WAITING, TasksStrings.TASK_STATUS_WAITING);
         addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.DEFERRED, TasksStrings.TASK_STATUS_DEFERRED);
-        facets.add(new Facet(TasksFacetType.TASK_STATUS, statusFacets));
+        facets.add(new DefaultFacet(TasksFacetType.TASK_STATUS, statusFacets));
 
         //add type facets
         final List<FacetValue> typeFacets = new ArrayList<FacetValue>(5);
         addTypeFacet(typeFacets, TaskTypeDisplayItem.Type.SINGLE_TASK, TasksStrings.TASK_TYPE_SINGLE_TASK);
         addTypeFacet(typeFacets, TaskTypeDisplayItem.Type.SERIES, TasksStrings.TASK_TYPE_SERIES);
-        facets.add(new Facet(TasksFacetType.TASK_TYPE, typeFacets));
+        facets.add(new DefaultFacet(TasksFacetType.TASK_TYPE, typeFacets));
 
         return new AutocompleteResult(facets);
     }

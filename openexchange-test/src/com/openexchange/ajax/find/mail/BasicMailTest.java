@@ -71,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.Module;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
@@ -330,7 +331,7 @@ public class BasicMailTest extends AbstractFindTest {
         List<Facet> facets = autocomplete(prefix);
         Facet facet = findByType(MailFacetType.CONTACTS, facets);
         assertNotNull("Contacts facet not found", facet);
-        List<FacetValue> values = facet.getValues();
+        List<FacetValue> values = ((DefaultFacet) facet).getValues();
         int nValues = values.size();
         assertTrue("Missing contacts in facets", values.size() > 5);
         findContactsInValues(contacts, values);
@@ -340,7 +341,7 @@ public class BasicMailTest extends AbstractFindTest {
         facets = autocomplete(prefix, Collections.singletonList(new ActiveFacet(MailFacetType.CONTACTS, values.get(0).getId(), values.get(0).getFilters().get(0))));
         facet = findByType(MailFacetType.CONTACTS, facets);
         assertNotNull("Contacts facet not found", facet);
-        values = facet.getValues();
+        values = ((DefaultFacet) facet).getValues();
         assertTrue("Wrong contacts in facets", values.size() == (nValues - 1));
         last = values.get(values.size() - 1);
         assertEquals("Prefix item is at wrong position in result set", prefix, last.getId());

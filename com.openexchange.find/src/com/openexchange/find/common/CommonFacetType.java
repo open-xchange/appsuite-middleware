@@ -74,12 +74,12 @@ public enum CommonFacetType implements FacetType {
      * The facet type for folders. The presence of this facet is mutually exclusive
      * with {@link CommonFacetType#FOLDER_TYPE}.
      */
-    FOLDER(CommonStrings.FACET_TYPE_FOLDER, false, true),
+    FOLDER(CommonStrings.FACET_TYPE_FOLDER),
     /**
      * The facet type for folder type. The presence of this facet is mutually exclusive
      * with {@link CommonFacetType#FOLDER}.
      */
-    FOLDER_TYPE(CommonStrings.FACET_TYPE_FOLDER_TYPE, false, true),
+    FOLDER_TYPE(CommonStrings.FACET_TYPE_FOLDER_TYPE),
     ;
 
     private static final Map<String, CommonFacetType> typesById = new HashMap<String, CommonFacetType>();
@@ -94,27 +94,14 @@ public enum CommonFacetType implements FacetType {
 
     private final String displayName;
 
-    private final boolean isFieldFacet;
-
-    private final boolean appliesOnce;
     private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
 
     private CommonFacetType() {
-        this(null, true);
+        this(null);
     }
 
-    private CommonFacetType(final String displayName) {
-        this(displayName, false);
-    }
-
-    private CommonFacetType(final String displayName, final boolean isFieldFacet) {
-        this(displayName, isFieldFacet, false);
-    }
-
-    private CommonFacetType(final String displayName, final boolean isFieldFacet, final boolean appliesOnce, final FacetType... conflictingFacets) {
+    private CommonFacetType(final String displayName, final FacetType... conflictingFacets) {
         this.displayName = displayName;
-        this.isFieldFacet = isFieldFacet;
-        this.appliesOnce = appliesOnce;
         if (conflictingFacets != null) {
             for (FacetType conflicting : conflictingFacets) {
                 this.conflictingFacets.add(conflicting);
@@ -133,17 +120,7 @@ public enum CommonFacetType implements FacetType {
     }
 
     @Override
-    public boolean isFieldFacet() {
-        return isFieldFacet;
-    }
-
-    @Override
-    public boolean appliesOnce() {
-        return appliesOnce;
-    }
-
-    @Override
-    public List<FacetType> conflictingFacets() {
+    public List<FacetType> getConflictingFacets() {
         return conflictingFacets;
     }
 

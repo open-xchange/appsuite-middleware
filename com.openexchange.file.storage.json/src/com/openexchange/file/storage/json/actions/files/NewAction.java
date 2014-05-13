@@ -59,6 +59,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link NewAction}
@@ -84,6 +86,12 @@ public class NewAction extends AbstractWriteAction {
         final IDBasedFileAccess fileAccess = request.getFileAccess();
 
         final File file = request.getFile();
+
+        // Check folder
+        if (Strings.isEmpty(file.getFolderId())) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("folder");
+        }
+
         file.setId(FileStorageFileAccess.NEW);
 
         if (request.hasUploads()) {
@@ -91,7 +99,7 @@ public class NewAction extends AbstractWriteAction {
         } else {
             fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
         }
-        
+
         if (request.extendedResponse()) {
             return result(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION), request);
         } else {

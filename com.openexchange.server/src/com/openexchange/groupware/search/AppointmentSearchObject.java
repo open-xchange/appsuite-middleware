@@ -64,6 +64,7 @@ public class AppointmentSearchObject extends CalendarSearchObject {
     private Set<Set<String>> externalParticipants;
     private Set<Integer> folderIDs;
     private Set<Integer> resourceIDs;
+    private boolean onlyPrivateAppointments;
 
 	/**
 	 * Initializes a new {@link AppointmentSearchObject}.
@@ -250,5 +251,25 @@ public class AppointmentSearchObject extends CalendarSearchObject {
      */
     public void setResourceIDs(Set<Integer> resourceIDs) {
         this.resourceIDs = resourceIDs;
+    }
+
+    /**
+     * Gets the private appointment limitation.
+     * Determines if the search should ignore appointments from non-private folders.
+     * 
+     * @return
+     */
+    public boolean isOnlyPrivateAppointments() {
+        return onlyPrivateAppointments;
+    }
+
+    /**
+     * Sets the private appointment limitation.
+     * Determines if the search should ignore appointments from non-private folders.
+     * 
+     * @param onlyPrivateAppointments
+     */
+    public void setOnlyPrivateAppointments(boolean onlyPrivateAppointments) {
+        this.onlyPrivateAppointments = onlyPrivateAppointments;
     }
 }
