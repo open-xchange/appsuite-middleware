@@ -76,9 +76,10 @@ public class ManagedFileActionFactory implements AJAXActionServiceFactory {
     public ManagedFileActionFactory(final ServiceLookup services) {
         super();
         actions = new ConcurrentHashMap<String, AJAXActionService>(4);
-        actions.put("keepalive", new com.openexchange.filemanagement.json.actions.KeepaliveAction(services));
-        actions.put("get", new com.openexchange.filemanagement.json.actions.GetAction(services));
-        actions.put("new", new com.openexchange.filemanagement.json.actions.NewAction(services));
+        actions.put("keepalive", new com.openexchange.filemanagement.json.actions.KeepaliveAction());
+        actions.put("get", new com.openexchange.filemanagement.json.actions.GetAction());
+        actions.put("new", new com.openexchange.filemanagement.json.actions.NewAction());
+        actions.put("range", new com.openexchange.filemanagement.json.actions.RangeAction());
     }
 
     @Override
