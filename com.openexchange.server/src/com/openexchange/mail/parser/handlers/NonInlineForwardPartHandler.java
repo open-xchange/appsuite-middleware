@@ -71,7 +71,7 @@ import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
- * {@link NonInlineForwardPartHandler} - Gathers all occuring non-inline parts in a mail and makes them accessible through
+ * {@link NonInlineForwardPartHandler} - Gathers all occurring non-inline parts in a mail and makes them accessible through
  * {@link #getNonInlineParts()}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -79,14 +79,15 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 public final class NonInlineForwardPartHandler implements MailMessageHandler {
 
     private final List<MailPart> nonInlineParts;
-
     private final Set<String> imageContentIds;
+    private boolean iCalendarContent;
 
     /**
      * Initializes a new {@link NonInlineForwardPartHandler}
      */
     public NonInlineForwardPartHandler() {
         super();
+        iCalendarContent = false;
         nonInlineParts = new ArrayList<MailPart>();
         imageContentIds = new HashSet<String>(1);
     }
@@ -98,8 +99,18 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
      */
     public NonInlineForwardPartHandler(final List<MailPart> nonInlineParts) {
         super();
+        iCalendarContent = false;
         this.nonInlineParts = nonInlineParts;
         imageContentIds = new HashSet<String>(1);
+    }
+
+    /**
+     * Checks if calendar content has been detected
+     *
+     * @return <code>true</code> if calendar content has been detected; otherwise <code>false</code>
+     */
+    public boolean hasCalendarContent() {
+        return iCalendarContent;
     }
 
     /**
@@ -289,6 +300,9 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
             if (!Part.INLINE.equalsIgnoreCase(disposition)) {
                 nonInlineParts.add(part);
             }
+        }
+        if (baseContentType.indexOf("calendar") >= 0 || baseContentType.indexOf("ics") >= 0) {
+            iCalendarContent = true;
         }
         return true;
     }
