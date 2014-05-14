@@ -49,6 +49,8 @@
 
 package com.openexchange.sessionstorage.hazelcast;
 
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
+
 
 /**
  * {@link Unregisterer}
@@ -61,5 +63,10 @@ public interface Unregisterer {
      * Manually unregisters the session storage
      */
     void unregisterSessionStorage();
+
+    /**
+     * Propagates not-active exception
+     */
+    void propagateNotActive(HazelcastInstanceNotActiveException notActiveException);
 
 }

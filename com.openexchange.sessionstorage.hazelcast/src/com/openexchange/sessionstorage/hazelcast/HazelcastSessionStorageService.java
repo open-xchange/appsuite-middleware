@@ -124,6 +124,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     private OXException handleNotActiveException(HazelcastInstanceNotActiveException e) {
         LOG.warn("Encountered a {} error. {} will be shut-down!", HazelcastInstanceNotActiveException.class.getSimpleName(), HazelcastSessionStorageService.class);
+        unregisterer.propagateNotActive(e);
         unregisterer.unregisterSessionStorage();
         inactive.set(true);
         return SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
