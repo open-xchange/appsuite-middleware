@@ -65,41 +65,39 @@ public enum CalendarFacetType implements FacetType {
     /**
      * The "subject" field facet
      */
-    SUBJECT("subject", null, false, true),
+    SUBJECT("subject", null),
     /**
      * The "email" field facet
      */
-    DESCRIPTION("description", null, false, true),
+    DESCRIPTION("description", null),
     /**
      * The "location" field facet
      */
-    LOCATION("location", null, false, true),
+    LOCATION("location", null),
     /**
      * The "attachment" field facet
      */
-    ATTACHMENT_NAME("attachment", null, false, true),
+    ATTACHMENT_NAME("attachment", null),
     /**
      * The "participant" facet
      */
-    PARTICIPANT("participant", CalendarStrings.FACET_TYPE_PARTICIPANT, false, false),
+    PARTICIPANT("participant", CalendarStrings.FACET_TYPE_PARTICIPANT),
     /**
      * The "my status" facet
      */
-    STATUS("status", CalendarStrings.FACET_TYPE_STATUS, true, false),
+    STATUS("status", CalendarStrings.FACET_TYPE_STATUS),
     /**
      * The "date" facet
      */
-    RELATIVE_DATE("date", CalendarStrings.FACET_TYPE_RELATIVE_DATE, true, false),
+    RELATIVE_DATE("date", CalendarStrings.FACET_TYPE_RELATIVE_DATE),
     /**
      * The "recurring type" facet
      */
-    RECURRING_TYPE("type", CalendarStrings.FACET_TYPE_RECURRING_TYPE, true, false),
+    RECURRING_TYPE("type", CalendarStrings.FACET_TYPE_RECURRING_TYPE),
     ;
 
     private final String id;
     private final String displayName;
-    private final boolean once;
-    private final boolean fieldFacet;
     private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
 
     /**
@@ -107,14 +105,10 @@ public enum CalendarFacetType implements FacetType {
      *
      * @param id The identifier of this facet
      * @param displayName The display name, or <code>null</code> if not relevant.
-     * @param once <code>true</code> if this filter can be applied only once, <code>false</code>, otherwise
-     * @param fieldFacet <code>true</code> if this facet denotes a field facet, <code>false</code>, otherwise
      */
-    private CalendarFacetType(String id, String displayName, boolean once, boolean fieldFacet) {
+    private CalendarFacetType(String id, String displayName) {
         this.id = id;
         this.displayName = displayName;
-        this.once = once;
-        this.fieldFacet = fieldFacet;
     }
 
     @Override
@@ -128,17 +122,7 @@ public enum CalendarFacetType implements FacetType {
     }
 
     @Override
-    public boolean isFieldFacet() {
-        return fieldFacet;
-    }
-
-    @Override
-    public boolean appliesOnce() {
-        return once;
-    }
-
-    @Override
-    public List<FacetType> conflictingFacets() {
+    public List<FacetType> getConflictingFacets() {
         return conflictingFacets;
     }
 

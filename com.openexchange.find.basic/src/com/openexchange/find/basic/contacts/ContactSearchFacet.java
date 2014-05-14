@@ -49,32 +49,16 @@
 
 package com.openexchange.find.basic.contacts;
 
-import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.FacetType;
-import com.openexchange.find.facet.FacetValue;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link ContactSearchFacet}
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public abstract class ContactSearchFacet extends Facet {
-
-    private static final long serialVersionUID = 3919108856976038573L;
-
-    /**
-     * Initializes a new {@link ContactSearchFacet}.
-     *
-     * @param type The facet type
-     * @param values The facet values
-     */
-    protected ContactSearchFacet(FacetType type, List<FacetValue> values) {
-        super(type, values);
-    }
+public interface ContactSearchFacet {
 
     /**
      * Constructs a search term for the supplied query.
@@ -91,8 +75,6 @@ public abstract class ContactSearchFacet extends Facet {
      *
      * @return The ID
      */
-    public String getID() {
-        return getType().getId();
-    }
+    public String getID();
 
 }

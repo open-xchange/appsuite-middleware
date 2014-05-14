@@ -47,74 +47,37 @@
  *
  */
 
-package com.openexchange.find.mail;
+package com.openexchange.find.internal;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.find.facet.FacetType;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.java.Strings;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 
 
 /**
- * Facet types for the mail module.
+ * Abstract class for find settings that automagically provides a {@link ConfigTreeEquivalent}
+ * for a {@link PreferencesItemService} implementation.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public enum MailFacetType implements FacetType {
+public abstract class FindSetting implements PreferencesItemService, ConfigTreeEquivalent {
 
-    SUBJECT,
-    MAIL_TEXT,
-    CONTACTS(MailStrings.FACET_SENDER_AND_RECIPIENT),
-    TIME(MailStrings.FACET_TIME);
+    private final String configPath = Strings.join(getPath(), "/");
 
-    private static final Map<String, MailFacetType> typesById = new HashMap<String, MailFacetType>();
-    static {
-        for (MailFacetType type : values()) {
-            typesById.put(type.getId(), type);
-        }
-    }
-
-
-    private final String displayName;
-
-    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
-
-    private MailFacetType() {
-        this(null);
-    }
-
-    private MailFacetType(final String displayName) {
-        this.displayName = displayName;
+    @Override
+    public String getConfigTreePath() {
+        return configPath;
     }
 
     @Override
-    public String getId() {
-        return toString().toLowerCase();
+    public String getJslobPath() {
+        return "io.ox/core//" + getConfigTreePath();
     }
 
     @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    @Override
-    public List<FacetType> getConflictingFacets() {
-        return conflictingFacets;
-    }
-
-    /**
-     * Gets a {@link MailFacetType} by its id.
-     * @return The type or <code>null</code>, if the id is invalid.
-     */
-    public static MailFacetType getById(String id) {
-        if (Strings.isEmpty(id)) {
-            return null;
-        }
-
-        return typesById.get(id);
+    public String toString() {
+        return getConfigTreePath() + " > " + getJslobPath();
     }
 
 }

@@ -49,19 +49,18 @@
 
 package com.openexchange.find.osgi;
 
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.find.SearchService;
+import com.openexchange.find.internal.AvailableModules;
 import com.openexchange.find.internal.MandatoryFolders;
 import com.openexchange.find.internal.SearchDriverManager;
 import com.openexchange.find.internal.SearchServiceImpl;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.java.Strings;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * The activator for find bundle.
@@ -70,12 +69,9 @@ import com.openexchange.jslob.ConfigTreeEquivalent;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Exception handling + logging
  * @since 7.6.0
  */
-public class FindActivator implements BundleActivator {
+public class FindActivator extends HousekeepingActivator {
 
-    private volatile ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker;
-    private volatile ServiceRegistration<SearchService> searchServiceRegistration;
-    private volatile ServiceRegistration<PreferencesItemService> mandatoryFoldersRegistration;
-    private volatile ServiceRegistration<ConfigTreeEquivalent> foldersJSLob;
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FindActivator.class);
 
     /**
      * Initializes a new {@link FindActivator}.
@@ -85,79 +81,39 @@ public class FindActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        final Logger logger = org.slf4j.LoggerFactory.getLogger(FindActivator.class);
-        logger.info("Starting bundle: com.openexchange.find");
-        try {
-            final SearchDriverManager driverManager = new SearchDriverManager(context);
-            final SearchServiceImpl searchService = new SearchServiceImpl(driverManager);
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigViewFactory.class };
+    }
 
-            final ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker = new ServiceTracker<ModuleSearchDriver, ModuleSearchDriver>(context, ModuleSearchDriver.class, driverManager);
-            this.driverTracker = driverTracker;
-            driverTracker.open();
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("Starting bundle: com.openexchange.find");
+        try {
+            final SearchDriverManager driverManager = new SearchDriverManager(context, getService(ConfigViewFactory.class));
+            track(ModuleSearchDriver.class, driverManager);
+            openTrackers();
+
+            final SearchServiceImpl searchService = new SearchServiceImpl(driverManager);
+            registerService(SearchService.class, searchService);
 
             final MandatoryFolders mandatoryFolders = new MandatoryFolders(driverManager);
-            searchServiceRegistration = context.registerService(SearchService.class, searchService, null);
-            mandatoryFoldersRegistration = context.registerService(PreferencesItemService.class, mandatoryFolders, null);
-            foldersJSLob = context.registerService(ConfigTreeEquivalent.class, new ConfigTreeEquivalent() {
-                private final String configPath = Strings.join(mandatoryFolders.getPath(), "/");
-                @Override
-                public String getConfigTreePath() {
-                    return configPath;
-                }
+            registerService(PreferencesItemService.class, mandatoryFolders);
+            registerService(ConfigTreeEquivalent.class, mandatoryFolders);
 
-                @Override
-                public String getJslobPath() {
-                    return "io.ox/core//search/mandatory/folder";
-                }
+            final AvailableModules availableModules = new AvailableModules(driverManager);
+            registerService(PreferencesItemService.class, availableModules);
+            registerService(ConfigTreeEquivalent.class, availableModules);
 
-                @Override
-                public String toString() {
-                    return getConfigTreePath() + " > " + getJslobPath();
-                }
-            }, null);
-
-            logger.info("Bundle successfully started: com.openexchange.find");
+            LOG.info("Bundle successfully started: com.openexchange.find");
         } catch (final Exception e) {
-            logger.error("Error while starting bundle: com.openexchange.find", e);
+            LOG.error("Error while starting bundle: com.openexchange.find", e);
             throw e;
         }
     }
 
     @Override
     public void stop(final BundleContext context) throws Exception {
-        final Logger logger = org.slf4j.LoggerFactory.getLogger(FindActivator.class);
-        logger.info("Stopping bundle: com.openexchange.find");
-        try {
-            final ServiceRegistration<SearchService> searchServiceRegistration = this.searchServiceRegistration;
-            if (searchServiceRegistration != null) {
-                searchServiceRegistration.unregister();
-                this.searchServiceRegistration = null;
-            }
-
-            final ServiceRegistration<PreferencesItemService> mandatoryFoldersRegistration = this.mandatoryFoldersRegistration;
-            if (mandatoryFoldersRegistration != null) {
-                mandatoryFoldersRegistration.unregister();
-                this.mandatoryFoldersRegistration = null;
-            }
-
-            final ServiceRegistration<ConfigTreeEquivalent> foldersJSLob = this.foldersJSLob;
-            if (foldersJSLob != null) {
-                foldersJSLob.unregister();
-                this.foldersJSLob = null;
-            }
-
-            final ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker = this.driverTracker;
-            if (driverTracker != null) {
-                driverTracker.close();
-                this.driverTracker = null;
-            }
-
-            logger.info("Bundle successfully stopped: com.openexchange.find");
-        } catch (final Exception e) {
-            logger.error("Error while stopping bundle: com.openexchange.find", e);
-            throw e;
-        }
+        LOG.info("Stopping bundle: com.openexchange.find");
     }
 
 }

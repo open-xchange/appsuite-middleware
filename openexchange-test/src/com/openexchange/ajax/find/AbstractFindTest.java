@@ -52,6 +52,7 @@ package com.openexchange.ajax.find;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -65,11 +66,14 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.DefaultFacet;
+import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.FilterBuilder;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.test.FolderTestManager;
 
 /**
@@ -115,6 +119,27 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      */
     protected List<PropDocument> query(Module module, List<ActiveFacet> facets) throws Exception {
         QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, module.getIdentifier());
+        QueryResponse queryResponse = client.execute(queryRequest);
+        SearchResult result = queryResponse.getSearchResult();
+        List<PropDocument> propDocuments = new ArrayList<PropDocument>();
+        List<Document> documents = result.getDocuments();
+        for (Document document : documents) {
+            propDocuments.add((PropDocument) document);
+        }
+        return propDocuments;
+    }
+
+    /**
+     * Performs a query request using the supplied active facets.
+     *
+     * @param module The module
+     * @param facets The active facets
+     * @param options The options
+     * @return The found documents
+     * @throws Exception
+     */
+    protected List<PropDocument> query(Module module, List<ActiveFacet> facets, Map<String, String> options) throws Exception {
+        QueryRequest queryRequest = new QueryRequest(true, 0, Integer.MAX_VALUE, facets, options, module.getIdentifier(), null);
         QueryResponse queryResponse = client.execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
@@ -266,17 +291,25 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     }
 
     /**
-     * Searches a FacetValue by its display name in a list of facets.
+     * Searches a FacetValue by its display name in a list of facets that are not of "simple" style.
      *
      * @param facets The facets to check
      * @param displayName The display name to check
      */
     protected static FacetValue findByDisplayName(List<Facet> facets, String displayName) {
         for (Facet facet : facets) {
-            List<FacetValue> values = facet.getValues();
-            for (FacetValue value : values) {
-                if (displayName.equals(value.getDisplayItem().getDefaultValue())) {
-                    return value;
+            if (facet instanceof SimpleFacet) {
+                SimpleFacet ff = (SimpleFacet) facet;
+                DisplayItem displayItem = ff.getDisplayItem();
+                if (displayName.equals(displayItem.getDefaultValue())) {
+                    return new FacetValue(facet.getType().getId(), displayItem, -1, ff.getFilter());
+                }
+            } else {
+                List<FacetValue> values = ((DefaultFacet) facet).getValues();
+                for (FacetValue value : values) {
+                    if (displayName.equals(value.getDisplayItem().getDefaultValue())) {
+                        return value;
+                    }
                 }
             }
         }

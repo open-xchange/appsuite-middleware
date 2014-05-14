@@ -25,44 +25,69 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "graph_category Open Xchange\n";
 	print "graph_vlabel bytes\n";
 	
+	my $printA = 0;
+	my $printB = 0;
+	my $printC = 0;
+	my $printD = 0;
+	my $printE = 0;
+	my $printF = 0;
+	
 	open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
 	
 	while (<SHOWRUNTIME>)
 	{
 		if ( $_ =~ /Code Cache,type=MemoryPool,Usage /) {
-			print "a.label Code Cache\n";
-			print "a.draw AREA\n";
+			$printA = 1;
 			next;
 		}
 		if ( $_ =~ /Perm Gen,type=MemoryPool,Usage /) {
-			print "b.label Perm Gen\n";
-			print "b.draw STACK\n";
+			$printB = 1;
 			next;
 		}
 		if ( $_ =~ /class storage,type=MemoryPool,Usage /) {
-			print "c.label class storage\n";
-			print "c.draw AREA\n";
+			$printC = 1;
 			next;
 		}
 		if ( $_ =~ /JIT code cache,type=MemoryPool,Usage /) {
-			print "d.label JIT code cache\n";
-			print "d.draw STACK\n";
+			$printD = 1;
 			next;
 		}
 		if ( $_ =~ /JIT data cache,type=MemoryPool,Usage /) {
-			print "e.label JIT data cache\n";
-			print "e.draw STACK\n";
+			$printE = 1;
 			next;
 		}
 		if ( $_ =~ /miscellaneous non-heap storage,type=MemoryPool,Usage /) {
-			print "f.label miscellaneous non-heap storage\n";
-			print "f.draw STACK\n";
+			$printF = 1;
 			next;
 		}
 	}
 	
 	close (SHOWRUNTIME);
-
+	
+	if ( $printA ) {
+		print "a.label Code Cache\n";
+		print "a.draw AREA\n";
+	}
+	if ( $printB ) {
+		print "b.label Perm Gen\n";
+		print "b.draw STACK\n";
+	}
+	if ( $printC ) {
+		print "c.label class storage\n";
+		print "c.draw AREA\n";
+	}
+	if ( $printD ) {
+		print "d.label JIT code cache\n";
+		print "d.draw STACK\n";
+	}
+	if ( $printE ) {
+		print "e.label JIT data cache\n";
+		print "e.draw STACK\n";
+	}
+	if ( $printF ) {
+		print "f.label miscellaneous non-heap storage\n";
+		print "f.draw STACK\n";
+	}
 	exit 0
 }
 									

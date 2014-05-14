@@ -47,74 +47,89 @@
  *
  */
 
-package com.openexchange.find.mail;
+package com.openexchange.find.facet;
 
-import java.util.HashMap;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import com.openexchange.find.facet.FacetType;
-import com.openexchange.java.Strings;
 
 
 /**
- * Facet types for the mail module.
+ * A {@link DefaultFacet} contains multiple {@link FacetValue}s and may be present
+ * multiple times in search requests to filter results by a combination of different
+ * values (e.g. "mails with 'foo' and 'bar' in subject").
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public enum MailFacetType implements FacetType {
+public class DefaultFacet extends AbstractFacet {
 
-    SUBJECT,
-    MAIL_TEXT,
-    CONTACTS(MailStrings.FACET_SENDER_AND_RECIPIENT),
-    TIME(MailStrings.FACET_TIME);
+    private static final long serialVersionUID = 7955913533889391522L;
 
-    private static final Map<String, MailFacetType> typesById = new HashMap<String, MailFacetType>();
-    static {
-        for (MailFacetType type : values()) {
-            typesById.put(type.getId(), type);
-        }
+    private final List<FacetValue> values;
+
+    public DefaultFacet(final FacetType type) {
+        super(type);
+        this.values = new LinkedList<FacetValue>();
     }
 
-
-    private final String displayName;
-
-    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
-
-    private MailFacetType() {
-        this(null);
-    }
-
-    private MailFacetType(final String displayName) {
-        this.displayName = displayName;
+    public DefaultFacet(final FacetType type, final List<FacetValue> values) {
+        super(type);
+        checkNotNull(values);
+        checkArgument(!values.isEmpty());
+        this.values = new LinkedList<FacetValue>(values);
     }
 
     @Override
-    public String getId() {
-        return toString().toLowerCase();
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    @Override
-    public List<FacetType> getConflictingFacets() {
-        return conflictingFacets;
+    public String getStyle() {
+        return "default";
     }
 
     /**
-     * Gets a {@link MailFacetType} by its id.
-     * @return The type or <code>null</code>, if the id is invalid.
+     * Returns a list of possible values.
+     * E.g. "John Doe", "Jane Doe".
      */
-    public static MailFacetType getById(String id) {
-        if (Strings.isEmpty(id)) {
-            return null;
-        }
-
-        return typesById.get(id);
+    public List<FacetValue> getValues() {
+        return values;
     }
 
+    public void addValue(FacetValue value) {
+        values.add(value);
+    }
+
+    @Override
+    public void accept(FacetVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((values == null) ? 0 : values.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DefaultFacet other = (DefaultFacet) obj;
+        if (values == null) {
+            if (other.values != null)
+                return false;
+        } else if (!values.equals(other.values))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "Facet [type=" + getType() + ", style=" + getStyle() + ", values=" + values + "]";
+    }
 }

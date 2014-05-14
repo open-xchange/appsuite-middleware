@@ -47,74 +47,39 @@
  *
  */
 
-package com.openexchange.find.mail;
-
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.find.facet.FacetType;
-import com.openexchange.java.Strings;
-
+package com.openexchange.cli;
 
 /**
- * Facet types for the mail module.
+ * {@link ExecutionFault} - A wrapper for exceptions causes by MBean invocation.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum MailFacetType implements FacetType {
+public class ExecutionFault extends Exception {
 
-    SUBJECT,
-    MAIL_TEXT,
-    CONTACTS(MailStrings.FACET_SENDER_AND_RECIPIENT),
-    TIME(MailStrings.FACET_TIME);
+    private static final long serialVersionUID = -435169182635746789L;
 
-    private static final Map<String, MailFacetType> typesById = new HashMap<String, MailFacetType>();
-    static {
-        for (MailFacetType type : values()) {
-            typesById.put(type.getId(), type);
-        }
-    }
-
-
-    private final String displayName;
-
-    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
-
-    private MailFacetType() {
-        this(null);
-    }
-
-    private MailFacetType(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    @Override
-    public String getId() {
-        return toString().toLowerCase();
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    @Override
-    public List<FacetType> getConflictingFacets() {
-        return conflictingFacets;
+    /**
+     * Initializes a new {@link ExecutionFault}.
+     *
+     * @param cause The cause
+     */
+    public ExecutionFault(Throwable cause) {
+        super(cause);
     }
 
     /**
-     * Gets a {@link MailFacetType} by its id.
-     * @return The type or <code>null</code>, if the id is invalid.
+     * Initializes a new {@link ExecutionFault}.
+     *
+     * @param message The message
+     * @param cause The cause
      */
-    public static MailFacetType getById(String id) {
-        if (Strings.isEmpty(id)) {
-            return null;
-        }
+    public ExecutionFault(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-        return typesById.get(id);
+    @Override
+    public synchronized Throwable initCause(Throwable cause) {
+        return this;
     }
 
 }

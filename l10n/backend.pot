@@ -2265,6 +2265,11 @@ msgid ""
 "be used within one request."
 msgstr ""
 
+#. You are not allowed to search in module \"%1$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:99
+msgid "You are not allowed to search in module \"%1$s\"."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:61
 msgid "%1$s <i>in appointments</i>"
 msgstr ""

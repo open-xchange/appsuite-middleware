@@ -56,8 +56,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.java.SearchStrings;
 import com.openexchange.search.CompositeSearchTerm;
@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class ContactSearchFieldFacet extends ContactSearchFacet {
+public abstract class ContactSearchFieldFacet extends SimpleFacet implements ContactSearchFacet {
 
     private static final long serialVersionUID = 2919108856076038573L;
 
@@ -85,13 +85,17 @@ public abstract class ContactSearchFieldFacet extends ContactSearchFacet {
      * @param query The query to insert into the filter
      */
     protected ContactSearchFieldFacet(ContactsFacetType type, DisplayItem displayItem, String query) {
-        super(type, Collections.singletonList(new FacetValue(type.getId(), displayItem, FacetValue.UNKNOWN_COUNT,
-            new Filter(Collections.singletonList(type.getId()), query))));
+        super(type, displayItem, new Filter(Collections.singletonList(type.getId()), query));
     }
 
     @Override
     public SearchTerm<?> getSearchTerm(ServerSession session, String query) throws OXException {
         return getSearchTerm(session, getFields(), query);
+    }
+
+    @Override
+    public String getID() {
+        return getType().getId();
     }
 
     /**

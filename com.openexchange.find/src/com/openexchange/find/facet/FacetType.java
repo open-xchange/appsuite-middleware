@@ -54,7 +54,8 @@ import com.openexchange.i18n.I18nService;
 
 
 /**
- * Defines the type of a facet.
+ * Defines the type of a facet. Every type must be static and must be registered
+ * in {@link Facets}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
@@ -78,28 +79,12 @@ public interface FacetType {
     String getDisplayName();
 
     /**
-     * @return if this facet is meant to provide
-     * exactly one value, that does never change.
-     */
-    boolean isFieldFacet();
-
-    /**
-     * Returns if only one value of this facet can be active at a time
-     * (e.g. it makes sense to filter for items from last week OR last month,
-     * but not both at the same time).
-     *
-     * @return <code>false</code> if this facet may be set multiple times
-     * with different values and filters.
-     */
-    boolean appliesOnce();
-
-    /**
      * Gets a list of facet types that must not be used together with this one in
      * autocomplete and query requests because they are mutually exclusive
      * (e.g. folder and folder type).
      *
      * @return A list of conflicting types; never <code>null</code>.
      */
-    List<FacetType> conflictingFacets();
+    List<FacetType> getConflictingFacets();
 
 }

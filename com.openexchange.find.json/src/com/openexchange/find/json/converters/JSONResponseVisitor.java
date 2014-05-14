@@ -54,6 +54,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -62,6 +63,7 @@ import com.openexchange.find.DocumentVisitor;
 import com.openexchange.find.calendar.CalendarDocument;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.drive.FileDocument;
+import com.openexchange.find.json.QueryResult;
 import com.openexchange.find.json.osgi.ResultConverterRegistry;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.tasks.TasksDocument;
@@ -99,18 +101,18 @@ public class JSONResponseVisitor implements DocumentVisitor {
     private final List<OXException> errors;
     private final JSONArray json;
     private final ResultConverterRegistry converterRegistry;
-    private final int[] columns;
+    private QueryResult queryResult;
 
     /**
      * @param session The session; never <code>null</code>.
      * @param converterRegistry The converter registry; never <code>null</code>.
-     * @param columns The requested response columns; possibly <code>null</code>.
+     * @param queryResult The query result; never <code>null</code>.
      */
-    public JSONResponseVisitor(final ServerSession session, final ResultConverterRegistry converterRegistry, int[] columns) {
+    public JSONResponseVisitor(final ServerSession session, final ResultConverterRegistry converterRegistry, QueryResult queryResult) {
         super();
         this.converterRegistry = converterRegistry;
         this.session = session;
-        this.columns = columns;
+        this.queryResult = queryResult;
         errors = new LinkedList<OXException>();
         json = new JSONArray();
     }
@@ -120,6 +122,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
     @Override
     public void visit(final MailDocument mailDocument) {
         if (mailFieldWriters == null) {
+            int[] columns = queryResult.getSearchRequest().getColumns();
             if (columns == null) {
                 mailFieldWriters = DEFAULT_MAIL_WRITERS;
             } else {
@@ -171,7 +174,12 @@ public class JSONResponseVisitor implements DocumentVisitor {
         try {
             final ResultConverter converter = converterRegistry.getConverter("task");
             if (null != converter) {
-                final AJAXRequestData requestData = new AJAXRequestData();
+                String timeZone = queryResult.getSearchRequest().getOptions().getTimeZone();
+                AJAXRequestData requestData = new AJAXRequestData();
+                if (timeZone != null) {
+                    requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone);
+                }
+
                 final AJAXRequestResult requestResult = new AJAXRequestResult(taskDocument.getTask());
                 converter.convert(requestData, requestResult, session, null);
                 json.put(requestResult.getResultObject());
@@ -182,9 +190,6 @@ public class JSONResponseVisitor implements DocumentVisitor {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void visit(ContactsDocument contactDocument) {
         try {
@@ -206,8 +211,14 @@ public class JSONResponseVisitor implements DocumentVisitor {
         try {
             ResultConverter calendarConverter = converterRegistry.getConverter("appointment");
             if (calendarConverter != null) {
+                String timeZone = queryResult.getSearchRequest().getOptions().getTimeZone();
+                AJAXRequestData requestData = new AJAXRequestData();
+                if (timeZone != null) {
+                    requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone);
+                }
+
                 AJAXRequestResult requestResult = new AJAXRequestResult(calendarDocument.getAppointment());
-                calendarConverter.convert(new AJAXRequestData(), requestResult, session, null);
+                calendarConverter.convert(requestData, requestResult, session, null);
                 json.put(requestResult.getResultObject());
             }
         } catch (OXException e) {

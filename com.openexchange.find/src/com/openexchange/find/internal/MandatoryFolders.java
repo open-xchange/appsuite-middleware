@@ -55,7 +55,6 @@ import com.openexchange.find.internal.SearchDriverManager.CachedConfig;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -64,12 +63,13 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
- * {@link MandatoryFolders}
+ * Injects a setting into the configuration tree that denotes which find modules
+ * require the folder facet to be set.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class MandatoryFolders implements PreferencesItemService {
+public class MandatoryFolders extends FindSetting {
 
     private final SearchDriverManager driverManager;
 

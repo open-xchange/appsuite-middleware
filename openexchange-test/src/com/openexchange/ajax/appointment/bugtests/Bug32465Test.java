@@ -47,74 +47,66 @@
  *
  */
 
-package com.openexchange.find.mail;
+package com.openexchange.ajax.appointment.bugtests;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.find.facet.FacetType;
-import com.openexchange.java.Strings;
-
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.TimeZone;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.CalendarTestManager;
 
 /**
- * Facet types for the mail module.
+ * {@link Bug32465Test}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public enum MailFacetType implements FacetType {
+public class Bug32465Test extends AbstractAJAXSession {
 
-    SUBJECT,
-    MAIL_TEXT,
-    CONTACTS(MailStrings.FACET_SENDER_AND_RECIPIENT),
-    TIME(MailStrings.FACET_TIME);
+    private CalendarTestManager ctm;
 
-    private static final Map<String, MailFacetType> typesById = new HashMap<String, MailFacetType>();
-    static {
-        for (MailFacetType type : values()) {
-            typesById.put(type.getId(), type);
-        }
-    }
-
-
-    private final String displayName;
-
-    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
-
-    private MailFacetType() {
-        this(null);
-    }
-
-    private MailFacetType(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    @Override
-    public String getId() {
-        return toString().toLowerCase();
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    @Override
-    public List<FacetType> getConflictingFacets() {
-        return conflictingFacets;
-    }
+    private Appointment appointment;
 
     /**
-     * Gets a {@link MailFacetType} by its id.
-     * @return The type or <code>null</code>, if the id is invalid.
+     * Initializes a new {@link Bug32465Test}.
+     * 
+     * @param name
      */
-    public static MailFacetType getById(String id) {
-        if (Strings.isEmpty(id)) {
-            return null;
-        }
+    public Bug32465Test(String name) {
+        super(name);
+    }
 
-        return typesById.get(id);
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        ctm = new CalendarTestManager(getClient());
+        appointment = new Appointment();
+        appointment.setTitle("Bug 32465 Test");
+        appointment.setStartDate(D("01.06.2014 00:00", TimeZone.getTimeZone("UTC")));
+        appointment.setEndDate(D("02.06.2014 00:00", TimeZone.getTimeZone("UTC")));
+        appointment.setFullTime(true);
+        appointment.setRecurrenceType(Appointment.DAILY);
+        appointment.setInterval(1);
+        appointment.setOccurrence(12);
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        appointment.setIgnoreConflicts(true);
+        ctm.insert(appointment);
+    }
+
+    @Test
+    public void testBug32465() throws Exception {
+        appointment.setOccurrence(13);
+        ctm.update(appointment);
+
+        Appointment loadedAppointment = ctm.get(appointment);
+        System.out.println(loadedAppointment.getStartDate());
+        System.out.println(loadedAppointment.getEndDate());
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ctm.cleanUp();
+        super.tearDown();
     }
 
 }

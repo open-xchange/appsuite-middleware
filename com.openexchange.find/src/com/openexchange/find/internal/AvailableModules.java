@@ -47,74 +47,60 @@
  *
  */
 
-package com.openexchange.find.mail;
+package com.openexchange.find.internal;
 
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import com.openexchange.find.facet.FacetType;
-import com.openexchange.java.Strings;
+import com.openexchange.exception.OXException;
+import com.openexchange.find.spi.ModuleSearchDriver;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
- * Facet types for the mail module.
+ * Injects a setting into the configuration tree that denotes which find modules
+ * are available for the given user.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public enum MailFacetType implements FacetType {
+public class AvailableModules extends FindSetting {
 
-    SUBJECT,
-    MAIL_TEXT,
-    CONTACTS(MailStrings.FACET_SENDER_AND_RECIPIENT),
-    TIME(MailStrings.FACET_TIME);
+    private final SearchDriverManager driverManager;
 
-    private static final Map<String, MailFacetType> typesById = new HashMap<String, MailFacetType>();
-    static {
-        for (MailFacetType type : values()) {
-            typesById.put(type.getId(), type);
-        }
-    }
-
-
-    private final String displayName;
-
-    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
-
-    private MailFacetType() {
-        this(null);
-    }
-
-    private MailFacetType(final String displayName) {
-        this.displayName = displayName;
+    public AvailableModules(final SearchDriverManager driverManager) {
+        super();
+        this.driverManager = driverManager;
     }
 
     @Override
-    public String getId() {
-        return toString().toLowerCase();
+    public String[] getPath() {
+        return new String[] { "search", "modules" };
     }
 
     @Override
-    public String getDisplayName() {
-        return displayName;
-    }
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
 
-    @Override
-    public List<FacetType> getConflictingFacets() {
-        return conflictingFacets;
-    }
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return true;
+            }
 
-    /**
-     * Gets a {@link MailFacetType} by its id.
-     * @return The type or <code>null</code>, if the id is invalid.
-     */
-    public static MailFacetType getById(String id) {
-        if (Strings.isEmpty(id)) {
-            return null;
-        }
-
-        return typesById.get(id);
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                List<ModuleSearchDriver> available = driverManager.determineDrivers(new ServerSessionAdapter(session, ctx, user, userConfig));
+                setting.setEmptyMultiValue();
+                for (ModuleSearchDriver driver : available) {
+                    setting.addMultiValue(driver.getModule().getIdentifier());
+                }
+            }
+        };
     }
 
 }

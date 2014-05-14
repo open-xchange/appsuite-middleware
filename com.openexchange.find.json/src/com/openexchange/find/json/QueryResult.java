@@ -49,6 +49,7 @@
 
 package com.openexchange.find.json;
 
+import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 
 
@@ -61,19 +62,26 @@ import com.openexchange.find.SearchResult;
  */
 public class QueryResult {
 
-    private final SearchResult searchResult;
+    private final SearchRequest searchRequest;
 
-    private final int[] columns;
+    private final SearchResult searchResult;
 
     /**
      * Initializes a new {@link QueryResult}.
+     * @param searchRequest The search reguest object; never <code>null</code>.
      * @param searchResult The search result object; never <code>null</code>.
-     * @param columns The requested response columns; possibly <code>null</code>.
      */
-    public QueryResult(SearchResult searchResult, int[] columns) {
+    public QueryResult(SearchRequest searchRequest, SearchResult searchResult) {
         super();
+        this.searchRequest = searchRequest;
         this.searchResult = searchResult;
-        this.columns = columns;
+    }
+
+    /**
+     * @return The search request object; never <code>null</code>.
+     */
+    public SearchRequest getSearchRequest() {
+        return searchRequest;
     }
 
     /**
@@ -81,13 +89,6 @@ public class QueryResult {
      */
     public SearchResult getSearchResult() {
         return searchResult;
-    }
-
-    /**
-     * @return The requested response columns; possibly <code>null</code>.
-     */
-    public int[] getColumns() {
-        return columns;
     }
 
 }

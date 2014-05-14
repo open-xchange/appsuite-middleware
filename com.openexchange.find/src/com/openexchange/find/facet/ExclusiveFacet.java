@@ -49,59 +49,37 @@
 
 package com.openexchange.find.facet;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
 /**
- * A {@link FieldFacet} is a special facet that has no meaningful values and provides
- * only a single filter. The facet generally references a logical field like
- * 'phone number'. Internally this logical field can map to several internal fields
- * (e.g. 'phone_private', 'phone_mobile', 'phone_business'). In clients the facet as
- * a whole can be displayed as a single item. Example: "Search for 'term' in field 'phone
- * number'".
- *
- * The queries of the facets filter contain only a single placeholder value. The client
- * takes care of providing a valid query during search time.
+ * An {@link ExclusiveFacet} is a facet where the contained values are
+ * mutually exclusive. That means that the facet must only be present once
+ * in search requests.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class FieldFacet extends Facet {
+public class ExclusiveFacet extends DefaultFacet {
 
-    private static final long serialVersionUID = -5699454846328204928L;
+    private static final long serialVersionUID = -8388379773362556244L;
 
-    public FieldFacet(final FacetType type, final DisplayItem displayItem, final Filter filter) {
-        super(type, buildValues(type, displayItem, filter));
+    public ExclusiveFacet(FacetType type) {
+        super(type);
     }
 
-    public FieldFacet(final FacetType type, final DisplayItem displayItem, final String filterField, final String filterValue) {
-        this(type, displayItem, Collections.singletonList(filterField), filterValue);
+    public ExclusiveFacet(FacetType type, List<FacetValue> values) {
+        super(type, values);
     }
 
-    public FieldFacet(final FacetType type, final DisplayItem displayItem, final List<String> filterFields, final String filterValue) {
-        super(type, buildValues(type, displayItem, filterFields, filterValue));
+    @Override
+    public String getStyle() {
+        return "exclusive";
     }
 
-    private static List<FacetValue> buildValues(FacetType type, DisplayItem displayItem, Filter filter) {
-        ArrayList<FacetValue> values = new ArrayList<FacetValue>(1);
-        values.add(new FacetValue(
-            type.getId(),
-            displayItem,
-            FacetValue.UNKNOWN_COUNT,
-            filter));
-        return values;
+    @Override
+    public void accept(FacetVisitor visitor) {
+        visitor.visit(this);
     }
 
-    private static List<FacetValue> buildValues(FacetType type, DisplayItem displayItem, List<String> filterFields, String filterValue) {
-        ArrayList<FacetValue> values = new ArrayList<FacetValue>(1);
-        Filter filter = new Filter(filterFields, Collections.<String>singletonList(filterValue));
-        values.add(new FacetValue(
-            type.getId(),
-            displayItem,
-            FacetValue.UNKNOWN_COUNT,
-            filter));
-        return values;
-    }
 }

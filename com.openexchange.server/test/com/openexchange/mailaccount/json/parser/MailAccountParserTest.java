@@ -92,6 +92,17 @@ public class MailAccountParserTest {
     }
 
     @Test
+    public void testParseTransportCredentials_nullvalues() throws Exception {
+        json = new JSONObject("{\"transport_login\":null,\"transport_password\":null,\"unified_inbox_enabled\":false,\"transport_credentials\":false,\"login\":\"ewaldbartkowiak@gmail.com\",\"mail_server\":\"imap.googlemail.com\",\"transport_server\":\"smtp.googlemail.com\",\"mail_port\":993,\"transport_port\":465,\"mail_protocol\":\"imap\",\"transport_protocol\":\"smtp\",\"mail_secure\":true,\"transport_secure\":true,\"config_source\":\"ISPDB\",\"primary_address\":\"ewaldbartkowiak@gmail.com\",\"password\":\"myPassword\",\"personal\":\"ewaldbartkowiak@gmail.com\",\"name\":\"ewaldbartkowiak@gmail.com\"}");
+
+        MailAccountParser.getInstance().parseTransportCredentials(mailAccountDescription, json, attributes);
+
+        Assert.assertEquals("ewaldbartkowiak@gmail.com", mailAccountDescription.getTransportLogin());
+        Assert.assertEquals("myPassword", mailAccountDescription.getTransportPassword());
+        Assert.assertEquals(2, attributes.size());
+    }
+
+    @Test
     public void testParseTransportCredentials_transportAuthFalseTransportPasswordAndLoginEmptyString_setEmptyStringForLoginAndPassword() throws Exception {
         json = new JSONObject("{\"unified_inbox_enabled\":false,\"transport_credentials\":false,\"login\":\"ewaldbartkowiak@gmail.com\",\"transport_login\":\"\",\"transport_password\":\"\",\"transport_auth\":\"false\",\"mail_server\":\"imap.googlemail.com\",\"transport_server\":\"smtp.googlemail.com\",\"mail_port\":993,\"transport_port\":465,\"mail_protocol\":\"imap\",\"transport_protocol\":\"smtp\",\"mail_secure\":true,\"transport_secure\":true,\"config_source\":\"ISPDB\",\"primary_address\":\"ewaldbartkowiak@gmail.com\",\"password\":\"myPassword\",\"personal\":\"ewaldbartkowiak@gmail.com\",\"name\":\"ewaldbartkowiak@gmail.com\"}");
 

@@ -126,6 +126,9 @@ public class IDMangler {
      * @return The identifier's components
      */
     public static List<String> unmangle(String mangled, final boolean stateMachine) {
+        if (null == mangled) {
+            return null;
+        }
         final List<String> list = new ArrayList<String>(5);
         if (stateMachine) {
             final StringBuilder buffer = new StringBuilder(50);

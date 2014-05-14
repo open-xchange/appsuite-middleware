@@ -60,8 +60,8 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.json.FindRequest;
-import com.openexchange.find.json.QueryResult;
 import com.openexchange.find.json.Offset;
+import com.openexchange.find.json.QueryResult;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -95,8 +95,8 @@ public class QueryAction extends AbstractFindAction {
         final List<ActiveFacet> activeFacets = request.getActiveFacets();
         Map<String, String> options = request.getOptions();
         final SearchRequest searchRequest = new SearchRequest(offset.off, offset.len, activeFacets, options, columns);
-        final SearchResult result = searchService.search(searchRequest, module, request.getServerSession());
-        return new AJAXRequestResult(new QueryResult(result, columns), QueryResult.class.getName());
+        final SearchResult searchResult = searchService.search(searchRequest, module, request.getServerSession());
+        return new AJAXRequestResult(new QueryResult(searchRequest, searchResult), QueryResult.class.getName());
     }
 
 

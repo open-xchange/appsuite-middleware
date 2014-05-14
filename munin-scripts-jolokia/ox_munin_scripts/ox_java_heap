@@ -31,7 +31,7 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	my @confArray = ("label Survivor","draw STACK");
 	callUrlForConfig("b",\@confArray,"/search/java.lang:*,name=*Survivor*,type=MemoryPool");
 	
-	my @confArray = ("abel Eden Space","draw STACK");
+	my @confArray = ("label Eden Space","draw STACK");
 	callUrlForConfig("c",\@confArray,"/search/java.lang:*,name=*Eden*,type=MemoryPool");
 	
 	my @confArray = ("label Java heap","draw AREA");
