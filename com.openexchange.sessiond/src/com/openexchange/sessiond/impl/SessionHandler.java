@@ -68,7 +68,6 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -126,9 +125,6 @@ public final class SessionHandler {
     /** Whether to put session s to central session storage asynchronously (default) or synchronously */
     private static volatile boolean asyncPutToSessionStorage;
 
-    /** The max. number of concurrent attempts to put a session into session storage */
-    private static volatile int maxConcurrentAsyncPut;
-
     /** The obfuscator */
     protected static Obfuscator obfuscator;
 
@@ -171,7 +167,6 @@ public final class SessionHandler {
             }
             noLimit = (config.getMaxSessions() == 0);
             asyncPutToSessionStorage = config.isAsyncPutToSessionStorage();
-            maxConcurrentAsyncPut = config.getMaxConcurrentAsyncPut();
             synchronized (SessionHandler.class) {
                 // Make it visible to other threads, too
                 obfuscator = new Obfuscator(config.getObfuscationKey());
@@ -506,9 +501,9 @@ public final class SessionHandler {
             return;
         }
         if (async) {
-            ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent, maxConcurrentAsyncPut));
+            ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent));
         } else {
-            final StoreSessionTask task = new StoreSessionTask(session, sessionStorageService, addIfAbsent, -1);
+            final StoreSessionTask task = new StoreSessionTask(session, sessionStorageService, addIfAbsent);
             final Thread thread = Thread.currentThread();
             boolean ran = false;
             task.beforeExecute(thread);
@@ -1425,49 +1420,19 @@ public final class SessionHandler {
 
     private static final class StoreSessionTask extends AbstractTask<Void> {
 
-        /** The current number of tasks trying to put a session into session storage */
-        private static final AtomicInteger ACTIVE_COUNTER = new AtomicInteger();
-
         private final SessionStorageService sessionStorageService;
         private final boolean addIfAbsent;
         private final SessionImpl session;
-        private final int threshold;
 
-        protected StoreSessionTask(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent, final int threshold) {
+        protected StoreSessionTask(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
             super();
             this.sessionStorageService = sessionStorageService;
             this.addIfAbsent = addIfAbsent;
             this.session = session;
-            this.threshold = threshold;
         }
 
         @Override
         public Void call() {
-            if (threshold > 0) {
-                // Atomically increment while checking "threshold" boundary
-                final AtomicInteger activeCounter = ACTIVE_COUNTER;
-                int cur;
-                do {
-                    cur = activeCounter.get();
-                    if (cur >= threshold) {
-                        LOG.warn("Denied to put session {} with Auth-Id {} into session storage (user={}, context={}) as threshold {} is exceeded",session.getSessionID(),session.getAuthId(),Integer.valueOf(session.getUserId()),Integer.valueOf(session.getContextId()),Integer.valueOf(threshold));
-                        return null;
-                    }
-                } while (!activeCounter.compareAndSet(cur, cur + 1));
-
-                // Put session with ensured decrement
-                try {
-                    doPutSession();
-                } finally {
-                    activeCounter.decrementAndGet();
-                }
-            } else {
-                doPutSession();
-            }
-            return null;
-        }
-
-        private void doPutSession() {
             try {
                 if (addIfAbsent) {
                     if (sessionStorageService.addSessionIfAbsent(obfuscator.wrap(session))) {
@@ -1482,6 +1447,7 @@ public final class SessionHandler {
             } catch (final Exception e) {
                 LOG.warn("Failed to put session {} with Auth-Id {} into session storage (user={}, context={})",session.getSessionID(),session.getAuthId(),Integer.valueOf(session.getUserId()),Integer.valueOf(session.getContextId()), e);
             }
+            return null;
         }
     }
 

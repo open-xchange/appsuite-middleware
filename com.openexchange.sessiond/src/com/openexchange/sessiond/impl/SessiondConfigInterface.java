@@ -89,16 +89,6 @@ public interface SessiondConfigInterface {
     boolean isAsyncPutToSessionStorage();
 
     /**
-     * Gets the max. number of concurrent attempts to put a session asynchronously into session storage.<br>
-     * Does only apply if {@link #isAsyncPutToSessionStorage()} returns <code>true</code>.
-     * <p>
-     * If that threshold is exceeded no more attempts will be performed.
-     *
-     * @return The max. number of concurrent attempts to put a session asynchronously into session storage
-     */
-    int getMaxConcurrentAsyncPut();
-
-    /**
      * Gets a key to encrypt passwords when putting session into storage.
      *
      * @return The obfuscation key

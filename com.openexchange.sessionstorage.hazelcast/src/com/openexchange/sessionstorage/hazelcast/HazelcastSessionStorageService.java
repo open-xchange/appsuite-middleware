@@ -550,7 +550,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     private IMap<String, PortableSession> sessions() throws OXException {
         try {
             HazelcastInstance hazelcastInstance = REFERENCE.get();
-            if (null == hazelcastInstance || false == hazelcastInstance.getLifecycleService().isRunning()) {
+            if (null == hazelcastInstance) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
             }
             return hazelcastInstance.getMap(sessionsMapName);

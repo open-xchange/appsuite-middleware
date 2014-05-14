@@ -57,7 +57,7 @@ import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link HazelcastAccess} - Provides access to Hazelcast instance.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HazelcastAccess {
@@ -66,7 +66,7 @@ public class HazelcastAccess {
 
     /**
      * Sets the Hazelcast instance to given value/reference.
-     * 
+     *
      * @param hazelcast The Hazelcast instance
      */
     public static void setHazelcastInstance(HazelcastInstance hazelcast) {
@@ -75,13 +75,13 @@ public class HazelcastAccess {
 
     /**
      * Gets the Hazelcast instance, throwing appropriate exceptions if it is not accessible.
-     * 
+     *
      * @return The Hazelcast instance
      * @throws OXException if the HazelcastInstance can't be found
      */
     public static HazelcastInstance getHazelcastInstance() throws OXException {
         HazelcastInstance hazelcastInstance = optHazelcastInstance();
-        if (null == hazelcastInstance || false == hazelcastInstance.getLifecycleService().isRunning()) {
+        if (null == hazelcastInstance) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
         }
         return hazelcastInstance;
@@ -89,7 +89,7 @@ public class HazelcastAccess {
 
     /**
      * Gets the (possibly <code>null</code> or not running) Hazelcast instance.
-     * 
+     *
      * @return The Hazelcast instance
      */
     public static HazelcastInstance optHazelcastInstance() {
@@ -98,7 +98,7 @@ public class HazelcastAccess {
 
     /**
      * Get the local Hazelcast Member.
-     * 
+     *
      * @return the local Hazelcast Member.
      * @throws OXException if the HazelcastInstance can't be found
      */
