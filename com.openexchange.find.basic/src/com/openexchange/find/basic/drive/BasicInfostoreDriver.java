@@ -84,9 +84,10 @@ import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.drive.FileSizeDisplayItem.Size;
 import com.openexchange.find.drive.FileTypeDisplayItem;
+import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.FieldFacet;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
 import com.openexchange.groupware.container.FolderObject;
@@ -249,12 +250,12 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
 
         if (!prefix.isEmpty()) {
             // Add field factes
-            final FieldFacet filenameFacet =
-                new FieldFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix), Field.FILENAME.getName(), prefix);
-            final FieldFacet descriptionFacet =
-                new FieldFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix), Field.DESCRIPTION.getName(), prefix);
-            final FieldFacet contentFacet =
-                new FieldFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix), Field.CONTENT.getName(), prefix);
+            final SimpleFacet filenameFacet =
+                new SimpleFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix), Field.FILENAME.getName(), prefix);
+            final SimpleFacet descriptionFacet =
+                new SimpleFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix), Field.DESCRIPTION.getName(), prefix);
+            final SimpleFacet contentFacet =
+                new SimpleFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix), Field.CONTENT.getName(), prefix);
             facets.add(filenameFacet);
             facets.add(descriptionFacet);
             facets.add(contentFacet);
@@ -287,7 +288,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
                 new FileTypeDisplayItem(DriveStrings.FILE_TYPE_VIDEO, FileTypeDisplayItem.Type.VIDEO),
                 FacetValue.UNKNOWN_COUNT,
                 new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
-            final Facet fileTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
+            final Facet fileTypeFacet = new ExclusiveFacet(DriveFacetType.FILE_TYPE, fileTypes);
             facets.add(fileTypeFacet);
         }
 
@@ -307,7 +308,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
             fileSize.add(new FacetValue(FileSizeDisplayItem.Size.GB1.getSize(), new FileSizeDisplayItem(Size.GB1.getSize(), Size.GB1), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singletonList(fieldFileSize),
                 FileSizeDisplayItem.Size.GB1.getSize())));
-            final Facet fileSizeFacet = new Facet(DriveFacetType.FILE_SIZE, fileSize);
+            final Facet fileSizeFacet = new ExclusiveFacet(DriveFacetType.FILE_SIZE, fileSize);
             facets.add(fileSizeFacet);
         }
 
@@ -324,7 +325,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
             values.add(new FacetValue(DriveConstants.FACET_VALUE_LAST_YEAR, new SimpleDisplayItem(DriveStrings.LAST_YEAR, true), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singletonList(fieldTime),
                 DriveConstants.FACET_VALUE_LAST_YEAR)));
-            facets.add(new Facet(DriveFacetType.TIME, values));
+            facets.add(new ExclusiveFacet(DriveFacetType.TIME, values));
         }
 
         return new AutocompleteResult(facets);

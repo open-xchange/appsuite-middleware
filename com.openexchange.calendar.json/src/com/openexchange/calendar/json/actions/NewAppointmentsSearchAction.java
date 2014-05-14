@@ -139,6 +139,7 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
         searchObj.setMinimumEndDate(start);
         searchObj.setMaximumStartDate(end);
         searchObj.setUserIDs(Collections.singleton(Integer.valueOf(req.getSession().getUserId())));
+        searchObj.setOnlyPrivateAppointments(true);
 
         final LinkedList<Appointment> linkedAppointmentList = new LinkedList<Appointment>();
 

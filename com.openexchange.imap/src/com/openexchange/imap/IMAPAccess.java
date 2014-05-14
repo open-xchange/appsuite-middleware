@@ -92,6 +92,7 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.imap.storecache.IMAPStoreContainer;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
@@ -1234,6 +1235,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Specify SSL protocols
              */
             imapProps.put("mail.imap.ssl.protocols", config.getIMAPProperties().getSSLProtocols());
+            /*
+             * Specify SSL cipher suites
+             */
+            final String cipherSuites = config.getIMAPProperties().getSSLCipherSuites();
+            if (false == Strings.isEmpty(cipherSuites)) {
+                imapProps.put("mail.imap.ssl.ciphersuites", cipherSuites);
+            }
         } else {
             /*
              * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
@@ -1276,6 +1284,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Specify SSL protocols
              */
             imapProps.put("mail.imap.ssl.protocols", config.getIMAPProperties().getSSLProtocols());
+            /*
+             * Specify SSL cipher suites
+             */
+            final String cipherSuites = config.getIMAPProperties().getSSLCipherSuites();
+            if (false == Strings.isEmpty(cipherSuites)) {
+                imapProps.put("mail.imap.ssl.ciphersuites", cipherSuites);
+            }
             // imapProps.put("mail.imap.ssl.enable", "true");
             /*
              * Needed for JavaMail >= 1.4

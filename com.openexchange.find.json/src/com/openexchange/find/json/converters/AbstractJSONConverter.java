@@ -58,7 +58,6 @@ import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 
@@ -89,35 +88,9 @@ public abstract class AbstractJSONConverter implements ResultConverter {
     protected JSONArray convertFacets(Locale locale, List<Facet> facets) throws JSONException {
         JSONArray result = new JSONArray(facets.size());
         for (Facet facet : facets) {
-            JSONObject jFacet = new JSONObject(4);
-
-            // Type information
-            FacetType type = facet.getType();
-            jFacet.put("id", type.getId());
-            if (type.isFieldFacet()) {
-                jFacet.put("field_facet", true);
-            } else {
-                jFacet.put("display_name", AJAXUtility.sanitizeParam(translator.translate(locale, type.getDisplayName())));
-            }
-
-            // Facet values
-            List<FacetValue> values = facet.getValues();
-            JSONArray jValues = new JSONArray(values.size());
-            for (FacetValue value : values) {
-                JSONObject valueJSON = convertFacetValue(locale, value);
-                jValues.put(valueJSON);
-            }
-            jFacet.put("values", jValues);
-
-            // Flags
-            JSONArray jFlags = new JSONArray();
-            for (String flag : facet.getFlags()) {
-                jFlags.put(flag);
-            }
-            jFacet.put("flags", jFlags);
-
-            // Put to JSON array
-            result.put(jFacet);
+            JSONFacetVisitor facetVisitor = new JSONFacetVisitor(translator, locale);
+            facet.accept(facetVisitor);
+            result.put(facetVisitor.getResult());
         }
 
         return result;

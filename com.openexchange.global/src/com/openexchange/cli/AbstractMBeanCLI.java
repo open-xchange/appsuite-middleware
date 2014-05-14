@@ -180,8 +180,7 @@ public abstract class AbstractMBeanCLI<R> {
                     retval = invoke(options, cmd, mbsc);
                 } catch (final Exception e) {
                     final Throwable t = e.getCause();
-                    final String message = null == t ? e.getMessage() : t.getMessage();
-                    System.err.println(null == message ? "An error occurred." : message);
+                    throw new ExecutionFault(null == t ? e : t);
                 }
             } finally {
                 try {
@@ -193,6 +192,10 @@ public abstract class AbstractMBeanCLI<R> {
 
             error = false;
             return retval;
+        } catch (final ExecutionFault e) {
+            final Throwable t = e.getCause();
+            final String message = t.getMessage();
+            System.err.println(null == message ? "An error occurred." : message);
         } catch (final ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp(options);

@@ -73,6 +73,7 @@ import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.contacts.ContactsStrings;
+import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
@@ -250,7 +251,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             }
         }
         if (!contactValues.isEmpty()) {
-            facets.add(new Facet(ContactsFacetType.CONTACT, contactValues));
+            facets.add(new ExclusiveFacet(ContactsFacetType.CONTACT, contactValues));
         }
         /*
          * add other facets

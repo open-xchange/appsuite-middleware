@@ -65,10 +65,10 @@ import com.openexchange.java.Strings;
  */
 public enum MailFacetType implements FacetType {
 
-    SUBJECT(null, true, false),
-    MAIL_TEXT(null, true, false),
+    SUBJECT,
+    MAIL_TEXT,
     CONTACTS(MailStrings.FACET_SENDER_AND_RECIPIENT),
-    TIME(MailStrings.FACET_TIME, false, true);
+    TIME(MailStrings.FACET_TIME);
 
     private static final Map<String, MailFacetType> typesById = new HashMap<String, MailFacetType>();
     static {
@@ -80,10 +80,6 @@ public enum MailFacetType implements FacetType {
 
     private final String displayName;
 
-    private final boolean isFieldFacet;
-
-    private final boolean appliesOnce;
-
     private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
 
     private MailFacetType() {
@@ -91,13 +87,7 @@ public enum MailFacetType implements FacetType {
     }
 
     private MailFacetType(final String displayName) {
-        this(displayName, false, false);
-    }
-
-    private MailFacetType(final String displayName, final boolean isFieldFacet, final boolean appliesOnce) {
         this.displayName = displayName;
-        this.isFieldFacet = isFieldFacet;
-        this.appliesOnce = appliesOnce;
     }
 
     @Override
@@ -111,17 +101,7 @@ public enum MailFacetType implements FacetType {
     }
 
     @Override
-    public boolean isFieldFacet() {
-        return isFieldFacet;
-    }
-
-    @Override
-    public boolean appliesOnce() {
-        return appliesOnce;
-    }
-
-    @Override
-    public List<FacetType> conflictingFacets() {
+    public List<FacetType> getConflictingFacets() {
         return conflictingFacets;
     }
 

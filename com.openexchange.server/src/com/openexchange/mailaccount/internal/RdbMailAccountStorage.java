@@ -1162,11 +1162,17 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (!PRIMARY_EDITABLE.contains(attribute)) {
                     final Object storageValue = attribute.doSwitch(storageGetSwitch);
                     final Object newValue = attribute.doSwitch(getSwitch);
-                    if (null != storageValue && (Attribute.PASSWORD_LITERAL.equals(attribute) ? null != newValue : !(DEFAULT_FULL_NAMES.contains(attribute) ? MailFolderUtility.prepareMailFolderParam(storageValue.toString()).equals(MailFolderUtility.prepareMailFolderParam(newValue.toString())) : storageValue.equals(newValue)))) {
-                        /*
-                         * Another attribute must not be changed
-                         */
-                        throw MailAccountExceptionCodes.NO_DEFAULT_UPDATE.create(I(user), I(cid));
+                    if (null != storageValue) {
+                        if (Attribute.PASSWORD_LITERAL.equals(attribute) || Attribute.TRANSPORT_PASSWORD_LITERAL.equals(attribute) || Attribute.TRANSPORT_LOGIN_LITERAL.equals(attribute)) {
+                            if (null != newValue) {
+                                throw MailAccountExceptionCodes.NO_DEFAULT_UPDATE_ATTR.create(attribute.getName(), I(user), I(cid));
+                            }
+                        } else if (!(DEFAULT_FULL_NAMES.contains(attribute) ? MailFolderUtility.prepareMailFolderParam(storageValue.toString()).equals(MailFolderUtility.prepareMailFolderParam(newValue.toString())) : storageValue.equals(newValue))) {
+                            /*
+                             * Another attribute must not be changed
+                             */
+                            throw MailAccountExceptionCodes.NO_DEFAULT_UPDATE_ATTR.create(attribute.getName(), I(user), I(cid));
+                        }
                     }
                 }
             }

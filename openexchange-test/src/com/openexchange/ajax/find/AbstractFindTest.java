@@ -65,9 +65,12 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.DefaultFacet;
+import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.FilterBuilder;
 import com.openexchange.test.FolderTestManager;
@@ -266,17 +269,25 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     }
 
     /**
-     * Searches a FacetValue by its display name in a list of facets.
+     * Searches a FacetValue by its display name in a list of facets that are not of "simple" style.
      *
      * @param facets The facets to check
      * @param displayName The display name to check
      */
     protected static FacetValue findByDisplayName(List<Facet> facets, String displayName) {
         for (Facet facet : facets) {
-            List<FacetValue> values = facet.getValues();
-            for (FacetValue value : values) {
-                if (displayName.equals(value.getDisplayItem().getDefaultValue())) {
-                    return value;
+            if (facet instanceof SimpleFacet) {
+                SimpleFacet ff = (SimpleFacet) facet;
+                DisplayItem displayItem = ff.getDisplayItem();
+                if (displayName.equals(displayItem.getDefaultValue())) {
+                    return new FacetValue(facet.getType().getId(), displayItem, -1, ff.getFilter());
+                }
+            } else {
+                List<FacetValue> values = ((DefaultFacet) facet).getValues();
+                for (FacetValue value : values) {
+                    if (displayName.equals(value.getDisplayItem().getDefaultValue())) {
+                        return value;
+                    }
                 }
             }
         }

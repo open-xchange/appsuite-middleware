@@ -49,7 +49,15 @@
 
 package com.openexchange.find.basic.mail;
 
-import static com.openexchange.find.basic.mail.Constants.*;
+import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
+import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
+import static com.openexchange.find.basic.mail.Constants.FIELD_FROM;
+import static com.openexchange.find.basic.mail.Constants.FIELD_SUBJECT;
+import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
+import static com.openexchange.find.basic.mail.Constants.RECIPIENT_FIELDS;
+import static com.openexchange.find.basic.mail.Constants.SENDER_AND_RECIPIENT_FIELDS;
+import static com.openexchange.find.basic.mail.Constants.SENDER_FIELDS;
+import static com.openexchange.find.basic.mail.Constants.asList;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -72,17 +80,17 @@ import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.mail.MailFacetValues;
+import com.openexchange.find.mail.ContactsFacet;
 import com.openexchange.find.mail.MailDocument;
-import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.mail.MailStrings;
+import com.openexchange.find.mail.MailTextFacet;
+import com.openexchange.find.mail.SubjectFacet;
+import com.openexchange.find.mail.TimeFacet;
 import com.openexchange.find.spi.SearchConfiguration;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
@@ -168,7 +176,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<Facet> facets = new ArrayList<Facet>(5);
         addFieldFacets(facets, prefix);
-        addContactFacet(facets, contacts, prefix, session);
+        addContactsFacet(facets, contacts, prefix, session);
         addTimeFacet(facets);
         return new AutocompleteResult(facets);
     }
@@ -229,55 +237,29 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private static void addFieldFacets(List<Facet> facets, String prefix) {
         if (!prefix.isEmpty()) {
-            Facet subjectFacet = new FieldFacet(
-                MailFacetType.SUBJECT,
-                new FormattableDisplayItem(MailStrings.FACET_SUBJECT, prefix),
-                FIELD_SUBJECT,
-                prefix);
-            facets.add(subjectFacet);
-            Facet bodyFacet = new FieldFacet(
-                MailFacetType.MAIL_TEXT,
-                new FormattableDisplayItem(MailStrings.FACET_MAIL_TEXT, prefix),
-                FIELD_BODY,
-                prefix);
-            facets.add(bodyFacet);
+            facets.add(new SubjectFacet(prefix, Filter.with(FIELD_SUBJECT, prefix)));
+            facets.add(new MailTextFacet(prefix, Filter.with(FIELD_BODY, prefix)));
         }
     }
 
     private static void addTimeFacet(List<Facet> facets) {
-        List<FacetValue> values = new ArrayList<FacetValue>(3);
-        values.add(new FacetValue(
-            MailFacetValues.FACET_VALUE_LAST_WEEK,
-            new SimpleDisplayItem(MailStrings.LAST_WEEK, true),
-            FacetValue.UNKNOWN_COUNT,
-            new Filter(asList(FIELD_TIME), MailFacetValues.FACET_VALUE_LAST_WEEK)));
-        values.add(new FacetValue(
-            MailFacetValues.FACET_VALUE_LAST_MONTH,
-            new SimpleDisplayItem(MailStrings.LAST_MONTH, true),
-            FacetValue.UNKNOWN_COUNT,
-            new Filter(asList(FIELD_TIME), MailFacetValues.FACET_VALUE_LAST_MONTH)));
-        values.add(new FacetValue(
-            MailFacetValues.FACET_VALUE_LAST_YEAR,
-            new SimpleDisplayItem(MailStrings.LAST_YEAR, true),
-            FacetValue.UNKNOWN_COUNT,
-            new Filter(asList(FIELD_TIME), MailFacetValues.FACET_VALUE_LAST_YEAR)));
-        facets.add(new Facet(MailFacetType.TIME, values));
+        facets.add(new TimeFacet());
     }
 
-    private static void addContactFacet(List<Facet> facets, List<Contact> contacts, String prefix, ServerSession session) {
-        List<FacetValue> contactValues = new ArrayList<FacetValue>(contacts.size());
+    private static void addContactsFacet(List<Facet> facets, List<Contact> contacts, String prefix, ServerSession session) {
+        ContactsFacet contactsFacet = new ContactsFacet();
         for (Contact contact : contacts) {
             String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
             List<String> queries = extractMailAddessesFrom(contact);
-            contactValues.add(buildContactValue(valueId, queries, new ContactDisplayItem(contact), session));
+            contactsFacet.addValue(buildContactValue(valueId, queries, new ContactDisplayItem(contact), session));
         }
 
         if (!prefix.isEmpty()) {
-            contactValues.add(buildContactValue(prefix, asList(prefix), new SimpleDisplayItem(prefix), session));
+            contactsFacet.addValue(buildContactValue(prefix, asList(prefix), new SimpleDisplayItem(prefix), session));
         }
 
-        if (!contactValues.isEmpty()) {
-            facets.add(new Facet(MailFacetType.CONTACTS, contactValues));
+        if (!contactsFacet.getValues().isEmpty()) {
+            facets.add(contactsFacet);
         }
     }
 
@@ -467,7 +449,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             return new SubjectTerm(query);
         } else if (FIELD_BODY.equals(field)) {
             return new BodyTerm(query);
-        } else if (FIELD_TIME.equals(field)) {
+        } else if (TimeFacet.FILTER_FIELD.equals(field)) {
             Pair<Comparison, Long> parsed = parseTimeQuery(query);
             Comparison comparison = parsed.getFirst();
             Long timestamp = parsed.getSecond();
@@ -524,21 +506,21 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private static Pair<Comparison, Long> parseTimeQuery(String query) throws OXException {
         if (Strings.isEmpty(query)) {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, FIELD_TIME);
+            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, TimeFacet.FILTER_FIELD);
         }
 
         Comparison comparison;
         long timestamp;
         Calendar cal = new GregorianCalendar(TimeZones.UTC);
-        if (MailFacetValues.FACET_VALUE_LAST_WEEK.equals(query)) {
+        if (TimeFacet.LAST_WEEK.equals(query)) {
             cal.add(Calendar.WEEK_OF_YEAR, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
-        } else if (MailFacetValues.FACET_VALUE_LAST_MONTH.equals(query)) {
+        } else if (TimeFacet.LAST_MONTH.equals(query)) {
             cal.add(Calendar.MONTH, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
-        } else if (MailFacetValues.FACET_VALUE_LAST_YEAR.equals(query)) {
+        } else if (TimeFacet.LAST_YEAR.equals(query)) {
             cal.add(Calendar.YEAR, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
@@ -588,7 +570,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             try {
                 timestamp = Long.parseLong(sTimestamp);
             } catch (NumberFormatException e) {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, FIELD_TIME);
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, TimeFacet.FILTER_FIELD);
             }
         }
 

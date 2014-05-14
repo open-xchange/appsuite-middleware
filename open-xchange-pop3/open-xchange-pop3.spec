@@ -44,17 +44,21 @@ if [ ${1:-0} -eq 2 ]; then
 
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc pop3.properties
 
+    PFILE=/opt/open-xchange/etc/pop3.properties
+
     # SoftwareChange_Request-1229
-    pfile=/opt/open-xchange/etc/pop3.properties
-    if ! ox_exists_property com.openexchange.pop3.allowPing $pfile; then
-        ox_set_property com.openexchange.pop3.allowPing false $pfile
+    if ! ox_exists_property com.openexchange.pop3.allowPing $PFILE; then
+        ox_set_property com.openexchange.pop3.allowPing false $PFILE
     fi
-    if ! ox_exists_property com.openexchange.pop3.logDeniedPing $pfile; then
-        ox_set_property com.openexchange.pop3.logDeniedPing true $pfile
+    if ! ox_exists_property com.openexchange.pop3.logDeniedPing $PFILE; then
+        ox_set_property com.openexchange.pop3.logDeniedPing true $PFILE
     fi
 
     # SoftwareChange_Request-1931
-    ox_add_property com.openexchange.pop3.ssl.protocols "SSLv3 TLSv1" /opt/open-xchange/etc/pop3.properties
+    ox_add_property com.openexchange.pop3.ssl.protocols "SSLv3 TLSv1" $PFILE
+
+    # SoftwareChange_Request-2016
+    ox_add_property com.openexchange.pop3.ssl.ciphersuites "" $PFILE
 fi
 
 %clean

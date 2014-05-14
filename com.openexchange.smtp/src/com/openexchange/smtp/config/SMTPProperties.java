@@ -52,6 +52,7 @@ package com.openexchange.smtp.config;
 import java.nio.charset.Charset;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -98,6 +99,8 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
     private boolean logTransport;
 
     private String sslProtocols;
+
+    private String cipherSuites;
 
     /**
      * Initializes a new {@link SMTPProperties}
@@ -178,6 +181,12 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         sslProtocols = configuration.getProperty("com.openexchange.smtp.ssl.protocols", "SSLv3 TLSv1").trim();
         logBuilder.append("\tSupported SSL protocols: ").append(sslProtocols).append("\n");
 
+        {
+            final String tmp = configuration.getProperty("com.openexchange.smtp.ssl.ciphersuites", "").trim();
+            this.cipherSuites = Strings.isEmpty(tmp) ? null : tmp;
+            logBuilder.append("\tSupported SSL cipher suites: ").append(null == this.cipherSuites ? "<default>" : cipherSuites).append("\n");
+        }
+
         logBuilder.append("Global SMTP properties successfully loaded!");
         LOG.info(logBuilder.toString());
     }
@@ -191,7 +200,8 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         smtpTimeout = 0;
         smtpConnectionTimeout = 0;
         logTransport = false;
-        sslProtocols = null;
+        sslProtocols = "SSLv3 TLSv1";
+        cipherSuites = null;
     }
 
     @Override
@@ -237,6 +247,11 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
     @Override
     public String getSSLProtocols() {
         return sslProtocols;
+    }
+
+    @Override
+    public String getSSLCipherSuites() {
+        return cipherSuites;
     }
 
 }

@@ -108,4 +108,12 @@ public interface ISMTPProperties extends ITransportProperties {
      */
     public String getSSLProtocols();
 
+    /**
+     * Gets the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens
+     * acceptable to the <code>javax.net.ssl.SSLSocket.setEnabledProtocols</code> method.
+     *
+     * @return The SSL cipher suites
+     */
+    public String getSSLCipherSuites();
+
 }

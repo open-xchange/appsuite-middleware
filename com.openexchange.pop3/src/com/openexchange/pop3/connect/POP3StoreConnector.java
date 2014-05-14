@@ -68,6 +68,7 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
@@ -314,7 +315,14 @@ public final class POP3StoreConnector {
                 /*
                  * Specify SSL protocols
                  */
-                pop3Props.put("mail.pop3.ssl.protocols", "SSLv3");
+                pop3Props.put("mail.pop3.ssl.protocols", pop3Config.getPOP3Properties().getSSLProtocols());
+                /*
+                 * Specify SSL cipher suites
+                 */
+                final String cipherSuites = pop3Config.getPOP3Properties().getSSLCipherSuites();
+                if (false == Strings.isEmpty(cipherSuites)) {
+                    pop3Props.put("mail.pop3.ssl.ciphersuites", cipherSuites);
+                }
             } else {
                 /*
                  * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
@@ -335,6 +343,13 @@ public final class POP3StoreConnector {
                  * Specify SSL protocols
                  */
                 pop3Props.put("mail.pop3.ssl.protocols", pop3Config.getPOP3Properties().getSSLProtocols());
+                /*
+                 * Specify SSL cipher suites
+                 */
+                final String cipherSuites = pop3Config.getPOP3Properties().getSSLCipherSuites();
+                if (false == Strings.isEmpty(cipherSuites)) {
+                    pop3Props.put("mail.pop3.ssl.ciphersuites", cipherSuites);
+                }
                 // pop3Props.put("mail.pop3.ssl.enable", "true");
                 /*
                  * Needed for JavaMail >= 1.4

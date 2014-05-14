@@ -174,6 +174,13 @@ public class Filter implements Serializable {
         return queries;
     }
 
+    /**
+     * Creates a new filter with the given field and query.
+     */
+    public static Filter with(String field, String query) {
+        return new FilterBuilder().addField(field).addQuery(query).build();
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

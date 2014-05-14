@@ -84,6 +84,7 @@ import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
@@ -196,9 +197,9 @@ public class BasicDriveTest extends AbstractFindTest {
         List<Facet> facets = autocomplete("");
         Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
         assertNotNull("Missing folder type facet", folderTypeFacet);
-        assertEquals("Expected all 3 folder types", 3, folderTypeFacet.getValues().size());
+        assertEquals("Expected all 3 folder types", 3, ((ExclusiveFacet) folderTypeFacet).getValues().size());
 
-        FacetValue chosenType = folderTypeFacet.getValues().get(0);
+        FacetValue chosenType = ((ExclusiveFacet) folderTypeFacet).getValues().get(0);
         facets = autocomplete("", Collections.singletonList(createFolderTypeFacet(FolderTypeDisplayItem.Type.getByIdentifier(chosenType.getId()))));
         assertNull("Folder type facet was returned", findByType(CommonFacetType.FOLDER_TYPE, facets));
     }
@@ -207,7 +208,7 @@ public class BasicDriveTest extends AbstractFindTest {
         List<Facet> facets = autocomplete("");
         Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
         assertNotNull("Missing folder type facet", folderTypeFacet);
-        assertEquals("Expected all 3 folder types", 3, folderTypeFacet.getValues().size());
+        assertEquals("Expected all 3 folder types", 3, ((ExclusiveFacet) folderTypeFacet).getValues().size());
         facets = autocomplete("", Collections.singletonList(createActiveFacet(CommonFacetType.FOLDER, testFolder.getObjectID(), Filter.NO_FILTER)));
         assertNull("Folder type facet was returned", findByType(CommonFacetType.FOLDER_TYPE, facets));
     }
