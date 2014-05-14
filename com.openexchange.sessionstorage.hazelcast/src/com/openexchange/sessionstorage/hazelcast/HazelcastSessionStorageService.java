@@ -100,16 +100,19 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     // ----------------------------------------------------------------------------------------------------------------------------------------------- //
 
     private final String sessionsMapName;
+    private final Unregisterer unregisterer;
     private final AtomicBoolean inactive;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
      *
      * @param sessionsMapName The name of the distributed 'sessions' map
+     * @param unregisterer The unregisterer
      */
-    public HazelcastSessionStorageService(String sessionsMapName) {
+    public HazelcastSessionStorageService(String sessionsMapName, Unregisterer unregisterer) {
         super();
         this.sessionsMapName = sessionsMapName;
+        this.unregisterer = unregisterer;
         inactive = new AtomicBoolean(false);
     }
 
@@ -120,6 +123,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     private OXException handleNotActiveException(HazelcastInstanceNotActiveException e) {
+        LOG.warn("Encountered a {} error. {} will be shut-down!", HazelcastInstanceNotActiveException.class.getSimpleName(), HazelcastSessionStorageService.class);
+        unregisterer.unregisterSessionStorage();
         inactive.set(true);
         return SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
     }

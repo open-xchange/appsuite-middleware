@@ -59,6 +59,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
@@ -72,6 +73,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.Services;
+import com.openexchange.sessionstorage.hazelcast.Unregisterer;
 import com.openexchange.sessionstorage.hazelcast.portable.PortableSessionFactory;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -83,10 +85,19 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HazelcastSessionStorageActivator extends HousekeepingActivator {
+public class HazelcastSessionStorageActivator extends HousekeepingActivator implements Unregisterer {
 
     /** The logger */
     static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastSessionStorageActivator.class);
+
+    private volatile ServiceTracker<HazelcastInstance, HazelcastInstance> hzSessionStorageRegistrationTracker;
+
+    /**
+     * Initializes a new {@link HazelcastSessionStorageActivator}.
+     */
+    public HazelcastSessionStorageActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -117,7 +128,8 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
             }
             if (storageEnabled) {
                 final BundleContext context = this.context;
-                track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+                final Unregisterer unregisterer = this;
+                ServiceTracker<HazelcastInstance, HazelcastInstance> hzSessionStorageRegistrationTracker = new ServiceTracker<HazelcastInstance, HazelcastInstance>(context, HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
                     private volatile ServiceRegistration<SessionStorageService> sessionStorageRegistration;
                     private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
@@ -130,7 +142,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                          * create & register session storage service
                          */
                         String sessionsMapName = discoverSessionsMapName(hazelcastInstance.getConfig());
-                        final HazelcastSessionStorageService sessionStorageService = new HazelcastSessionStorageService(sessionsMapName);
+                        final HazelcastSessionStorageService sessionStorageService = new HazelcastSessionStorageService(sessionsMapName, unregisterer);
                         sessionStorageRegistration = context.registerService(SessionStorageService.class, sessionStorageService, null);
                         /*
                          * create & register event handler
@@ -202,8 +214,21 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                         HazelcastSessionStorageService.setHazelcastInstance(null);
                     }
                 });
+                // Open tracker and thus register service once HazelcastInstance is available
+                hzSessionStorageRegistrationTracker.open();
+                this.hzSessionStorageRegistrationTracker = hzSessionStorageRegistrationTracker;
+                // Open others
                 openTrackers();
             }
+        }
+    }
+
+    @Override
+    public void unregisterSessionStorage() {
+        ServiceTracker<HazelcastInstance, HazelcastInstance> hzSessionStorageRegistrationTracker = this.hzSessionStorageRegistrationTracker;
+        if (null != hzSessionStorageRegistrationTracker) {
+            hzSessionStorageRegistrationTracker.close();
+            this.hzSessionStorageRegistrationTracker = null;
         }
     }
 
@@ -225,6 +250,11 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         LOG.info("Stopping bundle: com.openexchange.sessionstorage.hazelcast");
+
+        // Unregister service through closing service tracker
+        unregisterSessionStorage();
+
+        // Stop rest
         super.stopBundle();
         Services.setServiceLookup(null);
     }
