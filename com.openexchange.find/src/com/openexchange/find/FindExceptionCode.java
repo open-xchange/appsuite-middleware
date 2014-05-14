@@ -126,6 +126,10 @@ public enum FindExceptionCode implements DisplayableOXExceptionCode {
      * The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.
      */
     FACET_CONFLICT(FindExceptionMessages.FACET_CONFLICT, Category.CATEGORY_USER_INPUT, 16, FindExceptionMessages.FACET_CONFLICT),
+    /**
+     * Searching in module \"%1$s\" is disabled for user %2$d in context %3$d.
+     */
+    MODULE_DISABLED("Searching in module \"%1$s\" is disabled for user %2$d in context %3$d.", Category.CATEGORY_PERMISSION_DENIED, 17, FindExceptionMessages.MODULE_DISABLED),
 
     ;
 

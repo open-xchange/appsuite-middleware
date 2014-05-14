@@ -66,10 +66,14 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.find.spi.SearchConfiguration;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -79,44 +83,79 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SearchDriverManager implements ServiceTrackerCustomizer<ModuleSearchDriver, ModuleSearchDriver> {
 
+    private static final String PROP_DISABLED_MODULES = "com.openexchange.find.disabledModules";
+
     private final ConcurrentMap<Module, SortedSet<ComparableDriver>> driversByModule;
 
     private final Cache<String, List<CachedConfig>> configCache;
 
     private final BundleContext context;
 
-    public SearchDriverManager(final BundleContext context) {
+    private final ConfigViewFactory configViewFactory;
+
+    public SearchDriverManager(final BundleContext context, final ConfigViewFactory configViewFactory) {
         super();
         this.context = context;
+        this.configViewFactory = configViewFactory;
         driversByModule = new ConcurrentHashMap<Module, SortedSet<ComparableDriver>>();
         configCache = CacheBuilder.newBuilder().expireAfterWrite(30L, TimeUnit.SECONDS).build();
     }
 
-    public ModuleSearchDriver determineDriver(ServerSession session, Module module) throws OXException {
+    /**
+     * Determines the appropriate search driver for the given session and module.
+     *
+     * @param session The users session.
+     * @param module The module to check.
+     * @param failOnMissingPermission Whether to throw an exception if the user is not even allowed
+     * to search within the given module. If <code>false</code>, <code>null</code> is returned in that case.
+     * @return The driver or <code>null</code> if no valid one is available.
+     */
+    public ModuleSearchDriver determineDriver(ServerSession session, Module module, boolean failOnMissingPermission) throws OXException {
         ModuleSearchDriver determined = null;
-        SortedSet<ComparableDriver> drivers = driversByModule.get(module);
-        if (drivers != null) {
-            for (ComparableDriver driver : drivers) {
-                if (driver.getDriver().isValidFor(session)) {
-                    determined = driver.getDriver();
-                    break;
+        if (hasModulePermission(session, module)) {
+            SortedSet<ComparableDriver> drivers = driversByModule.get(module);
+            if (drivers != null) {
+                for (ComparableDriver driver : drivers) {
+                    if (driver.getDriver().isValidFor(session)) {
+                        determined = driver.getDriver();
+                        break;
+                    }
                 }
             }
+        } else if (failOnMissingPermission) {
+            throw FindExceptionCode.MODULE_DISABLED.create(module.getIdentifier(), session.getUserId(), session.getContextId());
         }
 
         return determined;
     }
 
+    /**
+     * Determines all appropriate search drivers for the given session.
+     *
+     * @param session The users session.
+     * @param module The module to check.
+     * @return A list of drivers valid for the sessions user.
+     */
     public List<ModuleSearchDriver> determineDrivers(ServerSession session) throws OXException {
         List<ModuleSearchDriver> drivers = new LinkedList<ModuleSearchDriver>();
         for (Module module : Module.values()) {
-            ModuleSearchDriver driver = determineDriver(session, module);
+            ModuleSearchDriver driver = determineDriver(session, module, false);
             if (driver != null) {
                 drivers.add(driver);
             }
         }
 
         return drivers;
+    }
+
+    private boolean hasModulePermission(ServerSession session, Module module) throws OXException {
+        ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
+        List<String> disabledModules = Strings.splitAndTrim(configView.opt(PROP_DISABLED_MODULES, String.class, ""), ",");
+        if (disabledModules.contains(module.getIdentifier())) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
