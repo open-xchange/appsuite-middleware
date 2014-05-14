@@ -1,3 +1,7 @@
+* 2014-05-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32226: Do not specify any cache-controlling HTTP header for "file" HTTP-API module
+
 * 2014-05-12 - martin.herfurth@open-xchange.com
 
  - Fix for bug 32385: New appointments request returns duplicate entries.
