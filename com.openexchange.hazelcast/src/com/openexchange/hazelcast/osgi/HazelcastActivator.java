@@ -78,7 +78,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HazelcastActivator implements BundleActivator {
+public class HazelcastActivator implements BundleActivator, Unregisterer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastActivator.class);
 
@@ -107,6 +107,7 @@ public class HazelcastActivator implements BundleActivator {
                             Strings.getLineSeparator(), Strings.getLineSeparator(), Strings.getLineSeparator());
                     }
                     HazelcastInstance hazelcast = startHazelcast(configService);
+                    // hazelcast = new InactiveAwareHazelcastInstance(hazelcast, HazelcastActivator.this);
                     serviceRegistration = context.registerService(HazelcastInstance.class, hazelcast, null);
                     hazelcastInstance = hazelcast;
                 } catch (Exception e) {
@@ -144,6 +145,25 @@ public class HazelcastActivator implements BundleActivator {
     }
 
     @Override
+    public void unregisterHazelcastInstance() {
+        ServiceRegistration<HazelcastInstance> serviceRegistration = this.serviceRegistration;
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+            this.serviceRegistration = null;
+        }
+        ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> tracker = this.tracker;
+        if (null != tracker) {
+            tracker.close();
+            this.tracker = null;
+        }
+        try {
+            stopHazelcast();
+        } catch (Exception e) {
+            LOG.error("Error stopping \"com.openexchange.hazelcast\"", e);
+        }
+    }
+
+    @Override
     public void stop(BundleContext arg0) throws Exception {
         ServiceRegistration<HazelcastInstance> serviceRegistration = this.serviceRegistration;
         if (null != serviceRegistration) {
@@ -159,15 +179,18 @@ public class HazelcastActivator implements BundleActivator {
     }
 
     private void stopHazelcast() throws Exception {
-        String lf = Strings.getLineSeparator();
-        LOG.info("{}Hazelcast:{}    Shutting down...{}", lf, lf, lf);
-        long start = System.currentTimeMillis();
         HazelcastInstance hazelcast = this.hazelcastInstance;
         if (null != hazelcast) {
+            String lf = Strings.getLineSeparator();
+            LOG.info("{}Hazelcast:{}    Shutting down...{}", lf, lf, lf);
+            long start = System.currentTimeMillis();
+
+            // Do shut-down
             hazelcast.getLifecycleService().shutdown();
             this.hazelcastInstance = null;
+
+            LOG.info("{}Hazelcast:{}    Shutdown completed after {} msec.{}", lf, lf, (System.currentTimeMillis() - start), lf);
         }
-        LOG.info("{}Hazelcast:{}    Shutdown completed after {} msec.{}", lf, lf, (System.currentTimeMillis() - start), lf);
     }
 
     private HazelcastInstance startHazelcast(HazelcastConfigurationService configService) throws Exception {
