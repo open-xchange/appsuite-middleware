@@ -911,7 +911,7 @@ public class JSONObject extends AbstractJSONValue {
 
     /**
      * Get an optional string associated with a key. It returns an empty string if there is no such key. If the value is not a string and is
-     * not null, then it is coverted to a string.
+     * not {@link #NULL}, then it is converted to a string.
      *
      * @param key A key string.
      * @return A string which is the value.
@@ -921,7 +921,7 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
-     * Get an optional string associated with a key. It returns the defaultValue if there is no such key.
+     * Get an optional string associated with a key. It returns the <tt>defaultValue</tt> if there is no such key or is {@link #NULL}.
      *
      * @param key A key string.
      * @param defaultValue The default.
@@ -929,7 +929,10 @@ public class JSONObject extends AbstractJSONValue {
      */
     public String optString(final String key, final String defaultValue) {
         final Object o = opt(key);
-        return o != null ? o.toString() : defaultValue;
+        if (o == null) {
+            return defaultValue;
+        }
+        return NULL.equals(o) ? defaultValue : o.toString();
     }
 
     /**

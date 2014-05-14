@@ -170,9 +170,27 @@ public final class SMTPConfig extends TransportConfig {
     protected boolean doCustomParsing(MailAccount account, Session session) throws OXException {
         if (!account.isDefaultAccount()) {
             login = account.getTransportLogin();
-            password = MailPasswordUtil.decrypt(account.getTransportPassword(), session, account.getId(), login, account.getTransportServer());
+
+            if (loginSeemsNotSet(login)) {
+                // Workaround for bug #32519 -- Fallback to mail account credentials
+                login = account.getLogin();
+                password = MailPasswordUtil.decrypt(account.getPassword(), session, account.getId(), login, account.getMailServer());
+            } else {
+                password = MailPasswordUtil.decrypt(account.getTransportPassword(), session, account.getId(), login, account.getTransportServer());
+            }
+
             return true;
         }
         return false;
     }
+
+    private static boolean loginSeemsNotSet(final String login) {
+        if (com.openexchange.java.Strings.isEmpty(login)) {
+            return true;
+        }
+
+        final String lc = com.openexchange.java.Strings.toLowerCase(login);
+        return "null".equals(login) || "nil".equals(login);
+    }
+
 }

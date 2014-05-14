@@ -63,12 +63,16 @@ import com.openexchange.session.Session;
  */
 public final class GenericProperty implements Decrypter {
 
+    /** The account identifier */
     public final int accountId;
 
+    /** The associated session */
     public final Session session;
 
+    /** The login identifier */
     public final String login;
 
+    /** The server name */
     public final String server;
 
     /**
@@ -92,12 +96,7 @@ public final class GenericProperty implements Decrypter {
         try {
             return MailPasswordUtil.decrypt(encrypted, session.getPassword());
         } catch (final GeneralSecurityException e) {
-            throw MailAccountExceptionCodes.PASSWORD_DECRYPTION_FAILED.create(
-                e,
-                login,
-                server,
-                Integer.valueOf(session.getUserId()),
-                Integer.valueOf(session.getContextId()));
+            throw MailAccountExceptionCodes.PASSWORD_DECRYPTION_FAILED.create(e, login, server, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
     }
 
