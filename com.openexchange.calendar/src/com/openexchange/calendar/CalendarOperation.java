@@ -1872,7 +1872,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 recColl.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
                 completenessChecked = true;
             }
-            cdao.removeUntil();
+            //cdao.removeUntil();
             // Calculate occurrence's time
             final Date occurrenceDate;
             if (cdao.getOccurrence() <= 0) {
