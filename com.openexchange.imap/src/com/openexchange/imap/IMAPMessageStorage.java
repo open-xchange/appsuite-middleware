@@ -1352,7 +1352,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     imapFolder.fetch(messages, FETCH_PROFILE_ENVELOPE_UID);
                     for (final Message message : messages) {
                         if (message != null && !message.isExpunged()) {
-                            MailMessage mailMessage = convertWithBody(mailAccount, fullName, message);
+                            MailMessage mailMessage = convertWithBody(getMailAccount(), fullName, message);
                             if (mailMessage != null) {
                                 list.add(mailMessage);
                             }
