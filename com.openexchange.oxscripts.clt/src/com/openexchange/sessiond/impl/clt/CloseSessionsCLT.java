@@ -49,10 +49,12 @@
 
 package com.openexchange.sessiond.impl.clt;
 
+import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import com.openexchange.cli.AbstractContextMBeanCLI;
+import com.openexchange.auth.mbean.AuthenticatorMBean;
+import com.openexchange.cli.AbstractMBeanCLI;
 import com.openexchange.sessiond.SessiondMBean;
 
 /**
@@ -60,7 +62,7 @@ import com.openexchange.sessiond.SessiondMBean;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CloseSessionsCLT extends AbstractContextMBeanCLI<Void> {
+public final class CloseSessionsCLT extends AbstractMBeanCLI<Void> {
 
     public static void main(String[] args) {
         new CloseSessionsCLT().execute(args);
@@ -76,12 +78,38 @@ public final class CloseSessionsCLT extends AbstractContextMBeanCLI<Void> {
     }
 
     @Override
-    protected void addMoreOptions(Options options) {
-        // No more options to add
+    protected void checkOptions(CommandLine cmd) {
+        // No more options to check
     }
 
     @Override
-    protected Void invoke(int contextId, Options options, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+    protected void addOptions(Options options) {
+        options.addOption("c", "context", true, "A valid context identifier");
+    }
+
+    @Override
+    protected Void invoke(Options options, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+        // Parse context identifier
+        if (!cmd.hasOption('c')) {
+            System.err.println("Missing context identifier.");
+            printHelp(options);
+            System.exit(1);
+            return null;
+        }
+        final int contextId;
+        {
+            final String optionValue = cmd.getOptionValue('c');
+            try {
+                contextId = Integer.parseInt(optionValue.trim());
+            } catch (final NumberFormatException e) {
+                System.err.println("Context identifier parameter is not a number: " + optionValue);
+                printHelp(options);
+                System.exit(1);
+                return null;
+            }
+        }
+
+        // Invoke MBean method
         final String[] signature = new String[] { int.class.getName() };
         final Object[] params = new Object[] { Integer.valueOf(contextId) };
         mbsc.invoke(getObjectName("SessionD Toolkit", SessiondMBean.SESSIOND_DOMAIN), "clearContextSessions", params, signature);
@@ -90,8 +118,13 @@ public final class CloseSessionsCLT extends AbstractContextMBeanCLI<Void> {
     }
 
     @Override
-    protected void checkOptions(CommandLine cmd) {
-        // No more options to check
+    protected boolean requiresAdministrativePermission() {
+        return true;
+    }
+
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
+        authenticator.doAuthentication(login, password);
     }
 
     @Override
