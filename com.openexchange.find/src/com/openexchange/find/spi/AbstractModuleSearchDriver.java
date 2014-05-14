@@ -228,7 +228,9 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
                         }
                     }
 
-                    filtered.add(new DefaultFacet(defaultFacet.getType(), filteredValues));
+                    if (!filteredValues.isEmpty()) {
+                        filtered.add(new DefaultFacet(defaultFacet.getType(), filteredValues));
+                    }
                 }
             }
         }
