@@ -1445,20 +1445,21 @@ public final class SessionHandler {
         public Void call() {
             if (threshold > 0) {
                 // Atomically increment while checking "threshold" boundary
+                final AtomicInteger activeCounter = ACTIVE_COUNTER;
                 int cur;
                 do {
-                    cur = ACTIVE_COUNTER.get();
+                    cur = activeCounter.get();
                     if (cur >= threshold) {
                         LOG.warn("Denied to put session {} with Auth-Id {} into session storage (user={}, context={}) as threshold {} is exceeded",session.getSessionID(),session.getAuthId(),Integer.valueOf(session.getUserId()),Integer.valueOf(session.getContextId()),Integer.valueOf(threshold));
                         return null;
                     }
-                } while (!ACTIVE_COUNTER.compareAndSet(cur, cur + 1));
+                } while (!activeCounter.compareAndSet(cur, cur + 1));
 
                 // Put session with ensured decrement
                 try {
                     doPutSession();
                 } finally {
-                    ACTIVE_COUNTER.decrementAndGet();
+                    activeCounter.decrementAndGet();
                 }
             } else {
                 doPutSession();
