@@ -63,14 +63,19 @@ public class RequestOptions {
 
     private static final String INCLUDE_CONTEXT_ADMIN = "admin";
 
+    private static final String CLIENT_TIMEZONE = "timezone";
+
     private final Map<String, String> optionMap;
 
     private final boolean includeContextAdmin;
+
+    private final String timeZone;
 
     public RequestOptions(final Map<String, String> optionMap) {
         super();
         this.optionMap = optionMap;
         this.includeContextAdmin = getBoolOption(INCLUDE_CONTEXT_ADMIN, true);
+        this.timeZone = getOption(CLIENT_TIMEZONE);
     }
 
     /**
@@ -81,6 +86,18 @@ public class RequestOptions {
      */
     public boolean includeContextAdmin() {
         return includeContextAdmin;
+    }
+
+    /**
+     * The clients time zone that should be used to convert date objects
+     * shown to the user. Should match a time zone ID like expected in
+     * {@link java.util.TimeZone#getTimeZone(String)}, but is not validated
+     * and should therefore be checked.
+     *
+     * @return The time zone or <code>null</code> if not set.
+     */
+    public String getTimeZone() {
+        return timeZone;
     }
 
     /**
