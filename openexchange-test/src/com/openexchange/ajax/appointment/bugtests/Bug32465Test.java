@@ -47,46 +47,66 @@
  *
  */
 
-package com.openexchange.filemanagement.json.actions;
+package com.openexchange.ajax.appointment.bugtests;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.session.ServerSession;
-
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.TimeZone;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.CalendarTestManager;
 
 /**
- * {@link KeepaliveAction}
+ * {@link Bug32465Test}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-@Action(method = RequestMethod.GET, name = "keepalive", description = "Updating a file's last access timestamp (keep alive)", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The ID of the uploaded file whose timestamp should be updated.")
-}, responseDescription = "The string \"null\" in response's data element")
-public final class KeepaliveAction implements AJAXActionService {
+public class Bug32465Test extends AbstractAJAXSession {
+
+    private CalendarTestManager ctm;
+
+    private Appointment appointment;
 
     /**
-     * Initializes a new {@link KeepaliveAction}.
+     * Initializes a new {@link Bug32465Test}.
+     * 
+     * @param name
      */
-    public KeepaliveAction() {
-        super();
+    public Bug32465Test(String name) {
+        super(name);
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        final String id = requestData.checkParameter(AJAXServlet.PARAMETER_ID);
-        final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-        management.getByID(id);
-        return new AJAXRequestResult(JSONObject.NULL, "json");
+    public void setUp() throws Exception {
+        super.setUp();
+        ctm = new CalendarTestManager(getClient());
+        appointment = new Appointment();
+        appointment.setTitle("Bug 32465 Test");
+        appointment.setStartDate(D("01.06.2014 00:00", TimeZone.getTimeZone("UTC")));
+        appointment.setEndDate(D("02.06.2014 00:00", TimeZone.getTimeZone("UTC")));
+        appointment.setFullTime(true);
+        appointment.setRecurrenceType(Appointment.DAILY);
+        appointment.setInterval(1);
+        appointment.setOccurrence(12);
+        appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
+        appointment.setIgnoreConflicts(true);
+        ctm.insert(appointment);
+    }
+
+    @Test
+    public void testBug32465() throws Exception {
+        appointment.setOccurrence(13);
+        ctm.update(appointment);
+
+        Appointment loadedAppointment = ctm.get(appointment);
+        System.out.println(loadedAppointment.getStartDate());
+        System.out.println(loadedAppointment.getEndDate());
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ctm.cleanUp();
+        super.tearDown();
     }
 
 }

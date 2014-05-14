@@ -714,7 +714,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             /*
              * create new file
              */
-            FolderID targetFolderID = new FolderID(document.getFolderId());
+            FolderID targetFolderID;
+            {
+                String folderId = document.getFolderId();
+                if (null == folderId) {
+                    throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create("null");
+                }
+                targetFolderID = new FolderID(folderId);
+            }
             document.setFolderId(targetFolderID.getFolderId());
             saveDelegation.call(getFileAccess(targetFolderID.getService(), targetFolderID.getAccountId()));
             FileID newID = new FileID(
