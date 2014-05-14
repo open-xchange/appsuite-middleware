@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.hazelcast.group;
 
+import static com.openexchange.realtime.hazelcast.serialization.PortableID.p;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -64,11 +65,13 @@ import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.group.InactivityNotice;
+import com.openexchange.realtime.group.commands.LeaveStanza;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
-import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerMBean;
 import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerManagement;
+import com.openexchange.realtime.hazelcast.serialization.PortableID;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.synthetic.SyntheticChannel;
 import com.openexchange.realtime.util.Duration;
 import com.openexchange.realtime.util.IDMap;
 
@@ -82,39 +85,82 @@ import com.openexchange.realtime.util.IDMap;
 public class DistributedGroupManagerImpl implements ManagementAware<DistributedGroupManagerMBean>, DistributedGroupManager, RealtimeJanitor {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedGroupManagerImpl.class);
-    private final MessageDispatcher globalMessageDispatcher;
+    private final MessageDispatcher messageDispatcher;
     private final String client_map;
     private final String group_map;
     private final IDMap<Duration> inactivityMap;
     private final DistributedGroupManagerManagement managementObject;
+    private final DistributedGroupManagerCleaner cleaner;
 
     /**
      * Initializes a new {@link DistributedGroupManagerImpl}.
-     * @param globalDispatcher
+     * 
+     * @param messageDispatcher The messageDispatcher 
+     * @param client_map The name of the client map
+     * @param group_map The name of group map
      */
-    public DistributedGroupManagerImpl(GlobalMessageDispatcherImpl globalMessageDispatcher, String client_map, String group_map) {
-        this.globalMessageDispatcher = globalMessageDispatcher;
+    public DistributedGroupManagerImpl(MessageDispatcher messageDispatcher, String client_map, String group_map) {
+        this.messageDispatcher = messageDispatcher;
         this.client_map=client_map;
         this.group_map=group_map;
         this.inactivityMap = new IDMap<Duration>(true);
         this.managementObject = new DistributedGroupManagerManagement(client_map);
-        
+        this.cleaner = new DistributedGroupManagerCleaner(this);
+    }
+
+    /**
+     * Gets the DistributedGroupManagerCleaner that reacts to eviction.
+     *
+     * @return The cleaner
+     */
+    public DistributedGroupManagerCleaner getCleaner() {
+        return cleaner;
     }
 
     public boolean add(ID client, ID group) throws OXException {
-        return getClientToGroupsMapping().put(client, group);
+        Validate.notNull(client, "Client must not be null");
+        Validate.notNull(group, "Group must not be null");
+        return getClientToGroupsMapping().put(p(client), p(group));
     }
 
     public Collection<ID> remove(ID client) throws OXException {
-        return getClientToGroupsMapping().remove(client);
+        Validate.notNull(client, "ID must not be null");
+        Collection<ID> removedGroups = getClientToGroupsMapping().remove(p(client));
+        LOG.debug("Removed client to group association {} <-> {}", client, removedGroups, !removedGroups.isEmpty());
+        sendLeave(client, removedGroups);
+        return removedGroups;
+    }
+
+    /**
+     * Send a @{@link Stanza} containing a {@link LeaveCommand} from a client to a {@link Collection} of groups.
+     * 
+     * @param client The client that leaves a group.
+     * @param groups The groups that the client should leave.
+     */
+    private void sendLeave(ID client, Collection<ID> groups) {
+        Validate.notNull(client, "Client must not be null");
+        Validate.notNull(groups, "Groups must not be null");
+        for (ID group : groups) {
+            try {
+                LOG.debug("Sending leave on behalf of {} to {}.", client, group);
+                messageDispatcher.send(new LeaveStanza(client, group));
+            } catch (OXException e) {
+                LOG.error("Unable to remove client {} from group {}.", client, group, e);
+            }
+        }
     }
 
     public boolean remove(ID client, ID group) throws OXException {
-        return getClientToGroupsMapping().remove(client, group);
+        Validate.notNull(client, "Client must not be null");
+        Validate.notNull(group, "Group must not be null");
+        boolean removed = getClientToGroupsMapping().remove(p(client), p(group));
+        LOG.info("Removed client to group association {} <-> {}: {}", client, group, removed);
+        return removed;
     }
 
     public Set<ID> getGroups(ID id) throws OXException {
-        return new HashSet<ID>(getClientToGroupsMapping().get(id));
+        Validate.notNull(id, "ID must not be null");
+        return new HashSet<ID>(getClientToGroupsMapping().get(p(id)));
     }
 
     public Set<ID> getMembers(ID id) throws OXException {
@@ -129,7 +175,7 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
             for(ID group : getGroups(id)) {
                 try {
                     LOG.debug("Informing GroupDispatcher {} about inactivity of client {} with Duration of {}.", group, id, duration);
-                    globalMessageDispatcher.send(new InactivityNotice(group, id, duration));
+                    messageDispatcher.send(new InactivityNotice(group, id, duration));
                 } catch (OXException e) {
                     LOG.error("Unable to inform GroupDispatcher {} about inactivity of client {} with Duration of {}.", group, id, duration, e);
                 }
@@ -139,10 +185,26 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
 
     @Override
     public void cleanupForId(ID id) {
+        if(SyntheticChannel.PROTOCOL.equals(id.getProtocol())) {
+            cleanupForSyntheticId(id);
+        } else {
+            cleanupForClientId(id);
+        }
+    }
+
+    private void cleanupForSyntheticId(ID id) {
+        /*
+         * - Find clients that are member of this group
+         * - Remove every client <-> group mapping 
+         */
+        LOG.debug("Cleanup for synthetic id {}", id);
+    }
+
+    private void cleanupForClientId(ID id) {
         try {
-        Collection<ID> removed = remove(id);
-        inactivityMap.remove(id);
-        LOG.debug("Cleanup for ID: {}. Removed from groups: {}", id, removed);
+            Collection<ID> removed = remove(id);
+            inactivityMap.remove(id);
+            LOG.debug("Cleanup for ID: {}. Removed from groups: {}", id, removed);
         } catch (Exception e) {
             LOG.error("Error while cleaning for ID {}", id, e);
         }
@@ -163,7 +225,7 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
      * 
      * @return A @ MultiMap} of one group to many members
      */
-    private MultiMap<ID, ID> getGroupToMembersMapping() throws OXException {
+    private MultiMap<PortableID, PortableID> getGroupToMembersMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMultiMap(group_map);
     }

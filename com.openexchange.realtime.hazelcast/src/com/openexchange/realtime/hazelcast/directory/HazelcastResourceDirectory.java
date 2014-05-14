@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import com.google.common.base.Optional;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.HazelcastInstance;
@@ -63,6 +64,7 @@ import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
 import com.hazelcast.core.TransactionalMap;
 import com.hazelcast.core.TransactionalMultiMap;
+import com.hazelcast.query.Predicate;
 import com.hazelcast.transaction.TransactionContext;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentSet;
@@ -509,27 +511,27 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
         @Override
         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-            try {
-                /*
-                 * This performs a set on map entries to prevent eviction
-                 */
-                getIDMapping().get(id.toGeneralForm().toString());
-                Map<String, Object> resourceWrap = getResourceMapping().get(id.toString());
-                if (resourceWrap == null) {
-                    LOG.debug("Unable to refresh id, might have been removed in the meantime: {}", id);
-                    syntheticIDs.remove(id);
-                } else {
-                    resourceWrap.put(HazelcastResourceWrapper.eviction_timestamp, System.currentTimeMillis());
-                    Map<String, Object> put = getResourceMapping().put(id.toString(), resourceWrap);
-                    if (put == null) {
-                        LOG.warn("There was no previous entry associated with id: {}when refreshing the directory entry via write.", id);
-                    } else {
-                        LOG.debug("Refreshed id: {} with resource: {}", id, resourceWrap);
-                    }
-                }
-            } catch (OXException e) {
-                LOG.error(e.getMessage());
-            }
+//            try {
+//                /*
+//                 * This performs a set on map entries to prevent eviction
+//                 */
+//                getIDMapping().get(id.toGeneralForm().toString());
+//                Map<String, Object> resourceWrap = getResourceMapping().get(id.toString());
+//                if (resourceWrap == null) {
+//                    LOG.debug("Unable to refresh id, might have been removed in the meantime: {}", id);
+//                    syntheticIDs.remove(id);
+//                } else {
+//                    resourceWrap.put(HazelcastResourceWrapper.eviction_timestamp, System.currentTimeMillis());
+//                    Map<String, Object> put = getResourceMapping().put(id.toString(), resourceWrap);
+//                    if (put == null) {
+//                        LOG.warn("There was no previous entry associated with id: {} when refreshing the directory entry via write.", id);
+//                    } else {
+//                        LOG.debug("Refreshed id: {} with resource: {}", id, resourceWrap);
+//                    }
+//                }
+//            } catch (OXException e) {
+//                LOG.error(e.getMessage());
+//            }
         }
 
     };
@@ -543,6 +545,32 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         } catch (OXException e) {
             LOG.error("", e);
         }
+    }
+
+    /**
+     * Add a {@link ResourceMappingEntryListener} to this ResourceDirectory. 
+     * @param entryListener the {@link ResourceMappingEntryListener} to add
+     * @param includeValue should the value be included when informing the listener
+     * @return the registration id that can be used to remove a previously added listener
+     * @throws OXException
+     */
+    public String addResourceMappingEntryListener(ResourceMappingEntryListener entryListener, boolean includeValue) throws OXException {
+        Optional<Predicate<String, Map<String, Object>>> predicate = entryListener.getPredicate();
+        if(predicate.isPresent()) {
+            return getResourceMapping().addEntryListener(entryListener, predicate.get(), includeValue);
+        } else {
+            return getResourceMapping().addEntryListener(entryListener, includeValue);
+        }
+    }
+
+    /**
+     * Remove a {@link ResourceMappingEntryListener} from this ResourceDirectory.
+     * @param registrationId the registration id gained while adding the listener
+     * @return true if removal of the listener succeeded, else false
+     * @throws OXException
+     */
+    public boolean removeResourceMappingEntryListener(String registrationId) throws OXException {
+        return getResourceMapping().removeEntryListener(registrationId);
     }
 
 }
