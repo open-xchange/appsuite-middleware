@@ -119,6 +119,11 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         }
     }
 
+    private OXException handleNotActiveException(HazelcastInstanceNotActiveException e) {
+        inactive.set(true);
+        return SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+    }
+
     @Override
     public Session lookupSession(final String sessionId) throws OXException {
         ensureActive();
@@ -129,8 +134,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             }
             return storedSession;
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         } catch (HazelcastException e) {
             throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(e, sessionId);
         } catch (OXException e) {
@@ -153,8 +157,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 sessionsMap.putIfAbsent(session.getSessionID(), new PortableSession(session));
             }
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         } catch (RuntimeException e) {
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -169,8 +172,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             return null == sessions().putIfAbsent(session.getSessionID(), new PortableSession(session));
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         } catch (final HazelcastException e) {
             throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
         } catch (final OXException e) {
@@ -188,8 +190,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             try {
                 sessions().set(session.getSessionID(), new PortableSession(session), 0, TimeUnit.SECONDS);
             } catch (HazelcastInstanceNotActiveException e) {
-                inactive.set(true);
-                throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+                throw handleNotActiveException(e);
             } catch (HazelcastException e) {
                 throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
             }
@@ -206,8 +207,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                     LOG.debug("Session with ID '{}' not found, unable to remove from storage.", sessionId);
                 }
             } catch (HazelcastInstanceNotActiveException e) {
-                inactive.set(true);
-                throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+                throw handleNotActiveException(e);
             } catch (HazelcastException e) {
                 throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, sessionId);
             } catch (OXException e) {
@@ -256,8 +256,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             } catch (ExecutionException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof HazelcastInstanceNotActiveException) {
-                    inactive.set(true);
-                    throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+                    throw handleNotActiveException((HazelcastInstanceNotActiveException) cause);
                 }
 
                 // Launder...
@@ -300,8 +299,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             } catch (ExecutionException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof HazelcastInstanceNotActiveException) {
-                    inactive.set(true);
-                    throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+                    throw handleNotActiveException((HazelcastInstanceNotActiveException) cause);
                 }
 
                 // Launder...
@@ -319,8 +317,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 return true;
             }
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         } catch (HazelcastException e) {
             LOG.debug("", e);
         }
@@ -341,8 +338,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 sessions().values(new SqlPredicate(PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId + " AND " + PortableSession.PARAMETER_USER_ID + " = " + userId));
             return null != sessions ? sessions.toArray(new Session[sessions.size()]) : new Session[0];
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         }
     }
 
@@ -355,8 +351,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
              */
             return findSession(new SqlPredicate(PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId + " AND " + PortableSession.PARAMETER_USER_ID + " = " + userId));
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         }
     }
 
@@ -415,8 +410,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             }
             throw SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(randomToken);
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         } catch (final HazelcastException e) {
             LOG.debug("", e);
             throw SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(e, randomToken);
@@ -445,8 +439,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             }
             throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(altId);
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         } catch (final HazelcastException e) {
             LOG.debug("", e);
             throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(e, altId);
@@ -470,8 +463,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             sessions().clear();
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         }
     }
 
@@ -487,8 +479,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             storedSession.setPassword(newPassword);
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         } catch (HazelcastException e) {
             LOG.debug("", e);
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -507,8 +498,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             storedSession.setLocalIp(localIp);
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         } catch (HazelcastException e) {
             LOG.debug("", e);
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -527,8 +517,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             storedSession.setClient(client);
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         } catch (HazelcastException e) {
             LOG.debug("", e);
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -547,8 +536,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             storedSession.setHash(hash);
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         } catch (HazelcastException e) {
             LOG.debug("", e);
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -565,8 +553,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                     throw SessionStorageExceptionCodes.DUPLICATE_AUTHID.create(session.getLogin(), login);
                 }
             } catch (HazelcastInstanceNotActiveException e) {
-                inactive.set(true);
-                throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+                throw handleNotActiveException(e);
             } catch (final HazelcastException e) {
                 LOG.debug("", e);
                 throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -586,8 +573,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 sessions.keySet(new SqlPredicate(PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId + " AND " + PortableSession.PARAMETER_USER_ID + " = " + userId));
             return null != sessionIDs ? sessionIDs.size() : 0;
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         }
     }
 
@@ -609,8 +595,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 LOG.debug("Received keep-alive for '{}'.", sessionID);
             }
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         }
     }
 
@@ -671,8 +656,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             }
             return hazelcastInstance.getMap(sessionsMapName);
         } catch (HazelcastInstanceNotActiveException e) {
-            inactive.set(true);
-            throw SessionStorageExceptionCodes.SESSION_STORAGE_DOWN.create(e, HazelcastSessionStorageService.class.getName());
+            throw handleNotActiveException(e);
         } catch (HazelcastException e) {
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
