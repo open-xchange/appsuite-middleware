@@ -85,7 +85,7 @@ public class DistributedGroupManagerCleaner implements ResourceMappingEntryListe
     @Override
     public void entryRemoved(EntryEvent<String, Map<String, Object>> event) {
         ID id = new ID(event.getKey());
-        LOG.info("Removal of key {}", id);
+        LOG.debug("Removal of key {}", id);
         janitor.cleanupForId(id);
     }
 

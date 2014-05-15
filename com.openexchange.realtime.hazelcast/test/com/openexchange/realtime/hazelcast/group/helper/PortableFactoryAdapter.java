@@ -47,25 +47,33 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast;
+package com.openexchange.realtime.hazelcast.group.helper;
 
+import com.hazelcast.nio.serialization.Portable;
+import com.hazelcast.nio.serialization.PortableFactory;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectoryTest;
-import com.openexchange.realtime.hazelcast.directory.HazelcastResourceTest;
-import com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImplTest;
 
 /**
- * {@link UnitTests}
+ * {@link PortableFactoryAdapter}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    HazelcastResourceTest.class,
-    HazelcastResourceDirectoryTest.class,
-    DistributedGroupManagerImplTest.class
-})
-public class UnitTests {}
+public class PortableFactoryAdapter implements PortableFactory {
+
+    private CustomPortableFactory customFactory;
+
+    public PortableFactoryAdapter(CustomPortableFactory customFactory) {
+        this.customFactory = customFactory;
+    }
+
+    @Override
+    public Portable create(int classId) {
+        if(customFactory.getClassId() == classId) {
+            return customFactory.create();
+        }
+        return null;
+    }
+
+}
