@@ -108,15 +108,14 @@ public class RequestReportingFilter implements Filter {
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
         if (isFilterEnabled) {
-            final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-            final HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-
             final RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
             // Request watcher is enabled but service is missing, bundle not started etc ..
             if (requestWatcher == null) {
                 LOG.debug("{} is not available. Unable to watch this request.", RequestWatcherService.class.getSimpleName());
-                chain.doFilter(httpServletRequest, httpServletResponse);
+                chain.doFilter(request, response);
             } else {
+                final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+                final HttpServletResponse httpServletResponse = (HttpServletResponse) response;
                 if (isLongRunning(httpServletRequest)) {
                     // Do not track long running requests
                     chain.doFilter(request, response);
