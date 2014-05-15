@@ -106,6 +106,10 @@ public class Address {
      * @return String with the sanitized number or 'null' if provided
      */
     private String sanitizePhoneNumber(String phoneNumber) {
+        if (phoneNumber == null) {
+            return phoneNumber;
+        }
+
         String toSanitize = phoneNumber;
 
         if (toSanitize.equalsIgnoreCase("null")) {
