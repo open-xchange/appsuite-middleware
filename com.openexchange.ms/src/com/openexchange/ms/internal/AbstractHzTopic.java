@@ -67,7 +67,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractHzTopic<E> implements Topic<E> {
+public abstract class AbstractHzTopic<E> extends AbstractHzResource implements Topic<E> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractHzTopic.class);
 

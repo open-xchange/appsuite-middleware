@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,78 +47,30 @@
  *
  */
 
-package com.openexchange.ms.internal.portable;
+package com.openexchange.ms.internal;
 
-import java.util.List;
-import com.hazelcast.core.HazelcastInstance;
+import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.ITopic;
-import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.ms.MessageListener;
-import com.openexchange.ms.internal.AbstractHzTopic;
+
 
 /**
- * {@link PortableHzTopic}
+ * {@link Unregisterer}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PortableHzTopic<P extends Portable> extends AbstractHzTopic<P> {
+public interface Unregisterer {
 
-    private final ITopic<PortableMessage<P>> hzTopic;
+    /** The singleton reference */
+    public static final AtomicReference<Unregisterer> INSTANCE_REF = new AtomicReference<Unregisterer>();
 
     /**
-     * Initializes a new {@link PortableHzTopic}.
-     *
-     * @param name The topic's name
-     * @param hz The hazelcast instance
+     * Manually unregisters the session storage
      */
-    public PortableHzTopic(String name, HazelcastInstance hz) {
-        super(name, hz);
-        this.hzTopic = hz.getTopic(name);
-    }
+    void unregisterMsService();
 
-    @Override
-    protected String registerListener(MessageListener<P> listener, String senderID) {
-        try {
-            return hzTopic.addMessageListener(new PortableHzMessageListener<P>(listener, senderID));
-        } catch (HazelcastInstanceNotActiveException e) {
-            throw handleNotActiveException(e);
-        }
-    }
-
-    @Override
-    protected boolean unregisterListener(String registrationID) {
-        try {
-            return hzTopic.removeMessageListener(registrationID);
-        } catch (HazelcastInstanceNotActiveException e) {
-            throw handleNotActiveException(e);
-        }
-    }
-
-    @Override
-    protected void publish(String senderId, P message) {
-        try {
-            hzTopic.publish(new PortableMessage<P>(senderId, message));
-        } catch (HazelcastInstanceNotActiveException e) {
-            throw handleNotActiveException(e);
-        }
-    }
-
-    @Override
-    protected void publish(String senderId, List<P> messages) {
-        try {
-            hzTopic.publish(new PortableMessage<P>(senderId, messages));
-        } catch (HazelcastInstanceNotActiveException e) {
-            throw handleNotActiveException(e);
-        }
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        if (null != hzTopic) {
-            hzTopic.destroy();
-        }
-    }
+    /**
+     * Propagates not-active exception
+     */
+    void propagateNotActive(HazelcastInstanceNotActiveException notActiveException);
 
 }

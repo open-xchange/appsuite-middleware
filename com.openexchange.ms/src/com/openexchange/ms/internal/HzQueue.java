@@ -59,6 +59,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IQueue;
 import com.hazelcast.core.ItemEvent;
 import com.openexchange.java.util.UUIDs;
@@ -71,7 +72,7 @@ import com.openexchange.ms.Queue;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HzQueue<E> implements Queue<E> {
+public final class HzQueue<E> extends AbstractHzResource implements Queue<E> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HzQueue.class);
 
@@ -106,7 +107,11 @@ public final class HzQueue<E> implements Queue<E> {
     @Override
     public void addMessageListener(final MessageListener<E> listener) {
         final HzMessageListener<E> hzListener = new HzMessageListener<E>(listener, senderId);
-        registeredListeners.put(listener, hzQueue.addItemListener(hzListener, true));
+        try {
+            registeredListeners.put(listener, hzQueue.addItemListener(hzListener, true));
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
@@ -115,6 +120,8 @@ public final class HzQueue<E> implements Queue<E> {
         if (null != regID) {
             try {
                 hzQueue.removeItemListener(regID);
+            } catch (HazelcastInstanceNotActiveException e) {
+                throw handleNotActiveException(e);
             } catch (final RuntimeException e) {
                 // Removing message listener failed
                 LOG.warn("Couldn't remove message listener from Hazelcast queue \"{}\".", name, e);
@@ -129,189 +136,289 @@ public final class HzQueue<E> implements Queue<E> {
 
     @Override
     public int size() {
-        return hzQueue.size();
+        try {
+            return hzQueue.size();
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     public boolean isEmpty() {
-        return hzQueue.isEmpty();
+        try {
+            return hzQueue.isEmpty();
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     public boolean add(final E e) {
-        return hzQueue.add(HzDataUtility.generateMapFor(e, senderId));
+        try {
+            return hzQueue.add(HzDataUtility.generateMapFor(e, senderId));
+        } catch (HazelcastInstanceNotActiveException exc) {
+            throw handleNotActiveException(exc);
+        }
     }
 
     @Override
     public Iterator<E> iterator() {
-        final Iterator<Map<String, Object>> iterator = hzQueue.iterator();
-        return new Iterator<E>() {
+        try {
+            final Iterator<Map<String, Object>> iterator = hzQueue.iterator();
+            return new Iterator<E>() {
 
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+                @Override
+                public boolean hasNext() {
+                    return iterator.hasNext();
+                }
 
-            @Override
-            public E next() {
-                final Map<String, Object> next = iterator.next();
-                return null == next ? null : (E) next.get(MESSAGE_DATA_OBJECT);
-            }
+                @Override
+                public E next() {
+                    final Map<String, Object> next = iterator.next();
+                    return null == next ? null : (E) next.get(MESSAGE_DATA_OBJECT);
+                }
 
-            @Override
-            public void remove() {
-                iterator.remove();
-            }
-        };
+                @Override
+                public void remove() {
+                    iterator.remove();
+                }
+            };
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     public E remove() {
-        final Map<String, Object> data = hzQueue.remove();
-        return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
+        try {
+            final Map<String, Object> data = hzQueue.remove();
+            return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     public boolean offer(final E e) {
-        return hzQueue.offer(HzDataUtility.generateMapFor(e, senderId));
+        try {
+            return hzQueue.offer(HzDataUtility.generateMapFor(e, senderId));
+        } catch (HazelcastInstanceNotActiveException exc) {
+            throw handleNotActiveException(exc);
+        }
     }
 
     @Override
     public Object[] toArray() {
-        final Object[] array = hzQueue.toArray();
-        final int length = array.length;
-        final Object[] ret = new Object[length];
-        for (int i = 0; i < length; i++) {
-            final Map<String, Object> data = (Map<String, Object>) array[i];
-            ret[i] = data.get(MESSAGE_DATA_OBJECT);
+        try {
+            final Object[] array = hzQueue.toArray();
+            final int length = array.length;
+            final Object[] ret = new Object[length];
+            for (int i = 0; i < length; i++) {
+                final Map<String, Object> data = (Map<String, Object>) array[i];
+                ret[i] = data.get(MESSAGE_DATA_OBJECT);
+            }
+            return ret;
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
         }
-        return ret;
     }
 
     @Override
     public E poll() {
-        final Map<String, Object> data = hzQueue.poll();
-        return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
+        try {
+            final Map<String, Object> data = hzQueue.poll();
+            return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     public E element() {
-        final Map<String, Object> data = hzQueue.element();
-        return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
+        try {
+            final Map<String, Object> data = hzQueue.element();
+            return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     public E peek() {
-        final Map<String, Object> data = hzQueue.peek();
-        return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
+        try {
+            final Map<String, Object> data = hzQueue.peek();
+            return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     public <T> T[] toArray(final T[] a) {
-        final Map<String, Object>[] array = hzQueue.toArray(new Map[0]);
-        final List<T> list = new ArrayList<T>(array.length);
-        for (int i = 0; i < array.length; i++) {
-            list.add((T) array[i].get(MESSAGE_DATA_OBJECT));
+        try {
+            final Map<String, Object>[] array = hzQueue.toArray(new Map[0]);
+            final List<T> list = new ArrayList<T>(array.length);
+            for (int i = 0; i < array.length; i++) {
+                list.add((T) array[i].get(MESSAGE_DATA_OBJECT));
+            }
+            return list.toArray(a);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
         }
-        return list.toArray(a);
     }
 
     @Override
     public void put(final E e) throws InterruptedException {
-        hzQueue.put(HzDataUtility.generateMapFor(e, senderId));
+        try {
+            hzQueue.put(HzDataUtility.generateMapFor(e, senderId));
+        } catch (HazelcastInstanceNotActiveException exc) {
+            throw handleNotActiveException(exc);
+        }
     }
 
     @Override
     public boolean offer(final E e, final long timeout, final TimeUnit unit) throws InterruptedException {
-        return hzQueue.offer(HzDataUtility.generateMapFor(e, senderId), timeout, unit);
+        try {
+            return hzQueue.offer(HzDataUtility.generateMapFor(e, senderId), timeout, unit);
+        } catch (HazelcastInstanceNotActiveException exc) {
+            throw handleNotActiveException(exc);
+        }
     }
 
     @Override
     public E take() throws InterruptedException {
-        final Map<String, Object> data = hzQueue.take();
-        return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
+        try {
+            final Map<String, Object> data = hzQueue.take();
+            return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     public E poll(final long timeout, final TimeUnit unit) throws InterruptedException {
-        final Map<String, Object> data = hzQueue.poll(timeout, unit);
-        return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
+        try {
+            final Map<String, Object> data = hzQueue.poll(timeout, unit);
+            return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     public int remainingCapacity() {
-        return hzQueue.remainingCapacity();
+        try {
+            return hzQueue.remainingCapacity();
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     public boolean remove(final Object o) {
-        return hzQueue.remove(o);
+        try {
+            return hzQueue.remove(o);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     public boolean contains(final Object o) {
-        return hzQueue.contains(o);
+        try {
+            return hzQueue.contains(o);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     public int drainTo(final Collection<? super E> c) {
-        final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
-        final int drained = hzQueue.drainTo(list);
-        for (int i = 0; i < drained; i++) {
-            c.add((E) list.get(i).get(MESSAGE_DATA_OBJECT));
+        try {
+            final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
+            final int drained = hzQueue.drainTo(list);
+            for (int i = 0; i < drained; i++) {
+                c.add((E) list.get(i).get(MESSAGE_DATA_OBJECT));
+            }
+            return drained;
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
         }
-        return drained;
     }
 
     @Override
     public boolean containsAll(final Collection<?> c) {
-        final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
-        for (final Object object : c) {
-            list.add(HzDataUtility.generateMapFor((E) object, senderId));
+        try {
+            final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
+            for (final Object object : c) {
+                list.add(HzDataUtility.generateMapFor((E) object, senderId));
+            }
+            return hzQueue.containsAll(list);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
         }
-        return hzQueue.containsAll(list);
     }
 
     @Override
     public int drainTo(final Collection<? super E> c, final int maxElements) {
-        final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
-        final int drained = hzQueue.drainTo(list, maxElements);
-        for (int i = 0; i < drained; i++) {
-            c.add((E) list.get(i).get(MESSAGE_DATA_OBJECT));
+        try {
+            final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
+            final int drained = hzQueue.drainTo(list, maxElements);
+            for (int i = 0; i < drained; i++) {
+                c.add((E) list.get(i).get(MESSAGE_DATA_OBJECT));
+            }
+            return drained;
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
         }
-        return drained;
     }
 
     @Override
     public boolean addAll(final Collection<? extends E> c) {
-        boolean retval = false;
-        for (final E e : c) {
-            retval = hzQueue.add(HzDataUtility.generateMapFor(e, senderId));
+        try {
+            boolean retval = false;
+            for (final E e : c) {
+                retval = hzQueue.add(HzDataUtility.generateMapFor(e, senderId));
+            }
+            return retval;
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
         }
-        return retval;
     }
 
     @Override
     public boolean removeAll(final Collection<?> c) {
-        final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
-        for (final Object object : c) {
-            list.add(HzDataUtility.generateMapFor((E) object, senderId));
+        try {
+            final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
+            for (final Object object : c) {
+                list.add(HzDataUtility.generateMapFor((E) object, senderId));
+            }
+            return hzQueue.removeAll(list);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
         }
-        return hzQueue.removeAll(list);
     }
 
     @Override
     public boolean retainAll(final Collection<?> c) {
-        final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
-        for (final Object object : c) {
-            list.add(HzDataUtility.generateMapFor((E) object, senderId));
+        try {
+            final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
+            for (final Object object : c) {
+                list.add(HzDataUtility.generateMapFor((E) object, senderId));
+            }
+            return hzQueue.retainAll(list);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
         }
-        return hzQueue.retainAll(list);
     }
 
     @Override
     public void clear() {
-        hzQueue.clear();
+        try {
+            hzQueue.clear();
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     // ------------------------------------------------------------------------ //
