@@ -57,8 +57,11 @@ import static com.openexchange.find.calendar.CalendarFacetType.RELATIVE_DATE;
 import static com.openexchange.find.calendar.CalendarFacetType.STATUS;
 import static com.openexchange.find.calendar.CalendarFacetType.SUBJECT;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -239,6 +242,39 @@ public class QueryTest extends CalendarFindTest {
         List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(PARTICIPANT, String.valueOf(userParticipant.getIdentifier()), "users", String.valueOf(userParticipant.getIdentifier()))));
         assertTrue("no appointments found", 0 < documents.size());
         assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+    }
+
+    public void testCorrectTimeZone() throws Exception {
+        /*
+         * We search for an appointment and request the dates in a different
+         * time zone than the one used when the appointment was created. Afterwards
+         * we expect the dates in the response object to match the requested time zone.
+         */
+        TimeZone userTimeZone = client.getValues().getTimeZone();
+        TimeZone responseTimeZone = TimeZone.getTimeZone("America/New York");
+        if (responseTimeZone.getRawOffset() == userTimeZone.getRawOffset()) { // we need different time zones for creation and query response
+            responseTimeZone = TimeZone.getTimeZone("Europe/Berlin");
+        }
+
+        Calendar originStartDate = TimeTools.createCalendar(userTimeZone);
+        Calendar originEndDate = (Calendar) originStartDate.clone();
+        originEndDate.add(Calendar.HOUR_OF_DAY, 1);
+        Calendar expectedStartDate = TimeTools.createCalendar(responseTimeZone);
+        Appointment appointment = randomAppointment();
+        appointment.setStartDate(originStartDate.getTime());
+        appointment.setEndDate(originEndDate.getTime());
+        appointment.setTitle(randomUID());
+        appointment = manager.insert(appointment);
+
+        List<PropDocument> documents = query(Collections.singletonList(createActiveFieldFacet(SUBJECT, "subject", randomSubstring(appointment.getTitle()))),Collections.singletonMap("timezone", responseTimeZone.getID()));
+        assertTrue("no appointments found", 0 < documents.size());
+        PropDocument document = findByProperty(documents, "title", appointment.getTitle());
+        assertNotNull("appointment not found", document);
+
+        Date d = new Date(Long.parseLong(document.getProps().get("start_date").toString()));
+        Calendar responseStartDate = Calendar.getInstance(responseTimeZone);
+        responseStartDate.setTime(d);
+        assertEquals(expectedStartDate, responseStartDate);
     }
 
 }

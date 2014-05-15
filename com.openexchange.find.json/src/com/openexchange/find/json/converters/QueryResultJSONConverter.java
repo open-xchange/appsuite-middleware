@@ -94,7 +94,7 @@ public class QueryResultJSONConverter extends AbstractJSONConverter {
                 json.put("start", searchResult.getStart());
                 json.put("size", searchResult.getSize());
 
-                JSONResponseVisitor visitor = new JSONResponseVisitor(session, converterRegistry, queryResult.getColumns());
+                JSONResponseVisitor visitor = new JSONResponseVisitor(session, converterRegistry, queryResult);
                 for (Document document : searchResult.getDocuments()) {
                     document.accept(visitor);
                 }

@@ -1,3 +1,12 @@
+* 2014-05-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 32465: Bad until value on series update.
+
+* 2014-05-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32519: Fixed parsing JSON in case JSON NULL is set as value and fall-back to mail account credentials if transport ones seems to be "not set"
+ - Fix for bug 32541: Expect master administrator credentials
+
 * 2014-05-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 32226: Do not specify any cache-controlling HTTP header for "file" HTTP-API module

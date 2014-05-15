@@ -473,7 +473,7 @@ public abstract class Stanza implements Serializable {
         }
         int numResults = filteredPayloadElements.size();
         if (numResults != 1) {
-            LOG.warn("Was expecting a single " + elementPath + " payload but found " + numResults 
+            LOG.debug("Was expecting a single " + elementPath + " payload but found " + numResults 
                 + " within the Stanza. Returning absent Optional instead.");
             return retval;
         }

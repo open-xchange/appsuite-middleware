@@ -88,6 +88,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 public class SyntheticChannel implements Channel, Runnable {
 
     private static final int NUMBER_OF_RUNLOOPS = 16;
+    public static final String PROTOCOL = "synthetic";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyntheticChannel.class);
     private static final String SENDLOCK = "syntheticChannel";
@@ -121,7 +122,7 @@ public class SyntheticChannel implements Channel, Runnable {
 
     @Override
     public String getProtocol() {
-        return "synthetic";
+        return PROTOCOL;
     }
 
     @Override

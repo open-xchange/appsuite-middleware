@@ -87,6 +87,8 @@ import com.openexchange.timer.TimerService;
 public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastRealtimeActivator.class);
+    private HazelcastResourceDirectory directory;
+    private String cleanerRegistrationId;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -126,7 +128,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
             String msg = "Distributed directory maps couldn't be found in hazelcast configuration";
             throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
         }
-        final HazelcastResourceDirectory directory = new HazelcastResourceDirectory(id_map, resource_map);
+        directory = new HazelcastResourceDirectory(id_map, resource_map);
         managementHouseKeeper.addManagementObject(directory.getManagementObject());
 
         GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
@@ -156,8 +158,9 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         String client_map = discoverMapName(config, "rtClientMapping-");
         String group_map = discoverMapName(config, "rtGroupMapping-");
         DistributedGroupManagerImpl distributedGroupManager = new DistributedGroupManagerImpl(globalDispatcher, client_map, group_map);
+        cleanerRegistrationId = directory.addResourceMappingEntryListener(distributedGroupManager.getCleaner(), true);
         registerService(DistributedGroupManager.class, distributedGroupManager);
-//        managementHouseKeeper.addManagementObject(distributedGroupManager.getManagementObject());
+        managementHouseKeeper.addManagementObject(distributedGroupManager.getManagementObject());
 
         directory.addChannel(globalDispatcher.getChannel());
         try {
@@ -170,6 +173,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
+        directory.removeResourceMappingEntryListener(cleanerRegistrationId);
         ManagementHouseKeeper.getInstance().cleanup();
         Services.setServiceLookup(null);
         super.stopBundle();

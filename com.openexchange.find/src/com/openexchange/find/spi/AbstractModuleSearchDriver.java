@@ -215,7 +215,9 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
             } else if (facet instanceof DefaultFacet) {
                 DefaultFacet defaultFacet = (DefaultFacet) facet;
                 List<ActiveFacet> activeFacets = type2active.get(facet.getType());
-                if (activeFacets != null) {
+                if (activeFacets == null) {
+                    filtered.add(facet);
+                } else {
                     List<FacetValue> filteredValues = new LinkedList<FacetValue>();
                     Set<String> valuesToRemove = new HashSet<String>(activeFacets.size());
                     for (ActiveFacet activeFacet : activeFacets) {
@@ -228,7 +230,9 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
                         }
                     }
 
-                    filtered.add(new DefaultFacet(defaultFacet.getType(), filteredValues));
+                    if (!filteredValues.isEmpty()) {
+                        filtered.add(new DefaultFacet(defaultFacet.getType(), filteredValues));
+                    }
                 }
             }
         }

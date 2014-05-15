@@ -129,5 +129,13 @@ public class IDManglerTest extends TestCase {
         assertEquals(Arrays.asList("some:/service:this is", "someFolder", "someId"), unmangled);
     }
 
+    public void testInfostoreFolderAndId() {
+        List<String> unmangled = IDMangler.unmangle("123/456");
+
+        assertEquals("Unexpected size", 2, unmangled.size());
+
+        assertEquals("123", unmangled.get(0));
+        assertEquals("456", unmangled.get(1));
+    }
 
 }

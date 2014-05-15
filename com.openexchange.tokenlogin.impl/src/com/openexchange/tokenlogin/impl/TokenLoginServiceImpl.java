@@ -212,8 +212,8 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             return null;
         }
         final HazelcastInstance hazelcastInstance = Services.getService(HazelcastInstance.class);
-        if (hazelcastInstance == null || !hazelcastInstance.getLifecycleService().isRunning()) {
-            LOG.trace("Hazelcast instance is not available or running.");
+        if (hazelcastInstance == null) {
+            LOG.trace("Hazelcast instance is not available.");
             return null;
         }
         return hazelcastInstance.getMap(mapName);

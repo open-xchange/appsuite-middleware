@@ -98,13 +98,11 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private ModuleSearchDriver requireDriver(ServerSession session, Module module) throws OXException {
-        ModuleSearchDriver determined = driverManager.determineDriver(session, module);
+        ModuleSearchDriver determined = driverManager.determineDriver(session, module, true);
         if (determined == null) {
-            throw FindExceptionCode.MISSING_DRIVER.create(module.name(), session.getUserId(), session.getContextId());
+            throw FindExceptionCode.MISSING_DRIVER.create(module.getIdentifier(), session.getUserId(), session.getContextId());
         }
         return determined;
     }
-
-
 
 }

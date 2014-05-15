@@ -161,7 +161,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
 
     private IMap<String, String> map() throws OXException {
         HazelcastInstance hazelcastInstance = REFERENCE.get();
-        if (hazelcastInstance == null || !hazelcastInstance.getLifecycleService().isRunning()) {
+        if (hazelcastInstance == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
         }
         return hazelcastInstance.getMap(mapName);

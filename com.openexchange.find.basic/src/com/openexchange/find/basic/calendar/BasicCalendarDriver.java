@@ -77,8 +77,8 @@ import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -236,6 +236,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         if (searchBuilder.isFalse()) {
             return SearchResult.EMPTY;
         }
+
         /*
          * perform search
          */
@@ -345,11 +346,11 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             if (date1 == date2) {
                 return 0;
             } else if (null == date1) {
-                return -1;
-            } else if (null == date2) {
                 return 1;
+            } else if (null == date2) {
+                return -1;
             } else {
-                return date1.compareTo(date2);
+                return date2.compareTo(date1);
             }
         }
     };

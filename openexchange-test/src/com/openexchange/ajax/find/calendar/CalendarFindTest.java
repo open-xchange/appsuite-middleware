@@ -50,6 +50,7 @@
 package com.openexchange.ajax.find.calendar;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
@@ -118,5 +119,17 @@ public class CalendarFindTest extends AbstractFindTest {
      */
     protected List<PropDocument> query(List<ActiveFacet> facets) throws Exception {
         return query(Module.CALENDAR, facets);
+    }
+
+    /**
+     * Performs a query request using the supplied active facets.
+     *
+     * @param facets The active facets
+     * @param options The options
+     * @return The found documents
+     * @throws Exception
+     */
+    protected List<PropDocument> query(List<ActiveFacet> facets, Map<String, String> options) throws Exception {
+        return query(Module.CALENDAR, facets, options);
     }
 }

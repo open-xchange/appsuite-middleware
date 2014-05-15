@@ -58,7 +58,7 @@ import org.apache.commons.lang.Validate;
  */
 public class IDComponentsParser {
 
-    static class IDComponents {
+    public static class IDComponents {
 
         public String protocol;
 

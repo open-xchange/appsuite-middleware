@@ -107,11 +107,18 @@ public class ID implements Serializable {
 
     public static final String INTERNAL_CONTEXT = "internal";
     
-    private String protocol;
-    private String component;
-    private String user;
-    private String context;
-    private String resource;
+    protected String protocol;
+    protected String component;
+    protected String user;
+    protected String context;
+    protected String resource;
+
+    /**
+     * Initializes a new {@link ID}.
+     */
+    public ID() {
+        super();
+    }
 
     /**
      * Initializes a new {@link ID}.
@@ -192,7 +199,7 @@ public class ID implements Serializable {
     /**
      * Check optional id components for emtpy strings and sanitize by setting to null or default values.
      */
-    private void sanitize() {
+    protected void sanitize() {
         if (Strings.isEmpty(protocol)) {
             protocol = null;
         }
@@ -210,7 +217,7 @@ public class ID implements Serializable {
     /*
      * Validate that mandatory id components exist.
      */
-    private void validate() throws IllegalArgumentException {
+    protected void validate() throws IllegalArgumentException {
         if (user == null) {
             throw new IllegalArgumentException("User information is obligatory for IDs");
         }

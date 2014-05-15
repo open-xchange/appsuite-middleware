@@ -166,7 +166,7 @@ public class GroupDispatcher implements ComponentHandle {
                 defaultAction(stanza);
             }
         } else {
-            LOG.error("Refusing to send to GroupDispatcher {} as sender is no member of the GroupDispatcher {}", stanza.getFrom(), groupId);
+            LOG.error("Refusing to send to GroupDispatcher as sender {} is no member of the GroupDispatcher {}", stanza.getFrom(), groupId);
             send(new NotMember(groupId, sender, stanza.getSelector()));
         }
     }
