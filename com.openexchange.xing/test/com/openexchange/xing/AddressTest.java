@@ -28,9 +28,9 @@ public class AddressTest {
 
         Address address = new Address(addressInformation);
 
-        Assert.assertEquals("null", address.getMobilePhone());
-        Assert.assertEquals("null", address.getFax());
-        Assert.assertEquals("null", address.getPhone());
+        Assert.assertEquals(null, address.getMobilePhone());
+        Assert.assertEquals(null, address.getFax());
+        Assert.assertEquals(null, address.getPhone());
     }
 
     @Test
@@ -40,7 +40,7 @@ public class AddressTest {
         Address address = new Address(addressInformation);
 
         Assert.assertEquals("+49|100|012345678", address.getMobilePhone());
-        Assert.assertEquals("null", address.getFax());
+        Assert.assertEquals(null, address.getFax());
         Assert.assertEquals("+49|771|12 34 56 1-0", address.getPhone());
         Assert.assertEquals("Untereschbach", address.getCity());
         Assert.assertEquals("DE", address.getCountry());

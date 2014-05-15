@@ -51,6 +51,7 @@ package com.openexchange.ms.internal.portable;
 
 import java.util.List;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.ITopic;
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.ms.MessageListener;
@@ -78,22 +79,38 @@ public final class PortableHzTopic<P extends Portable> extends AbstractHzTopic<P
 
     @Override
     protected String registerListener(MessageListener<P> listener, String senderID) {
-        return hzTopic.addMessageListener(new PortableHzMessageListener<P>(listener, senderID));
+        try {
+            return hzTopic.addMessageListener(new PortableHzMessageListener<P>(listener, senderID));
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     protected boolean unregisterListener(String registrationID) {
-        return hzTopic.removeMessageListener(registrationID);
+        try {
+            return hzTopic.removeMessageListener(registrationID);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     protected void publish(String senderId, P message) {
-        hzTopic.publish(new PortableMessage<P>(senderId, message));
+        try {
+            hzTopic.publish(new PortableMessage<P>(senderId, message));
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     protected void publish(String senderId, List<P> messages) {
-        hzTopic.publish(new PortableMessage<P>(senderId, messages));
+        try {
+            hzTopic.publish(new PortableMessage<P>(senderId, messages));
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
