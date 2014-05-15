@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.ITopic;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
@@ -80,17 +81,29 @@ public final class HzTopic<E> extends AbstractHzTopic<E> {
 
     @Override
     protected String registerListener(MessageListener<E> listener, String senderID) {
-        return hzTopic.addMessageListener(new HzMessageListener<E>(listener, senderID));
+        try {
+            return hzTopic.addMessageListener(new HzMessageListener<E>(listener, senderID));
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     protected boolean unregisterListener(String registrationID) {
-        return hzTopic.removeMessageListener(registrationID);
+        try {
+            return hzTopic.removeMessageListener(registrationID);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
     protected void publish(String senderId, E message) {
-        hzTopic.publish(HzDataUtility.generateMapFor(message, senderId));
+        try {
+            hzTopic.publish(HzDataUtility.generateMapFor(message, senderId));
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     @Override
@@ -105,7 +118,11 @@ public final class HzTopic<E> extends AbstractHzTopic<E> {
             multiple.put(sb.append(i+1).toString(), HzDataUtility.generateMapFor(messages.get(i), senderId));
         }
         // Publish
-        hzTopic.publish(multiple);
+        try {
+            hzTopic.publish(multiple);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
     }
 
     // ------------------------------------------------------------------------ //

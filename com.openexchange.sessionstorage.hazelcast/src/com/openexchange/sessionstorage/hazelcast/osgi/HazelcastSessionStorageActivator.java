@@ -64,6 +64,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
@@ -229,6 +230,14 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
         if (null != hzSessionStorageRegistrationTracker) {
             hzSessionStorageRegistrationTracker.close();
             this.hzSessionStorageRegistrationTracker = null;
+        }
+    }
+
+    @Override
+    public void propagateNotActive(HazelcastInstanceNotActiveException notActiveException) {
+        final BundleContext context = this.context;
+        if (null != context) {
+            context.registerService(HazelcastInstanceNotActiveException.class, notActiveException, null);
         }
     }
 

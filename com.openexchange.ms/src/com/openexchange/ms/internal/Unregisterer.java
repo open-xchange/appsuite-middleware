@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,30 @@
  *
  */
 
-package com.openexchange.ms.internal.portable;
+package com.openexchange.ms.internal;
 
-import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import com.hazelcast.core.HazelcastInstance;
+import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.ms.PortableMsService;
-import com.openexchange.ms.Topic;
-import com.openexchange.ms.internal.AbstractHzResource;
+
 
 /**
- * {@link PortableHzMsService}
+ * {@link Unregisterer}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PortableHzMsService extends AbstractHzResource implements PortableMsService {
+public interface Unregisterer {
 
-    private final HazelcastInstance hz;
-    private final ConcurrentMap<String, Topic<?>> topics;
+    /** The singleton reference */
+    public static final AtomicReference<Unregisterer> INSTANCE_REF = new AtomicReference<Unregisterer>();
 
     /**
-     * Initializes a new {@link PortableHzMsService}.
-     *
-     * @param hz The underlying hazelcast instance
+     * Manually unregisters the session storage
      */
-    public PortableHzMsService(HazelcastInstance hz) {
-        super();
-        this.hz = hz;
-        topics = new NonBlockingHashMap<String, Topic<?>>(16);
-    }
+    void unregisterMsService();
 
-    @Override
-    public <P extends Portable> Topic<P> getTopic(final String name) {
-        Topic<P> topic = (Topic<P>) topics.get(name);
-        if (null == topic) {
-            try {
-                PortableHzTopic<P> hzTopic = new PortableHzTopic<P>(name, hz);
-                topic = (Topic<P>) topics.putIfAbsent(name, hzTopic);
-                if (null == topic) {
-                    topic = hzTopic;
-                }
-            } catch (HazelcastInstanceNotActiveException e) {
-                throw handleNotActiveException(e);
-            }
-        }
-        return topic;
-    }
+    /**
+     * Propagates not-active exception
+     */
+    void propagateNotActive(HazelcastInstanceNotActiveException notActiveException);
 
 }

@@ -60,6 +60,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.java.Strings;
 
@@ -80,11 +81,13 @@ import com.openexchange.java.Strings;
  */
 public class HazelcastActivator implements BundleActivator, Unregisterer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastActivator.class);
+    /** The logger */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastActivator.class);
 
-    private volatile ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> tracker;
-    private volatile ServiceRegistration<HazelcastInstance> serviceRegistration;
-    private volatile HazelcastInstance hazelcastInstance;
+    volatile ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> configTracker;
+    volatile ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker;
+    volatile ServiceRegistration<HazelcastInstance> serviceRegistration;
+    volatile HazelcastInstance hazelcastInstance;
 
     /**
      * Initializes a new {@link HazelcastActivator}.
@@ -99,8 +102,8 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
             new ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService>() {
 
             @Override
-            public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> arg0) {
-                HazelcastConfigurationService configService = context.getService(arg0);
+            public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
+                HazelcastConfigurationService configService = context.getService(reference);
                 try {
                     if (false == configService.isEnabled()) {
                         LOG.info("{}Hazelcast:{}    Startup of Hazelcast clustering and data distribution platform denied per configuration.{}",
@@ -119,17 +122,24 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
             }
 
             @Override
-            public void modifiedService(ServiceReference<HazelcastConfigurationService> arg0, HazelcastConfigurationService arg1) {
+            public void modifiedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
                 // nothing to do
             }
 
             @Override
-            public void removedService(ServiceReference<HazelcastConfigurationService> arg0, HazelcastConfigurationService arg1) {
+            public void removedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
                 ServiceRegistration<HazelcastInstance> registration = serviceRegistration;
                 if (null != registration) {
                     registration.unregister();
                     serviceRegistration = null;
                 }
+
+                ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> t = inactiveTracker;
+                if (null != t) {
+                    t.close();
+                    inactiveTracker = null;
+                }
+
                 try {
                     stopHazelcast();
                 } catch (Exception e) {
@@ -137,11 +147,37 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
                     LOG.error(msg, e);
                     throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR, e));
                 }
-                context.ungetService(arg0);
+                context.ungetService(reference);
             }
         };
-        tracker = new ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService>(context, HazelcastConfigurationService.class, customizer);
-        tracker.open();
+        configTracker = new ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService>(context, HazelcastConfigurationService.class, customizer);
+        configTracker.open();
+
+        ServiceTrackerCustomizer<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> stc = new ServiceTrackerCustomizer<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException>() {
+
+            @Override
+            public void removedService(ServiceReference<HazelcastInstanceNotActiveException> reference, HazelcastInstanceNotActiveException service) {
+                context.ungetService(reference);
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<HazelcastInstanceNotActiveException> reference, HazelcastInstanceNotActiveException service) {
+                // Nothing to do
+            }
+
+            @Override
+            public HazelcastInstanceNotActiveException addingService(ServiceReference<HazelcastInstanceNotActiveException> reference) {
+                HazelcastInstanceNotActiveException notActiveException = context.getService(reference);
+
+                String lf = Strings.getLineSeparator();
+                LOG.warn("{}Hazelcast:{}    Detected a {}. Hazelcast is going to be shut-down!{}", lf, lf, HazelcastInstanceNotActiveException.class.getSimpleName(), lf);
+
+                unregisterHazelcastInstance();
+                return notActiveException;
+            }
+        };
+        inactiveTracker = new ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException>(context, HazelcastInstanceNotActiveException.class, stc);
+        inactiveTracker.open();
     }
 
     @Override
@@ -151,11 +187,19 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
             serviceRegistration.unregister();
             this.serviceRegistration = null;
         }
-        ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> tracker = this.tracker;
-        if (null != tracker) {
-            tracker.close();
-            this.tracker = null;
+
+        ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> configTracker = this.configTracker;
+        if (null != configTracker) {
+            configTracker.close();
+            this.configTracker = null;
         }
+
+        ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker = this.inactiveTracker;
+        if (null != inactiveTracker) {
+            inactiveTracker.close();
+            this.inactiveTracker = null;
+        }
+
         try {
             stopHazelcast();
         } catch (Exception e) {
@@ -170,15 +214,23 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
             serviceRegistration.unregister();
             this.serviceRegistration = null;
         }
-        ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> tracker = this.tracker;
+
+        ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> tracker = this.configTracker;
         if (null != tracker) {
             tracker.close();
-            this.tracker = null;
+            this.configTracker = null;
         }
+
+        ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker = this.inactiveTracker;
+        if (null != inactiveTracker) {
+            inactiveTracker.close();
+            this.inactiveTracker = null;
+        }
+
         stopHazelcast();
     }
 
-    private void stopHazelcast() throws Exception {
+    void stopHazelcast() throws Exception {
         HazelcastInstance hazelcast = this.hazelcastInstance;
         if (null != hazelcast) {
             String lf = Strings.getLineSeparator();
@@ -193,7 +245,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
         }
     }
 
-    private HazelcastInstance startHazelcast(HazelcastConfigurationService configService) throws Exception {
+    HazelcastInstance startHazelcast(HazelcastConfigurationService configService) throws Exception {
         String lf = Strings.getLineSeparator();
         LOG.info("{}Hazelcast:{}    Starting...{}", lf, lf, lf);
         if (false == configService.isEnabled()) {

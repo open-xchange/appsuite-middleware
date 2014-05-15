@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -73,11 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class AutosaveAction extends AbstractMailAction {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(AutosaveAction.class);
-
-    private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
-    private static final String CONTENT = MailJSONField.CONTENT.getKey();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutosaveAction.class);
 
     /**
      * Initializes a new {@link AutosaveAction}.

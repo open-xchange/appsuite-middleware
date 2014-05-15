@@ -56,8 +56,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.ms.MsEventConstants;
@@ -65,6 +67,7 @@ import com.openexchange.ms.MsService;
 import com.openexchange.ms.PortableMsService;
 import com.openexchange.ms.internal.HzMsService;
 import com.openexchange.ms.internal.Services;
+import com.openexchange.ms.internal.Unregisterer;
 import com.openexchange.ms.internal.portable.PortableHzMsService;
 import com.openexchange.ms.internal.portable.PortableMessageFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -75,7 +78,9 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MsActivator extends HousekeepingActivator {
+public class MsActivator extends HousekeepingActivator implements Unregisterer {
+
+    private volatile ServiceTracker<HazelcastInstance, HazelcastInstance> hzTracker;
 
     /**
      * Initializes a new {@link MsActivator}.
@@ -92,6 +97,7 @@ public class MsActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+        Unregisterer.INSTANCE_REF.set(this);
         final HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
         final boolean enabled = configService.isEnabled();
         if (enabled) {
@@ -105,7 +111,7 @@ public class MsActivator extends HousekeepingActivator {
             final BundleContext context = this.context;
             final AtomicReference<MsService> msServiceRef = new AtomicReference<MsService>();
             final AtomicReference<PortableMsService> portableMsServiceRef = new AtomicReference<PortableMsService>();
-            track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
+            ServiceTracker<HazelcastInstance, HazelcastInstance> hzTracker = new ServiceTracker<HazelcastInstance, HazelcastInstance>(context, HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
                 @Override
                 public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
@@ -145,14 +151,42 @@ public class MsActivator extends HousekeepingActivator {
                     }
                 }
             });
+            hzTracker.open();
+            this.hzTracker = hzTracker;
+
+            // Open other
             openTrackers();
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        ServiceTracker<HazelcastInstance, HazelcastInstance> hzTracker = this.hzTracker;
+        if (null != hzTracker) {
+            hzTracker.close();
+            this.hzTracker = null;
+        }
+
         super.stopBundle();
         Services.setServiceLookup(null);
+        Unregisterer.INSTANCE_REF.set(null);
+    }
+
+    @Override
+    public void unregisterMsService() {
+        ServiceTracker<HazelcastInstance, HazelcastInstance> hzTracker = this.hzTracker;
+        if (null != hzTracker) {
+            hzTracker.close();
+            this.hzTracker = null;
+        }
+    }
+
+    @Override
+    public void propagateNotActive(HazelcastInstanceNotActiveException notActiveException) {
+        BundleContext context = this.context;
+        if (null != context) {
+            registerService(HazelcastInstanceNotActiveException.class, notActiveException);
+        }
     }
 
     @Override

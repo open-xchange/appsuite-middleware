@@ -74,4 +74,12 @@ public class FileIDTest {
         FileID fileID = new FileID("12");
         assertEquals("12", fileID.toUniqueID());
     }
+
+    @Test
+    public void shouldReturnSimpleUniqueIDForInfostore2() {
+        FileID fileID = new FileID("123/12");
+        assertEquals("12", fileID.getFileId());
+        assertEquals("123", fileID.getFolderId());
+        assertEquals("com.openexchange.infostore", fileID.getService());
+    }
 }
