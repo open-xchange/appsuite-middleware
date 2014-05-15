@@ -162,6 +162,13 @@ public class CXFActivator extends HousekeepingActivator {
                                         }
                                         config.put("hide-service-list-page", hideServiceListPage.trim());
                                     }
+                                    final String disableAddressUpdates = configService.getProperty("com.openexchange.soap.cxf.disableAddressUpdates");
+                                    if (disableAddressUpdates != null) {
+                                        if (config == null) {
+                                            config = new Hashtable<String, Object>(2);
+                                        }
+                                        config.put("disable-address-updates", disableAddressUpdates);
+                                    }
                                 }
                                 // Registration
                                 httpService.registerServlet(alias, cxfServlet, config, null);

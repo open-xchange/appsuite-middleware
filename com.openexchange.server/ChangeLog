@@ -1,3 +1,7 @@
+* 2014-05-08 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32396 - Introduced a new servlet parameter 'disable-address-updates' which prevents the webservices' URL manipulation
+
 * 2014-05-14 - martin.herfurth@open-xchange.com
 
  - Fix for bug 32465: Bad until value on series update.
