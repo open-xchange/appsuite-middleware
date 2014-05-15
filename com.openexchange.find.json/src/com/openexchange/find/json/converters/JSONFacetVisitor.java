@@ -108,7 +108,7 @@ public class JSONFacetVisitor implements FacetVisitor {
 
             JSONObject jValue = new JSONObject();
             jValue.put("id", type.getId());
-            jValue.put("display_name", convertDisplayItem(locale, facet.getDisplayItem()));
+            jValue.put("display_name", AJAXUtility.sanitizeParam(convertDisplayItem(locale, facet.getDisplayItem())));
             jValue.put("filter", convertFilter(facet.getFilter()));
             result.put("values", new JSONArray(Collections.singletonList(jValue)));
 
@@ -183,7 +183,7 @@ public class JSONFacetVisitor implements FacetVisitor {
     protected JSONObject convertFacetValue(Locale locale, FacetValue value) throws JSONException {
         JSONObject valueJSON = new JSONObject(4);
         valueJSON.put("id", value.getId());
-        valueJSON.put("display_name", convertDisplayItem(locale, value.getDisplayItem()));
+        valueJSON.put("display_name", AJAXUtility.sanitizeParam(convertDisplayItem(locale, value.getDisplayItem())));
         int count = value.getCount();
         if (count >= 0) {
             valueJSON.put("count", value.getCount());
