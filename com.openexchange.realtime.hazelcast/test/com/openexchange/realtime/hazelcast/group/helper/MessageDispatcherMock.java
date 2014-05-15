@@ -47,25 +47,46 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast;
+package com.openexchange.realtime.hazelcast.group.helper;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import com.google.common.collect.Multimap;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.directory.Resource;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.IDMap;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectoryTest;
-import com.openexchange.realtime.hazelcast.directory.HazelcastResourceTest;
-import com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImplTest;
 
 /**
- * {@link UnitTests}
+ * {@link MessageDispatcherMock}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.x.y
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    HazelcastResourceTest.class,
-    HazelcastResourceDirectoryTest.class,
-    DistributedGroupManagerImplTest.class
-})
-public class UnitTests {}
+public class MessageDispatcherMock implements MessageDispatcher {
+
+    private Multimap<ID, Stanza> sentMessages;
+
+    public MessageDispatcherMock(Multimap<ID, Stanza> sentMessages) {
+        this.sentMessages = sentMessages;
+    }
+
+    @Override
+    public Map<ID, OXException> send(Stanza stanza, IDMap<Resource> recipients) throws OXException {
+        throw new UnsupportedOperationException("Not implemented, yet,");
+    }
+
+    @Override
+    public void send(Stanza stanza) throws OXException {
+        sentMessages.put(stanza.getTo(), stanza);
+    }
+
+    @Override
+    public Stanza sendSynchronously(Stanza stanza, long timeout, TimeUnit unit) throws OXException {
+        throw new UnsupportedOperationException("Not implemented, yet,");
+    }
+
+}
