@@ -121,6 +121,10 @@
 
  - Fix for bug 32017: Keep subfolder information intact for "Public files" (15) folder
 
+* 2014-05-08 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32396 - Introduced a new servlet parameter 'disable-address-updates' which prevents the webservices' URL manipulation
+
 * 2014-05-07 - martin.schneider@open-xchange.com
 
  - Fix for bug 32263: Set transport password instead of IMAP password for account update
