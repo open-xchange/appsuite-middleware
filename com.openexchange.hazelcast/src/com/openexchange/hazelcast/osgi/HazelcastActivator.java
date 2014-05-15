@@ -168,6 +168,10 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
             @Override
             public HazelcastInstanceNotActiveException addingService(ServiceReference<HazelcastInstanceNotActiveException> reference) {
                 HazelcastInstanceNotActiveException notActiveException = context.getService(reference);
+
+                String lf = Strings.getLineSeparator();
+                LOG.warn("{}Hazelcast:{}    Detected a {}. Hazelcast is going to be shut-down!{}", lf, lf, HazelcastInstanceNotActiveException.class.getSimpleName(), lf);
+
                 unregisterHazelcastInstance();
                 return notActiveException;
             }
