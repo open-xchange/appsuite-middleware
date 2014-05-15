@@ -52,16 +52,18 @@ package com.openexchange.ms.internal.portable;
 import java.util.concurrent.ConcurrentMap;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.ms.PortableMsService;
 import com.openexchange.ms.Topic;
+import com.openexchange.ms.internal.AbstractHzResource;
 
 /**
  * {@link PortableHzMsService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class PortableHzMsService implements PortableMsService {
+public final class PortableHzMsService extends AbstractHzResource implements PortableMsService {
 
     private final HazelcastInstance hz;
     private final ConcurrentMap<String, Topic<?>> topics;
@@ -81,10 +83,14 @@ public final class PortableHzMsService implements PortableMsService {
     public <P extends Portable> Topic<P> getTopic(final String name) {
         Topic<P> topic = (Topic<P>) topics.get(name);
         if (null == topic) {
-            PortableHzTopic<P> hzTopic = new PortableHzTopic<P>(name, hz);
-            topic = (Topic<P>) topics.putIfAbsent(name, hzTopic);
-            if (null == topic) {
-                topic = hzTopic;
+            try {
+                PortableHzTopic<P> hzTopic = new PortableHzTopic<P>(name, hz);
+                topic = (Topic<P>) topics.putIfAbsent(name, hzTopic);
+                if (null == topic) {
+                    topic = hzTopic;
+                }
+            } catch (HazelcastInstanceNotActiveException e) {
+                throw handleNotActiveException(e);
             }
         }
         return topic;
