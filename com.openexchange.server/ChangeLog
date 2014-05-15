@@ -1,3 +1,7 @@
+* 2014-05-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32033: Escape auto-complete prefix delivered in JSON response
+
 * 2014-05-14 - martin.herfurth@open-xchange.com
 
  - Fix for bug 32465: Bad until value on series update.
