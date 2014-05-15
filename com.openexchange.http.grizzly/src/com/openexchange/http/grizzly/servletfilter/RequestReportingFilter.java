@@ -110,14 +110,16 @@ public class RequestReportingFilter implements Filter {
         if (isFilterEnabled) {
             final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
             final HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-            if (isLongRunning(httpServletRequest)) { // Do not track long running requests
-                chain.doFilter(request, response);
+
+            final RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
+            // Request watcher is enabled but service is missing, bundle not started etc ..
+            if (requestWatcher == null) {
+                LOG.debug("{} is not available. Unable to watch this request.", RequestWatcherService.class.getSimpleName());
+                chain.doFilter(httpServletRequest, httpServletResponse);
             } else {
-                final RequestWatcherService requestWatcher = Services.optService(RequestWatcherService.class);
-                // Request watcher is enabled but service is missing, bundle not started etc ..
-                if (requestWatcher == null) {
-                    LOG.debug("{} is not available. Unable to watch this request.", RequestWatcherService.class.getSimpleName());
-                    chain.doFilter(httpServletRequest, httpServletResponse);
+                if (isLongRunning(httpServletRequest)) {
+                    // Do not track long running requests
+                    chain.doFilter(request, response);
                 } else {
                     final RequestRegistryEntry requestRegistryEntry = requestWatcher.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread(), LogProperties.getPropertyMap());
                     try {
