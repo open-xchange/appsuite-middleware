@@ -6,6 +6,7 @@
 
  - Fix for bug 29046: Disabled unsafe auto-consistency check & ensure folder changes are reflected in database on modifying operations
  - Fix for bug 32565: Best effort attempt to collect as many mobile numbers as possible on Google contact subscription
+ - Fix for bug 32590: Improved sanitizing of user input during search
 
 * 2014-05-15 - thorben.betten@open-xchange.com
 
