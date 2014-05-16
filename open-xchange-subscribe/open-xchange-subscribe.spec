@@ -9,7 +9,7 @@ BuildRequires: open-xchange-oauth
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 22
+%define        ox_release 23
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -166,6 +166,8 @@ fi
 %doc docs/
 
 %changelog
+* Fri May 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-05-26
 * Wed May 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-05-05
 * Fri Apr 25 2014 Marcus Klein <marcus.klein@open-xchange.com>
