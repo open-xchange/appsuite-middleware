@@ -118,12 +118,12 @@ final class SessionData {
 
         sessionList = new LinkedList<SessionContainer>();
         randoms = new ConcurrentHashMap<String, String>();
-        ReadWriteLock rwlock = new ReentrantReadWriteLock(true);
-        rlock = rwlock.readLock();
-        wlock = rwlock.writeLock();
-        rwlock = new ReentrantReadWriteLock(true);
-        wlongTermLock = rwlock.writeLock();
-        rlongTermLock = rwlock.readLock();
+        ReadWriteLock shortTermLock = new ReentrantReadWriteLock(true);
+        rlock = shortTermLock.readLock();
+        wlock = shortTermLock.writeLock();
+        ReadWriteLock longTermLock = new ReentrantReadWriteLock(true);
+        wlongTermLock = longTermLock.writeLock();
+        rlongTermLock = longTermLock.readLock();
         for (int i = 0; i < containerCount; i++) {
             sessionList.add(0, new SessionContainer());
         }
