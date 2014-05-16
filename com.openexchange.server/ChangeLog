@@ -5,6 +5,8 @@
 * 2014-05-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 32033: Escape auto-complete prefix delivered in JSON response
+ - Fix for bug 32559: Orderly parenthesized CSS assignment & allow "radial-gradient" for "background" style tag
+ - Fix for bug 29377: Perform a "right merge" from config tree to JSlob JSON data
 
 * 2014-05-14 - martin.herfurth@open-xchange.com
 

@@ -51,8 +51,10 @@ package com.openexchange.html.internal.css;
 
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -232,16 +234,14 @@ public final class CSSMatcher {
      * @return <code>true</code> if value is matched by given allowed values; otherwise <code>false</code>
      */
     public static boolean matches(final String value, final Set<String> allowedValuesSet) {
-        final int size = allowedValuesSet.size();
-        final String[] allowedValues = allowedValuesSet.toArray(new String[size]);
+        final Set<String> allowedValues = new HashSet<String>(allowedValuesSet);
         /*
          * Ensure to check against pattern first
          */
-        final TIntSet patIndices = new TIntHashSet(2);
-        for (int i = 0; i < size; i++) {
-            final String allowedValue = allowedValues[i];
+        for (Iterator<String> it = allowedValues.iterator(); it.hasNext();) {
+            final String allowedValue = it.next();
             if (PATTERN_IS_PATTERN.matcher(allowedValue).matches()) {
-                patIndices.add(i);
+                it.remove();
                 if (allowedValue.indexOf('d') >= 0) {
                     return false;
                 }
@@ -260,13 +260,13 @@ public final class CSSMatcher {
          * Now check against values
          */
         boolean retval = false;
-        for (int i = 0; i < size && !retval; i++) {
-            if (!patIndices.contains(i)) {
-                /*
-                 * Check against non-pattern allowed value
-                 */
-                retval = allowedValues[i].equalsIgnoreCase(value);
-            }
+        int pos = value.indexOf('(');
+        String checkEqualsWith = pos > 0 && value.indexOf(')', pos) > 0 ? value.substring(0, pos) : value;
+        for (Iterator<String> it = allowedValues.iterator(); !retval && it.hasNext();) {
+            /*
+             * Check against non-pattern allowed value
+             */
+            retval = it.next().equalsIgnoreCase(checkEqualsWith);
         }
         return retval;
     }
@@ -921,7 +921,7 @@ public final class CSSMatcher {
                         elemBuilder.append(elementValues);
                         hasValues = true;
                     } else {
-                        final String[] tokens = Strings.splitByWhitespaces(elementValues);
+                        final String[] tokens = splitToTokens(elementValues);
                         for (int j = 0; j < tokens.length; j++) {
                             if (matches(tokens[j], allowedValuesSet)) {
                                 if (j > 0) {
@@ -956,6 +956,50 @@ public final class CSSMatcher {
         }
         mr.appendTail(cssBuilder);
         return modified;
+    }
+
+    private static String[] splitToTokens(final String elementValues) {
+        List<String> l = new LinkedList<String>();
+        int length = elementValues.length();
+        StringBuilder token = new StringBuilder(16);
+        boolean open = false;
+        for (int i = 0; i < length; i++) {
+            char c = elementValues.charAt(i);
+            switch (c) {
+            case '\r': // fall-through
+            case '\f': // fall-through
+            case '\n': // fall-through
+            case '\t': // fall-through
+            case ' ':
+                {
+                    if (open) {
+                        token.append(c);
+                    } else {
+                        if (token.length() > 0) {
+                            l.add(token.toString());
+                            token.setLength(0);
+                        }
+                    }
+                }
+                break;
+            case '(':
+                token.append(c);
+                open = true;
+                break;
+            case ')':
+                token.append(c);
+                open = false;
+                break;
+            default:
+                token.append(c);
+                break;
+            }
+        }
+        if (token.length() > 0) {
+            l.add(token.toString());
+            token.setLength(0);
+        }
+        return l.toArray(new String[l.size()]);
     }
 
     /**

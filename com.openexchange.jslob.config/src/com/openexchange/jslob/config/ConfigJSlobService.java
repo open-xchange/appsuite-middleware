@@ -547,8 +547,7 @@ public final class ConfigJSlobService implements JSlobService {
                 }
             }
 
-            final JSONObject objectData = jsLob.getJsonObject();
-            jsLob.setJsonObject(JSONUtil.merge(objectData, jObject));
+            jsLob.setJsonObject(JSONUtil.rightMerge(jsLob.getJsonObject(), jObject));
         } catch (final JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException rte) {

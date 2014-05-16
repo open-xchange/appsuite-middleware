@@ -74,6 +74,30 @@ public final class JSONUtil {
     }
 
     /**
+     * Creates a {@link JSONObject} containing the merged view on given JSON objects performing a <i>"right merge"</i>,<br>
+     * that is root element of latter arguments overwrite the ones from <tt>jObject1</tt>.
+     *
+     * @param jObject1 The first JSON object
+     * @param jObjects The other JSON objects to merge with
+     * @return The merged JSON object
+     * @throws JSONException If composing merged JSON object fails for any reason
+     */
+    public static JSONObject rightMerge(final JSONObject jObject1, final JSONObject... jObjects) throws JSONException {
+        if (null == jObject1 || (null == jObjects) || (0 == jObjects.length)) {
+            return jObject1;
+        }
+        // Iterate others
+        for (final JSONObject obj : jObjects) {
+            if (null != obj) {
+                for (final Entry<String,Object> entry : obj.entrySet()) {
+                    jObject1.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        return jObject1;
+    }
+
+    /**
      * Creates a {@link JSONObject} containing the merged view on given JSON objects.
      *
      * @param jObject1 The first JSON object
@@ -85,7 +109,7 @@ public final class JSONUtil {
         if (null == jObject1) {
             return jObject1;
         }
-        final JSONObject merged = new JSONObject();
+        final JSONObject merged = new JSONObject(jObject1.length());
         for (final Entry<String,Object> entry : jObject1.entrySet()) {
             merged.put(entry.getKey(), entry.getValue());
         }
