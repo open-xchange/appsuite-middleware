@@ -119,7 +119,7 @@ public class Bug16158Test extends TestCase {
         Thread.sleep(50);
 
         for (final SessionFinder finder : finders) {
-            finder.stop();
+            finder.lastCheck();
         }
         for (final Thread finderThread : finderThreads) {
             finderThread.join();
@@ -154,19 +154,25 @@ public class Bug16158Test extends TestCase {
     private class SessionFinder implements Runnable {
         private boolean run = true;
         private boolean notFound = false;
+        private boolean lastCheck = false;
         SessionFinder() {
             super();
         }
         boolean hasNotFound() {
             return notFound;
         }
-        void stop() {
-            run = false;
+
+        void lastCheck() {
+            lastCheck = true;
         }
+
         @Override
         public void run() {
             try {
                 while (run && !notFound) {
+                    if (lastCheck) {
+                        run = false;
+                    }
                     final SessionControl control = sessionData.getSession(session.getSessionID());
                     notFound = null == control;
                 }
