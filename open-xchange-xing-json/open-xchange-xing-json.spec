@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-oauth
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -46,6 +46,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri May 16 2014 Steffen Templin <steffen.templin@open-xchange.com>
+Third release candidate for 7.6.0
 * Mon May 05 2014 Steffen Templin <steffen.templin@open-xchange.com>
 Second release candidate for 7.6.0
 * Fri Apr 11 2014 Steffen Templin <steffen.templin@open-xchange.com>

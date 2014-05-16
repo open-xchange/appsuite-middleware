@@ -996,13 +996,14 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 final MailMessage[] accountMails = mailAccess.getMessageStorage().searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields);
                                 final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                                 final UnifiedInboxUID helper = new UnifiedInboxUID();
+                                final String name = mailAccount.getName();
                                 for (final MailMessage accountMail : accountMails) {
                                     if (null != accountMail) {
                                         final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
                                         umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                         umm.setFolder(fullName);
                                         umm.setAccountId(accountId);
-                                        umm.setAccountName(mailAccount.getName());
+                                        umm.setAccountName(name);
                                         messages.add(umm);
                                     }
                                 }
@@ -1056,13 +1057,14 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             final MailMessage[] accountMails = mailAccess.getMessageStorage().searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields);
                             final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                             final UnifiedInboxUID helper = new UnifiedInboxUID();
+                            final String name = mailAccount.getName();
                             for (final MailMessage accountMail : accountMails) {
                                 if (null != accountMail) {
                                     final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
                                     umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                     umm.setFolder(fullName);
                                     umm.setAccountId(accountId);
-                                    umm.setAccountName(mailAccount.getName());
+                                    umm.setAccountName(name);
                                     messages.add(umm);
                                 }
                             }

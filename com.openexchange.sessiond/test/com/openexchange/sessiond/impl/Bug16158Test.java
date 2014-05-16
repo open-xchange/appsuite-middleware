@@ -77,10 +77,10 @@ public class Bug16158Test extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        sessionData = new SessionData(100, 1, 60000, 167, true);
+        sessionData = new SessionData(100, 1, 60000, 167, false);
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);
-        final SessionIdGenerator idGenerator = new  UUIDSessionIdGenerator();
+        final SessionIdGenerator idGenerator = new UUIDSessionIdGenerator();
         session = new SessionImpl(-1, "bug16158", null, 0, idGenerator.createSessionId(null, null), null, idGenerator.createRandomId(), null, null, null, null, null, false);
         sessionData.addSession(session, true);
         for (int i = 0; i < finders.length; i++) {

@@ -179,20 +179,36 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                     }
 
                     if (entry.hasPhoneNumbers()) {
+                        boolean mobile1Vacant = true;
+                        boolean mobile2Vacant = true;
+                        boolean otherVacant = true;
                         for (final PhoneNumber pn : entry.getPhoneNumbers()) {
-                            if (pn.getRel() != null) {
-                                if (pn.getRel().endsWith("work")) {
+                            final String rel = pn.getRel();
+                            if (rel != null) {
+                                if (rel.endsWith("work")) {
                                     contact.setTelephoneBusiness1(pn.getPhoneNumber());
-                                } else if (pn.getRel().endsWith("home")) {
+                                } else if (rel.endsWith("home")) {
                                     contact.setTelephoneHome1(pn.getPhoneNumber());
-                                } else if (pn.getRel().endsWith("other")) {
+                                } else if (rel.endsWith("other")) {
                                     contact.setTelephoneOther(pn.getPhoneNumber());
-                                } else if (pn.getRel().endsWith("work_fax")) {
+                                    otherVacant = false;
+                                } else if (rel.endsWith("work_fax")) {
                                     contact.setFaxBusiness(pn.getPhoneNumber());
-                                } else if (pn.getRel().endsWith("home_fax")) {
+                                } else if (rel.endsWith("home_fax")) {
                                     contact.setFaxHome(pn.getPhoneNumber());
-                                } else if (pn.getRel().endsWith("mobile")) {
-                                    contact.setCellularTelephone1(pn.getPhoneNumber());
+                                } else if (rel.endsWith("mobile")) {
+                                    if (mobile1Vacant) {
+                                        contact.setCellularTelephone1(pn.getPhoneNumber());
+                                        mobile1Vacant = false;
+                                    } else if (mobile2Vacant) {
+                                        contact.setCellularTelephone2(pn.getPhoneNumber());
+                                        mobile2Vacant = false;
+                                    } else if (otherVacant) {
+                                        contact.setTelephoneOther(pn.getPhoneNumber());
+                                        // No, don't set 'otherVacant = false'
+                                    } else {
+                                        LOG.debug("Could not map \"mobile\" number {} to a vacant contact field", pn.getPhoneNumber());
+                                    }
                                 }
                             }
                         }

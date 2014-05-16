@@ -23,7 +23,7 @@ public class AddressTest {
     private String filledZeroZeroExistend = "{\"street\":\"Zullicher Strasse 1\",\"zip_code\":\"33333\",\"city\":\"Gross-Kleinostheim\",\"province\":\"Nordrhein-Westfalen\",\"country\":\"DE\",\"email\":\"huhu@huphup.hup\",\"fax\":\"0049|111|111111-1111\",\"phone\":\"0049|111|22222-2222\",\"mobile_phone\":\"0049|170|87654321\"}";
 
     @Test
-    public void testConstructor_emptyJSON_stillNull() throws JSONException {
+    public void testConstructor_JSONwithNullValues_stillNullAfterSanitizing() throws JSONException {
         JSONObject addressInformation = new JSONObject(empty);
 
         Address address = new Address(addressInformation);
@@ -34,7 +34,7 @@ public class AddressTest {
     }
 
     @Test
-    public void testConstructor_almostFilled_everythingSetCorrectly() throws JSONException {
+    public void testConstructor_noLeadingZeroZeroOrPlus_setCorrectlyAfterSanitizing() throws JSONException {
         JSONObject addressInformation = new JSONObject(filledNothingInfrontOfCountryCode);
 
         Address address = new Address(addressInformation);
@@ -49,7 +49,7 @@ public class AddressTest {
     }
 
     @Test
-    public void testConstructor_plusExistent_everythingSetCorrectly() throws JSONException {
+    public void testConstructor_leadingPlusExistend_setCorrectlyAfterSanitzing() throws JSONException {
         JSONObject addressInformation = new JSONObject(filledPlusExistend);
 
         Address address = new Address(addressInformation);
@@ -64,7 +64,7 @@ public class AddressTest {
     }
 
     @Test
-    public void testConstructor_zeroZeroExistent_everythingSetCorrectly() throws JSONException {
+    public void testConstructor_leadingZeroZeroExistent_setCorrectlyAfterSanitizing() throws JSONException {
         JSONObject addressInformation = new JSONObject(filledZeroZeroExistend);
 
         Address address = new Address(addressInformation);
