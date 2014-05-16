@@ -1,3 +1,7 @@
+* 2014-05-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29046: Disabled unsafe auto-consistency check & ensure folder changes are reflected in database on modifying operations
+
 * 2014-05-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 32033: Escape auto-complete prefix delivered in JSON response
