@@ -1,3 +1,9 @@
+open-xchange-meta (7.6.0-3) stable; urgency=low
+
+  * Third release candidate for 7.6.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 16 May 2014 13:19:25 +0200
+
 open-xchange-meta (7.6.0-2) stable; urgency=low
 
   * Second release candidate for 7.6.0
