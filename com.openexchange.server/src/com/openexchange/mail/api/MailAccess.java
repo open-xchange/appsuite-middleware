@@ -683,7 +683,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     @Override
     public void close() {
-        try { close(true); } catch (final Exception x) { /**/ }
+        try { close(true); } catch (final Exception x) { LOG.debug("Error while closing MailAccess instance.", x); }
     }
 
     /**
