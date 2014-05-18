@@ -362,7 +362,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
             return null;
         }
         for (String query : queries) {
-            query.trim();
+            query = query.trim();
         }
 
         return Utils.termFor(QUERY_FIELDS, queries);
