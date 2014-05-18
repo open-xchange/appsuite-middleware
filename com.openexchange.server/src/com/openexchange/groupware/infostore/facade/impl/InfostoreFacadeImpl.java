@@ -1456,6 +1456,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public int[] removeVersion(final int id, final int[] versionIds, final ServerSession session) throws OXException {
+        if (null == versionIds) {
+            return new int[0];
+        }
         if (versionIds.length <= 0) {
             return versionIds;
         }
