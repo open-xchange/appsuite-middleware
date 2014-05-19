@@ -60,7 +60,8 @@ import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 public class HostingCLITest extends AbstractRMITest {
 
     @After
-    public void teardown() throws IOException, InterruptedException {
+    public void teardown() throws Exception {
+        super.tearDown();
         final ShellExecutor se = new ShellExecutor();
         final ArrayOutput deleteresult = se.executeprocargs(new String[] {
             prefix + "deletecontext", "-c", ctxid, "-A", OXADMINMASTER, "-P",

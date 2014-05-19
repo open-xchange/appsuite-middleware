@@ -294,7 +294,7 @@ public final class AttachmentUtility {
          */
         AttachmentMetadataImpl(int attachedId, int moduleId, int folderId) {
             super();
-            this.objectId = objectId;
+            this.objectId = attachedId;
             this.moduleId = moduleId;
             this.folderId = folderId;
         }

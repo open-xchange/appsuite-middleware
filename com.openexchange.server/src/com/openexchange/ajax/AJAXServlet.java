@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -107,7 +108,6 @@ import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
@@ -1121,10 +1121,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     protected static boolean mayUpload(final String action) {
         return UPLOAD_ACTIONS.contains(action) || Arrays.asList("CSV", "VCARD","ICAL", "OUTLOOK_CSV").contains(action); //Boo! Bad hack to get importer/export bundle working
-    }
-
-    static boolean isEmpty(final String string) {
-        return Strings.isEmpty(string);
     }
 
     private static final int BUFLEN = 65536;

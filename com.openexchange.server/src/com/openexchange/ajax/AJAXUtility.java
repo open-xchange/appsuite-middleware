@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -152,7 +153,7 @@ public final class AJAXUtility {
      * @return The sanitized input
      */
     public static String sanitizeParam(String sInput) {
-        if (AJAXServlet.isEmpty(sInput)) {
+        if (isEmpty(sInput)) {
             return sInput;
         }
 
@@ -201,7 +202,7 @@ public final class AJAXUtility {
      * @throws IllegalArgumentException If URL is invalid
      */
     public static String encodeUrl(final String s, final boolean forAnchor, final boolean forLocation, final String charsetName) {
-        if (AJAXServlet.isEmpty(s)) {
+        if (isEmpty(s)) {
             return s;
         }
         try {
@@ -210,8 +211,8 @@ public final class AJAXUtility {
             String retval = PATTERN_CRLF.matcher(s).replaceAll("");
             final Charset charset;
             {
-                final String cs = AJAXServlet.isEmpty(charsetName) ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charsetName;
-                charset = AJAXServlet.isEmpty(cs) ? Charsets.UTF_8 : Charsets.forName(cs);
+                final String cs = isEmpty(charsetName) ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charsetName;
+                charset = isEmpty(cs) ? Charsets.UTF_8 : Charsets.forName(cs);
             }
             if (forAnchor) {
                 // Prepare for being used as anchor/link
@@ -321,10 +322,10 @@ public final class AJAXUtility {
      */
     public static String decodeUrl(final String s, final String charset) {
         try {
-            if (AJAXServlet.isEmpty(s)) {
+            if (isEmpty(s)) {
                 return s;
             }
-            final String cs = AJAXServlet.isEmpty(charset) ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charset;
+            final String cs = isEmpty(charset) ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charset;
             return getUrlCodec(cs).decode(s, cs);
         } catch (final DecoderException e) {
             return s;
@@ -351,9 +352,9 @@ public final class AJAXUtility {
             if (tryFallBack) {
                 try {
                     String charenc = resp.getCharacterEncoding();
-                    if (Strings.isEmpty(charenc)) {
+                    if (isEmpty(charenc)) {
                         charenc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
-                        if (Strings.isEmpty(charenc)) {
+                        if (isEmpty(charenc)) {
                             charenc = "UTF-8";
                         }
                     }

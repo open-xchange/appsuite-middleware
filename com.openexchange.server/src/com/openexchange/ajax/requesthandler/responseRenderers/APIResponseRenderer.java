@@ -60,6 +60,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -203,6 +204,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                         callback = PATTERN_QUOTE.matcher(callback).replaceAll("$1\\\\\"");
                     }
                 }
+                callback = AJAXUtility.sanitizeParam(callback);
                 final PrintWriter writer = resp.getWriter();
                 writer.write(JS_FRAGMENT_PART1);
                 writer.write(callback);
@@ -221,7 +223,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                  */
             } else if (req.getParameter(JSONP) != null) {
                 resp.setContentType("text/javascript");
-                final String call = req.getParameter(JSONP);
+                final String call = AJAXUtility.sanitizeParam(req.getParameter(JSONP));
                 // Write: <call> + "(" + <json> + ")"
                 final PrintWriter writer = resp.getWriter();
                 writer.write(call);
