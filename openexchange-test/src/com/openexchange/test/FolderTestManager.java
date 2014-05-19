@@ -492,7 +492,7 @@ public class FolderTestManager implements TestManager{
                 fail("JSONException occured during " + action + ": " + e.getMessage());
             }
         } catch (final Exception e) {
-            fail("Unexpected error occured during " + action + ".");
+            fail("Unexpected error occured during " + action + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
