@@ -335,6 +335,10 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         return new ActiveFacet(type, valueId, filter);
     }
 
+    protected static ActiveFacet createActiveFacet(SimpleFacet facet) {
+        return new ActiveFacet(facet.getType(), facet.getType().getId(), facet.getFilter());
+    }
+
     protected static ActiveFacet createActiveFacet(FacetType type, int valueId, String field, String query) {
         Filter filter = new FilterBuilder()
             .addField(field)

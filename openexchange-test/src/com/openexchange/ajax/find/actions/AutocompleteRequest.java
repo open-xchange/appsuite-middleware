@@ -307,7 +307,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
 
         private static void ensureDisplayName(JSONObject json) throws JSONException {
             if (json.has("display_item")) {
-                JSONArray parts = (JSONArray) json.remove("displayItem");
+                JSONArray parts = (JSONArray) json.remove("display_item");
                 json.put("display_name", parts.getString(0) + ' ' + parts.getString(1));
             }
         }

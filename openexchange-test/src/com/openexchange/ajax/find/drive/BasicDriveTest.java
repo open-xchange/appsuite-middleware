@@ -88,6 +88,7 @@ import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -295,6 +296,23 @@ public class BasicDriveTest extends AbstractFindTest {
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest("", Module.DRIVE.getIdentifier(), facets, (Map<String, String>) null, false);
         AutocompleteResponse resp = client.execute(autocompleteRequest);
         assertTrue("Wrong exception", FindExceptionCode.FACET_CONFLICT.equals(resp.getException()));
+    }
+
+    public void testTokenizedQuery() throws Exception {
+        // description: "Test file for testing new find api"
+        SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "Test" + " " + "api"));
+        List<PropDocument> documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
+        assertTrue("no document found", 0 < documents.size());
+        assertNotNull("document not found", findByProperty(documents, "id", Integer.toString(metadata.getId())));
+
+        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "\"Test file for\""));
+        documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
+        assertTrue("no document found", 0 < documents.size());
+        assertNotNull("document not found", findByProperty(documents, "id", Integer.toString(metadata.getId())));
+
+        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "\"Test file murks\""));
+        documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
+        assertTrue("document found", 0 == documents.size());
     }
 
     protected List<Facet> autocomplete(String prefix) throws Exception {

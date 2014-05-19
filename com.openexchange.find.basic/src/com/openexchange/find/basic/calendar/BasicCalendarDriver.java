@@ -49,6 +49,7 @@
 
 package com.openexchange.find.basic.calendar;
 
+import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -70,6 +71,7 @@ import com.openexchange.find.calendar.CalendarDocument;
 import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.calendar.CalendarFacetValues;
 import com.openexchange.find.calendar.CalendarStrings;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
@@ -135,11 +137,6 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     @Override
-    protected String getFormatStringForGlobalFacet() {
-        return CalendarStrings.GLOBAL;
-    }
-
-    @Override
     protected Set<Integer> getSupportedFolderTypes() {
         return ALL_FOLDER_TYPES;
     }
@@ -155,14 +152,19 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             /*
              * add prefix-aware field facets
              */
-            facets.add(new SimpleFacet(CalendarFacetType.SUBJECT, new FormattableDisplayItem(CalendarStrings.SUBJECT, prefix),
-                CalendarFacetType.SUBJECT.getId(), prefix));
-            facets.add(new SimpleFacet(CalendarFacetType.DESCRIPTION, new FormattableDisplayItem(CalendarStrings.DESCRIPTION, prefix),
-                CalendarFacetType.DESCRIPTION.getId(), prefix));
-            facets.add(new SimpleFacet(CalendarFacetType.LOCATION, new FormattableDisplayItem(CalendarStrings.LOCATION, prefix),
-                CalendarFacetType.LOCATION.getId(), prefix));
-            facets.add(new SimpleFacet(CalendarFacetType.ATTACHMENT_NAME, new FormattableDisplayItem(CalendarStrings.ATTACHMENT_NAME, prefix),
-                CalendarFacetType.ATTACHMENT_NAME.getId(), prefix));
+            List<String> prefixTokens = tokenize(prefix);
+            if (!prefixTokens.isEmpty()) {
+                facets.add(new SimpleFacet(CommonFacetType.GLOBAL, new FormattableDisplayItem(CalendarStrings.GLOBAL, prefix),
+                    Filter.with(CommonFacetType.GLOBAL.getId(), prefixTokens)));
+                facets.add(new SimpleFacet(CalendarFacetType.SUBJECT, new FormattableDisplayItem(CalendarStrings.SUBJECT, prefix),
+                    Filter.with(CalendarFacetType.SUBJECT.getId(), prefixTokens)));
+                facets.add(new SimpleFacet(CalendarFacetType.DESCRIPTION, new FormattableDisplayItem(CalendarStrings.DESCRIPTION, prefix),
+                    Filter.with(CalendarFacetType.DESCRIPTION.getId(), prefixTokens)));
+                facets.add(new SimpleFacet(CalendarFacetType.LOCATION, new FormattableDisplayItem(CalendarStrings.LOCATION, prefix),
+                    Filter.with(CalendarFacetType.LOCATION.getId(), prefixTokens)));
+                facets.add(new SimpleFacet(CalendarFacetType.ATTACHMENT_NAME, new FormattableDisplayItem(CalendarStrings.ATTACHMENT_NAME, prefix),
+                    Filter.with(CalendarFacetType.ATTACHMENT_NAME.getId(), prefixTokens)));
+            }
         }
         /*
          * add participants facet dynamically

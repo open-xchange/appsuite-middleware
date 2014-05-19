@@ -49,6 +49,7 @@
 
 package com.openexchange.find.basic.contacts;
 
+import java.util.List;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.contacts.ContactsStrings;
@@ -74,10 +75,11 @@ public class AddressFacet extends ContactSearchFieldFacet {
     /**
      * Initializes a new {@link AddressFacet}.
      *
-     * @param query The query to insert into the filter
+     * @param query The query to insert into the display item
+     * @param tokenized The tokenized query to insert into the filter
      */
-    public AddressFacet(String query) {
-        super(ContactsFacetType.ADDRESS, new FormattableDisplayItem(ContactsStrings.FACET_ADDRESS, query), query);
+    public AddressFacet(String query, List<String> tokenized) {
+        super(ContactsFacetType.ADDRESS, new FormattableDisplayItem(ContactsStrings.FACET_ADDRESS, query), tokenized);
     }
 
     @Override
