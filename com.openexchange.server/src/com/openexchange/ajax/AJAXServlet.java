@@ -1038,7 +1038,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                     }
                 }
                 // Parse multipart request
-                upload.parseRequest(new ServletRequestContext(req));
+                items = upload.parseRequest(new ServletRequestContext(req));
             } catch (final FileUploadException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof IOException) {
