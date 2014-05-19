@@ -175,7 +175,7 @@ public class OXExceptionFactory {
                 }
             }
         }
-        return ret.addCategory(cat).setPrefix(code.getPrefix());
+        return ret.addCategory(cat).setPrefix(code.getPrefix()).setExceptionCode(code);
     }
 
 }

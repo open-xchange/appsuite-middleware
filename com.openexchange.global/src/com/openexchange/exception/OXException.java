@@ -251,6 +251,8 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private Generic generic;
 
+    private OXExceptionCode exceptionCode;
+
     /**
      * Initializes a default {@link OXException}.
      */
@@ -872,6 +874,26 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public OXException setPrefix(final String prefix) {
         this.prefix = prefix;
+        return this;
+    }
+
+    /**
+     * Gets the exception code
+     *
+     * @return The exception code or <code>null</code>
+     */
+    public OXExceptionCode getExceptionCode() {
+        return exceptionCode;
+    }
+
+    /**
+     * Sets the exception code
+     *
+     * @param exceptionCode The exception code to set
+     * @return This {@link OXException} with exception code applied
+     */
+    public OXException setExceptionCode(OXExceptionCode exceptionCode) {
+        this.exceptionCode = exceptionCode;
         return this;
     }
 
