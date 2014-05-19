@@ -69,8 +69,6 @@ import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.facet.AbstractFacet;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
@@ -215,6 +213,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
         }
 
         private FacetValue parseJFacetValue(final JSONObject jFacetValue) throws JSONException {
+            ensureDisplayName(jFacetValue);
             final String displayName = jFacetValue.getString("display_name");
             final int count = jFacetValue.optInt("count", -1);
             final List<Filter> filters = new LinkedList<Filter>();
@@ -234,6 +233,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
 
         private Filter parseJOption(final JSONObject jOption) throws JSONException {
             final String id = jOption.optString("id");
+            ensureDisplayName(jOption);
             final String displayName = jOption.optString("display_name");
             JSONObject jFilter = jOption.getJSONObject("filter");
             final JSONArray jQueries = jFilter.getJSONArray("queries");
@@ -305,31 +305,11 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
             return type;
         }
 
-        private DisplayItem parseJDisplayItem(final JSONObject jDisplayItem) throws JSONException {
-            final String defaultValue = jDisplayItem.getString("defaultValue");
-            final Map<String, Object> item = jDisplayItem.asMap();
-            return new DisplayItem() {
-
-                @Override
-                public String getDefaultValue() {
-                    return defaultValue;
-                }
-
-                @Override
-                public void accept(final DisplayItemVisitor visitor) {
-                    // Nothing
-                }
-
-                @Override
-                public Map<String, Object> getItem() {
-                    return item;
-                }
-
-                @Override
-                public boolean isLocalizable() {
-                    return false;
-                }
-            };
+        private static void ensureDisplayName(JSONObject json) throws JSONException {
+            if (json.has("display_item")) {
+                JSONArray parts = (JSONArray) json.remove("displayItem");
+                json.put("display_name", parts.getString(0) + ' ' + parts.getString(1));
+            }
         }
     }
 

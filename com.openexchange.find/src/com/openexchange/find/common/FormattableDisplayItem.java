@@ -54,31 +54,40 @@ import com.openexchange.find.facet.DisplayItemVisitor;
 
 
 /**
- * A display item that is localizable and shall be string formatted after localizing.
+ * A display item that is localizable and shall be string formatted by clients.
+ * The result string then consists of two parts: An argument (most likely user
+ * input) and a suffix that is appended to this argument.
+ * <br>
+ * Example:<br>
+ * new FormattableDisplayItem("in E-Mails", "term") can be constructed to a result
+ * string of "term in E-Mails" by clients.
+ *
+ * {@link FormattableDisplayItem#getDefaultValue()} returns the suffix.
+ * {@link FormattableDisplayItem#getItem} returns the argument.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
 public class FormattableDisplayItem implements DisplayItem {
 
-    private final String defaultValue;
+    private final String suffix;
 
-    private final Object args[];
+    private final String arg;
 
     /**
      * Initializes a new {@link FormattableDisplayItem}.
-     * @param defaultValue The default value. Never <code>null</code>.
-     * @param args The format arguments. Never <code>null</code>.
+     * @param suffix The suffix that is appended to the argument. Never <code>null</code>.
+     * @param args The format argument. Never <code>null</code>.
      */
-    public FormattableDisplayItem(final String defaultValue, final Object... args) {
+    public FormattableDisplayItem(final String suffix, final String arg) {
         super();
-        this.defaultValue = defaultValue;
-        this.args = args;
+        this.suffix = suffix;
+        this.arg = arg;
     }
 
     @Override
     public String getDefaultValue() {
-        return defaultValue;
+        return suffix;
     }
 
     @Override
@@ -87,8 +96,8 @@ public class FormattableDisplayItem implements DisplayItem {
     }
 
     @Override
-    public Object[] getItem() {
-        return args;
+    public String getItem() {
+        return arg;
     }
 
     @Override

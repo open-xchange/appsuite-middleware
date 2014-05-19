@@ -63,14 +63,29 @@ public class ContactsStrings implements LocalizableStrings {
 
     public static final String FACET_TYPE_CONTACT = "Contact";
 
-    public static final String FACET_GLOBAL = "%1$s <i>in contacts</i>";
+    // Context: Searching in contacts.
+    // Displayed as: [Search for] 'user input' in contacts.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String FACET_GLOBAL = "in contacts";
 
-    public static final String FACET_NAME = "%1$s <i>in names</i>";
+    // Context: Searching in contacts.
+    // Displayed as: [Search for] 'user input' in names.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String FACET_NAME = "in names";
 
-    public static final String FACET_EMAIL = "%1$s <i>in e-mail addresses</i>";
+    // Context: Searching in contacts.
+    // Displayed as: [Search for] 'user input' in e-mail addresses.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String FACET_EMAIL = "in e-mail addresses";
 
-    public static final String FACET_PHONE = "%1$s <i>in phone numbers</i>";
+    // Context: Searching in contacts.
+    // Displayed as: [Search for] 'user input' in phone numbers.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String FACET_PHONE = "in phone numbers";
 
-    public static final String FACET_ADDRESS = "%1$s <i>in addresses</i>";
+    // Context: Searching in contacts.
+    // Displayed as: [Search for] 'user input' in addresses.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String FACET_ADDRESS = "in addresses";
 
 }
