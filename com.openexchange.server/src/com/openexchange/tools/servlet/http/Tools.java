@@ -226,7 +226,7 @@ public final class Tools {
             synchronized (HEADER_DATEFORMAT) {
                 resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + expiry)));
             }
-            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=" + (expiry / 1000)); // 1 year
+            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=" + (expiry / 1000));
         }
     }
 
