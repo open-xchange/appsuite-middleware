@@ -202,6 +202,8 @@ public final class Tools {
 
     private static final long MILLIS_5MIN = 300000L;
 
+    private static final long MILLIS_HOUR = 3600000L;
+
     private static final long MILLIS_WEEK = 604800000L;
 
     private static final long MILLIS_YEAR = 52 * MILLIS_WEEK;
@@ -231,16 +233,25 @@ public final class Tools {
     }
 
     /**
-     * Gets the default of 5 minutes for <code>Expires</code> header.
+     * Gets the default of 5 minutes for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information.
      *
-     * @return The default of 5 minutes for <code>Expires</code> header
+     * @return The default of 5 minutes for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information
      */
     public static long getDefaultExpiry() {
         return MILLIS_5MIN;
     }
 
     /**
-     * Sets the given date for <code>Expires</code> header.
+     * Gets the default of 1 hour for image resources for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information.
+     *
+     * @return The default of 1 hour for image resources for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information
+     */
+    public static long getDefaultImageExpiry() {
+        return MILLIS_HOUR;
+    }
+
+    /**
+     * Sets the given date for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information.
      *
      * @param resp The HTTP response to apply to
      */
@@ -259,7 +270,7 @@ public final class Tools {
     }
 
     /**
-     * Sets the default of 5 minutes for <code>Expires</code> header.
+     * Sets the default of 5 minutes for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information.
      *
      * @param resp The HTTP response to apply to
      */
@@ -271,7 +282,19 @@ public final class Tools {
     }
 
     /**
-     * Sets the amount of 1 year for <code>Expires</code> header.
+     * Sets the default of 1 hour for image resources for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information.
+     *
+     * @param resp The HTTP response to apply to
+     */
+    public static void setDefaultImageExpiry(final HttpServletResponse resp) {
+        synchronized (HEADER_DATEFORMAT) {
+            resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_HOUR)));
+        }
+        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=3600"); // 1 hour
+    }
+
+    /**
+     * Sets the amount of 1 year for <tt>Expires</tt> and <tt>Cache-Control</tt>'s <tt>max-age</tt> header information.
      *
      * @param resp The HTTP response to apply to
      */
