@@ -249,7 +249,12 @@ public final class Tools {
             synchronized (HEADER_DATEFORMAT) {
                 resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(expires));
             }
-            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
+            int maxAge = (int) ((System.currentTimeMillis() - expires.getTime()) / 1000);
+            if (maxAge > 0) {
+                resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=" + maxAge);
+            } else {
+                resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=1");
+            }
         }
     }
 
