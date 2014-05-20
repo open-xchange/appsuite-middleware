@@ -927,7 +927,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
-        final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+        final MailSortField effectiveSortField = determineSortFieldForSearch(fullName, sortField);
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             final List<MailAccount> accounts = getAccounts();
             final MailFields mfs = new MailFields(fields);
@@ -1138,6 +1138,26 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         } finally {
             closeSafe(mailAccess);
         }
+    }
+
+    private MailSortField determineSortFieldForSearch(final String fullName, final MailSortField requestedSortField) {
+        final MailSortField effectiveSortField;
+        if (null == requestedSortField) {
+            effectiveSortField = MailSortField.RECEIVED_DATE;
+        } else {
+            if (MailSortField.SENT_DATE.equals(requestedSortField)) {
+                final String draftsFullname = UnifiedInboxAccess.DRAFTS;
+                if (fullName.equals(draftsFullname)) {
+                    effectiveSortField = MailSortField.RECEIVED_DATE;
+                } else {
+                    effectiveSortField = requestedSortField;
+                }
+            } else {
+                effectiveSortField = requestedSortField;
+            }
+        }
+
+        return effectiveSortField;
     }
 
     @Override
