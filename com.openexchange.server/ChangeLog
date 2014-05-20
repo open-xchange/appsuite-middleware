@@ -1,3 +1,7 @@
+* 2014-05-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28175: Tag wording for detected configuration flaws explicitly as "Warning"
+
 * 2014-05-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 32481: Ignore requests to LinkedIn JSON API if no LinkedIn OAuth account is available for associated user
