@@ -3,6 +3,7 @@
  - Fix for bug 28175: Tag wording for detected configuration flaws explicitly as "Warning"
  - Fix for bug 32633: Drop all remnants for obsolete POP3 tables
  - Fix for bug 32643: Check for possibly empty map prior to coercing to a JSON object
+ - Fix for bug 31962: Properly detect EAS ping request in case of base64-encoded binary data in request's query string
 
 * 2014-05-19 - thorben.betten@open-xchange.com
 
