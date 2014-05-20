@@ -53,13 +53,8 @@ import java.util.List;
 import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.Filter;
 
 
 /**
@@ -94,63 +89,6 @@ public abstract class AbstractJSONConverter implements ResultConverter {
         }
 
         return result;
-    }
-
-    protected JSONObject convertFacetValue(Locale locale, FacetValue value) throws JSONException {
-        JSONObject valueJSON = new JSONObject(4);
-        valueJSON.put("id", value.getId());
-        String displayName = convertDisplayItem(locale, value.getDisplayItem());
-        valueJSON.put("display_name", displayName);
-        int count = value.getCount();
-        if (count >= 0) {
-            valueJSON.put("count", value.getCount());
-        }
-
-        List<Filter> filters = value.getFilters();
-        if (filters.size() > 1) {
-            JSONArray filtersJSON = new JSONArray();
-            for (Filter filter : filters) {
-                JSONObject filterJSON = new JSONObject();
-                filterJSON.put("id", filter.getId());
-                // TODO: introduce boolean if "display_name" is localizable or state in JavaDoc
-                // that it has to be always localizable
-                filterJSON.put("display_name", AJAXUtility.sanitizeParam(translator.translate(locale, filter.getDisplayName())));
-                filterJSON.put("filter", convertFilter(filter));
-                filtersJSON.put(filterJSON);
-            }
-            valueJSON.put("options", filtersJSON);
-        } else {
-            valueJSON.put("filter", convertFilter(filters.get(0)));
-        }
-
-        return valueJSON;
-    }
-
-    protected String convertDisplayItem(Locale locale, DisplayItem displayItem) {
-        JSONDisplayItemVisitor visitor = new JSONDisplayItemVisitor(translator, locale);
-        displayItem.accept(visitor);
-        return visitor.getDisplayName();
-    }
-
-    protected JSONObject convertFilter(Filter filter) throws JSONException {
-        // Put fields to JSON array
-        List<String> fields = filter.getFields();
-        JSONArray jFields = new JSONArray(fields.size());
-        for (String field : fields) {
-            jFields.put(field);
-        }
-
-        List<String> queries = filter.getQueries();
-        JSONArray jQueries = new JSONArray(queries.size());
-        for (String query : queries) {
-            jQueries.put(query);
-        }
-
-        // Compose JSON object
-        JSONObject filterJSON = new JSONObject(3);
-        filterJSON.put("fields", jFields);
-        filterJSON.put("queries", jQueries);
-        return filterJSON;
     }
 
 }

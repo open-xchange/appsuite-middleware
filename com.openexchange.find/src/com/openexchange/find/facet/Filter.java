@@ -181,6 +181,17 @@ public class Filter implements Serializable {
         return new FilterBuilder().addField(field).addQuery(query).build();
     }
 
+    /**
+     * Creates a new filter with the given field and queries.
+     */
+    public static Filter with(String field, List<String> queries) {
+        FilterBuilder fb = new FilterBuilder().addField(field);
+        for (String query : queries) {
+            fb.addQuery(query);
+        }
+        return fb.build();
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

@@ -60,11 +60,15 @@ public class TasksStrings implements LocalizableStrings {
 
     // ------------------------- i18n strings for facet types -------------------------------------- //
 
-    // Search in tasks
-    public static final String FACET_GLOBAL = "%1$s <i>in tasks</i>";
+    // Context: Searching in tasks.
+    // Displayed as: [Search for] 'user input' in tasks.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String FACET_GLOBAL = "in tasks";
 
-    // Search in task name.
-    public static final String FACET_TASK_TITLE = "%1$s <i>in title</i>";
+    // Context: Searching in tasks.
+    // Displayed as: [Search for] 'user input' in title.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String FACET_TASK_TITLE = "in title";
 
     // Search in folders.
     public static final String FACET_TASK_FOLDERS = "Task folders";
@@ -78,11 +82,15 @@ public class TasksStrings implements LocalizableStrings {
     // Search in task status
     public static final String FACET_TASK_STATUS = "Task status";
 
-    // Search in task description
-    public static final String FACET_TASK_DESCRIPTION = "%1$s <i>in description</i>";
+    // Context: Searching in tasks.
+    // Displayed as: [Search for] 'user input' in description.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String FACET_TASK_DESCRIPTION = "in description";
 
-    // Search in task attachment name
-    public static final String FACET_TASK_ATTACHMENT_NAME = "%1$s <i>in attachment name</i>";
+    // Context: Searching in tasks.
+    // Displayed as: [Search for] 'user input' in attachment name.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String FACET_TASK_ATTACHMENT_NAME = "in attachment name";
 
     // ------------------------- i18n strings for folder types ------------------------------------- //
 

@@ -67,7 +67,6 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.ExclusiveFacet;
@@ -108,20 +107,10 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
     public final AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         checkActiveFacets(autocompleteRequest);
         AutocompleteResult autocompleteResult = doAutocomplete(autocompleteRequest, session);
-
-        LinkedList<Facet> modifiedFacets = new LinkedList<Facet>(autocompleteResult.getFacets());
-        if (!autocompleteRequest.getPrefix().isEmpty()) {
-            Facet globalFacet = new SimpleFacet(
-                CommonFacetType.GLOBAL,
-                new FormattableDisplayItem(getFormatStringForGlobalFacet(), autocompleteRequest.getPrefix()),
-                new Filter(Collections.singletonList(CommonFacetType.GLOBAL.getId()),
-                    Collections.singletonList(autocompleteRequest.getPrefix())));
-            modifiedFacets.addFirst(globalFacet);
-        }
-
+        List<Facet> modifiedFacets = new LinkedList<Facet>(autocompleteResult.getFacets());
         Facet folderTypeFacet = getFolderTypeFacet(getSupportedFolderTypes());
         if (folderTypeFacet != null) {
-            modifiedFacets.addLast(folderTypeFacet);
+            modifiedFacets.add(folderTypeFacet);
         }
 
         LinkedList<Facet> filteredFacets = filterFacets(modifiedFacets, autocompleteRequest.getActiveFacets());
@@ -151,13 +140,6 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
             }
         }
     }
-
-    /**
-     * The format string to construct the display item for the global facet.
-     * Something like "%1$s <i>in file name</i>". Must contain exactly one
-     * string reference that will be replaced with the current prefix.
-     */
-    protected abstract String getFormatStringForGlobalFacet();
 
     /**
      * @see ModuleSearchDriver#autocomplete(ServerSession, AutocompleteRequest)

@@ -65,7 +65,10 @@ import java.util.TimeZone;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.find.Module;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -275,6 +278,29 @@ public class QueryTest extends CalendarFindTest {
         Calendar responseStartDate = Calendar.getInstance(responseTimeZone);
         responseStartDate.setTime(d);
         assertEquals(expectedStartDate, responseStartDate);
+    }
+
+    public void testTokenizedQuery() throws Exception {
+        Appointment appointment = randomAppointment();
+        String t1 = randomUID();
+        String t2 = randomUID();
+        String t3 = randomUID();
+        appointment.setTitle(t1 + " " + t2 + " " + t3);
+        appointment = manager.insert(appointment);
+
+        SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.CALENDAR, t1 + " " + t3));
+        List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(globalFacet)));
+        assertTrue("no appointments found", 0 < documents.size());
+        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+
+        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.CALENDAR, "\"" + t1 + " " + t2 + "\""));
+        documents = query(Collections.singletonList(createActiveFacet(globalFacet)));
+        assertTrue("no appointments found", 0 < documents.size());
+        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+
+        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.CALENDAR, "\"" + t1 + " " + t3 + "\""));
+        documents = query(Collections.singletonList(createActiveFacet(globalFacet)));
+        assertTrue("appointments found", 0 == documents.size());
     }
 
 }

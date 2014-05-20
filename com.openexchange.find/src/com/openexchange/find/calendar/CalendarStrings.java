@@ -58,15 +58,30 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class CalendarStrings implements LocalizableStrings {
 
-    public static final String GLOBAL = "%1$s <i>in appointments</i>";
+    // Context: Searching in appointments.
+    // Displayed as: [Search for] 'user input' in appointments.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String GLOBAL = "in appointments";
 
-    public static final String SUBJECT = "%1$s <i>in subject</i>";
+    // Context: Searching in appointments.
+    // Displayed as: [Search for] 'user input' in subject.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String SUBJECT = "in subject";
 
-    public static final String DESCRIPTION = "%1$s <i>in description</i>";
+    // Context: Searching in appointments.
+    // Displayed as: [Search for] 'user input' in description.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String DESCRIPTION = "in description";
 
-    public static final String LOCATION = "%1$s <i>in location</i>";
+    // Context: Searching in appointments.
+    // Displayed as: [Search for] 'user input' in location.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String LOCATION = "in location";
 
-    public static final String ATTACHMENT_NAME = "%1$s <i>in attachment name</i>";
+    // Context: Searching in appointments.
+    // Displayed as: [Search for] 'user input' in appointments.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String ATTACHMENT_NAME = "in attachment name";
 
     public static final String FACET_TYPE_STATUS = "My Status";
 

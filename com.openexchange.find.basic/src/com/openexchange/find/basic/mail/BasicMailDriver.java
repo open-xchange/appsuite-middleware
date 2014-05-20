@@ -49,6 +49,7 @@
 
 package com.openexchange.find.basic.mail;
 
+import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
 import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
 import static com.openexchange.find.basic.mail.Constants.FIELD_FROM;
@@ -57,7 +58,6 @@ import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
 import static com.openexchange.find.basic.mail.Constants.RECIPIENT_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.SENDER_AND_RECIPIENT_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.SENDER_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.asList;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -80,11 +80,13 @@ import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.mail.ContactsFacet;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.mail.MailStrings;
@@ -175,15 +177,14 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         String prefix = autocompleteRequest.getPrefix();
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<Facet> facets = new ArrayList<Facet>(5);
-        addFieldFacets(facets, prefix);
-        addContactsFacet(facets, contacts, prefix, session);
+        List<String> prefixTokens = Collections.emptyList();
+        if (!prefix.isEmpty()) {
+            prefixTokens = tokenize(prefix);
+            addSimpleFacets(facets, prefix, prefixTokens);
+        }
+        addContactsFacet(facets, contacts, prefix, prefixTokens, session);
         addTimeFacet(facets);
         return new AutocompleteResult(facets);
-    }
-
-    @Override
-    protected String getFormatStringForGlobalFacet() {
-        return MailStrings.FACET_GLOBAL;
     }
 
     @Override
@@ -235,10 +236,14 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         }
     }
 
-    private static void addFieldFacets(List<Facet> facets, String prefix) {
-        if (!prefix.isEmpty()) {
-            facets.add(new SubjectFacet(prefix, Filter.with(FIELD_SUBJECT, prefix)));
-            facets.add(new MailTextFacet(prefix, Filter.with(FIELD_BODY, prefix)));
+    private static void addSimpleFacets(List<Facet> facets, String prefix, List<String> prefixTokens) {
+        if (!prefixTokens.isEmpty()) {
+            facets.add(new SimpleFacet(
+                CommonFacetType.GLOBAL,
+                new FormattableDisplayItem(MailStrings.FACET_GLOBAL, prefix),
+                Filter.with(CommonFacetType.GLOBAL.getId(), prefixTokens)));
+            facets.add(new SubjectFacet(prefix, Filter.with(FIELD_SUBJECT, prefixTokens)));
+            facets.add(new MailTextFacet(prefix, Filter.with(FIELD_BODY, prefixTokens)));
         }
     }
 
@@ -246,7 +251,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         facets.add(new TimeFacet());
     }
 
-    private static void addContactsFacet(List<Facet> facets, List<Contact> contacts, String prefix, ServerSession session) {
+    private static void addContactsFacet(List<Facet> facets, List<Contact> contacts, String prefix, List<String> prefixTokens, ServerSession session) {
         ContactsFacet contactsFacet = new ContactsFacet();
         for (Contact contact : contacts) {
             String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
@@ -254,8 +259,8 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             contactsFacet.addValue(buildContactValue(valueId, queries, new ContactDisplayItem(contact), session));
         }
 
-        if (!prefix.isEmpty()) {
-            contactsFacet.addValue(buildContactValue(prefix, asList(prefix), new SimpleDisplayItem(prefix), session));
+        if (!prefix.isEmpty() && !prefixTokens.isEmpty()) {
+            contactsFacet.addValue(buildContactValue(prefix, tokenize(prefix), new SimpleDisplayItem(prefix), session));
         }
 
         if (!contactsFacet.getValues().isEmpty()) {

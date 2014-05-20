@@ -49,6 +49,7 @@
 
 package com.openexchange.find.basic.drive;
 
+import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,6 +77,7 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.DriveFacetType;
@@ -85,8 +87,8 @@ import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -125,11 +127,6 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     @Override
     public boolean isValidFor(ServerSession session) {
         return session.getUserConfiguration().hasInfostore();
-    }
-
-    @Override
-    protected String getFormatStringForGlobalFacet() {
-        return DriveStrings.FACET_GLOBAL;
     }
 
     @Override
@@ -194,23 +191,33 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         final List<Facet> facets = new LinkedList<Facet>();
 
         if (!prefix.isEmpty()) {
-            // Add field factes
+            List<String> prefixTokens = tokenize(prefix);
+            // Add simple factes
             {
-                final Facet fileNameFacet = new SimpleFacet(DriveFacetType.FILE_NAME, new FormattableDisplayItem(
-                    DriveStrings.SEARCH_IN_FILE_NAME,
-                    prefix), Constants.FIELD_FILE_NAME, prefix);
+                final Facet globalFacet = new SimpleFacet(
+                    CommonFacetType.GLOBAL,
+                    new FormattableDisplayItem(DriveStrings.FACET_GLOBAL, prefix),
+                    Filter.with(CommonFacetType.GLOBAL.getId(), prefixTokens));
+                facets.add(globalFacet);
+            }
+            {
+                final Facet fileNameFacet = new SimpleFacet(
+                    DriveFacetType.FILE_NAME,
+                    new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix),
+                    Filter.with(Constants.FIELD_FILE_NAME, prefixTokens));
                 facets.add(fileNameFacet);
             }
             {
-                final Facet fileDescFacet = new SimpleFacet(DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(
-                    DriveStrings.SEARCH_IN_FILE_DESC,
-                    prefix), Constants.FIELD_FILE_DESC, prefix);
+                final Facet fileDescFacet = new SimpleFacet(
+                    DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix),
+                    Filter.with(Constants.FIELD_FILE_DESC, prefixTokens));
                 facets.add(fileDescFacet);
             }
             {
-                final Facet fileContentFacet = new SimpleFacet(DriveFacetType.FILE_CONTENT, new FormattableDisplayItem(
-                    DriveStrings.SEARCH_IN_FILE_CONTENT,
-                    prefix), Constants.FIELD_FILE_CONTENT, prefix);
+                final Facet fileContentFacet = new SimpleFacet(
+                    DriveFacetType.FILE_CONTENT,
+                    new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix),
+                    Filter.with(Constants.FIELD_FILE_CONTENT, prefixTokens));
                 facets.add(fileContentFacet);
             }
         }

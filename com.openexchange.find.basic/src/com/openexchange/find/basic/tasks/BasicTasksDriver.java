@@ -49,6 +49,7 @@
 
 package com.openexchange.find.basic.tasks;
 
+import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import static com.openexchange.find.basic.tasks.Constants.FIELD_STATUS;
 import static com.openexchange.find.basic.tasks.Constants.FIELD_TYPE;
 import java.util.ArrayList;
@@ -64,6 +65,7 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
@@ -71,8 +73,8 @@ import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.tasks.TaskStatusDisplayItem;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
 import com.openexchange.find.tasks.TasksDocument;
@@ -156,21 +158,33 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
     }
 
     @Override
-    protected String getFormatStringForGlobalFacet() {
-        return TasksStrings.FACET_GLOBAL;
-    }
-
-    @Override
     protected AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         String prefix = autocompleteRequest.getPrefix();
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<Facet> facets = new ArrayList<Facet>();
 
         //add field facets
+        List<String> prefixTokens = Collections.emptyList();
         if (false == Strings.isEmpty(prefix)) {
-            facets.add(new SimpleFacet(TasksFacetType.TASK_TITLE, new FormattableDisplayItem(TasksStrings.FACET_TASK_TITLE, prefix), Constants.FIELD_TITLE, prefix));
-            facets.add(new SimpleFacet(TasksFacetType.TASK_DESCRIPTION, new FormattableDisplayItem(TasksStrings.FACET_TASK_DESCRIPTION,  prefix), Constants.FIELD_DESCRIPTION, prefix));
-            facets.add(new SimpleFacet(TasksFacetType.TASK_ATTACHMENT_NAME, new FormattableDisplayItem(TasksStrings.FACET_TASK_ATTACHMENT_NAME,  prefix), Constants.FIELD_ATTACHMENT_NAME, prefix));
+            prefixTokens = tokenize(prefix);
+            if (!prefixTokens.isEmpty()) {
+                facets.add(new SimpleFacet(
+                    CommonFacetType.GLOBAL,
+                    new FormattableDisplayItem(TasksStrings.FACET_GLOBAL, prefix),
+                    Filter.with(CommonFacetType.GLOBAL.getId(), prefixTokens)));
+                facets.add(new SimpleFacet(
+                    TasksFacetType.TASK_TITLE,
+                    new FormattableDisplayItem(TasksStrings.FACET_TASK_TITLE, prefix),
+                    Filter.with(Constants.FIELD_TITLE, prefixTokens)));
+                facets.add(new SimpleFacet(
+                    TasksFacetType.TASK_DESCRIPTION,
+                    new FormattableDisplayItem(TasksStrings.FACET_TASK_DESCRIPTION, prefix),
+                    Filter.with(Constants.FIELD_DESCRIPTION, prefixTokens)));
+                facets.add(new SimpleFacet(
+                    TasksFacetType.TASK_ATTACHMENT_NAME,
+                    new FormattableDisplayItem(TasksStrings.FACET_TASK_ATTACHMENT_NAME, prefix),
+                    Filter.with(Constants.FIELD_ATTACHMENT_NAME, prefixTokens)));
+            }
         }
 
         //add participant facets
@@ -180,8 +194,8 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
             List<String> queries = extractMailAddessesFrom(c);
             participants.add(buildParticipantFacet(valueId, new ContactDisplayItem(c), queries));
         }
-        if (!prefix.isEmpty())
-            participants.add(buildParticipantFacet(prefix, new SimpleDisplayItem(prefix), Collections.singletonList(prefix)));
+        if (!prefix.isEmpty() && !prefixTokens.isEmpty())
+            participants.add(buildParticipantFacet(prefix, new SimpleDisplayItem(prefix), tokenize(prefix)));
         if (!participants.isEmpty())
             facets.add(new DefaultFacet(TasksFacetType.TASK_PARTICIPANTS, participants));
 

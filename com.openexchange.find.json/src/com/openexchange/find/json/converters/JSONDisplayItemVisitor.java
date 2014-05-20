@@ -50,6 +50,7 @@
 package com.openexchange.find.json.converters;
 
 import java.util.Locale;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.ContactTypeDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
@@ -73,7 +74,7 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     private final Locale locale;
 
-    private String result;
+    private Object result;
 
     public JSONDisplayItemVisitor(final StringTranslator translator, final Locale locale) {
         super();
@@ -127,9 +128,9 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     @Override
     public void visit(FormattableDisplayItem item) {
-        Object[] args = item.getItem();
-        String defaultValue = translator.translate(locale, item.getDefaultValue());
-        result = String.format(locale, defaultValue, args);
+        String suffix = translator.translate(locale, item.getDefaultValue());
+        String arg = AJAXUtility.sanitizeParam(item.getItem());
+        result = new String[] { arg, suffix };
     }
 
     @Override
@@ -143,13 +144,13 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
     }
 
     /**
-     * Gets the value to set for the 'display_name' attribute. This value
-     * is only valid if DisplayItem.accept(visitor) has been called.
+     * Gets the value to set for the 'display_name' or 'display_item' attribute.
+     * This value is only valid if DisplayItem.accept(visitor) has been called.
      *
      * @return The display name or <code>null</code> if it should
      * not be included in the response object.
      */
-    public String getDisplayName() {
+    public Object getResult() {
         return result;
     }
 }
