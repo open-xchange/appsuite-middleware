@@ -87,4 +87,13 @@ public abstract class OXRESTActivator extends HousekeepingActivator {
         registerWebService(serviceClass, null);
     }
 
+    /**
+     * Un-registers specified REST web service.
+     *
+     * @param serviceClass The service's class
+     */
+    protected <T> void unregisterWebService(Class<? extends OXRESTService<T>> serviceClass) {
+        unregisterService(serviceClass);
+    }
+
 }
