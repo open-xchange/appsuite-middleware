@@ -177,15 +177,42 @@ public class Filter implements Serializable {
     /**
      * Creates a new filter with the given field and query.
      */
-    public static Filter with(String field, String query) {
+    public static Filter of(String field, String query) {
         return new FilterBuilder().addField(field).addQuery(query).build();
     }
 
     /**
      * Creates a new filter with the given field and queries.
      */
-    public static Filter with(String field, List<String> queries) {
+    public static Filter of(String field, List<String> queries) {
         FilterBuilder fb = new FilterBuilder().addField(field);
+        for (String query : queries) {
+            fb.addQuery(query);
+        }
+        return fb.build();
+    }
+
+    /**
+     * Creates a new filter with the given fields and query.
+     */
+    public static Filter of(List<String> fields, String query) {
+        FilterBuilder fb = new FilterBuilder();
+        for (String field : fields) {
+            fb.addField(field);
+        }
+
+        fb.addQuery(query);
+        return fb.build();
+    }
+
+    /**
+     * Creates a new filter with the given fields and queries.
+     */
+    public static Filter of(List<String> fields, List<String> queries) {
+        FilterBuilder fb = new FilterBuilder();
+        for (String field : fields) {
+            fb.addField(field);
+        }
         for (String query : queries) {
             fb.addQuery(query);
         }

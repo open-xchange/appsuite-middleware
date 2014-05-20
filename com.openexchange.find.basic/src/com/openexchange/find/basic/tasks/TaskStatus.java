@@ -47,97 +47,37 @@
  *
  */
 
-package com.openexchange.find.common;
+package com.openexchange.find.basic.tasks;
 
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
-import com.openexchange.i18n.I18nService;
+import com.openexchange.groupware.tasks.Task;
 
 
 /**
- * A {@link DisplayItem} containing only a (possibly localizable) default value.
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class SimpleDisplayItem implements DisplayItem {
+public enum TaskStatus {
 
-    private final String defaultValue;
+    NOT_STARTED(Task.NOT_STARTED),
+    IN_PROGRESS(Task.IN_PROGRESS),
+    DONE(Task.DONE),
+    WAITING(Task.WAITING),
+    DEFERRED(Task.DEFERRED),
+    ;
 
-    private final boolean isLocalizable;
+    private final String identifier;
 
-    /**
-     * Initializes a new {@link SimpleDisplayItem} that
-     * is not localizable.
-     *
-     * @param defaultValue The default value
-     */
-    public SimpleDisplayItem(final String defaultValue) {
-        this(defaultValue, false);
+    private TaskStatus(final int identifier) {
+        this.identifier = Integer.toString(identifier);
     }
 
     /**
-     * Initializes a new {@link SimpleDisplayItem}.
+     * Gets the identifier
      *
-     * @param defaultValue The default value
-     * @param isLocalizable If the default value can be localized via {@link I18nService}.
+     * @return The identifier
      */
-    public SimpleDisplayItem(final String defaultValue, final boolean isLocalizable) {
-        super();
-        this.defaultValue = defaultValue;
-        this.isLocalizable = isLocalizable;
+    public String getIdentifier() {
+        return identifier;
     }
 
-    @Override
-    public String getDefaultValue() {
-        return defaultValue;
-    }
-
-    @Override
-    public boolean isLocalizable() {
-        return isLocalizable;
-    }
-
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public String getItem() {
-        return defaultValue;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
-        result = prime * result + ((isLocalizable) ? 1 : 0);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SimpleDisplayItem other = (SimpleDisplayItem) obj;
-        if (defaultValue == null) {
-            if (other.defaultValue != null)
-                return false;
-        } else if (!defaultValue.equals(other.defaultValue))
-            return false;
-        if (isLocalizable != other.isLocalizable)
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "SimpleDisplayItem [defaultValue=" + defaultValue + ", isLocalizable=" + isLocalizable + "]";
-    }
 }

@@ -47,21 +47,60 @@
  *
  */
 
-package com.openexchange.find.mail;
+package com.openexchange.find.facet;
 
-import com.openexchange.find.facet.DefaultFacet;
 
 
 /**
+ * A display item that is localizable and shall be string formatted by clients.
+ * The result string then consists of two parts: An argument (most likely user
+ * input) and a suffix that is appended to this argument.
+ * <br>
+ * Example:<br>
+ * new FormattableDisplayItem("in E-Mails", "term") can be constructed to a result
+ * string of "term in E-Mails" by clients.
+ *
+ * {@link FormattableDisplayItem#getDefaultValue()} returns the suffix.
+ * {@link FormattableDisplayItem#getItem} returns the argument.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class ContactsFacet extends DefaultFacet {
+public class FormattableDisplayItem implements DisplayItem {
 
-    private static final long serialVersionUID = 4892954333920389367L;
+    private final String suffix;
 
-    public ContactsFacet() {
-        super(MailFacetType.CONTACTS);
+    private final String arg;
+
+    /**
+     * Initializes a new {@link FormattableDisplayItem}.
+     * @param suffix The suffix that is appended to the argument. Never <code>null</code>.
+     * @param args The format argument. Never <code>null</code>.
+     */
+    public FormattableDisplayItem(final String suffix, final String arg) {
+        super();
+        this.suffix = suffix;
+        this.arg = arg;
+    }
+
+    @Override
+    public String getDefaultValue() {
+        return suffix;
+    }
+
+    @Override
+    public boolean isLocalizable() {
+        return true;
+    }
+
+    @Override
+    public String getItem() {
+        return arg;
+    }
+
+    @Override
+    public void accept(DisplayItemVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

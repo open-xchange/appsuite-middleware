@@ -50,9 +50,9 @@
 package com.openexchange.find.basic.contacts;
 
 import java.util.List;
-import com.openexchange.find.common.FormattableDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.contacts.ContactsStrings;
+import com.openexchange.find.facet.FormattableDisplayItem;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**

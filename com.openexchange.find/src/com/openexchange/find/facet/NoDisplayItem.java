@@ -50,6 +50,7 @@
 package com.openexchange.find.facet;
 
 
+
 /**
  * A display item that is meant to be ignored (e.g. not written out in API responses).
  *

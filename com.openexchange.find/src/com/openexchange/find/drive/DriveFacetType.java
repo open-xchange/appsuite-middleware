@@ -64,8 +64,6 @@ import com.openexchange.java.Strings;
  */
 public enum DriveFacetType implements FacetType {
 
-    CONTACTS(DriveStrings.FACET_CONTACTS),
-    FOLDERS(DriveStrings.FACET_FOLDERS),
     FILE_NAME(null),
     FILE_TYPE(DriveStrings.FACET_FILE_TYPE),
     FILE_DESCRIPTION(null),

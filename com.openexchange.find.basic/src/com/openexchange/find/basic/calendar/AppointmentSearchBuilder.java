@@ -68,6 +68,7 @@ import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.calendar.CalendarFacetType;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderStorage;
@@ -78,7 +79,6 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.java.SearchStrings;
 import com.openexchange.java.Strings;
@@ -209,19 +209,19 @@ public class AppointmentSearchBuilder {
      * folder ID or a folder type.
      *
      * @param folderID The folder ID to apply, or <code>null</code> if not specified
-     * @param folderType The folder type for that all folder shall be applied. -1 if not specified.
+     * @param folderType The folder type for that all folder shall be applied. <code>null</code> if not specified.
      * @return The builder
      * @throws OXException
      */
-    public AppointmentSearchBuilder applyFolders(String folderID, int folderType) throws OXException {
+    public AppointmentSearchBuilder applyFolders(String folderID, FolderType folderType) throws OXException {
         final Set<Integer> folderIDs;
         if (null == folderID) {
             Type type = null;
-            if (FolderObject.PRIVATE == folderType) {
+            if (FolderType.PRIVATE == folderType) {
                 type = PrivateType.getInstance();
-            } else if (FolderObject.PUBLIC == folderType) {
+            } else if (FolderType.PUBLIC == folderType) {
                 type = PublicType.getInstance();
-            } else if (FolderObject.SHARED == folderType) {
+            } else if (FolderType.SHARED == folderType) {
                 type = SharedType.getInstance();
             }
 

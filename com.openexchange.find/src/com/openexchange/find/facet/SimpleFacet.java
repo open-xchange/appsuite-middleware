@@ -68,9 +68,9 @@ public class SimpleFacet extends AbstractFacet{
 
     private static final long serialVersionUID = 6623209495601676515L;
 
-    private final DisplayItem displayItem;
+    private DisplayItem displayItem;
 
-    private final Filter filter;
+    private Filter filter;
 
     public SimpleFacet(FacetType type, DisplayItem displayItem, Filter filter) {
         super(type);
@@ -82,6 +82,27 @@ public class SimpleFacet extends AbstractFacet{
         super(type);
         this.displayItem = displayItem;
         filter = new Filter(Collections.singletonList(filterField), filterValue);
+    }
+
+    /**
+     * Only meant to be called by the builders in {@link Facet}.
+     */
+    SimpleFacet() {
+        super();
+    }
+
+    /**
+     * Only meant to be called by the builders in {@link Facet}.
+     */
+    void setDisplayItem(DisplayItem displayItem) {
+        this.displayItem = displayItem;
+    }
+
+    /**
+     * Only meant to be called by the builders in {@link Facet}.
+     */
+    void setFilter(Filter filter) {
+        this.filter = filter;
     }
 
     @Override

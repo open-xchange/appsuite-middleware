@@ -49,13 +49,13 @@
 
 package com.openexchange.find.json.converters;
 
+import static com.openexchange.ajax.AJAXUtility.sanitizeParam;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.ExclusiveFacet;
@@ -64,8 +64,8 @@ import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FacetVisitor;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.Option;
 import com.openexchange.find.facet.SimpleFacet;
-import com.openexchange.java.Strings;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -125,7 +125,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             FacetType type = facet.getType();
             result.put("id", type.getId());
             result.put("style", facet.getStyle());
-            result.put("display_name", sanitizeForDisplay(translator.translate(locale, type.getDisplayName())));
+            result.put("display_name", sanitizeParam(translator.translate(locale, type.getDisplayName())));
 
             List<FacetValue> values = facet.getValues();
             JSONArray jValues = new JSONArray(values.size());
@@ -148,7 +148,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             FacetType type = facet.getType();
             result.put("id", type.getId());
             result.put("style", facet.getStyle());
-            result.put("display_name", sanitizeForDisplay(translator.translate(locale, type.getDisplayName())));
+            result.put("display_name", sanitizeParam(translator.translate(locale, type.getDisplayName())));
 
             List<FacetValue> values = facet.getValues();
             JSONArray jValues = new JSONArray(values.size());
@@ -190,19 +190,18 @@ public class JSONFacetVisitor implements FacetVisitor {
             jValue.put("count", value.getCount());
         }
 
-        List<Filter> filters = value.getFilters();
-        if (filters.size() > 1) {
-            JSONArray filtersJSON = new JSONArray();
-            for (Filter filter : filters) {
-                JSONObject filterJSON = new JSONObject();
-                filterJSON.put("id", filter.getId());
-                filterJSON.put("display_name", sanitizeForDisplay(translator.translate(locale, filter.getDisplayName())));
-                filterJSON.put("filter", convertFilter(filter));
-                filtersJSON.put(filterJSON);
+        if (value.hasOptions()) {
+            JSONArray jOptions = new JSONArray();
+            for (Option option : value.getOptions()) {
+                JSONObject jOption = new JSONObject();
+                jOption.put("id", option.getId());
+                addDisplayItem(jOption, locale, option.getDisplayItem());
+                jOption.put("filter", convertFilter(option.getFilter()));
+                jOptions.put(jOption);
             }
-            jValue.put("options", filtersJSON);
+            jValue.put("options", jOptions);
         } else {
-            jValue.put("filter", convertFilter(filters.get(0)));
+            jValue.put("filter", convertFilter(value.getFilter()));
         }
 
         return jValue;
@@ -241,24 +240,6 @@ public class JSONFacetVisitor implements FacetVisitor {
         filterJSON.put("fields", jFields);
         filterJSON.put("queries", jQueries);
         return filterJSON;
-    }
-
-    private String sanitizeForDisplay(String forDisplay) {
-        if (Strings.isEmpty(forDisplay)) {
-            return forDisplay;
-        }
-
-        int pos = forDisplay.lastIndexOf(" <i>");
-        if (pos < 0) {
-            return AJAXUtility.sanitizeParam(forDisplay);
-        }
-
-        String toSanitize = forDisplay.substring(0, pos);
-        if (Strings.isEmpty(toSanitize)) {
-            return forDisplay;
-        }
-
-        return new StringBuilder(forDisplay.length()).append(AJAXUtility.sanitizeParam(toSanitize)).append(forDisplay.substring(pos)).toString();
     }
 
 }

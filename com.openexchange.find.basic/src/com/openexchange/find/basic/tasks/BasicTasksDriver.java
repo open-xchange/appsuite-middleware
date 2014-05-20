@@ -52,6 +52,9 @@ package com.openexchange.find.basic.tasks;
 import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import static com.openexchange.find.basic.tasks.Constants.FIELD_STATUS;
 import static com.openexchange.find.basic.tasks.Constants.FIELD_TYPE;
+import static com.openexchange.find.facet.Facets.newDefaultBuilder;
+import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
+import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,16 +70,12 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.FormattableDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.facet.DefaultFacet;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.SimpleFacet;
-import com.openexchange.find.tasks.TaskStatusDisplayItem;
-import com.openexchange.find.tasks.TaskTypeDisplayItem;
+import com.openexchange.find.facet.SimpleDisplayItem;
 import com.openexchange.find.tasks.TasksDocument;
 import com.openexchange.find.tasks.TasksFacetType;
 import com.openexchange.find.tasks.TasksStrings;
@@ -129,7 +128,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
     }
 
     @Override
-    protected Set<Integer> getSupportedFolderTypes() {
+    protected Set<FolderType> getSupportedFolderTypes() {
         return ALL_FOLDER_TYPES;
     }
 
@@ -168,22 +167,25 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         if (false == Strings.isEmpty(prefix)) {
             prefixTokens = tokenize(prefix);
             if (!prefixTokens.isEmpty()) {
-                facets.add(new SimpleFacet(
-                    CommonFacetType.GLOBAL,
-                    new FormattableDisplayItem(TasksStrings.FACET_GLOBAL, prefix),
-                    Filter.with(CommonFacetType.GLOBAL.getId(), prefixTokens)));
-                facets.add(new SimpleFacet(
-                    TasksFacetType.TASK_TITLE,
-                    new FormattableDisplayItem(TasksStrings.FACET_TASK_TITLE, prefix),
-                    Filter.with(Constants.FIELD_TITLE, prefixTokens)));
-                facets.add(new SimpleFacet(
-                    TasksFacetType.TASK_DESCRIPTION,
-                    new FormattableDisplayItem(TasksStrings.FACET_TASK_DESCRIPTION, prefix),
-                    Filter.with(Constants.FIELD_DESCRIPTION, prefixTokens)));
-                facets.add(new SimpleFacet(
-                    TasksFacetType.TASK_ATTACHMENT_NAME,
-                    new FormattableDisplayItem(TasksStrings.FACET_TASK_ATTACHMENT_NAME, prefix),
-                    Filter.with(Constants.FIELD_ATTACHMENT_NAME, prefixTokens)));
+                facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
+                    .withFormattableDisplayItem(TasksStrings.FACET_GLOBAL, prefix)
+                    .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
+                    .build());
+
+                facets.add(newSimpleBuilder(TasksFacetType.TASK_TITLE)
+                    .withFormattableDisplayItem(TasksStrings.FACET_TASK_TITLE, prefix)
+                    .withFilter(Filter.of(Constants.FIELD_TITLE, prefixTokens))
+                    .build());
+
+                facets.add(newSimpleBuilder(TasksFacetType.TASK_DESCRIPTION)
+                    .withFormattableDisplayItem(TasksStrings.FACET_TASK_DESCRIPTION, prefix)
+                    .withFilter(Filter.of(Constants.FIELD_DESCRIPTION, prefixTokens))
+                    .build());
+
+                facets.add(newSimpleBuilder(TasksFacetType.TASK_ATTACHMENT_NAME)
+                    .withFormattableDisplayItem(TasksStrings.FACET_TASK_ATTACHMENT_NAME, prefix)
+                    .withFilter(Filter.of(Constants.FIELD_ATTACHMENT_NAME, prefixTokens))
+                    .build());
             }
         }
 
@@ -191,88 +193,66 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         List<FacetValue> participants = new ArrayList<FacetValue>(contacts.size());
         for(Contact c : contacts) {
             String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(c.getObjectID()));
-            List<String> queries = extractMailAddessesFrom(c);
+            List<String> queries;
+            if (c.getInternalUserId() > 0) {
+                queries = Collections.singletonList(Integer.toString(c.getInternalUserId()));
+            } else {
+                queries = extractMailAddessesFrom(c);
+            }
+
             participants.add(buildParticipantFacet(valueId, new ContactDisplayItem(c), queries));
         }
-        if (!prefix.isEmpty() && !prefixTokens.isEmpty())
+
+        if (!prefix.isEmpty() && !prefixTokens.isEmpty()) {
             participants.add(buildParticipantFacet(prefix, new SimpleDisplayItem(prefix), tokenize(prefix)));
-        if (!participants.isEmpty())
-            facets.add(new DefaultFacet(TasksFacetType.TASK_PARTICIPANTS, participants));
+        }
+        if (!participants.isEmpty()) {
+            facets.add(newDefaultBuilder(TasksFacetType.TASK_PARTICIPANTS)
+                .withValues(participants)
+                .build());
+        }
 
         //add status facets
+
         final List<FacetValue> statusFacets = new ArrayList<FacetValue>(5);
-        addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.NOT_STARTED, TasksStrings.TASK_STATUS_NOT_STARTED);
-        addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.IN_PROGRESS, TasksStrings.TASK_STATUS_IN_PROGRESS);
-        addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.DONE, TasksStrings.TASK_STATUS_DONE);
-        addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.WAITING, TasksStrings.TASK_STATUS_WAITING);
-        addStatusFacet(statusFacets, TaskStatusDisplayItem.Type.DEFERRED, TasksStrings.TASK_STATUS_DEFERRED);
-        facets.add(new DefaultFacet(TasksFacetType.TASK_STATUS, statusFacets));
+        addStatusFacet(statusFacets, TaskStatus.NOT_STARTED, TasksStrings.TASK_STATUS_NOT_STARTED);
+        addStatusFacet(statusFacets, TaskStatus.IN_PROGRESS, TasksStrings.TASK_STATUS_IN_PROGRESS);
+        addStatusFacet(statusFacets, TaskStatus.DONE, TasksStrings.TASK_STATUS_DONE);
+        addStatusFacet(statusFacets, TaskStatus.WAITING, TasksStrings.TASK_STATUS_WAITING);
+        addStatusFacet(statusFacets, TaskStatus.DEFERRED, TasksStrings.TASK_STATUS_DEFERRED);
+        facets.add(newExclusiveBuilder(TasksFacetType.TASK_STATUS)
+            .withValues(statusFacets)
+            .build());
 
         //add type facets
         final List<FacetValue> typeFacets = new ArrayList<FacetValue>(5);
-        addTypeFacet(typeFacets, TaskTypeDisplayItem.Type.SINGLE_TASK, TasksStrings.TASK_TYPE_SINGLE_TASK);
-        addTypeFacet(typeFacets, TaskTypeDisplayItem.Type.SERIES, TasksStrings.TASK_TYPE_SERIES);
-        facets.add(new DefaultFacet(TasksFacetType.TASK_TYPE, typeFacets));
+        addTypeFacet(typeFacets, TaskType.SINGLE_TASK, TasksStrings.TASK_TYPE_SINGLE_TASK);
+        addTypeFacet(typeFacets, TaskType.SERIES, TasksStrings.TASK_TYPE_SERIES);
+        facets.add(newExclusiveBuilder(TasksFacetType.TASK_TYPE)
+            .withValues(typeFacets)
+            .build());
 
         return new AutocompleteResult(facets);
     }
 
-    /**
-     * Build a participant facet
-     * @param valueId
-     * @param item
-     * @param queries
-     * @return
-     */
     private static final FacetValue buildParticipantFacet(String valueId, DisplayItem item, List<String> queries) {
-        return new FacetValue(valueId, item, FacetValue.UNKNOWN_COUNT,
-                                        Collections.singletonList(
-                                            new Filter(Constants.FIELD_PARTICIPANT, TasksStrings.FACET_TASK_PARTICIPANTS, Constants.PARTICIPANTS, queries)));
+        return FacetValue.newBuilder(valueId)
+            .withDisplayItem(item)
+            .withFilter(Filter.of(Constants.PARTICIPANTS, queries))
+            .build();
     }
 
-    /**
-     * Add a status facet
-     * @param statusFacets
-     * @param type
-     * @param status
-     */
-    private static final void addStatusFacet(List<FacetValue> statusFacets, TaskStatusDisplayItem.Type type, String status) {
-        statusFacets.add(new FacetValue(type.getIdentifier(),
-                            new TaskStatusDisplayItem(status,type), FacetValue.UNKNOWN_COUNT,
-                            new Filter(Collections.singletonList(FIELD_STATUS),type.getIdentifier())));
+    private static final void addStatusFacet(List<FacetValue> statusFacets, TaskStatus type, String status) {
+        statusFacets.add(FacetValue.newBuilder(type.getIdentifier())
+                            .withLocalizableDisplayItem(status)
+                            .withFilter(Filter.of(FIELD_STATUS, type.getIdentifier()))
+                            .build());
     }
 
-    /**
-     * Add task type facet
-     * @param typeFacets
-     * @param type
-     * @param taskType
-     */
-    private static final void addTypeFacet(List<FacetValue> typeFacets, TaskTypeDisplayItem.Type type, String taskType) {
-        typeFacets.add(new FacetValue(type.getIdentifier(),
-                            new TaskTypeDisplayItem(taskType,type),
-                            FacetValue.UNKNOWN_COUNT,
-                            new Filter(Collections.singletonList(FIELD_TYPE),type.getIdentifier())));
-    }
-
-    //TODO: maybe move a level higher in the class hierarchy?
-    private static List<String> extractMailAddessesFrom(final Contact contact) {
-        List<String> addrs = new ArrayList<String>(3);
-        String mailAddress = contact.getEmail1();
-        if (mailAddress != null) {
-            addrs.add(mailAddress);
-        }
-
-        mailAddress = contact.getEmail2();
-        if (mailAddress != null) {
-            addrs.add(mailAddress);
-        }
-
-        mailAddress = contact.getEmail3();
-        if (mailAddress != null) {
-            addrs.add(mailAddress);
-        }
-
-        return addrs;
+    private static final void addTypeFacet(List<FacetValue> typeFacets, TaskType type, String taskType) {
+        typeFacets.add(FacetValue.newBuilder(type.getIdentifier())
+            .withLocalizableDisplayItem(taskType)
+            .withFilter(Filter.of(FIELD_TYPE, type.getIdentifier()))
+            .build());
     }
 }

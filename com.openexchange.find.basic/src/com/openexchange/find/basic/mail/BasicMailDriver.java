@@ -54,16 +54,36 @@ import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
 import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
 import static com.openexchange.find.basic.mail.Constants.FIELD_FROM;
 import static com.openexchange.find.basic.mail.Constants.FIELD_SUBJECT;
+import static com.openexchange.find.basic.mail.Constants.FIELD_TIME;
 import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
+import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_MONTH;
+import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_WEEK;
+import static com.openexchange.find.basic.mail.Constants.QUERY_LAST_YEAR;
 import static com.openexchange.find.basic.mail.Constants.RECIPIENT_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.SENDER_AND_RECIPIENT_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.SENDER_FIELDS;
+import static com.openexchange.find.common.CommonFacetType.GLOBAL;
+import static com.openexchange.find.facet.Facets.newSimpleBuilder;
+import static com.openexchange.find.mail.MailFacetType.CONTACTS;
+import static com.openexchange.find.mail.MailFacetType.MAIL_TEXT;
+import static com.openexchange.find.mail.MailFacetType.SUBJECT;
+import static com.openexchange.find.mail.MailFacetType.TIME;
+import static com.openexchange.find.mail.MailStrings.FACET_GLOBAL;
+import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
+import static com.openexchange.find.mail.MailStrings.FACET_RECIPIENT;
+import static com.openexchange.find.mail.MailStrings.FACET_SENDER;
+import static com.openexchange.find.mail.MailStrings.FACET_SENDER_AND_RECIPIENT;
+import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
+import static com.openexchange.find.mail.MailStrings.LAST_MONTH;
+import static com.openexchange.find.mail.MailStrings.LAST_WEEK;
+import static com.openexchange.find.mail.MailStrings.LAST_YEAR;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -80,19 +100,20 @@ import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.FormattableDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.common.FolderType;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Facets;
+import com.openexchange.find.facet.Facets.DefaultFacetBuilder;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.Option;
+import com.openexchange.find.facet.SimpleDisplayItem;
 import com.openexchange.find.facet.SimpleFacet;
-import com.openexchange.find.mail.ContactsFacet;
 import com.openexchange.find.mail.MailDocument;
-import com.openexchange.find.mail.MailStrings;
-import com.openexchange.find.mail.MailTextFacet;
-import com.openexchange.find.mail.SubjectFacet;
-import com.openexchange.find.mail.TimeFacet;
+import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.spi.SearchConfiguration;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
@@ -168,7 +189,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     @Override
-    protected Set<Integer> getSupportedFolderTypes() {
+    protected Set<FolderType> getSupportedFolderTypes() {
         return FOLDER_TYPE_NOT_SUPPORTED;
     }
 
@@ -212,9 +233,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             mailAccess.connect();
             IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             MailFolder folder = folderStorage.getFolder(fullnameArgument.getFullname());
-
-            List<Filter> filters = searchRequest.getFilters();
-            SearchTerm<?> searchTerm = prepareSearchTerm(folder, searchRequest.getQueries(), filters);
+            SearchTerm<?> searchTerm = prepareSearchTerm(folder, searchRequest);
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             List<MailMessage> messages = searchMessages(
                 messageStorage,
@@ -238,56 +257,80 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private static void addSimpleFacets(List<Facet> facets, String prefix, List<String> prefixTokens) {
         if (!prefixTokens.isEmpty()) {
-            facets.add(new SimpleFacet(
-                CommonFacetType.GLOBAL,
-                new FormattableDisplayItem(MailStrings.FACET_GLOBAL, prefix),
-                Filter.with(CommonFacetType.GLOBAL.getId(), prefixTokens)));
-            facets.add(new SubjectFacet(prefix, Filter.with(FIELD_SUBJECT, prefixTokens)));
-            facets.add(new MailTextFacet(prefix, Filter.with(FIELD_BODY, prefixTokens)));
+            facets.add(buildSimpleFacet(
+                GLOBAL,
+                FACET_GLOBAL,
+                prefix,
+                GLOBAL.getId(),
+                prefixTokens));
+
+            facets.add(buildSimpleFacet(
+                SUBJECT,
+                FACET_SUBJECT,
+                prefix,
+                FIELD_SUBJECT,
+                prefixTokens));
+
+            facets.add(buildSimpleFacet(
+                MAIL_TEXT,
+                FACET_MAIL_TEXT,
+                prefix,
+                FIELD_BODY,
+                prefixTokens));
         }
+    }
+
+    private static SimpleFacet buildSimpleFacet(FacetType type, String formatString, String formatArg, String filterField, List<String> prefixTokens) {
+        return newSimpleBuilder(type)
+            .withFormattableDisplayItem(formatString, formatArg)
+            .withFilter(Filter.of(filterField, prefixTokens))
+            .build();
     }
 
     private static void addTimeFacet(List<Facet> facets) {
-        facets.add(new TimeFacet());
+        facets.add(Facets.newExclusiveBuilder(TIME)
+            .addValue(FacetValue.newBuilder(QUERY_LAST_WEEK)
+                .withLocalizableDisplayItem(LAST_WEEK)
+                .withFilter(Filter.of(FIELD_TIME, QUERY_LAST_WEEK))
+                .build())
+            .addValue(FacetValue.newBuilder(QUERY_LAST_MONTH)
+                .withLocalizableDisplayItem(LAST_MONTH)
+                .withFilter(Filter.of(FIELD_TIME, QUERY_LAST_MONTH))
+                .build())
+            .addValue(FacetValue.newBuilder(QUERY_LAST_YEAR)
+                .withLocalizableDisplayItem(LAST_YEAR)
+                .withFilter(Filter.of(FIELD_TIME, QUERY_LAST_YEAR))
+                .build())
+            .build());
     }
 
     private static void addContactsFacet(List<Facet> facets, List<Contact> contacts, String prefix, List<String> prefixTokens, ServerSession session) {
-        ContactsFacet contactsFacet = new ContactsFacet();
+        DefaultFacetBuilder builder = Facets.newDefaultBuilder(CONTACTS);
+        boolean valuesAdded = false;
         for (Contact contact : contacts) {
             String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
             List<String> queries = extractMailAddessesFrom(contact);
-            contactsFacet.addValue(buildContactValue(valueId, queries, new ContactDisplayItem(contact), session));
+            builder.addValue(buildContactValue(valueId, queries, new ContactDisplayItem(contact), session));
+            valuesAdded = true;
         }
 
         if (!prefix.isEmpty() && !prefixTokens.isEmpty()) {
-            contactsFacet.addValue(buildContactValue(prefix, tokenize(prefix), new SimpleDisplayItem(prefix), session));
+            builder.addValue(buildContactValue(prefix, tokenize(prefix), new SimpleDisplayItem(prefix), session));
+            valuesAdded = true;
         }
 
-        if (!contactsFacet.getValues().isEmpty()) {
-            facets.add(contactsFacet);
+        if (valuesAdded) {
+            facets.add(builder.build());
         }
     }
 
     private static FacetValue buildContactValue(String valueId, List<String> queries, DisplayItem item, ServerSession session) {
-        List<Filter> filters = new ArrayList<Filter>(3);
-        filters.add(new Filter(
-            "all",
-            MailStrings.FACET_SENDER_AND_RECIPIENT,
-            SENDER_AND_RECIPIENT_FIELDS,
-            queries));
-        filters.add(new Filter(
-            "sender",
-            MailStrings.FACET_SENDER, SENDER_FIELDS,
-            queries));
-        filters.add(new Filter("recipient",
-            MailStrings.FACET_RECIPIENT,
-            RECIPIENT_FIELDS,
-            queries));
-        return new FacetValue(
-            valueId,
-            item,
-            FacetValue.UNKNOWN_COUNT,
-            filters);
+        return FacetValue.newBuilder(valueId)
+            .withDisplayItem(item)
+            .addOption(Option.newInstance("all", FACET_SENDER_AND_RECIPIENT, Filter.of(SENDER_AND_RECIPIENT_FIELDS, queries)))
+            .addOption(Option.newInstance("sender", FACET_SENDER, Filter.of(SENDER_FIELDS, queries)))
+            .addOption(Option.newInstance("sender", FACET_RECIPIENT, Filter.of(RECIPIENT_FIELDS, queries)))
+            .build();
     }
 
     private static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, int start, int size) throws OXException {
@@ -303,26 +346,6 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         List<MailMessage> resultMessages = new ArrayList<MailMessage>(messages.length);
         Collections.addAll(resultMessages, messages);
         return resultMessages;
-    }
-
-    private static List<String> extractMailAddessesFrom(final Contact contact) {
-        List<String> addrs = new ArrayList<String>(3);
-        String mailAddress = contact.getEmail1();
-        if (mailAddress != null) {
-            addrs.add(mailAddress);
-        }
-
-        mailAddress = contact.getEmail2();
-        if (mailAddress != null) {
-            addrs.add(mailAddress);
-        }
-
-        mailAddress = contact.getEmail3();
-        if (mailAddress != null) {
-            addrs.add(mailAddress);
-        }
-
-        return addrs;
     }
 
     private static enum OP {
@@ -341,19 +364,57 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return null;
     }
 
-    private SearchTerm<?> prepareSearchTerm(MailFolder folder, List<String> queries, List<Filter> filters) throws OXException {
+    private SearchTerm<?> prepareSearchTerm(MailFolder folder, SearchRequest searchRequest) throws OXException {
         List<String> queryFields = searchMailBody ? Constants.QUERY_FIELDS_BODY : Constants.QUERY_FIELDS;
-        SearchTerm<?> queryTerm = prepareQueryTerm(folder, queryFields, queries);
-        SearchTerm<?> filterTerm = prepareFilterTerm(folder, filters);
+        SearchTerm<?> queryTerm = prepareQueryTerm(folder, queryFields, searchRequest.getQueries());
+
+        List<SearchTerm<?>> facetTerms = new LinkedList<SearchTerm<?>>();
+        SearchTerm<?> timeTerm = prepareTermForFacet(searchRequest, MailFacetType.TIME, folder, OP.OR, OP.OR, OP.OR);
+        if (timeTerm != null) {
+            facetTerms.add(timeTerm);
+        }
+
+        SearchTerm<?> subjectTerm = prepareTermForFacet(searchRequest, MailFacetType.SUBJECT, folder, OP.AND, OP.AND, OP.AND);
+        if (subjectTerm != null) {
+            facetTerms.add(subjectTerm);
+        }
+
+        SearchTerm<?> bodyTerm = prepareTermForFacet(searchRequest, MailFacetType.MAIL_TEXT, folder, OP.AND, OP.AND, OP.AND);
+        if (bodyTerm != null) {
+            facetTerms.add(bodyTerm);
+        }
+
+        SearchTerm<?> contactsTerm = prepareTermForFacet(searchRequest, MailFacetType.CONTACTS, folder, OP.AND, OP.OR, OP.OR);
+        if (contactsTerm != null) {
+            facetTerms.add(contactsTerm);
+        }
+
+        SearchTerm<?> facetTerm = null;
+        if (!facetTerms.isEmpty()) {
+            if (facetTerms.size() == 1) {
+                facetTerm = facetTerms.get(0);
+            } else {
+                Iterator<SearchTerm<?>> it = facetTerms.iterator();
+                SearchTerm<?> t1 = it.next();
+                SearchTerm<?> t2 = it.next();
+                CatenatingTerm finalTerm = catenationFor(OP.AND, t1, t2);
+                while (it.hasNext()) {
+                    CatenatingTerm newTerm = catenationFor(OP.AND, finalTerm.getSecondTerm(), it.next());
+                    finalTerm.setSecondTerm(newTerm);
+                }
+                facetTerm = finalTerm;
+            }
+        }
+
         SearchTerm<?> searchTerm = null;
-        if (filterTerm == null || queryTerm == null) {
-            if (filterTerm != null) {
-                searchTerm = filterTerm;
+        if (facetTerm == null || queryTerm == null) {
+            if (facetTerm != null) {
+                searchTerm = facetTerm;
             } else {
                 searchTerm = queryTerm;
             }
         } else {
-            searchTerm = new ANDTerm(queryTerm, filterTerm);
+            searchTerm = new ANDTerm(queryTerm, facetTerm);
         }
 
         return searchTerm;
@@ -364,32 +425,48 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             return null;
         }
 
-        return termFor(fields, queries, OP.AND, folder.isSent());
+        return termFor(fields, queries, OP.OR, OP.AND, folder.isSent());
     }
 
-    private static SearchTerm<?> prepareFilterTerm(MailFolder folder, List<Filter> filters) throws OXException {
+    private static SearchTerm<?> prepareTermForFacet(SearchRequest searchRequest, FacetType type, MailFolder folder, OP filterOP, OP fieldOP, OP queryOP) throws OXException {
+        List<ActiveFacet> facets = searchRequest.getActiveFacets(type);
+        if (facets != null && !facets.isEmpty()) {
+            List<Filter> filters = new LinkedList<Filter>();
+            for (ActiveFacet facet : facets) {
+                Filter filter = facet.getFilter();
+                if (filter != Filter.NO_FILTER) {
+                    filters.add(filter);
+                }
+            }
+
+            return prepareFilterTerm(folder, filters, filterOP, fieldOP, queryOP);
+        }
+
+        return null;
+    }
+
+    private static SearchTerm<?> prepareFilterTerm(MailFolder folder, List<Filter> filters, OP filterOP, OP fieldOP, OP queryOP) throws OXException {
         if (filters == null || filters.isEmpty()) {
             return null;
         }
 
-        OP queryOperator = OP.OR;
         if (filters.size() == 1) {
-            return termFor(filters.get(0), queryOperator, folder.isSent());
+            return termFor(filters.get(0), fieldOP, queryOP, folder.isSent());
         }
 
         Iterator<Filter> it = filters.iterator();
         Filter f1 = it.next();
         Filter f2 = it.next();
-        ANDTerm finalTerm = new ANDTerm(termFor(f1, queryOperator, folder.isSent()), termFor(f2, queryOperator, folder.isSent()));
+        CatenatingTerm finalTerm = catenationFor(filterOP, termFor(f1, fieldOP, queryOP, folder.isSent()), termFor(f2, fieldOP, queryOP, folder.isSent()));
         while (it.hasNext()) {
-            ANDTerm newTerm = new ANDTerm(finalTerm.getSecondTerm(), termFor(it.next(), queryOperator, folder.isSent()));
+            CatenatingTerm newTerm = catenationFor(filterOP, finalTerm.getSecondTerm(), termFor(it.next(), fieldOP, queryOP, folder.isSent()));
             finalTerm.setSecondTerm(newTerm);
         }
 
         return finalTerm;
     }
 
-    private static SearchTerm<?> termFor(Filter filter, OP queryOperator, boolean isOutgoingFolder) throws OXException {
+    private static SearchTerm<?> termFor(Filter filter, OP fieldOP, OP queryOP, boolean isOutgoingFolder) throws OXException {
         List<String> fields = filter.getFields();
         if (fields == null || fields.isEmpty()) {
             throw FindExceptionCode.INVALID_FILTER_NO_FIELDS.create(filter);
@@ -400,36 +477,36 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             throw FindExceptionCode.INVALID_FILTER_NO_QUERIES.create(filter);
         }
 
-        return termFor(fields, queries, queryOperator, isOutgoingFolder);
+        return termFor(fields, queries, fieldOP, queryOP, isOutgoingFolder);
     }
 
-    private static SearchTerm<?> termFor(List<String> fields, List<String> queries, OP queryOperator, boolean isOutgoingFolder) throws OXException {
+    private static SearchTerm<?> termFor(List<String> fields, List<String> queries, OP fieldOP, OP queryOP, boolean isOutgoingFolder) throws OXException {
         if (fields.size() > 1) {
             Iterator<String> it = fields.iterator();
             String f1 = it.next();
             String f2 = it.next();
-            CatenatingTerm finalTerm = catenationFor(OP.OR, termForField(f1, queries, queryOperator, isOutgoingFolder), termForField(f2, queries, queryOperator, isOutgoingFolder));
+            CatenatingTerm finalTerm = catenationFor(fieldOP, termForField(f1, queries, queryOP, isOutgoingFolder), termForField(f2, queries, queryOP, isOutgoingFolder));
             while (it.hasNext()) {
                 String f = it.next();
-                CatenatingTerm newTerm = catenationFor(OP.OR, finalTerm.getSecondTerm(), termForField(f, queries, queryOperator, isOutgoingFolder));
+                CatenatingTerm newTerm = catenationFor(fieldOP, finalTerm.getSecondTerm(), termForField(f, queries, queryOP, isOutgoingFolder));
                 finalTerm.setSecondTerm(newTerm);
             }
 
             return finalTerm;
         }
 
-        return termForField(fields.iterator().next(), queries, queryOperator, isOutgoingFolder);
+        return termForField(fields.iterator().next(), queries, queryOP, isOutgoingFolder);
     }
 
-    private static SearchTerm<?> termForField(String field, List<String> queries, OP queryOperator, boolean isOutgoingFolder) throws OXException {
+    private static SearchTerm<?> termForField(String field, List<String> queries, OP queryOP, boolean isOutgoingFolder) throws OXException {
         if (queries.size() > 1) {
             Iterator<String> it = queries.iterator();
             String q1 = it.next();
             String q2 = it.next();
-            CatenatingTerm finalTerm = catenationFor(queryOperator, termForQuery(field, q1, isOutgoingFolder), termForQuery(field, q2, isOutgoingFolder));
+            CatenatingTerm finalTerm = catenationFor(queryOP, termForQuery(field, q1, isOutgoingFolder), termForQuery(field, q2, isOutgoingFolder));
             while (it.hasNext()) {
                 String q = it.next();
-                CatenatingTerm newTerm = catenationFor(queryOperator, finalTerm.getSecondTerm(), termForQuery(field, q, isOutgoingFolder));
+                CatenatingTerm newTerm = catenationFor(queryOP, finalTerm.getSecondTerm(), termForQuery(field, q, isOutgoingFolder));
                 finalTerm.setSecondTerm(newTerm);
             }
 
@@ -454,7 +531,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             return new SubjectTerm(query);
         } else if (FIELD_BODY.equals(field)) {
             return new BodyTerm(query);
-        } else if (TimeFacet.FILTER_FIELD.equals(field)) {
+        } else if (FIELD_TIME.equals(field)) {
             Pair<Comparison, Long> parsed = parseTimeQuery(query);
             Comparison comparison = parsed.getFirst();
             Long timestamp = parsed.getSecond();
@@ -511,21 +588,21 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private static Pair<Comparison, Long> parseTimeQuery(String query) throws OXException {
         if (Strings.isEmpty(query)) {
-            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, TimeFacet.FILTER_FIELD);
+            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, FIELD_TIME);
         }
 
         Comparison comparison;
         long timestamp;
         Calendar cal = new GregorianCalendar(TimeZones.UTC);
-        if (TimeFacet.LAST_WEEK.equals(query)) {
+        if (QUERY_LAST_WEEK.equals(query)) {
             cal.add(Calendar.WEEK_OF_YEAR, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
-        } else if (TimeFacet.LAST_MONTH.equals(query)) {
+        } else if (QUERY_LAST_MONTH.equals(query)) {
             cal.add(Calendar.MONTH, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
-        } else if (TimeFacet.LAST_YEAR.equals(query)) {
+        } else if (QUERY_LAST_YEAR.equals(query)) {
             cal.add(Calendar.YEAR, -1);
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
@@ -575,7 +652,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             try {
                 timestamp = Long.parseLong(sTimestamp);
             } catch (NumberFormatException e) {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, TimeFacet.FILTER_FIELD);
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, FIELD_TIME);
             }
         }
 

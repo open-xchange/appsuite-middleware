@@ -80,12 +80,4 @@ public final class CommonStrings implements LocalizableStrings {
 
     public static final String FOLDER_TYPE_SHARED = "Shared";
 
-    public static final String FOLDER_TYPE_EXTERNAL = "External";
-
-    // ------------------------- i18n strings for contact types ------------------------------------- //
-
-    public static final String CONTACT_TYPE_CONTACT = "Contact";
-
-    public static final String CONTACT_TYPE_DISTRIBUTION_LIST = "Distribution List";
-
 }

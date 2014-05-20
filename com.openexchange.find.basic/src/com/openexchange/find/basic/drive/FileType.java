@@ -47,66 +47,50 @@
  *
  */
 
-package com.openexchange.find.drive;
-
-import com.openexchange.find.facet.DefaultDisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
+package com.openexchange.find.basic.drive;
 
 
 /**
- * {@link FileDisplayItem}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public class FileDisplayItem extends DefaultDisplayItem {
-
-    public static enum Type {
-
-        FILENAME("file_name"),
-
-        DESCRIPTION("file_description"),
-
-        CONTENT("file_content");
-
-        private String identifier;
-
-        private Type(String identifier) {
-            this.identifier = identifier;
-        }
-
-        public String getIdentifier() {
-            return identifier;
-        }
-    }
-
-    private final Type type;
-    private final String displayName;
+public enum FileType {
 
     /**
-     * Initializes a new {@link FileDisplayItem}.
+     * Image types.
      */
-    public FileDisplayItem(Type type, String displayName) {
-        super();
-        this.type = type;
-        this.displayName = displayName;
+    IMAGES("image"),
+    /**
+     * Audio types.
+     */
+    AUDIO("audio"),
+    /**
+     * Video files.
+     */
+    VIDEO("video"),
+    /**
+     * Document files.
+     */
+    DOCUMENTS("text"),
+    /**
+     * Other file types.
+     */
+    OTHER("other"),
+    ;
+
+    private final String identifier;
+
+    private FileType(final String identifier) {
+        this.identifier = identifier;
     }
 
-    @Override
-    public String getDefaultValue() {
-        return displayName;
-    }
-
-    @Override
-    public Type getItem() {
-        return type;
-    }
-
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        if (null != visitor) {
-            visitor.visit(this);
-        }
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getIdentifier() {
+        return identifier;
     }
 
 }

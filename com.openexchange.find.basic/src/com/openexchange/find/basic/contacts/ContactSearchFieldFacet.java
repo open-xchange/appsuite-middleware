@@ -73,7 +73,7 @@ public abstract class ContactSearchFieldFacet extends SimpleFacet {
      * @param query The query to insert into the filter
      */
     protected ContactSearchFieldFacet(ContactsFacetType type, DisplayItem displayItem, List<String> queries) {
-        super(type, displayItem, Filter.with(type.getId(), queries));
+        super(type, displayItem, Filter.of(type.getId(), queries));
     }
 
     /**
