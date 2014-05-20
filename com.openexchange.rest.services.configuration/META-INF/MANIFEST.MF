@@ -16,4 +16,4 @@ Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.rest.services.osgiservice,
  com.openexchange.server,
  org.json,
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework
