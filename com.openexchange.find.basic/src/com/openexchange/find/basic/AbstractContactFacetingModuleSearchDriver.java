@@ -181,6 +181,29 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
     }
 
     /**
+     * Returns all mail addresses of a {@link Contact}.
+     */
+    protected static List<String> extractMailAddessesFrom(final Contact contact) {
+        List<String> addrs = new ArrayList<String>(3);
+        String mailAddress = contact.getEmail1();
+        if (mailAddress != null) {
+            addrs.add(mailAddress);
+        }
+
+        mailAddress = contact.getEmail2();
+        if (mailAddress != null) {
+            addrs.add(mailAddress);
+        }
+
+        mailAddress = contact.getEmail3();
+        if (mailAddress != null) {
+            addrs.add(mailAddress);
+        }
+
+        return addrs;
+    }
+
+    /**
      * Performs a contact search by prefix.
      *
      * @param session The server session

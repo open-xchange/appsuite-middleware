@@ -50,9 +50,9 @@
 package com.openexchange.find.basic.drive;
 
 import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
-import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
+import static com.openexchange.find.basic.drive.Utils.prepareSearchTerm;
+import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,7 +64,6 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.search.AndTerm;
 import com.openexchange.file.storage.search.DescriptionTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.OrTerm;
@@ -78,17 +77,16 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.FormattableDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.drive.FileDocument;
-import com.openexchange.find.drive.FileTypeDisplayItem;
-import com.openexchange.find.facet.ExclusiveFacet;
+import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Facets;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.SimpleFacet;
+import com.openexchange.find.facet.SimpleDisplayItem;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -130,7 +128,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    protected Set<Integer> getSupportedFolderTypes() {
+    protected Set<FolderType> getSupportedFolderTypes() {
         return FOLDER_TYPE_NOT_SUPPORTED;
     }
 
@@ -145,7 +143,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
 
         // Yield search term from search request
-        SearchTerm<?> term = prepareSearchTerm(searchRequest.getQueries(), searchRequest.getFilters());
+        SearchTerm<?> term = prepareSearchTerm(searchRequest);
         if (term == null) {
             term = new TitleTerm("*", true, true);
         }
@@ -192,46 +190,50 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
         if (!prefix.isEmpty()) {
             List<String> prefixTokens = tokenize(prefix);
-            // Add simple factes
-            {
-                final Facet globalFacet = new SimpleFacet(
-                    CommonFacetType.GLOBAL,
-                    new FormattableDisplayItem(DriveStrings.FACET_GLOBAL, prefix),
-                    Filter.with(CommonFacetType.GLOBAL.getId(), prefixTokens));
-                facets.add(globalFacet);
-            }
-            {
-                final Facet fileNameFacet = new SimpleFacet(
-                    DriveFacetType.FILE_NAME,
-                    new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix),
-                    Filter.with(Constants.FIELD_FILE_NAME, prefixTokens));
-                facets.add(fileNameFacet);
-            }
-            {
-                final Facet fileDescFacet = new SimpleFacet(
-                    DriveFacetType.FILE_DESCRIPTION, new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix),
-                    Filter.with(Constants.FIELD_FILE_DESC, prefixTokens));
-                facets.add(fileDescFacet);
-            }
-            {
-                final Facet fileContentFacet = new SimpleFacet(
-                    DriveFacetType.FILE_CONTENT,
-                    new FormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix),
-                    Filter.with(Constants.FIELD_FILE_CONTENT, prefixTokens));
-                facets.add(fileContentFacet);
-            }
+            // Add simple facets
+            facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
+                .withFormattableDisplayItem(DriveStrings.FACET_GLOBAL, prefix)
+                .withFilter(Filter.of(Constants.FIELD_GLOBAL, prefixTokens))
+                .build());
+            facets.add(newSimpleBuilder(DriveFacetType.FILE_NAME)
+                .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix)
+                .withFilter(Filter.of(Constants.FIELD_FILE_NAME, prefixTokens))
+                .build());
+            facets.add(newSimpleBuilder(DriveFacetType.FILE_DESCRIPTION)
+                .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix)
+                .withFilter(Filter.of(Constants.FIELD_FILE_DESC, prefixTokens))
+                .build());
+            facets.add(newSimpleBuilder(DriveFacetType.FILE_CONTENT)
+                .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix)
+                .withFilter(Filter.of(Constants.FIELD_FILE_CONTENT, prefixTokens))
+                .build());
         }
         // Add static file type facet
         {
-            final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
             final String fieldFileType = Constants.FIELD_FILE_TYPE;
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.AUDIO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_AUDIO, FileTypeDisplayItem.Type.AUDIO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS, FileTypeDisplayItem.Type.DOCUMENTS), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.IMAGES.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_IMAGES, FileTypeDisplayItem.Type.IMAGES), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.IMAGES.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.OTHER.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_OTHER, FileTypeDisplayItem.Type.OTHER), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.OTHER.getIdentifier())));
-            fileTypes.add(new FacetValue(FileTypeDisplayItem.Type.VIDEO.getIdentifier(), new FileTypeDisplayItem(DriveStrings.FILE_TYPE_VIDEO, FileTypeDisplayItem.Type.VIDEO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(fieldFileType), FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
-            final Facet folderTypeFacet = new ExclusiveFacet(DriveFacetType.FILE_TYPE, fileTypes);
-            facets.add(folderTypeFacet);
+            final DefaultFacet fileTypeFacet = Facets.newExclusiveBuilder(DriveFacetType.FILE_TYPE)
+                .addValue(FacetValue.newBuilder(FileType.AUDIO.getIdentifier())
+                    .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_AUDIO)
+                    .withFilter(Filter.of(fieldFileType, FileType.AUDIO.getIdentifier()))
+                    .build())
+                .addValue(FacetValue.newBuilder(FileType.DOCUMENTS.getIdentifier())
+                    .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS)
+                    .withFilter(Filter.of(fieldFileType, FileType.DOCUMENTS.getIdentifier()))
+                    .build())
+                .addValue(FacetValue.newBuilder(FileType.IMAGES.getIdentifier())
+                    .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_IMAGES)
+                    .withFilter(Filter.of(fieldFileType, FileType.IMAGES.getIdentifier()))
+                    .build())
+                .addValue(FacetValue.newBuilder(FileType.OTHER.getIdentifier())
+                    .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_OTHER)
+                    .withFilter(Filter.of(fieldFileType, FileType.OTHER.getIdentifier()))
+                    .build())
+                .addValue(FacetValue.newBuilder(FileType.VIDEO.getIdentifier())
+                    .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_VIDEO)
+                    .withFilter(Filter.of(fieldFileType, FileType.VIDEO.getIdentifier()))
+                    .build())
+                .build();
+            facets.add(fileTypeFacet);
         }
 
         return new AutocompleteResult(facets);
@@ -240,40 +242,6 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     @Override
     public Module getModule() {
         return Module.DRIVE;
-    }
-
-    private static SearchTerm<?> prepareSearchTerm(final List<String> queries, final List<Filter> filters) throws OXException {
-        final SearchTerm<?> queryTerm = prepareQueryTerm(queries);
-        final SearchTerm<?> filterTerm = prepareFilterTerm(filters);
-        if (filterTerm == null || queryTerm == null) {
-            return (filterTerm == null) ? queryTerm : filterTerm;
-        }
-        return new AndTerm(Arrays.<SearchTerm<?>> asList(queryTerm, filterTerm));
-    }
-
-    private static SearchTerm<?> prepareQueryTerm(final List<String> queries) throws OXException {
-        if (queries == null || queries.isEmpty()) {
-            return null;
-        }
-
-        return Utils.termFor(QUERY_FIELDS, queries);
-    }
-
-    private static SearchTerm<?> prepareFilterTerm(final List<Filter> filters) throws OXException {
-        if (filters == null || filters.isEmpty()) {
-            return null;
-        }
-
-        final int size = filters.size();
-        if (size == 1) {
-            return Utils.termFor(filters.get(0));
-        }
-
-        final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(size);
-        for (final Filter filter : filters) {
-            terms.add(Utils.termFor(filter));
-        }
-        return new AndTerm(terms);
     }
 
     private List<FacetValue> getAutocompleteFiles(ServerSession session, AutocompleteRequest request) throws OXException {

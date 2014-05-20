@@ -88,4 +88,8 @@ public class ContactsStrings implements LocalizableStrings {
     // The 'user input' part is always prepended, please heed this in translations.
     public static final String FACET_ADDRESS = "in addresses";
 
+    public static final String CONTACT_TYPE_CONTACT = "Contact";
+
+    public static final String CONTACT_TYPE_DISTRIBUTION_LIST = "Distribution List";
+
 }

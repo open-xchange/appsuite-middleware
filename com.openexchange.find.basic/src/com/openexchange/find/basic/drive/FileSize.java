@@ -47,97 +47,25 @@
  *
  */
 
-package com.openexchange.find.drive;
-
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
+package com.openexchange.find.basic.drive;
 
 /**
- * The display item for folder type; either <i>private</i>, <i>public</i>, <i>shared</i> or <i>external</i>.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class FileTypeDisplayItem implements DisplayItem {
+public enum FileSize {
+    MB1("> 1MB"),
+    MB10("> 10MB"),
+    MB100("> 100MB"),
+    GB1("> 1GB");
 
-    /**
-     * The file type enumeration.
-     */
-    public static enum Type {
+    private String size;
 
-        /**
-         * Image types.
-         */
-        IMAGES("image"),
-        /**
-         * Audio types.
-         */
-        AUDIO("audio"),
-        /**
-         * Video files.
-         */
-        VIDEO("video"),
-        /**
-         * Document files.
-         */
-        DOCUMENTS("text"),
-        /**
-         * Other file types.
-         */
-        OTHER("other"),
-        ;
-
-        private final String identifier;
-
-        private Type(final String identifier) {
-            this.identifier = identifier;
-        }
-
-        /**
-         * Gets the identifier
-         *
-         * @return The identifier
-         */
-        public String getIdentifier() {
-            return identifier;
-        }
-
+    private FileSize(String size) {
+        this.size = size;
     }
 
-    // ----------------------------------------------------------------------------- //
-
-    private final Type type;
-    private final String displayName;
-
-    /**
-     * Initializes a new {@link FileTypeDisplayItem}.
-     *
-     * @param type The folder type associated with this display item
-     */
-    public FileTypeDisplayItem(final String displayName, final Type type) {
-        super();
-        this.displayName = displayName;
-        this.type = type;
+    public String getSize() {
+        return size;
     }
-
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public Type getItem() {
-        return type;
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return displayName;
-    }
-
-    @Override
-    public boolean isLocalizable() {
-        return true;
-    }
-
 }

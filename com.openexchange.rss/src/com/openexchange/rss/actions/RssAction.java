@@ -139,6 +139,8 @@ public class RssAction implements AJAXActionService {
                 for (final URL url : urls) {
                     try {
                         feeds.add(fetcher.retrieveFeed(url));
+                    } catch (final java.net.SocketTimeoutException e) {
+                        throw RssExceptionCodes.TIMEOUT_ERROR.create(e, url.toString());
                     } catch (final ParsingFeedException parsingException) {
                         final OXException oxe = RssExceptionCodes.INVALID_RSS.create(parsingException, url.toString());
                         if (1 == urls.size()) {

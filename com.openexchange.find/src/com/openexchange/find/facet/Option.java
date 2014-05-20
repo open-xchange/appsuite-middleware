@@ -47,82 +47,73 @@
  *
  */
 
-package com.openexchange.find.tasks;
+package com.openexchange.find.facet;
 
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
-import com.openexchange.groupware.tasks.Task;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 
 /**
- * The display item for task status types; either <i>Not started</i>, <i>In Progress</i>, <i>Done</i>, <i>Waiting</i> or <i>Deferred</i>.
- *
- * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class TaskStatusDisplayItem implements DisplayItem {
+public class Option {
+
+    private final String id;
+
+    private final DisplayItem displayItem;
+
+    private final Filter filter;
 
     /**
-     * The task status type enumeration.
+     * Convenience method that takes a localizable string to construct an according
+     * {@link SimpleDisplayItem}.
+     * @param id
+     *   The unique id of this option within a {@link FacetValue}.
+     * @param localizableDisplayName
+     *   The localizable display name of this option (shown within a client).
+     * @param filter
+     *   The filter.
      */
-    public static enum Type {
-
-        NOT_STARTED(Task.NOT_STARTED),
-        IN_PROGRESS(Task.IN_PROGRESS),
-        DONE(Task.DONE),
-        WAITING(Task.WAITING),
-        DEFERRED(Task.DEFERRED),
-        ;
-
-        private final String identifier;
-
-        private Type(final int identifier) {
-            this.identifier = Integer.toString(identifier);
-        }
-
-        /**
-         * Gets the identifier
-         *
-         * @return The identifier
-         */
-        public String getIdentifier() {
-            return identifier;
-        }
+    public static Option newInstance(String id, String localizableDisplayName, Filter filter) {
+        SimpleDisplayItem displayItem = new SimpleDisplayItem(localizableDisplayName, true);
+        checkNotNull(id);
+        checkNotNull(displayItem);
+        checkNotNull(filter);
+        return new Option(id, displayItem, filter);
     }
 
-    // ----------------------------------------------------------------------------- //
-
-    private final Type type;
-    private final String displayName;
-
     /**
-     * Initializes a new {@link TaskStatusDisplayItem}.
-     *
-     * @param type The Task status type associated with this display item
+     * @param id
+     *   The unique id of this option within a {@link FacetValue}.
+     * @param displayItem
+     *   The display item of this option (shown within a client).
+     * @param filter
+     *   The filter.
      */
-    public TaskStatusDisplayItem(final String displayName, final Type type) {
+    public static Option newInstance(String id, DisplayItem displayItem, Filter filter) {
+        checkNotNull(id);
+        checkNotNull(displayItem);
+        checkNotNull(filter);
+        return new Option(id, displayItem, filter);
+    }
+
+    private Option(String id, DisplayItem displayItem, Filter filter) {
         super();
-        this.displayName = displayName;
-        this.type = type;
+        this.id = id;
+        this.displayItem = displayItem;
+        this.filter = filter;
     }
 
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
+    public String getId() {
+        return id;
     }
 
-    @Override
-    public Type getItem() {
-        return type;
+    public DisplayItem getDisplayItem() {
+        return displayItem;
     }
 
-    @Override
-    public String getDefaultValue() {
-        return displayName;
-    }
-
-    @Override
-    public boolean isLocalizable() {
-        return true;
+    public Filter getFilter() {
+        return filter;
     }
 
 }

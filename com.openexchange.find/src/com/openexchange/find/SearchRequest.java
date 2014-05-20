@@ -57,11 +57,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.groupware.container.FolderObject;
 
 /**
  * Encapsulates a search request.
@@ -183,24 +182,21 @@ public class SearchRequest extends AbstractFindRequest {
 
     /**
      * Gets the folder type set via a present facet of type {@link CommonFacetType#FOLDER_TYPE}.
-     * @return The folder type as specified in {@link FolderObject} or <code>-1</code>.
+     * @return The folder type as specified in {@link FolderType} or <code>null</code>.
      */
-    public int getFolderType() throws OXException {
+    public FolderType getFolderType() throws OXException {
         List<ActiveFacet> facets = facetMap.get(CommonFacetType.FOLDER_TYPE);
         if (facets == null || facets.isEmpty()) {
-            return -1;
+            return null;
         }
 
-        String type = facets.get(0).getValueId();
-        if (FolderTypeDisplayItem.Type.PRIVATE.getIdentifier().equals(type)) {
-            return FolderObject.PRIVATE;
-        } else if (FolderTypeDisplayItem.Type.PUBLIC.getIdentifier().equals(type)) {
-            return FolderObject.PUBLIC;
-        } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(type)) {
-            return FolderObject.SHARED;
-        } else {
-            throw FindExceptionCode.INVALID_FOLDER_TYPE.create(type == null ? "null" : type);
+        String identifier = facets.get(0).getValueId();
+        FolderType type = FolderType.getByIdentifier(identifier);
+        if (type == null) {
+            throw FindExceptionCode.INVALID_FOLDER_TYPE.create(identifier == null ? "null" : identifier);
         }
+
+        return type;
     }
 
     /**

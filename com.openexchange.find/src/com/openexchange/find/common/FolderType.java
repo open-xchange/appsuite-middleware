@@ -47,23 +47,69 @@
  *
  */
 
-package com.openexchange.find.mail;
+package com.openexchange.find.common;
 
-import com.openexchange.find.common.FormattableDisplayItem;
-import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.SimpleFacet;
-
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * The folder type enumeration.
  */
-public class SubjectFacet extends SimpleFacet {
+public enum FolderType {
 
-    private static final long serialVersionUID = 1893571237024869725L;
+    /**
+     * The type denoting private folders.
+     */
+    PRIVATE("private", FolderObject.PRIVATE),
+    /**
+     * The type denoting public folders.
+     */
+    PUBLIC("public", FolderObject.PUBLIC),
+    /**
+     * The type denoting shared folders.
+     */
+    SHARED("shared", FolderObject.SHARED)
+    ;
 
-    public SubjectFacet(String subject, Filter filter) {
-        super(MailFacetType.SUBJECT, new FormattableDisplayItem(MailStrings.FACET_SUBJECT, subject), filter);
+    private static final Map<String, FolderType> typesById = new HashMap<String, FolderType>(3);
+    static {
+        for (FolderType type : values()) {
+            typesById.put(type.getIdentifier(), type);
+        }
     }
 
+    private final String identifier;
+
+    private final int intId;
+
+    private FolderType(final String identifier, final int intId) {
+        this.identifier = identifier;
+        this.intId = intId;
+    }
+
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    /**
+     * Gets the identifier as specified in {@link FolderObject}.
+     */
+    public int getIntIdentifier() {
+        return intId;
+    }
+
+    /**
+     * Gets the type by its identifier.
+     *
+     * @return The type or <code>null</code> if unknown.
+     */
+    public static FolderType getByIdentifier(String identifier) {
+        return typesById.get(identifier);
+    }
 }

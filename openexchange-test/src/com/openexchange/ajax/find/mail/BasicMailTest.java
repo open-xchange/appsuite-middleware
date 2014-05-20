@@ -136,7 +136,7 @@ public class BasicMailTest extends AbstractFindTest {
         /*
          * Set own contact as activeFacet
          */
-        ActiveFacet activeFacet = createActiveFacet(MailFacetType.CONTACTS, found.getId(), found.getFilters().get(0));
+        ActiveFacet activeFacet = createActiveFacet(MailFacetType.CONTACTS, found.getId(), found.getOptions().get(0).getFilter());
         facets = autocomplete(prefix, Collections.singletonList(activeFacet));
         found = detectContact(facets);
         assertNull("Own contact should've been missing in response", found);
@@ -339,7 +339,7 @@ public class BasicMailTest extends AbstractFindTest {
         FacetValue last = values.get(values.size() - 1);
         assertEquals("Prefix item is at wrong position in result set", prefix, last.getId());
 
-        facets = autocomplete(prefix, Collections.singletonList(new ActiveFacet(MailFacetType.CONTACTS, values.get(0).getId(), values.get(0).getFilters().get(0))));
+        facets = autocomplete(prefix, Collections.singletonList(new ActiveFacet(MailFacetType.CONTACTS, values.get(0).getId(), values.get(0).getOptions().get(0).getFilter())));
         facet = findByType(MailFacetType.CONTACTS, facets);
         assertNotNull("Contacts facet not found", facet);
         values = ((DefaultFacet) facet).getValues();

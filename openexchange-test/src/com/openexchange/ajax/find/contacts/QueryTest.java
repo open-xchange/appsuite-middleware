@@ -65,7 +65,7 @@ import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.SimpleFacet;
@@ -99,7 +99,7 @@ public class QueryTest extends ContactsFindTest {
         facets.add(applyMatchingFacet(EMAIL, contact, randomUID() + "@example.org", "email", EMAIL_COLUMNS, true));
         facets.add(applyMatchingFacet(GLOBAL, contact, randomUID(), "address_book", ADDRESSBOOK_COLUMNS, true));
         facets.add(createActiveFieldFacet(CONTACT_TYPE, "contact_type", "contact"));
-        facets.add(createFolderTypeFacet(FolderTypeDisplayItem.Type.PRIVATE));
+        facets.add(createFolderTypeFacet(FolderType.PRIVATE));
         contact = manager.newAction(contact);
         assertFoundDocumentInSearch(facets, contact.getEmail1());
     }
@@ -147,12 +147,12 @@ public class QueryTest extends ContactsFindTest {
 
     public void testFilterFolderType() throws Exception {
         Contact contact = manager.newAction(randomContact());
-        List<PropDocument> privateFolderDocuments = query(Collections.singletonList(createFolderTypeFacet(FolderTypeDisplayItem.Type.PRIVATE)));
+        List<PropDocument> privateFolderDocuments = query(Collections.singletonList(createFolderTypeFacet(FolderType.PRIVATE)));
         assertTrue("no contacts found", 0 < privateFolderDocuments.size());
         assertNotNull("contact not found", findByProperty(privateFolderDocuments, "email1", contact.getEmail1()));
-        List<PropDocument> sharedFolderDocuments = query(Collections.singletonList(createFolderTypeFacet(FolderTypeDisplayItem.Type.SHARED)));
+        List<PropDocument> sharedFolderDocuments = query(Collections.singletonList(createFolderTypeFacet(FolderType.SHARED)));
         assertNull("contact found", findByProperty(sharedFolderDocuments, "email1", contact.getEmail1()));
-        List<PropDocument> publicFolderDocuments = query(Collections.singletonList(createFolderTypeFacet(FolderTypeDisplayItem.Type.PUBLIC)));
+        List<PropDocument> publicFolderDocuments = query(Collections.singletonList(createFolderTypeFacet(FolderType.PUBLIC)));
         assertNull("contact found", findByProperty(publicFolderDocuments, "email1", contact.getEmail1()));
         assertNotNull("user contact not found", findByProperty(publicFolderDocuments, "email1", client.getValues().getDefaultAddress()));
     }

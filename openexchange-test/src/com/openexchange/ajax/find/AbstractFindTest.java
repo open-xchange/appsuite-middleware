@@ -64,7 +64,7 @@ import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.DisplayItem;
@@ -316,7 +316,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         return null;
     }
 
-    protected static ActiveFacet createFolderTypeFacet(FolderTypeDisplayItem.Type type) {
+    protected static ActiveFacet createFolderTypeFacet(FolderType type) {
         return createActiveFacet(
             CommonFacetType.FOLDER_TYPE,
             type.getIdentifier(),

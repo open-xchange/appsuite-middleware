@@ -72,6 +72,10 @@ public class ExclusiveFacet extends DefaultFacet {
         super(type, values);
     }
 
+    ExclusiveFacet() {
+        super();
+    }
+
     @Override
     public String getStyle() {
         return "exclusive";

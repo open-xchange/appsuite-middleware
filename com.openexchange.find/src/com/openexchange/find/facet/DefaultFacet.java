@@ -67,7 +67,7 @@ public class DefaultFacet extends AbstractFacet {
 
     private static final long serialVersionUID = 7955913533889391522L;
 
-    private final List<FacetValue> values;
+    private List<FacetValue> values;
 
     public DefaultFacet(final FacetType type) {
         super(type);
@@ -78,7 +78,22 @@ public class DefaultFacet extends AbstractFacet {
         super(type);
         checkNotNull(values);
         checkArgument(!values.isEmpty());
-        this.values = new LinkedList<FacetValue>(values);
+        setValues(new LinkedList<FacetValue>(values));
+    }
+
+    /**
+     * Only meant to be called by the builders in {@link Facet}.
+     */
+    DefaultFacet() {
+        super();
+        this.values = new LinkedList<FacetValue>();
+    }
+
+    /**
+     * Only meant to be called by the builders in {@link Facet}.
+     */
+    void setValues(List<FacetValue> values) {
+        this.values = values;
     }
 
     @Override

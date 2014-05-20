@@ -47,62 +47,53 @@
  *
  */
 
-package com.openexchange.find.drive;
+package com.openexchange.find.facet;
 
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
+import com.openexchange.i18n.I18nService;
 
 
 /**
- * {@link FileSizeDisplayItem}
+ * A {@link DisplayItem} containing only a (possibly localizable) default value.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.0
  */
-public class FileSizeDisplayItem implements DisplayItem {
+public class SimpleDisplayItem implements DisplayItem {
 
-    public static enum Size {
-        MB1("> 1MB"),
-        MB10("> 10MB"),
-        MB100("> 100MB"),
-        GB1("> 1GB");
+    private final String defaultValue;
 
-        private String size;
-
-        private Size(String size) {
-            this.size = size;
-        }
-
-        public String getSize() {
-            return size;
-        }
-    }
-
-    private String displayName;
-    private Size size;
+    private final boolean isLocalizable;
 
     /**
-     * Initializes a new {@link FileSizeDisplayItem}.
+     * Initializes a new {@link SimpleDisplayItem} that
+     * is not localizable.
+     *
+     * @param defaultValue The default value
      */
-    public FileSizeDisplayItem(String displayName, Size size) {
+    public SimpleDisplayItem(final String defaultValue) {
+        this(defaultValue, false);
+    }
+
+    /**
+     * Initializes a new {@link SimpleDisplayItem}.
+     *
+     * @param defaultValue The default value
+     * @param isLocalizable If the default value can be localized via {@link I18nService}.
+     */
+    public SimpleDisplayItem(final String defaultValue, final boolean isLocalizable) {
         super();
-        this.displayName = displayName;
-        this.size = size;
+        this.defaultValue = defaultValue;
+        this.isLocalizable = isLocalizable;
     }
 
     @Override
     public String getDefaultValue() {
-        return displayName;
+        return defaultValue;
     }
 
     @Override
     public boolean isLocalizable() {
-        return false;
-    }
-
-    @Override
-    public Object getItem() {
-        return size;
+        return isLocalizable;
     }
 
     @Override
@@ -110,4 +101,41 @@ public class FileSizeDisplayItem implements DisplayItem {
         visitor.visit(this);
     }
 
+    @Override
+    public String getItem() {
+        return defaultValue;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
+        result = prime * result + ((isLocalizable) ? 1 : 0);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SimpleDisplayItem other = (SimpleDisplayItem) obj;
+        if (defaultValue == null) {
+            if (other.defaultValue != null)
+                return false;
+        } else if (!defaultValue.equals(other.defaultValue))
+            return false;
+        if (isLocalizable != other.isLocalizable)
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleDisplayItem [defaultValue=" + defaultValue + ", isLocalizable=" + isLocalizable + "]";
+    }
 }

@@ -47,53 +47,32 @@
  *
  */
 
-package com.openexchange.find.mail;
-
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.facet.ExclusiveFacet;
-import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.Filter;
+package com.openexchange.find.basic.tasks;
 
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class TimeFacet extends ExclusiveFacet {
+public enum TaskType {
 
-    private static final long serialVersionUID = -8066952323635426860L;
+    SINGLE_TASK("single_task"),
+    SERIES("series"),
+    ;
 
-    public final static String FILTER_FIELD = "time";
+    private final String identifier;
 
-    public final static String LAST_WEEK = "last_week";
-
-    public final static String LAST_MONTH = "last_month";
-
-    public final static String LAST_YEAR = "last_year";
-
-    private static List<FacetValue> DEFAULT_VALUES = new ArrayList<FacetValue>(3);
-    static {
-        DEFAULT_VALUES.add(new FacetValue(
-            LAST_WEEK,
-            new SimpleDisplayItem(MailStrings.LAST_WEEK, true),
-            FacetValue.UNKNOWN_COUNT,
-            Filter.with(FILTER_FIELD, LAST_WEEK)));
-        DEFAULT_VALUES.add(new FacetValue(
-            LAST_MONTH,
-            new SimpleDisplayItem(MailStrings.LAST_MONTH, true),
-            FacetValue.UNKNOWN_COUNT,
-            Filter.with(FILTER_FIELD, LAST_MONTH)));
-        DEFAULT_VALUES.add(new FacetValue(
-            LAST_YEAR,
-            new SimpleDisplayItem(MailStrings.LAST_YEAR, true),
-            FacetValue.UNKNOWN_COUNT,
-            Filter.with(FILTER_FIELD, LAST_YEAR)));
+    private TaskType(final String identifier) {
+        this.identifier = identifier;
     }
 
-    public TimeFacet() {
-        super(MailFacetType.TIME, DEFAULT_VALUES);
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getIdentifier() {
+        return identifier;
     }
 
 }
