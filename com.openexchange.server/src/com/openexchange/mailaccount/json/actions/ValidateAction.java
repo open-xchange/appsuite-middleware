@@ -187,6 +187,10 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
      * @throws OXException If an severe error occurs
      */
     public static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session, final boolean ignoreInvalidTransport, final List<OXException> warnings) throws OXException {
+        // Check for primary account
+        if (MailAccount.DEFAULT_ID == accountDescription.getId()) {
+            return Boolean.TRUE;
+        }
         // Validate mail server
         boolean validated = checkMailServerURL(accountDescription, session, warnings);
         // Failed?
