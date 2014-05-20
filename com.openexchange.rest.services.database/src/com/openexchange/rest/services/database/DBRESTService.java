@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.services.database;
 
+import static com.openexchange.java.util.NativeBuilders.map;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -56,7 +57,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -81,26 +81,26 @@ import com.openexchange.rest.services.database.transactions.Transaction;
 import com.openexchange.rest.services.database.transactions.TransactionKeeper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
-import static com.openexchange.java.util.NativeBuilders.*;
+
 /**
  * The {@link DBRESTService} exposes database access via an HTTP API. See doc/README.md for all the details.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 @ROOT("/database/v1")
 public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
-    
+
     private static final int MAX_ROWS = 1000;
     private static final int QUERY_LIMIT = 100;
-    
+
     private Connection con = null;
     private Transaction tx = null;
-    
+
     private ConnectionPostProcessor postProcessor = null;
 
-    private List<Statement> statements = new LinkedList<Statement>();
-    private List<ResultSet> resultSets = new LinkedList<ResultSet>();
-    
+    private final List<Statement> statements = new LinkedList<Statement>();
+    private final List<ResultSet> resultSets = new LinkedList<ResultSet>();
+
     private AccessType accessType = null;
     private Integer ctxId = null;
     private boolean skipVersionNegotiation = false;
@@ -109,7 +109,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
     private boolean success = false;
     private BeforeHandler beforeHandler = null;
     private MonitoredMetadata monitoredMetadata;
-    
+
     @PUT("/configdb/readOnly")
     public void queryConfigDB() throws OXException {
         returnConnectionWhenDone(AccessType.READ);
@@ -128,7 +128,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
     public void queryOXDB(int ctxId) throws OXException {
         returnConnectionWhenDone(AccessType.READ, ctxId);
         con = dbService().getReadOnly(ctxId);
-        
+
         perform();
     }
 
@@ -136,10 +136,10 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
     public void updateOXDB(int ctxId) throws OXException {
         returnConnectionWhenDone(AccessType.WRITE, ctxId);
         con = dbService().getWritable(ctxId);
-        
+
         perform();
     }
-    
+
     @PUT("/pool/r/:readId/w/:writeId/:schema/readOnly")
     public void queryInMonitoredConnection(int readId, int writeId, String schema) throws OXException {
         queryInMonitoredConnection(readId, writeId, schema, 0);
@@ -152,9 +152,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
 
     @PUT("/pool/r/:readId/w/:writeId/:schema/:partitionId/readOnly")
     public void queryInMonitoredConnection(int readId, int writeId, String schema, int partitionId) throws OXException {
-        returnMonitoredConnectionWhenDone(AccessType.READ, readId, writeId, schema, partitionId);   
+        returnMonitoredConnectionWhenDone(AccessType.READ, readId, writeId, schema, partitionId);
         con = dbService().getReadOnlyMonitored(readId, writeId, schema, partitionId);
-        
+
         perform();
     }
 
@@ -165,7 +165,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
 
         perform();
     }
-    
+
     @PUT("/transaction/:transactionId")
     public void queryTransaction(String txId) throws OXException {
         tx = context.transactions.getTransaction(txId);
@@ -173,9 +173,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             halt(404);
         }
         postProcessor = new TransactionCloser(tx);
-        
+
         con = tx.getConnection();
-        
+
         perform();
     }
 
@@ -202,7 +202,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             halt(404);
         }
         postProcessor = new TransactionCloser(tx);
-        
+
         try {
             context.transactions.commit(txId);
         } catch (SQLException e) {
@@ -210,28 +210,28 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         }
         unpackTransaction();
     }
-    
+
     @PUT("/migration/for/:ctxId/to/:toVersion/forModule/:module")
     public void initialMigration(int ctxId, String toVersion, String module) throws OXException {
         migrate(ctxId, "", toVersion, module);
     }
-    
+
     @PUT("/migration/for/:ctxId/from/:fromVersion/to/:toVersion/forModule/:module")
     public void migrate(int ctxId, final String fromVersion, final String toVersion, final String module) throws OXException {
         finishMigrationWhenDone(ctxId);
         con = services.getService(DatabaseService.class).getForUpdateTask(ctxId);
         migrationMetadata = new MigrationMetadata(ctxId, fromVersion, toVersion, module);
         skipVersionNegotiation = true;
-        
+
         boolean successfullyLocked = context.versions.lock(con, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
         if (!successfullyLocked) {
             services.getService(DatabaseService.class).backForUpdateTask(ctxId, con);
             postProcessor = null;
             halt(423); // LOCKED
         }
-        
+
         beforeHandler = new TrySchemaVersionUpdate(module, fromVersion, toVersion);
-        
+
         perform();
     }
     @PUT("/migration/for/pool/r/:readId/w/:writeId/:schema/to/:toVersion/forModule/:module")
@@ -243,7 +243,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
     public void migrateMonitored(int readPoolId, int writePoolId, String schema, int partitionId, String toVersion, String module) throws OXException {
         migrateMonitored(readPoolId, writePoolId, schema, partitionId, "", toVersion, module);
     }
-    
+
     @PUT("/migration/for/pool/r/:readId/w/:writeId/:schema/from/:fromVersion/to/:toVersion/forModule/:module")
     public void migrateMonitored(int readPoolId, int writePoolId, String schema, String fromVersion, String toVersion, String module) throws OXException {
         migrateMonitored(readPoolId, writePoolId, schema, 0, fromVersion, toVersion, module);
@@ -255,20 +255,20 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         con = services.getService(DatabaseService.class).getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId);
         migrationMetadata = new MigrationMetadata(fromVersion, toVersion, module);
         monitoredMetadata = new MonitoredMetadata(readPoolId, writePoolId, schema, partitionId);
-        
+
         skipVersionNegotiation = true;
-        
+
         boolean successfullyLocked = context.versions.lock(con, module, System.currentTimeMillis(), System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS));
         if (!successfullyLocked) {
             services.getService(DatabaseService.class).backForUpdateTask(ctxId, con);
             postProcessor = null;
             halt(423); // LOCKED
         }
-        
+
         beforeHandler = new TrySchemaVersionUpdate(module, fromVersion, toVersion);
-        
+
         perform();
-        
+
     }
 
     @GET("/unlock/for/:ctxId/andModule/:module")
@@ -287,7 +287,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
     public void unlockMonitored(int readPoolId, int writePoolId, String schema, String module) throws OXException {
         unlockMonitored(readPoolId, writePoolId, schema, 0, module);
     }
-    
+
     @GET("/unlock/pool/r/:readId/w/:writeId/:schema/:partitionId/andModule/:module")
     public void unlockMonitored(int readPoolId, int writePoolId, String schema, int partitionId, String module) throws OXException {
         DatabaseService dbs = services.getService(DatabaseService.class);
@@ -299,21 +299,21 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                 dbs.backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, con);
             }
         }
-        
+
     }
-    
+
     @GET("/init/w/:writeId/:schema")
     public void initSchema(int writePoolId, String schema) throws OXException {
         DatabaseService db = dbService();
         db.initMonitoringTables(writePoolId, schema);
         db.initPartitions(writePoolId, schema, 0);
-        
+
         Connection con = db.get(writePoolId, schema);
-        
+
         new CreateServiceSchemaVersionTable().perform(con);
         new CreateServiceSchemaLockTable().perform(con);
     }
-    
+
     @PUT("/pool/w/:writeId/:schema/partitions")
     public void insertPartitionIds(int writeId, String schema) throws OXException {
         try {
@@ -322,13 +322,13 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             for(int i = 0; i < partitionIds.length; i++) {
                 partitionIds[i] = arr.getInt(i);
             }
-            
+
             dbService().initPartitions(writeId, schema, partitionIds);
         } catch (JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
     }
-    
+
     @Override
     public void after() throws OXException {
         for(ResultSet rs: resultSets) {
@@ -346,14 +346,14 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         }
         super.after();
     }
-    
+
     // Common logic
 
     private void prepare() throws OXException {
         handleTransaction();
         handleVersionNegotiation();
     }
-    
+
     private void perform() throws OXException {
         prepare();
         try {
@@ -377,18 +377,18 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                 if (query.wantsResultSet()) {
                     ResultSet rs = stmt.executeQuery();
                     resultSets.add(rs);
-                    
+
                     Map<String, Object> result = new HashMap<String, Object>();
-                    
+
                     List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
-                    
+
                     int count = 0;
                     List<String> columns = new ArrayList<String>();
                     ResultSetMetaData metaData = rs.getMetaData();
                     for(int i = 1, size = metaData.getColumnCount(); i <= size; i++) {
                         columns.add(metaData.getColumnName(i));
                     }
-                    
+
                     while(rs.next() && count < MAX_ROWS) {
                         Map<String, Object> row = new HashMap<String, Object>();
                         for(String colName: columns) {
@@ -401,12 +401,12 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                         result.put("exceeded", true);
                     }
                     result.put("rows", rows);
-                    
+
                     results.put(question.getKey(), result);
                 } else {
                     int rows = stmt.executeUpdate();
                     MapBuilder<Object, Object> res = map().put("updated", rows);
-                    
+
                     if (query.wantsGeneratedKeys()) {
                         ResultSet rs = stmt.getGeneratedKeys();
                         this.resultSets.add(rs);
@@ -426,14 +426,14 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                 handleSQLException();
             }
         }
-        
+
         MapBuilder<Object, Object> response = map().put("results", results);
         if (tx != null) {
             response.put("tx", tx.getID());
         }
         respond(response.build());
     }
-    
+
     private void handleSQLException() {
         try {
             if (tx != null) {
@@ -485,12 +485,12 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                 }
             }
         } catch (JSONException x) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(x, x.getMessage());
         }
         return queries;
     }
 
-    
+
     private void handleTransaction() throws OXException {
         unpackTransaction();
         if (isSet("keepOpen") && param("keepOpen", boolean.class)) {
@@ -520,7 +520,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             }
         }
     }
-    
+
     private void unpackTransaction() {
         if (tx != null) {
             tx.extendLifetime();
@@ -534,7 +534,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                 accessType = (AccessType) tx.getParameter("accessType");
             }
             con = tx.getConnection();
-        }         
+        }
     }
 
     private void handleVersionNegotiation() throws OXException {
@@ -563,15 +563,15 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             halt(409);
         }
     }
-    
+
     private void beforeQueries() throws OXException, SQLException {
         if (beforeHandler != null) {
             beforeHandler.before();
         }
     }
-    
+
     // Utilities
-    
+
     private DatabaseService dbService() {
         return services.getService(DatabaseService.class);
     }
@@ -581,7 +581,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         public void done(Connection con) throws SQLException, OXException;
 
     }
-    
+
     private static interface BeforeHandler {
         public void before() throws OXException, SQLException;
     }
@@ -589,11 +589,11 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
      private static enum AccessType {
         READ, WRITE
     }
-     
+
     private void returnMonitoredConnectionWhenDone(final AccessType accessType, final int readId, final int writeId, final String schema, final int partitionId) {
         this.accessType = accessType;
         this.monitoredMetadata = new MonitoredMetadata(readId, writeId, schema, partitionId);
-        
+
         this.postProcessor = new ConnectionPostProcessor() {
 
             @Override
@@ -609,14 +609,14 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                     db.backWritableMonitored(readId, writeId, schema, partitionId, con);
                     break;
                 }
-            }            
+            }
         };
     }
 
     private void returnConnectionWhenDone(final AccessType accessType) {
         this.accessType = accessType;
         this.ctxId = null;
-        
+
         this.postProcessor = new ConnectionPostProcessor() {
 
             @Override
@@ -635,11 +635,11 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             }
         };
     }
-    
+
     private void returnConnectionWhenDone(final AccessType accessType, final int ctxId) {
         this.accessType = accessType;
         this.ctxId = ctxId;
-        
+
         this.postProcessor = new ConnectionPostProcessor() {
 
             @Override
@@ -656,13 +656,13 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                     break;
                 }
             }
-        };        
+        };
     }
-    
+
     private void finishMigrationWhenDone(final int ctxId) {
         this.ctxId = ctxId;
         this.accessType = AccessType.WRITE;
-        
+
         this.postProcessor = new ConnectionPostProcessor() {
 
             @Override
@@ -676,10 +676,10 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             }
         };
     }
-    
+
     private void finishMigrationWhenDone(final int readPoolId, final int writePoolId, final String schema, final int partitionId) {
         this.accessType = AccessType.WRITE;
-        
+
         this.postProcessor = new ConnectionPostProcessor() {
 
             @Override
@@ -694,14 +694,14 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         };
     }
 
-    
+
     private class TransactionCloser implements ConnectionPostProcessor {
-        private Transaction tx;
-        
+        private final Transaction tx;
+
         public TransactionCloser(Transaction tx) {
             this.tx = tx;
         }
-        
+
         @Override
         public void done(Connection con) throws SQLException, OXException {
             if (success) {
@@ -709,7 +709,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             }
             DatabaseService db = services.getService(DatabaseService.class);
             Integer ctxId = (Integer) tx.getParameter("ctxId");
-            
+
             if (migrationMetadata != null) {
                 if (success) {
                     con.commit();
@@ -717,7 +717,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                 con.setAutoCommit(true);
                 context.versions.unlock(con, migrationMetadata.module);
             }
-            
+
             if (monitoredMetadata != null) {
                 switch (accessType) {
                 case READ:
@@ -726,9 +726,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                 case WRITE:
                     if (migrationMetadata != null) {
                         db.backWritableMonitoredForUpdateTask(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
-                        
+
                     } else {
-                        db.backWritableMonitored(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);                        
+                        db.backWritableMonitored(monitoredMetadata.readId, monitoredMetadata.writeId, monitoredMetadata.schema, monitoredMetadata.partitionId, con);
                     }
                     break;
                 }
@@ -752,22 +752,22 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                 }
             }
         }
-        
+
     }
-    
+
     private static class Query {
-        private String query;
-        private List<Object> values;
+        private final String query;
+        private final List<Object> values;
         private boolean wantsResultSet = false;
         private boolean wantsGeneratedKeys = false;
-               
+
         public Query(String query, List<Object> values, boolean wantsResultSet, boolean wantsGeneratedKeys) {
             this.query = query;
             this.values = values;
             this.wantsResultSet = wantsResultSet;
             this.wantsGeneratedKeys = wantsGeneratedKeys;
         }
-        
+
         public boolean wantsGeneratedKeys() {
             return wantsGeneratedKeys;
         }
@@ -782,16 +782,16 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             }
             return stmt;
         }
-        
+
         public boolean wantsResultSet() {
             return wantsResultSet;
         }
     }
-    
+
     private static class MigrationMetadata {
         public int ctxId;
         public String fromVersion, toVersion, module;
-        
+
         public MigrationMetadata(String fromVersion, String toVersion, String module) {
             super();
             this.fromVersion = fromVersion;
@@ -807,7 +807,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
             this.module = module;
         }
     }
-    
+
     private static class MonitoredMetadata {
 
         public int readId;
@@ -816,7 +816,7 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         public int partitionId;
 
         public MonitoredMetadata(int readId, int writeId, String schema, int partitionId) {
-            this.readId = readId; 
+            this.readId = readId;
             this.writeId = writeId;
             this.schema = schema;
             this.partitionId = partitionId;
@@ -825,26 +825,26 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         public String getID() {
             return readId+":"+writeId+":"+schema;
         }
-        
+
     }
-    
+
     public static final class Environment {
         public TransactionKeeper transactions;
         public VersionChecker versions;
-        
+
         public Environment(TransactionKeeper transactions, VersionChecker versions) {
             this.transactions = transactions;
             this.versions = versions;
         }
-        
+
     }
-    
+
     private class TrySchemaVersionUpdate implements BeforeHandler {
 
-        private String module;
-        private String fromVersion;
-        private String toVersion;
-        
+        private final String module;
+        private final String fromVersion;
+        private final String toVersion;
+
         public TrySchemaVersionUpdate(String module, String fromVersion, String toVersion) {
             super();
             this.module = module;
@@ -864,9 +864,9 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
                 halt(409);
             }
         }
-        
+
     }
-    
+
 
 
 
