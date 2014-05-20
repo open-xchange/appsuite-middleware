@@ -98,6 +98,7 @@ public final class HtmlRESTActivator extends OXRESTActivator {
             @Override
             public void removedService(ServiceReference<HtmlService> reference, HtmlService service) {
                 unregisterWebService(HtmlRESTService.class);
+                context.ungetService(reference);
             }
         };
         track(HtmlService.class, customizer);
