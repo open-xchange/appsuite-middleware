@@ -112,6 +112,10 @@
 
  - Fix for bug 32226: Fixed regex used for look-up of referenced inline images
 
+* 2014-05-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31962: Properly detect EAS ping request in case of base64-encoded binary data in request's query string
+
 * 2014-05-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 32481: Ignore requests to LinkedIn JSON API if no LinkedIn OAuth account is available for associated user
