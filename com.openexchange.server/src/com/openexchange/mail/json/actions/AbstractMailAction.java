@@ -391,9 +391,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
          */
         int accountId;
         {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             final int user = session.getUserId();
             final int cid = session.getContextId();
             if (null == from) {
