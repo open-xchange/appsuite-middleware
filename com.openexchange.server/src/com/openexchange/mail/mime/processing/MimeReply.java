@@ -75,6 +75,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -121,6 +122,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -319,11 +321,28 @@ public final class MimeReply {
                 if (accountId == MailAccount.DEFAULT_ID) {
                     addUserAliases(fromCandidates, session, ctx);
                 } else {
-                    final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                    if (null == mass) {
-                        addUserAliases(fromCandidates, session, ctx);
+                    // Check for Unified Mail account
+                    ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+                    UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
+                    if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
+                        int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
+                        if (realAccountId == MailAccount.DEFAULT_ID) {
+                            addUserAliases(fromCandidates, session, ctx);
+                        } else {
+                            final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                            if (null == mass) {
+                                addUserAliases(fromCandidates, session, ctx);
+                            } else {
+                                fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                            }
+                        }
                     } else {
-                        fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                        final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                        if (null == mass) {
+                            addUserAliases(fromCandidates, session, ctx);
+                        } else {
+                            fromCandidates.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                        }
                     }
                 }
                 /*
@@ -1214,6 +1233,52 @@ public final class MimeReply {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    /**
+     * Resolves specified "from" address to associated account identifier
+     *
+     * @param session The session
+     * @param from The from addresses
+     * @return The account identifier
+     * @throws OXException If address cannot be resolved
+     */
+    private static int resolveFrom2Account(final Session session, final InternetAddress[] from) throws OXException {
+        if (null == from || from.length == 0) {
+            return MailAccount.DEFAULT_ID;
+        }
+        return resolveFrom2Account(session, from[0]);
+    }
+
+    /**
+     * Resolves specified "from" address to associated account identifier
+     *
+     * @param session The session
+     * @param from The from address
+     * @return The account identifier
+     * @throws OXException If address cannot be resolved
+     */
+    private static int resolveFrom2Account(final Session session, final InternetAddress from) throws OXException {
+        /*
+         * Resolve "From" to proper mail account to select right transport server
+         */
+        int accountId;
+        if (null == from) {
+            accountId = MailAccount.DEFAULT_ID;
+        } else {
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService( MailAccountStorageService.class);
+            final int user = session.getUserId();
+            final int cid = session.getContextId();
+            accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
+            if (accountId != -1) {
+                // Retry with IDN representation
+                accountId = storageService.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), user, cid);
+            }
+        }
+        if (accountId == -1) {
+            accountId = MailAccount.DEFAULT_ID;
+        }
+        return accountId;
     }
 
 }
