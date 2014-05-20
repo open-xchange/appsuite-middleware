@@ -729,6 +729,9 @@ public final class InternalList {
         // Adds (cid,changing_date) index to calendar tables if missing
         list.add(new com.openexchange.groupware.update.tasks.CalendarAddChangingDateIndexTask());
 
+        // Checks and drops obsolete tables possibly created for managing POP3 accounts
+        list.add(new com.openexchange.groupware.update.tasks.POP3CheckAndDropObsoleteTablesTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }
