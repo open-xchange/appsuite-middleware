@@ -107,7 +107,6 @@ public final class IMAPSort {
      * @throws MessagingException If sort attempt fails horribly
      */
     public static int[] sortMessages(final IMAPFolder imapFolder, final int[] filter, final MailSortField sortField, final OrderDirection orderDir, final IMAPConfig imapConfig) throws MessagingException {
-        final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             return new int[0];
@@ -116,6 +115,7 @@ public final class IMAPSort {
         if (imapConfig.isImapSort() || (imapConfig.getCapabilities().hasSort() && (size >= MailProperties.getInstance().getMailFetchLimit()))) {
             try {
                 // Get IMAP sort criteria
+                final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
                 final String sortCriteria = getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
                 if (null != sortCriteria) {
                     final int[] seqNums;
