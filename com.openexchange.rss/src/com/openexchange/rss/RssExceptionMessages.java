@@ -65,6 +65,9 @@ public final class RssExceptionMessages implements LocalizableStrings {
     // HTTP error %1$s while loading RSS feed from URL: %2$s.
     public static final String RSS_HTTP_ERROR_MSG = "HTTP error %1$s while loading RSS feed from URL: %2$s.";
 
+    // Timeout while reading the RSS feed from URL: %1$s
+    public static final String TIMEOUT_ERROR_MSG = "Timeout while reading the RSS feed from URL: %1$s";
+
     /**
      * Initializes a new {@link RssExceptionMessages}.
      */

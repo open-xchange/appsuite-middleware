@@ -78,6 +78,10 @@ public enum RssExceptionCodes implements DisplayableOXExceptionCode {
      * HTTP error %1$s while loading RSS feed from URL: %2$s.
      */
     RSS_HTTP_ERROR("HTTP error %1$s while loading RSS feed from URL: %2$s.", RssExceptionMessages.RSS_HTTP_ERROR_MSG, CATEGORY_SERVICE_DOWN, 4),
+    /**
+     * Timeout while reading the RSS feed from URL: %1$s
+     */
+    TIMEOUT_ERROR("Timeout while reading the RSS feed from URL: %1$s", RssExceptionMessages.TIMEOUT_ERROR_MSG, CATEGORY_SERVICE_DOWN, 5),
 
     ;
 
