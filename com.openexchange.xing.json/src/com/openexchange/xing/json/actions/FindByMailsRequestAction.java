@@ -28,7 +28,11 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
+<<<<<<< HEAD
  *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+=======
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+>>>>>>> fac75520a0f7fc37d75b906a18da6412b990fe5b
  *     Mail: info@open-xchange.com
  *
  *
@@ -70,15 +74,19 @@ import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link FindByMailsRequestAction}
- * 
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class FindByMailsRequestAction extends AbstractXingAction {
 
-    public FindByMailsRequestAction(ServiceLookup services) {
-        super(services);
-    }
+	/**
+	 * Initializes a new {@link FindByMailsRequestAction}.
+	 */
+	public FindByMailsRequestAction(ServiceLookup services) {
+		super(services);
+	}
 
+    @Override
     protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
         Object objData = req.getRequest().getData();
         if (objData == null) {
@@ -90,18 +98,20 @@ public class FindByMailsRequestAction extends AbstractXingAction {
         }
 
         JSONObject jsonData = (JSONObject) objData;
-        JSONArray jsonArray = (JSONArray) jsonData.optJSONArray("emails");
+        JSONArray jsonArray = jsonData.optJSONArray("emails");
         if(jsonArray == null) {
         	throw XingExceptionCodes.MANDATORY_REQUEST_DATA_MISSING.create("emails");
         }
 
-        List<String> emails = new ArrayList<String>();
 
-        for(int i=0; i<jsonArray.length(); i++){
+        int length = jsonArray.length();
+        List<String> emails = new ArrayList<String>(length);
+        for (int i = 0; i < length; i++) {
             String email = jsonArray.getString(i);
             email = validateMailAddress(email);
             emails.add(email);
         }
+
         String token = req.getParameter("testToken");
         String secret = req.getParameter("testSecret");
 
@@ -114,10 +124,15 @@ public class FindByMailsRequestAction extends AbstractXingAction {
             }
         }
 
-        XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-        Map<String, Object> xingUser = xingAPI.findByEmailsGetXingAttributes(emails);
-        final JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(xingUser);
+		XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
+		Map<String, Object> xingUser = xingAPI.findByEmailsGetXingAttributes(emails);
 
-        return new AJAXRequestResult(result);
-    }
+		if (null == xingUser || xingUser.isEmpty()) {
+		    return new AJAXRequestResult(new JSONObject(0));
+        }
+
+		final JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(xingUser);
+		return new AJAXRequestResult(result);
+	}
+
 }

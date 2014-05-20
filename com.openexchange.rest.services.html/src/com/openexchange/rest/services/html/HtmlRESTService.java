@@ -47,55 +47,58 @@
  *
  */
 
-package com.openexchange.rest.services.osgiservice;
+package com.openexchange.rest.services.html;
 
-import com.openexchange.osgi.HousekeepingActivator;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlService;
 import com.openexchange.rest.services.OXRESTService;
-import com.openexchange.rest.services.internal.OXRESTServiceFactory;
-
+import com.openexchange.rest.services.annotations.PUT;
+import com.openexchange.rest.services.annotations.ROOT;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * An {@link OXRESTActivator} knows how to publish OXRESTService implementations to the system.
+ * The {@link HtmlRESTService} allows clients to process HTML content.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
  */
-public abstract class OXRESTActivator extends HousekeepingActivator {
+@ROOT("/htmlproc/v1")
+public class HtmlRESTService extends OXRESTService<HtmlService>{
 
     /**
-     * Initializes a new {@link OXRESTActivator}.
+     * Initializes a new {@link HtmlRESTService}.
      */
-    protected OXRESTActivator() {
+    public HtmlRESTService() {
         super();
     }
 
     /**
-     * Registers specified REST web service.
+     * <pre>
+     * PUT /rest/htmlproc/v1/sanitize
+     * &lt;HTML-content&gt;
+     * </pre>
      *
-     * @param serviceClass The service's class
-     * @param context The associated context
+     * Retrieves the sanitized version of passed content.<br>
+     * Return an Object with a property to value mapping or a status 404 if a property is not set.
      */
-    protected <T> void registerWebService(Class<? extends OXRESTService<T>> serviceClass, T context) {
-        registerService(OXRESTServiceFactory.class, new IntrospectingServiceFactory<T>(serviceClass, this, context));
-    }
+    @PUT("/sanitize")
+    public Object getSanitizedHtmlContent() throws OXException {
+        Object data = request.getData();
+        if (data instanceof String) {
+            return context.sanitize((String)data, null, true, new boolean[1], null);
+        }
 
-    /**
-     * Registers specified REST web service.
-     *
-     * @param serviceClass The service's class
-     */
-    protected void registerWebService(Class<? extends OXRESTService<Void>> serviceClass) {
-        registerWebService(serviceClass, null);
-    }
+        if (data instanceof JSONObject) {
+            try {
+                final String sanitized = context.sanitize(((JSONObject) data).getString("content"), null, true, new boolean[1], null);
+                return new JSONObject(2).put("content", sanitized);
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
+        }
 
-    /**
-     * Un-registers specified REST web service.
-     *
-     * @param serviceClass The service's class
-     */
-    protected <T> void unregisterWebService(Class<? extends OXRESTService<T>> serviceClass) {
-        unregisterService(serviceClass);
+        throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
     }
 
 }

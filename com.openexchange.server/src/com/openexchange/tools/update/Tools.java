@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 
@@ -658,6 +659,29 @@ public final class Tools {
                 stmt.setObject(i++, arg);
             }
             stmt.execute();
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * Drops specified table.
+     *
+     * @param con The connection to use
+     * @param tableName The table name
+     * @throws SQLException If dropping columns fails
+     */
+    public static boolean dropTable(final Connection con, final String tableName) throws SQLException {
+        if (Strings.isEmpty(tableName)) {
+            return false;
+        }
+
+        final StringBuffer sql = new StringBuffer("DROP TABLE ").append(tableName);
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sql.toString());
+            return true;
         } finally {
             closeSQLStuff(stmt);
         }

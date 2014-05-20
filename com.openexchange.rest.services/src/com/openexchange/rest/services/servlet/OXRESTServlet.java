@@ -122,7 +122,7 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
 
             OXRESTServiceWrapper wrapper = retrieveWrapper(req.getMethod(), request.getPathInfo());
             if (wrapper == null) {
-                resp.sendError(404);
+                resp.sendError(404, "No such REST service or method match found");
                 return;
             }
 

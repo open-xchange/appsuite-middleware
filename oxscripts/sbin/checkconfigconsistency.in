@@ -74,7 +74,7 @@ warnPortOrServer() {
 
     if [ -n "$udpenabled" ] && [ "$udpenabled" == "true" ]; then
 	if [ -n "$tcpserver" ]; then
-	    warn "TcpServers is set and"
+	    warn "Warning: TcpServers is set and"
 	    warn "UdpDiscoveryEnabled is set to true"
 	    warn "in $cache"
 	    warn "either set UdpDiscoveryEnabled to false or uncomment TcpServers"
@@ -92,7 +92,7 @@ warnUdpIncomplete() {
 
     if [ -n "$udpenabled" ] && [ "$udpenabled" == "true" ]; then
 	if [ -z "$udpaddr" ] || [ -z "$udpport" ]; then
-	    warn "UdpDiscoveryEnabled is enabled, but"
+	    warn "Warning: UdpDiscoveryEnabled is enabled, but"
 	    warn "either UdpDiscoveryAddr or"
 	    warn "UdpDiscoveryPort is not set"
 	    warn "in $cache"
@@ -133,7 +133,7 @@ if [ -s $ADMINSYSTEMPROPS ]; then
     ADMINCACHECCFPATH=$(readProp com.openexchange.caching.configfile $ADMINSYSTEMPROPS)
     if [ -z "$ADMINCACHECCFPATH" ] || \
 	[ "$ADMINCACHECCFPATH" != "cache.ccf" ]; then
-	warn "com.openexchange.caching.configfile in $ADMINSYSTEMPROPS is either empty"
+	warn "Warning: com.openexchange.caching.configfile in $ADMINSYSTEMPROPS is either empty"
 	warn "or contains the wrong path."
 	warn "correct path must be cache.ccf"
     fi
@@ -151,7 +151,7 @@ if [ -s $ADMINCACHECCF ]; then
     warnUdpIncomplete "$ADMINUDPDISCENABLED" "$ADMINUDPDISCADDR" "$ADMINUDPPORT" "$ADMINCACHECCF"
 
     if [ "$ADMINUDPDISCENABLED" != "$SERVERUDPDISCENABLED" ];then
-	warn "UdpDiscoveryEnabled is not, but must equal in"
+	warn "Warning: UdpDiscoveryEnabled is not, but must equal in"
 	warn "$CACHECCF"
 	warn "and"
 	warn "$ADMINCACHECCF"
@@ -165,7 +165,7 @@ if [ -s $ADMINCACHECCF ]; then
 	    fi
 	done
 	if [ -z "$portfound" ]; then
-	    warn "TcpListenerPort in"
+	    warn "Warning: TcpListenerPort in"
 	    warn "$CACHECCF"
 	    warn "must be the same port as in"
 	    warn "TcpServers in"
@@ -181,7 +181,7 @@ if [ -s $ADMINCACHECCF ]; then
 	    fi
 	done
 	if [ -z "$portfound" ]; then
-	    warn "TcpListenerPort in"
+	    warn "Warning: TcpListenerPort in"
 	    warn "$ADMINCACHECCF"
 	    warn "must be the same port as in"
 	    warn "TcpServers in"
@@ -192,7 +192,7 @@ if [ -s $ADMINCACHECCF ]; then
 	fi
     else
 	if [ "$ADMINUDPDISCADDR" != "$SERVERUDPDISCADDR" ]; then
-	    warn "UdpDiscoveryAddr in"
+	    warn "Warning: UdpDiscoveryAddr in"
 	    warn "$ADMINCACHECCF"
 	    warn "is not, but must be the same address as in"
 	    warn "$CACHECCF"
@@ -201,7 +201,7 @@ if [ -s $ADMINCACHECCF ]; then
 	    echo
 	fi
 	if [ "$ADMINUDPPORT" != "$SERVERUDPPORT" ]; then
-	    warn "UdpDiscoveryPort in"
+	    warn "Warning: UdpDiscoveryPort in"
 	    warn "$ADMINCACHECCF"
 	    warn "is not, but must be the same port as in"
 	    warn "$CACHECCF"

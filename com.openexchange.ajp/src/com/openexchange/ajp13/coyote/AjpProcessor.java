@@ -77,6 +77,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.codec.binary.Base64;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
@@ -525,7 +526,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     @Override
     public boolean isLongRunning() {
-        return isEASPingCommand();
+        return isDriveRequest() || isEASPingCommand();
     }
 
     @Override
@@ -1250,14 +1251,55 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     private static final String EAS_PING = "Ping";
 
+    private static final int EAS_COMMAND_CODE_PING = 18;
+
     /**
      * Checks for long-running EAS ping command, that is URI is equal to <code>"/Microsoft-Server-ActiveSync"</code> and request's
      * <code>"Cmd"</code> parameter equals <code>"Ping"</code>.
      *
      * @return <code>true</code> if EAS ping command is detected; otherwise <code>false</code>
      */
-    private boolean isEASPingCommand() {
-        return EAS_URI.equals(request.getRequestURI()) && EAS_PING.equals(request.getParameter(EAS_CMD));
+    private final boolean isEASPingCommand() {
+        if (EAS_URI.equals(request.getRequestURI())) {
+            if (EAS_PING.equals(request.getParameter(EAS_CMD))) {
+                return true;
+            }
+
+            /*-
+             * Check for possibly EAS base64-encoded query string
+             *
+             * Second byte reflects EAS command
+             */
+            final byte[] bytes = getBase64Bytes(request.getQueryString());
+            if (null != bytes && bytes.length > 2 && EAS_COMMAND_CODE_PING == bytes[1]) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private final byte[] getBase64Bytes(final String queryString) {
+        if (Strings.isEmpty(queryString)) {
+            return null;
+        }
+
+        try {
+            final byte[] encodedBytes = Charsets.toAsciiBytes(queryString);
+            if (Base64.isBase64(encodedBytes)) {
+                return Base64.decodeBase64(encodedBytes);
+            }
+        } catch (final Exception e) {
+            LOG.warn("Could not check for EAS base64-encoded query string", e);
+        }
+
+        return null;
+    }
+
+    private static final String DRIVE_URI = "/ajax/drive";
+
+    private final boolean isDriveRequest() {
+        return DRIVE_URI.equals(request.getRequestURI());
     }
 
     /**
@@ -1438,8 +1480,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 request.setQueryString(queryString);
                 {
                     parseQueryString(queryString);
-                    if (isEASPingCommand()) {
-                        LOG.debug("Incoming long-running EAS ping request.");
+                    if (LOG.isDebugEnabled()) {
+                        if (isEASPingCommand()) {
+                            LOG.debug("Incoming long-running EAS ping request.");
+                        } else if (isDriveRequest()) {
+                            LOG.debug("Incoming long-running OX Drive request.");
+                        }
                     }
                 }
             }

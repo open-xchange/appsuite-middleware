@@ -312,7 +312,7 @@ public class XingAPI<S extends Session> {
     /**
      * Looks up a user and returns all attributes from XING.
      *
-     * @param emailAddress The E-Mail address to look-up
+     * @param emailAddresses The E-Mail addressed to look-up
      * @return The associated user attributes
      * @throws XingUnlinkedException If you have not set an access token pair on the session, or if the user has revoked access.
      * @throws XingServerException If the server responds with an error code. See the constants in {@link XingServerException} for the

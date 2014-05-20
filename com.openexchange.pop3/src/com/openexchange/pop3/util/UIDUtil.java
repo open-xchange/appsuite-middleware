@@ -49,16 +49,6 @@
 
 package com.openexchange.pop3.util;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.pop3.POP3ExceptionCode;
-import com.openexchange.session.Session;
 import com.planetj.math.rabinhash.RabinHashFunction64;
 
 /**
@@ -100,63 +90,6 @@ public final class UIDUtil {
             longs[i] = uid2long(uidls[i]);
         }
         return longs;
-    }
-
-    private static final String SELECT_UID = "SELECT uidl FROM user_pop3_data WHERE cid = ? AND user = ? AND uid = ?";
-
-    /**
-     * Gets the UIDL for specified UID value.
-     *
-     * @param uid The UID
-     * @param session The session
-     * @return The UIDL for specified UID value
-     * @throws OXException If UIDL look-up fails
-     */
-    public static String long2uid(final long uid, final Session session) throws OXException {
-        final int cid = session.getContextId();
-        final Connection con;
-        try {
-            con = Database.get(cid, false);
-        } catch (final OXException e) {
-            throw e;
-        }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement(SELECT_UID);
-            stmt.setLong(1, cid);
-            stmt.setLong(2, session.getUserId());
-            stmt.setLong(3, uid);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(uid), "INBOX");
-            }
-            return rs.getString(1);
-        } catch (final SQLException e) {
-            throw POP3ExceptionCode.SQL_ERROR.create(e.getMessage(), e);
-        } finally {
-            closeSQLStuff(rs, stmt);
-            Database.back(cid, false, con);
-        }
-    }
-
-    /**
-     * Gets the UIDLs for specified UID values.
-     *
-     * @param uids The UIDs
-     * @param session The session
-     * @return The UIDLs for specified UID values
-     * @throws OXException If UIDL look-up fails
-     */
-    public static String[] longs2uids(final long[] uids, final Session session) throws OXException {
-        if (null == uids) {
-            return null;
-        }
-        final String[] retval = new String[uids.length];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = long2uid(uids[i], session);
-        }
-        return retval;
     }
 
 }
