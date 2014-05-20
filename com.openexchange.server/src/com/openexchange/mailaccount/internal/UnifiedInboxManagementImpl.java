@@ -81,7 +81,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
 
     private static final String SQL_CHECK = "SELECT url FROM user_mail_account WHERE cid = ? AND user = ? AND name = ?";
 
-    private static final String SQL_ENABLED = "SELECT id FROM user_mail_account WHERE cid = ? AND user = ? AND unified_inbox > 0";
+    private static final String SQL_ENABLED = "SELECT 1 FROM user_mail_account WHERE cid = ? AND user = ? AND unified_inbox > 0";
 
     /**
      * Initializes a new {@link UnifiedInboxManagementImpl}.
