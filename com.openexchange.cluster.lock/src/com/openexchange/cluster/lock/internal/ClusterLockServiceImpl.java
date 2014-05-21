@@ -67,7 +67,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
     /**
      * Initializes a new {@link ClusterLockServiceImpl}.
      */
-    public ClusterLockServiceImpl(HazelcastInstance hazelcastInstance) {
+    public ClusterLockServiceImpl(final HazelcastInstance hazelcastInstance) {
         super();
         this.hazelcastInstance = hazelcastInstance;
     }
@@ -77,12 +77,12 @@ public class ClusterLockServiceImpl implements ClusterLockService {
      * @see com.openexchange.cluster.lock.ClusterLock#acquireClusterLock()
      */
     @Override
-    public Lock acquireClusterLock(String action) throws OXException {
-        ConcurrentMap<String, Lock> map = hazelcastInstance.getMap("SingleNodeClusterLocks");
+    public Lock acquireClusterLock(final String action) throws OXException {
+        final ConcurrentMap<String, Lock> map = hazelcastInstance.getMap("SingleNodeClusterLocks");
         if (map.get(action) != null) {
             throw ClusterLockExceptionCodes.CLUSTER_LOCKED.create(action);
         }
-        Lock lock = hazelcastInstance.getLock(action);
+        final Lock lock = hazelcastInstance.getLock(action);
         if (map.putIfAbsent(action, lock) != null) {
             throw ClusterLockExceptionCodes.CLUSTER_LOCKED.create(action);
         }
@@ -94,9 +94,9 @@ public class ClusterLockServiceImpl implements ClusterLockService {
      * @see com.openexchange.cluster.lock.ClusterLockService#releaseClusterLock(java.lang.String, java.util.concurrent.locks.Lock)
      */
     @Override
-    public void releaseClusterLock(String action, Lock lock) throws OXException {
-        ConcurrentMap<String, Lock> map = hazelcastInstance.getMap("SingleNodeClusterLocks");
-        Lock l = map.get(action);
+    public void releaseClusterLock(final String action, final Lock lock) throws OXException {
+        final ConcurrentMap<String, Lock> map = hazelcastInstance.getMap("SingleNodeClusterLocks");
+        final Lock l = map.get(action);
         if (lock.equals(l)) {
             map.remove(action);
         }
@@ -107,18 +107,19 @@ public class ClusterLockServiceImpl implements ClusterLockService {
      * @see com.openexchange.cluster.lock.ClusterLockService#acquirePeriodicClusterLock(java.lang.String, java.lang.Long)
      */
     @Override
-    public Lock acquirePeriodicClusterLock(String action, Long period) throws OXException {
-        Long now = System.currentTimeMillis();
-        ConcurrentMap<String, Long> map = hazelcastInstance.getMap("PeriodicClusterLocks");
-        Long timestamp = map.get(action);
+    public Lock acquirePeriodicClusterLock(final String action, final Long period) throws OXException {
+        final Long now = System.currentTimeMillis();
+        final ConcurrentMap<String, Long> map = hazelcastInstance.getMap("PeriodicClusterLocks");
+        final Long timestamp = map.get(action);
         if (timestamp != null) {
             if (now - timestamp < period) {
                 throw ClusterLockExceptionCodes.CLUSTER_PERIODIC_LOCKED.create(period, action, period - (now - timestamp));
             }
         }
-        Lock lock = hazelcastInstance.getLock(action);
-        if (map.putIfAbsent(action, now) != null) {
-            throw ClusterLockExceptionCodes.CLUSTER_PERIODIC_LOCKED.create(period, action, period - (now - timestamp));
+        final Lock lock = hazelcastInstance.getLock(action);
+        final Long futureTS = map.putIfAbsent(action, now);
+        if (futureTS != null) {
+            throw ClusterLockExceptionCodes.CLUSTER_PERIODIC_LOCKED.create(period, action, period - (now - futureTS));
         }
         return lock;
     }
