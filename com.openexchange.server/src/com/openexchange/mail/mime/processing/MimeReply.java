@@ -464,11 +464,28 @@ public final class MimeReply {
                 if (accountId == MailAccount.DEFAULT_ID) {
                     addUserAddresses(filter, mailSession, session, ctx);
                 } else {
-                    final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                    if (null == mass) {
-                        addUserAddresses(filter, mailSession, session, ctx);
+                    // Check for Unified Mail account
+                    ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+                    UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
+                    if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
+                        int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
+                        if (realAccountId == MailAccount.DEFAULT_ID) {
+                            addUserAliases(filter, session, ctx);
+                        } else {
+                            final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                            if (null == mass) {
+                                addUserAliases(filter, session, ctx);
+                            } else {
+                                filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                            }
+                        }
                     } else {
-                        filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                        final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                        if (null == mass) {
+                            addUserAliases(filter, session, ctx);
+                        } else {
+                            filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                        }
                     }
                 }
                 /*
