@@ -111,7 +111,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
     /**
      * @return a boolean value indicated if an auto login should proceed afterwards
      */
-    public boolean loginOperation(final HttpServletRequest req, final HttpServletResponse resp, final LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
+    protected boolean loginOperation(final HttpServletRequest req, final HttpServletResponse resp, final LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
         Tools.disableCaching(resp);
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
 
