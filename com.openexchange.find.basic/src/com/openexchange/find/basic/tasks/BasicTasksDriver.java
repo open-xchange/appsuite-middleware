@@ -137,7 +137,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         TaskSearchObject searchObject = new TaskSearchObjectBuilder(session)
             .addFilters(searchRequest.getFilters())
             .addQueries(searchRequest.getQueries())
-            .applyFolders(searchRequest.getFolderId(), searchRequest.getFolderType())
+            .applyFolders(searchRequest)
             .build();
         searchObject.setStart(searchRequest.getStart());
         searchObject.setSize(searchRequest.getSize());

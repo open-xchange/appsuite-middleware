@@ -398,6 +398,22 @@ public class TaskTestManager implements TestManager{
         return task;
     }
 
+    /**
+     * Constructs a new TestTask with the given title and time zone, parent folder created by and modified by already initialized
+     */
+    public TestTask newTask(String title, int parentFolder) throws OXException, IOException, SAXException, JSONException {
+        TestTask task = new TestTask();
+        task.setTitle(title);
+
+        UserValues values = getClient().getValues();
+        task.setTimezone(values.getTimeZone());
+        task.setParentFolderID(parentFolder);
+        task.setCreatedBy(values.getUserId());
+        task.setModifiedBy(values.getUserId());
+
+        return task;
+    }
+
     private void doHandleExeption(Exception exc, String action) {
         try {
             lastException = exc;

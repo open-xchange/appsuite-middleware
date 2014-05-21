@@ -57,7 +57,6 @@ import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_ACCEPTED
 import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_DECLINED;
 import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_NONE;
 import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_TENTATIVE;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -66,18 +65,10 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
-import com.openexchange.find.basic.Services;
+import com.openexchange.find.SearchRequest;
+import com.openexchange.find.basic.Folders;
 import com.openexchange.find.calendar.CalendarFacetType;
-import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.folderstorage.FolderResponse;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.type.PrivateType;
-import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.java.SearchStrings;
@@ -208,50 +199,16 @@ public class AppointmentSearchBuilder {
      * Applies folder IDs to the search, depending on the existence of a specific
      * folder ID or a folder type.
      *
-     * @param folderID The folder ID to apply, or <code>null</code> if not specified
-     * @param folderType The folder type for that all folder shall be applied. <code>null</code> if not specified.
+     * @param searchRequest
      * @return The builder
      * @throws OXException
      */
-    public AppointmentSearchBuilder applyFolders(String folderID, FolderType folderType) throws OXException {
-        final Set<Integer> folderIDs;
-        if (null == folderID) {
-            Type type = null;
-            if (FolderType.PRIVATE == folderType) {
-                type = PrivateType.getInstance();
-            } else if (FolderType.PUBLIC == folderType) {
-                type = PublicType.getInstance();
-            } else if (FolderType.SHARED == folderType) {
-                type = SharedType.getInstance();
-            }
-
-            if (type == null) {
-                folderIDs = null;
-            } else {
-                hasFolderFilter = true;
-                folderIDs = new HashSet<Integer>();
-                FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
-                    FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session, null);
-                UserizedFolder[] folders = visibleFolders.getResponse();
-                if (null != folders && 0 < folders.length) {
-                    for (UserizedFolder folder : folders) {
-                        try {
-                            folderIDs.add(Integer.valueOf(folder.getID()));
-                        } catch (NumberFormatException e) {
-                            throw FindExceptionCode.INVALID_FOLDER_ID.create(folder.getID(), Module.CALENDAR.getIdentifier());
-                        }
-                    }
-                }
-            }
-        } else {
-            try {
-                folderIDs = Collections.singleton(Integer.valueOf(folderID));
-            } catch (NumberFormatException e) {
-                throw FindExceptionCode.INVALID_FOLDER_ID.create(folderID, Module.CALENDAR.getIdentifier());
-            }
+    public AppointmentSearchBuilder applyFolders(SearchRequest searchRequest) throws OXException {
+        List<Integer> folderIDs = Folders.getIDs(searchRequest, Module.CALENDAR, session);
+        if (folderIDs != null && !folderIDs.isEmpty()) {
+            appointmentSearch.setFolderIDs(new HashSet<Integer>(folderIDs));
+            hasFolderFilter = true;
         }
-
-        appointmentSearch.setFolderIDs(folderIDs);
         return this;
     }
 

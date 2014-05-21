@@ -49,14 +49,15 @@
 
 package com.openexchange.find.basic.tasks;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
+import com.openexchange.find.Module;
+import com.openexchange.find.SearchRequest;
+import com.openexchange.find.basic.Folders;
 import com.openexchange.find.basic.Services;
-import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.folderstorage.FolderStorage;
@@ -181,35 +182,10 @@ public class TaskSearchObjectBuilder {
      * @return The builder
      * @throws OXException
      */
-    public TaskSearchObjectBuilder applyFolders(String folderID, FolderType folderType) throws OXException {
-        if (null == folderID) {
-            if (folderType == null) {
-                return this;
-            }
-
-            Type t = null;
-            if (FolderType.PUBLIC == folderType) {
-                t = PublicType.getInstance();
-            } else if (FolderType.SHARED == folderType) {
-                t = SharedType.getInstance();
-            } else if (FolderType.PRIVATE == folderType) {
-                t = PrivateType.getInstance();
-            }
-
-            if (t != null) {
-                UserizedFolder[] folders = Services.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, TaskContentType.getInstance(), t, false, session, null).getResponse();
-                if (folders != null && folders.length > 0) {
-                    for (UserizedFolder uf : folders) {
-                        searchObject.addFolder(Integer.valueOf(uf.getID()));
-                    }
-                }
-            }
-        } else {
-            try {
-                searchObject.setFolders(Collections.singletonList(Integer.valueOf(folderID)));
-            } catch (NumberFormatException e) {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(e, folderID, CommonFacetType.FOLDER.getId());
-            }
+    public TaskSearchObjectBuilder applyFolders(SearchRequest searchRequest) throws OXException {
+        List<Integer> folderIDs = Folders.getIDs(searchRequest, Module.TASKS, session);
+        if (folderIDs != null && !folderIDs.isEmpty()) {
+            searchObject.setFolders(folderIDs);
         }
         return this;
     }
