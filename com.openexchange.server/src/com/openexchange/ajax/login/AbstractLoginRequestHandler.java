@@ -281,8 +281,9 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             final Set<LoginRampUpService> rampUpServices = this.rampUpServices;
             if (rampUpServices != null) {
                 try {
+                    String client = session.getClient();
                     for (LoginRampUpService rampUpService : rampUpServices) {
-                        if (rampUpService.contributesTo(session.getClient())) {
+                        if (rampUpService.contributesTo(client)) {
                             JSONObject contribution = rampUpService.getContribution(session, AJAXRequestDataTools.getInstance().parseRequest(req, false, false, session, ""));
                             json.put("rampup", contribution);
                             break;
