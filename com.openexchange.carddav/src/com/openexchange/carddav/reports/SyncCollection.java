@@ -144,6 +144,6 @@ public class SyncCollection extends WebdavPropfindAction {
     }
 
     private String getSyncToken(WebdavRequest req, Document requestBody) throws WebdavProtocolException {
-    	return requestBody.getRootElement().getChildText("sync-token", DAV_NS);
+    	return null == requestBody ? null : requestBody.getRootElement().getChildText("sync-token", DAV_NS);
     }
 }

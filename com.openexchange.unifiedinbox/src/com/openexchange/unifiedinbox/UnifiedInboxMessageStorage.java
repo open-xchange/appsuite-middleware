@@ -927,7 +927,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
-        final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+        final MailSortField effectiveSortField = determineSortFieldForSearch(fullName, sortField);
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             final List<MailAccount> accounts = getAccounts();
             final MailFields mfs = new MailFields(fields);
@@ -996,13 +996,14 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 final MailMessage[] accountMails = mailAccess.getMessageStorage().searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields);
                                 final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                                 final UnifiedInboxUID helper = new UnifiedInboxUID();
+                                final String name = mailAccount.getName();
                                 for (final MailMessage accountMail : accountMails) {
                                     if (null != accountMail) {
                                         final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
                                         umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                         umm.setFolder(fullName);
                                         umm.setAccountId(accountId);
-                                        umm.setAccountName(mailAccount.getName());
+                                        umm.setAccountName(name);
                                         messages.add(umm);
                                     }
                                 }
@@ -1056,13 +1057,14 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             final MailMessage[] accountMails = mailAccess.getMessageStorage().searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields);
                             final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
                             final UnifiedInboxUID helper = new UnifiedInboxUID();
+                            final String name = mailAccount.getName();
                             for (final MailMessage accountMail : accountMails) {
                                 if (null != accountMail) {
                                     final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
                                     umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                     umm.setFolder(fullName);
                                     umm.setAccountId(accountId);
-                                    umm.setAccountName(mailAccount.getName());
+                                    umm.setAccountName(name);
                                     messages.add(umm);
                                 }
                             }
@@ -1136,6 +1138,26 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         } finally {
             closeSafe(mailAccess);
         }
+    }
+
+    private MailSortField determineSortFieldForSearch(final String fullName, final MailSortField requestedSortField) {
+        final MailSortField effectiveSortField;
+        if (null == requestedSortField) {
+            effectiveSortField = MailSortField.RECEIVED_DATE;
+        } else {
+            if (MailSortField.SENT_DATE.equals(requestedSortField)) {
+                final String draftsFullname = UnifiedInboxAccess.DRAFTS;
+                if (fullName.equals(draftsFullname)) {
+                    effectiveSortField = MailSortField.RECEIVED_DATE;
+                } else {
+                    effectiveSortField = requestedSortField;
+                }
+            } else {
+                effectiveSortField = requestedSortField;
+            }
+        }
+
+        return effectiveSortField;
     }
 
     @Override

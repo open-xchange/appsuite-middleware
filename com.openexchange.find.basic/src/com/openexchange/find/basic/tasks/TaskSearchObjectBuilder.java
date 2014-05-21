@@ -57,9 +57,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.tasks.TaskTypeDisplayItem;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -67,7 +66,6 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.tools.session.ServerSession;
 
@@ -179,18 +177,22 @@ public class TaskSearchObjectBuilder {
      * folder ID or a folder type.
      *
      * @param folderID The folder ID to apply, or <code>null</code> if not specified
-     * @param folderType The folder type for that all folder shall be applied. -1 if not specified.
+     * @param folderType The folder type for that all folder shall be applied; <code>null</code> if not specified.
      * @return The builder
      * @throws OXException
      */
-    public TaskSearchObjectBuilder applyFolders(String folderID, int folderType) throws OXException {
+    public TaskSearchObjectBuilder applyFolders(String folderID, FolderType folderType) throws OXException {
         if (null == folderID) {
+            if (folderType == null) {
+                return this;
+            }
+
             Type t = null;
-            if (FolderObject.PUBLIC == folderType) {
+            if (FolderType.PUBLIC == folderType) {
                 t = PublicType.getInstance();
-            } else if (FolderObject.SHARED == folderType) {
+            } else if (FolderType.SHARED == folderType) {
                 t = SharedType.getInstance();
-            } else if (FolderObject.PRIVATE == folderType) {
+            } else if (FolderType.PRIVATE == folderType) {
                 t = PrivateType.getInstance();
             }
 
@@ -282,11 +284,11 @@ public class TaskSearchObjectBuilder {
     private void addFolderTypeFilters(List<String> filters) throws OXException {
         for(String q : filters) {
             Type t;
-            if (FolderTypeDisplayItem.Type.PUBLIC.getIdentifier().equals(q)) {
+            if (FolderType.PUBLIC.getIdentifier().equals(q)) {
                 t = PublicType.getInstance();
-            } else if (FolderTypeDisplayItem.Type.SHARED.getIdentifier().equals(q)) {
+            } else if (FolderType.SHARED.getIdentifier().equals(q)) {
                 t = SharedType.getInstance();
-            } else if (FolderTypeDisplayItem.Type.PRIVATE.getIdentifier().equals(q)) {
+            } else if (FolderType.PRIVATE.getIdentifier().equals(q)) {
                 t = PrivateType.getInstance();
             } else {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(q, "folder_type");
@@ -321,9 +323,9 @@ public class TaskSearchObjectBuilder {
      */
     private void addRecurrenceTypeFilters(List<String> filters) throws OXException {
         for(String r : filters) {
-            if (TaskTypeDisplayItem.Type.SERIES.getIdentifier().equals(r))
+            if (TaskType.SERIES.getIdentifier().equals(r))
                 searchObject.setSeriesFilter(true);
-            else if(TaskTypeDisplayItem.Type.SINGLE_TASK.getIdentifier().equals(r))
+            else if(TaskType.SINGLE_TASK.getIdentifier().equals(r))
                 searchObject.setSingleOccurrenceFilter(true);
             else
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(r, "type");

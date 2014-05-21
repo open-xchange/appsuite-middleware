@@ -50,15 +50,6 @@
 package com.openexchange.find.facet;
 
 import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.ContactTypeDisplayItem;
-import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.FormattableDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.drive.FileDisplayItem;
-import com.openexchange.find.drive.FileSizeDisplayItem;
-import com.openexchange.find.drive.FileTypeDisplayItem;
-import com.openexchange.find.tasks.TaskStatusDisplayItem;
-import com.openexchange.find.tasks.TaskTypeDisplayItem;
 
 
 
@@ -74,21 +65,7 @@ public interface DisplayItemVisitor {
 
     void visit(SimpleDisplayItem item);
 
-    void visit(FolderTypeDisplayItem item);
-
-    void visit(FileTypeDisplayItem fileTypeDisplayItem);
-
-    void visit(TaskStatusDisplayItem item);
-
-    void visit(TaskTypeDisplayItem item);
-
-    void visit(ContactTypeDisplayItem contactTypeDisplayItem);
-
-    void visit(FileDisplayItem filenameDisplayItem);
-
     void visit(FormattableDisplayItem formattableDisplayItem);
-
-    void visit(FileSizeDisplayItem fileSizeDisplayItem);
 
     void visit(NoDisplayItem noDisplayItem);
 

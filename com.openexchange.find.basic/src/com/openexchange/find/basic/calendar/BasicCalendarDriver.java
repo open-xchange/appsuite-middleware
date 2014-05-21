@@ -49,6 +49,10 @@
 
 package com.openexchange.find.basic.calendar;
 
+import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
+import static com.openexchange.find.facet.Facets.newDefaultBuilder;
+import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
+import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -70,15 +74,12 @@ import com.openexchange.find.calendar.CalendarDocument;
 import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.calendar.CalendarFacetValues;
 import com.openexchange.find.calendar.CalendarStrings;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.FormattableDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.facet.DefaultFacet;
-import com.openexchange.find.facet.ExclusiveFacet;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -135,12 +136,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     @Override
-    protected String getFormatStringForGlobalFacet() {
-        return CalendarStrings.GLOBAL;
-    }
-
-    @Override
-    protected Set<Integer> getSupportedFolderTypes() {
+    protected Set<FolderType> getSupportedFolderTypes() {
         return ALL_FOLDER_TYPES;
     }
 
@@ -155,21 +151,38 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             /*
              * add prefix-aware field facets
              */
-            facets.add(new SimpleFacet(CalendarFacetType.SUBJECT, new FormattableDisplayItem(CalendarStrings.SUBJECT, prefix),
-                CalendarFacetType.SUBJECT.getId(), prefix));
-            facets.add(new SimpleFacet(CalendarFacetType.DESCRIPTION, new FormattableDisplayItem(CalendarStrings.DESCRIPTION, prefix),
-                CalendarFacetType.DESCRIPTION.getId(), prefix));
-            facets.add(new SimpleFacet(CalendarFacetType.LOCATION, new FormattableDisplayItem(CalendarStrings.LOCATION, prefix),
-                CalendarFacetType.LOCATION.getId(), prefix));
-            facets.add(new SimpleFacet(CalendarFacetType.ATTACHMENT_NAME, new FormattableDisplayItem(CalendarStrings.ATTACHMENT_NAME, prefix),
-                CalendarFacetType.ATTACHMENT_NAME.getId(), prefix));
+            List<String> prefixTokens = tokenize(prefix);
+            if (!prefixTokens.isEmpty()) {
+                facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
+                    .withFormattableDisplayItem(CalendarStrings.GLOBAL, prefix)
+                    .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
+                    .build());
+                facets.add(newSimpleBuilder(CalendarFacetType.SUBJECT)
+                    .withFormattableDisplayItem(CalendarStrings.SUBJECT, prefix)
+                    .withFilter(Filter.of(CalendarFacetType.SUBJECT.getId(), prefixTokens))
+                    .build());
+                facets.add(newSimpleBuilder(CalendarFacetType.DESCRIPTION)
+                    .withFormattableDisplayItem(CalendarStrings.DESCRIPTION, prefix)
+                    .withFilter(Filter.of(CalendarFacetType.DESCRIPTION.getId(), prefixTokens))
+                    .build());
+                facets.add(newSimpleBuilder(CalendarFacetType.LOCATION)
+                    .withFormattableDisplayItem(CalendarStrings.LOCATION, prefix)
+                    .withFilter(Filter.of(CalendarFacetType.LOCATION.getId(), prefixTokens))
+                    .build());
+                facets.add(newSimpleBuilder(CalendarFacetType.ATTACHMENT_NAME)
+                    .withFormattableDisplayItem(CalendarStrings.ATTACHMENT_NAME, prefix)
+                    .withFilter(Filter.of(CalendarFacetType.ATTACHMENT_NAME.getId(), prefixTokens))
+                    .build());
+            }
         }
         /*
          * add participants facet dynamically
          */
         List<FacetValue> participantValues = getParticipantValues(autocompleteRequest, session);
         if (null != participantValues && 0 < participantValues.size()) {
-            facets.add(new DefaultFacet(CalendarFacetType.PARTICIPANT, participantValues));
+            facets.add(newDefaultBuilder(CalendarFacetType.PARTICIPANT)
+                .withValues(participantValues)
+                .build());
         }
         /*
          * add other facets
@@ -181,13 +194,13 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     private static Facet getStatusFacet() {
-        List<FacetValue> statusValues = new ArrayList<FacetValue>();
         List<String> fields = Collections.singletonList(CalendarFacetType.STATUS.getId());
-        statusValues.add(buildStatusFacetValue(CalendarFacetValues.STATUS_ACCEPTED, CalendarStrings.STATUS_ACCEPTED, fields));
-        statusValues.add(buildStatusFacetValue(CalendarFacetValues.STATUS_DECLINED, CalendarStrings.STATUS_DECLINED, fields));
-        statusValues.add(buildStatusFacetValue(CalendarFacetValues.STATUS_TENTATIVE, CalendarStrings.STATUS_TENTATIVE, fields));
-        statusValues.add(buildStatusFacetValue(CalendarFacetValues.STATUS_NONE, CalendarStrings.STATUS_NONE, fields));
-        return new ExclusiveFacet(CalendarFacetType.STATUS, statusValues);
+        return newExclusiveBuilder(CalendarFacetType.STATUS)
+            .addValue(buildStatusFacetValue(CalendarFacetValues.STATUS_ACCEPTED, CalendarStrings.STATUS_ACCEPTED, fields))
+            .addValue(buildStatusFacetValue(CalendarFacetValues.STATUS_DECLINED, CalendarStrings.STATUS_DECLINED, fields))
+            .addValue(buildStatusFacetValue(CalendarFacetValues.STATUS_TENTATIVE, CalendarStrings.STATUS_TENTATIVE, fields))
+            .addValue(buildStatusFacetValue(CalendarFacetValues.STATUS_NONE, CalendarStrings.STATUS_NONE, fields))
+            .build();
     }
 
     private static FacetValue buildStatusFacetValue(String id, String displayName, List<String> filterFields) {
@@ -195,11 +208,11 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     private static Facet getRelativeDateFacet() {
-        List<FacetValue> dateValues = new ArrayList<FacetValue>();
         List<String> fields = Collections.singletonList(CalendarFacetType.RELATIVE_DATE.getId());
-        dateValues.add(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_COMING, CalendarStrings.RELATIVE_DATE_COMING, fields));
-        dateValues.add(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_PAST, CalendarStrings.RELATIVE_DATE_PAST, fields));
-        return new ExclusiveFacet(CalendarFacetType.RELATIVE_DATE, dateValues);
+        return newExclusiveBuilder(CalendarFacetType.RELATIVE_DATE)
+            .addValue(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_COMING, CalendarStrings.RELATIVE_DATE_COMING, fields))
+            .addValue(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_PAST, CalendarStrings.RELATIVE_DATE_PAST, fields))
+            .build();
     }
 
     private static FacetValue buildRelativeDateFacetValue(String id, String displayName, List<String> filterFields) {
@@ -207,11 +220,11 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     private static Facet getRecurringTypeFacet() {
-        List<FacetValue> recurringTypeValues = new ArrayList<FacetValue>();
         List<String> fields = Collections.singletonList(CalendarFacetType.RECURRING_TYPE.getId());
-        recurringTypeValues.add(buildRecurringTypeFacetValue(CalendarFacetValues.RECURRING_TYPE_SERIES, CalendarStrings.RECURRING_TYPE_SERIES, fields));
-        recurringTypeValues.add(buildRecurringTypeFacetValue(CalendarFacetValues.RECURRING_TYPE_SINGLE, CalendarStrings.RECURRING_TYPE_SINGLE, fields));
-        return new ExclusiveFacet(CalendarFacetType.RECURRING_TYPE, recurringTypeValues);
+        return newExclusiveBuilder(CalendarFacetType.RECURRING_TYPE)
+            .addValue(buildRecurringTypeFacetValue(CalendarFacetValues.RECURRING_TYPE_SERIES, CalendarStrings.RECURRING_TYPE_SERIES, fields))
+            .addValue(buildRecurringTypeFacetValue(CalendarFacetValues.RECURRING_TYPE_SINGLE, CalendarStrings.RECURRING_TYPE_SINGLE, fields))
+            .build();
     }
 
     private static FacetValue buildRecurringTypeFacetValue(String id, String displayName, List<String> filterFields) {
@@ -219,7 +232,10 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     private static FacetValue buildStaticFacetValue(String id, String displayName, List<String> filterFields, String filterQuery) {
-        return new FacetValue(id, new SimpleDisplayItem(displayName, true), FacetValue.UNKNOWN_COUNT, new Filter(filterFields, filterQuery));
+        return FacetValue.newBuilder(id)
+            .withLocalizableDisplayItem(displayName)
+            .withFilter(Filter.of(filterFields, filterQuery))
+            .build();
     }
 
     @Override
@@ -367,20 +383,22 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
                 /*
                  * build "users" filter for internal user
                  */
-                filter = new Filter(Collections.singletonList("users"), String.valueOf(contact.getInternalUserId()));
+                filter = Filter.of("users", String.valueOf(contact.getInternalUserId()));
             } else {
                 /*
                  * build "participants" filter for email addresses
                  */
                 Set<String> emailAddresses = extractEmailAddresses(contact);
                 if (null != emailAddresses && 0 < emailAddresses.size()) {
-                    filter = new Filter(Collections.singletonList("participants"), new ArrayList<String>(emailAddresses));
+                    filter = Filter.of("participants", new ArrayList<String>(emailAddresses));
                 }
             }
             if (null != filter) {
-                contactFacets.add(new FacetValue(
-                    prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID())),
-                    new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
+                String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
+                contactFacets.add(FacetValue.newBuilder(valueId)
+                    .withDisplayItem(new ContactDisplayItem(contact))
+                    .withFilter(filter)
+                    .build());
             }
         }
         return contactFacets;

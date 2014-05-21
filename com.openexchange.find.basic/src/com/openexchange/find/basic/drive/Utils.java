@@ -49,12 +49,15 @@
 
 package com.openexchange.find.basic.drive;
 
+import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
 import static com.openexchange.java.Strings.isEmpty;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +65,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.search.AndTerm;
 import com.openexchange.file.storage.search.ComparablePattern;
 import com.openexchange.file.storage.search.ComparisonType;
 import com.openexchange.file.storage.search.ContentTerm;
@@ -76,9 +80,11 @@ import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.search.TitleTerm;
 import com.openexchange.file.storage.search.VersionCommentTerm;
 import com.openexchange.find.FindExceptionCode;
+import com.openexchange.find.SearchRequest;
 import com.openexchange.find.basic.drive.BasicDriveDriver.Comparison;
 import com.openexchange.find.drive.DriveConstants;
-import com.openexchange.find.drive.FileTypeDisplayItem;
+import com.openexchange.find.drive.DriveFacetType;
+import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.java.Strings;
@@ -100,6 +106,96 @@ public final class Utils {
         super();
     }
 
+    public static enum OP {
+        AND, OR
+    }
+
+    public static SearchTerm<?> prepareSearchTerm(final SearchRequest searchRequest) throws OXException {
+        final List<SearchTerm<?>> facetTerms = new LinkedList<SearchTerm<?>>();
+        for (DriveFacetType type : DriveFacetType.values()) {
+            final List<ActiveFacet> facets = searchRequest.getActiveFacets(type);
+            if (facets != null && !facets.isEmpty()) {
+                final Pair<OP, OP> ops = operationsFor(type);
+                final List<Filter> filters = new LinkedList<Filter>();
+                for (final ActiveFacet facet : facets) {
+                    final Filter filter = facet.getFilter();
+                    if (filter != Filter.NO_FILTER) {
+                        filters.add(filter);
+                    }
+                }
+
+                facetTerms.add(prepareFilterTerm(filters, ops.getFirst(), ops.getSecond()));
+            }
+        }
+
+        final SearchTerm<?> queryTerm = prepareQueryTerm(searchRequest.getQueries());
+        SearchTerm<?> facetTerm = null;
+        if (!facetTerms.isEmpty()) {
+            if (facetTerms.size() == 1) {
+                facetTerm = facetTerms.get(0);
+            } else {
+                facetTerm = new AndTerm(facetTerms);
+            }
+        }
+
+        if (facetTerm == null || queryTerm == null) {
+            return (facetTerm == null) ? queryTerm : facetTerm;
+        }
+
+        return new AndTerm(Arrays.<SearchTerm<?>> asList(queryTerm, facetTerm));
+    }
+
+    public static Pair<OP, OP> operationsFor(DriveFacetType type) {
+        OP fieldOP = OP.OR;
+        OP queryOP = OP.OR;
+        switch (type) {
+            case FILE_NAME:
+                fieldOP = OP.OR;
+                queryOP = OP.AND;
+                break;
+
+            case FILE_DESCRIPTION:
+                fieldOP = OP.OR;
+                queryOP = OP.AND;
+                break;
+
+            case FILE_CONTENT:
+                fieldOP = OP.OR;
+                queryOP = OP.AND;
+                break;
+
+            default:
+                break;
+        }
+
+        return new Pair<OP, OP>(fieldOP, queryOP);
+    }
+
+    public static SearchTerm<?> prepareQueryTerm(final List<String> queries) throws OXException {
+        if (queries == null || queries.isEmpty()) {
+            return null;
+        }
+
+        return Utils.termFor(QUERY_FIELDS, queries, OP.OR, OP.AND);
+    }
+
+    public static SearchTerm<?> prepareFilterTerm(final List<Filter> filters, final OP fieldOP, final OP queryOP) throws OXException {
+        if (filters == null || filters.isEmpty()) {
+            return null;
+        }
+
+        final int size = filters.size();
+        if (size == 1) {
+            return Utils.termFor(filters.get(0), fieldOP, queryOP);
+        }
+
+        final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(size);
+        for (final Filter filter : filters) {
+            terms.add(Utils.termFor(filter, fieldOP, queryOP));
+        }
+        return new AndTerm(terms);
+    }
+
     /**
      * Gets the search term for given field and query
      *
@@ -118,6 +214,7 @@ public final class Utils {
             terms.add(new FileNameTerm(query));
             terms.add(new TitleTerm(query, true, true));
             terms.add(new DescriptionTerm(query, true, true));
+            terms.add(new VersionCommentTerm(query, true));
             return new OrTerm(terms);
         } else if (Constants.FIELD_FILE_NAME.equals(field)) {
             final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(2);
@@ -162,10 +259,11 @@ public final class Utils {
      *
      * @param field The field identifier
      * @param queries The queries
+     * @param queryOP The operation to concatenate multiple queries with
      * @return The appropriate search term or <code>null</code>
      * @throws OXException If field is unknown
      */
-    public static SearchTerm<?> termForField(final String field, final List<String> queries) throws OXException {
+    public static SearchTerm<?> termForField(final String field, final List<String> queries, final OP queryOP) throws OXException {
         final int size = queries.size();
         if (size > 1) {
             final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(size);
@@ -180,7 +278,11 @@ public final class Utils {
                 return null;
             }
 
-            return new OrTerm(terms);
+            if (queryOP == OP.OR) {
+                return new OrTerm(terms);
+            } else {
+                return new AndTerm(terms);
+            }
         }
 
         return termForQuery(field, queries.iterator().next());
@@ -191,15 +293,17 @@ public final class Utils {
      *
      * @param fields The field identifiers
      * @param queries The queries
+     * @param fieldOP The operation to concatenate multiple fields with
+     * @param queryOP The operation to concatenate multiple queries with
      * @return The appropriate search term or <code>null</code>
      * @throws OXException If a field is unknown
      */
-    public static SearchTerm<?> termFor(final List<String> fields, final List<String> queries) throws OXException {
+    public static SearchTerm<?> termFor(final List<String> fields, final List<String> queries, final OP fieldOP, final OP queryOP) throws OXException {
         final int size = fields.size();
         if (size > 1) {
             final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(size);
             for (final String field : fields) {
-                final SearchTerm<?> term = termForField(field, queries);
+                final SearchTerm<?> term = termForField(field, queries, queryOP);
                 if (null != term) {
                     terms.add(term);
                 }
@@ -209,20 +313,26 @@ public final class Utils {
                 return null;
             }
 
-            return new OrTerm(terms);
+            if (fieldOP == OP.OR) {
+                return new OrTerm(terms);
+            } else {
+                return new AndTerm(terms);
+            }
         }
 
-        return termForField(fields.iterator().next(), queries);
+        return termForField(fields.iterator().next(), queries, queryOP);
     }
 
     /**
      * Gets the search term for specified filter.
      *
      * @param filter The filter
+     * @param fieldOP The operation to concatenate multiple fields with
+     * @param queryOP The operation to concatenate multiple queries with
      * @return The appropriate search term or <code>null</code>
      * @throws OXException If filter is invalid
      */
-    public static SearchTerm<?> termFor(final Filter filter) throws OXException {
+    public static SearchTerm<?> termFor(final Filter filter, final OP fieldOP, final OP queryOP) throws OXException {
         if (null == filter) {
             return null;
         }
@@ -237,7 +347,7 @@ public final class Utils {
             throw FindExceptionCode.INVALID_FILTER_NO_QUERIES.create(filter);
         }
 
-        return termFor(fields, queries);
+        return termFor(fields, queries, fieldOP, queryOP);
     }
 
     public static File documentMetadata2File(final DocumentMetadata doc) {
@@ -721,15 +831,15 @@ public final class Utils {
      */
     private static SearchTerm<?> buildFileTypeTerm(String query) {
         String[] patterns;
-        if (FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier().equals(query)) {
+        if (FileType.DOCUMENTS.getIdentifier().equals(query)) {
             patterns = Constants.FILETYPE_PATTERNS_DOCUMENTS;
-        } else if (FileTypeDisplayItem.Type.IMAGES.getIdentifier().equals(query)) {
+        } else if (FileType.IMAGES.getIdentifier().equals(query)) {
             patterns = Constants.FILETYPE_PATTERNS_IMAGES;
-        } else if (FileTypeDisplayItem.Type.VIDEO.getIdentifier().equals(query)) {
+        } else if (FileType.VIDEO.getIdentifier().equals(query)) {
             patterns = Constants.FILETYPE_PATTERNS_VIDEO;
-        } else if (FileTypeDisplayItem.Type.AUDIO.getIdentifier().equals(query)) {
+        } else if (FileType.AUDIO.getIdentifier().equals(query)) {
             patterns = Constants.FILETYPE_PATTERNS_AUDIO;
-        } else if (FileTypeDisplayItem.Type.OTHER.getIdentifier().equals(query)) {
+        } else if (FileType.OTHER.getIdentifier().equals(query)) {
             // negate all other patterns
             String[][] patternsToNegate = {
                 Constants.FILETYPE_PATTERNS_DOCUMENTS,

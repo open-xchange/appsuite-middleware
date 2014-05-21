@@ -49,13 +49,13 @@
 
 package com.openexchange.find.json.converters;
 
+import static com.openexchange.ajax.AJAXUtility.sanitizeParam;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.ExclusiveFacet;
@@ -64,6 +64,7 @@ import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.FacetVisitor;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.Option;
 import com.openexchange.find.facet.SimpleFacet;
 
 /**
@@ -108,7 +109,7 @@ public class JSONFacetVisitor implements FacetVisitor {
 
             JSONObject jValue = new JSONObject();
             jValue.put("id", type.getId());
-            jValue.put("display_name", AJAXUtility.sanitizeParam(convertDisplayItem(locale, facet.getDisplayItem())));
+            addDisplayItem(jValue, locale, facet.getDisplayItem());
             jValue.put("filter", convertFilter(facet.getFilter()));
             result.put("values", new JSONArray(Collections.singletonList(jValue)));
 
@@ -124,7 +125,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             FacetType type = facet.getType();
             result.put("id", type.getId());
             result.put("style", facet.getStyle());
-            result.put("display_name", AJAXUtility.sanitizeParam(translator.translate(locale, type.getDisplayName())));
+            result.put("display_name", sanitizeParam(translator.translate(locale, type.getDisplayName())));
 
             List<FacetValue> values = facet.getValues();
             JSONArray jValues = new JSONArray(values.size());
@@ -147,7 +148,7 @@ public class JSONFacetVisitor implements FacetVisitor {
             FacetType type = facet.getType();
             result.put("id", type.getId());
             result.put("style", facet.getStyle());
-            result.put("display_name", AJAXUtility.sanitizeParam(translator.translate(locale, type.getDisplayName())));
+            result.put("display_name", sanitizeParam(translator.translate(locale, type.getDisplayName())));
 
             List<FacetValue> values = facet.getValues();
             JSONArray jValues = new JSONArray(values.size());
@@ -181,38 +182,43 @@ public class JSONFacetVisitor implements FacetVisitor {
     }
 
     protected JSONObject convertFacetValue(Locale locale, FacetValue value) throws JSONException {
-        JSONObject valueJSON = new JSONObject(4);
-        valueJSON.put("id", value.getId());
-        valueJSON.put("display_name", AJAXUtility.sanitizeParam(convertDisplayItem(locale, value.getDisplayItem())));
+        JSONObject jValue = new JSONObject(4);
+        jValue.put("id", value.getId());
+        addDisplayItem(jValue, locale, value.getDisplayItem());
         int count = value.getCount();
         if (count >= 0) {
-            valueJSON.put("count", value.getCount());
+            jValue.put("count", value.getCount());
         }
 
-        List<Filter> filters = value.getFilters();
-        if (filters.size() > 1) {
-            JSONArray filtersJSON = new JSONArray();
-            for (Filter filter : filters) {
-                JSONObject filterJSON = new JSONObject();
-                filterJSON.put("id", filter.getId());
-                // TODO: introduce boolean if "display_name" is localizable or state in JavaDoc
-                // that it has to be always localizable
-                filterJSON.put("display_name", AJAXUtility.sanitizeParam(translator.translate(locale, filter.getDisplayName())));
-                filterJSON.put("filter", convertFilter(filter));
-                filtersJSON.put(filterJSON);
+        if (value.hasOptions()) {
+            JSONArray jOptions = new JSONArray();
+            for (Option option : value.getOptions()) {
+                JSONObject jOption = new JSONObject();
+                jOption.put("id", option.getId());
+                addDisplayItem(jOption, locale, option.getDisplayItem());
+                jOption.put("filter", convertFilter(option.getFilter()));
+                jOptions.put(jOption);
             }
-            valueJSON.put("options", filtersJSON);
+            jValue.put("options", jOptions);
         } else {
-            valueJSON.put("filter", convertFilter(filters.get(0)));
+            jValue.put("filter", convertFilter(value.getFilter()));
         }
 
-        return valueJSON;
+        return jValue;
     }
 
-    protected String convertDisplayItem(Locale locale, DisplayItem displayItem) {
+    protected void addDisplayItem(JSONObject json, Locale locale, DisplayItem displayItem) throws JSONException {
         JSONDisplayItemVisitor visitor = new JSONDisplayItemVisitor(translator, locale);
         displayItem.accept(visitor);
-        return visitor.getDisplayName();
+        Object result = visitor.getResult();
+        if (result instanceof String) {
+            json.put("display_name", result);
+        } else if (result instanceof String[]) {
+            JSONArray parts = new JSONArray();
+            parts.put(((String[])result)[0]);
+            parts.put(((String[])result)[1]);
+            json.put("display_item", parts);
+        }
     }
 
     protected JSONObject convertFilter(Filter filter) throws JSONException {

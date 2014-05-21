@@ -49,11 +49,12 @@
 
 package com.openexchange.find.basic.contacts;
 
+import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
+import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
+import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.contact.ContactFieldOperand;
@@ -69,13 +70,15 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.contacts.ContactsStrings;
-import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Facets.ExclusiveFacetBuilder;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderStorage;
@@ -87,7 +90,6 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -131,12 +133,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     @Override
-    protected String getFormatStringForGlobalFacet() {
-        return ContactsStrings.FACET_GLOBAL;
-    }
-
-    @Override
-    protected Set<Integer> getSupportedFolderTypes() {
+    protected Set<FolderType> getSupportedFolderTypes() {
         return ALL_FOLDER_TYPES;
     }
 
@@ -175,11 +172,9 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * combine with addressbook queries
          */
-        for (String query : searchRequest.getQueries()) {
-            SearchTerm<?> term = ContactSearchFieldFacet.getSearchTerm(session, ADDRESSBOOK_FIELDS, query);
-            if (null != term) {
-                searchTerm.addSearchTerm(term);
-            }
+        SearchTerm<?> term = Utils.getSearchTerm(session, ADDRESSBOOK_FIELDS, searchRequest.getQueries());
+        if (null != term) {
+            searchTerm.addSearchTerm(term);
         }
         /*
          * check for valid search term
@@ -230,28 +225,36 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             /*
              * add prefix-aware field facets
              */
-            facets.add(new NameFacet(prefix));
-            facets.add(new EmailFacet(prefix));
-            facets.add(new PhoneFacet(prefix));
-            facets.add(new AddressFacet(prefix));
+            List<String> prefixTokens = tokenize(prefix);
+            if (!prefixTokens.isEmpty()) {
+                facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
+                    .withFormattableDisplayItem(ContactsStrings.FACET_GLOBAL, prefix)
+                    .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
+                    .build());
+                facets.add(new NameFacet(prefix, prefixTokens));
+                facets.add(new EmailFacet(prefix, prefixTokens));
+                facets.add(new PhoneFacet(prefix, prefixTokens));
+                facets.add(new AddressFacet(prefix, prefixTokens));
+            }
         }
         /*
          * add ContactsFacetType.CONTACT facet dynamically
          */
-        List<FacetValue> contactValues = new LinkedList<FacetValue>();
         {
             List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
             if (null != contacts && !contacts.isEmpty()) {
+                ExclusiveFacetBuilder builder = newExclusiveBuilder(ContactsFacetType.CONTACT);
                 for (Contact contact : contacts) {
                     String id = ContactsFacetType.CONTACT.getId();
-                    Filter filter = new Filter(Collections.singletonList(id), String.valueOf(contact.getObjectID()));
-                    contactValues.add(new FacetValue(prepareFacetValueId(id, session.getContextId(),
-                        Integer.toString(contact.getObjectID())), new ContactDisplayItem(contact), 1, filter));
+                    Filter filter = Filter.of(id, String.valueOf(contact.getObjectID()));
+                    String valueId = prepareFacetValueId(id, session.getContextId(), Integer.toString(contact.getObjectID()));
+                    builder.addValue(FacetValue.newBuilder(valueId)
+                        .withDisplayItem(new ContactDisplayItem(contact))
+                        .withFilter(filter)
+                        .build());
                 }
+                facets.add(builder.build());
             }
-        }
-        if (!contactValues.isEmpty()) {
-            facets.add(new ExclusiveFacet(ContactsFacetType.CONTACT, contactValues));
         }
         /*
          * add other facets
@@ -260,13 +263,17 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         return new AutocompleteResult(facets);
     }
 
-    private SearchTerm<?> getFolderTypeTerm(ServerSession session, int folderType) throws OXException {
+    private SearchTerm<?> getFolderTypeTerm(ServerSession session, FolderType folderType) throws OXException {
+        if (folderType == null) {
+            return null;
+        }
+
         Type type = null;
-        if (FolderObject.PRIVATE == folderType) {
+        if (FolderType.PRIVATE == folderType) {
             type = PrivateType.getInstance();
-        } else if (FolderObject.PUBLIC == folderType) {
+        } else if (FolderType.PUBLIC == folderType) {
             type = PublicType.getInstance();
-        } else if (FolderObject.SHARED == folderType) {
+        } else if (FolderType.SHARED == folderType) {
             type = SharedType.getInstance();
         }
 
@@ -302,35 +309,35 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     /**
-     * Creates a search term for the query using a facet matching the supplied field.
+     * Creates a search term for the queries using a facet matching the supplied field.
      *
      * @param session The server session
      * @param field The filter field to select the matching facet
-     * @param query The query
+     * @param queries The queries
      * @return The search term, or <code>null</code> to indicate a <code>FALSE</code> condition with empty results.
      * @throws OXException
      */
-    private SearchTerm<?> createSearchTerm(ServerSession session, String field, String query) throws OXException {
+    private SearchTerm<?> createSearchTerm(ServerSession session, String field, List<String> queries) throws OXException {
         ContactsFacetType type = ContactsFacetType.getById(field);
         if (null == type) {
             throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
         }
         switch (type) {
         case ADDRESS:
-            return new AddressFacet(query).getSearchTerm(session, query);
+            return Utils.getSearchTerm(session, AddressFacet.ADDRESS_FIELDS, queries);
         case CONTACT:
             SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
             searchTerm.addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
-            searchTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(query)));
+            searchTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(queries.get(0))));
             return searchTerm;
         case CONTACT_TYPE:
-            return ContactTypeFacet.getInstance().getSearchTerm(session, query);
+            return ContactTypeFacet.getInstance().getSearchTerm(session, queries);
         case EMAIL:
-            return new EmailFacet(query).getSearchTerm(session, query);
+            return Utils.getSearchTerm(session, EmailFacet.EMAIL_FIELDS, queries);
         case NAME:
-            return new NameFacet(query).getSearchTerm(session, query);
+            return Utils.getSearchTerm(session, NameFacet.NAME_FIELDS, queries);
         case PHONE:
-            return new PhoneFacet(query).getSearchTerm(session, query);
+            return Utils.getSearchTerm(session, PhoneFacet.PHONE_FIELDS, queries);
         default:
             throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
         }
@@ -348,15 +355,13 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         List<String> fields = filter.getFields();
         List<String> queries = filter.getQueries();
         if (1 == fields.size() && 1 == queries.size()) {
-            return createSearchTerm(session, fields.iterator().next(), queries.iterator().next());
+            return createSearchTerm(session, fields.iterator().next(), queries);
         }
         CompositeSearchTerm compositeTerm = new CompositeSearchTerm(CompositeOperation.OR);
         for (String field : fields) {
-            for (String query : queries) {
-                SearchTerm<?> searchTerm = createSearchTerm(session, field, query);
-                if (null != searchTerm) {
-                    compositeTerm.addSearchTerm(searchTerm);
-                }
+            SearchTerm<?> searchTerm = createSearchTerm(session, field, filter.getQueries());
+            if (null != searchTerm) {
+                compositeTerm.addSearchTerm(searchTerm);
             }
         }
         return 0 == compositeTerm.getOperands().length ? null : compositeTerm;

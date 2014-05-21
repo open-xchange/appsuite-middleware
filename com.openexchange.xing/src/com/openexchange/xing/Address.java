@@ -54,21 +54,21 @@ import org.json.JSONObject;
 /**
  * {@link Address} - Represents an address.
  * <p>
- *
+ * 
  * <pre>
  *     "private_address": {
  *       "city": "Hamburg",
  *       "country": "DE",
  *       "zip_code": "20357",
  *       "street": "Privatstra\u00dfe 1",
- *       "phone": "49|40|1234560",
- *       "fax": "||",
+ *       "phone": "+49|40|1234560",
+ *       "fax": null,
  *       "province": "Hamburg",
  *       "email": "max@mustermann.de",
- *       "mobile_phone": "49|0155|1234567"
+ *       "mobile_phone": "+49|0155|1234567"
  *     }
  * </pre>
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Address {

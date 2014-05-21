@@ -79,15 +79,16 @@ import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.drive.Constants;
+import com.openexchange.find.basic.drive.FileSize;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.drive.DriveFacetType;
-import com.openexchange.find.drive.FileSizeDisplayItem;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -168,9 +169,9 @@ public class BasicDriveTest extends AbstractFindTest {
 
     public void testSizeFacet() throws Exception {
         verifyDocumentExists();
-        ActiveFacet fileSizeFacet = new ActiveFacet(DriveFacetType.FILE_SIZE, FileSizeDisplayItem.Size.MB1.getSize(), new Filter(
+        ActiveFacet fileSizeFacet = new ActiveFacet(DriveFacetType.FILE_SIZE, FileSize.MB1.getSize(), new Filter(
             Collections.singletonList(Constants.FIELD_FILE_SIZE),
-            FileSizeDisplayItem.Size.MB1.getSize()));
+            FileSize.MB1.getSize()));
         QueryRequest request = new QueryRequest(0, 10, Collections.singletonList(fileSizeFacet), Module.DRIVE.getIdentifier());
         QueryResponse response = client.execute(request);
         SearchResult result = response.getSearchResult();
@@ -200,7 +201,7 @@ public class BasicDriveTest extends AbstractFindTest {
         assertEquals("Expected all 3 folder types", 3, ((ExclusiveFacet) folderTypeFacet).getValues().size());
 
         FacetValue chosenType = ((ExclusiveFacet) folderTypeFacet).getValues().get(0);
-        facets = autocomplete("", Collections.singletonList(createFolderTypeFacet(FolderTypeDisplayItem.Type.getByIdentifier(chosenType.getId()))));
+        facets = autocomplete("", Collections.singletonList(createFolderTypeFacet(FolderType.getByIdentifier(chosenType.getId()))));
         assertNull("Folder type facet was returned", findByType(CommonFacetType.FOLDER_TYPE, facets));
     }
 
@@ -291,10 +292,27 @@ public class BasicDriveTest extends AbstractFindTest {
     public void testConflictingFacetsCauseException() throws Exception {
         List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
         facets.add(createActiveFacet(CommonFacetType.FOLDER, testFolder.getObjectID(), Filter.NO_FILTER));
-        facets.add(createFolderTypeFacet(FolderTypeDisplayItem.Type.PRIVATE));
+        facets.add(createFolderTypeFacet(FolderType.PRIVATE));
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest("", Module.DRIVE.getIdentifier(), facets, (Map<String, String>) null, false);
         AutocompleteResponse resp = client.execute(autocompleteRequest);
         assertTrue("Wrong exception", FindExceptionCode.FACET_CONFLICT.equals(resp.getException()));
+    }
+
+    public void testTokenizedQuery() throws Exception {
+        // description: "Test file for testing new find api"
+        SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "Test" + " " + "api"));
+        List<PropDocument> documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
+        assertTrue("no document found", 0 < documents.size());
+        assertNotNull("document not found", findByProperty(documents, "id", Integer.toString(metadata.getId())));
+
+        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "\"Test file for\""));
+        documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
+        assertTrue("no document found", 0 < documents.size());
+        assertNotNull("document not found", findByProperty(documents, "id", Integer.toString(metadata.getId())));
+
+        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "\"Test file murks\""));
+        documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
+        assertTrue("document found", 0 == documents.size());
     }
 
     protected List<Facet> autocomplete(String prefix) throws Exception {

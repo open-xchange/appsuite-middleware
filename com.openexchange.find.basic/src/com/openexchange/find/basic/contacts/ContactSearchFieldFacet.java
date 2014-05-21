@@ -49,31 +49,19 @@
 
 package com.openexchange.find.basic.contacts;
 
-import java.util.Collections;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.contact.ContactFieldOperand;
-import com.openexchange.exception.OXException;
-import com.openexchange.find.FindExceptionCode;
+import java.util.List;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.java.SearchStrings;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ConstantOperand;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ContactSearchFieldFacet}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class ContactSearchFieldFacet extends SimpleFacet implements ContactSearchFacet {
+public abstract class ContactSearchFieldFacet extends SimpleFacet {
 
     private static final long serialVersionUID = 2919108856076038573L;
 
@@ -84,18 +72,8 @@ public abstract class ContactSearchFieldFacet extends SimpleFacet implements Con
      * @param displayItem The display item representing the facet
      * @param query The query to insert into the filter
      */
-    protected ContactSearchFieldFacet(ContactsFacetType type, DisplayItem displayItem, String query) {
-        super(type, displayItem, new Filter(Collections.singletonList(type.getId()), query));
-    }
-
-    @Override
-    public SearchTerm<?> getSearchTerm(ServerSession session, String query) throws OXException {
-        return getSearchTerm(session, getFields(), query);
-    }
-
-    @Override
-    public String getID() {
-        return getType().getId();
+    protected ContactSearchFieldFacet(ContactsFacetType type, DisplayItem displayItem, List<String> queries) {
+        super(type, displayItem, Filter.of(type.getId(), queries));
     }
 
     /**
@@ -104,43 +82,4 @@ public abstract class ContactSearchFieldFacet extends SimpleFacet implements Con
      * @return The contact fields used by the facet
      */
     protected abstract ContactField[] getFields();
-
-    static SearchTerm<?> getSearchTerm(ServerSession session, ContactField[] fields, String query) throws OXException {
-        checkPatternLength(query);
-        String pattern = addWildcards(query, true, true);
-        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        for (ContactField field : fields) {
-            orTerm.addSearchTerm(getFieldEqualsPatternTerm(field, pattern));
-        }
-        return orTerm;
-    }
-
-    private static SingleSearchTerm getFieldEqualsPatternTerm(ContactField field, String pattern) {
-        SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-        searchTerm.addOperand(new ContactFieldOperand(field));
-        searchTerm.addOperand(new ConstantOperand<String>(pattern));
-        return searchTerm;
-    }
-
-    private static String addWildcards(String pattern, boolean prepend, boolean append) {
-        if ((null == pattern || 0 == pattern.length()) && (append || prepend)) {
-            return "*";
-        }
-        if (null != pattern) {
-            if (prepend && '*' != pattern.charAt(0)) {
-                pattern = "*" + pattern;
-            }
-            if (append && '*' != pattern.charAt(pattern.length() - 1)) {
-                pattern = pattern + "*";
-            }
-        }
-        return pattern;
-    }
-
-    private static void checkPatternLength(String pattern) throws OXException {
-        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        if (null != pattern && 0 < minimumSearchCharacters && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
-            throw FindExceptionCode.QUERY_TOO_SHORT.create(Integer.valueOf(minimumSearchCharacters));
-        }
-    }
 }

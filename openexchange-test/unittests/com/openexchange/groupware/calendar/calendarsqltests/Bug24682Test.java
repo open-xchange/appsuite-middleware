@@ -50,13 +50,14 @@
 package com.openexchange.groupware.calendar.calendarsqltests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.Arrays;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link Bug24682Test}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug24682Test extends CalendarSqlTest {
@@ -96,7 +97,7 @@ public class Bug24682Test extends CalendarSqlTest {
         appointments.switchUser(thirdUser);
         int[] columns = new int[] { CalendarDataObject.OBJECT_ID, CalendarDataObject.FOLDER_ID };
         CalendarDataObject[] changeExceptionsByRecurrence = calendarCollectionService.getChangeExceptionsByRecurrence(appointment.getObjectID(), columns, appointments.getSession());
-        assertEquals("Wrong folder id"+System.getProperty("line.separator")+changeExceptionsByRecurrence.toString(), sharedFolderId1, changeExceptionsByRecurrence[0].getParentFolderID());
+        assertEquals("Wrong folder id"+System.getProperty("line.separator")+Arrays.toString(changeExceptionsByRecurrence), sharedFolderId1, changeExceptionsByRecurrence[0].getParentFolderID());
         // System.out.println(changeExceptionsByRecurrence.toString());
     }
 

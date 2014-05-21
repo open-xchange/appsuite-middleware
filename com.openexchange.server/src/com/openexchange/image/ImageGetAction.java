@@ -66,6 +66,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -141,7 +142,6 @@ public class ImageGetAction implements AJAXActionService {
             final String clientETag = requestData.getHeader("If-None-Match");
             if (null != clientETag && clientETag.equals(dataETag)) {
                 requestResult.setType(AJAXRequestResult.ResultType.ETAG);
-                requestResult.setExpires(1000L);
                 requestResult.setFormat("file");
                 return requestResult;
             }
@@ -149,7 +149,7 @@ public class ImageGetAction implements AJAXActionService {
             obtainImageData(dataSource, imageLocation, session, requestResult);
             if (null != dataETag) {
                 requestResult.setHeader("ETag", dataETag);
-                requestResult.setExpires(1000L);
+                requestResult.setExpires(Tools.getDefaultImageExpiry());
             }
         } catch (OXException e) {
             LOG.warn("Retrieving image failed.", e);

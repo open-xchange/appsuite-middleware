@@ -283,14 +283,15 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                             if (fn == null) {
                                 return new int[] {0,0};
                             }
-                            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                            if (messageStorage instanceof IMailFolderStorageEnhanced2) {
-                                return ((IMailFolderStorageEnhanced2) messageStorage).getTotalAndUnreadCounter(fn);
+                            IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+                            if (folderStorage instanceof IMailFolderStorageEnhanced2) {
+                                return ((IMailFolderStorageEnhanced2) folderStorage).getTotalAndUnreadCounter(fn);
                             }
-                            if (messageStorage instanceof IMailFolderStorageEnhanced) {
-                                final IMailFolderStorageEnhanced enhanced = (IMailFolderStorageEnhanced) messageStorage;
+                            if (folderStorage instanceof IMailFolderStorageEnhanced) {
+                                final IMailFolderStorageEnhanced enhanced = (IMailFolderStorageEnhanced) folderStorage;
                                 return new int[] { enhanced.getTotalCounter(fn), enhanced.getUnreadCounter(fn) };
                             }
+                            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                             final MailField[] fields = new MailField[] { MailField.ID };
                             final int count = messageStorage.searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, fields).length;
                             final MailMessage[] unreadMessages = messageStorage.getUnreadMessages(fn, MailSortField.RECEIVED_DATE, OrderDirection.ASC, fields, -1);
@@ -334,17 +335,18 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
             // Get account's messages
-            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            if (messageStorage instanceof IMailFolderStorageEnhanced2) {
-                return ((IMailFolderStorageEnhanced2) messageStorage).getTotalAndUnreadCounter(fa.getFullname());
+            IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            if (folderStorage instanceof IMailFolderStorageEnhanced2) {
+                return ((IMailFolderStorageEnhanced2) folderStorage).getTotalAndUnreadCounter(fa.getFullname());
             }
-            if (messageStorage instanceof IMailFolderStorageEnhanced) {
-                final IMailFolderStorageEnhanced enhanced = (IMailFolderStorageEnhanced) messageStorage;
+            if (folderStorage instanceof IMailFolderStorageEnhanced) {
+                final IMailFolderStorageEnhanced enhanced = (IMailFolderStorageEnhanced) folderStorage;
                 final int count = enhanced.getTotalCounter(fa.getFullname());
                 final int unreadCount = enhanced.getUnreadCounter(fa.getFullname());
                 return new int[] { count, unreadCount };
             }
             final MailField[] fields = new MailField[] { MailField.ID };
+            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             final int count = messageStorage.searchMessages(fa.getFullname(), null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, fields).length;
             final MailMessage[] unreadMessages = messageStorage.getUnreadMessages(fa.getFullname(), MailSortField.RECEIVED_DATE, OrderDirection.ASC, fields, -1);
             final int unreadCount = unreadMessages.length;

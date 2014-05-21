@@ -51,7 +51,6 @@ package com.openexchange.find.basic.drive;
 
 import java.util.Arrays;
 import java.util.List;
-import com.openexchange.find.drive.FileTypeDisplayItem.Type;
 
 
 /**

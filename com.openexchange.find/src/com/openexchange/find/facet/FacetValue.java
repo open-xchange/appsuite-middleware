@@ -51,7 +51,7 @@ package com.openexchange.find.facet;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.find.SearchRequest;
 
@@ -74,7 +74,9 @@ public class FacetValue implements Serializable {
 
     private final int count;
 
-    private final List<Filter> filters;
+    private final Filter filter;
+
+    private final List<Option> options;
 
 
     /**
@@ -92,7 +94,15 @@ public class FacetValue implements Serializable {
      *   The filter.
      */
     public FacetValue(String id, DisplayItem displayItem, int count, Filter filter) {
-        this(id, displayItem, count, Collections.singletonList(filter));
+        super();
+        checkNotNull(id);
+        checkNotNull(displayItem);
+        checkNotNull(filter);
+        this.id = id;
+        this.displayItem = displayItem;
+        this.count = count;
+        this.filter = filter;
+        this.options = null;
     }
 
     /**
@@ -106,19 +116,33 @@ public class FacetValue implements Serializable {
      * @param count
      *   The number of result documents that apply to the given filter.
      *   {@link FacetValue#UNKNOWN_COUNT} if unknown.
-     * @param filters
-     *   The filters.
+     * @param options
+     *   The options.
      */
-    public FacetValue(String id, DisplayItem displayItem, int count, List<Filter> filters) {
+    public FacetValue(String id, DisplayItem displayItem, int count, List<Option> options) {
         super();
         checkNotNull(id);
         checkNotNull(displayItem);
-        checkNotNull(filters);
-        checkArgument(filters.size() > 0);
+        checkNotNull(options);
+        checkArgument(options.size() > 0);
         this.id = id;
         this.displayItem = displayItem;
         this.count = count;
-        this.filters = filters;
+        this.options = options;
+        this.filter = null;
+    }
+
+    private FacetValue(FacetValueBuilder builder) {
+        super();
+        this.id = builder.id;
+        this.displayItem = builder.displayItem;
+        this.count = builder.count;
+        this.filter = builder.filter;
+        this.options = builder.options;
+    }
+
+    public static FacetValueBuilder newBuilder(String valueId) {
+        return new FacetValueBuilder(valueId);
     }
 
     /**
@@ -145,12 +169,38 @@ public class FacetValue implements Serializable {
     }
 
     /**
-     * @return The filters of which one has to be applied to
-     * {@link SearchRequest}s to filter on this value.
-     * Never <code>null</code>.
+     * Whether this value has options or a single filter.
+     *
+     * @return <code>true</code> if {@link FacetValue#getOptions()} will return a
+     * non-empty list with options. Otherwise <code>false</code>, what guarantees
+     * that {@link FacetValue#getFilter()} returns a filter object.
      */
-    public List<Filter> getFilters() {
-        return filters;
+    public boolean hasOptions() {
+        if (options == null) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * The list of options of which one can be chosen to filter on.
+     *
+     * @return A list of options if {@link FacetValue#hasOptions()} returns <code>true</code>,
+     * otherwise <code>null</code>.
+     */
+    public List<Option> getOptions() {
+        return options;
+    }
+
+    /**
+     * Gets the filter that has to be applied to {@link SearchRequest}s to filter on this value.
+     *
+     * @return A filter object if {@link FacetValue#hasOptions()} returns <code>false</code>,
+     * otherwise <code>null</code>.
+     */
+    public Filter getFilter() {
+        return filter;
     }
 
     @Override
@@ -159,7 +209,8 @@ public class FacetValue implements Serializable {
         int result = 1;
         result = prime * result + count;
         result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((filters == null) ? 0 : filters.hashCode());
+        result = prime * result + ((filter == null) ? 0 : filter.hashCode());
+        result = prime * result + ((options == null) ? 0 : options.hashCode());
         result = prime * result + ((displayItem == null) ? 0 : displayItem.hashCode());
         return result;
     }
@@ -177,10 +228,15 @@ public class FacetValue implements Serializable {
             return false;
         if (count != other.count)
             return false;
-        if (filters == null) {
-            if (other.filters != null)
+        if (filter == null) {
+            if (other.filter != null)
                 return false;
-        } else if (!filters.equals(other.filters))
+        } else if (!filter.equals(other.filter))
+            return false;
+        if (options == null) {
+            if (other.options != null)
+                return false;
+        } else if (!options.equals(other.options))
             return false;
         if (displayItem == null) {
             if (other.displayItem != null)
@@ -192,6 +248,82 @@ public class FacetValue implements Serializable {
 
     @Override
     public String toString() {
-        return "FacetValue [id=" + id + ", name=" + displayItem + ", count=" + count + ", filters=" + filters + "]";
+        return "FacetValue [id=" + id + ", name=" + displayItem + ", count=" + count + ", filter=" + filter + ", options=" + options + "]";
+    }
+
+    public static final class FacetValueBuilder {
+
+        private static final String MISSING_FIELD = "A %s must be set!";
+
+        private final String id;
+
+        private DisplayItem displayItem;
+
+        private int count = UNKNOWN_COUNT;
+
+        private Filter filter;
+
+        private List<Option> options;
+
+        public FacetValueBuilder(String id) {
+            super();
+            this.id = id;
+        }
+
+        public FacetValueBuilder withDisplayItem(DisplayItem displayItem) {
+            this.displayItem = displayItem;
+            return this;
+        }
+
+        public FacetValueBuilder withSimpleDisplayItem(String displayName) {
+            this.displayItem = new SimpleDisplayItem(displayName);
+            return this;
+        }
+
+        public FacetValueBuilder withLocalizableDisplayItem(String displayName) {
+            this.displayItem = new SimpleDisplayItem(displayName, true);
+            return this;
+        }
+
+        public FacetValueBuilder withFormattableDisplayItem(String suffix, String arg) {
+            this.displayItem = new FormattableDisplayItem(suffix, arg);
+            return this;
+        }
+
+        public FacetValueBuilder withCount(int count) {
+            this.count = count;
+            return this;
+        }
+
+        public FacetValueBuilder withFilter(Filter filter) {
+            this.filter = filter;
+            return this;
+        }
+
+        public FacetValueBuilder addOption(Option option) {
+            if (options == null) {
+                options = new LinkedList<Option>();
+            }
+
+            options.add(option);
+            return this;
+        }
+
+        public FacetValueBuilder withOptions(List<Option> options) {
+            this.options = options;
+            return this;
+        }
+
+        public FacetValue build() {
+            checkNotNull(id, MISSING_FIELD, "id");
+            checkNotNull(displayItem, MISSING_FIELD, DisplayItem.class.getSimpleName());
+            if (options == null) {
+                checkNotNull(filter, "A filter or at least two options must be set!");
+            } else {
+                checkArgument(options.size() > 1, "At least two " + Option.class.getSimpleName() + "s must be set!");
+            }
+
+            return new FacetValue(this);
+        }
     }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.find.actions;
 
+import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -63,20 +64,20 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.find.Module;
 import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.facet.AbstractFacet;
 import com.openexchange.find.facet.ActiveFacet;
-import com.openexchange.find.facet.DefaultFacet;
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
-import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.SimpleDisplayItem;
+import com.openexchange.find.facet.FacetValue.FacetValueBuilder;
+import com.openexchange.find.facet.Facets;
+import com.openexchange.find.facet.Facets.DefaultFacetBuilder;
+import com.openexchange.find.facet.Facets.ExclusiveFacetBuilder;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.SimpleFacet;
+import com.openexchange.find.facet.Option;
 import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.tasks.TasksFacetType;
 
@@ -184,27 +185,27 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
             AbstractFacet facet = null;
             if ("simple".equals(jFacet.getString("style"))) {
                 final JSONArray jFacetValues = jFacet.getJSONArray("values");
-                final int len = jFacetValues.length();
                 final FacetValue value = parseJFacetValue(jFacetValues.getJSONObject(0));
-                facet = new SimpleFacet(facetType, value.getDisplayItem(), value.getFilters().get(0));
-                // TODO: use after API change:
-                // facet = new FieldFacet(facetType, new SimpleDisplayItem(jFacet.getString("display_name")), parseJFilter(jFacet.getJSONObject("filter")));
-            } else if ("default".equals(jFacet.getString("style"))) {
+                facet = newSimpleBuilder(facetType)
+                    .withDisplayItem(value.getDisplayItem())
+                    .withFilter(value.getFilter())
+                    .build();
+              } else if ("default".equals(jFacet.getString("style"))) {
                 final JSONArray jFacetValues = jFacet.getJSONArray("values");
                 final int len = jFacetValues.length();
-                final List<FacetValue> values = new ArrayList<FacetValue>(len);
+                final DefaultFacetBuilder builder = Facets.newDefaultBuilder(facetType);
                 for (int i = 0; i < len; i++) {
-                    values.add(parseJFacetValue(jFacetValues.getJSONObject(i)));
+                    builder.addValue(parseJFacetValue(jFacetValues.getJSONObject(i)));
                 }
-                facet = new DefaultFacet(facetType, values);
+                facet = builder.build();
             } else if ("exclusive".equals(jFacet.getString("style"))) {
                 final JSONArray jFacetValues = jFacet.getJSONArray("options");
                 final int len = jFacetValues.length();
-                final List<FacetValue> values = new ArrayList<FacetValue>(len);
+                final ExclusiveFacetBuilder builder = Facets.newExclusiveBuilder(facetType);
                 for (int i = 0; i < len; i++) {
-                    values.add(parseJFacetValue(jFacetValues.getJSONObject(i)));
+                    builder.addValue(parseJFacetValue(jFacetValues.getJSONObject(i)));
                 }
-                facet = new ExclusiveFacet(facetType, values);
+                facet = builder.build();
             }
 
             JSONArray jFlags = jFacet.getJSONArray("flags");
@@ -215,42 +216,31 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
         }
 
         private FacetValue parseJFacetValue(final JSONObject jFacetValue) throws JSONException {
-            final String displayName = jFacetValue.getString("display_name");
+            final String id = jFacetValue.getString("id");
+            final String displayName = extractDisplayName(jFacetValue);
             final int count = jFacetValue.optInt("count", -1);
-            final List<Filter> filters = new LinkedList<Filter>();
+            FacetValueBuilder builder = FacetValue.newBuilder(id)
+                .withSimpleDisplayItem(displayName)
+                .withCount(count);
             if (jFacetValue.has("filter")) {
                 final JSONObject jFilter = jFacetValue.getJSONObject("filter");
-                filters.add(parseJFilter(jFilter));
+                builder.withFilter(parseJFilter(jFilter));
             } else {
                 final JSONArray options = jFacetValue.getJSONArray("options");
                 for (int i = 0; i < options.length(); i++) {
                     final JSONObject jOption = options.getJSONObject(i);
-                    filters.add(parseJOption(jOption));
+                    builder.addOption(parseJOption(jOption));
                 }
             }
 
-            return new FacetValue(jFacetValue.getString("id"), new SimpleDisplayItem(displayName), count, filters);
+            return builder.build();
         }
 
-        private Filter parseJOption(final JSONObject jOption) throws JSONException {
+        private Option parseJOption(final JSONObject jOption) throws JSONException {
             final String id = jOption.optString("id");
-            final String displayName = jOption.optString("display_name");
-            JSONObject jFilter = jOption.getJSONObject("filter");
-            final JSONArray jQueries = jFilter.getJSONArray("queries");
-            int length = jQueries.length();
-            final List<String> queries = new LinkedList<String>();
-            for (int i = 0; i < length; i++) {
-                queries.add(jQueries.getString(i));
-            }
-
-            final JSONArray jFields = jFilter.getJSONArray("fields");
-            length= jFields.length();
-            final List<String> fields = new LinkedList<String>();
-            for (int i = 0; i < length; i++) {
-                fields.add(jFields.getString(i));
-            }
-
-            return new Filter(id, displayName, fields, queries);
+            final String displayName = extractDisplayName(jOption);
+            final Filter filter = parseJFilter(jOption.getJSONObject("filter"));
+            return Option.newInstance(id, new SimpleDisplayItem(displayName), filter);
         }
 
         private Filter parseJFilter(final JSONObject jFilter) throws JSONException {
@@ -268,7 +258,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
                 fields.add(jFields.getString(i));
             }
 
-            return new Filter(fields, queries);
+            return Filter.of(fields, queries);
         }
 
         private static FacetType facetTypeFor(Module module, String id) {
@@ -305,31 +295,13 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
             return type;
         }
 
-        private DisplayItem parseJDisplayItem(final JSONObject jDisplayItem) throws JSONException {
-            final String defaultValue = jDisplayItem.getString("defaultValue");
-            final Map<String, Object> item = jDisplayItem.asMap();
-            return new DisplayItem() {
-
-                @Override
-                public String getDefaultValue() {
-                    return defaultValue;
-                }
-
-                @Override
-                public void accept(final DisplayItemVisitor visitor) {
-                    // Nothing
-                }
-
-                @Override
-                public Map<String, Object> getItem() {
-                    return item;
-                }
-
-                @Override
-                public boolean isLocalizable() {
-                    return false;
-                }
-            };
+        private static String extractDisplayName(JSONObject json) throws JSONException {
+            if (json.has("display_item")) {
+                JSONArray parts = (JSONArray) json.get("display_item");
+                return parts.getString(0) + ' ' + parts.getString(1);
+            } else {
+                return json.optString("display_name");
+            }
         }
     }
 

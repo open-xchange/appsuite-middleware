@@ -52,7 +52,6 @@ package com.openexchange.logging.osgi;
 import java.util.Collection;
 import java.util.List;
 import javax.management.ObjectName;
-import org.apache.commons.lang.Validate;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -210,7 +209,9 @@ public class Activator implements BundleActivator {
      * @return true, if an object of that class is available within the collection. Otherwise false.
      */
     protected <T> boolean hasInstanceOf(Collection<?> collection, Class<T> clazz) {
-        Validate.notNull(collection);
+        if (collection == null) {
+            throw new IllegalArgumentException("The collection is null");
+        }
 
         for (Object o : collection) {
             if (o != null && o.getClass() == clazz) {

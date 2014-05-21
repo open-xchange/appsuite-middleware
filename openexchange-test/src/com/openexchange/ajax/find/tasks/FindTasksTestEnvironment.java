@@ -78,12 +78,12 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.basic.tasks.TaskType;
 import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.tasks.TaskTypeDisplayItem;
 import com.openexchange.find.tasks.TasksFacetType;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
@@ -130,8 +130,6 @@ public class FindTasksTestEnvironment {
 
     /** List of Lists with filters */
     private List<List<ActiveFacet>> facets = new ArrayList<List<ActiveFacet>>();
-
-    private enum FolderType {PRIVATE, PUBLIC, SHARED};
 
     private enum Status {NOT_STARTED, IN_PROGRESS, DONE, WAITING, DEFERRED};
 
@@ -552,16 +550,16 @@ public class FindTasksTestEnvironment {
 
         //folder type
         l = new ArrayList<ActiveFacet>(3);
-        l.add(createFolderTypeFacet(FolderTypeDisplayItem.Type.PRIVATE));
-        l.add(createFolderTypeFacet(FolderTypeDisplayItem.Type.PUBLIC));
-        l.add(createFolderTypeFacet(FolderTypeDisplayItem.Type.SHARED));
+        l.add(createFolderTypeFacet(FolderType.PRIVATE));
+        l.add(createFolderTypeFacet(FolderType.PUBLIC));
+        l.add(createFolderTypeFacet(FolderType.SHARED));
         facets.add(l);
 
         //type
         l = new ArrayList<ActiveFacet>(2);
         type = TasksFacetType.TASK_TYPE;
-        l.add(createActiveFacet(type, 0, createFilter("type", TaskTypeDisplayItem.Type.SINGLE_TASK.toString().toLowerCase()))); //single
-        l.add(createActiveFacet(type, 1, createFilter("type", TaskTypeDisplayItem.Type.SERIES.toString().toLowerCase()))); //series
+        l.add(createActiveFacet(type, 0, createFilter("type", TaskType.SINGLE_TASK.toString().toLowerCase()))); //single
+        l.add(createActiveFacet(type, 1, createFilter("type", TaskType.SERIES.toString().toLowerCase()))); //series
         facets.add(l);
     }
 
@@ -573,7 +571,7 @@ public class FindTasksTestEnvironment {
         return new ActiveFacet(type, valueId, filter);
     }
 
-    private final ActiveFacet createFolderTypeFacet(FolderTypeDisplayItem.Type type) {
+    private final ActiveFacet createFolderTypeFacet(FolderType type) {
         return createActiveFacet(
             CommonFacetType.FOLDER_TYPE,
             type.getIdentifier(),

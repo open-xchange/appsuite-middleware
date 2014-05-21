@@ -1,6 +1,30 @@
+* 2014-05-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28175: Tag wording for detected configuration flaws explicitly as "Warning"
+ - Fix for bug 32633: Drop all remnants for obsolete POP3 tables
+ - Fix for bug 32643: Check for possibly empty map prior to coercing to a JSON object
+ - Fix for bug 31962: Properly detect EAS ping request in case of base64-encoded binary data in request's query string
+
+* 2014-05-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32481: Ignore requests to LinkedIn JSON API if no LinkedIn OAuth account is available for associated user
+ - Fix for bug 32410: Set default expiry for image resources to 1 hour; reopens bug #31918, but will be resolved by UI
+
+* 2014-05-16 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 32554: Add all trashed folders to a list and ignore those when searching for all files.
+
+* 2014-05-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29046: Disabled unsafe auto-consistency check & ensure folder changes are reflected in database on modifying operations
+ - Fix for bug 32565: Best effort attempt to collect as many mobile numbers as possible on Google contact subscription
+ - Fix for bug 32590: Improved sanitizing of user input during search
+
 * 2014-05-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 32033: Escape auto-complete prefix delivered in JSON response
+ - Fix for bug 32559: Orderly parenthesized CSS assignment & allow "radial-gradient" for "background" style tag
+ - Fix for bug 29377: Perform a "right merge" from config tree to JSlob JSON data
 
 * 2014-05-14 - martin.herfurth@open-xchange.com
 

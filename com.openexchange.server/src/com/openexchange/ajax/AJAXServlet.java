@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -107,7 +108,6 @@ import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
@@ -1023,65 +1023,44 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         if (!mayUpload(action)) {
             throw UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(action);
         }
-        /*
-         * Get file upload
-         */
+        // Get file upload
         final ServletFileUpload upload = newFileUploadBase();
         List<FileItem> items = null;
         try {
-            /*
-             * Parse the upload request
-             */
-            items = new LinkedList<FileItem>();
-            {
-                boolean cleanUp = true;
-                try {
-                    // Check request's character encoding
-                    if (null == req.getCharacterEncoding()) {
-                        try {
-                            req.setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                    // Parse multipart request
-                    upload.parseRequest(new ServletRequestContext(req), items);
-                    cleanUp = false;
-                } catch (final FileUploadException e) {
-                    final Throwable cause = e.getCause();
-                    if (cause instanceof IOException) {
-                        final String message = cause.getMessage();
-                        if (null != message && message.startsWith("Max. byte count of ")) {
-                            // E.g. Max. byte count of 10240 exceeded.
-                            final int pos = message.indexOf(" exceeded", 19 + 1);
-                            final String limit = message.substring(19, pos);
-                            throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true));
-                        }
-                    } else if (cause instanceof EOFException) {
-                        // Stream closed/ended unexpectedly
-                        throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
-                    }
-                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
-                } finally {
-                    if (cleanUp) {
-                        for (final FileItem fileItem : items) {
-                            try { fileItem.delete(); } catch (final Exception e) { /* Ignore */ }
-                        }
+            // Parse the upload request
+            try {
+                // Check request's character encoding
+                if (null == req.getCharacterEncoding()) {
+                    try {
+                        req.setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
+                    } catch (final Exception e) {
+                        // Ignore
                     }
                 }
+                // Parse multipart request
+                items = upload.parseRequest(new ServletRequestContext(req));
+            } catch (final FileUploadException e) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof IOException) {
+                    final String message = cause.getMessage();
+                    if (null != message && message.startsWith("Max. byte count of ")) {
+                        // E.g. Max. byte count of 10240 exceeded.
+                        final int pos = message.indexOf(" exceeded", 19 + 1);
+                        final String limit = message.substring(19, pos);
+                        throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true));
+                    }
+                } else if (cause instanceof EOFException) {
+                    // Stream closed/ended unexpectedly
+                    throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
+                }
+                throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
             }
-            /*
-             * Create the upload event
-             */
+            // Create the upload event
             final UploadEvent uploadEvent = new UploadEvent();
             uploadEvent.setAction(action);
-            /*
-             * Set affiliation to mail upload
-             */
+            // Set affiliation to mail upload
             uploadEvent.setAffiliationId(UploadEvent.MAIL_UPLOAD);
-            /*
-             * Fill upload event instance
-             */
+            // Fill upload event instance
             final String charEnc;
             {
                 final String rce = req.getCharacterEncoding();
@@ -1121,10 +1100,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     protected static boolean mayUpload(final String action) {
         return UPLOAD_ACTIONS.contains(action) || Arrays.asList("CSV", "VCARD","ICAL", "OUTLOOK_CSV").contains(action); //Boo! Bad hack to get importer/export bundle working
-    }
-
-    static boolean isEmpty(final String string) {
-        return Strings.isEmpty(string);
     }
 
     private static final int BUFLEN = 65536;

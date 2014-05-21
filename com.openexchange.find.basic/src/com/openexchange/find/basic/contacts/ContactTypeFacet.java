@@ -50,14 +50,12 @@
 package com.openexchange.find.basic.contacts;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
-import com.openexchange.find.common.CommonStrings;
-import com.openexchange.find.common.ContactTypeDisplayItem;
 import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.contacts.ContactsStrings;
 import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
@@ -75,7 +73,34 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContactTypeFacet extends ExclusiveFacet implements ContactSearchFacet {
+public class ContactTypeFacet extends ExclusiveFacet {
+
+    public static enum Type {
+
+        /**
+         * The type denoting 'normal' contacts.
+         */
+        CONTACT("contact"),
+        /**
+         * The type denoting distribution lists.
+         */
+        DISTRIBUTION_LIST("distribution list"), ;
+
+        private final String identifier;
+
+        private Type(final String identifier) {
+            this.identifier = identifier;
+        }
+
+        /**
+         * Gets the identifier
+         *
+         * @return The identifier
+         */
+        public String getIdentifier() {
+            return identifier;
+        }
+    }
 
     private static final long serialVersionUID = -9031103652463933032L;
 
@@ -100,40 +125,40 @@ public class ContactTypeFacet extends ExclusiveFacet implements ContactSearchFac
     private static List<FacetValue> getFacetValues() {
         String id = ContactsFacetType.CONTACT_TYPE.getId();
         List<FacetValue> facetValues = new ArrayList<FacetValue>(2);
-        facetValues.add(new FacetValue(ContactTypeDisplayItem.Type.CONTACT.getIdentifier(),
-            new ContactTypeDisplayItem(CommonStrings.CONTACT_TYPE_CONTACT, ContactTypeDisplayItem.Type.CONTACT),
-            FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(id), ContactTypeDisplayItem.Type.CONTACT.getIdentifier())));
-        facetValues.add(new FacetValue(ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier(),
-            new ContactTypeDisplayItem(CommonStrings.CONTACT_TYPE_DISTRIBUTION_LIST, ContactTypeDisplayItem.Type.DISTRIBUTION_LIST),
-            FacetValue.UNKNOWN_COUNT, new Filter(Collections.singletonList(id), ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier())));
+        facetValues.add(FacetValue.newBuilder(Type.CONTACT.getIdentifier())
+            .withLocalizableDisplayItem(ContactsStrings.CONTACT_TYPE_CONTACT)
+            .withFilter(Filter.of(id, Type.CONTACT.getIdentifier()))
+            .build());
+
+        facetValues.add(FacetValue.newBuilder(Type.DISTRIBUTION_LIST.getIdentifier())
+            .withLocalizableDisplayItem(ContactsStrings.CONTACT_TYPE_DISTRIBUTION_LIST)
+            .withFilter(Filter.of(id, Type.DISTRIBUTION_LIST.getIdentifier()))
+            .build());
+
         return facetValues;
     }
 
-    @Override
-    public SearchTerm<?> getSearchTerm(ServerSession session, String query) throws OXException {
-        if (ContactTypeDisplayItem.Type.CONTACT.getIdentifier().equals(query)) {
-            CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            SingleSearchTerm term1 = new SingleSearchTerm(SingleOperation.ISNULL);
-            term1.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
-            searchTerm.addSearchTerm(term1);
-            SingleSearchTerm term2 = new SingleSearchTerm(SingleOperation.EQUALS);
-            term2.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
-            term2.addOperand(new ConstantOperand<Boolean>(Boolean.FALSE));
-            searchTerm.addSearchTerm(term2);
-            return searchTerm;
+    public SearchTerm<?> getSearchTerm(ServerSession session, List<String> queries) throws OXException {
+        if (!queries.isEmpty()) {
+            if (Type.CONTACT.getIdentifier().equals(queries.get(0))) {
+                CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR);
+                SingleSearchTerm term1 = new SingleSearchTerm(SingleOperation.ISNULL);
+                term1.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
+                searchTerm.addSearchTerm(term1);
+                SingleSearchTerm term2 = new SingleSearchTerm(SingleOperation.EQUALS);
+                term2.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
+                term2.addOperand(new ConstantOperand<Boolean>(Boolean.FALSE));
+                searchTerm.addSearchTerm(term2);
+                return searchTerm;
+            }
+            if (Type.DISTRIBUTION_LIST.getIdentifier().equals(queries.get(0))) {
+                SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+                searchTerm.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
+                searchTerm.addOperand(new ConstantOperand<Boolean>(Boolean.TRUE));
+                return searchTerm;
+            }
         }
-        if (ContactTypeDisplayItem.Type.DISTRIBUTION_LIST.getIdentifier().equals(query)) {
-            SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-            searchTerm.addOperand(new ContactFieldOperand(ContactField.MARK_AS_DISTRIBUTIONLIST));
-            searchTerm.addOperand(new ConstantOperand<Boolean>(Boolean.TRUE));
-            return searchTerm;
-        }
-        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, getID());
-    }
-
-    @Override
-    public String getID() {
-        return getType().getId();
+        throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(queries, getType().getId());
     }
 
 }

@@ -142,7 +142,7 @@ public class SyncCollection extends WebdavPropfindAction {
 
     private String getSyncToken(final WebdavRequest req, final Document requestBody) throws WebdavProtocolException {
 
-        final List<Element> children = requestBody.getRootElement().getChildren("sync-token", DAV_NS);
+        final List<Element> children = null == requestBody ? null : requestBody.getRootElement().getChildren("sync-token", DAV_NS);
         if (children == null || children.isEmpty()) {
             return null;
         }

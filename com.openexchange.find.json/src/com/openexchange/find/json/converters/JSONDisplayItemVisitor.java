@@ -49,19 +49,13 @@
 
 package com.openexchange.find.json.converters;
 
+import static com.openexchange.ajax.AJAXUtility.sanitizeParam;
 import java.util.Locale;
 import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.ContactTypeDisplayItem;
-import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.FormattableDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.drive.FileDisplayItem;
-import com.openexchange.find.drive.FileSizeDisplayItem;
-import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
+import com.openexchange.find.facet.FormattableDisplayItem;
 import com.openexchange.find.facet.NoDisplayItem;
-import com.openexchange.find.tasks.TaskStatusDisplayItem;
-import com.openexchange.find.tasks.TaskTypeDisplayItem;
+import com.openexchange.find.facet.SimpleDisplayItem;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -73,7 +67,7 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     private final Locale locale;
 
-    private String result;
+    private Object result;
 
     public JSONDisplayItemVisitor(final StringTranslator translator, final Locale locale) {
         super();
@@ -83,58 +77,23 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     @Override
     public void visit(ContactDisplayItem item) {
-        result = item.getDefaultValue();
+        result = sanitizeParam(item.getDefaultValue());
     }
 
     @Override
     public void visit(SimpleDisplayItem item) {
         if (item.isLocalizable()) {
-            result = translator.translate(locale, item.getDefaultValue());
+            result = sanitizeParam(translator.translate(locale, item.getDefaultValue()));
         } else {
-            result = item.getDefaultValue();
+            result = sanitizeParam(item.getDefaultValue());
         }
     }
 
     @Override
-    public void visit(final FolderTypeDisplayItem item) {
-        result = translator.translate(locale, item.getDefaultValue());
-    }
-
-    @Override
-    public void visit(FileTypeDisplayItem item) {
-        result = translator.translate(locale, item.getDefaultValue());
-    }
-
-    @Override
-    public void visit(TaskStatusDisplayItem item) {
-        result = translator.translate(locale, item.getDefaultValue());
-    }
-
-    @Override
-    public void visit(TaskTypeDisplayItem item) {
-        result = translator.translate(locale, item.getDefaultValue());
-    }
-
-    @Override
-    public void visit(ContactTypeDisplayItem item) {
-        result = translator.translate(locale, item.getDefaultValue());
-    }
-
-    @Override
-    public void visit(FileDisplayItem item) {
-        result = item.getDefaultValue();
-    }
-
-    @Override
     public void visit(FormattableDisplayItem item) {
-        Object[] args = item.getItem();
-        String defaultValue = translator.translate(locale, item.getDefaultValue());
-        result = String.format(locale, defaultValue, args);
-    }
-
-    @Override
-    public void visit(FileSizeDisplayItem item) {
-        result = item.getDefaultValue();
+        String suffix = sanitizeParam(translator.translate(locale, item.getDefaultValue()));
+        String arg = sanitizeParam(item.getItem());
+        result = new String[] { arg, suffix };
     }
 
     @Override
@@ -143,13 +102,13 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
     }
 
     /**
-     * Gets the value to set for the 'display_name' attribute. This value
-     * is only valid if DisplayItem.accept(visitor) has been called.
+     * Gets the value to set for the 'display_name' or 'display_item' attribute.
+     * This value is only valid if DisplayItem.accept(visitor) has been called.
      *
      * @return The display name or <code>null</code> if it should
      * not be included in the response object.
      */
-    public String getDisplayName() {
+    public Object getResult() {
         return result;
     }
 }

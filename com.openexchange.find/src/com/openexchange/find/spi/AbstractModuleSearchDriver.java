@@ -49,8 +49,9 @@
 
 package com.openexchange.find.spi;
 
-import java.util.ArrayList;
+import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -66,17 +67,17 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.CommonStrings;
-import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.FormattableDisplayItem;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Facets;
+import com.openexchange.find.facet.Facets.ExclusiveFacetBuilder;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.SimpleFacet;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -91,37 +92,22 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
      * A speaking constant that should be returned by {@link AbstractModuleSearchDriver#getSupportedFolderTypes()},
      * if the folder type facet is not supported.
      */
-    protected static final Set<Integer> FOLDER_TYPE_NOT_SUPPORTED = Collections.emptySet();
+    protected static final Set<FolderType> FOLDER_TYPE_NOT_SUPPORTED = Collections.emptySet();
 
     /**
-     * A set containing the folder types  {@link FolderObject#PRIVATE},
-     * {@link FolderObject#PUBLIC} and {@link FolderObject#SHARED}.
+     * A set containing all folder types.
      */
-    protected static final Set<Integer> ALL_FOLDER_TYPES = new HashSet<Integer>(3);
-    static {
-        ALL_FOLDER_TYPES.add(FolderObject.PRIVATE);
-        ALL_FOLDER_TYPES.add(FolderObject.PUBLIC);
-        ALL_FOLDER_TYPES.add(FolderObject.SHARED);
-    }
+    protected static final Set<FolderType> ALL_FOLDER_TYPES = EnumSet.allOf(FolderType.class);
+
 
     @Override
     public final AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         checkActiveFacets(autocompleteRequest);
         AutocompleteResult autocompleteResult = doAutocomplete(autocompleteRequest, session);
-
-        LinkedList<Facet> modifiedFacets = new LinkedList<Facet>(autocompleteResult.getFacets());
-        if (!autocompleteRequest.getPrefix().isEmpty()) {
-            Facet globalFacet = new SimpleFacet(
-                CommonFacetType.GLOBAL,
-                new FormattableDisplayItem(getFormatStringForGlobalFacet(), autocompleteRequest.getPrefix()),
-                new Filter(Collections.singletonList(CommonFacetType.GLOBAL.getId()),
-                    Collections.singletonList(autocompleteRequest.getPrefix())));
-            modifiedFacets.addFirst(globalFacet);
-        }
-
+        List<Facet> modifiedFacets = new LinkedList<Facet>(autocompleteResult.getFacets());
         Facet folderTypeFacet = getFolderTypeFacet(getSupportedFolderTypes());
         if (folderTypeFacet != null) {
-            modifiedFacets.addLast(folderTypeFacet);
+            modifiedFacets.add(folderTypeFacet);
         }
 
         LinkedList<Facet> filteredFacets = filterFacets(modifiedFacets, autocompleteRequest.getActiveFacets());
@@ -153,13 +139,6 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
     }
 
     /**
-     * The format string to construct the display item for the global facet.
-     * Something like "%1$s <i>in file name</i>". Must contain exactly one
-     * string reference that will be replaced with the current prefix.
-     */
-    protected abstract String getFormatStringForGlobalFacet();
-
-    /**
      * @see ModuleSearchDriver#autocomplete(ServerSession, AutocompleteRequest)
      */
     protected abstract AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException;
@@ -172,13 +151,13 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
     /**
      * Specifies if the {@link CommonFacetType#FOLDER_TYPE} facet is supported.
      *
-     * @return A set of folder type ids see {@link FolderObject#PRIVATE}, {@link FolderObject#PUBLIC}, {@link FolderObject#SHARED}.
+     * @return A set of folder types.
      * Returns <code>null</code> or an empty set if the facet is not supported at all.
      *
      * @see {@link AbstractModuleSearchDriver#ALL_FOLDER_TYPES} and {@link AbstractModuleSearchDriver#FOLDER_TYPE_NOT_SUPPORTED}
      * for convenience.
      */
-    protected abstract Set<Integer> getSupportedFolderTypes();
+    protected abstract Set<FolderType> getSupportedFolderTypes();
 
     protected LinkedList<Facet> filterFacets(List<Facet> facets, List<ActiveFacet> active) {
         if (facets.isEmpty() || active.isEmpty()) {
@@ -226,12 +205,14 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
 
                     for (FacetValue value : defaultFacet.getValues()) {
                         if (!valuesToRemove.contains(value.getId())) {
-                            filteredValues.add(new FacetValue(value.getId(), value.getDisplayItem(), FacetValue.UNKNOWN_COUNT, value.getFilters()));
+                            filteredValues.add(value);
                         }
                     }
 
                     if (!filteredValues.isEmpty()) {
-                        filtered.add(new DefaultFacet(defaultFacet.getType(), filteredValues));
+                        filtered.add(Facets.newDefaultBuilder(defaultFacet.getType())
+                            .withValues(filteredValues)
+                            .build());
                     }
                 }
             }
@@ -244,32 +225,33 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
         return prefix + '/' + Integer.toString(contextId) + '/' + objectId;
     }
 
-    private static Facet getFolderTypeFacet(Set<Integer> supportedTypes) {
+    private static Facet getFolderTypeFacet(Set<FolderType> supportedTypes) {
         if (supportedTypes == null || supportedTypes.isEmpty()) {
             return null;
         }
 
-        List<FacetValue> folderValues = new ArrayList<FacetValue>();
-        List<String> fields = Collections.singletonList(CommonFacetType.FOLDER_TYPE.getId());
-        if (supportedTypes.contains(FolderObject.PRIVATE)) {
-            folderValues.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
-                CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT,
-                new Filter(fields, FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
+        ExclusiveFacetBuilder builder = newExclusiveBuilder(CommonFacetType.FOLDER_TYPE);
+        if (supportedTypes.contains(FolderType.PRIVATE)) {
+            builder.addValue(FacetValue.newBuilder(FolderType.PRIVATE.getIdentifier())
+                .withLocalizableDisplayItem(CommonStrings.FOLDER_TYPE_PRIVATE)
+                .withFilter(Filter.of(CommonFacetType.FOLDER_TYPE.getId(), FolderType.PRIVATE.getIdentifier()))
+                .build());
         }
 
-        if (supportedTypes.contains(FolderObject.PUBLIC)) {
-            folderValues.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
-                CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT,
-                new Filter(fields, FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
+        if (supportedTypes.contains(FolderType.PUBLIC)) {
+            builder.addValue(FacetValue.newBuilder(FolderType.PUBLIC.getIdentifier())
+                .withLocalizableDisplayItem(CommonStrings.FOLDER_TYPE_PUBLIC)
+                .withFilter(Filter.of(CommonFacetType.FOLDER_TYPE.getId(), FolderType.PUBLIC.getIdentifier()))
+                .build());
         }
 
-        if (supportedTypes.contains(FolderObject.SHARED)) {
-            folderValues.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
-                CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT,
-                new Filter(fields, FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
+        if (supportedTypes.contains(FolderType.SHARED)) {
+            builder.addValue(FacetValue.newBuilder(FolderType.SHARED.getIdentifier())
+                .withLocalizableDisplayItem(CommonStrings.FOLDER_TYPE_SHARED)
+                .withFilter(Filter.of(CommonFacetType.FOLDER_TYPE.getId(), FolderType.SHARED.getIdentifier()))
+                .build());
         }
 
-        Facet facet = new ExclusiveFacet(CommonFacetType.FOLDER_TYPE, folderValues);
-        return facet;
+        return builder.build();
     }
 }

@@ -75,6 +75,7 @@ import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -135,7 +136,7 @@ public class BasicMailTest extends AbstractFindTest {
         /*
          * Set own contact as activeFacet
          */
-        ActiveFacet activeFacet = createActiveFacet(MailFacetType.CONTACTS, found.getId(), found.getFilters().get(0));
+        ActiveFacet activeFacet = createActiveFacet(MailFacetType.CONTACTS, found.getId(), found.getOptions().get(0).getFilter());
         facets = autocomplete(prefix, Collections.singletonList(activeFacet));
         found = detectContact(facets);
         assertNull("Own contact should've been missing in response", found);
@@ -338,7 +339,7 @@ public class BasicMailTest extends AbstractFindTest {
         FacetValue last = values.get(values.size() - 1);
         assertEquals("Prefix item is at wrong position in result set", prefix, last.getId());
 
-        facets = autocomplete(prefix, Collections.singletonList(new ActiveFacet(MailFacetType.CONTACTS, values.get(0).getId(), values.get(0).getFilters().get(0))));
+        facets = autocomplete(prefix, Collections.singletonList(new ActiveFacet(MailFacetType.CONTACTS, values.get(0).getId(), values.get(0).getOptions().get(0).getFilter())));
         facet = findByType(MailFacetType.CONTACTS, facets);
         assertNotNull("Contacts facet not found", facet);
         values = ((DefaultFacet) facet).getValues();
@@ -406,6 +407,35 @@ public class BasicMailTest extends AbstractFindTest {
         }
 
         assertTrue("Document contained more fields than requested: " + props.keySet(), props.size() == 0);
+    }
+
+
+    public void testTokenizedQuery() throws Exception {
+        String t1 = randomUID();
+        String t2 = randomUID();
+        String t3 = randomUID();
+        String[][] mailIds = importMail(defaultAddress, t1 + " " + t2 + " " + t3, "");
+
+
+        List<ActiveFacet> facets = prepareFacets();
+        SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.MAIL, t1 + " " + t3));
+        facets.add(createActiveFacet(globalFacet));
+        List<PropDocument> documents = query(Module.MAIL, facets);
+        assertTrue("no document found", 0 < documents.size());
+        assertNotNull("document not found", findByProperty(documents, "id", mailIds[0][1]));
+
+        prepareFacets();
+        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.MAIL, "\"" + t1 + " " + t2 + "\""));
+        facets.add(createActiveFacet(globalFacet));
+        documents = query(Module.MAIL, facets);
+        assertTrue("no document found", 0 < documents.size());
+        assertNotNull("document not found", findByProperty(documents, "id", mailIds[0][1]));
+
+        prepareFacets();
+        globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.MAIL, "\"" + t1 + " " + t3 + "\""));
+        facets.add(createActiveFacet(globalFacet));
+        documents = query(Module.MAIL, facets);
+        assertTrue("document found", 0 == documents.size());
     }
 
     private void findContactsInValues(List<Contact> contacts, List<FacetValue> values) {

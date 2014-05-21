@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The Open-Xchange REST service for HTML processing
+Bundle-SymbolicName: com.openexchange.rest.services.html
+Bundle-Version: 7.6.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.exception,
+ com.openexchange.html,
+ com.openexchange.html.tools,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.rest.services,
+ com.openexchange.rest.services.annotations,
+ com.openexchange.rest.services.osgiservice,
+ com.openexchange.server,
+ com.openexchange.tools.servlet,
+ org.json,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.rest.services.html.osgi.HtmlRESTActivator

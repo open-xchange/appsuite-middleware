@@ -407,12 +407,12 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     @Override
     public String getClient() {
-        return session.getClient();
+        return session().getClient();
     }
 
     @Override
     public void setClient(final String client) {
-        session.setClient(client);
+        session().setClient(client);
     }
 
     @Override
@@ -510,22 +510,22 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     @Override
     public boolean isAnonymous() {
-        return session.getUserId() <= 0;
+        return session().getUserId() <= 0;
     }
 
     @Override
     public String toString() {
-        return session.toString();
+        return session().toString();
     }
 
     @Override
     public boolean isTransient() {
-        return session.isTransient();
+        return session().isTransient();
     }
 
     @Override
     public int hashCode() {
-        return session.hashCode();
+        return session().hashCode();
     }
 
 }

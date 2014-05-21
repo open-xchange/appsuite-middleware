@@ -66,15 +66,28 @@ public abstract class AbstractFacet implements Facet, Serializable {
 
     private static final long serialVersionUID = 3011527528866807119L;
 
-    private final FacetType type;
+    private FacetType type;
 
-    private final List<String> flags;
+    private final List<String> flags = new LinkedList<String>();
 
     protected AbstractFacet(final FacetType type) {
         super();
         checkNotNull(type);
+        setType(type);
+    }
+
+    /**
+     * Only meant to be called by the builders in {@link Facet}.
+     */
+    AbstractFacet() {
+        super();
+    }
+
+    /**
+     * Only meant to be called by the builders in {@link Facet}.
+     */
+    void setType(final FacetType type) {
         this.type = type;
-        flags = new LinkedList<String>();
         for (FacetType conflicting : type.getConflictingFacets()) {
             flags.add("conflicts:" + conflicting.getId());
         }

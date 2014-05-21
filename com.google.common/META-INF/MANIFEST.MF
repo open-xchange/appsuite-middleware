@@ -6,7 +6,7 @@ Bundle-Version: 14.0.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: lib/guava-16.0.jar
+Bundle-ClassPath: lib/guava-17.0.jar
 Export-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.base.internal,

@@ -59,8 +59,10 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class DriveStrings implements LocalizableStrings {
 
-    // Search in drive
-    public static final String FACET_GLOBAL = "%1$s <i>in drive</i>";
+    // Context: Searching in drive.
+    // Displayed as: [Search for] 'user input' in drive.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String FACET_GLOBAL = "in drive";
 
     // Search in file name.
     public static final String FACET_FILE_NAME = "File name";
@@ -112,14 +114,20 @@ public class DriveStrings implements LocalizableStrings {
     // Shared folders
     public static final String FOLDER_TYPE_SHARED = "Shared folders";
 
-    // Search in file field file name.
-    public static final String SEARCH_IN_FILE_NAME = "%1$s <i>in file name</i>";
+    // Context: Searching in drive.
+    // Displayed as: [Search for] 'user input' in file name.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String SEARCH_IN_FILE_NAME = "in file name";
 
-    // Search in file field file description.
-    public static final String SEARCH_IN_FILE_DESC = "%1$s <i>in file description</i>";
+    // Context: Searching in drive.
+    // Displayed as: [Search for] 'user input' in file description.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String SEARCH_IN_FILE_DESC = "in file description";
 
-    // Search in file field file content.
-    public static final String SEARCH_IN_FILE_CONTENT = "%1$s <i>in file content</i>";
+    // Context: Searching in drive.
+    // Displayed as: [Search for] 'user input' in file content.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String SEARCH_IN_FILE_CONTENT = "in file content";
 
     // ------------------------------- Time --------------------------------------------- //
 

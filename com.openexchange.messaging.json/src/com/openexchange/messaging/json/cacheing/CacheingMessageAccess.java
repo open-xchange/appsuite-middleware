@@ -124,7 +124,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
     }
 
     private MessagingField[] addDefaultFields(final MessagingField[] fields) {
-        final Set<MessagingField> allFields = new HashSet<MessagingField>(Arrays.asList(fields));
+        final Set<MessagingField> allFields = null == fields ? new HashSet<MessagingField>(12) : new HashSet<MessagingField>(Arrays.asList(fields));
         allFields.add(MessagingField.FOLDER_ID);
         allFields.add(MessagingField.ID);
         allFields.add(MessagingField.SUBJECT);

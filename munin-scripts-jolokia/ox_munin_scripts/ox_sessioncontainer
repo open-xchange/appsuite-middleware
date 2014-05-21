@@ -28,6 +28,9 @@ callUrl();
 sub callUrl {
 	my @shortvals;
 	my @longvals;
+	
+	my $shortcombined = 0;
+	my $longcombined = 0;
 	my $ua = LWP::UserAgent->new();
 	my $req = HTTP::Request->new(GET => "$url/read/com.openexchange.sessiond:name=SessionD Toolkit");
 	$req->authorization_basic($username,$password);
@@ -41,12 +44,20 @@ sub callUrl {
 		if (defined $json->{value}){
 			@shortvals = @{$json->{value}->{NumberOfShortTermSessions}};
 			@longvals = @{$json->{value}{NumberOfLongTermSessions}};
+			print "multigraph ox_sessioncontainer.short\n";
 			for (my $i = 0; $i < @shortvals; $i++) {
-				print "s$i.value $shortvals[$i]\n";
+				print "short$i.value $shortvals[$i]\n";
+				$shortcombined = $shortcombined + $shortvals[$i];
 			}
+			
+			print "multigraph ox_sessioncontainer.long\n";
 			for (my $i = 0; $i < @longvals; $i++) {
-				print "l$i.value $longvals[$i]\n";
+				print "long$i.value $longvals[$i]\n";
+				$longcombined = $longcombined + $longvals[$i];
 			}
+			print "multigraph ox_sessioncontainer\n";
+			print "short.value $shortcombined\n";
+			print "long.value $longcombined\n";
 		}
 	}
 	else {
@@ -75,23 +86,52 @@ sub callUrlForConfig {
 	my $response = $ua->request($req);
 	
 	if ($response->is_success) {
-
+		print "multigraph ox_sessioncontainer\n";
 		print "graph_title Sessions per Container\n";
 		print "graph_args --base 1000 -l 0\n";
 		print "graph_category Open Xchange\n";
 		print "graph_vlabel Number\n";
+		print "short.label Short term sessions combined\n";
+		print "short.draw AREASTACK\n";
+		print "long.label Long term sessions combined\n";
+		print "long.draw AREASTACK\n";
 
 		my $json = decode_json($response->decoded_content);
 		if (defined $json->{value}){
+			
 			@shortvals = @{$json->{value}{NumberOfShortTermSessions}};
 			@longvals = @{$json->{value}{NumberOfLongTermSessions}};
+			
+			print "multigraph ox_sessioncontainer.short\n";
+			print "graph_title Short term sessions\n";
+			print "graph_args --base 1000 -l 0\n";
+			print "graph_category Open Xchange\n";
+			print "graph_vlabel Number total\n";
+			my $colour = 0;
 			for (my $i = 0; $i < @shortvals; $i++) {
-				print "s$i.label Short term session container $i\n";
-				print "s$i.draw LINE1\n";
+				print "short$i.label Short term session container $i\n";
+				print "short$i.draw AREASTACK\n";
+				print "short$i.colour COLOUR$colour\n";
+				$colour = $colour + 1;
+				if ($colour == 29) {
+					$colour = 0;
+				}
 			}
+			
+			print "multigraph ox_sessioncontainer.long\n";
+			print "graph_title Long term sessions\n";
+			print "graph_args --base 1000 -l 0\n";
+			print "graph_category Open Xchange\n";
+			print "graph_vlabel Number total\n";
+			my $colour = 0;
 			for (my $i = 0; $i < @longvals; $i++) {
-				print "l$i.label Long term session container $i\n";
-				print "l$i.draw LINE1\n";
+				print "long$i.label Long term session container $i\n";
+				print "long$i.draw AREASTACK\n";
+				print "long$i.colour COLOUR$colour\n";
+				$colour = $colour + 1;
+				if ($colour == 29) {
+					$colour = 0;
+				}
 			}
 		}
 	}

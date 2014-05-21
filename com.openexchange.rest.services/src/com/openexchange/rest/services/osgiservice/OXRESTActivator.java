@@ -62,6 +62,13 @@ import com.openexchange.rest.services.internal.OXRESTServiceFactory;
 public abstract class OXRESTActivator extends HousekeepingActivator {
 
     /**
+     * Initializes a new {@link OXRESTActivator}.
+     */
+    protected OXRESTActivator() {
+        super();
+    }
+
+    /**
      * Registers specified REST web service.
      *
      * @param serviceClass The service's class
@@ -78,6 +85,15 @@ public abstract class OXRESTActivator extends HousekeepingActivator {
      */
     protected void registerWebService(Class<? extends OXRESTService<Void>> serviceClass) {
         registerWebService(serviceClass, null);
+    }
+
+    /**
+     * Un-registers specified REST web service.
+     *
+     * @param serviceClass The service's class
+     */
+    protected <T> void unregisterWebService(Class<? extends OXRESTService<T>> serviceClass) {
+        unregisterService(serviceClass);
     }
 
 }
