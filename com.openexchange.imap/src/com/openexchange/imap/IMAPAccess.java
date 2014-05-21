@@ -80,6 +80,7 @@ import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.config.MailAccountIMAPProperties;
@@ -552,15 +553,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             IMAPStore imapStore = null;
             try {
+                final boolean[] preAuthStartTlsCap = new boolean[1];
+                preAuthStartTlsCap[0] = false;
                 /*
                  * Get connected store
                  */
-                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass);
+                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass, preAuthStartTlsCap);
                 /*
                  * Add warning if non-secure
                  */
                 try {
-                    if (!config.isSecure() && !imapStore.hasCapability("STARTTLS")) {
+                    if (!config.isSecure() && !imapStore.hasCapability("STARTTLS") && !preAuthStartTlsCap[0]) {
                         if ("create".equals(session.getParameter("mail-account.validate.type"))) {
                             warnings.add(MailExceptionCode.NON_SECURE_CREATION.create());
                         } else {
@@ -886,6 +889,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     private IMAPStore newConnectedImapStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw) throws MessagingException {
+        return newConnectedImapStore(imapSession, server, port, login, pw, null);
+    }
+
+    private IMAPStore newConnectedImapStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final boolean[] preAuthStartTlsCap) throws MessagingException {
         /*
          * Establish a new one...
          */
@@ -894,6 +901,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * ... and connect it
          */
         try {
+            if (null != preAuthStartTlsCap) {
+                try {
+                    final String serverUrl = new StringBuilder(36).append(IDNA.toASCII(server)).append(':').append(port).toString();
+                    final Map<String, String> capabilities = IMAPCapabilityAndGreetingCache.getCapabilities(serverUrl, false, IMAPProperties.getInstance());
+                    if (null != capabilities) {
+                        preAuthStartTlsCap[0] = capabilities.containsKey("STARTTLS");
+                    }
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
             imapStore.connect(server, port, login, pw);
         } catch (final AuthenticationFailedException e) {
             /*

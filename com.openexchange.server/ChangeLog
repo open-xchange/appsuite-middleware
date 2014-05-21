@@ -1,3 +1,7 @@
+* 2014-05-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32652: Do also consider pre-auth capabilities when checking for a secure connection
+
 * 2014-05-21 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 31798: Implemented a ClusterLockService with which a cluster wide lock can be acquired in order for single nodes to run periodic tasks
