@@ -98,7 +98,7 @@ public class CalendarFindTest extends AbstractFindTest {
      *
      * @return The appointment
      */
-    protected Appointment randomAppointment() throws Exception {
+    protected Appointment randomPrivateAppointment() throws Exception {
         Appointment app = new Appointment();
         app.setTitle(randomUID());
         app.setLocation(randomUID());
@@ -106,6 +106,25 @@ public class CalendarFindTest extends AbstractFindTest {
         app.setStartDate(TimeTools.D("Next friday at 10:15"));
         app.setEndDate(TimeTools.D("Next friday at 11:30"));
         app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app.setIgnoreConflicts(true);
+        return app;
+    }
+
+    /**
+     * Creates a new, random appointment instance containing some basic random data, with the folder ID being set to the given one.
+     * The appointment is not created at the server automatically.
+     *
+     * @param parentFolder The parent folder id
+     * @return The appointment
+     */
+    protected Appointment randomAppointment(int parentFolder) throws Exception {
+        Appointment app = new Appointment();
+        app.setTitle(randomUID());
+        app.setLocation(randomUID());
+        app.setNote(randomUID());
+        app.setStartDate(TimeTools.D("Next friday at 10:15"));
+        app.setEndDate(TimeTools.D("Next friday at 11:30"));
+        app.setParentFolderID(parentFolder);
         app.setIgnoreConflicts(true);
         return app;
     }

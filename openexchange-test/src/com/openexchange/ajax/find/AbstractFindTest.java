@@ -73,6 +73,7 @@ import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.FilterBuilder;
+import com.openexchange.find.facet.Option;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.test.FolderTestManager;
 
@@ -274,6 +275,23 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     }
 
     /**
+     * Searches a {@link FacetValue} by its value id.
+     *
+     * @param valueId The value id
+     * @param facet The facet
+     * @return The found value or <code>null</code> if not present
+     */
+    protected static FacetValue findByValueId(String valueId, DefaultFacet facet) {
+        for (FacetValue value : facet.getValues()) {
+            if (valueId.equals(value.getId())) {
+                return value;
+            }
+         }
+
+        return null;
+    }
+
+    /**
      * Searches the supplied list of property documents matching the supplied value in one of its properties.
      *
      * @param documents The documents to check
@@ -337,6 +355,15 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
 
     protected static ActiveFacet createActiveFacet(SimpleFacet facet) {
         return new ActiveFacet(facet.getType(), facet.getType().getId(), facet.getFilter());
+    }
+
+    protected static ActiveFacet createActiveFacet(DefaultFacet facet, FacetValue value) {
+        if (value.hasOptions()) {
+            Option option = value.getOptions().get(0);
+            return new ActiveFacet(facet.getType(), option.getId(), option.getFilter());
+        }
+
+        return new ActiveFacet(facet.getType(), value.getId(), value.getFilter());
     }
 
     protected static ActiveFacet createActiveFacet(FacetType type, int valueId, String field, String query) {

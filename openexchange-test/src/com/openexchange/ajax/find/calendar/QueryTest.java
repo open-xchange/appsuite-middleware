@@ -61,17 +61,23 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.find.Module;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.ExclusiveFacet;
+import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 
 /**
@@ -91,7 +97,7 @@ public class QueryTest extends CalendarFindTest {
     }
 
     public void testFilterChaining() throws Exception {
-        Appointment appointment = randomAppointment();
+        Appointment appointment = randomPrivateAppointment();
         List<ActiveFacet> facets = new ArrayList<ActiveFacet>();
         facets.add(createActiveFieldFacet(SUBJECT, "subject", randomSubstring(appointment.getTitle())));
         facets.add(createActiveFieldFacet(LOCATION, "location", randomSubstring(appointment.getLocation())));
@@ -107,7 +113,7 @@ public class QueryTest extends CalendarFindTest {
     }
 
     public void testFilterSubject() throws Exception {
-        Appointment appointment = randomAppointment();
+        Appointment appointment = randomPrivateAppointment();
         appointment.setTitle(randomUID());
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(Collections.singletonList(createActiveFieldFacet(SUBJECT, "subject", randomSubstring(appointment.getTitle()))));
@@ -116,7 +122,7 @@ public class QueryTest extends CalendarFindTest {
     }
 
     public void testEmptyFilter() throws Exception {
-        Appointment appointment = randomAppointment();
+        Appointment appointment = randomPrivateAppointment();
         appointment.setTitle(randomUID());
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(Collections.singletonList(createActiveFieldFacet(SUBJECT, "subject", "")));
@@ -125,7 +131,7 @@ public class QueryTest extends CalendarFindTest {
     }
 
     public void testFilterLocation() throws Exception {
-        Appointment appointment = randomAppointment();
+        Appointment appointment = randomPrivateAppointment();
         appointment.setLocation(randomUID());
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(Collections.singletonList(createActiveFieldFacet(LOCATION, "location", randomSubstring(appointment.getLocation()))));
@@ -134,7 +140,7 @@ public class QueryTest extends CalendarFindTest {
     }
 
     public void testFilterDescription() throws Exception {
-        Appointment appointment = randomAppointment();
+        Appointment appointment = randomPrivateAppointment();
         appointment.setNote(randomUID());
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(Collections.singletonList(createActiveFieldFacet(DESCRIPTION, "description", randomSubstring(appointment.getNote()))));
@@ -143,11 +149,11 @@ public class QueryTest extends CalendarFindTest {
     }
 
     public void testFilterRelativeDate() throws Exception {
-        Appointment comingAppointment = randomAppointment();
+        Appointment comingAppointment = randomPrivateAppointment();
         comingAppointment.setStartDate(TimeTools.D("tomorrow at noon"));
         comingAppointment.setEndDate(TimeTools.D("tomorrow at noon"));
         comingAppointment = manager.insert(comingAppointment);
-        Appointment pastAppointment = randomAppointment();
+        Appointment pastAppointment = randomPrivateAppointment();
         pastAppointment.setStartDate(TimeTools.D("yesterday at noon"));
         pastAppointment.setEndDate(TimeTools.D("yesterday at noon"));
         pastAppointment = manager.insert(pastAppointment);
@@ -164,16 +170,16 @@ public class QueryTest extends CalendarFindTest {
     }
 
     public void testFilterStatus() throws Exception {
-        Appointment acceptedAppointment = randomAppointment();
+        Appointment acceptedAppointment = randomPrivateAppointment();
         acceptedAppointment = manager.insert(acceptedAppointment);
         manager.confirm(acceptedAppointment, Appointment.ACCEPT, "accept");
-        Appointment declinedAppointment = randomAppointment();
+        Appointment declinedAppointment = randomPrivateAppointment();
         declinedAppointment = manager.insert(declinedAppointment);
         manager.confirm(declinedAppointment, Appointment.DECLINE, "decline");
-        Appointment tentativeAppointment = randomAppointment();
+        Appointment tentativeAppointment = randomPrivateAppointment();
         tentativeAppointment = manager.insert(tentativeAppointment);
         manager.confirm(tentativeAppointment, Appointment.TENTATIVE, "tentative");
-        Appointment noneAppointment = randomAppointment();
+        Appointment noneAppointment = randomPrivateAppointment();
         noneAppointment = manager.insert(noneAppointment);
         manager.confirm(noneAppointment, Appointment.NONE, "none");
 
@@ -207,8 +213,8 @@ public class QueryTest extends CalendarFindTest {
     }
 
     public void testFilterRecurringType() throws Exception {
-        Appointment appointment = manager.insert(randomAppointment());
-        Appointment recurringAppointment = randomAppointment();
+        Appointment appointment = manager.insert(randomPrivateAppointment());
+        Appointment recurringAppointment = randomPrivateAppointment();
         recurringAppointment.setRecurrenceType(Appointment.DAILY);
         recurringAppointment.setInterval(1);
         recurringAppointment = manager.insert(recurringAppointment);
@@ -226,7 +232,7 @@ public class QueryTest extends CalendarFindTest {
 
     public void testFilterParticipants() throws Exception {
         ExternalUserParticipant participant = new ExternalUserParticipant(randomUID() + "example.com");
-        Appointment appointment = randomAppointment();
+        Appointment appointment = randomPrivateAppointment();
         appointment.addParticipant(participant);
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(PARTICIPANT, participant.getEmailAddress(), "participants", participant.getEmailAddress())));
@@ -239,7 +245,7 @@ public class QueryTest extends CalendarFindTest {
         int userId = client2.getValues().getUserId();
         client2.logout();
         UserParticipant userParticipant = new UserParticipant(userId);
-        Appointment appointment = randomAppointment();
+        Appointment appointment = randomPrivateAppointment();
         appointment.addParticipant(userParticipant);
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(PARTICIPANT, String.valueOf(userParticipant.getIdentifier()), "users", String.valueOf(userParticipant.getIdentifier()))));
@@ -263,7 +269,7 @@ public class QueryTest extends CalendarFindTest {
         Calendar originEndDate = (Calendar) originStartDate.clone();
         originEndDate.add(Calendar.HOUR_OF_DAY, 1);
         Calendar expectedStartDate = TimeTools.createCalendar(responseTimeZone);
-        Appointment appointment = randomAppointment();
+        Appointment appointment = randomPrivateAppointment();
         appointment.setStartDate(originStartDate.getTime());
         appointment.setEndDate(originEndDate.getTime());
         appointment.setTitle(randomUID());
@@ -281,7 +287,7 @@ public class QueryTest extends CalendarFindTest {
     }
 
     public void testTokenizedQuery() throws Exception {
-        Appointment appointment = randomAppointment();
+        Appointment appointment = randomPrivateAppointment();
         String t1 = randomUID();
         String t2 = randomUID();
         String t3 = randomUID();
@@ -301,6 +307,73 @@ public class QueryTest extends CalendarFindTest {
         globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.CALENDAR, "\"" + t1 + " " + t3 + "\""));
         documents = query(Collections.singletonList(createActiveFacet(globalFacet)));
         assertTrue("appointments found", 0 == documents.size());
+    }
+
+    public void testFolderTypeFacet() throws Exception {
+        FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
+        FolderObject[] folders = new FolderObject[3];
+        folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
+            randomUID(),
+            FolderObject.CALENDAR,
+            client.getValues().getPrivateAppointmentFolder(),
+            client.getValues().getUserId()));
+        folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(
+            randomUID(),
+            FolderObject.CALENDAR,
+            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+            client.getValues().getUserId()));
+        folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(
+            randomUID(),
+            FolderObject.CALENDAR,
+            client.getValues().getPrivateAppointmentFolder(),
+            client.getValues().getUserId()));
+
+        Appointment[] appointments = new Appointment[3];
+        appointments[0] = manager.insert(randomAppointment(folders[0].getObjectID()));
+        appointments[1] = manager.insert(randomAppointment(folders[1].getObjectID()));
+        appointments[2] = manager.insert(randomAppointment(folders[2].getObjectID()));
+
+        for (int i = 0; i < 3; i++) {
+            FolderType folderType = typesInOrder[i];
+            List<Facet> facets = autocomplete(Module.CALENDAR, "");
+            ExclusiveFacet folderTypeFacet = (ExclusiveFacet) findByType(CommonFacetType.FOLDER_TYPE, facets);
+            FacetValue typeValue = findByValueId(folderType.getIdentifier(), folderTypeFacet);
+            List<PropDocument> docs = query(Collections.singletonList(createActiveFacet(folderTypeFacet, typeValue)));
+            PropDocument[] foundDocs = new PropDocument[3];
+            for (PropDocument doc : docs) {
+                Map<String, Object> props = doc.getProps();
+                if (appointments[0].getTitle().equals(props.get("title"))) {
+                    foundDocs[0] = doc;
+                    break;
+                } else if (appointments[1].getTitle().equals(props.get("title"))) {
+                    foundDocs[1] = doc;
+                    break;
+                } else if (appointments[2].getTitle().equals(props.get("title"))) {
+                    foundDocs[2] = doc;
+                    break;
+                }
+            }
+
+            switch (folderType) {
+                case PRIVATE:
+                    assertNotNull("Private appointment not found", foundDocs[0]);
+                    assertNull("Public appointment found but should not", foundDocs[1]);
+                    assertNotNull("Shared appointment not found", foundDocs[2]);
+                    break;
+
+                case PUBLIC:
+                    assertNull("Private appointment found but should not", foundDocs[0]);
+                    assertNotNull("Public appointment not found", foundDocs[1]);
+                    assertNull("Shared appointment found but should not", foundDocs[2]);
+                    break;
+
+                case SHARED:
+                    assertNull("Private appointment found but should not", foundDocs[0]);
+                    assertNull("Public appointment found but should not", foundDocs[1]);
+                    assertNotNull("Shared appointment not found", foundDocs[2]);
+                    break;
+            }
+        }
     }
 
 }

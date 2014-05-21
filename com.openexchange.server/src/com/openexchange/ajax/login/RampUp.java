@@ -49,35 +49,20 @@
 
 package com.openexchange.ajax.login;
 
-import static com.openexchange.ajax.login.LoginTools.updateIPAddress;
 import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.login.LoginRampUpService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -95,7 +80,7 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
 
     @Override
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        
+
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
         final Response response = new Response();
         Session session = null;
@@ -107,15 +92,12 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
             }
             session = sessiondService.getSession(req.getParameter("session"));
             final JSONObject json = new JSONObject(8);
-    
-            performRampUp(req, session, json, ServerSessionAdapter.valueOf(session), true);
-    
+
+            performRampUp(req, json, ServerSessionAdapter.valueOf(session), true);
+
             // Set data
             response.setData(json);
 
-        } catch (final JSONException e) {
-            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            response.setException(oje);
         } catch (OXException e) {
             response.setException(e);
         }
@@ -132,7 +114,7 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
         } catch (final JSONException e) {
             LoginServlet.sendError(resp);
         }
-        
+
     }
 
 }
