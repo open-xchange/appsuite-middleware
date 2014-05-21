@@ -182,7 +182,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         final List<MailAccount> accounts = new ArrayList<MailAccount>(tmp.length);
         final int thisAccountId = access.getAccountId();
         for (final MailAccount mailAccount : tmp) {
-            if (mailAccount.isUnifiedINBOXEnabled() && thisAccountId != mailAccount.getId()) {
+            if (thisAccountId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
                 accounts.add(mailAccount);
             }
         }
@@ -332,7 +332,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Return properly filled array
             return messages;
         }
-        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(fullName);
+        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
         MailAccess<?, ?> mailAccess = null;
         try {
             final int accountId = fa.getAccountId();
@@ -403,7 +403,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 closeSafe(mailAccess);
             }
         }
-        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(fullName);
+        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, fa.getAccountId());
@@ -455,7 +455,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
                             // Get real full name
-                            fn = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullName);
+                            fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullName);
                             // Check if denoted account has such a default folder
                             if (fn == null) {
                                 return Collections.emptyList();
@@ -635,7 +635,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         /*
          * Certain account's folder
          */
-        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(fullName);
+        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
         MailAccess<?, ?> mailAccess = null;
         try {
             final int accountId = fa.getAccountId();
@@ -823,7 +823,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
                             // Get real full name
-                            fn = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullName);
+                            fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullName);
                             // Check if denoted account has such a default folder
                             if (fn == null) {
                                 return Collections.emptyList();
@@ -901,7 +901,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
-        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(fullName);
+        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
         MailAccess<?, ?> mailAccess = null;
         try {
             final int accountId = fa.getAccountId();
@@ -987,7 +987,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 mailAccess = MailAccess.getInstance(getSession(), accountId);
                                 mailAccess.connect();
                                 // Get real full name
-                                fn = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullName);
+                                fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullName);
                                 // Check if denoted account has such a default folder
                                 if (fn == null) {
                                     return Collections.emptyList();
@@ -1048,7 +1048,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
                             // Get real full name
-                            fn = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullName);
+                            fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullName);
                             // Check if denoted account has such a default folder
                             if (fn == null) {
                                 return Collections.emptyList();
@@ -1119,7 +1119,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
-        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(fullName);
+        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
         MailAccess<?, ?> mailAccess = null;
         try {
             final int accountId = fa.getAccountId();
@@ -1183,7 +1183,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
                             // Get real full name
-                            final String fn = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullName);
+                            final String fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullName);
                             // Check if denoted account has such a default folder
                             if (fn == null) {
                                 return Collections.emptyList();
@@ -1230,7 +1230,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
-        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(fullName);
+        final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
         MailAccess<?, ?> mailAccess = null;
         try {
             final int accountId = fa.getAccountId();
@@ -1305,7 +1305,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
             }
         } else {
-            final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(fullName);
+            final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
             MailAccess<?, ?> mailAccess = null;
             try {
                 mailAccess = MailAccess.getInstance(session, fa.getAccountId());
@@ -1334,7 +1334,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             throw UnifiedInboxException.Code.INVALID_DESTINATION_FOLDER.create(new Object[0]);
         }
         // Parse destination folder
-        final FullnameArgument destFullnameArgument = UnifiedInboxUtility.parseNestedFullname(destFullname);
+        final FullnameArgument destFullnameArgument = UnifiedInboxUtility.parseNestedFullName(destFullname);
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, destFullnameArgument.getAccountId());
@@ -1399,7 +1399,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
             }
         } else {
-            final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(fullName);
+            final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
             MailAccess<?, ?> mailAccess = null;
             try {
                 mailAccess = MailAccess.getInstance(session, fa.getAccountId());
@@ -1468,7 +1468,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
             }
         } else {
-            final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(fullName);
+            final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
             MailAccess<?, ?> mailAccess = null;
             try {
                 mailAccess = MailAccess.getInstance(session, fa.getAccountId());
