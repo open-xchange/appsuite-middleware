@@ -158,7 +158,6 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 }
             }
         }, false);
-        startRefreshTimer();
     }
 
     @Override
@@ -350,7 +349,6 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     @Override
     protected HazelcastResource doSet(ID id, Resource resource, boolean overwrite) throws OXException {
         HazelcastResource hazelcastResource = new HazelcastResource(resource);
-        id.on(ID.Events.REFRESH, TOUCH_ID);
 
         HazelcastResource previousResource = null;
         TransactionContext tx = newTransaction();
@@ -482,59 +480,6 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     protected static TransactionContext newTransaction() throws OXException {
         return HazelcastAccess.getHazelcastInstance().newTransactionContext();
     }
-
-    /**
-     * Starts the timer that refreshes synthetic resources
-     */
-    protected void startRefreshTimer() {
-        Services.getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                for (ID syntheticID : syntheticIDs) {
-                    try {
-                        syntheticID.trigger(ID.Events.REFRESH, this);
-                    } catch(RealtimeException re) {
-                        LOG.error("Error while refreshing ID: {}", syntheticID, re);
-                    }
-                }
-            }
-
-        }, 1, 15, TimeUnit.MINUTES);
-    }
-
-    /**
-     * Touch the infos we track for a given ID so they don't get automatically removed by Hazelcast's eviction policy as long as it's in
-     * active use.
-     */
-    private final IDEventHandler TOUCH_ID = new IDEventHandler() {
-
-        @Override
-        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-//            try {
-//                /*
-//                 * This performs a set on map entries to prevent eviction
-//                 */
-//                getIDMapping().get(id.toGeneralForm().toString());
-//                Map<String, Object> resourceWrap = getResourceMapping().get(id.toString());
-//                if (resourceWrap == null) {
-//                    LOG.debug("Unable to refresh id, might have been removed in the meantime: {}", id);
-//                    syntheticIDs.remove(id);
-//                } else {
-//                    resourceWrap.put(HazelcastResourceWrapper.eviction_timestamp, System.currentTimeMillis());
-//                    Map<String, Object> put = getResourceMapping().put(id.toString(), resourceWrap);
-//                    if (put == null) {
-//                        LOG.warn("There was no previous entry associated with id: {} when refreshing the directory entry via write.", id);
-//                    } else {
-//                        LOG.debug("Refreshed id: {} with resource: {}", id, resourceWrap);
-//                    }
-//                }
-//            } catch (OXException e) {
-//                LOG.error(e.getMessage());
-//            }
-        }
-
-    };
 
     @Override
     public void cleanupForId(ID id) {
