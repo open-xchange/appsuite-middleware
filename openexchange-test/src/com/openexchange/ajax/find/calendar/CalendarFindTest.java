@@ -124,7 +124,7 @@ public class CalendarFindTest extends AbstractFindTest {
         app.setNote(randomUID());
         app.setStartDate(TimeTools.D("Next friday at 10:15"));
         app.setEndDate(TimeTools.D("Next friday at 11:30"));
-        app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app.setParentFolderID(parentFolder);
         app.setIgnoreConflicts(true);
         return app;
     }
