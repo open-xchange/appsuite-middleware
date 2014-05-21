@@ -132,8 +132,6 @@ public class HashCalculator {
      */
     public String getHash(final HttpServletRequest req, final String userAgent, final String client) {
         try {
-            long st = System.currentTimeMillis();
-
             final MessageDigest md = MessageDigest.getInstance("MD5");
             md.update((null == userAgent ? parseClientUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
             if (null != client) {
