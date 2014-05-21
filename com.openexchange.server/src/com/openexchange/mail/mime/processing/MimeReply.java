@@ -470,11 +470,11 @@ public final class MimeReply {
                     if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
                         int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
                         if (realAccountId == MailAccount.DEFAULT_ID) {
-                            addUserAliases(filter, session, ctx);
+                            addUserAddresses(filter, mailSession, session, ctx);
                         } else {
                             final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
                             if (null == mass) {
-                                addUserAliases(filter, session, ctx);
+                                addUserAddresses(filter, mailSession, session, ctx);
                             } else {
                                 filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
                             }
@@ -482,7 +482,7 @@ public final class MimeReply {
                     } else {
                         final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
                         if (null == mass) {
-                            addUserAliases(filter, session, ctx);
+                            addUserAddresses(filter, mailSession, session, ctx);
                         } else {
                             filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
                         }
