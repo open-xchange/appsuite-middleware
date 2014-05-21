@@ -255,6 +255,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 /*
                  * update exception
                  */
+                // TODO fix for bug 32536 - closing reminder for appointment results in 'containing changes'
                 if (null != originalException && false == containsChanges(originalException, exceptionToSave)) {
                     LOG.debug("No changes detected in {}, skipping update.", exceptionToSave);
                 } else {
@@ -454,7 +455,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
          * parse appointments
          */
         return factory.getIcalParser().parseAppointments(
-                patchedICal, getTimeZone(), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+            patchedICal, getTimeZone(), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
     }
 
     private static boolean differs(Object value1, Object value2) {
@@ -477,8 +478,8 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
 
     private static boolean differs(int field, Appointment oldAppointment, CalendarDataObject cdo) {
         return oldAppointment.contains(field) && false == cdo.contains(field) ||
-                false == oldAppointment.contains(field) && cdo.contains(field) ||
-                differs(oldAppointment.get(field), cdo.get(field));
+            false == oldAppointment.contains(field) && cdo.contains(field) ||
+            differs(oldAppointment.get(field), cdo.get(field));
     }
 
     private static boolean containsChanges(Appointment oldAppointment, CalendarDataObject cdo) {
@@ -500,7 +501,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 }
             }
             if (CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() &&
-                    CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType()) {
+                CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType()) {
                 for (int field : RECURRENCE_FIELDS) {
                     if (differs(field, oldAppointment, cdo)) {
                         return true;
@@ -533,7 +534,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
          * reset previously set recurrence specific fields
          */
         if (CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() &&
-                CalendarObject.NO_RECURRENCE != updatedAppointment.getRecurrenceType()) {
+            CalendarObject.NO_RECURRENCE != updatedAppointment.getRecurrenceType()) {
             for (int field : RECURRENCE_FIELDS) {
                 if (oldAppointment.contains(field) && false == updatedAppointment.contains(field)) {
                     if (CalendarObject.UNTIL == field) {
