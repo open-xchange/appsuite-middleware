@@ -62,9 +62,9 @@ public interface DispatcherPrefixService {
     public static final String DEFAULT_PREFIX = "/ajax/";
 
     /**
-     * The default alternative prefix <tt>"/ox7/api/"</tt>.
+     * The default alternative prefix <tt>"/appsuite/api/"</tt>.
      */
-    public static final String DEFAULT_ALT_PREFIX = "/ox7/api/";
+    public static final String DEFAULT_ALT_PREFIX = "/appsuite/api/";
 
     /**
      * Gets the prefix for dispatcher; e.g. <tt>"/ajax/"</tt> (default).

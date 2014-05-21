@@ -195,8 +195,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     @Override
     public InputStream getDocument(String folderId, String id, String version, long offset, long length) throws OXException {
         try {
-            return getInfostore(folderId).getDocument(
-                ID(id), null == version ? -1 : Integer.parseInt(version), offset, length, sessionObj);
+            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Integer.parseInt(version), offset, length, sessionObj);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -205,8 +204,12 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     @Override
     public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         try {
-            final DocumentMetadata documentMetadata =
-                getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Integer.parseInt(version), sessionObj);
+            final DocumentMetadata documentMetadata = getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Integer.parseInt(version), sessionObj);
+
+            if (null != folderId && documentMetadata.getFolderId() > 0 && !folderId.equals(Long.toString(documentMetadata.getFolderId()))) {
+                throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
+            }
+
             return new InfostoreFile(documentMetadata);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
