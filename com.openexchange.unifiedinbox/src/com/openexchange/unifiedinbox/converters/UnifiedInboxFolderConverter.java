@@ -273,7 +273,7 @@ public final class UnifiedInboxFolderConverter {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
             for (int i = 0; i < retval.length; i++) {
-                final String accountFullname = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullnames[i]);
+                final String accountFullname = UnifiedInboxUtility.determineAccountFullName(mailAccess, fullnames[i]);
                 if (null != accountFullname && mailAccess.getFolderStorage().exists(accountFullname)) {
                     final MailFolder mf = mailAccess.getFolderStorage().getFolder(accountFullname);
                     retval[i] =
