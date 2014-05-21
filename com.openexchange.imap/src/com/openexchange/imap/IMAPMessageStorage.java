@@ -1607,7 +1607,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         sentFolder = null;
                         for (final Conversation conversation : conversations) {
                             for (final MailMessage sentMessage : sentMessages) {
-                                if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                                if (!sentMessage.isDeleted() && conversation.referencesOrIsReferencedBy(sentMessage)) {
                                     conversation.addMessage(sentMessage);
                                 }
                             }

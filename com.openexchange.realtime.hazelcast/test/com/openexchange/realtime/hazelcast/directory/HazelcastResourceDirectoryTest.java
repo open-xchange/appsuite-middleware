@@ -372,8 +372,4 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         return true;
     }
 
-    @Override
-    protected void startRefreshTimer() {
-    }
-
 }

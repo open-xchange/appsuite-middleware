@@ -152,12 +152,6 @@ public class StateManager implements RealtimeJanitor {
                 } else {
                     LOG.error("Unable to cleanup for id {}. GLobalRealtimeCleanupService is missing!", client);
                 }
-            } else {
-                try {
-                    state.getId().trigger(ID.Events.REFRESH, this);
-                } catch (Exception e) {
-                    LOG.error("Triggering refresh of ID: {} failed.", state.getId(), e);
-                }
             }
         }
     }
