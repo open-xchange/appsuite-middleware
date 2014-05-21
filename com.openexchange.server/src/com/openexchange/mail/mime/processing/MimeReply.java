@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.mail.mime.filler.MimeMessageFiller.setReplyHeaders;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
@@ -279,7 +280,7 @@ public final class MimeReply {
             final MailMessage origMsg;
             {
                 final ContentType contentType = originalMsg.getContentType();
-                if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(toLowerCase("type"))))) {
+                if (contentType.startsWith("multipart/related") && ("application/smil".equals(asciiLowerCase(contentType.getParameter("type"))))) {
                     origMsg = MimeSmilFixer.getInstance().process(originalMsg);
                 } else {
                     origMsg = ManagedMimeMessage.clone(originalMsg);
@@ -464,11 +465,28 @@ public final class MimeReply {
                 if (accountId == MailAccount.DEFAULT_ID) {
                     addUserAddresses(filter, mailSession, session, ctx);
                 } else {
-                    final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                    if (null == mass) {
-                        addUserAddresses(filter, mailSession, session, ctx);
+                    // Check for Unified Mail account
+                    ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+                    UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
+                    if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
+                        int realAccountId = resolveFrom2Account(session, origMsg.getFrom());
+                        if (realAccountId == MailAccount.DEFAULT_ID) {
+                            addUserAddresses(filter, mailSession, session, ctx);
+                        } else {
+                            final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                            if (null == mass) {
+                                addUserAddresses(filter, mailSession, session, ctx);
+                            } else {
+                                filter.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                            }
+                        }
                     } else {
-                        filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                        final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                        if (null == mass) {
+                            addUserAddresses(filter, mailSession, session, ctx);
+                        } else {
+                            filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                        }
                     }
                 }
                 /*
@@ -969,7 +987,7 @@ public final class MimeReply {
          */
         for (int i = count - 1; i >= 0; i--) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
-            if (!"attachment".equals(toLowerCase(part.getContentDisposition().getDisposition()))) {
+            if (!"attachment".equals(asciiLowerCase(part.getContentDisposition().getDisposition()))) {
                 partContentType.setContentType(part.getContentType());
                 if (partContentType.startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
                     final MailMessage enclosedMsg = (MailMessage) part.getContent();
@@ -1220,19 +1238,6 @@ public final class MimeReply {
 
     private static boolean hasContent(final String html) {
         return PATTERN_CONTENT.matcher(html).find();
-    }
-
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     /**

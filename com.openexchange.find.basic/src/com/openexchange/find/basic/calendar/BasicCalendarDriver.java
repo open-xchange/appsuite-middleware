@@ -247,7 +247,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         AppointmentSearchObject appointmentSearch = searchBuilder
             .applyFilters(searchRequest.getFilters())
             .applyQueries(searchRequest.getQueries())
-            .applyFolders(searchRequest.getFolderId(), searchRequest.getFolderType())
+            .applyFolders(searchRequest)
             .build();
         if (searchBuilder.isFalse()) {
             return SearchResult.EMPTY;

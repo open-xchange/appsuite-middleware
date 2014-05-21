@@ -54,8 +54,6 @@ import java.util.Map;
 import java.util.Random;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.find.Module;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -110,7 +108,7 @@ public class CalendarFindTest extends AbstractFindTest {
         app.setNote(randomUID());
         app.setStartDate(TimeTools.D("Next friday at 10:15"));
         app.setEndDate(TimeTools.D("Next friday at 11:30"));
-        app.setParentFolderID(parentFolder);
+        app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         app.setIgnoreConflicts(true);
         return app;
     }

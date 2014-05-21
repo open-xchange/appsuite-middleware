@@ -329,7 +329,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             .withDisplayItem(item)
             .addOption(Option.newInstance("all", FACET_SENDER_AND_RECIPIENT, Filter.of(SENDER_AND_RECIPIENT_FIELDS, queries)))
             .addOption(Option.newInstance("sender", FACET_SENDER, Filter.of(SENDER_FIELDS, queries)))
-            .addOption(Option.newInstance("sender", FACET_RECIPIENT, Filter.of(RECIPIENT_FIELDS, queries)))
+            .addOption(Option.newInstance("recipient", FACET_RECIPIENT, Filter.of(RECIPIENT_FIELDS, queries)))
             .build();
     }
 

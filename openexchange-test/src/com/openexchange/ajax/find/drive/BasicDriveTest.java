@@ -50,6 +50,7 @@
 package com.openexchange.ajax.find.drive;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,12 +65,10 @@ import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
+import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.ListInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
 import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
-import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
-import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.SearchInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.SearchInfostoreResponse;
 import com.openexchange.configuration.MailConfig;
@@ -105,6 +104,8 @@ public class BasicDriveTest extends AbstractFindTest {
 
     private FolderObject testFolder;
 
+    private InfostoreTestManager manager;
+
     private static final String SEARCH = "BasicDriveTest";
 
     /**
@@ -131,28 +132,19 @@ public class BasicDriveTest extends AbstractFindTest {
             client.getValues().getUserId());
         testFolder = folderManager.insertFolderOnServer(testFolder);
 
+        manager = new InfostoreTestManager(client);
         metadata = new DocumentMetadataImpl();
         metadata.setFileName(file.getName());
         metadata.setTitle(file.getName());
         metadata.setDescription("Test file for testing new find api");
         metadata.setFolderId(testFolder.getObjectID());
         metadata.setMeta(Collections.singletonMap("key", (Object) "value"));
-        NewInfostoreRequest request = new NewInfostoreRequest(metadata, file);
-        NewInfostoreResponse response = client.execute(request);
-        assertFalse("Could not create test file for BasicDriveTest", response.hasError());
-        metadata.setId(response.getID());
-        metadata.setLastModified(response.getTimestamp());
+        manager.newAction(metadata, file);
     }
 
     @Override
     public void tearDown() throws Exception {
-        if (metadata.getId() != -1) {
-            DeleteInfostoreRequest request = new DeleteInfostoreRequest(
-                metadata.getId(),
-                testFolder.getObjectID(),
-                metadata.getLastModified());
-            client.execute(request);
-        }
+        manager.cleanUp();
         super.tearDown();
     }
 
@@ -313,6 +305,107 @@ public class BasicDriveTest extends AbstractFindTest {
         globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "\"Test file murks\""));
         documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
         assertTrue("document found", 0 == documents.size());
+    }
+
+    public void testFolderTypeFacet() throws Exception {
+        AJAXClient client2 = new AJAXClient(User.User2);
+        try {
+            FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
+            AJAXClient[] clients = new AJAXClient[] { client, client, client2 };
+            FolderObject[] folders = new FolderObject[3];
+            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
+                randomUID(),
+                FolderObject.INFOSTORE,
+                client.getValues().getPrivateInfostoreFolder(),
+                client.getValues().getUserId()));
+            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(
+                randomUID(),
+                FolderObject.INFOSTORE,
+                FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,
+                client.getValues().getUserId()));
+            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(
+                randomUID(),
+                FolderObject.INFOSTORE,
+                client.getValues().getPrivateInfostoreFolder(),
+                client.getValues().getUserId(),
+                client2.getValues().getUserId()));
+
+            DocumentMetadata[] documents = new DocumentMetadata[3];
+            documents[0] = new DocumentMetadataImpl(metadata);
+            documents[0].setTitle(randomUID());
+            documents[0].setFolderId(folders[0].getObjectID());
+            documents[1] = new DocumentMetadataImpl(metadata);
+            documents[1].setTitle(randomUID());
+            documents[1].setFolderId(folders[1].getObjectID());
+            documents[2] = new DocumentMetadataImpl(metadata);
+            documents[2].setTitle(randomUID());
+            documents[2].setFolderId(folders[2].getObjectID());
+            manager.newAction(documents[0]);
+            manager.newAction(documents[1]);
+            manager.newAction(documents[2]);
+
+            for (int i = 0; i < 3; i++) {
+                FolderType folderType = typesInOrder[i];
+                List<Facet> facets = autocomplete(clients[i], "");
+                ExclusiveFacet folderTypeFacet = (ExclusiveFacet) findByType(CommonFacetType.FOLDER_TYPE, facets);
+                FacetValue typeValue = findByValueId(folderType.getIdentifier(), folderTypeFacet);
+                List<PropDocument> docs = query(clients[i], Collections.singletonList(createActiveFacet(folderTypeFacet, typeValue)));
+                PropDocument[] foundDocs = new PropDocument[3];
+                for (PropDocument doc : docs) {
+                    Map<String, Object> props = doc.getProps();
+                    if (documents[0].getTitle().equals(props.get("title"))) {
+                        foundDocs[0] = doc;
+                        continue;
+                    } else if (documents[1].getTitle().equals(props.get("title"))) {
+                        foundDocs[1] = doc;
+                        continue;
+                    } else if (documents[2].getTitle().equals(props.get("title"))) {
+                        foundDocs[2] = doc;
+                        continue;
+                    }
+                }
+
+                switch (folderType) {
+                    case PRIVATE:
+                        assertNotNull("Private document not found", foundDocs[0]);
+                        assertNull("Public document found but should not", foundDocs[1]);
+                        assertNotNull("Shared document not found", foundDocs[2]);
+                        break;
+
+                    case PUBLIC:
+                        assertNull("Private document found but should not", foundDocs[0]);
+                        assertNotNull("Public document not found", foundDocs[1]);
+                        assertNull("Shared document found but should not", foundDocs[2]);
+                        break;
+
+                    case SHARED:
+                        assertNull("Private document found but should not", foundDocs[0]);
+                        assertNull("Public document found but should not", foundDocs[1]);
+                        assertNotNull("Shared document not found", foundDocs[2]);
+                        break;
+                }
+            }
+        } finally {
+            client2.logout();
+        }
+    }
+
+    protected List<Facet> autocomplete(AJAXClient client, String prefix) throws Exception {
+        AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.DRIVE.getIdentifier());
+        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        return autocompleteResponse.getFacets();
+    }
+
+    protected List<PropDocument> query(AJAXClient client, List<ActiveFacet> facets) throws Exception {
+        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, Module.DRIVE.getIdentifier());
+        QueryResponse queryResponse = client.execute(queryRequest);
+        SearchResult result = queryResponse.getSearchResult();
+        List<PropDocument> propDocuments = new ArrayList<PropDocument>();
+        List<Document> documents = result.getDocuments();
+        for (Document document : documents) {
+            propDocuments.add((PropDocument) document);
+        }
+        return propDocuments;
     }
 
     protected List<Facet> autocomplete(String prefix) throws Exception {

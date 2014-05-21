@@ -187,4 +187,15 @@ public abstract class ContactsFindTest extends AbstractFindTest {
         return contact;
     }
 
+    protected Contact randomContact(int parentFolder) {
+        Contact contact = new Contact();
+        contact.setParentFolderID(parentFolder);
+        contact.setSurName(randomUID());
+        contact.setGivenName(randomUID());
+        contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
+        contact.setEmail1(randomUID() + "@example.com");
+        contact.setUid(randomUID());
+        return contact;
+    }
+
 }

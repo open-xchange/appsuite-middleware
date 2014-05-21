@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.find.actions;
 
-import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -71,13 +70,14 @@ import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.SimpleDisplayItem;
 import com.openexchange.find.facet.FacetValue.FacetValueBuilder;
 import com.openexchange.find.facet.Facets;
 import com.openexchange.find.facet.Facets.DefaultFacetBuilder;
 import com.openexchange.find.facet.Facets.ExclusiveFacetBuilder;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.Option;
+import com.openexchange.find.facet.SimpleDisplayItem;
+import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.tasks.TasksFacetType;
 
@@ -184,13 +184,10 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
 
             AbstractFacet facet = null;
             if ("simple".equals(jFacet.getString("style"))) {
-                final JSONArray jFacetValues = jFacet.getJSONArray("values");
-                final FacetValue value = parseJFacetValue(jFacetValues.getJSONObject(0));
-                facet = newSimpleBuilder(facetType)
-                    .withDisplayItem(value.getDisplayItem())
-                    .withFilter(value.getFilter())
-                    .build();
-              } else if ("default".equals(jFacet.getString("style"))) {
+                final Filter filter = parseJFilter(jFacet.getJSONObject("filter"));
+                final String displayName = extractDisplayName(jFacet);
+                facet = new SimpleFacet(facetType, new SimpleDisplayItem(displayName), filter);
+            } else if ("default".equals(jFacet.getString("style"))) {
                 final JSONArray jFacetValues = jFacet.getJSONArray("values");
                 final int len = jFacetValues.length();
                 final DefaultFacetBuilder builder = Facets.newDefaultBuilder(facetType);

@@ -345,13 +345,13 @@ public class QueryTest extends CalendarFindTest {
                 Map<String, Object> props = doc.getProps();
                 if (appointments[0].getTitle().equals(props.get("title"))) {
                     foundDocs[0] = doc;
-                    break;
+                    continue;
                 } else if (appointments[1].getTitle().equals(props.get("title"))) {
                     foundDocs[1] = doc;
-                    break;
+                    continue;
                 } else if (appointments[2].getTitle().equals(props.get("title"))) {
                     foundDocs[2] = doc;
-                    break;
+                    continue;
                 }
             }
 
