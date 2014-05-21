@@ -14,6 +14,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.capabilities.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.capabilities.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.charset"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.cluster.lock"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.config.cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.config.cascade.context"/>
