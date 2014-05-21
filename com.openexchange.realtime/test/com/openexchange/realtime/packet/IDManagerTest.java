@@ -50,8 +50,11 @@
 package com.openexchange.realtime.packet;
 
 import static com.openexchange.realtime.packet.ID.Events.BEFOREDISPOSE;
-import static com.openexchange.realtime.packet.ID.Events.REFRESH;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -119,17 +122,12 @@ public class IDManagerTest extends IDManager {
         marens.on(BEFOREDISPOSE, handler1);
         marens.on(BEFOREDISPOSE, handler2);
         marens.on(BEFOREDISPOSE, handler3);
-        marens.on(REFRESH, handler3);
         assertEquals(3, getEventHandlers(marens, BEFOREDISPOSE) .size());
-        assertEquals(1, getEventHandlers(marens, REFRESH) .size());
         
-        marens.off(REFRESH, handler3);
         assertEquals(3, getEventHandlers(marens, BEFOREDISPOSE) .size());
-        assertEquals(0, getEventHandlers(marens, REFRESH) .size());
         
         marens.off(BEFOREDISPOSE, handler3);
         assertEquals(2, getEventHandlers(marens, BEFOREDISPOSE) .size());
-        assertEquals(0, getEventHandlers(marens, REFRESH) .size());
     }
 
     @Test

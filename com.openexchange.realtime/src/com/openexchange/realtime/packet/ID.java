@@ -493,11 +493,6 @@ public class ID implements Serializable {
          */
         public static final String BEFOREDISPOSE = "beforedispose";
 
-        /**
-         * This event is triggered to ensure that resources for this ID aren't freed up by eviction policies or sth. similar.
-         */
-        public static final String REFRESH = "refresh";
-
     }
 
     /**
