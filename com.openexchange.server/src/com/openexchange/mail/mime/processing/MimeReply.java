@@ -476,7 +476,7 @@ public final class MimeReply {
                             if (null == mass) {
                                 addUserAddresses(filter, mailSession, session, ctx);
                             } else {
-                                filter.add(new QuotedInternetAddress(mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
+                                filter.add(new QuotedInternetAddress(mass.getMailAccount(realAccountId, session.getUserId(), session.getContextId()).getPrimaryAddress(), false));
                             }
                         }
                     } else {
