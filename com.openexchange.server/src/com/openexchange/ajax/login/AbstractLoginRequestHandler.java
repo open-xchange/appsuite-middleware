@@ -191,7 +191,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             }
 
             // Perform Client Specific Ramp-Up
-            performRampUp(req, session, json, serverSession);
+            performRampUp(req, json, serverSession);
 
             // Set response
             response.setData(json);
@@ -253,19 +253,43 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
         return false;
     }
 
-    protected void performRampUp(final HttpServletRequest req, final Session session, final JSONObject json, ServerSession serverSession) throws OXException, IOException, JSONException {
-        performRampUp(req, session, json, serverSession, false);
+    /**
+     * Performs the ramp-up.
+     *
+     * @param req The HTTP request
+     * @param json The JSON object to contribute to
+     * @param session The associated session
+     * @throws OXException If an Open-Xchange error occurred
+     * @throws IOException If an I/O error occurred
+     */
+    protected void performRampUp(HttpServletRequest req, JSONObject json, ServerSession session) throws OXException, IOException {
+        performRampUp(req, json, session, false);
     }
-    protected void performRampUp(final HttpServletRequest req, final Session session, final JSONObject json, ServerSession serverSession, boolean force) throws OXException, IOException, JSONException {
+
+    /**
+     * (Possibly enforced) Performs the ramp-up.
+     *
+     * @param req The HTTP request
+     * @param json The JSON object to contribute to
+     * @param session The associated session
+     * @param force <code>true</code> to enforce; otherwise <code>false</code> to check for presence of <code>"...&rampup=true"</code> URL parameter
+     * @throws OXException If an Open-Xchange error occurred
+     * @throws IOException If an I/O error occurred
+     */
+    protected void performRampUp(HttpServletRequest req, JSONObject json, ServerSession session, boolean force) throws OXException, IOException {
         if (force || Boolean.parseBoolean(req.getParameter("rampup"))) {
             final Set<LoginRampUpService> rampUpServices = this.rampUpServices;
             if (rampUpServices != null) {
-                for (LoginRampUpService rampUpService : rampUpServices) {
-                    if (rampUpService.contributesTo(session.getClient())) {
-                        JSONObject contribution = rampUpService.getContribution(serverSession, AJAXRequestDataTools.getInstance().parseRequest(req, false, false, serverSession, ""));
-                        json.put("rampup", contribution);
-                        break;
+                try {
+                    for (LoginRampUpService rampUpService : rampUpServices) {
+                        if (rampUpService.contributesTo(session.getClient())) {
+                            JSONObject contribution = rampUpService.getContribution(session, AJAXRequestDataTools.getInstance().parseRequest(req, false, false, session, ""));
+                            json.put("rampup", contribution);
+                            break;
+                        }
                     }
+                } catch (JSONException e) {
+                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                 }
             }
         }

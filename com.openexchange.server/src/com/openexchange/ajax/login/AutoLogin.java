@@ -196,7 +196,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                             }
                         }
 
-                        performRampUp(req, session, json, ServerSessionAdapter.valueOf(session));
+                        performRampUp(req, json, ServerSessionAdapter.valueOf(session));
 
                         // Set data
                         response.setData(json);
