@@ -59,7 +59,9 @@ import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
@@ -88,6 +90,10 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
 
     protected Random random;
 
+    protected AJAXClient client2;
+
+    protected FolderTestManager folderManager2;
+
     /**
      * Default constructor.
      *
@@ -101,7 +107,9 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
         random = new Random();
+        client2 = new AJAXClient(User.User2);
         folderManager = new FolderTestManager(getClient());
+        folderManager2 = new FolderTestManager(client2);
     }
 
     @Override

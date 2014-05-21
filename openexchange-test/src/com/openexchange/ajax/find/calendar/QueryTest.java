@@ -322,16 +322,17 @@ public class QueryTest extends CalendarFindTest {
             FolderObject.CALENDAR,
             FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
             client.getValues().getUserId()));
-        folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(
+        folders[2] = folderManager2.insertFolderOnServer(folderManager.generateSharedFolder(
             randomUID(),
             FolderObject.CALENDAR,
-            client.getValues().getPrivateAppointmentFolder(),
+            client2.getValues().getPrivateAppointmentFolder(),
+            client2.getValues().getUserId(),
             client.getValues().getUserId()));
 
         Appointment[] appointments = new Appointment[3];
         appointments[0] = manager.insert(randomAppointment(folders[0].getObjectID()));
         appointments[1] = manager.insert(randomAppointment(folders[1].getObjectID()));
-        appointments[2] = manager.insert(randomAppointment(folders[2].getObjectID()));
+        appointments[2] = manager2.insert(randomAppointment(folders[2].getObjectID()));
 
         for (int i = 0; i < 3; i++) {
             FolderType folderType = typesInOrder[i];
@@ -358,7 +359,7 @@ public class QueryTest extends CalendarFindTest {
                 case PRIVATE:
                     assertNotNull("Private appointment not found", foundDocs[0]);
                     assertNull("Public appointment found but should not", foundDocs[1]);
-                    assertNotNull("Shared appointment not found", foundDocs[2]);
+                    assertNull("Shared appointment found but should not", foundDocs[2]);
                     break;
 
                 case PUBLIC:
