@@ -190,7 +190,7 @@ public final class SMTPConfig extends TransportConfig {
         }
 
         final String lc = com.openexchange.java.Strings.toLowerCase(login);
-        return "null".equals(login) || "nil".equals(login);
+        return "null".equals(lc) || "nil".equals(lc);
     }
 
 }
