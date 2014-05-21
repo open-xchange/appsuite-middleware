@@ -3,6 +3,7 @@
  - Fix for bug 32652: Do also consider pre-auth capabilities when checking for a secure connection
  - Fix for bug 32651: Do not overwrite settings fetched from config-cascade in JSON merge
  - Fix for bug 32409: Check retrieved document against passed folder identifier (if any)
+ - Fix for bug 32226: Fixed regex used for look-up of referenced inline images
 
 * 2014-05-21 - ioannis.chouklis@open-xchange.com
 
