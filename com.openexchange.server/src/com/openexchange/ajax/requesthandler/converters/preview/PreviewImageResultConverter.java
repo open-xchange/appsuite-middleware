@@ -64,6 +64,7 @@ import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.preview.ContentTypeChecker;
@@ -84,7 +85,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PreviewImageResultConverter extends AbstractPreviewResultConverter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreviewImageResultConverter.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreviewImageResultConverter.class);
 
     /**
      * Initializes a new {@link PreviewImageResultConverter}.
@@ -121,8 +123,9 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             // Get eTag from result that provides the IFileHolder
             final String eTag = result.getHeader("ETag");
             final boolean isValidEtag = !Strings.isEmpty(eTag);
+            final String previewLanguage = getUserLanguage(session);
             if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
-                final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
+                final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData, previewLanguage);
                 final CachedResource cachedPreview = resourceCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     requestData.setFormat("file");
@@ -188,6 +191,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                     dataProperties.put("PreviewHeight", requestData.getParameter("height"));
                     dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
                     dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
+                    dataProperties.put("PreviewLanguage", previewLanguage);
                     previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), getOutput(), session, 1);
                 } finally {
                     Streams.close(stream, fileHolder);
@@ -266,6 +270,11 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private String getUserLanguage(final ServerSession session) {
+        final User sessionUser = session.getUser();
+        return null == sessionUser ? null : sessionUser.getPreferredLanguage();
     }
 
     private void setDefaulThumbnail(final AJAXRequestData requestData, final AJAXRequestResult result) {
