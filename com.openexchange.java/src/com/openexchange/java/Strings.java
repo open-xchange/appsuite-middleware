@@ -680,6 +680,10 @@ public class Strings {
      * @return The lower-case string
      */
     public static String asciiLowerCase(String s) {
+        if (null == s) {
+            return null;
+        }
+
         char[] c = null;
         int i = s.length();
 
