@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-04-27 22:05+0200\n"
+"PO-Revision-Date: 2014-05-14 15:40+0200\n"
 "Last-Translator: Nicolas Ternisien <nicolas@bureau-cornavin.com>\n"
-"Language-Team: French <fr@bureau-cornavin.com>\n"
+"Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr_CA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2393,6 +2393,26 @@ msgstr "L'aspect « %1$s » est obligatoire et doit être défini."
 msgid "Could not parse \"%1$s\"."
 msgstr "Impossible d'analyser « %1$s »."
 
+#. The folder id \"%1$s\" is invalid for module \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:90
+msgid "The folder id \"%1$s\" is invalid for module \"%2$s\"."
+msgstr ""
+"L'identifiant de dossier « %1$s » n'est pas valable pour le module  « %2$s »."
+
+#. The folder type \"%1$s\" is not supported.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:93
+msgid "The folder type \"%1$s\" is not supported."
+msgstr "Le type de dossier « %1$s » n'est pas géré."
+
+#. The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:96
+msgid ""
+"The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not "
+"be used within one request."
+msgstr ""
+"Les types d'aspect « %1$s » et « %2$s » sont mutuellement en conflit et ne "
+"peuvent pas être utilisés à l'intérieur d'une même requête."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:61
 msgid "%1$s <i>in appointments</i>"
 msgstr "%1$s <i>dans les rendez-vous</i>"
@@ -2557,61 +2577,86 @@ msgstr "Type du fichier"
 msgid "File size"
 msgstr "Taille du fichier"
 
+#. Search criteria time
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
+msgid "Time"
+msgstr "Période"
+
 #. -------------------------- i18n strings for file types ---------------------------- //
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:94
 msgid "Images"
 msgstr "Images"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:96
 msgid "Audio"
 msgstr "Audio"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:98
 msgid "Video"
 msgstr "Vidéo"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:100
 msgid "Documents"
 msgstr "Documents"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:102
 msgid "Other"
 msgstr "Autre"
 
 #. ---------------------------------------------------------------------------------- //
 #. Public folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
 msgid "Public folders"
 msgstr "Dossiers publics"
 
 #. Private folders
 #. Name of the parent folder for the private user folders.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:110
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
 msgstr "Dossiers privés"
 
 #. Shared folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:113
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
 msgid "Shared folders"
 msgstr "Dossiers partagés"
 
 #. Search in file field file name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:116
 msgid "%1$s <i>in file name</i>"
 msgstr "%1$s <i>dans le nom du fichier</i>"
 
 #. Search in file field file description.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:119
 msgid "%1$s <i>in file description</i>"
 msgstr "%1$s <i>dans la description du fichier</i>"
 
 #. Search in file field file content.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:119
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:122
 msgid "%1$s <i>in file content</i>"
 msgstr "%1$s <i>dans le contenu du fichier</i>"
+
+#. ------------------------------- Time --------------------------------------------- //
+#. Search mails from last week
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:127
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
+msgid "last week"
+msgstr "la semaine dernière"
+
+#. Search mails from last month
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
+msgid "last month"
+msgstr "le mois dernier"
+
+#. Search mails from last year
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:133
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:92
+msgid "last year"
+msgstr "l'année dernière"
 
 #. Search in emails
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:65
@@ -2637,26 +2682,6 @@ msgstr "Expéditeur"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:80
 msgid "Recipient"
 msgstr "Destinataire"
-
-#. Search criteria time
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
-msgid "Time"
-msgstr "Période"
-
-#. Search mails from last week
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
-msgid "last week"
-msgstr "la semaine dernière"
-
-#. Search mails from last month
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
-msgid "last month"
-msgstr "le mois dernier"
-
-#. Search mails from last year
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:92
-msgid "last year"
-msgstr "l'année dernière"
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Search in tasks
@@ -3651,24 +3676,35 @@ msgstr ""
 msgid "The request sent was missing its body"
 msgstr "La requête envoyée n'avait pas de corps"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:75
+#. The account is invalid, please recreate it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:76
 msgid "The account is invalid, please recreate it."
 msgstr "Le compte est invalide, veuillez le recréer."
 
+#. The account "%1$s" is invalid, please recreate it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:79
+msgid "The account \"%1$s\" is invalid, please recreate it."
+msgstr "Le compte « %1$s » n'est pas valable, veuillez le recréer."
+
 #. Please provide a display name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:82
 msgid "Please provide a display name."
 msgstr "Veuillez fournir un nom d'affichage."
 
 #. The associated OAuth provider denied the request: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:85
 msgid "The associated OAuth provider denied the request: %1$s."
 msgstr "Le fournisseur OAuth associé a refusé la demande : %1$s."
 
 #. The OAuth authentication process has been canceled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
 msgid "The OAuth authentication process has been canceled."
 msgstr "Le processus d'authentification OAuth a été annulé."
+
+#. Could not get a valid response from the associated OAuth provider.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:91
+msgid "Could not get a valid response from the associated OAuth provider."
+msgstr "Impossible d'obtenir une réponse valable du fournisseur OAuth associé."
 
 #. *
 #. * New password too short.
@@ -4153,16 +4189,21 @@ msgstr ""
 "être créé pour l'utilisateur %2$s"
 
 #. *
-#. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.
+#. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work. Please be advised that while it is safe to ignore this warning, the POP3 account might not work if the supplied credentials are invalid.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:295
 msgid ""
 "Validation of POP3 credentials is disabled due to possible login "
-"restrictions by provider. Otherwise subsequent login attempt might not work."
+"restrictions by provider. Otherwise subsequent login attempt might not work. "
+"Please be advised that while it is safe to ignore this warning, the POP3 "
+"account might not work if the supplied credentials are invalid."
 msgstr ""
-"La vérification des justificatifs d'identité est désactivée. Il se peut que "
-"les connexions aient été restreintes par le fournisseur de services. Une "
-"nouvelle tentative de connexion pourrait ne pas fonctionner."
+"La validation des données de connexion POP3 est désactivée à cause de "
+"restrictions de connexion du fournisseur. Si c'est le cas, les prochaines "
+"tentatives de connexion peuvent ne pas fonctionner. Veuillez remarquer que "
+"bien que cet avertissement puisse être ignoré en toute sécurité, le compte "
+"POP3 peut ne pas fonctionner si les données de connexion fournies ne sont pas "
+"valables."
 
 #. POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:298
@@ -4300,11 +4341,10 @@ msgid ""
 "delete some appointments in order to create new ones. Please note: The quota "
 "refers to all appointments of all users in this context."
 msgstr ""
-"Quota dépassé pour le calendrier. Limite du quota : %2$s. Quota utilisé : %"
-"1$s. Veuillez supprimer "
-"certains rendez-vous afin d'en créer de nouveaux. Remarque : le quota se "
-"réfère à tous les rendez-vous "
-"de tous les utilisateurs de ce contexte."
+"Quota dépassé pour le calendrier. Limite du quota : %2$s. Quota utilisé : "
+"%1$s. Veuillez supprimer certains rendez-vous afin d'en créer de nouveaux. "
+"Remarque : le quota se réfère à tous les rendez-vous de tous les "
+"utilisateurs de ce contexte."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
 msgid ""
@@ -4312,11 +4352,10 @@ msgid ""
 "delete some contacts in order to create new ones. Please note: The quota "
 "refers to all contacts of all users in this context."
 msgstr ""
-"Quota dépassé pour les contacts. Limite du quota : %2$s. Quota utilisé : %"
-"1$s. Veuillez supprimer "
-"certains contacts afin d'en créer de nouveaux. Remarque : le quota se réfère "
-"à tous les contacts"
-"de tous les utilisateurs de ce contexte."
+"Quota dépassé pour les contacts. Limite du quota : %2$s. Quota utilisé : "
+"%1$s. Veuillez supprimer certains contacts afin d'en créer de nouveaux. "
+"Remarque : le quota se réfère à tous les contactsde tous les utilisateurs de "
+"ce contexte."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:68
 msgid ""
@@ -4325,10 +4364,9 @@ msgid ""
 "tasks of all users in this context."
 msgstr ""
 "Quota dépassé pour les tâches. Limite du quota : %2$s. Quota utilisé : %1$s. "
-"Veuillez supprimer "
-"certaines tâches afin d'en créer de nouvelles. Remarque : le quota se réfère "
-"à toutes les tâches "
-"de tous les utilisateurs de ce contexte."
+"Veuillez supprimer certaines tâches afin d'en créer de nouvelles. Remarque : "
+"le quota se réfère à toutes les tâches de tous les utilisateurs de ce "
+"contexte."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:70
 msgid ""
@@ -4336,11 +4374,10 @@ msgid ""
 "some files in order to create new ones. Please note: The quota refers to all "
 "files of all users in this context."
 msgstr ""
-"Quota dépassé pour les fichiers. Limite du quota : %2$s. Quota utilisé : %"
-"1$s. Veuillez supprimer "
-"certains fichiers afin d'en créer de nouveaux. Remarque : le quota se réfère "
-"à tous les fichiers"
-"de tous les utilisateurs de ce contexte."
+"Quota dépassé pour les fichiers. Limite du quota : %2$s. Quota utilisé : "
+"%1$s. Veuillez supprimer certains fichiers afin d'en créer de nouveaux. "
+"Remarque : le quota se réfère à tous les fichiersde tous les utilisateurs de "
+"ce contexte."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:72
 msgid ""
@@ -4350,8 +4387,8 @@ msgid ""
 msgstr ""
 "Quota dépassé pour les pièces jointes. Limite du quota : %2$s. Quota "
 "utilisé : %1$s. Veuillez supprimer certaines pièces jointes afin d'en créer "
-"de nouvelles. Remarque : le quota se "
-"réfère à toutes les pièces jointes de tous les utilisateurs de ce contexte."
+"de nouvelles. Remarque : le quota se réfère à toutes les pièces jointes de "
+"tous les utilisateurs de ce contexte."
 
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
@@ -4435,6 +4472,11 @@ msgstr ""
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
 msgstr ""
 "URL de flux RSS invalide ou contenu XML mal formé fourni par l'URL : %1$s"
+
+#. HTTP error %1$s while loading RSS feed from URL: %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:66
+msgid "HTTP error %1$s while loading RSS feed from URL: %2$s."
+msgstr "Erreur HTTP %1$s lors du chargement du flux RSS depuis l'URL : %2$s."
 
 #. *
 #. * The value you inserted for %2$s is not correct
@@ -7883,8 +7925,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:65
 msgid "Found two mail accounts with same identifier %1$s for user %2$s."
 msgstr ""
-"Deux comptes de courrier avec le même identifiant %1$s pour l'utilisateur %"
-"2$s ont été trouvés."
+"Deux comptes de courrier avec le même identifiant %1$s pour l'utilisateur "
+"%2$s ont été trouvés."
 
 #. Shown when the requested host cannot be resolved
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
@@ -8570,8 +8612,8 @@ msgid ""
 "The source the subscription belongs to is currently inactive, and cannot "
 "provide data."
 msgstr ""
-"La source à laquelle cet abonnement appartient est actuellement "
-"inactive et ne peut pas fournir de données."
+"La source à laquelle cet abonnement appartient est actuellement inactive et "
+"ne peut pas fournir de données."
 
 #. The message displayed if the user would like to access the service but does not have an OAuth account.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:84
@@ -8813,6 +8855,11 @@ msgstr "La taille du message dépasse les 140 caractères maximum autorisés."
 msgid "The mandatory parameter \"%1$s\" is missing in the request body"
 msgstr ""
 "Le paramètre obligatoire « %1$s » est manquant dans le corps de la requête."
+
+#. The XING server is not available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:113
+msgid "The XING server is not available."
+msgstr "Le serveur XING est indisponible."
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
@@ -15461,9 +15508,6 @@ msgstr "Zoulou"
 
 #~ msgid "No such token: %1$s"
 #~ msgstr "Aucun jeton de ce type : %1$s"
-
-#~ msgid "Token login service is not available."
-#~ msgstr "Le service de connexion par jeton est indisponible."
 
 #~ msgid "No such session for token: %1$s"
 #~ msgstr "Aucune session de ce type pour le jeton : %1$s"

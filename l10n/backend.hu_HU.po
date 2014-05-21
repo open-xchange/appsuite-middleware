@@ -11,15 +11,15 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-05-01 20:26-0700\n"
-"Last-Translator: Kálmán Kéménczy <kkemenczy@gmail.com>\n"
+"PO-Revision-Date: 2014-05-17 17:55+0200\n"
+"Last-Translator: Gabor Kelemen <kelemeng at gnome dot hu>\n"
 "Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Lokalize 1.4\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -391,8 +391,8 @@ msgid ""
 "the appointment was deleted. Best ignore it."
 msgstr ""
 "Egy résztvevő módosítani kívánja állapotát egy nem található találkozón. "
-"Valószínűleg a találkozó már törlésre került, ezért célszerű ezt a módosítást "
-"figyelmen kívül hagyni."
+"Valószínűleg a találkozó már törlésre került, ezért célszerű ezt a "
+"módosítást figyelmen kívül hagyni."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:75
 msgid "The organizer declined your counter proposal for the appointment."
@@ -1876,8 +1876,8 @@ msgid ""
 "Logon failure: the user has not been granted the requested logon type at "
 "this computer."
 msgstr ""
-"Bejelentkezési hiba: a felhasználó nem kapta meg a kért bejelentkezési típust "
-"ezen a számítógépen."
+"Bejelentkezési hiba: a felhasználó nem kapta meg a kért bejelentkezési "
+"típust ezen a számítógépen."
 
 #. The account used is a Computer Account. Use your global user account or local user account to access this server.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:231
@@ -1908,9 +1908,9 @@ msgid ""
 "Please contact your system administrator or hoster in case you can no longer "
 "log in."
 msgstr ""
-"A fiókja blokkolásra került. Ennek számos oka lehet, például hogy többször is "
-"elgépelte a jelszavát.\nKeresse meg rendszergazdáját vagy szolgáltatóját, ha "
-"nem tud belépni."
+"A fiókja blokkolásra került. Ennek számos oka lehet, például hogy többször "
+"is elgépelte a jelszavát.\n"
+"Keresse meg rendszergazdáját vagy szolgáltatóját, ha nem tud belépni."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:61
@@ -2312,12 +2312,31 @@ msgstr "A keresési szűrő ismeretlen mezőt tartalmaz: '%1$s'."
 #. The facet \"%1$s\" is mandatory and has to be set.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
 msgid "The facet \"%1$s\" is mandatory and has to be set."
-msgstr "A(z) „%1$s” megadása szükséges."
+msgstr "A(z) „%1$s” nézet megadása szükséges."
 
 #. Could not parse \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:87
 msgid "Could not parse \"%1$s\"."
-msgstr "A(z) \"%1$s\" nem dolgozható fel."
+msgstr "A(z) „%1$s” nem dolgozható fel."
+
+#. The folder id \"%1$s\" is invalid for module \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:90
+msgid "The folder id \"%1$s\" is invalid for module \"%2$s\"."
+msgstr "A mappaazonosító („%1$s”) érvénytelen a(z) „%2$s” modulhoz."
+
+#. The folder type \"%1$s\" is not supported.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:93
+msgid "The folder type \"%1$s\" is not supported."
+msgstr "A(z) „%1$s” mappatípus nem támogatott."
+
+#. The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:96
+msgid ""
+"The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not "
+"be used within one request."
+msgstr ""
+"A(z) „%1$s” és „%2$s\" nézettípusok ütköznek és nem használhatók egy kérésen "
+"belül."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:61
 msgid "%1$s <i>in appointments</i>"
@@ -2483,61 +2502,86 @@ msgstr "Fájltípus"
 msgid "File size"
 msgstr "Fájlméret"
 
+#. Search criteria time
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
+msgid "Time"
+msgstr "Idő"
+
 #. -------------------------- i18n strings for file types ---------------------------- //
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:94
 msgid "Images"
 msgstr "Képek"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:96
 msgid "Audio"
 msgstr "Hangfájl"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:98
 msgid "Video"
 msgstr "Videó"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:100
 msgid "Documents"
 msgstr "Dokumentumok"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:102
 msgid "Other"
 msgstr "Egyéb"
 
 #. ---------------------------------------------------------------------------------- //
 #. Public folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
 msgid "Public folders"
 msgstr "Nyilvános mappák"
 
 #. Private folders
 #. Name of the parent folder for the private user folders.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:110
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
 msgstr "Személyes mappák"
 
 #. Shared folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:113
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
 msgid "Shared folders"
 msgstr "Megosztott mappák"
 
 #. Search in file field file name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:116
 msgid "%1$s <i>in file name</i>"
 msgstr "%1$s <i>a fájlnévben</i>"
 
 #. Search in file field file description.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:119
 msgid "%1$s <i>in file description</i>"
 msgstr "%1$s <i>a leírásban</i>"
 
 #. Search in file field file content.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:119
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:122
 msgid "%1$s <i>in file content</i>"
 msgstr "%1$s <i>a fájltartalomban</i>"
+
+#. ------------------------------- Time --------------------------------------------- //
+#. Search mails from last week
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:127
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
+msgid "last week"
+msgstr "múlt héten"
+
+#. Search mails from last month
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
+msgid "last month"
+msgstr "utolsó hónap"
+
+#. Search mails from last year
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:133
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:92
+msgid "last year"
+msgstr "múlt évben"
 
 #. Search in emails
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:65
@@ -2563,26 +2607,6 @@ msgstr "Feladó"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:80
 msgid "Recipient"
 msgstr "Címzett"
-
-#. Search criteria time
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
-msgid "Time"
-msgstr "Idő"
-
-#. Search mails from last week
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
-msgid "last week"
-msgstr "múlt héten"
-
-#. Search mails from last month
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
-msgid "last month"
-msgstr "utolsó hónap"
-
-#. Search mails from last year
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:92
-msgid "last year"
-msgstr "múlt évben"
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Search in tasks
@@ -2964,9 +2988,9 @@ msgid ""
 "administer right in its initial rights specified by IMAP server. However, "
 "the folder has been created."
 msgstr ""
-"Az összesített jogok nem alkalmazhatók az új mappára az IMAP-kiszolgáló által "
-"megadott kiinduló jogok közül hiányzó adminisztrációs jog miatt. A mappa "
-"ennek ellenére létrejött."
+"Az összesített jogok nem alkalmazhatók az új mappára az IMAP-kiszolgáló "
+"által megadott kiinduló jogok közül hiányzó adminisztrációs jog miatt. A "
+"mappa ennek ellenére létrejött."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:92
 msgid "No administer permission specified for folder"
@@ -3046,9 +3070,10 @@ msgid ""
 "In that case, please try to empty your deleted items first, or delete "
 "smaller messages first."
 msgstr ""
-"Ez az üzenet nem mozgatható a törölt elemek mappába, amelynek lehetséges oka, "
-"hogy a postafiók majdnem megtelt.\nEbben az esetben először próbálja meg "
-"kiüríteni a törölt elemek mappát vagy letörölni a kisebb üzeneteket."
+"Ez az üzenet nem mozgatható a törölt elemek mappába, amelynek lehetséges "
+"oka, hogy a postafiók majdnem megtelt.\n"
+"Ebben az esetben először próbálja meg kiüríteni a törölt elemek mappát vagy "
+"letörölni a kisebb üzeneteket."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:122
 msgid "Missing folder in mail move operation"
@@ -3107,8 +3132,8 @@ msgid ""
 "A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
 "Error message: %2$s"
 msgstr ""
-"Protokollkivétel történt a(z) „%1$s” IMAP-kérés végrehajtásakor.\nHibaüzenet: "
-"%2$s"
+"Protokollkivétel történt a(z) „%1$s” IMAP-kérés végrehajtásakor.\n"
+"Hibaüzenet: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:144
 msgid ""
@@ -3237,8 +3262,8 @@ msgid ""
 "Could not translate a single field of information. Entry %s has not been "
 "inserted."
 msgstr ""
-"Egyetlen információmező sem fordítható le, ez a bejegyzés nem lett hozzáadva: "
-"%s."
+"Egyetlen információmező sem fordítható le, ez a bejegyzés nem lett "
+"hozzáadva: %s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:97
 msgid ""
@@ -3533,24 +3558,35 @@ msgstr "A(z) %1$s cím nincs a kivétellistán a(z) %2$s OAuth API-hoz"
 msgid "The request sent was missing its body"
 msgstr "Az elküldött kérésből hiányzik a törzs"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:75
+#. The account is invalid, please recreate it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:76
 msgid "The account is invalid, please recreate it."
 msgstr "A felhasználói fiók érvénytelen, kérjük hozza létre újra."
 
+#. The account "%1$s" is invalid, please recreate it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:79
+msgid "The account \"%1$s\" is invalid, please recreate it."
+msgstr "A felhasználói fiók („%1$s”) érvénytelen, hozza létre újra."
+
 #. Please provide a display name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:82
 msgid "Please provide a display name."
 msgstr "Adjon meg egy megjelenő nevet."
 
 #. The associated OAuth provider denied the request: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:85
 msgid "The associated OAuth provider denied the request: %1$s."
 msgstr "A társított OAuth szolgáltató megtagadta a kérést: %1$s."
 
 #. The OAuth authentication process has been canceled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
 msgid "The OAuth authentication process has been canceled."
 msgstr "Az OAuth hitelesítési folyamat megszakítva."
+
+#. Could not get a valid response from the associated OAuth provider.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:91
+msgid "Could not get a valid response from the associated OAuth provider."
+msgstr "Nem érkezett érvényes válasz a társított OAuth szolgáltatótól."
 
 #. *
 #. * New password too short.
@@ -3584,8 +3620,8 @@ msgstr "A jelszó nem lett megváltoztatva."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:75
 msgid "User %1$s has no mail module access due to user configuration"
 msgstr ""
-"A felhasználói beállítások miatt a(z) %1$s felhasználónak nincs hozzáférése a "
-"levelezőmodulhoz"
+"A felhasználói beállítások miatt a(z) %1$s felhasználónak nincs hozzáférése "
+"a levelezőmodulhoz"
 
 #. *
 #. * No access to mail folder %1$s
@@ -3668,9 +3704,9 @@ msgid ""
 "permissions specified by the POP3 server do not include administer "
 "permissions. The folder has been created, though."
 msgstr ""
-"Az összesített jogok nem alkalmazhatók a(z) %1$s új mappára a POP3-kiszolgáló "
-"által megadott kiinduló jogok közül hiányzó adminisztrációs jog miatt. A "
-"mappa ennek ellenére létrejött."
+"Az összesített jogok nem alkalmazhatók a(z) %1$s új mappára a POP3-"
+"kiszolgáló által megadott kiinduló jogok közül hiányzó adminisztrációs jog "
+"miatt. A mappa ennek ellenére létrejött."
 
 #. *
 #. * No admin permission specified for folder %1$s
@@ -3736,8 +3772,8 @@ msgid ""
 "POP3 search failed due to the following reason: %1$s. Switching to "
 "application-based search"
 msgstr ""
-"A POP3-keresés sikertelen a következő ok miatt: %1$s. Váltás alkalmazás alapú "
-"keresésre"
+"A POP3-keresés sikertelen a következő ok miatt: %1$s. Váltás alkalmazás "
+"alapú keresésre"
 
 #. *
 #. * POP3 sort failed due to following reason: %1$s Switching to application-based sorting
@@ -3775,8 +3811,8 @@ msgid ""
 "mailbox is nearly full. In that case, please try to empty your deleted items "
 "first, or delete smaller messages first."
 msgstr ""
-"Ez az üzenet nem mozgatható a törölt elemek mappába, amelynek lehetséges oka, "
-"hogy a postafiók majdnem megtelt. Ebben az esetben először próbálja meg "
+"Ez az üzenet nem mozgatható a törölt elemek mappába, amelynek lehetséges "
+"oka, hogy a postafiók majdnem megtelt. Ebben az esetben először próbálja meg "
 "kiüríteni a törölt elemek mappát vagy letörölni a kisebb üzeneteket."
 
 #. *
@@ -3822,8 +3858,8 @@ msgid ""
 "Message(s) %1$s in folder %2$s could not be deleted due to the following "
 "error: %3$s"
 msgstr ""
-"Az üzenetek (%1$s) nem törölhetők a(z) %2$s mappában a következő hiba miatt: %"
-"3$s"
+"Az üzenetek (%1$s) nem törölhetők a(z) %2$s mappában a következő hiba miatt: "
+"%3$s"
 
 #. *
 #. * Not allowed to open folder %1$s due to missing read access
@@ -3843,8 +3879,8 @@ msgstr ""
 msgid ""
 "The raw content's input stream of message %1$s in folder %2$s cannot be read"
 msgstr ""
-"A nyers tartalom bemeneti adatfolyama nem olvasható a(z) %1$s üzenetből a(z) %"
-"2$s mappában"
+"A nyers tartalom bemeneti adatfolyama nem olvasható a(z) %1$s üzenetből a(z) "
+"%2$s mappában"
 
 #. *
 #. * Versit object %1$s could not be saved
@@ -3986,8 +4022,8 @@ msgid ""
 "from server: %5$s"
 msgstr ""
 "A bejelentkezési késleltetés megakadályozza a kapcsolódást a(z) %1$s "
-"levélkiszolgálóhoz a(z) %2$s bejelentkezéssel. A levélkiszolgáló hibaüzenete: "
-"%5$s"
+"levélkiszolgálóhoz a(z) %2$s bejelentkezéssel. A levélkiszolgáló "
+"hibaüzenete: %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -3999,8 +4035,8 @@ msgid ""
 "%5$s seconds. Error message from server: %6$s"
 msgstr ""
 "A bejelentkezési késleltetés megakadályozza a kapcsolódást a(z) %1$s "
-"levélkiszolgálóhoz a(z) %2$s bejelentkezéssel. Próbálja újra %6$s másodpercen "
-"belül. A levélkiszolgáló hibaüzenete: %6$s"
+"levélkiszolgálóhoz a(z) %2$s bejelentkezéssel. Próbálja újra %6$s "
+"másodpercen belül. A levélkiszolgáló hibaüzenete: %6$s"
 
 #. *
 #. * POP3 storage path "%1$s" cannot be created for user %2$s in context %3$s.
@@ -4014,16 +4050,20 @@ msgstr ""
 "hozható létre %2$s felhasználó számára."
 
 #. *
-#. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.
+#. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work. Please be advised that while it is safe to ignore this warning, the POP3 account might not work if the supplied credentials are invalid.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:295
 msgid ""
 "Validation of POP3 credentials is disabled due to possible login "
-"restrictions by provider. Otherwise subsequent login attempt might not work."
+"restrictions by provider. Otherwise subsequent login attempt might not work. "
+"Please be advised that while it is safe to ignore this warning, the POP3 "
+"account might not work if the supplied credentials are invalid."
 msgstr ""
 "A POP3 hitelesítési adatok ellenőrzése le van tiltva a szolgáltató általi "
 "lehetséges bejelentkezési korlátozások miatt. Ellenkező esetben a jövőbeli "
-"bejelentkezési kísérletek nem lehetnének sikeresek."
+"bejelentkezési kísérletek nem lehetnének sikeresek. Vegye figyelembe, hogy "
+"noha ezt a figyelmeztetést figyelmen kívül hagyhatja, de a POP3 fiók nem fog "
+"működni, ha a megadott hitelesítési adatok érvénytelenek."
 
 #. POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:298
@@ -4039,7 +4079,8 @@ msgid ""
 "The following field(s) are too long: %1$s. Please shorten the values and try "
 "again"
 msgstr ""
-"A következő mezők túl hosszúak: %1$s. Rövidítse az értékeket, és próbálja újra"
+"A következő mezők túl hosszúak: %1$s. Rövidítse az értékeket, és próbálja "
+"újra"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:64
 msgid "The data you provided (%1$s) cannot be changed."
@@ -4100,16 +4141,19 @@ msgid ""
 "data:\n"
 "Data published by %s on %s\n"
 msgstr ""
-"Adatvédelem: \nA weboldalon található adatok és hivatkozások azzal a "
-"feltételezéssel kerülnek megosztásra, hogy ezek tulajdonosai lehetővé teszik "
-"ezt. Sem %s, sem annak leányvállalatai nem felelnek ezek közzétételéért vagy "
-"újra megjelentetéséért.\nEzen adatok jogosulatlan terjesztése tilos. "
-"Amennyiben ezeket tárolni, feldolgozni vagy továbbadni kívánja, győződjön meg "
-"arról, hogy ehhez megfelelő jogokkal rendelkezik.\nAmennyiben Ön az egyik "
-"felsorolt ​​vagy megnevezett személy az adott weboldalon, és nem ért egyet "
-"annak közzétételével, akkor kérjük küldjön egy levelet, amely tartalmazza a "
-"weboldal URL-jét (hivatkozását) a következő címre: %s, valamint az adatot "
-"közzétevő számára:\nAz adatot közzétette: %s, %s\n"
+"Adatvédelem: \n"
+"A weboldalon található adatok és hivatkozások azzal a feltételezéssel "
+"kerülnek megosztásra, hogy ezek tulajdonosai lehetővé teszik ezt. Sem %s, "
+"sem annak leányvállalatai nem felelnek ezek közzétételéért vagy újra "
+"megjelentetéséért.\n"
+"Ezen adatok jogosulatlan terjesztése tilos. Amennyiben ezeket tárolni, "
+"feldolgozni vagy továbbadni kívánja, győződjön meg arról, hogy ehhez "
+"megfelelő jogokkal rendelkezik.\n"
+"Amennyiben Ön az egyik felsorolt ​​vagy megnevezett személy az adott "
+"weboldalon, és nem ért egyet annak közzétételével, akkor kérjük küldjön egy "
+"levelet, amely tartalmazza a weboldal URL-jét (hivatkozását) a következő "
+"címre: %s, valamint az adatot közzétevő számára:\n"
+"Az adatot közzétette: %s, %s\n"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:73
 msgid "the hoster"
@@ -4151,8 +4195,8 @@ msgid ""
 "delete some appointments in order to create new ones. Please note: The quota "
 "refers to all appointments of all users in this context."
 msgstr ""
-"A naptár kvótáját túllépte, amelynek korlátja: %2$s. A felhasznált kvóta: %"
-"1$s. Töröljön néhány eseményt, ha újakat szeretne létrehozni. Megjegyzés: A "
+"A naptár kvótáját túllépte, amelynek korlátja: %2$s. A felhasznált kvóta: "
+"%1$s. Töröljön néhány eseményt, ha újakat szeretne létrehozni. Megjegyzés: A "
 "kvóta ebben az esetben az összes felhasználó találkozójára vonatkozik."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
@@ -4172,9 +4216,9 @@ msgid ""
 "some tasks in order to create new ones. Please note: The quota refers to all "
 "tasks of all users in this context."
 msgstr ""
-"A faladatok kvótáját túllépte, amelynek korlátja: %2$s. A felhasznált kvóta: %"
-"1$s. Töröljön néhány feladatot, ha újakat szeretne létrehozni. Megjegyzés: A "
-"kvóta ebben az esetben az összes felhasználó feladataira vonatkozik."
+"A faladatok kvótáját túllépte, amelynek korlátja: %2$s. A felhasznált kvóta: "
+"%1$s. Töröljön néhány feladatot, ha újakat szeretne létrehozni. Megjegyzés: "
+"A kvóta ebben az esetben az összes felhasználó feladataira vonatkozik."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:70
 msgid ""
@@ -4182,8 +4226,8 @@ msgid ""
 "some files in order to create new ones. Please note: The quota refers to all "
 "files of all users in this context."
 msgstr ""
-"A fájlok kvótáját túllépte, amelynek korlátja: %2$s. A felhasznált kvóta: %"
-"1$s. Töröljön néhány fájlt, ha újakat szeretne létrehozni. Megjegyzés: A "
+"A fájlok kvótáját túllépte, amelynek korlátja: %2$s. A felhasznált kvóta: "
+"%1$s. Töröljön néhány fájlt, ha újakat szeretne létrehozni. Megjegyzés: A "
 "kvóta ebben az esetben az összes felhasználó fájljaira vonatkozik."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:72
@@ -4278,8 +4322,13 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
 msgstr ""
-"Érvénytelen RSS URL vagy következő URL nem biztosít megfelelően formázott XML "
-"tartalmat: %1$s"
+"Érvénytelen RSS URL vagy következő URL nem biztosít megfelelően formázott "
+"XML tartalmat: %1$s"
+
+#. HTTP error %1$s while loading RSS feed from URL: %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:66
+msgid "HTTP error %1$s while loading RSS feed from URL: %2$s."
+msgstr "HTTP hiba (%1$s) az RSS hírforrás betöltésekor innen: %2$s."
 
 #. *
 #. * The value you inserted for %2$s is not correct
@@ -4591,9 +4640,9 @@ msgid ""
 "user (or owner of the calendar). Please remove additional participants or "
 "remove the \"Private\" mark."
 msgstr ""
-"A „Személyes” jelölésű találkozók csak a megfelelő felhasználó (vagy a naptár "
-"tulajdonosa) számára ütemezhetők. Távolítsa el a további résztvevőket, vagy a "
-"„Személyes” jelölést."
+"A „Személyes” jelölésű találkozók csak a megfelelő felhasználó (vagy a "
+"naptár tulajdonosa) számára ütemezhetők. Távolítsa el a további "
+"résztvevőket, vagy a „Személyes” jelölést."
 
 #. *
 #. * Unsupported \"shown as\" value %d.
@@ -4630,8 +4679,8 @@ msgstr "A kért „Cím” érték nem lett megadva."
 msgid ""
 "Move not supported: Cannot move an appointment from folder %d to folder %d."
 msgstr ""
-"A mozgatás nem támogatott: A találkozó nem mozgatható a(z) %d. mappából a(z) %"
-"d. mappába"
+"A mozgatás nem támogatott: A találkozó nem mozgatható a(z) %d. mappából a(z) "
+"%d. mappába"
 
 #. *
 #. * Move not allowed from shared folders.
@@ -4769,8 +4818,8 @@ msgid ""
 "An external participant with the E-Mail address %1$s is already included. "
 "Please remove participant duplicate and retry."
 msgstr ""
-"Már tartalmaz egy %1$s e-mail című külső résztvevőt. Távolítsa el a duplikált "
-"résztvevőt, és próbálja újra."
+"Már tartalmaz egy %1$s e-mail című külső résztvevőt. Távolítsa el a "
+"duplikált résztvevőt, és próbálja újra."
 
 #. *
 #. * Moving a recurring appointment to another folder is not supported.
@@ -4811,8 +4860,8 @@ msgid ""
 "You do not have the appropriate permission to create objects in the folder "
 "\"%1$s\"."
 msgstr ""
-"Nincs megfelelő jogosultsága objektumok létrehozásához ebben a mappában: „%"
-"1$s”."
+"Nincs megfelelő jogosultsága objektumok létrehozásához ebben a mappában: "
+"„%1$s”."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:77
 msgid "Unable to synchronize the old contact with the new changes."
@@ -4920,16 +4969,16 @@ msgid ""
 "You do not have the appropriate permission to change objects in the folder "
 "\"%2$s\"."
 msgstr ""
-"Nincs megfelelő jogosultsága objektumok módosításához ebben a mappában: „%"
-"2$s”."
+"Nincs megfelelő jogosultsága objektumok módosításához ebben a mappában: "
+"„%2$s”."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
 "An E-Mail address is mandatory for external distribution list members. "
 "Please add a valid E-Mail address."
 msgstr ""
-"Az e-mail cím megadása szükséges a külső disztribúciós lista tagjainak. Adjon "
-"meg érvényes e-mail címet."
+"Az e-mail cím megadása szükséges a külső disztribúciós lista tagjainak. "
+"Adjon meg érvényes e-mail címet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:123
 msgid ""
@@ -5165,10 +5214,11 @@ msgid ""
 "read or understood the message contents."
 msgstr ""
 "Ez egy tértivevény egy Ön által küldött levélről, amelynek dátuma: #DATE#, "
-"címzettje: #RECIPIENT#, tárgya: „#SUBJECT#”.\n\nMegjegyzés: Ez a tértivevény "
-"csak azt bizonyítja, hogy az üzenete megjelent a címzett számítógépén, azt "
-"azonban nem garantálja, hogy a címzett elolvasta és megértette az üzenet "
-"tartalmát."
+"címzettje: #RECIPIENT#, tárgya: „#SUBJECT#”.\n"
+"\n"
+"Megjegyzés: Ez a tértivevény csak azt bizonyítja, hogy az üzenete megjelent "
+"a címzett számítógépén, azt azonban nem garantálja, hogy a címzett elolvasta "
+"és megértette az üzenet tartalmát."
 
 #. The prefixed text on reply.
 #. #DATE# is replaced with the sent date of referenced email
@@ -5194,8 +5244,11 @@ msgid ""
 "Date: #DATE# at #TIME#\n"
 "Subject: #SUBJECT#"
 msgstr ""
-"---------- Eredeti üzenet ----------\nFeladó: #FROM#\nCímzett: "
-"#TO##CC_LINE#\nDátum: #DATE# at #TIME#\nTárgy: #SUBJECT#"
+"---------- Eredeti üzenet ----------\n"
+"Feladó: #FROM#\n"
+"Címzett: #TO##CC_LINE#\n"
+"Dátum: #DATE# at #TIME#\n"
+"Tárgy: #SUBJECT#"
 
 #. The internationalized default subject.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
@@ -5263,12 +5316,30 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"[created_by] új találkozót hozott létre,\namelyet saját naptárában "
-"megtekinthet:\n[link]\n\nTalálkozó\n===========\nLétrehozta: "
-"[created_by]\nLétrehozás időpontja: [creation_datetime]\n[title]\n[location][f"
-"older_name]\n\n[start]\n[end]\n[series][delete_exceptions][change_exceptions]"
-"\n[description]\nRésztvevők\n============\n[participants]\n\nErőforrások\n==="
-"======\n[resources]\n\n========================================== "
+"[created_by] új találkozót hozott létre,\n"
+"amelyet saját naptárában megtekinthet:\n"
+"[link]\n"
+"\n"
+"Találkozó\n"
+"===========\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás időpontja: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:94
 msgid ""
@@ -5294,11 +5365,27 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"[created_by] új találkozót hozott létre.\n\nTalálkozó\n===========\nLétrehozta"
-": [created_by]\nLétrehozás időpontja: [creation_datetime]\n[title]\n[location]"
-"\n[start]\n[end]\n[series][delete_exceptions][change_exceptions]\n[description"
-"]\nRésztvevők\n============\n[participants]\n\nErőforrások\n=========\n[resour"
-"ces]\n\n========================================== "
+"[created_by] új találkozót hozott létre.\n"
+"\n"
+"Találkozó\n"
+"===========\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás időpontja: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:124
 msgid ""
@@ -5327,12 +5414,30 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"[created_by], [behalf_of] nevében új találkozót hozott létre,\namelyet saját "
-"naptárában megtekinthet:\n[link]\n\nTalálkozó\n===========\nLétrehozta: "
-"[created_by]\nLétrehozás időpontja: [creation_datetime]\n[title]\n[location][f"
-"older_name]\n\n[start]\n[end]\n[series][delete_exceptions][change_exceptions]"
-"\n[description]\nRésztvevők\n============\n[participants]\n\nErőforrások\n==="
-"======\n[resources]\n\n========================================== "
+"[created_by], [behalf_of] nevében új találkozót hozott létre,\n"
+"amelyet saját naptárában megtekinthet:\n"
+"[link]\n"
+"\n"
+"Találkozó\n"
+"===========\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás időpontja: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:157
 msgid ""
@@ -5358,12 +5463,27 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"[created_by], [behalf_of] nevében új találkozót hozott "
-"létre\n\nTalálkozó\n===========\nLétrehozta: [created_by]\nLétrehozás "
-"időpontja: [creation_datetime]\n[title]\n[location]\n[start]\n[end]\n[series]["
-"delete_exceptions][change_exceptions]\n[description]\nRésztvevők\n============"
-"\n[participants]\n\nErőforrások\n=========\n[resources]\n\n==================="
-"======================= "
+"[created_by], [behalf_of] nevében új találkozót hozott létre\n"
+"\n"
+"Találkozó\n"
+"===========\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás időpontja: [creation_datetime]\n"
+"[title]\n"
+"[location]\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:194
 msgid ""
@@ -5394,12 +5514,32 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"[created_by] új feladatot hozott létre,\namelyet megtekinthet a saját "
-"feladatai között:\n[link]\n\nFeladat\n====\nLétrehozta: "
-"[created_by]\nLétrehozás dátuma: [creation_datetime]\n[title]\n[folder_name]\n"
-"[priority]\n[task_status]\n\n[start]\n[end]\n[series]\n[description]\nRésztvev"
-"ők\n============\n[participants]\n\nErőforrások\n=========\n[resources]\n\n==="
-"======================================= "
+"[created_by] új feladatot hozott létre,\n"
+"amelyet megtekinthet a saját feladatai között:\n"
+"[link]\n"
+"\n"
+"Feladat\n"
+"====\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás dátuma: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:226
 msgid ""
@@ -5428,11 +5568,30 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"[created_by] új feladatot hozott létre,\n\nFeladat\n====\nLétrehozta: "
-"[created_by]\nLétrehozás dátuma: [creation_datetime]\n[title]\n[folder_name]\n"
-"[priority]\n[task_status]\n\n[start]\n[end]\n[series]\n[description]\nRésztvev"
-"ők\n============\n[participants]\n\nErőforrások\n=========\n[resources]\n\n==="
-"======================================= "
+"[created_by] új feladatot hozott létre,\n"
+"\n"
+"Feladat\n"
+"====\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás dátuma: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:266
 msgid ""
@@ -5461,12 +5620,30 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"A találkozóra nem kerül sor.\nVagy [changed_by] törölte, vagy\nmár nem "
-"szerepel a résztvevők listáján.\n\nTalálkozó\n===========\nLétrehozta:  "
-"[created_by]\nLétrehozás dátuma:  [creation_datetime]\n[title]\n[location][fol"
-"der_name]\n\n[start]\n[end]\n[series][delete_exceptions][change_exceptions]\n["
-"description]\nRésztvevők\n============\n[participants]\n\nErőforrások\n======="
-"==\n[resources]\n\n=========================================="
+"A találkozóra nem kerül sor.\n"
+"Vagy [changed_by] törölte, vagy\n"
+"már nem szerepel a résztvevők listáján.\n"
+"\n"
+"Találkozó\n"
+"===========\n"
+"Létrehozta:  [created_by]\n"
+"Létrehozás dátuma:  [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:299
 msgid ""
@@ -5496,12 +5673,31 @@ msgid ""
 "\n"
 "========================================== "
 msgstr ""
-"Vagy [changed_by] törölte ezt a feladatot, vagy\nmár nem szerepel a "
-"résztvevők listáján.\n\nFeladat\n===========\nLétrehozta:  "
-"[created_by]\nLétrehozás dátuma:  [creation_datetime]\n[title]\n[folder_name]"
-"\n[priority]\n[task_status]\n\n[start]\n[end]\n[series]\n[description]\nRészt"
-"vevők\n============\n[participants]\n\nErőforrások\n=========\n[resources]\n"
-"\n========================================== "
+"Vagy [changed_by] törölte ezt a feladatot, vagy\n"
+"már nem szerepel a résztvevők listáján.\n"
+"\n"
+"Feladat\n"
+"===========\n"
+"Létrehozta:  [created_by]\n"
+"Létrehozás dátuma:  [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"========================================== "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:334
 msgid ""
@@ -5530,12 +5726,30 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[created_by] módosította a találkozót,\namelyet a saját naptárában "
-"megtekinthet:\n[link]\n\nTalálkozó\n===========\nLétrehozta: "
-"[created_by]\nLétrehozás időpontja: [creation_datetime]\n[title]\n[location][f"
-"older_name]\n\n[start]\n[end]\n[series][delete_exceptions][change_exceptions]"
-"\n[description]\nRésztvevők\n============\n[participants]\n\nErőforrások\n==="
-"======\n[resources]\n\n=========================================="
+"[created_by] módosította a találkozót,\n"
+"amelyet a saját naptárában megtekinthet:\n"
+"[link]\n"
+"\n"
+"Találkozó\n"
+"===========\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás időpontja: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:367
 msgid ""
@@ -5562,11 +5776,28 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[created_by] módosította a találkozót.\n\nTalálkozó\n===========\nLétrehozta: "
-"[created_by]\nLétrehozás időpontja: [creation_datetime]\n[title]\n[location][f"
-"older_name]\n\n[start]\n[end]\n[series][delete_exceptions][change_exceptions]"
-"\n[description]\nRésztvevők\n============\n[participants]\n\nErőforrások\n==="
-"======\n[resources]\n\n=========================================="
+"[created_by] módosította a találkozót.\n"
+"\n"
+"Találkozó\n"
+"===========\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás időpontja: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:404
 msgid ""
@@ -5597,12 +5828,32 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[created_by] módosította a feladatot,\namelyet megtekinthet a saját feladatai "
-"között:\n[link]\n\nFeladat\n====\nLétrehozta: [created_by]\nLétrehozás "
-"dátuma: [creation_datetime]\n[title]\n[folder_name]\n[priority]\n[task_status]"
-"\n\n[start]\n[end]\n[series]\n[description]\nRésztvevők\n============\n[partic"
-"ipants]\n\nErőforrások\n=========\n[resources]\n\n============================"
-"=============="
+"[created_by] módosította a feladatot,\n"
+"amelyet megtekinthet a saját feladatai között:\n"
+"[link]\n"
+"\n"
+"Feladat\n"
+"====\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás dátuma: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:436
 msgid ""
@@ -5631,11 +5882,30 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[created_by] módosította a feladatot.\n\nFeladat\n====\nLétrehozta: "
-"[created_by]\nLétrehozás dátuma: [creation_datetime]\n[title]\n[folder_name]\n"
-"[priority]\n[task_status]\n\n[start]\n[end]\n[series]\n[description]\nRésztvev"
-"ők\n============\n[participants]\n\nErőforrások\n=========\n[resources]\n\n==="
-"======================================="
+"[created_by] módosította a feladatot.\n"
+"\n"
+"Feladat\n"
+"====\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás dátuma: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:476
 msgid ""
@@ -5664,12 +5934,30 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[changed_by]: a találkozó [confirmation_action],\namelyet a saját naptárában "
-"megtekinthet:\n[link]\n\nTalálkozó\n===========\nLétrehozta: "
-"[created_by]\nLétrehozás időpontja: [creation_datetime]\n[title]\n[location][f"
-"older_name]\n\n[start]\n[end]\n[series][delete_exceptions][change_exceptions]"
-"\n[description]\nRésztvevők\n============\n[participants]\n\nErőforrások\n==="
-"======\n[resources]\n\n=========================================="
+"[changed_by]: a találkozó [confirmation_action],\n"
+"amelyet a saját naptárában megtekinthet:\n"
+"[link]\n"
+"\n"
+"Találkozó\n"
+"===========\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás időpontja: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:509
 msgid ""
@@ -5696,12 +5984,28 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[changed_by]: a találkozó [confirmation_action].\n\nTalálkozó\n===========\nLé"
-"trehozta: [created_by]\nLétrehozás időpontja: "
-"[creation_datetime]\n[title]\n[location][folder_name]\n\n[start]\n[end]\n[seri"
-"es][delete_exceptions][change_exceptions]\n[description]\nRésztvevők\n========"
-"====\n[participants]\n\nErőforrások\n=========\n[resources]\n\n==============="
-"==========================="
+"[changed_by]: a találkozó [confirmation_action].\n"
+"\n"
+"Találkozó\n"
+"===========\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás időpontja: [creation_datetime]\n"
+"[title]\n"
+"[location][folder_name]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series][delete_exceptions][change_exceptions]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:540
 msgid ""
@@ -5732,12 +6036,32 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[changed_by]: a feladat [confirmation_action],\namelyet megtekinthet a saját "
-"feladatai között:\n[link]\n\nFeladat\n====\nLétrehozta: "
-"[created_by]\nLétrehozás dátuma: [creation_datetime]\n[title]\n[folder_name]\n"
-"[priority]\n[task_status]\n\n[start]\n[end]\n[series]\n[description]\nRésztvev"
-"ők\n============\n[participants]\n\nErőforrások\n=========\n[resources]\n\n==="
-"======================================="
+"[changed_by]: a feladat [confirmation_action],\n"
+"amelyet megtekinthet a saját feladatai között:\n"
+"[link]\n"
+"\n"
+"Feladat\n"
+"====\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás dátuma: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:572
 msgid ""
@@ -5766,11 +6090,30 @@ msgid ""
 "\n"
 "=========================================="
 msgstr ""
-"[changed_by]: a feladat [confirmation_action].\n\nFeladat\n====\nLétrehozta: "
-"[created_by]\nLétrehozás dátuma: [creation_datetime]\n[title]\n[folder_name]\n"
-"[priority]\n[task_status]\n\n[start]\n[end]\n[series]\n[description]\nRésztvev"
-"ők\n============\n[participants]\n\nErőforrások\n=========\n[resources]\n\n==="
-"======================================="
+"[changed_by]: a feladat [confirmation_action].\n"
+"\n"
+"Feladat\n"
+"====\n"
+"Létrehozta: [created_by]\n"
+"Létrehozás dátuma: [creation_datetime]\n"
+"[title]\n"
+"[folder_name]\n"
+"[priority]\n"
+"[task_status]\n"
+"\n"
+"[start]\n"
+"[end]\n"
+"[series]\n"
+"[description]\n"
+"Résztvevők\n"
+"============\n"
+"[participants]\n"
+"\n"
+"Erőforrások\n"
+"=========\n"
+"[resources]\n"
+"\n"
+"=========================================="
 
 #. -
 #. * MESSAGE SUBJECT PREFIXES
@@ -5957,7 +6300,9 @@ msgstr "Ismétlődés: %1$s"
 msgid ""
 "Comments:\n"
 "%1$s"
-msgstr "Megjegyzések:\n%1$s"
+msgstr ""
+"Megjegyzések:\n"
+"%1$s"
 
 #. Priority: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:740
@@ -6402,8 +6747,8 @@ msgid ""
 "Locking attributes of multiple users is not allowed. You tried to lock %1$d "
 "user's attributes."
 msgstr ""
-"Több felhasználó attribútumainak zárolása nem engedélyezett. %1$d felhasználó "
-"attribútumait próbálta zárolni."
+"Több felhasználó attribútumainak zárolása nem engedélyezett. %1$d "
+"felhasználó attribútumait próbálta zárolni."
 
 #. *
 #. * User is missing for the reminder.
@@ -6574,8 +6919,8 @@ msgid ""
 "You do not have the appropriate permissions to create tasks in folder \"%1$s"
 "\"."
 msgstr ""
-"Nincs megfelelő jogosultsága feladatok létrehozásához ebben a mappában: „%"
-"1$s”."
+"Nincs megfelelő jogosultsága feladatok létrehozásához ebben a mappában: "
+"„%1$s”."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:89
 msgid "You do not have the appropriate permission to delegate tasks."
@@ -6600,8 +6945,8 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to edit tasks in folder \"%1$s\"."
 msgstr ""
-"Nincs megfelelő jogosultsága feladatok szerkesztéséhez ebben a mappában: „%"
-"1$s”."
+"Nincs megfelelő jogosultsága feladatok szerkesztéséhez ebben a mappában: "
+"„%1$s”."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
 msgid "Moving items from or into shared folder \"%1$s\" is not allowed."
@@ -6715,8 +7060,8 @@ msgid ""
 "Processed a wrong number of rows in database. Expected %1$d rows but worked "
 "on %2$d rows."
 msgstr ""
-"Hibás számú sor lett feldolgozva az adatbázisból. A várt %1$d sor helyett %"
-"2$d sor került feldolgozásra."
+"Hibás számú sor lett feldolgozva az adatbázisból. A várt %1$d sor helyett "
+"%2$d sor került feldolgozásra."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:76
 msgid "Updating schema \"%1$s\" failed. Cause: \"%2$s\"."
@@ -6727,8 +7072,8 @@ msgid ""
 "Blocking tasks (\"%1$s\") must be executed before background tasks can be "
 "executed (\"%2$s\")."
 msgstr ""
-"A blokkoló feladatokat („%1$s”) a háttérfeladatok végrehajtása („%2$s”) előtt "
-"kell végrehajtani."
+"A blokkoló feladatokat („%1$s”) a háttérfeladatok végrehajtása („%2$s”) "
+"előtt kell végrehajtani."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:80
 msgid "Unknown task: \"%1$s\"."
@@ -6816,8 +7161,8 @@ msgid ""
 "Request rejected because its size exceeds the maximum configured size of "
 "%1$s."
 msgstr ""
-"A kérés visszautasítva, mert mérete meghaladja a beállított maximális értéket "
-"(%1$s)."
+"A kérés visszautasítva, mert mérete meghaladja a beállított maximális "
+"értéket (%1$s)."
 
 #. Connection has been closed unexpectedly. Please try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:107
@@ -6913,8 +7258,8 @@ msgid ""
 "full. Please try to empty your deleted items first, or delete smaller "
 "messages first."
 msgstr ""
-"Ez az üzenet nem mozgatható a törölt elemek mappába, amelynek lehetséges oka, "
-"hogy a postafiók majdnem megtelt. Ebben az esetben először próbálja meg "
+"Ez az üzenet nem mozgatható a törölt elemek mappába, amelynek lehetséges "
+"oka, hogy a postafiók majdnem megtelt. Ebben az esetben először próbálja meg "
 "kiüríteni a törölt elemek mappát vagy letörölni a kisebb üzeneteket."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:92
@@ -7074,8 +7419,8 @@ msgid ""
 "Cannot forward more than %1$s messages at once. Please divide the messages "
 "to forward in chunks of appropriate size."
 msgstr ""
-"Egyszerre nem továbbítható %1$s üzenetnél több. Darabolja fel az üzeneteket a "
-"továbbküldéshez megfelelő méretű részekre."
+"Egyszerre nem továbbítható %1$s üzenetnél több. Darabolja fel az üzeneteket "
+"a továbbküldéshez megfelelő méretű részekre."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:160
 msgid "Your account has been created but will not use a secure connection."
@@ -7121,8 +7466,8 @@ msgstr "Túllépte a megengedett levélméretet. A maximum %1$s."
 msgid ""
 "Re-sending message denied because message is not located in \"%1$s\" folder."
 msgstr ""
-"Az újraküldés megtagadva, mert az üzenet nem ebben a mappában található: „%"
-"1$s”."
+"Az újraküldés megtagadva, mert az üzenet nem ebben a mappában található: "
+"„%1$s”."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:174
 msgid "Validation of server %1$s failed with reason: %3$s"
@@ -7239,8 +7584,8 @@ msgid ""
 "You do not have the appropriate permissions to change the content of folder "
 "\"%1$s\" on mail server %2$s."
 msgstr ""
-"Nincs megfelelő jogosultsága a(z) „%1$s” mappa tartalmának módosításához a(z) "
-"„%2$s” levélkiszolgálón."
+"Nincs megfelelő jogosultsága a(z) „%1$s” mappa tartalmának módosításához "
+"a(z) „%2$s” levélkiszolgálón."
 
 #. *
 #. * Invalid search expression: %1$s
@@ -7437,8 +7782,8 @@ msgid ""
 "Default port specified for mail protocol \"%1$s\", but SSL is enabled. "
 "Please review if appropriate."
 msgstr ""
-"Alapértelmezett port lett megadva a(z) „%1$s” levélprotokollhoz, de az SSL be "
-"van kapcsolva. Ellenőrizze, hogy ez megfelelő-e."
+"Alapértelmezett port lett megadva a(z) „%1$s” levélprotokollhoz, de az SSL "
+"be van kapcsolva. Ellenőrizze, hogy ez megfelelő-e."
 
 #. Shown when SSL port was set but SSL not enabled
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:113
@@ -7589,7 +7934,8 @@ msgstr ""
 msgid ""
 "Administrative permissions for a group are not allowed in a private folder."
 msgstr ""
-"Csoport adminisztrációs jogosultsága nem engedélyezett egy személyes mappában."
+"Csoport adminisztrációs jogosultsága nem engedélyezett egy személyes "
+"mappában."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:83
 msgid "Only the owner of a private folder may hold administrative permissions."
@@ -7654,8 +8000,8 @@ msgid ""
 "You do not have appropriate permissions to delete all contained items in the "
 "folder \"%2$s\"."
 msgstr ""
-"Nincs megfelelő jogosultsága a(z) „%2$s” mappa által tartalmazott összes elem "
-"törléséhez."
+"Nincs megfelelő jogosultsága a(z) „%2$s” mappa által tartalmazott összes "
+"elem törléséhez."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
 msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
@@ -7727,8 +8073,8 @@ msgid ""
 "The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
 "a different name and try again."
 msgstr ""
-"Már létezik „%1$s” nevű mappa a(z) „%2$s” mappa alatt. Válasszon másik nevet, "
-"és próbálja újra."
+"Már létezik „%1$s” nevű mappa a(z) „%2$s” mappa alatt. Válasszon másik "
+"nevet, és próbálja újra."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid "The folder name contains invalid characters."
@@ -7740,8 +8086,8 @@ msgid ""
 "can not share two folders with exactly the same name with a user. Please "
 "rename the folder before sharing it with this user."
 msgstr ""
-"Már megoszt egy „%1$s” nevű személyes mappát ugyanezzel a felhasználóval. Nem "
-"oszthat meg két teljesen azonos nevű mappát ugyanazzal a felhasználóval. "
+"Már megoszt egy „%1$s” nevű személyes mappát ugyanezzel a felhasználóval. "
+"Nem oszthat meg két teljesen azonos nevű mappát ugyanazzal a felhasználóval. "
 "Nevezze át a mappát, mielőtt megosztaná a felhasználóval."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
@@ -7749,8 +8095,8 @@ msgid ""
 "Duplicate permission defined for user \"%1$s\". Only one permission per user "
 "is allowed."
 msgstr ""
-"A(z) „%1$s” felhasználó jogosultsága többször szerepel. Felhasználónként csak "
-"egy jogosultság engedélyezett."
+"A(z) „%1$s” felhasználó jogosultsága többször szerepel. Felhasználónként "
+"csak egy jogosultság engedélyezett."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
 msgid ""
@@ -7801,8 +8147,8 @@ msgid ""
 "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
 "restored."
 msgstr ""
-"„%1$s” tulajdonos adminisztrációs jogosultságai helyre lettek állítva a(z) „%"
-"2$s” mappán."
+"„%1$s” tulajdonos adminisztrációs jogosultságai helyre lettek állítva a(z) "
+"„%2$s” mappán."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -7903,8 +8249,8 @@ msgid ""
 "The following recipient is not allowed: %1$s. Please remove associated "
 "address and try again."
 msgstr ""
-"A következő címzett nem engedélyezett: %1$s. Távolítsa el a kérdéses címet és "
-"próbálja újra."
+"A következő címzett nem engedélyezett: %1$s. Távolítsa el a kérdéses címet "
+"és próbálja újra."
 
 #. The message displayed if the requested subscription cannot be found from the server.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:69
@@ -8020,7 +8366,9 @@ msgstr "Nem módosíthatók az adatok. (%1$s)"
 msgid ""
 "Please (re-)authorize your Twitter accounts.\n"
 "Twitter responded with: %1$s"
-msgstr "Engedélyezze újra a Twitter-fiókjait.\nA Twitter válasza: %1$s"
+msgstr ""
+"Engedélyezze újra a Twitter-fiókjait.\n"
+"A Twitter válasza: %1$s"
 
 #. The request is understood, but it has been refused or access is not allowed: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:67
@@ -8028,8 +8376,8 @@ msgid ""
 "The request is understood, but it has been refused or access is not allowed: "
 "%1$s"
 msgstr ""
-"A kérés megértve, de el lett utasítva vagy a hozzáférés nem engedélyezett: %"
-"1$s"
+"A kérés megértve, de el lett utasítva vagy a hozzáférés nem engedélyezett: "
+"%1$s"
 
 #. Invalid format in search query.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:70
@@ -8218,6 +8566,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:110
 msgid "The mandatory parameter \"%1$s\" is missing in the request body"
 msgstr "Az \"%1$s\" kötelező paraméter hiányzik a kérésből"
+
+#. The XING server is not available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:113
+msgid "The XING server is not available."
+msgstr "A XING kiszolgáló nem érhető el."
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
@@ -14612,9 +14965,6 @@ msgstr "Zulu"
 
 #~ msgid "No such token: %1$s"
 #~ msgstr "Nincs ilyen token: %1$s"
-
-#~ msgid "Token login service is not available."
-#~ msgstr "A token bejelentkezési szolgáltatás nem érhető el."
 
 #~ msgid "No such session for token: %1$s"
 #~ msgstr "Nincs ilyen munkamenet a tokenhez: %1$s"
