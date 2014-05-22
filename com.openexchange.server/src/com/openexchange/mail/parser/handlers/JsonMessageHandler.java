@@ -434,6 +434,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
+        if (isInline && isAlternative && null != altId && id.startsWith(altId) && baseContentType.startsWith("text/xml")) {
+            // Ignore
+            return true;
+        }
+
+        // Handle attachment
         return handleAttachment0(part, isInline, null, baseContentType, fileName, id);
     }
 
