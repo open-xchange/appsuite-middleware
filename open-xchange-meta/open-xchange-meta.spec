@@ -421,6 +421,8 @@ Authors:
 %changelog
 * Fri May 16 2014 Carsten Hoeger <choeger@open-xchange.com>
 Third release candidate for 7.6.0
+* Fri May 16 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-05-26
 * Wed May 07 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-05-05
 * Mon May 05 2014 Carsten Hoeger <choeger@open-xchange.com>
