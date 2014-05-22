@@ -65,7 +65,7 @@ check_on_needed() {
 }
 
 check_argument() {
-    local _pattern=$(echo ${2} | tr [:upper:] [:lower:])
+    local _pattern=$(echo ${2} | ${TR} [:upper:] [:lower:])
     case ${_pattern} in
         false) _pattern=false ;;
         true) _pattern=true ;;
@@ -84,13 +84,28 @@ cat << EOF
 ###############################################################################
                                   WARNING
 While creating Java heap dumps your JVM will be stopped and the OX Service is
-not functional. This step may take several minutes and it can happen that you
-have to restart the open-xchange service afterwards by hand again.
+not functional. This step may take several minutes and it could happen that you
+need to restart the open-xchange service afterwards manually again.
+
+Please also make sure that you have enough free disk space for processing the
+data in directories which are defined by '--tempdir' and '--log-archive',
+depending on your ox-scriptconf.sh '-Xmx' size of your groupware Java virtual
+machine and amount of logs, several gigabyte could be needed!
+
+System Info:
+Groupware Max Heap Size: $(cat /opt/open-xchange/etc/ox-scriptconf.sh | \
+    grep -A 1 'groupware Java virtual machine' | \
+    ${SED} 's|.*-Xmx|-Xmx|g' | \
+    ${SED} 's|"||g' | \
+    ${TAIL} -n 1)
+OX Log Storage: $(${DU} -h ${OX_LOG_DIR})
+
+$(${DF} -h ${TMP})    --${TMP_LONG}=${TMP}
+$(${DF} -h $(${DIRNAME} ${LOGARC}) | ${TAIL} -n 1)    --${LOGARC_LONG}=$(dirname ${LOGARC})/<name>.tar
 
 ###############################################################################
-Creating Heap-Dumps will stop
 EOF
-read -p "Press any key to continue or [ctrl+c] to cancel..."
+read -p "Press ENTER to continue or [ctrl+c] to cancel..."
 }
 
 . ${OXFUNCTIONS}
@@ -128,7 +143,7 @@ DROP_OLDER_LOGS_THAN_KEEP_ALWAYS="open-xchange.log.0 open-xchange-console.log op
 OX_LOG_DIR=/var/log/open-xchange
 ARCHIVE_DIRS="/opt/open-xchange/etc ${OX_LOG_DIR}"
 
-PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf'
+PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf;java -version'
 
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
 LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$DROP_OLDER_LOGS_THAN_LONG:'
@@ -137,7 +152,7 @@ usage() {
     echo
     echo "${0} currently knows the following parameters:"
     echo
-    local lopts=$(echo ${LONGOPTS} | sed -e 's/[:,]/ /g')
+    local lopts=$(echo ${LONGOPTS} | ${SED} -e 's/[:,]/ /g')
     printf '%-22s | %-45s | %-s\n' "Parameter" "Default value" "Possible values"
     echo "--------------------------------------------------------------------------------------------"
     for opt in ${lopts}; do
@@ -158,10 +173,29 @@ Example:
 
 use -D for Debug mode
 
+Please see for further information, requirements and examples following documentation:
+http://oxpedia.org/wiki/index.php?title=AppSuite:Oxsysreport
+
 EOF
     echo
 }
 
+get_ox_java_pid() {
+    local _ox_pid=$(ps ax | \
+        grep 'open-xchange' | \
+        grep 'java' | \
+        ${HEAD} -n 1 | \
+        ${AWK} '{print $1}')
+    echo "${_ox_pid}"
+}
+
+is_ox_running() {
+    if [ -n "$(get_ox_java_pid)" ]; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
 
 TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:hD --long "$(eval echo ${LONGOPTS}),help" -- "${@}") \
     || die "exiting"
@@ -170,8 +204,18 @@ eval set -- "${TEMP}"
 
 # needed to catch the exit from a sub shell
 set -e
-TAR=$(check_on_needed tar)
+AWK=$(check_on_needed awk)
 BZIP2=$(check_on_needed bzip2)
+DF=$(check_on_needed df)
+DIRNAME=$(check_on_needed dirname)
+DU=$(check_on_needed du)
+GZIP=$(check_on_needed gzip)
+HEAD=$(check_on_needed head)
+SED=$(check_on_needed sed)
+SLEEP=$(check_on_needed sleep)
+TAIL=$(check_on_needed tail)
+TAR=$(check_on_needed tar)
+TR=$(check_on_needed tr)
 
 while true; do
     case "${1}" in
@@ -196,12 +240,21 @@ while true; do
             shift 2
             KILL=$(check_on_needed kill)
             TOP=$(check_on_needed top)
+            if [ 'false' == "$(is_ox_running)" ]; then
+                echo "Error, open-xchange service is not running" >&2
+                exit 1
+            fi
         ;;
         --${CREATE_HEAP_DUMP_LONG})
             HEAP_DUMP=$(check_argument ${1} ${2})
             shift 2
-            JMAP=$(check_on_needed jmap)
-            warning_heap_dump
+            if [ 'false' == "$(is_ox_running)" ]; then
+                echo "Error, open-xchange service is not running" >&2
+                exit 1
+            fi
+            if [ 'true' == "${HEAP_DUMP}" ]; then
+                warning_heap_dump
+            fi
         ;;
         --${SKIP_COMPRESSION_LONG})
             SKIP_COMPRESSION=$(check_argument ${1} ${2})
@@ -254,7 +307,7 @@ for opt in ${MUSTOPTS}; do
 done
 
 # generic option checking
-ALLOPTS=$(echo ${LONGOPTS} | sed -e 's/[$:,]/ /g' -e 's/_LONG//g')
+ALLOPTS=$(echo ${LONGOPTS} | ${SED} -e 's/[$:,]/ /g' -e 's/_LONG//g')
 for opt in ${ALLOPTS}; do
     opt_var=$(eval echo \$${opt})
     opt_var_long=$(eval echo \$${opt}_LONG)
@@ -297,7 +350,7 @@ elif [ $(( ${DIST} & ${SUSE} )) -eq ${SUSE} ]; then
      test -f /etc/my.cnf && ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/my.cnf"
 elif [ $(( ${DIST} & ${REDHAT} )) -eq ${REDHAT} ]; then
      echo Redhat system detected
-     ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/redhat-release"
+     ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/*-release"
      PROCS=${PROCS}';rpm -qa --last'
      test -f /etc/my.cnf && ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/my.cnf"
 else
@@ -315,7 +368,7 @@ collect_files() {
            -type f > /${TMP}/${LOGDIR}/${DROP_OLDER_LOGS_THAN_LONG}-exclude
        # remove mandatory files from exclusion list if listed
        for keep in ${DROP_OLDER_LOGS_THAN_KEEP_ALWAYS}; do
-           sed -i "/${keep}$/d" /${TMP}/${LOGDIR}/${DROP_OLDER_LOGS_THAN_LONG}-exclude
+           ${SED} -i "/${keep}$/d" /${TMP}/${LOGDIR}/${DROP_OLDER_LOGS_THAN_LONG}-exclude
        done
        ${TAR} cvf /${TMP}/${LOGDIR}/ox_files_and_logs.tar \
            --ignore-failed-read ${ARCHIVE_DIRS} \
@@ -355,13 +408,33 @@ clean_up(){
    test "${KEEP_TMP}" = "true" || rm -rf ${TMP}/${LOGDIR}
 }
 
-get_ox_pid() {
-    local _ox_pid=$(ps ax | \
+get_ox_user_ID() {
+    local _ox_user=$(ps axu | \
         grep 'open-xchange' | \
         grep 'java' | \
-        head -n 1 | \
-        awk '{print $1}')
-    echo "${_ox_pid}"
+        ${HEAD} -n 1 | \
+        ${AWK} '{print $1}')
+    echo "${_ox_user}"
+}
+
+identify_and_move_ibm_dumps() {
+# The IBM Java VM is storing the dumps separately in the filesystem, we search
+# for the storage location within the open-xchange-console.log and move them
+# into the support tarball. The filesystem storage location can be indified
+# by enties like below:
+# JVMDUMP010I Java dump written to /tmp/javacore.20140522.122625.3824.0005.txt
+# JVMDUMP010I Snap dump written to /tmp/Snap.20140522.122628.3824.0008.trc
+# JVMDUMP010I System dump written to /tmp/core.20140522.122628.3824.0006.dmp
+        local _pattern=${1}
+        local _dump_files=$(cat ${OX_LOG_DIR}/open-xchange-console.log | \
+            grep "${_pattern}" | \
+            ${SED} "s|.*${_pattern}||g")
+        for file in ${_dump_files}; do
+            if [ -f "${file}" ]; then
+                mkdir -p ${TMP}/${LOGDIR}/$(${DIRNAME} ${file})
+                mv ${file} ${TMP}/${LOGDIR}/${file}
+            fi
+        done
 }
 
 create_thread_dumps() {
@@ -372,21 +445,81 @@ create_thread_dumps() {
     echo -n "Creating Threaddumps: "
     for i in $(seq ${_count}); do
         echo -n "${i} "
-        ${KILL} -3 $(get_ox_pid)
-        sleep ${_delay}
+        ${KILL} -3 $(get_ox_java_pid)
+        ${SLEEP} ${_delay}
     done
     echo
+    if [ 'ibm' == "$(get_java_vm_type)" ]; then
+        identify_and_move_ibm_dumps "Java dump written to "
+    fi
 }
 
 create_heap_dump() {
-   local _jmap_cmd="jmap -F -dump:file"
-   ${_jmap_cmd}=${TMP}/${LOGDIR}/commands/"${_jmap_cmd} (heap-dump)" $(get_ox_pid)
+   local _heap_dump_cmd="jmap -dump:file"
+   local _heap_histo_cmd="jmap -histo"
+   # Grant write permissions for ox user
+   if [ 'ibm' != "$(get_java_vm_type)" ]; then
+       JMAP=$(check_on_needed jmap)
+       SUDO=$(check_on_needed sudo)
+       chmod a+w ${TMP}/${LOGDIR}/commands
+       ${SUDO} -u "#$(get_ox_user_ID)" ${_heap_histo_cmd} $(get_ox_java_pid) \
+           >> "${TMP}/${LOGDIR}/commands/${_heap_histo_cmd} (heap-dump)"
+       ${SUDO} -u "#$(get_ox_user_ID)" \
+           ${_heap_dump_cmd}=${TMP}/${LOGDIR}/commands/"${_heap_dump_cmd} (heap-dump)" \
+           $(get_ox_java_pid)
+   else
+       JEXTRACT=$(check_on_needed jextract)
+       echo "Terminating open-xchange service for heap dump creation:"
+       cd ${TMP}
+       kill -ABRT "$(get_ox_java_pid)"
+       while [ -n "$(get_ox_java_pid)" ]; do
+           echo -n .
+           ${SLEEP} 1
+       done
+       OX_JVM_TERMINATED=true
+       echo
+       identify_and_move_ibm_dumps "System dump written to "
+       identify_and_move_ibm_dumps "Snap dump written to "
+       identify_and_move_ibm_dumps "Java dump written to "
+       HEAP_DUMPS=$(find ${TMP}/${LOGDIR} -name "core.*.dmp")
+       echo "Processing Heap-Dumps..."
+       for heap_dump in ${HEAP_DUMPS}; do
+           if [ 'true' != "${SKIP_COMPRESSION}" ]; then
+               ${JEXTRACT} ${heap_dump} 2> /dev/null
+               # the heap dump is included in the jextract zip archive
+               rm ${heap_dump}
+           else
+               ${JEXTRACT} ${heap_dump} -nozip 2> /dev/null
+           fi
+       done
+   fi
 }
+
+get_java_vm_type() {
+   # the java vm type is defines in third line of 'java -version' output
+   local _java_vm_type=$(cat ${TMP}/${LOGDIR}/commands/java\ -version | \
+       ${HEAD} -n 3  | \
+       ${TAIL} -n 1 | \
+       ${SED} 's|(.*||g' | \
+       ${TR} [:upper:] [:lower:])
+       case ${_java_vm_type} in
+           openjdk*) _java_vm_type=openjdk ;;
+           ibm*) _java_vm_type=ibm ;;
+           hotspot*) _java_vm_type=hotspot ;;
+           sun*) _java_vm_type=sun ;;
+           oracle*) _java_vm_type=oracle ;;
+           *) _java_vm_type=unknown ;;
+       esac
+       echo ${_java_vm_type}
+}
+
 
 trap "rm -f ${LOGARC}; clean_up; exit 1" SIGINT SIGSEGV SIGQUIT SIGTERM
 
 echo creating logdir ${TMP}/${LOGDIR}
 mkdir -p ${TMP}/${LOGDIR}/commands/
+echo collecting system data into ${TMP}/${LOGDIR}
+collect_output
 if [ 'true' == "${THREAD_DUMP}" ]; then
     create_thread_dumps
 fi
@@ -395,11 +528,12 @@ if [ 'true' == "${HEAP_DUMP}" ]; then
 fi
 echo collecting files into ${TMP}/${LOGDIR}/ox_files_and_logs.tar${LOGS_AND_FILES_SUFFIX}
 collect_files
-echo collecting system data into ${TMP}/${LOGDIR}
-collect_output
 echo creating archive ${LOGARC}${LOGARC_SUFFIX}
 ${TAR} cvf ${LOGARC} -C ${TMP} ${LOGDIR} > /dev/null 2>&1
 if [ 'true' != "${SKIP_COMPRESSION}" ]; then
-       gzip ${LOGARC}
+       ${GZIP} ${LOGARC}
+fi
+if [ 'true' == "${OX_JVM_TERMINATED}" ];then
+    service open-xchange start
 fi
 clean_up
