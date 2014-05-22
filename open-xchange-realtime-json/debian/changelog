@@ -1,3 +1,9 @@
+open-xchange-realtime-json (7.4.2-24) stable; urgency=low
+
+  * Build for patch 2014-05-26
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 22 May 2014 10:29:47 +0200
+
 open-xchange-realtime-json (7.4.2-23) stable; urgency=low
 
   * Build for patch 2014-05-26
