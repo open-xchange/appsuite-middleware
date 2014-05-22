@@ -55,7 +55,7 @@ public class MailAccountParserTest {
 
         Assert.assertEquals(transportLogin, mailAccountDescription.getTransportLogin());
         Assert.assertEquals(null, mailAccountDescription.getTransportPassword());
-        Assert.assertEquals(2, attributes.size());
+        Assert.assertEquals(1, attributes.size());
     }
 
     @Test
@@ -66,7 +66,7 @@ public class MailAccountParserTest {
 
         Assert.assertEquals(null, mailAccountDescription.getTransportLogin());
         Assert.assertEquals(transportPassword, mailAccountDescription.getTransportPassword());
-        Assert.assertEquals(2, attributes.size());
+        Assert.assertEquals(1, attributes.size());
     }
 
     @Test
@@ -97,9 +97,9 @@ public class MailAccountParserTest {
 
         MailAccountParser.getInstance().parseTransportCredentials(mailAccountDescription, json, attributes);
 
-        Assert.assertEquals("ewaldbartkowiak@gmail.com", mailAccountDescription.getTransportLogin());
-        Assert.assertEquals("myPassword", mailAccountDescription.getTransportPassword());
-        Assert.assertEquals(2, attributes.size());
+        Assert.assertEquals(null, mailAccountDescription.getTransportLogin());
+        Assert.assertEquals(null, mailAccountDescription.getTransportPassword());
+        Assert.assertEquals(0, attributes.size());
     }
 
     @Test
@@ -130,9 +130,9 @@ public class MailAccountParserTest {
 
         MailAccountParser.getInstance().parseTransportCredentials(mailAccountDescription, json, attributes);
 
-        Assert.assertEquals(imapLogin, mailAccountDescription.getTransportLogin());
-        Assert.assertEquals(imapPassword, mailAccountDescription.getTransportPassword());
-        Assert.assertEquals(2, attributes.size());
+        Assert.assertEquals(null, mailAccountDescription.getTransportLogin());
+        Assert.assertEquals(null, mailAccountDescription.getTransportPassword());
+        Assert.assertEquals(0, attributes.size());
     }
 
     @Test
@@ -143,7 +143,7 @@ public class MailAccountParserTest {
 
         Assert.assertEquals(null, mailAccountDescription.getTransportLogin());
         Assert.assertEquals(transportPassword, mailAccountDescription.getTransportPassword());
-        Assert.assertEquals(2, attributes.size());
+        Assert.assertEquals(1, attributes.size());
     }
 
     @Test
@@ -154,6 +154,6 @@ public class MailAccountParserTest {
 
         Assert.assertEquals(transportLogin, mailAccountDescription.getTransportLogin());
         Assert.assertEquals(null, mailAccountDescription.getTransportPassword());
-        Assert.assertEquals(2, attributes.size());
+        Assert.assertEquals(1, attributes.size());
     }
 }
