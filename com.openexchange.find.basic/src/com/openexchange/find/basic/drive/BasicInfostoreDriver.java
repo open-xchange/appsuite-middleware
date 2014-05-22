@@ -53,12 +53,14 @@ import static com.openexchange.find.basic.SimpleTokenizer.tokenize;
 import static com.openexchange.find.basic.drive.Utils.prepareSearchTerm;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.java.Autoboxing.I2i;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
@@ -321,6 +323,10 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         return folderIDs;
     }
 
+    /*
+     * Returns all folders that are below the users default folder (i.e. "My Files"), including that
+     * folder itself, where the user has the necessary permissions.
+     */
     private static List<Integer> determinePrivateFolderIds(ServerSession session) throws OXException {
         final Context context = session.getContext();
         final int userId = session.getUserId();
@@ -344,6 +350,10 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         return folderIDs;
     }
 
+    /*
+     * Returns the system-wide public infostore folder and all folders below it, where the user
+     * has the necessary permissions.
+     */
     private static List<Integer> determinePublicFolderIds(ServerSession session) throws OXException {
         final Context context = session.getContext();
         final int userId = session.getUserId();
@@ -367,16 +377,23 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         return folderIDs;
     }
 
+    /*
+     * Returns the system-wide user infostore folder including and folders below it, where the user
+     * has the necessary permissions and the folder is shared (i.e. has permissions for multiple users).
+     * The users own default folder is excluded. Also all folders are excluded that have been created
+     * by the user itself, as they are shared to others but are private in terms of the user.
+     */
     private static List<Integer> determineSharedFolderIds(ServerSession session) throws OXException {
         final Context context = session.getContext();
         final int userId = session.getUserId();
         final UserConfiguration userConfig = session.getUserConfiguration();
         final OXFolderAccess folderAccess = new OXFolderAccess(context);
-        FolderObject infostoreFolder = folderAccess.getFolderObject(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+        final FolderObject userInfostoreFolder = folderAccess.getDefaultFolder(userId, FolderObject.INFOSTORE);
+        FolderObject systemInfostoreFolder = folderAccess.getFolderObject(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
         FolderFilter filter = new FolderFilter() {
             @Override
             public boolean accept(FolderObject folder) throws OXException {
-                if (folder.getNonSystemPermissionsAsArray().length < 2) {
+                if (folder.getNonSystemPermissionsAsArray().length < 2 || folder.getObjectID() == userInfostoreFolder.getObjectID() || folder.getCreatedBy() == userId) {
                     return false;
                 }
 
@@ -386,11 +403,11 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         };
 
         List<Integer> folderIDs = new LinkedList<Integer>();
-        if (filter.accept(infostoreFolder)) {
-            folderIDs.add(infostoreFolder.getObjectID());
+        if (filter.accept(systemInfostoreFolder)) {
+            folderIDs.add(systemInfostoreFolder.getObjectID());
         }
 
-        addSubfolderIDs(folderIDs, infostoreFolder, folderAccess, context, filter);
+        addSubfolderIDs(folderIDs, systemInfostoreFolder, folderAccess, context, filter);
         return folderIDs;
     }
 
@@ -412,6 +429,11 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         boolean accept(FolderObject folder) throws OXException;
     }
 
+    /*
+     * For performance and complexity reasons, the returned folder ids may not exactly match all folders of the
+     * given type. In edge cases folders can be missing or folders can be contained that don't match the type.
+     * See the comments within the single 'determine'-methods for details.
+     */
     private static List<Integer> determineFolderIds(SearchRequest searchRequest, ServerSession session) throws OXException {
         List<Integer> folderIDs;
         FolderType folderType = searchRequest.getFolderType();
