@@ -19,6 +19,7 @@
 * 2014-05-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 32677: Do net set SMTP credentials if not explicitly set + several sanitizing operations to ensure SMTP authentication does still work
+ - Fix for bug 32692: Ignore alternative XML part
 
 * 2014-05-21 - thorben.betten@open-xchange.com
 
