@@ -49,9 +49,7 @@
 
 package com.openexchange.login.internal;
 
-import static com.openexchange.ajax.login.LoginTools.updateIPAddress;
 import static com.openexchange.java.Autoboxing.I;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -59,10 +57,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.security.auth.login.LoginException;
-import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.fields.LoginFields;
-import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -135,29 +130,8 @@ public final class LoginPerformer {
         return doLogin(request, new HashMap<String, Object>(1));
     }
 
-    /**
-     * Performs the login for specified login request.
-     *
-     * @param request The login request
-     * @param properties The properties
-     * @return The login providing login information
-     * @throws OXException If login fails
-     */
     public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
-        return doLogin(request, properties, false);
-    }
-
-    /**
-     * Performs the login for specified login request.
-     *
-     * @param request The login request
-     * @param properties The properties
-     * @param reuseExisting <code>true</code> to re-use possibly existing session; otherwise <code>false</code> to create a new session
-     * @return The login providing login information
-     * @throws OXException If login fails
-     */
-    public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties, boolean reuseExisting) throws OXException {
-        return doLogin(request, properties, new NormalLoginMethod(request, properties), reuseExisting);
+        return doLogin(request, properties, new NormalLoginMethod(request, properties));
     }
 
     /**
@@ -169,7 +143,7 @@ public final class LoginPerformer {
      */
     public LoginResult doAutoLogin(final LoginRequest request) throws OXException {
         final Map<String, Object> properties = new HashMap<String, Object>();
-        return doLogin(request, properties, new AutoLoginMethod(request, properties), false);
+        return doLogin(request, properties, new AutoLoginMethod(request, properties));
     }
 
     /**
@@ -179,7 +153,7 @@ public final class LoginPerformer {
      * @return The login providing login information
      * @throws OXException If login fails
      */
-    private LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod, boolean reuseExisting) throws OXException {
+    private LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
         sanityChecks(request);
         final LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
@@ -220,11 +194,9 @@ public final class LoginPerformer {
                 throw e;
             }
             authService.authorizeUser(ctx, user);
-
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
-
-            // Get SessionD service
+            // Create session
             SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
             if (null == sessiondService) {
                 sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
@@ -233,78 +205,10 @@ public final class LoginPerformer {
                     throw ServiceExceptionCode.absentService(SessiondService.class);
                 }
             }
-
-            // Check for already valid session (if desired)
-            Session session = null;
-            if (reuseExisting && null != cookies) {
-                LoginConfiguration conf = LoginServlet.getLoginConfiguration();
-                if (conf.isSessiondAutoLogin()) {
-                    String secret = null;
-                    final String hash = request.getHash();
-                    final String sessionCookieName = LoginServlet.SESSION_PREFIX + hash;
-                    final String secretCookieName = LoginServlet.SECRET_PREFIX + hash;
-
-                    NextCookie: for (final Cookie cookie : cookies) {
-                        final String cookieName = cookie.getName();
-                        if (cookieName.startsWith(sessionCookieName)) {
-                            final String sessionId = cookie.getValue();
-                            session = sessiondService.getSession(sessionId);
-                            if (null != session) {
-                                // IP check if enabled; otherwise update session's IP address if different to request's IP address
-                                // Insecure check is done in updateIPAddress method.
-                                if (!conf.isIpCheck()) {
-                                    // Update IP address if necessary
-                                    updateIPAddress(conf, request.getClientIP(), session);
-                                } else {
-                                    final String newIP = request.getClientIP();
-                                    SessionServlet.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
-                                    // IP check passed: update IP address if necessary
-                                    updateIPAddress(conf, newIP, session);
-                                }
-                                try {
-                                    final Context sessionContext = ContextStorage.getInstance().getContext(session.getContextId());
-                                    if (!sessionContext.isEnabled()) {
-                                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                                    }
-                                    final User sessionUser = UserStorage.getInstance().getUser(session.getUserId(), sessionContext);
-                                    if (!sessionUser.isMailEnabled()) {
-                                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                                    }
-                                } catch (final UndeclaredThrowableException e) {
-                                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-                                }
-
-                                // Secret already found?
-                                if (null != secret) {
-                                    break NextCookie;
-                                }
-                            }
-                        } else if (cookieName.startsWith(secretCookieName)) {
-                            secret = cookie.getValue();
-                            /*
-                             * Session already found?
-                             */
-                            if (null != session) {
-                                break NextCookie;
-                            }
-                        }
-                    }
-
-                    if (null != session) {
-                        if (null == secret || !session.getSecret().equals(secret) || ctx.getContextId() != session.getContextId() || user.getId() != session.getUserId()) {
-                            session = null;
-                        }
-                    }
-                }
-            }
-
+            final Session session = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
             if (null == session) {
-                // Create session
-                session = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
-                if (null == session) {
-                    // Session could not be created
-                    throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
-                }
+                // Session could not be created
+                throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
             }
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             if (SessionEnhancement.class.isInstance(authed)) {
