@@ -109,7 +109,7 @@ public class FormLogin implements LoginRequestHandler {
                 properties.put("client.capabilities", capabilities);
             }
         }
-        LoginResult result = LoginPerformer.getInstance().doLogin(request, properties, true);
+        LoginResult result = LoginPerformer.getInstance().doLogin(request, properties);
         Session session = result.getSession();
         User user = result.getUser();
 

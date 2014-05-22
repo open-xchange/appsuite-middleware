@@ -1,3 +1,7 @@
+* 2014-05-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32677: Do not set SMTP credentials if not explicitly set + several sanitizing operations to ensure SMTP authentication does still work
+
 * 2014-05-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 32652: Do also consider pre-auth capabilities when checking for a secure connection
