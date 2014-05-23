@@ -781,7 +781,7 @@ public class LoginServlet extends AJAXServlet {
      * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
      * @param serverName The HTTP request's server name
      */
-    protected void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
+    public static void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
         final Cookie cookie = new Cookie(SESSION_PREFIX + hash, session.getSessionID());
         configureCookie(cookie, secure, serverName, confReference.get());
         resp.addCookie(cookie);
