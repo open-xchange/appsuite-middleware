@@ -241,6 +241,23 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         }
     }
 
+    private boolean CheckHzMapForMissingToken(final String token) {
+        final IMap<String, String> hzMap = hzMap();
+        if (null == hzMap) {
+            LOG.trace("Hazelcast map for remote token logins is not available.");
+            //When Hz is absent, the token can only be redeemed on the same system and is therefore valid.
+            return false;
+        } else {
+            // This MUST be synchronous! Otherwise it may be possible to use a token twice, once from local map and once from remote map
+            // because remote remove happens before asynchronous put.
+            if (null == hzMap.get(token)){
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
     @Override
     public String acquireToken(final Session session) {
         Validate.notNull(session);
@@ -248,6 +265,14 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         // Only one token per session
         final String sessionId = session.getSessionID();
         String token = sessionId2token.get(sessionId);
+        // Check if token is already used on the cluster
+        if (null != token) {
+            if (CheckHzMapForMissingToken(token)){
+                // If it has been removed in the meantime, remove it from internal Maps and create a new one
+                removeTokenFor(session);
+                token = null;
+            }
+        }
         if (null == token) {
             final String newToken = UUIDs.getUnformattedString(UUID.randomUUID());
             token = sessionId2token.putIfAbsent(sessionId, newToken);
@@ -288,10 +313,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             sessionId = token2sessionId.remove(token);
             if (null == sessionId) {
                 // Local MISS, look up in remote map
-                final IMap<String, String> hzMap = hzMap();
-                if (null != hzMap) {
-                    sessionId = hzMap.remove(token);
-                }
+                sessionId = removeFromHzMap(token);
                 LOG.trace("Resolved token {} remotely to session {}.", token, sessionId);
             } else {
                 // Local HIT, remove from remote map
