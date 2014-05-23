@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;

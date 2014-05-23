@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import static com.openexchange.tools.Collections.newHashMap;
 import java.io.BufferedWriter;

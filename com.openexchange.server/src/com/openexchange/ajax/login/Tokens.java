@@ -60,7 +60,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.SessionServlet;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.writer.LoginWriter;
@@ -118,7 +118,7 @@ public final class Tokens implements LoginRequestHandler {
             LoginTools.updateIPAddress(conf, req.getRemoteAddr(), session);
         } else {
             final String newIP = req.getRemoteAddr();
-            SessionServlet.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
+            SessionUtility.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
             // IP check passed: update IP address if necessary
             LoginTools.updateIPAddress(conf, newIP, session);
         }

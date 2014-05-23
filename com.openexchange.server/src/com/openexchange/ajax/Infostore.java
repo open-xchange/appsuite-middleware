@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -115,8 +116,6 @@ public class Infostore extends PermissionServlet {
     private static final String STR_JSON = "json";
 
     private static final String STR_ERROR = "error";
-
-    private static final String STR_ACTION = "action";
 
     private static final String MIME_TEXT_HTML = "text/html";
 

@@ -65,7 +65,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.SessionServlet;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -154,7 +154,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                             updateIPAddress(conf, req.getRemoteAddr(), session);
                         } else {
                             final String newIP = req.getRemoteAddr();
-                            SessionServlet.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
+                            SessionUtility.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
                             // IP check passed: update IP address if necessary
                             updateIPAddress(conf, newIP, session);
                         }
@@ -217,8 +217,8 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                 }
             }
             if (null == response.getData() || session == null || secret == null || !(session.getSecret().equals(secret))) {
-                SessionServlet.removeOXCookies(hash, req, resp);
-                SessionServlet.removeJSESSIONID(req, resp);
+                SessionUtility.removeOXCookies(hash, req, resp);
+                SessionUtility.removeJSESSIONID(req, resp);
                 if (doAutoLogin(req, resp)) {
                     throw OXJSONExceptionCodes.INVALID_COOKIE.create();
                 }
@@ -236,12 +236,12 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             } else {
                 e.log(LOG);
             }
-            if (SessionServlet.isIpCheckError(e) && null != session) {
+            if (SessionUtility.isIpCheckError(e) && null != session) {
                 try {
                     // Drop Open-Xchange cookies
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                    SessionServlet.removeOXCookies(session.getHash(), req, resp);
-                    SessionServlet.removeJSESSIONID(req, resp);
+                    SessionUtility.removeOXCookies(session.getHash(), req, resp);
+                    SessionUtility.removeJSESSIONID(req, resp);
                     sessiondService.removeSession(session.getSessionID());
                 } catch (final Exception e2) {
                     LOG.error("Cookies could not be removed.", e2);

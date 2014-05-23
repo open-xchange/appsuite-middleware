@@ -70,8 +70,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -107,7 +109,7 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DispatcherServlet.class);
 
-    private static final Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
+    private static final @NonNull Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
 
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
@@ -242,7 +244,7 @@ public class DispatcherServlet extends SessionServlet {
 
     @Override
     protected void initializeSession(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
-        if (null != getSessionObject(req, true)) {
+        if (null != SessionUtility.getSessionObject(req, true)) {
             return;
         }
         // Remember session
@@ -256,7 +258,7 @@ public class DispatcherServlet extends SessionServlet {
             final String sessionId = req.getParameter(PARAMETER_SESSION);
             if (sessionId != null && sessionId.length() > 0) {
                 try {
-                    session = getSession(req, sessionId, sessiondService);
+                    session = SessionUtility.getSession(req, sessionId, sessiondService);
                 } catch (final OXException e) {
                     if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
                         throw e;
@@ -268,11 +270,11 @@ public class DispatcherServlet extends SessionServlet {
                         throw e;
                     }
                     // Missing secret cookie
-                    session = getSession(hashSource, req, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), e, getAjaxRequestDataTools()));
+                    session = SessionUtility.getSession(SessionUtility.getHashSource(), req, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), e, getAjaxRequestDataTools()));
                 }
-                verifySession(req, sessiondService, sessionId, session);
-                rememberSession(req, session);
-                checkPublicSessionCookie(req, resp, session, sessiondService);
+                SessionUtility.verifySession(req, sessiondService, sessionId, session);
+                SessionUtility.rememberSession(req, session);
+                SessionUtility.checkPublicSessionCookie(req, resp, session, sessiondService);
                 sessionParamFound = true;
             } else {
                 session = null;
@@ -294,7 +296,7 @@ public class DispatcherServlet extends SessionServlet {
         }
         // Try public session
         if (!mayOmitSession) {
-            findPublicSessionId(req, session, sessiondService, mayUseFallbackSession, mayPerformPublicSessionAuth);
+            SessionUtility.findPublicSessionId(req, session, sessiondService, mayUseFallbackSession, mayPerformPublicSessionAuth);
         }
     }
 
@@ -495,7 +497,7 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     private ServerSession getSession(final HttpServletRequest httpRequest, final Dispatcher dispatcher, final String module, final String action) throws OXException {
-        ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
+        ServerSession session = SessionUtility.getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
         if (session == null) {
             if (!dispatcher.mayOmitSession(module, action)) {
                 if (dispatcher.mayUseFallbackSession(module, action)) {

@@ -62,7 +62,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.Multiple;
-import com.openexchange.ajax.SessionServlet;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
@@ -232,7 +232,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             }
             final Session session = result.getSession();
             // Store associated session
-            SessionServlet.rememberSession(req, new ServerSessionAdapter(session));
+            SessionUtility.rememberSession(req, new ServerSessionAdapter(session));
             LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
             // Login response is unfortunately not conform to default responses.
             if (req.getParameter("callback") != null && LoginServlet.ACTION_LOGIN.equals(req.getParameter("action"))) {

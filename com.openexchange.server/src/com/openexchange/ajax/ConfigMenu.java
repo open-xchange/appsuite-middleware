@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import static com.openexchange.config.json.actions.PUTAction.sanitizeJsonSetting;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

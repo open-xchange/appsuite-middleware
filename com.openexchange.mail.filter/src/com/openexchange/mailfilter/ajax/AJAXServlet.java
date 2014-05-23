@@ -57,7 +57,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
-import com.openexchange.ajax.SessionServlet;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.CookieHashSource;
@@ -161,7 +161,7 @@ public abstract class AJAXServlet extends HttpServlet {
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
             response.setLocale(session);
-            final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
+            final String secret = SessionUtility.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
@@ -226,7 +226,7 @@ public abstract class AJAXServlet extends HttpServlet {
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
             response.setLocale(session);
-            final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
+            final String secret = SessionUtility.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());

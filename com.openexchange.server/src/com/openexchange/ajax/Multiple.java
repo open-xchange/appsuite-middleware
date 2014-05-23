@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.io.Reader;
