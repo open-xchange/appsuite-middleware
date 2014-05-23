@@ -241,21 +241,16 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         }
     }
 
-    private boolean CheckHzMapForMissingToken(final String token) {
+    private boolean checkHzMapForMissingToken(final String token) {
         final IMap<String, String> hzMap = hzMap();
         if (null == hzMap) {
             LOG.trace("Hazelcast map for remote token logins is not available.");
             //When Hz is absent, the token can only be redeemed on the same system and is therefore valid.
             return false;
-        } else {
-            // This MUST be synchronous! Otherwise it may be possible to use a token twice, once from local map and once from remote map
-            // because remote remove happens before asynchronous put.
-            if (null == hzMap.get(token)){
-                return true;
-            } else {
-                return false;
-            }
         }
+        // This MUST be synchronous! Otherwise it may be possible to use a token twice, once from local map and once from remote map
+        // because remote remove happens before asynchronous put.
+        return null == hzMap.get(token) ? true : false;
     }
 
     @Override
@@ -267,7 +262,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         String token = sessionId2token.get(sessionId);
         // Check if token is already used on the cluster
         if (null != token) {
-            if (CheckHzMapForMissingToken(token)){
+            if (checkHzMapForMissingToken(token)){
                 // If it has been removed in the meantime, remove it from internal Maps and create a new one
                 removeTokenFor(session);
                 token = null;
