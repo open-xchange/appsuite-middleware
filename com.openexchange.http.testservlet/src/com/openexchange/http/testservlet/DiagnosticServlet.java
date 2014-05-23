@@ -136,6 +136,20 @@ public class DiagnosticServlet extends HttpServlet {
             return;
         }
 
+        // Unknown parameter value
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        resp.setContentType("text/html");
+        PrintWriter writer = resp.getWriter();
+        final StringBuilder page = new StringBuilder(1024);
+        page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
+        page.append("<html>\n");
+        page.append("<head><title>Diagnostic</title></head>\n");
+        page.append("<body>\n");
+        page.append("<h1>Diagnostic</h1><hr/>\n");
+        page.append("<p>Unknown parameter value</p>\n");
+        page.append("</body>\n</html>");
+        writer.write(page.toString());
+        writer.flush();
     }
 
 }
