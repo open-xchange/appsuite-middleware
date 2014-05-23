@@ -250,7 +250,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         }
         // This MUST be synchronous! Otherwise it may be possible to use a token twice, once from local map and once from remote map
         // because remote remove happens before asynchronous put.
-        return null == hzMap.get(token) ? true : false;
+        return (null == hzMap.get(token));
     }
 
     @Override
