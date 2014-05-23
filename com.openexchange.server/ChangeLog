@@ -1,3 +1,7 @@
+* 2014-05-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32708: Fixed forwarding of mails from Unified Mail
+
 * 2014-05-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 32677: Do net set SMTP credentials if not explicitly set + several sanitizing operations to ensure SMTP authentication does still work
