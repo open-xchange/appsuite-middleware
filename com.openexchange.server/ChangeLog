@@ -1,6 +1,7 @@
 * 2014-05-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 32708: Fixed forwarding of mails from Unified Mail
+ - Fix for bug 32625: Keep subscription statuses when moving IMAP folders
 
 * 2014-05-22 - thorben.betten@open-xchange.com
 
