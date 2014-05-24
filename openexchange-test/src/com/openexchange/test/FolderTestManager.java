@@ -57,6 +57,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -158,8 +159,8 @@ public class FolderTestManager implements TestManager{
      * Create multiple folders via the HTTP-API at once
      */
     public void insertFoldersOnServer(final FolderObject[] folders) {
-        for (int i = 0; i < folders.length; i++) {
-            this.insertFolderOnServer(folders[i]);
+        for (FolderObject folder : folders) {
+            this.insertFolderOnServer(folder);
         }
     }
 
@@ -492,11 +493,10 @@ public class FolderTestManager implements TestManager{
                 fail("JSONException occured during " + action + ": " + e.getMessage());
             }
         } catch (final Exception e) {
-            fail("Unexpected error occured during " + action + ": " + e.getMessage());
-            e.printStackTrace();
+            fail("Unexpected error occured during " + action + ": " + e.getMessage() + "\n" + ExceptionUtils.getStackTrace(e));
         }
     }
-    
+
     public FolderObject generatePrivateFolder(final String name, final int moduleID, final int parentID, final int userID) {
         final FolderObject folder = new FolderObject();
         folder.setFolderName(name);
