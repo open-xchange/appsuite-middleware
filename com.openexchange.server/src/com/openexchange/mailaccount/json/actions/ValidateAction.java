@@ -259,18 +259,18 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             fillTransportServerCredentials(accountDescription, session, true);
         }
         // Credentials
-        String login = accountDescription.getTransportLogin();
-        String password = accountDescription.getTransportPassword();
         {
+            String login = accountDescription.getTransportLogin();
+            String password = accountDescription.getTransportPassword();
             if (isEmpty(login)) {
                 login = accountDescription.getLogin();
             }
             if (isEmpty(password)) {
                 password = accountDescription.getPassword();
             }
+            transportConfig.setLogin(login);
+            transportConfig.setPassword(password);
         }
-        transportConfig.setLogin(login);
-        transportConfig.setPassword(password);
         // Set server and port
         final URI uri;
         try {
