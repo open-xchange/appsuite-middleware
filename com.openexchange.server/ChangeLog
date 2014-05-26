@@ -16,6 +16,10 @@
  - Fix for bug 32555: Keep other Content-Type parameters when fixing Apple Mailer messages
  - Fix for bug 32625: Keep subscription statuses when moving IMAP folders
 
+* 2014-05-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32722: Check file store existence prior to attempting to create its lock file
+
 * 2014-05-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 32677: Do net set SMTP credentials if not explicitly set + several sanitizing operations to ensure SMTP authentication does still work
