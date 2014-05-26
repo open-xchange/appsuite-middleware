@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.ajax.parser.FolderParser;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -30,6 +31,7 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
         /*
          * Calling super.createResponse initiates the modified and deleted ids for the update response
          */
+        System.out.println("MS temporary debug - response data: " + ResponseWriter.getJSON(response).toString());
         final FolderUpdatesResponse folderUpdateResponse = super.createResponse(response);
         final JSONArray rows = (JSONArray) response.getData();
         if (rows == null) {
