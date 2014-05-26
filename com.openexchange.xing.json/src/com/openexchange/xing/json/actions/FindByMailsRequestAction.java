@@ -28,11 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
-<<<<<<< HEAD
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
-=======
  *     Copyright (C) 2004-2014 Open-Xchange, Inc.
->>>>>>> fac75520a0f7fc37d75b906a18da6412b990fe5b
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,8 +70,8 @@ import com.openexchange.xing.session.WebAuthSession;
 
 /**
  * {@link FindByMailsRequestAction}
- *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FindByMailsRequestAction extends AbstractXingAction {
 
@@ -102,7 +98,6 @@ public class FindByMailsRequestAction extends AbstractXingAction {
         if(jsonArray == null) {
         	throw XingExceptionCodes.MANDATORY_REQUEST_DATA_MISSING.create("emails");
         }
-
 
         int length = jsonArray.length();
         List<String> emails = new ArrayList<String>(length);
@@ -134,5 +129,4 @@ public class FindByMailsRequestAction extends AbstractXingAction {
 		final JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(xingUser);
 		return new AJAXRequestResult(result);
 	}
-
 }
