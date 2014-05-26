@@ -6,7 +6,8 @@ Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.find.basic.osgi.FindBasicActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.api2,
+Import-Package: com.davekoelle,
+ com.openexchange.api2,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.contact,
@@ -36,11 +37,13 @@ Import-Package: com.openexchange.api2,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.infostore,
+ com.openexchange.groupware.infostore.search,
  com.openexchange.groupware.infostore.utils,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.results,
  com.openexchange.groupware.search,
  com.openexchange.groupware.tasks,
+ com.openexchange.groupware.tools.chunk,
  com.openexchange.groupware.tools.iterator,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.i18n,

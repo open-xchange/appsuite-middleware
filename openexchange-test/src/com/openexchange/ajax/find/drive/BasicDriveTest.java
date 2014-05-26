@@ -390,6 +390,60 @@ public class BasicDriveTest extends AbstractFindTest {
         }
     }
 
+//    Takes half an hour do create and delete all those folders...
+//    public void testFolderChunking() throws Exception {
+//        FolderObject first = null;
+//        FolderObject middle = null;
+//        FolderObject last = null;
+//        for (int i = 0; i < 2002; i++) {
+//            FolderObject folder = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
+//                randomUID(),
+//                FolderObject.INFOSTORE,
+//                client.getValues().getPrivateInfostoreFolder(),
+//                client.getValues().getUserId()));
+//            if (i == 0) {
+//                first = folder;
+//            } else if (i == 1000) {
+//                middle = folder;
+//            } else if (i == 2001) {
+//                last = folder;
+//            }
+//        }
+//
+//        DocumentMetadata firstDoc = new DocumentMetadataImpl(metadata);
+//        firstDoc.setTitle("zzz" + randomUID());
+//        firstDoc.setFolderId(first.getObjectID());
+//
+//        DocumentMetadata middleDoc = new DocumentMetadataImpl(metadata);
+//        middleDoc.setTitle("aaa" + randomUID());
+//        middleDoc.setFolderId(middle.getObjectID());
+//
+//        DocumentMetadata lastDoc = new DocumentMetadataImpl(metadata);
+//        lastDoc.setTitle("012" + randomUID());
+//        lastDoc.setFolderId(last.getObjectID());
+//        manager.newAction(firstDoc);
+//        manager.newAction(middleDoc);
+//        manager.newAction(lastDoc);
+//
+//        List<Facet> facets = autocomplete(client, "");
+//        ExclusiveFacet folderTypeFacet = (ExclusiveFacet) findByType(CommonFacetType.FOLDER_TYPE, facets);
+//        FacetValue typeValue = findByValueId(FolderType.PRIVATE.getIdentifier(), folderTypeFacet);
+//        List<PropDocument> docs = query(client, Collections.singletonList(createActiveFacet(folderTypeFacet, typeValue)));
+//
+//        List<String> found = new ArrayList<String>(3);
+//        for (PropDocument doc : docs) {
+//            String title = (String) doc.getProps().get("title");
+//            if (title.equals(firstDoc.getTitle()) || title.equals(middleDoc.getTitle()) || title.equals(lastDoc.getTitle())) {
+//                found.add(title);
+//            }
+//        }
+//
+//        assertEquals("Did not find all documents", 3, found.size());
+//        assertEquals("Wrong order", lastDoc.getTitle(), found.get(0));
+//        assertEquals("Wrong order", middleDoc.getTitle(), found.get(1));
+//        assertEquals("Wrong order", firstDoc.getTitle(), found.get(2));
+//    }
+
     protected List<Facet> autocomplete(AJAXClient client, String prefix) throws Exception {
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.DRIVE.getIdentifier());
         AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
