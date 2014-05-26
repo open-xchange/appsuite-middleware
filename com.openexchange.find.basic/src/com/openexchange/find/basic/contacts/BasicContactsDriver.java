@@ -76,7 +76,6 @@ import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.contacts.ContactsFacetType;
-import com.openexchange.find.contacts.ContactsStrings;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Facets.ExclusiveFacetBuilder;
@@ -213,7 +212,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             List<String> prefixTokens = tokenize(prefix);
             if (!prefixTokens.isEmpty()) {
                 facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
-                    .withFormattableDisplayItem(ContactsStrings.FACET_GLOBAL, prefix)
+                    .withSimpleDisplayItem(prefix)
                     .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
                     .build());
                 facets.add(new NameFacet(prefix, prefixTokens));

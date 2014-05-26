@@ -68,7 +68,6 @@ import static com.openexchange.find.mail.MailFacetType.CONTACTS;
 import static com.openexchange.find.mail.MailFacetType.MAIL_TEXT;
 import static com.openexchange.find.mail.MailFacetType.SUBJECT;
 import static com.openexchange.find.mail.MailFacetType.TIME;
-import static com.openexchange.find.mail.MailStrings.FACET_GLOBAL;
 import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
 import static com.openexchange.find.mail.MailStrings.FACET_RECIPIENT;
 import static com.openexchange.find.mail.MailStrings.FACET_SENDER;
@@ -257,12 +256,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private static void addSimpleFacets(List<Facet> facets, String prefix, List<String> prefixTokens) {
         if (!prefixTokens.isEmpty()) {
-            facets.add(buildSimpleFacet(
-                GLOBAL,
-                FACET_GLOBAL,
-                prefix,
-                GLOBAL.getId(),
-                prefixTokens));
+
+            facets.add(newSimpleBuilder(GLOBAL)
+                .withSimpleDisplayItem(prefix)
+                .withFilter(Filter.of(GLOBAL.getId(), prefixTokens))
+                .build());
 
             facets.add(buildSimpleFacet(
                 SUBJECT,

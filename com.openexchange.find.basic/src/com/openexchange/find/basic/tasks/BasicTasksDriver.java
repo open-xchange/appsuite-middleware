@@ -168,7 +168,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
             prefixTokens = tokenize(prefix);
             if (!prefixTokens.isEmpty()) {
                 facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
-                    .withFormattableDisplayItem(TasksStrings.FACET_GLOBAL, prefix)
+                    .withSimpleDisplayItem(prefix)
                     .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
                     .build());
 
