@@ -70,6 +70,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.annotation.NonNull;
@@ -78,6 +79,7 @@ import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -1203,6 +1205,69 @@ public class AJAXRequestData {
                 url.append('?');
             }
             url.append(query);
+        }
+        // Return URL
+        return url;
+    }
+
+    /**
+     * Constructs a URL to this server, injecting the host name and optionally the JVM route.
+     *
+     * <pre>
+     *  &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
+     * </pre>
+     *
+     * @param protocol The protocol to use (HTTP or HTTPS). If <code>null</code>, defaults to the protocol used for this request.
+     * @param path The path on the server. If <code>null</code> no path is inserted
+     * @param withRoute Whether to include the JVM route in the server URL or not
+     * @param params The query string parameters. If <code>null</code> no query is included
+     * @return A string builder with the URL so far, ready for meddling.
+     */
+    public StringBuilder constructURLWithParameters(final String protocol, final String path, final boolean withRoute, final Map<String, String> params) {
+        final StringBuilder url = new StringBuilder(128);
+        // Protocol/schema
+        {
+            String prot = protocol;
+            if (prot == null) {
+                prot = isSecure() ? "https://" : "http://";
+            }
+            url.append(prot);
+            if (!prot.endsWith("://")) {
+                url.append("://");
+            }
+        }
+        // Host name
+        url.append(hostname);
+        // Path
+        if (path != null) {
+            if (!path.startsWith("/")) {
+                url.append('/');
+            }
+            url.append(path);
+        }
+        // JVM route
+        if (withRoute) {
+            url.append(";jsessionid=").append(route);
+        }
+        // Query string
+        if (params != null) {
+            boolean first = true;
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                String key = entry.getKey();
+                if (!Strings.isEmpty(key)) {
+                    if (first) {
+                        url.append('?');
+                        first = false;
+                    } else {
+                        url.append('&');
+                    }
+                    url.append(AJAXUtility.encodeUrl(key, true));
+                    String value = entry.getValue();
+                    if (!Strings.isEmpty(value)) {
+                        url.append('=').append(AJAXUtility.encodeUrl(value, true));
+                    }
+                }
+            }
         }
         // Return URL
         return url;
