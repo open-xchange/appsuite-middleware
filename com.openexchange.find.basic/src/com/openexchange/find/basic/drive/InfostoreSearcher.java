@@ -146,7 +146,7 @@ public class InfostoreSearcher {
                     user,
                     permissionBits);
 
-                final List<Document> results = new ArrayList<Document>(it.size());
+                final List<Document> results = new ArrayList<Document>(it.size() < 0 ? size : it.size());
                 while (it.hasNext()) {
                     final DocumentMetadata doc = it.next();
                     results.add(new FileDocument(documentMetadata2File(doc)));
