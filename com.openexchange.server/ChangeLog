@@ -1,3 +1,7 @@
+* 2014-05-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32722: Check file store existence prior to attempting to create its lock file
+
 * 2014-05-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 32708: Fixed forwarding of mails from Unified Mail
