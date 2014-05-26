@@ -582,7 +582,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
         final SearchIterator<DocumentMetadata> iterator =
             search.search(
                 fids.toArray(),
-                visitor.getInfstoreTerm(),
+                visitor.getInfostoreTerm(),
                 FieldMapping.getMatching(fields),
                 FieldMapping.getMatching(sort),
                 FieldMapping.getSortDirection(order),
