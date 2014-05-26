@@ -262,10 +262,10 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         {
             String login = accountDescription.getTransportLogin();
             String password = accountDescription.getTransportPassword();
-            if (isEmpty(login)) {
+            if (!seemsValid(login)) {
                 login = accountDescription.getLogin();
             }
-            if (isEmpty(password)) {
+            if (!seemsValid(password)) {
                 password = accountDescription.getPassword();
             }
             transportConfig.setLogin(login);
@@ -365,4 +365,13 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             accountDescription.setTransportPassword(password);
         }
     }
+
+    private static boolean seemsValid(final String str) {
+        if (isEmpty(str)) {
+            return false;
+        }
+
+        return !"null".equalsIgnoreCase(str);
+    }
+
 }
