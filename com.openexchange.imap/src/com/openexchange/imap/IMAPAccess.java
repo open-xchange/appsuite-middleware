@@ -66,6 +66,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.Provider;
+import javax.mail.Store;
 import javax.mail.URLName;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
@@ -100,6 +101,7 @@ import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailProperties;
+import com.openexchange.mail.api.IMailStoreAware;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
@@ -124,7 +126,7 @@ import com.sun.mail.imap.JavaIMAPStore;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageStorage> {
+public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageStorage> implements IMailStoreAware {
 
     /**
      * Serial Version UID
@@ -317,6 +319,23 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
         }
         return maxCount.intValue();
+    }
+
+    @Override
+    public boolean isStoreSupported() throws OXException {
+        return true;
+    }
+
+    @Override
+    public Store getStore() throws OXException {
+        if (!connected) {
+            throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
+        }
+        IMAPStore imapStore = this.imapStore;
+        if (null == imapStore) {
+            throw IMAPException.create(IMAPException.Code.NOT_CONNECTED, getMailConfig(), session, new Object[0]);
+        }
+        return imapStore;
     }
 
     /**

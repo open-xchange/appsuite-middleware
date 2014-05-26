@@ -60,11 +60,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
+import javax.mail.Store;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailProperties;
+import com.openexchange.mail.api.IMailStoreAware;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
@@ -93,7 +95,7 @@ import com.sun.mail.pop3.POP3Store;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageStorage> {
+public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageStorage> implements IMailStoreAware {
 
     /**
      * Serial Version UID
@@ -257,6 +259,23 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     private POP3Access(final Session session, final int accountId) {
         super(session, accountId);
         setMailProperties((Properties) System.getProperties().clone());
+    }
+
+    @Override
+    public boolean isStoreSupported() throws OXException {
+        return (pop3Storage instanceof IMailStoreAware) && ((IMailStoreAware) pop3Storage).isStoreSupported();
+    }
+
+    @Override
+    public Store getStore() throws OXException {
+        if (pop3Storage instanceof IMailStoreAware) {
+            IMailStoreAware storeAware = (IMailStoreAware) pop3Storage;
+            if (storeAware.isStoreSupported()) {
+                return storeAware.getStore();
+            }
+        }
+
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
     }
 
     /**

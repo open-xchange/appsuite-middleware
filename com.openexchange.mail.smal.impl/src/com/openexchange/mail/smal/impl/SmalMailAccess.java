@@ -49,12 +49,14 @@
 
 package com.openexchange.mail.smal.impl;
 
+import javax.mail.Store;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailProperties;
+import com.openexchange.mail.api.IMailStoreAware;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
@@ -67,7 +69,7 @@ import com.openexchange.sessiond.SessiondService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMessageStorage> {
+public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMessageStorage> implements IMailStoreAware {
 
     private static final long serialVersionUID = 3887048765113161340L;
 
@@ -204,6 +206,25 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
      */
     protected void closeDelegateMailAccess() {
         closeUnwrappedInstance(delegateMailAccess);
+    }
+
+    @Override
+    public boolean isStoreSupported() throws OXException {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> inst = getDelegateMailAccess();
+        return (inst instanceof IMailStoreAware) && ((IMailStoreAware) inst).isStoreSupported();
+    }
+
+    @Override
+    public Store getStore() throws OXException {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> inst = getDelegateMailAccess();
+        if (inst instanceof IMailStoreAware) {
+            IMailStoreAware storeAware = (IMailStoreAware) inst;
+            if (storeAware.isStoreSupported()) {
+                return storeAware.getStore();
+            }
+        }
+
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
     }
 
     @Override
