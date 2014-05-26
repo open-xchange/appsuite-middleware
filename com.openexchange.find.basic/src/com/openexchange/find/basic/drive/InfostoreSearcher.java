@@ -86,6 +86,17 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class InfostoreSearcher {
 
+    /*
+     * If we need to do chunk loading only HARD_LIMIT messages will be retrieved and sorted
+     * to avoid OOM situations. For very long result sets this will lead to missing results
+     * when paging exceeds this limit.
+     */
+    private static final int HARD_LIMIT = 2000;
+
+    /*
+     * Max. number of folders to search in at a time. If more folders need to be considered,
+     * chunk loading is performed.
+     */
     private static final int MAX_FOLDERS = 1000;
 
     private final SearchTerm<?> infostoreTerm;
@@ -135,7 +146,7 @@ public class InfostoreSearcher {
                     user,
                     permissionBits);
 
-                final List<Document> results = new ArrayList<Document>(it.size());
+                final List<Document> results = new ArrayList<Document>(it.size() < 0 ? size : it.size());
                 while (it.hasNext()) {
                     final DocumentMetadata doc = it.next();
                     results.add(new FileDocument(documentMetadata2File(doc)));
@@ -149,12 +160,14 @@ public class InfostoreSearcher {
     }
 
     private List<Document> performChunkedSearch() throws OXException {
-        final List<Document> results = new ArrayList<Document>(size > 500 ? 500 : size);
+        final List<Document> results = new ArrayList<Document>(HARD_LIMIT);
         Set<Metadata> extendedFieldSet = new HashSet<Metadata>();
         Collections.addAll(extendedFieldSet, fields);
         extendedFieldSet.add(Metadata.TITLE_LITERAL);
         extendedFieldSet.add(Metadata.FILENAME_LITERAL);
         final Metadata[] extendedFields = extendedFieldSet.toArray(new Metadata[extendedFieldSet.size()]);
+        final double chunks = Math.ceil((double) folderIDs.size() / MAX_FOLDERS);
+        final int limitPerChunk = (int) Math.ceil(HARD_LIMIT / chunks);
         ChunkPerformer.perform(folderIDs, 0, MAX_FOLDERS, new ListPerformable<Integer>() {
             @Override
             public void perform(List<Integer> subList) throws OXException {
@@ -164,10 +177,10 @@ public class InfostoreSearcher {
                         I2i(subList),
                         infostoreTerm,
                         extendedFields,
-                        null,
-                        InfostoreSearchEngine.NOT_SET,
-                        start,
-                        start + size,
+                        Metadata.TITLE_LITERAL,
+                        InfostoreSearchEngine.ASC,
+                        0,
+                        limitPerChunk,
                         context,
                         user,
                         permissionBits);
@@ -181,6 +194,10 @@ public class InfostoreSearcher {
                 }
             }
         });
+
+        if (start > results.size()) {
+            return Collections.emptyList();
+        }
 
         final AlphanumComparator alphanumComparator = new AlphanumComparator(user.getLocale());
         Collections.sort(results, new Comparator<Document>() {
@@ -202,7 +219,11 @@ public class InfostoreSearcher {
             }
         });
 
-        return results;
+        int toIndex = results.size();
+        if (start + size > 0 && start + size < results.size()) {
+            toIndex = start + size;
+        }
+        return results.subList(start, toIndex);
     }
 
 }

@@ -241,6 +241,11 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         }
     }
 
+    
+    /**
+     * @param token The token to be checked
+     * @return false if hazelcast is running, false if hazelcast is running and the token is found. true if hazelcast is running and the token is not found
+     */
     private boolean checkHzMapForMissingToken(final String token) {
         final IMap<String, String> hzMap = hzMap();
         if (null == hzMap) {

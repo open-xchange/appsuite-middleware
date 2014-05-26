@@ -89,6 +89,8 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "Response with timestamp: An array with data for new, modified and deleted folders. New and modified folders are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted folders (should the ignore parameter be ever implemented) would be identified by their object IDs as plain strings, without being part of a nested array.")
 public final class UpdatesAction extends AbstractFolderAction {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesAction.class);
+
     public static final String ACTION = AJAXServlet.ACTION_UPDATES;
 
     /**
@@ -142,8 +144,8 @@ public final class UpdatesAction extends AbstractFolderAction {
                 ignoreDeleted,
                 includeMail ? new ContentType[] { ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class).getByString(
                     "mail") } : null,
-                session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session)));
+                    session,
+                    new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session)));
         /*
          * Determine last-modified time stamp
          */
@@ -163,10 +165,16 @@ public final class UpdatesAction extends AbstractFolderAction {
                 lastModified = ((lastModified >= time) ? lastModified : time);
             }
         }
+
         /*
          * Write subfolders as JSON arrays to JSON array
          */
         final JSONArray resultArray = FolderWriter.writeMultiple2Array(columns, result[0], session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+
+        // HAS TO BE REMOVED AFTER TEST IS SUCCESSFUL
+        LOG.info("MS temporary debug: ", resultArray.toString());
+        //
+
         try {
             final JSONArray jsonArray2 =
                 FolderWriter.writeMultiple2Array(
@@ -184,6 +192,9 @@ public final class UpdatesAction extends AbstractFolderAction {
         /*
          * Return appropriate result
          */
+        // HAS TO BE REMOVED AFTER TEST IS SUCCESSFUL
+        LOG.info("MS temporary debug - result array send in RequestResult: ", resultArray.toString());
+        //
         return new AJAXRequestResult(resultArray, 0 == lastModified ? null : new Date(lastModified)).addWarnings(resultObject.getWarnings());
     }
 

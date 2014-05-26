@@ -154,7 +154,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             List<String> prefixTokens = tokenize(prefix);
             if (!prefixTokens.isEmpty()) {
                 facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
-                    .withFormattableDisplayItem(CalendarStrings.GLOBAL, prefix)
+                    .withSimpleDisplayItem(prefix)
                     .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
                     .build());
                 facets.add(newSimpleBuilder(CalendarFacetType.SUBJECT)
