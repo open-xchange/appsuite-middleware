@@ -715,6 +715,8 @@ public abstract class MailConfig {
      * Member section
      */
 
+    protected AuthType authType;
+    protected Map<String, Object> authProps;
     protected int accountId;
     protected Session session;
     protected String login;
@@ -727,8 +729,29 @@ public abstract class MailConfig {
      */
     protected MailConfig() {
         super();
+        authProps = null;
+        authType = AuthType.LOGIN;
         standardFullNames = new String[LENGTH];
         standardNames = new String[LENGTH];
+    }
+
+
+    /**
+     * Gets the authentication type.
+     *
+     * @return The authentication type
+     */
+    public AuthType getAuthType() {
+        return authType;
+    }
+
+    /**
+     * Gets the authentication properties.
+     *
+     * @return The authentication properties or <code>null</code>
+     */
+    public Map<String, Object> getAuthProps() {
+        return authProps;
     }
 
     /**
