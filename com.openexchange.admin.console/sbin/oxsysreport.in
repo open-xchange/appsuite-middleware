@@ -76,10 +76,13 @@ SKIP_COMPRESSION_VALUES="true false"
 EXCLUDE_OLDER_LOGS_THAN=disabled
 EXCLUDE_OLDER_LOGS_THAN_LONG=exclude-old-logs
 EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days"
+EXCLUDE_SECRETS=false
+EXCLUDE_SECRETS_LONG=exclude-ox-secrets
+EXCLUDE_SECRETS_VALUES="true false"
 KEEP_LOGS_ALWAYS="open-xchange.log.0 open-xchange-console.log open-xchange-osgi.log ox-udm-modules-switch.log"
 PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf;java -version'
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
-LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:'
+LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:,$EXCLUDE_SECRETS_LONG:'
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cp df du egrep find grep gzip head mkdir mktemp rm rmdir sed sleep tail tar xargs"
 OX_LOG_DIR=/var/log/open-xchange
@@ -220,13 +223,18 @@ collect_ox_configs() {
         die "${0}: Internal Tool Error, tried to modify original data: ${OX_CONFIG_DIR}"
    fi
    cp -rL ${OX_CONFIG_DIR} ${_ox_config_copy}
+   if [ 'true' == "${EXCLUDE_SECRETS}" ]; then
+       echo "Removing secrets from Open-Xchange configurations: ${_ox_config_copy}"
+       exclude_secret_ox_properties_entries ${_ox_config_copy}
+       exclude_secret_ox_config_files ${_ox_config_copy}
+   fi
 }
 
-create_excluded_overview() {
+create_excluded_and_modified_overview() {
 # Create an overview of excluded, modified files and remove fragmented exclude
 # files
     local _overview_file=$(normalize_path /${TMP}/${LOGDIR}/${1})
-    echo "Creating an overview about excluded files: ${_overview_file}"
+    echo "Creating an overview about modified and excluded files: ${_overview_file}"
     cat ${ALL_EXCLUDED} | sed "s|$(normalize_path ${TMP}/${LOGDIR})||g" | \
     sed 's|^/||g' | \
     sort > ${_overview_file}
@@ -342,6 +350,56 @@ distribution_check() {
      else
          echo "Distribution not detected"
      fi
+}
+
+exclude_secret_ox_properties_entries() {
+# This function only works on .properies* files and replace secret enties with an
+# '<REMOVED BY OXSYSREPORT>' marker on a working copy.
+# _file=/tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties
+# _original_line=com.openexchange.oauth.msn.apiSecret=secret
+# _plain_property=com.openexchange.oauth.msn.apiSecret=
+# _secret_part=secret
+# _modified_line=com.openexchange.oauth.msn.apiSecret=<REMOVED BY OXSYSREPORT>
+    local _ox_config_copy=${1}
+    local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-secret-exclude)
+    local _whitelist='enabledMailCapableKey|UserAttributePassword|^[[:blank:]]*#'
+    local _blacklist='[pP]assword[[:blank:]]*=|[sS]ecret[[:blank:]]*=|[kK]ey[[:blank:]]*=|secretSource[[:blank:]]*=|secretRandom[[:blank:]]*='
+    find ${_ox_config_copy} -type f -name "*.properties*" | \
+        xargs egrep -rIv "${_whitelist}" | \
+        egrep "${_blacklist}" > ${_tmp_exclude_status}
+
+    while read line; do
+        local _file=$(echo ${line} | awk -F ':' '{print $1}')
+        local _original_line=$(echo ${line} | awk -F '\\.properties.*:' '{print $2}')
+        local _plain_property=$(echo ${_original_line} | sed 's|=.*$|=|g')
+        local _secret_part=$(echo ${_original_line} | \
+            sed "s|${_plain_property}||g" | \
+            sed 's|password=||g' )
+        if [ -n "${_secret_part}" ]; then
+            local _modified_line=$(echo ${_original_line} | \
+                sed "s|${_secret_part}|<REMOVED BY OXSYSREPORT>|g")
+        else
+            local _modified_line="${_original_line}<REMOVED BY OXSYSREPORT>"
+        fi
+        sed -i "s|^${_original_line}$|${_modified_line}|g" ${_file}
+        sed -i "s|:${_original_line}$|:${_modified_line}|g" ${_tmp_exclude_status}
+    done < ${_tmp_exclude_status}
+    print_hint_to_line_end ${_tmp_exclude_status} "modified"
+    ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
+}
+
+exclude_secret_ox_config_files() {
+# This function removes every file which is not whitelisted.
+    local _ox_config_copy=${1}
+    local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-exclude)
+    local _whitelist='\.properties.*$|\.yml$|\.xml$|\.yaml$|\.sh$|\.ccf$|\.types$|\.sql$|\.txt$|\.name$|\.perfMap$|folder-reserved-names'
+    find ${_ox_config_copy} -type f | \
+        egrep -v "${_whitelist}" | \
+        sed 's| |// |g' > ${_tmp_exclude_status}
+    cat ${_tmp_exclude_status} | \
+        xargs -r rm
+    print_hint_to_line_end ${_tmp_exclude_status} "removed"
+    ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
 }
 
 fix_log_archive_tarball_name() {
@@ -600,6 +658,10 @@ for argument in ${@}; do
             fi
             shift 2
        ;;
+        --${EXCLUDE_SECRETS_LONG})
+            EXCLUDE_SECRETS=$(check_argument ${1} ${2})
+            shift 2
+       ;;
         -h|--help)
             usage
             exit 0
@@ -699,7 +761,7 @@ collect_logs ${OX_LOG_DIR}
 if [ -n "${UNIVENTION_LOG_DIR}" ]; then
     collect_logs ${UNIVENTION_LOG_DIR}
 fi
-create_excluded_overview excluded-files.txt
+create_excluded_and_modified_overview modified-and-excluded-files.txt
 echo "Creating final archive: $(normalize_path ${LOGARC})"
 tar cvf ${LOGARC%%.gz}  -C ${TMP} ${LOGDIR} > /dev/null 2>&1
 if [ 'true' != "${SKIP_COMPRESSION}" ]; then
