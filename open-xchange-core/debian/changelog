@@ -22,6 +22,12 @@ open-xchange-core (7.6.0-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 12 Feb 2014 09:35:07 +0100
 
+open-xchange-core (7.4.2-24) stable; urgency=low
+
+  * Build for patch 2014-05-26
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 22 May 2014 12:43:59 +0200
+
 open-xchange-core (7.4.2-23) stable; urgency=low
 
   * Build for patch 2014-05-26
