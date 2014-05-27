@@ -160,6 +160,11 @@ public enum XingExceptionCodes implements DisplayableOXExceptionCode {
      * The XING server is not available.
      */
     XING_SERVER_UNAVAILABLE("The XING server is not available.", Category.CATEGORY_SERVICE_DOWN, 27, XingExceptionMessages.XING_SERVER_UNAVAILABLE_MSG),
+    /**
+     * A XING account has already been requested for E-Mail address %1$s.
+     */
+    LEAD_ALREADY_EXISTS("A XING account has already been requested for E-Mail address %1$s.", Category.CATEGORY_USER_INPUT, 28, XingExceptionMessages.LEAD_ALREADY_EXISTS_MSG),
+
     ;
 
     private final Category category;
