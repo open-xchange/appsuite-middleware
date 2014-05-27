@@ -620,6 +620,7 @@ public class LocalFileStorage extends DefaultFileStorage {
     }
 
     protected void lock(final long timeout) throws OXException {
+        ensureStorageExists();
         final File lock = new File(storage, LOCK_FILENAME);
         final long maxLifeTime = 100 * timeout;
         final long lastModified = lock.lastModified();
