@@ -117,10 +117,12 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
      */
     UNEXPECTED_ERROR(CATEGORY_ERROR, 9999, SubscriptionErrorMessage.UNEXPECTED_ERROR_MSG),
     /**
-     *
+     * User does not have an OAuth-account to access this service.
      */
     NO_OAUTH_ACCOUNT_GIVEN(CATEGORY_USER_INPUT, 90111, SubscriptionErrorMessage.NO_OAUTH_ACCOUNT_GIVEN_MSG, SubscriptionErrorStrings.NO_OAUTH_ACCOUNT_GIVEN_DISPLAY),
-
+    /**
+     * Your account needs to be verified: %1$s
+     */
     NEED_VERIFICATION(CATEGORY_USER_INPUT, 90112, SubscriptionErrorStrings.NEED_VERIFICATION_DISPLAY, SubscriptionErrorStrings.NEED_VERIFICATION_DISPLAY),
     ;
 
