@@ -47,42 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.find.tasks;
-
-import org.junit.Test;
-import com.openexchange.ajax.find.actions.AutocompleteRequest;
-import com.openexchange.ajax.find.actions.AutocompleteResponse;
-import com.openexchange.find.Module;
-import com.openexchange.find.tasks.TasksStrings;
-
+package com.openexchange.xing.exception;
 
 /**
- * {@link FindTasksAutocompleteTests}
+ * {@link XingInvalidFieldException} - Throws if XING API complains about one or more invalid fields.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FindTasksAutocompleteTests extends AbstractFindTasksTest {
+public class XingInvalidFieldException extends XingException {
+
+    private static final long serialVersionUID = -5569197291690418791L;
 
     /**
-     * Initializes a new {@link FindTasksAutocompleteTests}.
-     */
-    public FindTasksAutocompleteTests(String n) {
-        super(n);
-    }
-
-    /**
+     * Initializes a new {@link XingInvalidFieldException}.
      *
-     * @throws Exception
+     * @param detailMessage The detail message describing the invalid fields
      */
-    @Test
-    public void testAutocompleteFieldFacets() throws Exception {
-        String prefix = client.getValues().getDefaultAddress().substring(0, 3);
-        AutocompleteRequest request = new AutocompleteRequest(prefix, Module.TASKS.getIdentifier());
-        AutocompleteResponse response = client.execute(request);
-
-        assertNotNull(findByDisplayName(response.getFacets(), prefix));
-        assertNotNull(findByDisplayName(response.getFacets(), prefix + " " + TasksStrings.FACET_TASK_TITLE));
-        assertNotNull(findByDisplayName(response.getFacets(), prefix + " " + TasksStrings.FACET_TASK_DESCRIPTION));
-        assertNotNull(findByDisplayName(response.getFacets(), prefix + " " + TasksStrings.FACET_TASK_ATTACHMENT_NAME));
+    public XingInvalidFieldException(String detailMessage) {
+        super(detailMessage);
     }
+
+    /**
+     * Initializes a new {@link XingInvalidFieldException}.
+     *
+     * @param detailMessage The detail message describing the invalid fields
+     * @param throwable The cause
+     */
+    public XingInvalidFieldException(String detailMessage, Throwable throwable) {
+        super(detailMessage, throwable);
+    }
+
 }

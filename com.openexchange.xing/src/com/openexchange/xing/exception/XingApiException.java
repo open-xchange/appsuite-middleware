@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONObject;
+import com.openexchange.xing.util.JSONCoercion;
 
 /**
  * {@link XingApiException} - As specified <a href="https://dev.xing.com/docs#error-responses">here</a>.
@@ -78,7 +79,7 @@ public class XingApiException extends XingException {
         for (Entry<String, Object> entry : errorObject.entrySet()) {
             final String name = entry.getKey();
             if (!"message".equals(name) && !"error_name".equals(name)) {
-                properties.put(name, entry.getValue());
+                properties.put(name, JSONCoercion.coerceToNative(entry.getValue()));
             }
         }
     }

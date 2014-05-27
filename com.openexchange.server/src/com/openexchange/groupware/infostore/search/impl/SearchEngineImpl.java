@@ -51,26 +51,20 @@ package com.openexchange.groupware.infostore.search.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.TIntList;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Deque;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Stack;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.configuration.ServerConfig;
@@ -133,17 +127,14 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             security.setProvider(provider);
         }
     }
-    
+
     @Override
     public SearchIterator<DocumentMetadata> search(final int[] folderIds, final SearchTerm<?> searchTerm, final Metadata[] cols, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
-
         Connection con = getReadConnection(ctx);
-
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
         if (folderIds == null || folderIds.length == 0) {
-            
-            final Set<Integer> ignoredTrashedFolders = OXFolderIteratorSQL.getIgnoredTrashFolders(user, userPermissions, ctx, con, FolderObject.TRASH, new int[] { FolderObject.INFOSTORE });
+            final Set<Integer> ignoredTrashedFolders = OXFolderIteratorSQL.getTrashFolders(user, userPermissions, ctx, con, new int[] { FolderObject.INFOSTORE });
             final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
                 user.getId(),
                 user.getGroups(),
@@ -151,7 +142,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 FolderObject.INFOSTORE,
                 ctx,
                 con)).asQueue();
-            
+
             for (final FolderObject folder : queue) {
                 // Exclude trash folder if not set explicitly
                 if (folder.getType() == FolderObject.TRASH || ignoredTrashedFolders.contains(folder.getObjectID())) {
@@ -167,8 +158,6 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
         } else {
             for (int folderId : folderIds) {
-                // Optionally get all subfolders?
-                // final Set<Integer> folders = getAllSubfolders(folderId, user, userPermissions, ctx, con);
                 final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
                 if (perm.canReadAllObjects()) {
                     all.add(Integer.valueOf(folderId));

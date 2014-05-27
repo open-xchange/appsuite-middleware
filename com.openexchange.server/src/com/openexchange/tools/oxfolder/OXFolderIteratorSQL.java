@@ -2039,6 +2039,7 @@ public final class OXFolderIteratorSQL {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(contextId));
         }
+
         try {
             return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeReadCon);
         } catch (final OXException e) {
@@ -2313,10 +2314,10 @@ public final class OXFolderIteratorSQL {
         }
         return StringCollection.getSqlInString(userId, groups);
     }
-    
+
     /**
      * Get all subfolders from the specified parent
-     * 
+     *
      * @param folderId parent
      * @param user the user
      * @param userPermissions user permission bits
@@ -2342,10 +2343,10 @@ public final class OXFolderIteratorSQL {
         } while (!deck.isEmpty());
         return Collections.unmodifiableSet(allSubFolders);
     }
-    
+
     /**
-     * Returns a HashSet with all trashed folders for the specified type and modules
-     * 
+     * Returns a HashSet with all trashed folders for the specified modules
+     *
      * @param user
      * @param userPermissions
      * @param ctx
@@ -2353,12 +2354,12 @@ public final class OXFolderIteratorSQL {
      * @return
      * @throws OXException
      */
-    public static Set<Integer> getIgnoredTrashFolders(final User user, final UserPermissionBits userPermissions, final Context ctx, final Connection con, final int type, final int[] modules) throws OXException {
+    public static Set<Integer> getTrashFolders(final User user, final UserPermissionBits userPermissions, final Context ctx, final Connection con, final int[] modules) throws OXException {
         final List<FolderObject> trashFolders = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
             user.getId(),
             user.getGroups(),
             userPermissions.getAccessibleModules(),
-            type,
+            FolderObject.TRASH,
             modules,
             ctx)).asList();
         final Set<Integer> ignore = new HashSet<Integer>();

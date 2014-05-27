@@ -264,27 +264,8 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         return new AutocompleteResult(facets);
     }
 
-    private static List<Integer> determineAllFolderIds(ServerSession session) throws OXException {
-        final Context context = session.getContext();
-        final int userId = session.getUserId();
-        final UserConfiguration userConfig = session.getUserConfiguration();
-        final OXFolderAccess folderAccess = new OXFolderAccess(context);
-        FolderObject infostoreFolder = folderAccess.getFolderObject(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
-        FolderFilter filter = new FolderFilter() {
-            @Override
-            public boolean accept(FolderObject folder) throws OXException {
-                EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
-                return perm.isFolderVisible() && perm.canReadOwnObjects();
-            }
-        };
-
-        List<Integer> folderIDs = new LinkedList<Integer>();
-        if (filter.accept(infostoreFolder)) {
-            folderIDs.add(infostoreFolder.getObjectID());
-        }
-
-        addSubfolderIDs(folderIDs, infostoreFolder, folderAccess, context, filter);
-        return folderIDs;
+    private static List<Integer> determineAllFolderIDs(ServerSession session) throws OXException {
+        return Collections.emptyList();
     }
 
     /*
@@ -404,7 +385,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         String requestFolderId = searchRequest.getFolderId();
         if (requestFolderId == null) {
             if (folderType == null) {
-                folderIDs = determineAllFolderIds(session);
+                folderIDs = determineAllFolderIDs(session);
             } else {
                 switch (folderType) {
                     case PRIVATE:

@@ -112,6 +112,9 @@ public final class XingExceptionMessages implements LocalizableStrings {
     // The XING server is not available.
     public static final String XING_SERVER_UNAVAILABLE_MSG = "The XING server is not available.";
 
+    // A XING account has already been requested for E-Mail address %1$s.
+    public static final String LEAD_ALREADY_EXISTS_MSG = "A XING account has already been requested for E-Mail address %1$s.";
+
     /**
      * Initializes a new {@link XingExceptionMessages}.
      */

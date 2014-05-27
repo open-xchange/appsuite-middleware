@@ -49,6 +49,7 @@
 
 package com.openexchange.xing;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,8 +82,11 @@ import com.openexchange.java.ImageTypeDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.xing.RESTUtility.Method;
+import com.openexchange.xing.exception.XingApiException;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingIOException;
+import com.openexchange.xing.exception.XingInvalidFieldException;
+import com.openexchange.xing.exception.XingLeadAlreadyExistsException;
 import com.openexchange.xing.exception.XingServerException;
 import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.session.Session;
@@ -1416,11 +1420,13 @@ public class XingAPI<S extends Session> {
     public Map<String, Object> signUpLead(final LeadDescription leadDescription) throws XingException {
         final String url = RESTUtility.buildURL(session.getWebServer(), -1, "/signup-api/v1/leads", null);
 
+        String email = null;
         try {
             final JSONObject jLeadDesc = new JSONObject(10);
             {
                 final String tmp = leadDescription.getEmail();
                 if (!Strings.isEmpty(tmp)) {
+                    email = tmp;
                     jLeadDesc.put("email", tmp);
                 }
             }
@@ -1456,6 +1462,49 @@ public class XingAPI<S extends Session> {
                 session,
                 Arrays.asList(XingServerException._201_CREATED)).toObject();
             return jResponse.asMap();
+        } catch (final XingApiException e) {
+            if ("INVALID".equals(e.getErrorName())) {
+                String desc = null;
+                @SuppressWarnings("unchecked") Map<String, Object> errorProps = (Map<String, Object>) e.getProperties().get("errors");
+                if (null != errorProps) {
+                    StringBuilder descBuilder = new StringBuilder();
+                    boolean first = true;
+                    for (Map.Entry<String, Object> entry : errorProps.entrySet()) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            descBuilder.append(", ");
+                        }
+
+                        String fieldName = entry.getKey();
+                        descBuilder.append(fieldName).append(" ");
+
+                        Object reason = entry.getValue();
+                        if (reason instanceof List) {
+                            @SuppressWarnings("unchecked") List<Object> reasons = (List<Object>) reason;
+                            if (1 == reasons.size()) {
+                                String sCause = reasons.get(0).toString();
+                                if ("email".equals(fieldName) && "EXISTS_AS_LEAD".equals(sCause)) {
+                                    throw new XingLeadAlreadyExistsException(email, e);
+                                }
+
+                                descBuilder.append(asciiLowerCase(sCause));
+                            } else {
+                                descBuilder.append(asciiLowerCase(reasons.toString()));
+                            }
+                        } else {
+                            descBuilder.append(asciiLowerCase(reason.toString()));
+                        }
+                    }
+                    desc = descBuilder.toString();
+                }
+
+                if (null != desc) {
+                    throw new XingInvalidFieldException(desc, e);
+                }
+            }
+
+            throw e;
         } catch (final JSONException e) {
             throw new XingException(e);
         } catch (final RuntimeException e) {
