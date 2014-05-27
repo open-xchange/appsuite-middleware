@@ -299,4 +299,14 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return tmp.trim();
     }
 
+    @Override
+    public String getSSLCipherSuites() {
+        final String tmp = properties.get("com.openexchange.imap.ssl.ciphersuites");
+        if (null == tmp) {
+            return IMAPProperties.getInstance().getSSLCipherSuites();
+        }
+
+        return tmp.trim();
+    }
+
 }

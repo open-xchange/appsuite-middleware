@@ -171,12 +171,20 @@ public final class SMTPConfig extends TransportConfig {
         if (!account.isDefaultAccount()) {
             login = account.getTransportLogin();
 
-            if (loginSeemsNotSet(login)) {
-                // Workaround for bug #32519 -- Fallback to mail account credentials
+            if (seemsNotSet(login)) {
+                // Fallback to mail account credentials
                 login = account.getLogin();
                 password = MailPasswordUtil.decrypt(account.getPassword(), session, account.getId(), login, account.getMailServer());
             } else {
-                password = MailPasswordUtil.decrypt(account.getTransportPassword(), session, account.getId(), login, account.getTransportServer());
+                String tpwd = account.getTransportPassword();
+                if (com.openexchange.java.Strings.isEmpty(tpwd)) {
+                    password = MailPasswordUtil.decrypt(account.getPassword(), session, account.getId(), login, account.getMailServer());
+                } else {
+                    password = MailPasswordUtil.decrypt(tpwd, session, account.getId(), login, account.getTransportServer());
+                    if (seemsNotSet(password)) {
+                        password = MailPasswordUtil.decrypt(account.getPassword(), session, account.getId(), login, account.getMailServer());
+                    }
+                }
             }
 
             return true;
@@ -184,13 +192,13 @@ public final class SMTPConfig extends TransportConfig {
         return false;
     }
 
-    private static boolean loginSeemsNotSet(final String login) {
-        if (com.openexchange.java.Strings.isEmpty(login)) {
+    private static boolean seemsNotSet(final String str) {
+        if (com.openexchange.java.Strings.isEmpty(str)) {
             return true;
         }
 
-        final String lc = com.openexchange.java.Strings.toLowerCase(login);
-        return "null".equals(login) || "nil".equals(login);
+        final String lc = com.openexchange.java.Strings.toLowerCase(str);
+        return "null".equals(lc) || "nil".equals(lc);
     }
 
 }

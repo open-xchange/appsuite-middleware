@@ -100,6 +100,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
@@ -394,6 +395,13 @@ public final class SMTPTransport extends MailTransport {
                          * Specify SSL protocols
                          */
                         smtpProps.put("mail.smtp.ssl.protocols", smtpConfig.getSMTPProperties().getSSLProtocols());
+                        /*
+                         * Specify SSL cipher suites
+                         */
+                        final String cipherSuites = smtpConfig.getSMTPProperties().getSSLCipherSuites();
+                        if (false == Strings.isEmpty(cipherSuites)) {
+                            smtpProps.put("mail.smtp.ssl.ciphersuites", cipherSuites);
+                        }
                         // smtpProps.put("mail.smtp.ssl", "true");
                         /*
                          * Needed for JavaMail >= 1.4
@@ -437,6 +445,13 @@ public final class SMTPTransport extends MailTransport {
                          * Specify SSL protocols
                          */
                         smtpProps.put("mail.smtp.ssl.protocols", smtpConfig.getSMTPProperties().getSSLProtocols());
+                        /*
+                         * Specify SSL cipher suites
+                         */
+                        final String cipherSuites = smtpConfig.getSMTPProperties().getSSLCipherSuites();
+                        if (false == Strings.isEmpty(cipherSuites)) {
+                            smtpProps.put("mail.smtp.ssl.ciphersuites", cipherSuites);
+                        }
                         // smtpProps.put("mail.smtp.ssl", "true");
                         /*
                          * Needed for JavaMail >= 1.4

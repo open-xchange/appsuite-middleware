@@ -59,7 +59,6 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,11 +74,11 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "The string \"null\" in response's data element")
 public final class KeepaliveAction implements AJAXActionService {
 
-    private final ServiceLookup services;
-
-    public KeepaliveAction(final ServiceLookup services) {
+    /**
+     * Initializes a new {@link KeepaliveAction}.
+     */
+    public KeepaliveAction() {
         super();
-        this.services = services;
     }
 
     @Override

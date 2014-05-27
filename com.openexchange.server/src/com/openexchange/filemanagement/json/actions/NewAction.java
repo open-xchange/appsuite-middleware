@@ -67,7 +67,6 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -85,11 +84,11 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "A JSON array containing the IDs of the uploaded files. The files are accessible through the returned IDs for future use.")
 public final class NewAction implements AJAXActionService {
 
-    private final ServiceLookup services;
-
-    public NewAction(final ServiceLookup services) {
+    /**
+     * Initializes a new {@link NewAction}.
+     */
+    public NewAction() {
         super();
-        this.services = services;
     }
 
     @Override

@@ -658,7 +658,7 @@ public abstract class MailConfig {
      * @throws OXException If a configuration error occurs
      */
     protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final MailAccount mailAccount) throws OXException {
-        final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
+        final String proxyDelimiter = mailAccount.isDefaultAccount() ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
         // Assign login
         final String slogin = session.getLoginName();
         if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {

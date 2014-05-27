@@ -52,10 +52,10 @@ package com.openexchange.filemanagement.json.actions;
 import java.io.File;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -66,7 +66,6 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -80,37 +79,13 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "id", description = "The ID of the uploaded file.")
 }, responseDescription = "The content of the requested file is directly written into output stream.")
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
-public final class GetAction implements ETagAwareAJAXActionService {
+public final class GetAction implements AJAXActionService {
 
-    private final ServiceLookup services;
-
-    public GetAction(final ServiceLookup services) {
+    /**
+     * Initializes a new {@link GetAction}.
+     */
+    public GetAction() {
         super();
-        this.services = services;
-    }
-
-    @Override
-    public boolean checkETag(final String clientETag, final AJAXRequestData request, final ServerSession session) throws OXException {
-        if (clientETag == null || clientETag.length() == 0) {
-            return false;
-        }
-        try {
-            final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            management.getByID(clientETag);
-            request.setExpires(ManagedFileManagement.TIME_TO_LIVE);
-            return true;
-        } catch (final OXException e) {
-            if (ManagedFileExceptionErrorMessage.NOT_FOUND.equals(e)) {
-                return false;
-            }
-            throw e;
-        }
-    }
-
-    @Override
-    public void setETag(final String eTag, final long expires, final AJAXRequestResult result) throws OXException {
-        result.setExpires(expires);
-        result.setHeader("ETag", eTag);
     }
 
     @Override
@@ -155,15 +130,10 @@ public final class GetAction implements ETagAwareAJAXActionService {
             }
             fileHolder.setContentType(contentType.toString());
             fileHolder.setDisposition(disposition);
-            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-            /*
-             * Set ETag
-             */
-            setETag(id, ManagedFileManagement.TIME_TO_LIVE, result);
             /*
              * Return result
              */
-            return result;
+            return new AJAXRequestResult(fileHolder, "file");
         } catch (final RuntimeException e) {
             throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         }

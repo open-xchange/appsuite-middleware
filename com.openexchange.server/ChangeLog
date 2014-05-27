@@ -1,6 +1,32 @@
+* 2014-05-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32677: Do net set SMTP credentials if not explicitly set + several sanitizing operations to ensure SMTP authentication does still work
+
+* 2014-05-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32226: Fixed regex used for look-up of referenced inline images
+
 * 2014-05-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 32519: Fixed parsing JSON in case JSON NULL is set as value and fall-back to mail account credentials if transport ones seems to be "not set"
+
+* 2014-05-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32226: Do not specify any cache-controlling HTTP header for "file" HTTP-API module
+
+* 2014-05-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30843: Introduced properties for IMAP, POP3, and SMTP to specify the SSL cipher suites that will be enabled for SSL connections
+ - Fix for bug 32466: Ignore transport credentials on primary mail account update
+
+* 2014-05-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32296: Do not use proxy authentication for external mail accounts
+
+* 2014-05-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 32044: Update the reminder's folderID for all accessing users, if there are no participants. Check additionally permissions
+   on the destination folder for all reminder.
 
 * 2014-04-30 - martin.schneider@open-xchange.com
 

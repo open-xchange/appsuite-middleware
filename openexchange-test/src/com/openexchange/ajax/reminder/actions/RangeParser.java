@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.reminder.actions;
 
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -59,19 +58,12 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class RangeParser extends AbstractAJAXParser<RangeResponse> {
 
-    /**
-     * Default constructor.
-     */
-    RangeParser() {
-        super(true);
+    RangeParser(boolean failOnError) {
+        super(failOnError);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected RangeResponse createResponse(final Response response)
-        throws JSONException {
+    protected RangeResponse createResponse(final Response response) {
         return new RangeResponse(response);
     }
 }

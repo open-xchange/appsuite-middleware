@@ -69,7 +69,6 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -87,11 +86,11 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public final class RangeAction implements AJAXActionService {
 
-    private final ServiceLookup services;
-
-    public RangeAction(final ServiceLookup services) {
+    /**
+     * Initializes a new {@link RangeAction}.
+     */
+    public RangeAction() {
         super();
-        this.services = services;
     }
 
     @Override

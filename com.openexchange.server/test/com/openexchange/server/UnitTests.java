@@ -76,6 +76,7 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
     com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
     com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
+    com.openexchange.mail.api.MailConfigTest.class,
     com.openexchange.mail.mime.ContentDispositionTest.class,
     com.openexchange.mail.mime.ContentTypeTest.class,
     com.openexchange.mail.mime.MimeStructureFixerTest.class,

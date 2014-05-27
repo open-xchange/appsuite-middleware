@@ -136,10 +136,10 @@ public final class Create {
      * @param admin user identifier of the admin.
      * @return a ready to insert folder.
      */
-    public static FolderObject createPrivateFolder(final String name, final int type, final int admin) {
+    public static FolderObject createPrivateFolder(final String name, final int module, final int admin, OCLPermission... shared) {
         final FolderObject folder = new FolderObject();
         folder.setFolderName(name);
-        folder.setModule(type);
+        folder.setModule(module);
         folder.setType(FolderObject.PRIVATE);
         final OCLPermission perm = ocl(
             admin,
@@ -149,7 +149,10 @@ public final class Create {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
-        folder.setPermissionsAsArray(new OCLPermission[] { perm });
+        folder.addPermission(perm);
+        for (OCLPermission permission : shared) {
+            folder.addPermission(permission);
+        }
         return folder;
     }
 
