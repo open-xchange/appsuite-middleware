@@ -52,6 +52,8 @@ ox_update_permissions /opt/open-xchange/etc/filestore-s3.properties root:open-xc
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu May 22 2014 Markus Wagner <markus.wagner@open-xchange.com>
+Build for patch 2014-05-26
 * Fri May 16 2014 Markus Wagner <markus.wagner@open-xchange.com>
 Third release candidate for 7.6.0
 * Fri May 16 2014 Markus Wagner <markus.wagner@open-xchange.com>

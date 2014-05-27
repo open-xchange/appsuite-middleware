@@ -50,6 +50,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/contact-storage-ldap/cache.properties
 
 %changelog
+* Thu May 22 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2014-05-26
 * Fri May 16 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Third release candidate for 7.6.0
 * Fri May 16 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>

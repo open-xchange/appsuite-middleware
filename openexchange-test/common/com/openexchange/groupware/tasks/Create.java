@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.tasks;
 
-import static com.openexchange.java.Autoboxing.F;
 import static com.openexchange.java.Autoboxing.L;
 import java.math.BigDecimal;
 import java.util.Date;
