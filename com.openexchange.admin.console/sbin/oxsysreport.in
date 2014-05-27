@@ -49,34 +49,424 @@
 #
 
 OXFUNCTIONS=@oxfunctions@
+export PATH="${PATH}:/opt/open-xchange/sbin"
 
-test -f ${OXFUNCTIONS} || {
-    echo "missing common shell functions file"
-    exit 1
-}
+# some defaults
+PATH="${PATH}:/opt/open-xchange/sbin"
+TMP=/tmp
+TMP_LONG=tempdir
+LOGDIR=ox_support_infos-$(date +%Y%m%d-%H%M%S)
+LOGDIR_LONG=logdir
+LOGARC=${TMP}/${LOGDIR}.tar
+LOGARC_SUFFIX=".gz"
+LOGS_SUFFIX=".bz2"
+LOGARC_LONG=log-archive
+KEEP_TMP=false
+KEEP_TMP_LONG=keep-tmp-files
+KEEP_TMP_VALUES="true false"
+CREATE_THREAD_DUMP=false
+CREATE_THREAD_DUMP_LONG=thread-dump
+CREATE_THREAD_DUMP_VALUES="true false"
+CREATE_HEAP_DUMP=false
+CREATE_HEAP_DUMP_LONG=heap-dump
+CREATE_HEAP_DUMP_VALUES="true false"
+SKIP_COMPRESSION=false
+SKIP_COMPRESSION_LONG=skip-compression
+SKIP_COMPRESSION_VALUES="true false"
+EXCLUDE_OLDER_LOGS_THAN=disabled
+EXCLUDE_OLDER_LOGS_THAN_LONG=exclude-old-logs
+EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days"
+KEEP_LOGS_ALWAYS="open-xchange.log.0 open-xchange-console.log open-xchange-osgi.log ox-udm-modules-switch.log"
+PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf;java -version'
+MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
+LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:'
+EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
+NEEDED_TOOLS="awk bzip2 cat cp df du egrep find grep gzip head mkdir mktemp rm rmdir sed sleep tail tar xargs"
+OX_LOG_DIR=/var/log/open-xchange
+OX_CONFIG_DIR=/opt/open-xchange/etc
 
-check_on_needed() {
-    local path=$(type -P ${1})
-    if [ -z "${path}" ]; then
-        echo "missing needed command ${1}" >&2
-        exit 1
-    fi
-    echo ${path}
-}
+###############################################################################
+#                                   Functions                                 #
+###############################################################################
 
 check_argument() {
-    local _pattern=$(echo ${2} | ${TR} [:upper:] [:lower:])
+    local _pattern=$(echo ${2} | tr [:upper:] [:lower:])
     case ${_pattern} in
         false) _pattern=false ;;
         true) _pattern=true ;;
         yes) _pattern=true ;;
         *) _pattern=invalid ;;
     esac
-    echo ${_pattern}
     if [ 'invalid' == "${_pattern}" ]; then
-        echo "${0}: Error, option '${1}' requires true or false argument" >&2
-        exit 1
+        usage
+        die "Error, option '${1}' requires true or false argument"
+    else
+        echo ${_pattern}
     fi
+}
+
+check_on_needed() {
+    local path=$(type -P ${1})
+    if [ -z "${path}" ]; then
+        die "${0}: Error, missing needed command: ${1}"
+    fi
+}
+
+clean_up(){
+   test "${KEEP_TMP}" = "true" || rm -rf ${TMP}/${LOGDIR}
+}
+
+collect_command_output() {
+   echo "Collecting output of system tools into $(normalize_path ${TMP}/${LOGDIR}/commands)"
+   cd /${TMP}
+   OIFS=${IFS}
+   IFS=";"
+   for i in ${PROCS}; do
+       IFS=${OIFS}
+       ${i} > "/${TMP}/${LOGDIR}/commands/${i}" 2>&1
+       IFS=";"
+   done
+   IFS=${OIFS}
+   cd - > /dev/null 2>&1
+}
+
+collect_httpd_configs() {
+    # Be very selective on what to add to the archive (Bug#28830)
+    for dir in /etc/httpd /etc/apache*; do
+        if [ -d "${dir}" ]; then
+            local _tmp=$(mktemp)
+            local _name=$(basename $(find ${dir} -maxdepth 0 -type d | head -n 1))
+            local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/${_name}-configs-exclude)
+            local _httpd_config_copy=$(normalize_path ${TMP}/${LOGDIR}/${dir})
+            echo "Collecting httpd configuration into ${_httpd_config_copy}"
+            mkdir -p $(dirname ${_httpd_config_copy})
+            cp -aL ${dir} ${_httpd_config_copy}
+            # Drop all files without name schema '.conf' or which are stored outside
+            # <name>-enabled or <name>-available directories
+            find ${_httpd_config_copy} -type f | \
+                egrep -v '^.*\.conf$|^.*-(enabled|available)/.*$' | \
+                sed 's| |\\ |g' >> ${_tmp}
+            # Drop all files with SSL suffix types
+            find ${_httpd_config_copy} -type f | \
+                egrep '^.*\.crt$|^.*\.key$|^.*\.csr$|^.*\.prm$' | \
+                sed 's| |\\ |g' >> ${_tmp}
+            # Drop all which could be identified as cert or key file
+            find ${_httpd_config_copy} -type f | \
+                sed 's| |\\ |g' | \
+                xargs -r file | \
+                egrep '*[cC]ertificate*|*[kK]ey*' | \
+                awk -F ':' '{print $1}' >> ${_tmp}
+            cat ${_tmp} | sort -u > ${_tmp_exclude_status}
+            rm ${_tmp}
+            cat ${_tmp_exclude_status} | xargs -r rm
+            # Delete empty directories
+            find ${_httpd_config_copy} -depth -type d -empty | \
+                sed 's| |\\ |g' | \
+                xargs -r rmdir
+            print_hint_to_line_end ${_tmp_exclude_status} "removed"
+            ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
+        fi
+    done
+}
+
+collect_logs() {
+   local _log_dir=${1}
+   local _name=$(basename $(find ${_log_dir} -maxdepth 0 -type d | head -n 1))
+   local _bname=$(echo ${_name} | sed 's/\(^.\)/\U\1/' | sed 's|-xchange|-Xchange|g')
+   local _logs_archive=$(normalize_path \
+       ${TMP}/${LOGDIR}/${_name}-logs.tar)
+   local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/${_name}-logs-exclude)
+
+   echo "Collecting ${_bname} logs into ${_logs_archive}${LOGS_SUFFIX}"
+   if [ 'disabled' == "${EXCLUDE_OLDER_LOGS_THAN}" ]; then
+       tar cvf ${_logs_archive} \
+           --ignore-failed-read ${_log_dir} > /dev/null 2>&1
+   else
+       # Find files which should be excluded by --drop-older-logs-than option
+       find ${_log_dir} \
+           -mtime +${EXCLUDE_OLDER_LOGS_THAN} \
+           -type f > ${_tmp_exclude_status}
+       # Remove mandatory files from exclusion list if listed
+       for keep in ${KEEP_LOGS_ALWAYS}; do
+           sed -i "/${keep}$/d" ${_tmp_exclude_status}
+       done
+       tar cvf ${_logs_archive} \
+           --ignore-failed-read ${_log_dir} \
+           --exclude-from=${_tmp_exclude_status} > /dev/null 2>&1
+       print_hint_to_line_end ${_tmp_exclude_status} "removed"
+       ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
+   fi
+
+   if [ 'true' != "${SKIP_COMPRESSION}" ]; then
+       bzip2 -9 ${_logs_archive}
+   fi
+}
+
+collect_other_configs() {
+    if [ -n "${OTHER_CONFIGS}" ]; then
+        echo "Collecting other system configurations into $(normalize_path ${TMP}/${LOGDIR}/etc)"
+        for config in ${OTHER_CONFIGS}; do
+            mkdir -p ${TMP}/${LOGDIR}/$(dirname ${config})
+            cp -aL ${config} ${TMP}/${LOGDIR}/$(dirname ${config})
+        done
+    fi
+}
+
+collect_ox_configs() {
+   local _ox_config_copy=$(normalize_path ${TMP}/${LOGDIR}/${OX_CONFIG_DIR})
+   echo "Collecting Open-Xchange configurations into ${_ox_config_copy}"
+   mkdir -p $(dirname ${_ox_config_copy})
+   if [ "$(normalize_path ${OX_CONFIG_DIR})" == "$(normalize_path ${_ox_config_copy})" ]; then
+        die "${0}: Internal Tool Error, tried to modify original data: ${OX_CONFIG_DIR}"
+   fi
+   cp -rL ${OX_CONFIG_DIR} ${_ox_config_copy}
+}
+
+create_excluded_overview() {
+# Create an overview of excluded, modified files and remove fragmented exclude
+# files
+    local _overview_file=$(normalize_path /${TMP}/${LOGDIR}/${1})
+    echo "Creating an overview about excluded files: ${_overview_file}"
+    cat ${ALL_EXCLUDED} | sed "s|$(normalize_path ${TMP}/${LOGDIR})||g" | \
+    sed 's|^/||g' | \
+    sort > ${_overview_file}
+    rm ${ALL_EXCLUDED}
+}
+
+create_heap_dump() {
+# Most JVM's are working with jmap to create heap dumps but some distributions like
+# Redhead have issues with '-F' option on Java 1.7.0. The sudo command is needed
+# to have the right permissions and is somehow much faster as '-F', calling as root
+# will fail on some systems.
+    echo "Creating Java heap dump of Open-Xchange groupware..."
+    if [ 'ibm' != "${JAVA_VM_TYPE}" ]; then
+        local _heap_dump_cmd="jmap -dump:file"
+        local _heap_dump_log="${TMP}/${LOGDIR}/commands/${_heap_dump_cmd}"
+        local _heap_dump="${_heap_dump_log} (heap-dump)"
+        local _heap_histo_cmd="jmap -histo"
+        local _heap_histo_log="${TMP}/${LOGDIR}/commands/${_heap_histo_cmd}"
+        local _heap_histo_dump="${TMP}/${LOGDIR}/commands/${_heap_histo_cmd} (heap-dump)"
+
+        # Grant write permissions for ox user
+        chmod a+w ${TMP}/${LOGDIR}/commands
+        sudo -u "#$(get_ox_user_ID)" ${_heap_histo_cmd} $(get_ox_java_pid) \
+            > "${_heap_histo_dump}" 2> "${_heap_histo_log}"
+        sudo -u "#$(get_ox_user_ID)" \
+            ${_heap_dump_cmd}=${TMP}/${LOGDIR}/commands/"${_heap_dump_cmd} (heap-dump)" \
+            $(get_ox_java_pid) 2>&1 | \
+            tee "${_heap_dump_log}" | sed 's|^|  |g'
+        if [ 'true' != "${SKIP_COMPRESSION}" ]; then
+            echo "Compressing Java heap dump: ${_heap_dump}${LOGS_SUFFIX}"
+            bzip2 "${_heap_dump}"
+        fi
+   else
+        echo -n "  Terminating 'open-xchange' service for heap dump creation"
+        cd ${TMP}
+        # This will create the heap dump on ibm java
+        kill -ABRT "$(get_ox_java_pid)"
+        # Wait until all dumps are written, which will inditified by stopped ox java process
+        while [ -n "$(get_ox_java_pid)" ]; do
+            echo -n .
+            sleep 1
+        done
+        echo
+        OX_JVM_TERMINATED=true
+        identify_and_move_ibm_dumps "dump written to "
+        local _heap_dumps=$(find ${TMP}/${LOGDIR} -name "core.*.dmp")
+
+        echo "  Processing heap dumps..."
+        if [ 'true' != "${SKIP_COMPRESSION}" ]; then
+            local _jextract_cmd="jextract"
+        else
+            local _jextract_cmd="jextract -nozip"
+        fi
+        for heap_dump in ${_heap_dumps}; do
+            local _heap_dump_log="${TMP}/${LOGDIR}/commands/${_jextract_cmd} $(basename ${heap_dump}) (heap-dump)"
+                ${_jextract_cmd} ${heap_dump} 2>&1 | \
+                    tee "${_heap_dump_log}" | \
+                    egrep -v '^.*-->$|^Adding .*'| \
+                    sed 's|^|    |g'
+                if [ 'true' != "${SKIP_COMPRESSION}" ]; then
+                    # the heap dump is included in the jextract zip archive
+                    rm ${heap_dump}
+                fi
+        done
+    fi
+}
+
+create_thread_dumps() {
+# By kill -3 on the java pid the JVM creates a thread dump. The top output
+# is needed to identiefy long running tasks. On IBM Java the JVM stores the
+# dumps seperatly and not into the open-xchange-console.log.
+    local _delay=3
+    local _count=5
+    local _top_cmd="top -d ${_delay} -bHn 5"
+    ${_top_cmd} >> /${TMP}/${LOGDIR}/commands/"${_top_cmd} (thread-dump)" &
+    echo -n "Creating Java thread dumps: "
+    for i in $(seq ${_count}); do
+        echo -n "${i} "
+        kill -3 $(get_ox_java_pid)
+        sleep ${_delay}
+    done
+    echo
+    if [ 'ibm' == "${JAVA_VM_TYPE}" ]; then
+        identify_and_move_ibm_dumps "dump written to "
+    fi
+}
+
+distribution_check() {
+# Distribution depending staff should go here
+    ox_system_type
+    DIST=${?}
+
+     if [ $(( ${DIST} & ${DEBIAN} )) -eq ${DEBIAN} ]; then
+         echo "Debian system detected"
+         OTHER_CONFIGS="${OTHER_CONFIGS} /etc/debian_version"
+         PROCS=${PROCS}';dpkg -l'
+         test -f /etc/mysql/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/mysql/my.cnf"
+     elif [ $(( ${DIST} & ${UCS} )) -eq ${UCS} ]; then
+         echo "Univention system detected"
+         UNIVENTION_LOG_DIR="/var/log/univention*"
+         PROCS=${PROCS}';dpkg -l;ucr dump'
+         test -f /etc/mysql/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/mysql/my.cnf"
+     elif [ $(( ${DIST} & ${SUSE} )) -eq ${SUSE} ]; then
+         echo "SuSE system detected"
+         OTHER_CONFIGS="${OTHER_CONFIGS} /etc/SuSE-release"
+         PROCS=${PROCS}';rpm -qa --last'
+         test -f /etc/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/my.cnf"
+     elif [ $(( ${DIST} & ${REDHAT} )) -eq ${REDHAT} ]; then
+         echo "Redhat system detected"
+         OTHER_CONFIGS="${OTHER_CONFIGS} /etc/*-release"
+         PROCS=${PROCS}';rpm -qa --last'
+         test -f /etc/my.cnf && OTHER_CONFIGS="${OTHER_CONFIGS} /etc/my.cnf"
+     else
+         echo "Distribution not detected"
+     fi
+}
+
+fix_log_archive_tarball_name() {
+# Drop --log-archive '.tar*' user input end replace it like defined
+    local _name="$(echo ${1} | \
+    sed 's|.tar\\.*||g' | \
+    sed 's|.tar||g' | \
+    sed 's|$|.tar|g' | \
+    sed 's|.gz||g')${LOGARC_SUFFIX}"
+    echo ${_name}
+}
+
+get_java_vm_type() {
+# The java vm type is defines in third line of 'java -version' output
+   local _java_vm_type=$(java -version 2>&1 | \
+       head -n 3  | \
+       tail -n 1 | \
+       sed 's|(.*||g' | \
+       tr [:upper:] [:lower:])
+       case ${_java_vm_type} in
+           *openjdk*) _java_vm_type=openjdk ;;
+           *ibm*) _java_vm_type=ibm ;;
+           *hotspot*) _java_vm_type=hotspot ;;
+           *sun*) _java_vm_type=sun ;;
+           *oracle*) _java_vm_type=oracle ;;
+           *) _java_vm_type=unknown ;;
+       esac
+       echo ${_java_vm_type}
+}
+
+get_ox_java_pid() {
+    local _ox_pid=$(ps ax | \
+        grep 'open-xchange' | \
+        grep 'java' | \
+        head -n 1 | \
+        awk '{print $1}')
+    echo "${_ox_pid}"
+}
+
+get_ox_user_ID() {
+    local _ox_user=$(ps axu | \
+        grep 'open-xchange' | \
+        grep 'java' | \
+        head -n 1 | \
+        awk '{print $1}')
+    echo "${_ox_user}"
+}
+
+identify_and_move_ibm_dumps() {
+# The IBM Java VM is storing the dumps separately in the filesystem, we search
+# for the storage location within the open-xchange-console.log and move them
+# into the support tarball. The filesystem storage location can be indified
+# by enties like below:
+# JVMDUMP010I Java dump written to /tmp/javacore.20140522.122625.3824.0005.txt
+# JVMDUMP010I Snap dump written to /tmp/Snap.20140522.122628.3824.0008.trc
+# JVMDUMP010I System dump written to /tmp/core.20140522.122628.3824.0006.dmp
+        echo "  Moving separate stored IBM Java dumps:"
+        local _pattern=${1}
+        local _dump_files=$(cat ${OX_LOG_DIR}/open-xchange-console.log | \
+            grep "${_pattern}" | \
+            sed "s|.*${_pattern}||g")
+        for file in ${_dump_files}; do
+            if [ -f "${file}" ]; then
+                mkdir -p ${TMP}/${LOGDIR}/$(dirname ${file})
+                mv -v ${file} $( normalize_path ${TMP}/${LOGDIR}/${file}) | \
+                sed -r 's/(„|“)//g' | sed 's|^|  |g'
+            fi
+        done
+}
+
+is_ox_running() {
+    if [ -n "$(get_ox_java_pid)" ]; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
+
+normalize_path() {
+# Add a leading and remove dublicated or more slashes
+    echo ${@} | sed 's|^|/|g' | sed 's|//*|/|g'
+}
+
+print_hint_to_line_end() {
+    sed -i "s|$| (${2})|g" ${1}
+}
+
+usage() {
+    echo "Usage: $(basename ${0})  [<OPTION>  <VALUE>] ..."
+    echo
+    echo "${0} currently knows the following parameters:"
+    echo
+    local _lopts=$(echo ${LONGOPTS} | sed -e 's/[:,]/ /g')
+    printf '%-22s | %-45s | %-s\n' "Option" "Default value" "Possible values"
+    echo "--------------------------------------------------------------------------------------------"
+    for opt in ${_lopts}; do
+        local _rvar=${opt%_LONG}
+        GLOBIGNORE='*'
+        local _possible=$(eval echo ${opt%_LONG}_VALUES)
+        local _lopt=$(eval echo ${opt})
+        if [ "${LOGARC_LONG}" == "${_lopt}" ]; then
+            local _default="$(eval echo "${_rvar}")"
+            local _default=$(fix_log_archive_tarball_name ${_default})
+        else
+            local _default="$(eval echo "${_rvar}")"
+        fi
+#        echo ${_opt} ${_rvar} ${_default} ${_lopt}
+        printf '%-22s | %-45s | %-s\n' "--${_lopt}" ${_default} "${_possible}"
+        GLOBIGNORE=
+    done
+cat<<EOF
+
+Examples:
+
+  ${0}
+
+Drop all log files which are not modified since two days:
+  ${0} --${EXCLUDE_OLDER_LOGS_THAN_LONG} 2
+
+use -D for Debug mode
+
+Please see for further information, requirements and examples following documentation:
+http://oxpedia.org/wiki/index.php?title=AppSuite:Oxsysreport
+
+EOF
 }
 
 warning_heap_dump() {
@@ -95,132 +485,52 @@ machine and amount of logs, several gigabyte could be needed!
 System Info:
 Groupware Max Heap Size: $(cat /opt/open-xchange/etc/ox-scriptconf.sh | \
     grep -A 1 'groupware Java virtual machine' | \
-    ${SED} 's|.*-Xmx|-Xmx|g' | \
-    ${SED} 's|"||g' | \
-    ${TAIL} -n 1)
-OX Log Storage: $(${DU} -h ${OX_LOG_DIR})
+    sed 's|.*-Xmx|-Xmx|g' | \
+    sed 's|"||g' | \
+    tail -n 1)
+OX Log Storage: $(du -h ${OX_LOG_DIR})
 
-$(${DF} -h ${TMP})    --${TMP_LONG}=${TMP}
-$(${DF} -h $(${DIRNAME} ${LOGARC}) | ${TAIL} -n 1)    --${LOGARC_LONG}=$(dirname ${LOGARC})/<name>.tar
+$(df -h ${TMP})    Processing data within: $(normalize_path ${TMP}/${LOGDIR})
+$(df -h $(dirname ${LOGARC}) | tail -n 1)    Final tarball storage: ${LOGARC}
 
 ###############################################################################
 EOF
 read -p "Press ENTER to continue or [ctrl+c] to cancel..."
+echo
 }
 
-. ${OXFUNCTIONS}
+###############################################################################
+#                              Runtime Checks                                 #
+###############################################################################
 
-export PATH="${PATH}:/opt/open-xchange/sbin"
-
-# some defaults
-PATH="${PATH}:/opt/open-xchange/sbin"
-TMP=/tmp
-TMP_LONG=tempdir
-LOGDIR=ox_support_infos-$(date +%Y%m%d-%H%M%S)
-LOGDIR_LONG=logdir
-LOGARC=${TMP}/${LOGDIR}.tar
-LOGARC_SUFFIX=".gz"
-LOGS_AND_FILES_SUFFIX=".bz2"
-LOGARC_LONG=log-archive
-KEEP_TMP=false
-KEEP_TMP_LONG=keep-tmp-files
-KEEP_TMP_VALUES="true false"
-CREATE_THREAD_DUMP=false
-CREATE_THREAD_DUMP_LONG=thread-dump
-CREATE_THREAD_DUMP_VALUES="true false"
-CREATE_HEAP_DUMP=false
-CREATE_HEAP_DUMP_LONG=heap-dump
-CREATE_HEAP_DUMP_VALUES="true false"
-SKIP_COMPRESSION=false
-SKIP_COMPRESSION_LONG=skip-compression
-SKIP_COMPRESSION_VALUES="true false"
-DROP_OLDER_LOGS_THAN=disabled
-DROP_OLDER_LOGS_THAN_LONG=drop-older-logs-than
-DROP_OLDER_LOGS_THAN_VALUES="0 ... n Days"
-DROP_OLDER_LOGS_THAN_KEEP_ALWAYS="open-xchange.log.0 open-xchange-console.log open-xchange-osgi.log"
-
-# NOTE: Do not add arbitrary directories here!
-OX_LOG_DIR=/var/log/open-xchange
-ARCHIVE_DIRS="/opt/open-xchange/etc ${OX_LOG_DIR}"
-
-PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf;java -version'
-
-MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
-LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$DROP_OLDER_LOGS_THAN_LONG:'
-
-usage() {
-    echo
-    echo "${0} currently knows the following parameters:"
-    echo
-    local lopts=$(echo ${LONGOPTS} | ${SED} -e 's/[:,]/ /g')
-    printf '%-22s | %-45s | %-s\n' "Parameter" "Default value" "Possible values"
-    echo "--------------------------------------------------------------------------------------------"
-    for opt in ${lopts}; do
-        local rvar=${opt%_LONG}
-        GLOBIGNORE='*'
-        local default="$(eval echo "${rvar}")"
-        local possible=$(eval echo ${opt%_LONG}_VALUES)
-        local lopt=$(eval echo ${opt})
-        # echo $opt $rvar $default $lopt
-        printf '%-22s | %-45s | %-s\n' "--${lopt}" ${default} "${possible}"
-        GLOBIGNORE=
-    done
-cat<<EOF
-
-Example:
-
-  ${0}
-
-use -D for Debug mode
-
-Please see for further information, requirements and examples following documentation:
-http://oxpedia.org/wiki/index.php?title=AppSuite:Oxsysreport
-
-EOF
-    echo
+test -f ${OXFUNCTIONS} || {
+    echo "missing common shell functions file"
+    exit 1
 }
 
-get_ox_java_pid() {
-    local _ox_pid=$(ps ax | \
-        grep 'open-xchange' | \
-        grep 'java' | \
-        ${HEAD} -n 1 | \
-        ${AWK} '{print $1}')
-    echo "${_ox_pid}"
-}
+source ${OXFUNCTIONS}
 
-is_ox_running() {
-    if [ -n "$(get_ox_java_pid)" ]; then
-        echo "true"
-    else
-        echo "false"
-    fi
-}
+for tool in ${EARLY_NEEDED_TOOLS}; do
+    check_on_needed ${tool} >/dev/null
+done
 
+JAVA_VM_TYPE=$(get_java_vm_type)
 TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:hD --long "$(eval echo ${LONGOPTS}),help" -- "${@}") \
     || die "exiting"
 
-eval set -- "${TEMP}"
+eval set -e -- "${TEMP}"
 
-# needed to catch the exit from a sub shell
-set -e
-AWK=$(check_on_needed awk)
-BZIP2=$(check_on_needed bzip2)
-DF=$(check_on_needed df)
-DIRNAME=$(check_on_needed dirname)
-DU=$(check_on_needed du)
-GZIP=$(check_on_needed gzip)
-HEAD=$(check_on_needed head)
-SED=$(check_on_needed sed)
-SLEEP=$(check_on_needed sleep)
-TAIL=$(check_on_needed tail)
-TAR=$(check_on_needed tar)
-TR=$(check_on_needed tr)
-
-while true; do
+for argument in ${@}; do
     case "${1}" in
         --${TMP_LONG})
-            TMP=${2}
+            if [ -d "${2}" ]; then
+                cd ${2}
+                TMP=$(pwd)
+                cd - &> /dev/null
+            else
+                usage
+                die "Error, option --${TMP_LONG} directory do not exist: ${2}"
+            fi
             shift 2
         ;;
         --${LOGDIR_LONG})
@@ -232,49 +542,67 @@ while true; do
             shift 2
         ;;
         --${LOGARC_LONG})
-            LOGARC=${2}
+            if [ -d "$(dirname ${2})" ]; then
+                cd $(dirname ${2})
+                LOGARC=$(pwd)/$(basename ${2})
+            else
+                usage
+                die "Error, option --${LOGARC_LONG} path do not exist: $(dirname ${2})"
+            fi
+            LOGARC=$(fix_log_archive_tarball_name ${LOGARC})
+            if [ "${2}" != "${LOGARC})" ]; then
+                echo
+                echo "Info, changing tarball name --${LOGARC_LONG} from ${2} to ${LOGARC}"
+                echo
+            fi
+            if [ -e "${LOGARC}" ]; then
+                usage
+                die "Error, option --${LOGARC_LONG} is pointing to an existing file: ${LOGARC}"
+            elif [ -e "${LOGARC%%.gz}" ]; then
+                usage
+                die "Error, option --${LOGARC_LONG} is pointing uncompressed to an existing file: ${LOGARC%%.gz}"
+            fi
+            unset TMP_LOGARC_TRABALL
             shift 2
         ;;
         --${CREATE_THREAD_DUMP_LONG})
-            THREAD_DUMP=$(check_argument ${1} ${2})
+            CREATE_THREAD_DUMP=$(check_argument ${1} ${2})
+            NEEDED_TOOLS="kill top ${NEEDED_TOOLS}"
             shift 2
-            KILL=$(check_on_needed kill)
-            TOP=$(check_on_needed top)
             if [ 'false' == "$(is_ox_running)" ]; then
-                echo "Error, open-xchange service is not running" >&2
-                exit 1
+                die "${0}: Error, open-xchange service is not running"
             fi
         ;;
         --${CREATE_HEAP_DUMP_LONG})
-            HEAP_DUMP=$(check_argument ${1} ${2})
+            CREATE_HEAP_DUMP=$(check_argument ${1} ${2})
+            if [ 'ibm' == "${JAVA_VM_TYPE}" ]; then
+                NEEDED_TOOLS="kill service jextract tee ${NEEDED_TOOLS}"
+            else
+                NEEDED_TOOLS="jmap sudo tee ${NEEDED_TOOLS}"
+            fi
             shift 2
             if [ 'false' == "$(is_ox_running)" ]; then
-                echo "Error, open-xchange service is not running" >&2
-                exit 1
-            fi
-            if [ 'true' == "${HEAP_DUMP}" ]; then
-                warning_heap_dump
+                die "${0}: Error, open-xchange service is not running"
             fi
         ;;
         --${SKIP_COMPRESSION_LONG})
             SKIP_COMPRESSION=$(check_argument ${1} ${2})
             shift 2
             unset LOGARC_SUFFIX
-            unset LOGS_AND_FILES_SUFFIX
+            unset LOGS_SUFFIX
         ;;
-        --${DROP_OLDER_LOGS_THAN_LONG})
+        --${EXCLUDE_OLDER_LOGS_THAN_LONG})
             if [ '0' -le "${2}" ] 2> /dev/null ; then
-                DROP_OLDER_LOGS_THAN=${2}
+                EXCLUDE_OLDER_LOGS_THAN=${2}
             else
-                echo "${0}: Error, option '${1}' requires positive numbers" >&2
-                exit 1
+                usage
+                die "Error, option '${1}' requires positive numbers: ${2}"
             fi
             shift 2
        ;;
         -h|--help)
             usage
-            exit
-            shift
+            exit 0
         ;;
         -D)
             set -x
@@ -285,29 +613,42 @@ while true; do
             break
         ;;
         *)
-            die "Internal error!"
-            exit 1
+            die "${0}: Internal Error!"
         ;;
     esac
 done
 
+LOGARC=$(fix_log_archive_tarball_name ${LOGARC})
+
 if [ $(id -u) -ne 0 ]; then
-    die "need to be root in order to collect all needed data"
+    die "${0}: Error, need to be root in order to collect all needed data"
 fi
 
+if [ -d "${TMP}/${LOGDIR}" ]; then
+    usage
+    die "Error, '--${TMP_LONG}' and '--${LOGDIR_LONG}' directory already exists: $(normalize_path ${TMP}/${LOGDIR})"
+fi
 
-# generic parameter checking
+for tool in ${NEEDED_TOOLS}; do
+    check_on_needed ${tool}
+done
+
+if [ 'true' == "${CREATE_HEAP_DUMP}" ]; then
+    warning_heap_dump
+fi
+
+# Generic parameter checking
 for opt in ${MUSTOPTS}; do
     opt_var=$(eval echo \$${opt})
     opt_var_long=$(eval echo \$${opt}_LONG)
     if [ -z "${opt_var}" ]; then
     usage;
-         die "missing required option --${opt_var_long}"
+         die "${0}: Error, missing required option --${opt_var_long}"
     fi
 done
 
-# generic option checking
-ALLOPTS=$(echo ${LONGOPTS} | ${SED} -e 's/[$:,]/ /g' -e 's/_LONG//g')
+# Generic option checking
+ALLOPTS=$(echo ${LONGOPTS} | sed -e 's/[$:,]/ /g' -e 's/_LONG//g')
 for opt in ${ALLOPTS}; do
     opt_var=$(eval echo \$${opt})
     opt_var_long=$(eval echo \$${opt}_LONG)
@@ -324,216 +665,47 @@ for opt in ${ALLOPTS}; do
             fi
         done
         if [ -z "${found}" ]; then
-            die "\"${opt_var}\" is not a valid option to --${opt_var_long}"
+            die "${0}: Error, \"${opt_var}\" is not a valid option to --${opt_var_long}"
         fi
     fi
 done
+
+###############################################################################
+#                                Runtime Main                                 #
+###############################################################################
+# The tool has passed all sanity checks and now it is required not to break on
+# futher errors, except critical internal tool errors.
 set +e
-# distribution depending staff should go here
-ox_system_type
-DIST=${?}
-
-if [ $(( ${DIST} & ${DEBIAN} )) -eq ${DEBIAN} ]; then
-     echo Debian system detected
-     ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/debian_version"
-     PROCS=${PROCS}';dpkg -l'
-     test -f /etc/mysql/my.cnf && ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/mysql/my.cnf"
-elif [ $(( ${DIST} & ${UCS} )) -eq ${UCS} ]; then
-     echo "Univention system detected"
-     ARCHIVE_DIRS="${ARCHIVE_DIRS} /var/log/univention*"
-     PROCS=${PROCS}';dpkg -l;ucr dump'
-     test -f /etc/mysql/my.cnf && ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/mysql/my.cnf"
-elif [ $(( ${DIST} & ${SUSE} )) -eq ${SUSE} ]; then
-     echo SuSE system detected
-     ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/SuSE-release"
-     PROCS=${PROCS}';rpm -qa --last'
-     test -f /etc/my.cnf && ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/my.cnf"
-elif [ $(( ${DIST} & ${REDHAT} )) -eq ${REDHAT} ]; then
-     echo Redhat system detected
-     ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/*-release"
-     PROCS=${PROCS}';rpm -qa --last'
-     test -f /etc/my.cnf && ARCHIVE_DIRS="${ARCHIVE_DIRS} /etc/my.cnf"
-else
-     echo Distribution not detected
-fi
-
-collect_files() {
-   if [ 'disabled' == "${DROP_OLDER_LOGS_THAN}" ]; then
-       ${TAR} cvf /${TMP}/${LOGDIR}/ox_files_and_logs.tar \
-           --ignore-failed-read ${ARCHIVE_DIRS} > /dev/null 2>&1
-   else
-       # find files which should be excluded by --drop-older-logs-than option
-       find ${OX_LOG_DIR} \
-           -mtime +${DROP_OLDER_LOGS_THAN} \
-           -type f > /${TMP}/${LOGDIR}/${DROP_OLDER_LOGS_THAN_LONG}-exclude
-       # remove mandatory files from exclusion list if listed
-       for keep in ${DROP_OLDER_LOGS_THAN_KEEP_ALWAYS}; do
-           ${SED} -i "/${keep}$/d" /${TMP}/${LOGDIR}/${DROP_OLDER_LOGS_THAN_LONG}-exclude
-       done
-       ${TAR} cvf /${TMP}/${LOGDIR}/ox_files_and_logs.tar \
-           --ignore-failed-read ${ARCHIVE_DIRS} \
-           --exclude-from=/${TMP}/${LOGDIR}/${DROP_OLDER_LOGS_THAN_LONG}-exclude > /dev/null 2>&1
-   fi
-   OIFS=${IFS}
-   IFS=$'\n'
-   # be very selective on what to add to the archive (Bug#28830)
-   for dir in /etc/httpd /etc/apache*; do
-       test -d ${dir} || continue
-       for file in $(find ${dir} -type f \
-                   -regex '^.*\.conf$' -o \
-                   -regex '^.*-\(enabled\|availabled\)\/.*$'); do
-       ALLFILES="${ALLFILES} ${file}"
-       done
-   done
-   IFS=${OIFS}
-   ${TAR} rvf /${TMP}/${LOGDIR}/ox_files_and_logs.tar --ignore-failed-read ${ALLFILES} > /dev/null 2>&1
-   if [ 'true' != "${SKIP_COMPRESSION}" ]; then
-       bzip2 -9 /${TMP}/${LOGDIR}/ox_files_and_logs.tar
-   fi
-}
-
-collect_output() {
-   cd /${TMP}
-   IFS=";"
-   for i in ${PROCS}; do
-       unset IFS
-       ${i} > "/${TMP}/${LOGDIR}/commands/${i}" 2>&1
-       IFS=";"
-   done
-   unset IFS
-   cd - > /dev/null 2>&1
-}
-
-clean_up(){
-   test "${KEEP_TMP}" = "true" || rm -rf ${TMP}/${LOGDIR}
-}
-
-get_ox_user_ID() {
-    local _ox_user=$(ps axu | \
-        grep 'open-xchange' | \
-        grep 'java' | \
-        ${HEAD} -n 1 | \
-        ${AWK} '{print $1}')
-    echo "${_ox_user}"
-}
-
-identify_and_move_ibm_dumps() {
-# The IBM Java VM is storing the dumps separately in the filesystem, we search
-# for the storage location within the open-xchange-console.log and move them
-# into the support tarball. The filesystem storage location can be indified
-# by enties like below:
-# JVMDUMP010I Java dump written to /tmp/javacore.20140522.122625.3824.0005.txt
-# JVMDUMP010I Snap dump written to /tmp/Snap.20140522.122628.3824.0008.trc
-# JVMDUMP010I System dump written to /tmp/core.20140522.122628.3824.0006.dmp
-        local _pattern=${1}
-        local _dump_files=$(cat ${OX_LOG_DIR}/open-xchange-console.log | \
-            grep "${_pattern}" | \
-            ${SED} "s|.*${_pattern}||g")
-        for file in ${_dump_files}; do
-            if [ -f "${file}" ]; then
-                mkdir -p ${TMP}/${LOGDIR}/$(${DIRNAME} ${file})
-                mv ${file} ${TMP}/${LOGDIR}/${file}
-            fi
-        done
-}
-
-create_thread_dumps() {
-    local _delay=3
-    local _count=5
-    local _top_cmd="top -d ${_delay} -bHn 5"
-    ${_top_cmd} >> ${TMP}/${LOGDIR}/commands/"${_top_cmd} (thread-dump)" &
-    echo -n "Creating Threaddumps: "
-    for i in $(seq ${_count}); do
-        echo -n "${i} "
-        ${KILL} -3 $(get_ox_java_pid)
-        ${SLEEP} ${_delay}
-    done
-    echo
-    if [ 'ibm' == "$(get_java_vm_type)" ]; then
-        identify_and_move_ibm_dumps "Java dump written to "
-    fi
-}
-
-create_heap_dump() {
-   local _heap_dump_cmd="jmap -dump:file"
-   local _heap_histo_cmd="jmap -histo"
-   # Grant write permissions for ox user
-   if [ 'ibm' != "$(get_java_vm_type)" ]; then
-       JMAP=$(check_on_needed jmap)
-       SUDO=$(check_on_needed sudo)
-       chmod a+w ${TMP}/${LOGDIR}/commands
-       ${SUDO} -u "#$(get_ox_user_ID)" ${_heap_histo_cmd} $(get_ox_java_pid) \
-           >> "${TMP}/${LOGDIR}/commands/${_heap_histo_cmd} (heap-dump)"
-       ${SUDO} -u "#$(get_ox_user_ID)" \
-           ${_heap_dump_cmd}=${TMP}/${LOGDIR}/commands/"${_heap_dump_cmd} (heap-dump)" \
-           $(get_ox_java_pid)
-   else
-       JEXTRACT=$(check_on_needed jextract)
-       echo "Terminating open-xchange service for heap dump creation:"
-       cd ${TMP}
-       kill -ABRT "$(get_ox_java_pid)"
-       while [ -n "$(get_ox_java_pid)" ]; do
-           echo -n .
-           ${SLEEP} 1
-       done
-       OX_JVM_TERMINATED=true
-       echo
-       identify_and_move_ibm_dumps "System dump written to "
-       identify_and_move_ibm_dumps "Snap dump written to "
-       identify_and_move_ibm_dumps "Java dump written to "
-       HEAP_DUMPS=$(find ${TMP}/${LOGDIR} -name "core.*.dmp")
-       echo "Processing Heap-Dumps..."
-       for heap_dump in ${HEAP_DUMPS}; do
-           if [ 'true' != "${SKIP_COMPRESSION}" ]; then
-               ${JEXTRACT} ${heap_dump} 2> /dev/null
-               # the heap dump is included in the jextract zip archive
-               rm ${heap_dump}
-           else
-               ${JEXTRACT} ${heap_dump} -nozip 2> /dev/null
-           fi
-       done
-   fi
-}
-
-get_java_vm_type() {
-   # the java vm type is defines in third line of 'java -version' output
-   local _java_vm_type=$(cat ${TMP}/${LOGDIR}/commands/java\ -version | \
-       ${HEAD} -n 3  | \
-       ${TAIL} -n 1 | \
-       ${SED} 's|(.*||g' | \
-       ${TR} [:upper:] [:lower:])
-       case ${_java_vm_type} in
-           openjdk*) _java_vm_type=openjdk ;;
-           ibm*) _java_vm_type=ibm ;;
-           hotspot*) _java_vm_type=hotspot ;;
-           sun*) _java_vm_type=sun ;;
-           oracle*) _java_vm_type=oracle ;;
-           *) _java_vm_type=unknown ;;
-       esac
-       echo ${_java_vm_type}
-}
-
 
 trap "rm -f ${LOGARC}; clean_up; exit 1" SIGINT SIGSEGV SIGQUIT SIGTERM
 
-echo creating logdir ${TMP}/${LOGDIR}
+if [ 'ibm' == "${JAVA_VM_TYPE}" ]; then
+    echo "IBM Java Virtual Machine detected"
+fi
+distribution_check
+echo "Creating temporary log directory: $(normalize_path ${TMP}/${LOGDIR})"
 mkdir -p ${TMP}/${LOGDIR}/commands/
-echo collecting system data into ${TMP}/${LOGDIR}
-collect_output
-if [ 'true' == "${THREAD_DUMP}" ]; then
+collect_command_output
+collect_httpd_configs
+collect_ox_configs
+collect_other_configs
+if [ 'true' == "${CREATE_THREAD_DUMP}" ]; then
     create_thread_dumps
 fi
-if [ 'true' == "${HEAP_DUMP}" ]; then
+if [ 'true' == "${CREATE_HEAP_DUMP}" ]; then
     create_heap_dump
 fi
-echo collecting files into ${TMP}/${LOGDIR}/ox_files_and_logs.tar${LOGS_AND_FILES_SUFFIX}
-collect_files
-echo creating archive ${LOGARC}${LOGARC_SUFFIX}
-${TAR} cvf ${LOGARC} -C ${TMP} ${LOGDIR} > /dev/null 2>&1
-if [ 'true' != "${SKIP_COMPRESSION}" ]; then
-       ${GZIP} ${LOGARC}
+collect_logs ${OX_LOG_DIR}
+if [ -n "${UNIVENTION_LOG_DIR}" ]; then
+    collect_logs ${UNIVENTION_LOG_DIR}
 fi
-if [ 'true' == "${OX_JVM_TERMINATED}" ];then
+create_excluded_overview excluded-files.txt
+echo "Creating final archive: $(normalize_path ${LOGARC})"
+tar cvf ${LOGARC%%.gz}  -C ${TMP} ${LOGDIR} > /dev/null 2>&1
+if [ 'true' != "${SKIP_COMPRESSION}" ]; then
+    gzip ${LOGARC%%.gz}
+fi
+if [ 'true' == "${OX_JVM_TERMINATED}" ]; then
     service open-xchange start
 fi
 clean_up
