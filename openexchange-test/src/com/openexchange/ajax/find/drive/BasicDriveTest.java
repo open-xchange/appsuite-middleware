@@ -63,6 +63,8 @@ import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
+import com.openexchange.ajax.folder.actions.EnumAPI;
+import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
@@ -83,6 +85,7 @@ import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
@@ -388,6 +391,51 @@ public class BasicDriveTest extends AbstractFindTest {
         } finally {
             client2.logout();
         }
+    }
+
+    public void testDeletedFilesAreIgnored() throws Exception {
+        FolderObject deletedFolder = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
+            randomUID(),
+            FolderObject.INFOSTORE,
+            client.getValues().getPrivateInfostoreFolder(),
+            client.getValues().getUserId()));
+        DocumentMetadata deletedDocument = new DocumentMetadataImpl(metadata);
+        deletedDocument.setTitle(randomUID());
+        deletedDocument.setFolderId(deletedFolder.getObjectID());
+        manager.newAction(deletedDocument);
+        folderManager.deleteFolderOnServer(deletedFolder);
+        FolderObject reloadedFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, deletedFolder.getObjectID())).getFolder();
+        FolderObject trashFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, reloadedFolder.getParentFolderID())).getFolder();
+        assertEquals("Wrong type", FolderObject.TRASH, trashFolder.getType());
+
+        List<Facet> autocompleteResponse = autocomplete(deletedDocument.getTitle());
+        DefaultFacet folderTypeFacet = (DefaultFacet) findByType(CommonFacetType.FOLDER_TYPE, autocompleteResponse);
+        ActiveFacet[] folderTypeFacets = new ActiveFacet[3];
+        folderTypeFacets[0] = createActiveFacet(folderTypeFacet, findByValueId(FolderType.PRIVATE.getIdentifier(), folderTypeFacet));
+        folderTypeFacets[1] = createActiveFacet(folderTypeFacet, findByValueId(FolderType.PUBLIC.getIdentifier(), folderTypeFacet));
+        folderTypeFacets[2] = createActiveFacet(folderTypeFacet, findByValueId(FolderType.SHARED.getIdentifier(), folderTypeFacet));
+
+        ActiveFacet fileNameFacet = createActiveFacet((SimpleFacet) findByType(DriveFacetType.FILE_NAME, autocompleteResponse));
+        List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
+        facets.add(fileNameFacet);
+        facets.add(createActiveFacet(CommonFacetType.FOLDER, reloadedFolder.getObjectID(), Filter.NO_FILTER));
+        List<PropDocument> documents = query(client, facets);
+        assertEquals("Wrong number of documents", 1, documents.size());
+        assertEquals("Wrong document", deletedDocument.getTitle(), (String) documents.get(0).getProps().get("title"));
+
+        facets.clear();
+        facets.add(fileNameFacet);
+        documents = query(client, facets);
+        assertEquals("Wrong number of documents", 0, documents.size());
+
+        for (int i = 0; i < 3; i++) {
+            facets.clear();
+            facets.add(fileNameFacet);
+            facets.add(folderTypeFacets[i]);
+            documents = query(client, facets);
+            assertEquals("Wrong number of documents. Document found in " + folderTypeFacets[i].getValueId() + " folder.", 0, documents.size());
+        }
+
     }
 
 //    Takes half an hour do create and delete all those folders...
