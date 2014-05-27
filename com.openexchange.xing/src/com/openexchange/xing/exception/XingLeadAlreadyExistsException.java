@@ -47,42 +47,46 @@
  *
  */
 
-package com.openexchange.ajax.find.tasks;
-
-import org.junit.Test;
-import com.openexchange.ajax.find.actions.AutocompleteRequest;
-import com.openexchange.ajax.find.actions.AutocompleteResponse;
-import com.openexchange.find.Module;
-import com.openexchange.find.tasks.TasksStrings;
-
+package com.openexchange.xing.exception;
 
 /**
- * {@link FindTasksAutocompleteTests}
+ * {@link XingLeadAlreadyExistsException} - Throws if XING API complains about an E-Mail address that already exists.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FindTasksAutocompleteTests extends AbstractFindTasksTest {
+public class XingLeadAlreadyExistsException extends XingException {
+
+    private static final long serialVersionUID = -6669197291690418791L;
+
+    private final String email;
 
     /**
-     * Initializes a new {@link FindTasksAutocompleteTests}.
-     */
-    public FindTasksAutocompleteTests(String n) {
-        super(n);
-    }
-
-    /**
+     * Initializes a new {@link XingLeadAlreadyExistsException}.
      *
-     * @throws Exception
+     * @param email The E-Mail address that already exists
      */
-    @Test
-    public void testAutocompleteFieldFacets() throws Exception {
-        String prefix = client.getValues().getDefaultAddress().substring(0, 3);
-        AutocompleteRequest request = new AutocompleteRequest(prefix, Module.TASKS.getIdentifier());
-        AutocompleteResponse response = client.execute(request);
-
-        assertNotNull(findByDisplayName(response.getFacets(), prefix));
-        assertNotNull(findByDisplayName(response.getFacets(), prefix + " " + TasksStrings.FACET_TASK_TITLE));
-        assertNotNull(findByDisplayName(response.getFacets(), prefix + " " + TasksStrings.FACET_TASK_DESCRIPTION));
-        assertNotNull(findByDisplayName(response.getFacets(), prefix + " " + TasksStrings.FACET_TASK_ATTACHMENT_NAME));
+    public XingLeadAlreadyExistsException(String email) {
+        this(email, null);
     }
+
+    /**
+     * Initializes a new {@link XingLeadAlreadyExistsException}.
+     *
+     * @param email The E-Mail address that already exists
+     * @param throwable The cause
+     */
+    public XingLeadAlreadyExistsException(String email, Throwable throwable) {
+        super("A lead with E-Mail address " + email + " already exists", throwable);
+        this.email = email;
+    }
+
+    /**
+     * Gets the E-Mail address that already exists
+     *
+     * @return The E-Mail address that already exists
+     */
+    public String getEmail() {
+        return email;
+    }
+
 }

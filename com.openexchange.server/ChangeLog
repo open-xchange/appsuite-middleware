@@ -1,3 +1,7 @@
+* 2014-05-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32732: Orderly detect a duplicate lead request
+
 * 2014-05-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 32708: Fixed forwarding of mails from Unified Mail
