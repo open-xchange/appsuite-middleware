@@ -99,6 +99,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Collators;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -1650,8 +1651,7 @@ public final class MailFolderStorage implements FolderStorage {
 
         public MailAccountComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override
@@ -1683,8 +1683,7 @@ public final class MailFolderStorage implements FolderStorage {
 
         public SimpleMailFolderComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override
@@ -1701,8 +1700,7 @@ public final class MailFolderStorage implements FolderStorage {
         public SimpleMailFolderInfoComparator(final Locale locale, final boolean translate) {
             super();
             this.translate = translate;
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override
@@ -1724,8 +1722,7 @@ public final class MailFolderStorage implements FolderStorage {
                 indexMap.put(names[i], Integer.valueOf(i));
             }
             na = Integer.valueOf(names.length);
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         private Integer getNumberOf(final String name) {
@@ -1766,8 +1763,7 @@ public final class MailFolderStorage implements FolderStorage {
                 indexMap.put(names[i], Integer.valueOf(i));
             }
             na = Integer.valueOf(names.length);
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         private Integer getNumberOf(final String name) {

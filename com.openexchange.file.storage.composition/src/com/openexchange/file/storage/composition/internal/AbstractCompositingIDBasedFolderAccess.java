@@ -78,6 +78,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.java.Collators;
 import com.openexchange.session.Session;
 import com.openexchange.tx.AbstractService;
 import com.openexchange.tx.TransactionException;
@@ -493,8 +494,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
         AccessWrapperComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override

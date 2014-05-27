@@ -115,6 +115,7 @@ import com.openexchange.imap.entity2acl.UserGroupID;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
+import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
@@ -3273,8 +3274,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
         FullDisplayNameComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override

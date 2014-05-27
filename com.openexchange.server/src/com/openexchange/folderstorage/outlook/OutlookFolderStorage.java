@@ -138,6 +138,7 @@ import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.java.Collators;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -2551,8 +2552,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         public MailAccountComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale == null ? Locale.US : locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale == null ? Locale.US : locale);
         }
 
         @Override
@@ -2584,8 +2584,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         public MessagingAccountComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale == null ? Locale.US : locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale == null ? Locale.US : locale);
         }
 
         @Override
@@ -2601,8 +2600,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         public FileStorageAccountComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override
@@ -2618,8 +2616,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         public FolderNameComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale == null ? Locale.US : locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale == null ? Locale.US : locale);
         }
 
         @Override

@@ -57,6 +57,7 @@ import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Collators;
 
 /**
  * {@link CreatedByComparator} - Comparator for "created-by" field.
@@ -82,8 +83,7 @@ public class CreatedByComparator implements Comparator<DataObject> {
     public CreatedByComparator(final Locale locale, final Context context) {
         super();
         cache = new TIntObjectHashMap<String>(24);
-        collator = Collator.getInstance(locale);
-        collator.setStrength(Collator.SECONDARY);
+        collator = Collators.getSecondaryInstance(locale);
         this.context = context;
     }
 

@@ -127,6 +127,7 @@ import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Collators;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -2006,8 +2007,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
         public FolderObjectComparator(final Locale locale, final Context context) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
             this.context = context;
         }
 
@@ -2061,8 +2061,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
         public FolderNameComparator(final Locale locale, final Context context) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
             this.context = context;
         }
 

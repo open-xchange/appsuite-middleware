@@ -86,6 +86,7 @@ import com.openexchange.folderstorage.messaging.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.MessagingType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Collators;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.messaging.MailMessagingService;
@@ -1182,8 +1183,7 @@ public final class MessagingFolderStorage implements FolderStorage {
 
         MessagingAccountComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override
@@ -1218,8 +1218,7 @@ public final class MessagingFolderStorage implements FolderStorage {
 
         SimpleMessagingFolderComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         @Override
@@ -1243,8 +1242,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                 indexMap.put(names[i], Integer.valueOf(i));
             }
             na = Integer.valueOf(names.length);
-            collator = Collator.getInstance(locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale);
         }
 
         private Integer getNumberOf(final String name) {

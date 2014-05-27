@@ -101,6 +101,7 @@ import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.folderstorage.virtual.sql.Select;
 import com.openexchange.folderstorage.virtual.sql.Update;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Collators;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -917,8 +918,7 @@ public final class VirtualFolderStorage implements FolderStorage {
 
         protected PairComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale == null ? Locale.US : locale);
-            collator.setStrength(Collator.SECONDARY);
+            collator = Collators.getSecondaryInstance(locale == null ? Locale.US : locale);
         }
 
         @Override

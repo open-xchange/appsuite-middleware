@@ -59,6 +59,7 @@ import java.util.EnumSet;
 import java.util.Locale;
 import javax.mail.internet.MailDateFormat;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Collators;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
@@ -128,8 +129,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
         this.field = field;
         this.descending = descending;
         this.locale = locale;
-        collator = Collator.getInstance(locale);
-        collator.setStrength(Collator.SECONDARY);
+        collator = Collators.getSecondaryInstance(locale);
         get = new MessagingMessageGetSwitch();
     }
 

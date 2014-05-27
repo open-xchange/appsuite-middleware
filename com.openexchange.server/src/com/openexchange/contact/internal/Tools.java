@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.internal;
 
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -77,6 +76,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.preferences.ServerUserSetting;
@@ -123,30 +123,29 @@ public final class Tools {
 	                return 0;
 	            }
             };
-	    } else {
-	        /*
-	         * sort using the mapping's comparator with collation
-	         */
-	        final Comparator<Object> collationComparator = null == sortOptions.getCollation() ? null :
-	            Collator.getInstance(SuperCollator.get(sortOptions.getCollation()).getJavaLocale());
-	        return new Comparator<Contact>() {
-	            @Override
-	            public int compare(Contact o1, Contact o2) {
-	                for (SortOrder order : sortOptions.getOrder()) {
-	                    int comparison = 0;
-	                    try {
-	                        comparison = ContactMapper.getInstance().get(order.getBy()).compare(o1, o2, collationComparator);
-	                    } catch (OXException e) {
-	                        LOG.error("error comparing objects", e);
-	                    }
-	                    if (0 != comparison) {
-	                        return Order.DESCENDING.equals(order.getOrder()) ? -1 * comparison : comparison;
-	                    }
-	                }
-	                return 0;
-	            }
-	        };
 	    }
+        /*
+         * sort using the mapping's comparator with collation
+         */
+        final Comparator<Object> collationComparator = null == sortOptions.getCollation() ? null :
+            Collators.getDefaultInstance(SuperCollator.get(sortOptions.getCollation()).getJavaLocale());
+        return new Comparator<Contact>() {
+            @Override
+            public int compare(Contact o1, Contact o2) {
+                for (SortOrder order : sortOptions.getOrder()) {
+                    int comparison = 0;
+                    try {
+                        comparison = ContactMapper.getInstance().get(order.getBy()).compare(o1, o2, collationComparator);
+                    } catch (OXException e) {
+                        LOG.error("error comparing objects", e);
+                    }
+                    if (0 != comparison) {
+                        return Order.DESCENDING.equals(order.getOrder()) ? -1 * comparison : comparison;
+                    }
+                }
+                return 0;
+            }
+        };
 	}
 
 	/**
