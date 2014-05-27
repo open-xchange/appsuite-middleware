@@ -1,0 +1,229 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.jsieve.export;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import javax.mail.internet.idn.IDNA;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.mailfilter.ajax.Credentials;
+import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
+import com.openexchange.mailfilter.internal.MailFilterProperties;
+import com.openexchange.mailfilter.services.Services;
+import com.openexchange.session.Session;
+import com.openexchange.tools.net.URIDefaults;
+import com.openexchange.tools.net.URIParser;
+
+/**
+ * {@link SieveHandlerFactory}
+ * 
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
+public final class SieveHandlerFactory {
+
+    /**
+     * Connect to the Sieve server and return a handler
+     * 
+     * @param creds credentials
+     * @return a sieve handler
+     * @throws OXException
+     */
+    public static SieveHandler getSieveHandler(Credentials creds) throws OXException {
+        final SieveHandler sieveHandler;
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
+
+        final String logintype = config.getProperty(MailFilterProperties.Values.SIEVE_LOGIN_TYPE.property);
+        final int sieve_port;
+        final String sieve_server;
+        User storageUser = null;
+        if (MailFilterProperties.LoginTypes.GLOBAL.name.equals(logintype)) {
+            sieve_server = config.getProperty(MailFilterProperties.Values.SIEVE_SERVER.property);
+            if (null == sieve_server) {
+                throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(MailFilterProperties.Values.SIEVE_SERVER.property);
+            }
+            try {
+                sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
+            } catch (final RuntimeException e) {
+                throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
+            }
+        } else if (MailFilterProperties.LoginTypes.USER.name.equals(logintype)) {
+            storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
+            if (null != storageUser) {
+                final String mailServerURL = storageUser.getImapServer();
+                final URI uri;
+                try {
+                    uri = URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP);
+                } catch (final URISyntaxException e) {
+                    throw OXMailfilterExceptionCode.NO_SERVERNAME_IN_SERVERURL.create(e, mailServerURL);
+                }
+                sieve_server = uri.getHost();
+                try {
+                    sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
+                } catch (final RuntimeException e) {
+                    throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
+                }
+            } else {
+                throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+            }
+        } else {
+            throw OXMailfilterExceptionCode.NO_VALID_LOGIN_TYPE.create();
+        }
+        /*
+         * Get SIEVE_AUTH_ENC property
+         */
+        final String authEnc = config.getProperty(
+            MailFilterProperties.Values.SIEVE_AUTH_ENC.property,
+            MailFilterProperties.Values.SIEVE_AUTH_ENC.def);
+        /*
+         * Establish SieveHandler
+         */
+        final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
+        if (MailFilterProperties.CredSrc.SESSION.name.equals(credsrc) || MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
+            final String username = creds.getUsername();
+            final String authname = creds.getAuthname();
+            final String password = getRightPassword(config, creds);
+            if (null != username) {
+                sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
+            } else {
+                sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
+            }
+        } else if (MailFilterProperties.CredSrc.IMAP_LOGIN.name.equals(credsrc)) {
+            final String authname;
+            if (null != storageUser) {
+                authname = storageUser.getImapLogin();
+            } else {
+                storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
+                if (null != storageUser) {
+                    authname = storageUser.getImapLogin();
+                } else {
+                    throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+                }
+            }
+            final String username = creds.getUsername();
+            final String password = getRightPassword(config, creds);
+            if (null != username) {
+                sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
+            } else {
+                sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
+            }
+        } else if (MailFilterProperties.CredSrc.MAIL.name.equals(credsrc)) {
+            final String authname;
+            if (null != storageUser) {
+                authname = storageUser.getMail();
+            } else {
+                storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
+                if (null != storageUser) {
+                    authname = storageUser.getMail();
+                } else {
+                    throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+                }
+            }
+            final String username = creds.getUsername();
+            final String password = getRightPassword(config, creds);
+            if (null != username) {
+                sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
+            } else {
+                sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
+            }
+        } else {
+            throw OXMailfilterExceptionCode.NO_VALID_CREDSRC.create();
+        }
+        return sieveHandler;
+    }
+
+    /**
+     * Get a SieveHandler for the specified Session
+     * 
+     * @param session the server session
+     * @return a SieveHandler
+     * @throws OXException
+     */
+    public static SieveHandler getSieveHandler(final Session session) throws OXException {
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
+        final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
+        final String loginName;
+        if (MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
+            loginName = session.getLogin();
+        } else {
+            loginName = session.getLoginName();
+        }
+        final String password = session.getPassword();
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
+
+        return getSieveHandler(new Credentials(loginName, password, userId, contextId));
+    }
+
+    /**
+     * Get the correct password according to the credentials
+     * 
+     * @param config
+     * @param creds
+     * @return
+     * @throws OXException
+     */
+    protected static String getRightPassword(final ConfigurationService config, final Credentials creds) throws OXException {
+        final String passwordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
+        if (MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
+            return creds.getPassword();
+        } else if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
+            final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
+            if (null == masterpassword || masterpassword.length() == 0) {
+                throw OXMailfilterExceptionCode.NO_MASTERPASSWORD_SET.create();
+            }
+            return masterpassword;
+        } else {
+            throw OXMailfilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+        }
+    }
+}

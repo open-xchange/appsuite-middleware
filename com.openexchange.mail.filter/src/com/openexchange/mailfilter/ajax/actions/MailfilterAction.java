@@ -51,8 +51,6 @@ package com.openexchange.mailfilter.ajax.actions;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
@@ -65,7 +63,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
-import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
@@ -78,8 +75,6 @@ import org.json.JSONValue;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.IfCommand;
@@ -90,6 +85,7 @@ import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.export.Capabilities;
 import com.openexchange.jsieve.export.SIEVEResponse;
 import com.openexchange.jsieve.export.SieveHandler;
+import com.openexchange.jsieve.export.SieveHandlerFactory;
 import com.openexchange.jsieve.export.SieveTextFilter;
 import com.openexchange.jsieve.export.SieveTextFilter.ClientRulesAndRequire;
 import com.openexchange.jsieve.export.SieveTextFilter.RuleListAndNextUid;
@@ -104,8 +100,6 @@ import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.session.Session;
-import com.openexchange.tools.net.URIDefaults;
-import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -227,7 +221,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     protected JSONObject actionConfig(final MailfilterRequest request) throws OXException {
         synchronized (mutex) {
             final Credentials credentials = request.getCredentials();
-            final SieveHandler sieveHandler = connectRight(credentials);
+            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             // First fetch configuration:
             JSONObject tests = null;
             try {
@@ -274,7 +268,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         synchronized (mutex) {
             final Credentials credentials = request.getCredentials();
             final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            final SieveHandler sieveHandler = connectRight(credentials);
+            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
@@ -338,7 +332,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         synchronized (mutex) {
             final Parameters parameters = request.getParameters();
             final Credentials credentials = request.getCredentials();
-            final SieveHandler sieveHandler = connectRight(credentials);
+            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
@@ -405,7 +399,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         synchronized (mutex) {
             final Credentials credentials = request.getCredentials();
             final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            final SieveHandler sieveHandler = connectRight(credentials);
+            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
@@ -531,7 +525,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         synchronized (mutex) {
             final Credentials credentials = request.getCredentials();
             final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            final SieveHandler sieveHandler = connectRight(credentials);
+            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
@@ -608,7 +602,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         synchronized (mutex) {
             final Credentials credentials = request.getCredentials();
             final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            final SieveHandler sieveHandler = connectRight(credentials);
+            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
@@ -682,7 +676,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     protected void actionDeleteScript(final MailfilterRequest request) throws OXException {
         synchronized (mutex) {
             final Credentials credentials = request.getCredentials();
-            final SieveHandler sieveHandler = connectRight(credentials);
+            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
@@ -721,7 +715,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     protected String actionGetScript(final MailfilterRequest request) throws OXException {
         synchronized (mutex) {
             final Credentials credentials = request.getCredentials();
-            final SieveHandler sieveHandler = connectRight(credentials);
+            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
@@ -764,128 +758,6 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     @Override
     protected Rule2JSON2Rule getConverter() {
         return new Rule2JSON2Rule();
-    }
-
-    // protected so that we can test this
-    protected String getRightPassword(final ConfigurationService config, final Credentials creds) throws OXException {
-        final String passwordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
-        if (MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
-            return creds.getPassword();
-        } else if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
-            final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
-            if (null == masterpassword || masterpassword.length() == 0) {
-                throw OXMailfilterExceptionCode.NO_MASTERPASSWORD_SET.create();
-            }
-            return masterpassword;
-        } else {
-            throw OXMailfilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
-        }
-    }
-
-    private SieveHandler connectRight(final Credentials creds) throws OXException {
-        final SieveHandler sieveHandler;
-        final ConfigurationService config = Services.getService(
-                ConfigurationService.class);
-
-        final String logintype = config.getProperty(MailFilterProperties.Values.SIEVE_LOGIN_TYPE.property);
-        final int sieve_port;
-        final String sieve_server;
-        User storageUser = null;
-        if (MailFilterProperties.LoginTypes.GLOBAL.name.equals(logintype)) {
-            sieve_server = config.getProperty(MailFilterProperties.Values.SIEVE_SERVER.property);
-            if (null == sieve_server) {
-                throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(MailFilterProperties.Values.SIEVE_SERVER.property);
-            }
-            try {
-                sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
-            } catch (final RuntimeException e) {
-                throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
-            }
-        } else if (MailFilterProperties.LoginTypes.USER.name.equals(logintype)) {
-            storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
-            if (null != storageUser) {
-                final String mailServerURL = storageUser.getImapServer();
-                final URI uri;
-                try {
-                    uri = URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP);
-                } catch (final URISyntaxException e) {
-                    throw OXMailfilterExceptionCode.NO_SERVERNAME_IN_SERVERURL.create(e, mailServerURL);
-                }
-                sieve_server = uri.getHost();
-                try {
-                    sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
-                } catch (final RuntimeException e) {
-                    throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(e,
-                            MailFilterProperties.Values.SIEVE_PORT.property);
-                }
-            } else {
-                throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid "
-                        + creds.getUserid() + " and contextid " + creds.getContextid());
-            }
-        } else {
-            throw OXMailfilterExceptionCode.NO_VALID_LOGIN_TYPE.create();
-        }
-        /*
-         * Get SIEVE_AUTH_ENC property
-         */
-        final String authEnc = config.getProperty(MailFilterProperties.Values.SIEVE_AUTH_ENC.property, MailFilterProperties.Values.SIEVE_AUTH_ENC.def);
-        /*
-         * Establish SieveHandler
-         */
-        final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
-        if (MailFilterProperties.CredSrc.SESSION.name.equals(credsrc) || MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
-            final String username = creds.getUsername();
-            final String authname = creds.getAuthname();
-            final String password = getRightPassword(config, creds);
-            if (null != username) {
-                sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
-            } else {
-                sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
-            }
-        } else if (MailFilterProperties.CredSrc.IMAP_LOGIN.name.equals(credsrc)) {
-            final String authname;
-            if (null != storageUser) {
-                authname = storageUser.getImapLogin();
-            } else {
-                storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
-                if (null != storageUser) {
-                    authname = storageUser.getImapLogin();
-                } else {
-                    throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create(
-                            "Could not get a valid user object for uid " + creds.getUserid() + " and contextid "
-                                    + creds.getContextid());
-                }
-            }
-            final String username = creds.getUsername();
-            final String password = getRightPassword(config, creds);
-            if (null != username) {
-                sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
-            } else {
-                sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
-            }
-            } else if (MailFilterProperties.CredSrc.MAIL.name.equals(credsrc)) {
-                final String authname;
-                if (null != storageUser) {
-                    authname = storageUser.getMail();
-                } else {
-                    storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
-                    if (null != storageUser) {
-                        authname = storageUser.getMail();
-                    } else {
-                        throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
-                    }
-                }
-                final String username = creds.getUsername();
-                final String password = getRightPassword(config, creds);
-                if (null != username) {
-                    sieveHandler = new SieveHandler(username, authname, password, sieve_server, sieve_port, authEnc);
-                } else {
-                    sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
-                }
-        } else {
-            throw OXMailfilterExceptionCode.NO_VALID_CREDSRC.create();
-        }
-        return sieveHandler;
     }
 
     private boolean isVacationRule(final Rule newrule) {
