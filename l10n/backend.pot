@@ -7756,6 +7756,11 @@ msgstr ""
 msgid "The XING server is not available."
 msgstr ""
 
+#. A XING account has already been requested for E-Mail address %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:116
+msgid "A XING account has already been requested for E-Mail address %1$s."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
 msgstr ""

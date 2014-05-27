@@ -172,7 +172,7 @@ public final class UpdatesAction extends AbstractFolderAction {
         final JSONArray resultArray = FolderWriter.writeMultiple2Array(columns, result[0], session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
 
         // HAS TO BE REMOVED AFTER TEST IS SUCCESSFUL
-        LOG.info("MS temporary debug: ", resultArray.toString());
+        LOG.info("MS temporary debug: " + resultArray.toString());
         //
 
         try {
@@ -193,7 +193,7 @@ public final class UpdatesAction extends AbstractFolderAction {
          * Return appropriate result
          */
         // HAS TO BE REMOVED AFTER TEST IS SUCCESSFUL
-        LOG.info("MS temporary debug - result array send in RequestResult: ", resultArray.toString());
+        LOG.info("MS temporary debug - result array send in RequestResult: " + resultArray.toString());
         //
         return new AJAXRequestResult(resultArray, 0 == lastModified ? null : new Date(lastModified)).addWarnings(resultObject.getWarnings());
     }

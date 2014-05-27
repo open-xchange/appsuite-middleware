@@ -106,25 +106,18 @@ public class JSONCoercion {
      *
      * @param object The JSON data to coerce
      * @return The resulting Java representation.
-     * @throws JSONException If coercion fails
      */
-    public static Object coerceToNative(final Object object) throws JSONException {
-        if (object instanceof JSONArray) {
-            final JSONArray jsonArray = (JSONArray) object;
-            final int length = jsonArray.length();
-            final List<Object> list = new ArrayList<Object>(length);
-            for (int i = 0; i < length; i++) {
-                list.add(coerceToNative(jsonArray.get(i)));
+    public static Object coerceToNative(final Object object) {
+        if (object instanceof JSONValue) {
+            JSONValue jValue = (JSONValue) object;
+
+            // Check for a JSON array
+            if (jValue.isArray()) {
+                return jValue.toArray().asList();
             }
-            return list;
-        }
-        if (object instanceof JSONObject) {
-            final JSONObject jsonObject = (JSONObject) object;
-            final Map<String, Object> map = new LinkedHashMap<String, Object>(jsonObject.length());
-            for (final String key : jsonObject.keySet()) {
-                map.put(key, coerceToNative(jsonObject.get(key)));
-            }
-            return map;
+
+            // Otherwise a JSON object
+            return jValue.toObject().asMap();
         }
         if (JSONObject.NULL == object) {
             return null;
