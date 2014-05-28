@@ -2,5 +2,6 @@
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.mail.filter"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.0,com.openexchange.mail.filter.json"/>
 </provider>
 </psf>
