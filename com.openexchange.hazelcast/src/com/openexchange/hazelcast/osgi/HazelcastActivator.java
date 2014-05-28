@@ -113,7 +113,8 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
                             hazelcastInstance = hazelcast;
                         }
                     } else {
-                        LOG.info("{}Hazelcast:{}    Startup of Hazelcast clustering and data distribution platform denied per configuration.{}", Strings.getLineSeparator(), Strings.getLineSeparator(), Strings.getLineSeparator());
+                        String lf = Strings.getLineSeparator();
+                        LOG.info("{}Hazelcast:{}    Startup of Hazelcast clustering and data distribution platform denied per configuration.{}", lf, lf, lf);
                     }
                 } catch (Exception e) {
                     String msg = "Error starting \"com.openexchange.hazelcast\"";
