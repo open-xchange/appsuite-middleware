@@ -105,7 +105,7 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
             ZipEntry entry;
             ICalParser iCalParser = workflow.getActivator().getICalParser();
             while ((entry = zis.getNextEntry()) != null) {
-                LOG.info("Extracting: {}", entry);
+                LOG.debug("Extracting: {}", entry);
                 int count;
                 byte data[] = new byte[buflen];
                 // write the files to the disk
