@@ -2,6 +2,10 @@
 
  - Fix for bug 32796: Proper handling of special "*" query during task search
 
+* 2014-05-28 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32784: Prepare file sizes for error messages to be human readable
+
 * 2014-05-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 32732: Orderly detect a duplicate lead request
