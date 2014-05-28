@@ -2,6 +2,7 @@
 
  - Fix for bug 32796: Proper handling of special "*" query during task search
  - Fix for bug 32800: Respect index boundaries when adding SIEVE rules to a java.util.List
+ - Fix for bug 32802: Ensure storage instance is initialized during start-up
 
 * 2014-05-28 - martin.schneider@open-xchange.com
 
