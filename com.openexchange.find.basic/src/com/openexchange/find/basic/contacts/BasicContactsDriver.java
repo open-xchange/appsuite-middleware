@@ -169,32 +169,41 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * extract requested contact fields
          */
-        boolean excludeAdmin = false == searchRequest.getOptions().includeContextAdmin();
         ContactField[] contactFields;
         int[] columnIDs = searchRequest.getColumns();
         if (null == columnIDs || 0 == columnIDs.length) {
             columnIDs = ColumnParser.parseColumns("list");
         }
-        contactFields = excludeAdmin ?
-            ColumnParser.getFieldsToQuery(columnIDs, ContactField.INTERNAL_USERID) : ColumnParser.getFieldsToQuery(columnIDs);
+
+        /*
+         * exclude context admin if requested
+         */
+        if (searchRequest.getOptions().includeContextAdmin()) {
+            contactFields = ColumnParser.getFieldsToQuery(columnIDs);
+        } else {
+            contactFields = ColumnParser.getFieldsToQuery(columnIDs, ContactField.INTERNAL_USERID);
+            SingleSearchTerm t = new SingleSearchTerm(SingleOperation.NOT_EQUALS);
+            t.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+            t.addOperand(new ConstantOperand<Integer>(session.getContext().getMailadmin()));
+            searchTerm.addSearchTerm(t);
+        }
+
         /*
          * search
          */
         List<Document> contactDocuments = new ArrayList<Document>();
         SortOptions sortOptions = new SortOptions(searchRequest.getStart(), searchRequest.getSize());
-        int excludedAdminID = excludeAdmin ? session.getContext().getMailadmin() : -1;
         SearchIterator<Contact> searchIterator = null;
         try {
             searchIterator = Services.getContactService().searchContacts(session, searchTerm, contactFields, sortOptions);
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
-                if (excludedAdminID != contact.getInternalUserId()) {
-                    contactDocuments.add(new ContactsDocument(contact));
-                }
+                contactDocuments.add(new ContactsDocument(contact));
             }
         } finally {
             SearchIterators.close(searchIterator);
         }
+
         return new SearchResult(-1, searchRequest.getStart(), contactDocuments, searchRequest.getActiveFacets());
     }
 

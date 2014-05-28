@@ -59,6 +59,7 @@ import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.osgi.Services;
@@ -95,9 +96,15 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
             LOG.error("Unable to remove {} from ResourceDirectory.", id, oxe);
         }
 
-        //Do the local cleanup via a simple service call
-        LocalRealtimeCleanup localRealtimeCleanup = Services.getService(LocalRealtimeCleanup.class);
-        localRealtimeCleanup.cleanForId(id);
+        // Do the local cleanup via a simple service call
+        LocalRealtimeCleanup localRealtimeCleanup = Services.optService(LocalRealtimeCleanup.class);
+        if (localRealtimeCleanup == null) {
+            LOG.error(
+                "Unable to start local cleanup. Shutting down?",
+                RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class));
+        } else {
+            localRealtimeCleanup.cleanForId(id);
+        }
 
         //Remote cleanup via distributed MultiTask to remaining members of the cluster
         HazelcastInstance hazelcastInstance;

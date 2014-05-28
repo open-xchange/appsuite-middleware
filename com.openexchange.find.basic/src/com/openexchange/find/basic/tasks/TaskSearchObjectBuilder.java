@@ -68,6 +68,7 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.search.TaskSearchObject;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -81,7 +82,9 @@ public class TaskSearchObjectBuilder {
 
     private final ServerSession session;
 
-    private enum SupportedFields {title, description, status, folder_type, type, participant, attachment};
+    private enum SupportedFields {
+        title, description, status, folder_type, type, participant, attachment
+    };
 
     /**
      * Initializes a new {@link TaskSearchBuilder}.
@@ -103,12 +106,13 @@ public class TaskSearchObjectBuilder {
 
     /**
      * Add the specified {@link Filter}s to the search object
+     *
      * @param filters
      * @return
      * @throws OXException if the provided {@Filter} contains an unsupported field (@see {@link SupportedFields}).
      */
     public TaskSearchObjectBuilder addFilters(List<Filter> filters) throws OXException {
-        for(Filter f : filters) {
+        for (Filter f : filters) {
             addFilter(f);
         }
         return this;
@@ -116,13 +120,14 @@ public class TaskSearchObjectBuilder {
 
     /**
      * Add a {@link Filter} to the search object
+     *
      * @param filter
      * @return
-     * @throws OXException if the provided {@link Filter} either contains an unsupported field (@see {@link SupportedFields})
-     * or a field that is <code>null</code>.
+     * @throws OXException if the provided {@link Filter} either contains an unsupported field (@see {@link SupportedFields}) or a field
+     *             that is <code>null</code>.
      */
     public TaskSearchObjectBuilder addFilter(Filter filter) throws OXException {
-        for(String f : filter.getFields()) {
+        for (String f : filter.getFields()) {
             SupportedFields sf;
             try {
                 sf = SupportedFields.valueOf(f);
@@ -132,30 +137,30 @@ public class TaskSearchObjectBuilder {
                 throw FindExceptionCode.NULL_FIELD.create(f);
             }
 
-            switch(sf) {
-                case title:
-                    addTitleFilters(filter.getQueries());
-                    break;
-                case description:
-                    addDescriptionFilters(filter.getQueries());
-                    break;
-                case status:
-                    addStateFilters(filter.getQueries());
-                    break;
-                case folder_type:
-                    addFolderTypeFilters(filter.getQueries());
-                    break;
-                case type:
-                    addRecurrenceTypeFilters(filter.getQueries());
-                    break;
-                case participant:
-                    addParticipantFilters(filter.getQueries());
-                    break;
-                case attachment:
-                    addAttachmentFilters(filter.getQueries());
-                    break;
-                default:
-                    throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(f);
+            switch (sf) {
+            case title:
+                addTitleFilters(filter.getQueries());
+                break;
+            case description:
+                addDescriptionFilters(filter.getQueries());
+                break;
+            case status:
+                addStateFilters(filter.getQueries());
+                break;
+            case folder_type:
+                addFolderTypeFilters(filter.getQueries());
+                break;
+            case type:
+                addRecurrenceTypeFilters(filter.getQueries());
+                break;
+            case participant:
+                addParticipantFilters(filter.getQueries());
+                break;
+            case attachment:
+                addAttachmentFilters(filter.getQueries());
+                break;
+            default:
+                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(f);
             }
         }
         return this;
@@ -163,6 +168,7 @@ public class TaskSearchObjectBuilder {
 
     /**
      * Add the specified queries to the search object
+     *
      * @param queries
      * @return
      */
@@ -174,8 +180,7 @@ public class TaskSearchObjectBuilder {
     }
 
     /**
-     * Applies folder IDs to the search, depending on the existence of a specific
-     * folder ID or a folder type.
+     * Applies folder IDs to the search, depending on the existence of a specific folder ID or a folder type.
      *
      * @param folderID The folder ID to apply, or <code>null</code> if not specified
      * @param folderType The folder type for that all folder shall be applied; <code>null</code> if not specified.
@@ -192,14 +197,19 @@ public class TaskSearchObjectBuilder {
 
     /**
      * Add a query to the search object
+     *
      * @param query
      * @return
      */
     public TaskSearchObjectBuilder addQuery(String query) {
         Set<String> queries = searchObject.getQueries();
-        if (queries == null)
+        if (queries == null) {
             queries = new HashSet<String>();
-        queries.add(wrapWithWildcards(query));
+        }
+        String wrapped = wrapWithWildcards(query);
+        if (null != wrapped) {
+            queries.add(wrapped);
+        }
         searchObject.setQueries(queries);
         return this;
     }
@@ -211,10 +221,14 @@ public class TaskSearchObjectBuilder {
      */
     private void addTitleFilters(List<String> filters) {
         Set<String> tf = searchObject.getTitles();
-        if (tf == null)
+        if (tf == null) {
             tf = new HashSet<String>(filters.size());
-        for(String q : filters) {
-            tf.add(wrapWithWildcards(q));
+        }
+        for (String q : filters) {
+            String wrapped = wrapWithWildcards(q);
+            if (null != wrapped) {
+                tf.add(wrapped);
+            }
         }
         searchObject.setTitles(tf);
     }
@@ -226,27 +240,34 @@ public class TaskSearchObjectBuilder {
      */
     private void addDescriptionFilters(List<String> filters) {
         Set<String> df = searchObject.getNotes();
-        if (df == null)
+        if (df == null) {
             df = new HashSet<String>(filters.size());
-        for(String q : filters) {
-            df.add(wrapWithWildcards(q));
+        }
+        for (String q : filters) {
+            String wrapped = wrapWithWildcards(q);
+            if (null != wrapped) {
+                df.add(wrapped);
+            }
         }
         searchObject.setNotes(df);
     }
 
     /**
      * Add the status filter
+     *
      * @param filters
      * @throws OXException
      */
     private void addStateFilters(List<String> filters) throws OXException {
         Set<Integer> sf = searchObject.getStateFilters();
-        if (sf == null)
+        if (sf == null) {
             sf = new HashSet<Integer>(filters.size());
-        for(String q : filters) {
+        }
+        for (String q : filters) {
             int s = Integer.parseInt(q);
-            if (s > 5 || s < 1)
+            if (s > 5 || s < 1) {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(q, "status");
+            }
             sf.add(s);
         }
         searchObject.setStateFilters(sf);
@@ -254,11 +275,12 @@ public class TaskSearchObjectBuilder {
 
     /**
      * Prefetch all relevant folder ids, according to the specified filters
+     *
      * @param filters
      * @throws OXException
      */
     private void addFolderTypeFilters(List<String> filters) throws OXException {
-        for(String q : filters) {
+        for (String q : filters) {
             Type t;
             if (FolderType.PUBLIC.getIdentifier().equals(q)) {
                 t = PublicType.getInstance();
@@ -269,7 +291,8 @@ public class TaskSearchObjectBuilder {
             } else {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(q, "folder_type");
             }
-            UserizedFolder[] folders = Services.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, TaskContentType.getInstance(), t, false, session, null).getResponse();
+            UserizedFolder[] folders =
+                Services.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, TaskContentType.getInstance(), t, false, session, null).getResponse();
             if (folders != null && folders.length > 0) {
                 for (UserizedFolder uf : folders) {
                     searchObject.addFolder(Integer.valueOf(uf.getID()));
@@ -280,31 +303,38 @@ public class TaskSearchObjectBuilder {
 
     /**
      * Add the attachment filters
+     *
      * @param filters
      */
     private void addAttachmentFilters(List<String> filters) {
         Set<String> af = searchObject.getAttachmentNames();
-        if (af == null)
+        if (af == null) {
             af = new HashSet<String>(filters.size());
-        for(String q : filters) {
-            af.add(wrapWithWildcards(q));
+        }
+        for (String q : filters) {
+            String wrapped = wrapWithWildcards(q);
+            if (null != wrapped) {
+                af.add(wrapped);
+            }
         }
         searchObject.setAttachmentNames(af);
     }
 
     /**
      * Set the recurrence type filter
+     *
      * @param filters
      * @throws OXException
      */
     private void addRecurrenceTypeFilters(List<String> filters) throws OXException {
-        for(String r : filters) {
-            if (TaskType.SERIES.getIdentifier().equals(r))
+        for (String r : filters) {
+            if (TaskType.SERIES.getIdentifier().equals(r)) {
                 searchObject.setSeriesFilter(true);
-            else if(TaskType.SINGLE_TASK.getIdentifier().equals(r))
+            } else if (TaskType.SINGLE_TASK.getIdentifier().equals(r)) {
                 searchObject.setSingleOccurrenceFilter(true);
-            else
+            } else {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(r, "type");
+            }
         }
     }
 
@@ -312,15 +342,21 @@ public class TaskSearchObjectBuilder {
         Set<Integer> intP = searchObject.getUserIDs();
         Set<String> extP = searchObject.getExternalParticipants();
 
-        if (intP == null)
+        if (intP == null) {
             intP = new HashSet<Integer>();
+        }
 
-        if (extP == null)
+        if (extP == null) {
             extP = new HashSet<String>();
+        }
 
-        for(String f : filters) {
-            if (f.matches("\\d+")) {
-                intP.add(Integer.parseInt(f));
+        for (String f : filters) {
+            if (Strings.isNumeric(f)) {
+                try {
+                    intP.add(Integer.valueOf(f));
+                } catch (NumberFormatException e) {
+                    extP.add(f);
+                }
             } else {
                 extP.add(f);
             }
@@ -334,17 +370,23 @@ public class TaskSearchObjectBuilder {
     }
 
     /**
-     * Wrap query with wildcards
+     * Wrap query with wild-cards.
      *
      * @param query
      * @return
      */
-    private String wrapWithWildcards(String query) {
-        String wrapped = null;
-        if (query.charAt(0) != '*')
+    private static String wrapWithWildcards(String query) {
+        if (null == query) {
+            return query;
+        }
+
+        String wrapped = query;
+        if (!wrapped.startsWith("*")) {
             wrapped = '*' + query;
-        if (query.charAt(query.length() - 1) != '*')
+        }
+        if (!wrapped.endsWith("*")) {
             wrapped = query + '*';
+        }
         return wrapped;
     }
 }

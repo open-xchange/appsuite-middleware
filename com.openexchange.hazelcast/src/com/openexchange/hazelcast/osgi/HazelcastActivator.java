@@ -105,14 +105,17 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
             public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
                 HazelcastConfigurationService configService = context.getService(reference);
                 try {
-                    if (false == configService.isEnabled()) {
-                        LOG.info("{}Hazelcast:{}    Startup of Hazelcast clustering and data distribution platform denied per configuration.{}",
-                            Strings.getLineSeparator(), Strings.getLineSeparator(), Strings.getLineSeparator());
+                    if (configService.isEnabled()) {
+                        HazelcastInstance hazelcast = startHazelcast(configService);
+                        // hazelcast = new InactiveAwareHazelcastInstance(hazelcast, HazelcastActivator.this);
+                        if (null != hazelcast) {
+                            serviceRegistration = context.registerService(HazelcastInstance.class, hazelcast, null);
+                            hazelcastInstance = hazelcast;
+                        }
+                    } else {
+                        String lf = Strings.getLineSeparator();
+                        LOG.info("{}Hazelcast:{}    Startup of Hazelcast clustering and data distribution platform denied per configuration.{}", lf, lf, lf);
                     }
-                    HazelcastInstance hazelcast = startHazelcast(configService);
-                    // hazelcast = new InactiveAwareHazelcastInstance(hazelcast, HazelcastActivator.this);
-                    serviceRegistration = context.registerService(HazelcastInstance.class, hazelcast, null);
-                    hazelcastInstance = hazelcast;
                 } catch (Exception e) {
                     String msg = "Error starting \"com.openexchange.hazelcast\"";
                     LOG.error(msg, e);

@@ -124,6 +124,10 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
      * Your account needs to be verified: %1$s
      */
     NEED_VERIFICATION(CATEGORY_USER_INPUT, 90112, SubscriptionErrorStrings.NEED_VERIFICATION_DISPLAY, SubscriptionErrorStrings.NEED_VERIFICATION_DISPLAY),
+    /**
+     * The service provider asked for an identity confirmation. This happens for some accounts and cannot fixed by us. It is in the provider's responsibility. For this reason, the subscription cannot be completed.
+     */
+    ABORT_IDENTITY_CONFIRMATION(CATEGORY_USER_INPUT, 90113, SubscriptionErrorStrings.ABORT_IDENTITY_CONFIRMATION_DISPLAY, SubscriptionErrorStrings.ABORT_IDENTITY_CONFIRMATION_DISPLAY),
     ;
 
     private static final String SQL_ERROR = "A SQL error occurred.";

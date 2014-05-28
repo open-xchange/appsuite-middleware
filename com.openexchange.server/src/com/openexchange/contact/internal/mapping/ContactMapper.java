@@ -61,6 +61,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
+import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
@@ -89,53 +90,53 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
     }
 
-	/**
-	 * Validates all properties of the supplied contact by executing the
-	 * <code>validate</code>-method for each known mapping.
-	 *
-	 * @param contact the contact to validate
-	 * @throws OXException
-	 */
-	public void validateAll(final Contact contact) throws OXException {
-		for (ContactMapping<? extends Object> mapping : mappings.values()) {
-			mapping.validate(contact);
-		}
-	}
+    /**
+     * Validates all properties of the supplied contact by executing the
+     * <code>validate</code>-method for each known mapping.
+     *
+     * @param contact the contact to validate
+     * @throws OXException
+     */
+    public void validateAll(final Contact contact) throws OXException {
+        for (ContactMapping<? extends Object> mapping : mappings.values()) {
+            mapping.validate(contact);
+        }
+    }
 
-	@Override
-	public ContactMapping<? extends Object> get(final ContactField field) throws OXException {
-		if (null == field) {
-			throw new IllegalArgumentException("field");
-		}
-		final ContactMapping<? extends Object> mapping = mappings.get(field);
-		if (null == mapping) {
-			throw OXException.notFound(field.toString());
-		}
-		return mapping;
-	}
+    @Override
+    public ContactMapping<? extends Object> get(final ContactField field) throws OXException {
+        if (null == field) {
+            throw new IllegalArgumentException("field");
+        }
+        final ContactMapping<? extends Object> mapping = mappings.get(field);
+        if (null == mapping) {
+            throw OXException.notFound(field.toString());
+        }
+        return mapping;
+    }
 
 
-	@Override
-	public Contact newInstance() {
-		return new Contact();
-	}
+    @Override
+    public Contact newInstance() {
+        return new Contact();
+    }
 
-	@Override
-	public ContactField[] newArray(int size) {
-		return new ContactField[size];
-	}
+    @Override
+    public ContactField[] newArray(int size) {
+        return new ContactField[size];
+    }
 
-	@Override
-	protected EnumMap<ContactField, ? extends com.openexchange.groupware.tools.mappings.Mapping<? extends Object, Contact>> getMappings() {
-		return mappings;
-	}
+    @Override
+    protected EnumMap<ContactField, ? extends com.openexchange.groupware.tools.mappings.Mapping<? extends Object, Contact>> getMappings() {
+        return mappings;
+    }
 
-	/**
-	 * Holds all known contact mappings.
-	 */
-	private static final EnumMap<ContactField, ContactMapping<? extends Object>> mappings;
-	static {
-		mappings = new EnumMap<ContactField, ContactMapping<? extends Object>>(ContactField.class);
+    /**
+     * Holds all known contact mappings.
+     */
+    private static final EnumMap<ContactField, ContactMapping<? extends Object>> mappings;
+    static {
+        mappings = new EnumMap<ContactField, ContactMapping<? extends Object>>(ContactField.class);
         mappings.put(ContactField.DISPLAY_NAME, new StringMapping() {
 
             @Override
@@ -153,11 +154,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getDisplayName();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeDisplayName();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeDisplayName();
 
-			}
+            }
         });
 
         mappings.put(ContactField.SUR_NAME, new StringMapping() {
@@ -177,11 +178,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getSurName();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeSurName();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeSurName();
 
-			}
+            }
         });
 
         mappings.put(ContactField.GIVEN_NAME, new StringMapping() {
@@ -201,11 +202,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getGivenName();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeGivenName();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeGivenName();
 
-			}
+            }
         });
 
         mappings.put(ContactField.MIDDLE_NAME, new StringMapping() {
@@ -225,11 +226,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getMiddleName();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeMiddleName();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeMiddleName();
 
-			}
+            }
         });
 
         mappings.put(ContactField.SUFFIX, new StringMapping() {
@@ -249,11 +250,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getSuffix();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeSuffix();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeSuffix();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TITLE, new StringMapping() {
@@ -273,11 +274,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTitle();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTitle();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTitle();
 
-			}
+            }
         });
 
         mappings.put(ContactField.STREET_HOME, new StringMapping() {
@@ -297,11 +298,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getStreetHome();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeStreetHome();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeStreetHome();
 
-			}
+            }
         });
 
         mappings.put(ContactField.POSTAL_CODE_HOME, new StringMapping() {
@@ -321,11 +322,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getPostalCodeHome();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removePostalCodeHome();
+            @Override
+            public void remove(Contact contact) {
+                contact.removePostalCodeHome();
 
-			}
+            }
         });
 
         mappings.put(ContactField.CITY_HOME, new StringMapping() {
@@ -345,11 +346,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCityHome();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCityHome();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCityHome();
 
-			}
+            }
         });
 
         mappings.put(ContactField.STATE_HOME, new StringMapping() {
@@ -369,11 +370,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getStateHome();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeStateHome();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeStateHome();
 
-			}
+            }
         });
 
         mappings.put(ContactField.COUNTRY_HOME, new StringMapping() {
@@ -393,11 +394,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCountryHome();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCountryHome();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCountryHome();
 
-			}
+            }
         });
 
         mappings.put(ContactField.MARITAL_STATUS, new StringMapping() {
@@ -417,11 +418,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getMaritalStatus();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeMaritalStatus();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeMaritalStatus();
 
-			}
+            }
         });
 
         mappings.put(ContactField.NUMBER_OF_CHILDREN, new StringMapping() {
@@ -441,11 +442,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getNumberOfChildren();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeNumberOfChildren();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeNumberOfChildren();
 
-			}
+            }
         });
 
         mappings.put(ContactField.PROFESSION, new StringMapping() {
@@ -465,11 +466,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getProfession();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeProfession();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeProfession();
 
-			}
+            }
         });
 
         mappings.put(ContactField.NICKNAME, new StringMapping() {
@@ -489,11 +490,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getNickname();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeNickname();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeNickname();
 
-			}
+            }
         });
 
         mappings.put(ContactField.SPOUSE_NAME, new StringMapping() {
@@ -513,11 +514,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getSpouseName();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeSpouseName();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeSpouseName();
 
-			}
+            }
         });
 
         mappings.put(ContactField.NOTE, new StringMapping() {
@@ -537,11 +538,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getNote();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeNote();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeNote();
 
-			}
+            }
         });
 
         mappings.put(ContactField.COMPANY, new StringMapping() {
@@ -561,11 +562,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCompany();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCompany();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCompany();
 
-			}
+            }
         });
 
         mappings.put(ContactField.DEPARTMENT, new StringMapping() {
@@ -585,11 +586,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getDepartment();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeDepartment();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeDepartment();
 
-			}
+            }
         });
 
         mappings.put(ContactField.POSITION, new StringMapping() {
@@ -609,11 +610,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getPosition();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removePosition();
+            @Override
+            public void remove(Contact contact) {
+                contact.removePosition();
 
-			}
+            }
         });
 
         mappings.put(ContactField.EMPLOYEE_TYPE, new StringMapping() {
@@ -633,11 +634,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getEmployeeType();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeEmployeeType();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeEmployeeType();
 
-			}
+            }
         });
 
         mappings.put(ContactField.ROOM_NUMBER, new StringMapping() {
@@ -657,11 +658,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getRoomNumber();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeRoomNumber();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeRoomNumber();
 
-			}
+            }
         });
 
         mappings.put(ContactField.STREET_BUSINESS, new StringMapping() {
@@ -681,11 +682,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getStreetBusiness();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeStreetBusiness();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeStreetBusiness();
 
-			}
+            }
         });
 
         mappings.put(ContactField.POSTAL_CODE_BUSINESS, new StringMapping() {
@@ -705,11 +706,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getPostalCodeBusiness();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removePostalCodeBusiness();
+            @Override
+            public void remove(Contact contact) {
+                contact.removePostalCodeBusiness();
 
-			}
+            }
         });
 
         mappings.put(ContactField.CITY_BUSINESS, new StringMapping() {
@@ -729,11 +730,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCityBusiness();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCityBusiness();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCityBusiness();
 
-			}
+            }
         });
 
         mappings.put(ContactField.STATE_BUSINESS, new StringMapping() {
@@ -753,11 +754,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getStateBusiness();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeStateBusiness();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeStateBusiness();
 
-			}
+            }
         });
 
         mappings.put(ContactField.COUNTRY_BUSINESS, new StringMapping() {
@@ -777,11 +778,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCountryBusiness();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCountryBusiness();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCountryBusiness();
 
-			}
+            }
         });
 
         mappings.put(ContactField.NUMBER_OF_EMPLOYEE, new StringMapping() {
@@ -801,11 +802,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getNumberOfEmployee();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeNumberOfEmployee();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeNumberOfEmployee();
 
-			}
+            }
         });
 
         mappings.put(ContactField.SALES_VOLUME, new StringMapping() {
@@ -825,11 +826,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getSalesVolume();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeSalesVolume();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeSalesVolume();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TAX_ID, new StringMapping() {
@@ -849,11 +850,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTaxID();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTaxID();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTaxID();
 
-			}
+            }
         });
 
         mappings.put(ContactField.COMMERCIAL_REGISTER, new StringMapping() {
@@ -873,11 +874,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCommercialRegister();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCommercialRegister();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCommercialRegister();
 
-			}
+            }
         });
 
         mappings.put(ContactField.BRANCHES, new StringMapping() {
@@ -897,11 +898,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getBranches();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeBranches();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeBranches();
 
-			}
+            }
         });
 
         mappings.put(ContactField.BUSINESS_CATEGORY, new StringMapping() {
@@ -921,11 +922,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getBusinessCategory();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeBusinessCategory();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeBusinessCategory();
 
-			}
+            }
         });
 
         mappings.put(ContactField.INFO, new StringMapping() {
@@ -945,11 +946,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getInfo();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeInfo();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeInfo();
 
-			}
+            }
         });
 
         mappings.put(ContactField.MANAGER_NAME, new StringMapping() {
@@ -969,11 +970,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getManagerName();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeManagerName();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeManagerName();
 
-			}
+            }
         });
 
         mappings.put(ContactField.ASSISTANT_NAME, new StringMapping() {
@@ -993,11 +994,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getAssistantName();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeAssistantName();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeAssistantName();
 
-			}
+            }
         });
 
         mappings.put(ContactField.STREET_OTHER, new StringMapping() {
@@ -1017,11 +1018,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getStreetOther();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeStreetOther();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeStreetOther();
 
-			}
+            }
         });
 
         mappings.put(ContactField.POSTAL_CODE_OTHER, new StringMapping() {
@@ -1041,11 +1042,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getPostalCodeOther();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removePostalCodeOther();
+            @Override
+            public void remove(Contact contact) {
+                contact.removePostalCodeOther();
 
-			}
+            }
         });
 
         mappings.put(ContactField.CITY_OTHER, new StringMapping() {
@@ -1065,11 +1066,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCityOther();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCityOther();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCityOther();
 
-			}
+            }
         });
 
         mappings.put(ContactField.STATE_OTHER, new StringMapping() {
@@ -1089,11 +1090,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getStateOther();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeStateOther();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeStateOther();
 
-			}
+            }
         });
 
         mappings.put(ContactField.COUNTRY_OTHER, new StringMapping() {
@@ -1113,11 +1114,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCountryOther();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCountryOther();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCountryOther();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_ASSISTANT, new StringMapping() {
@@ -1137,11 +1138,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneAssistant();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneAssistant();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneAssistant();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_BUSINESS1, new StringMapping() {
@@ -1161,11 +1162,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneBusiness1();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneBusiness1();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneBusiness1();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_BUSINESS2, new StringMapping() {
@@ -1185,11 +1186,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneBusiness2();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneBusiness2();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneBusiness2();
 
-			}
+            }
         });
 
         mappings.put(ContactField.FAX_BUSINESS, new StringMapping() {
@@ -1209,11 +1210,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getFaxBusiness();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeFaxBusiness();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeFaxBusiness();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_CALLBACK, new StringMapping() {
@@ -1233,11 +1234,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneCallback();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneCallback();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneCallback();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_CAR, new StringMapping() {
@@ -1257,11 +1258,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneCar();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneCar();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneCar();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_COMPANY, new StringMapping() {
@@ -1281,11 +1282,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneCompany();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneCompany();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneCompany();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_HOME1, new StringMapping() {
@@ -1305,11 +1306,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneHome1();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneHome1();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneHome1();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_HOME2, new StringMapping() {
@@ -1329,11 +1330,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneHome2();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneHome2();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneHome2();
 
-			}
+            }
         });
 
         mappings.put(ContactField.FAX_HOME, new StringMapping() {
@@ -1353,11 +1354,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getFaxHome();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeFaxHome();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeFaxHome();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_ISDN, new StringMapping() {
@@ -1377,11 +1378,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneISDN();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneISDN();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneISDN();
 
-			}
+            }
         });
 
         mappings.put(ContactField.CELLULAR_TELEPHONE1, new StringMapping() {
@@ -1401,11 +1402,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCellularTelephone1();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCellularTelephone1();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCellularTelephone1();
 
-			}
+            }
         });
 
         mappings.put(ContactField.CELLULAR_TELEPHONE2, new StringMapping() {
@@ -1425,11 +1426,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCellularTelephone2();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCellularTelephone2();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCellularTelephone2();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_OTHER, new StringMapping() {
@@ -1449,11 +1450,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneOther();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneOther();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneOther();
 
-			}
+            }
         });
 
         mappings.put(ContactField.FAX_OTHER, new StringMapping() {
@@ -1473,11 +1474,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getFaxOther();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeFaxOther();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeFaxOther();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_PAGER, new StringMapping() {
@@ -1497,11 +1498,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephonePager();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephonePager();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephonePager();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_PRIMARY, new StringMapping() {
@@ -1521,11 +1522,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephonePrimary();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephonePrimary();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephonePrimary();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_RADIO, new StringMapping() {
@@ -1545,11 +1546,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneRadio();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneRadio();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneRadio();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_TELEX, new StringMapping() {
@@ -1569,11 +1570,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneTelex();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneTelex();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneTelex();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_TTYTDD, new StringMapping() {
@@ -1593,11 +1594,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneTTYTTD();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneTTYTTD();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneTTYTTD();
 
-			}
+            }
         });
 
         mappings.put(ContactField.INSTANT_MESSENGER1, new StringMapping() {
@@ -1617,11 +1618,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getInstantMessenger1();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeInstantMessenger1();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeInstantMessenger1();
 
-			}
+            }
         });
 
         mappings.put(ContactField.INSTANT_MESSENGER2, new StringMapping() {
@@ -1641,11 +1642,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getInstantMessenger2();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeInstantMessenger2();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeInstantMessenger2();
 
-			}
+            }
         });
 
         mappings.put(ContactField.TELEPHONE_IP, new StringMapping() {
@@ -1665,11 +1666,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getTelephoneIP();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeTelephoneIP();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeTelephoneIP();
 
-			}
+            }
         });
 
         mappings.put(ContactField.EMAIL1, new EMailMapping() {
@@ -1689,11 +1690,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getEmail1();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeEmail1();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeEmail1();
 
-			}
+            }
         });
 
         mappings.put(ContactField.EMAIL2, new EMailMapping() {
@@ -1713,11 +1714,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getEmail2();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeEmail2();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeEmail2();
 
-			}
+            }
         });
 
         mappings.put(ContactField.EMAIL3, new EMailMapping() {
@@ -1737,11 +1738,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getEmail3();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeEmail3();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeEmail3();
 
-			}
+            }
         });
 
         mappings.put(ContactField.URL, new StringMapping() {
@@ -1761,11 +1762,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getURL();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeURL();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeURL();
 
-			}
+            }
         });
 
         mappings.put(ContactField.CATEGORIES, new StringMapping() {
@@ -1785,11 +1786,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCategories();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCategories();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCategories();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD01, new StringMapping() {
@@ -1809,11 +1810,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField01();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField01();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField01();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD02, new StringMapping() {
@@ -1833,11 +1834,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField02();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField02();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField02();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD03, new StringMapping() {
@@ -1857,11 +1858,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField03();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField03();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField03();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD04, new StringMapping() {
@@ -1881,11 +1882,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField04();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField04();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField04();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD05, new StringMapping() {
@@ -1905,11 +1906,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField05();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField05();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField05();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD06, new StringMapping() {
@@ -1929,11 +1930,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField06();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField06();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField06();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD07, new StringMapping() {
@@ -1953,11 +1954,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField07();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField07();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField07();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD08, new StringMapping() {
@@ -1977,11 +1978,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField08();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField08();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField08();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD09, new StringMapping() {
@@ -2001,11 +2002,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField09();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField09();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField09();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD10, new StringMapping() {
@@ -2025,11 +2026,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField10();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField10();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField10();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD11, new StringMapping() {
@@ -2049,11 +2050,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField11();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField11();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField11();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD12, new StringMapping() {
@@ -2073,11 +2074,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField12();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField12();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField12();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD13, new StringMapping() {
@@ -2097,11 +2098,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField13();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField13();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField13();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD14, new StringMapping() {
@@ -2121,11 +2122,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField14();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField14();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField14();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD15, new StringMapping() {
@@ -2145,11 +2146,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField15();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField15();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField15();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD16, new StringMapping() {
@@ -2169,11 +2170,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField16();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField16();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField16();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD17, new StringMapping() {
@@ -2193,11 +2194,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField17();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField17();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField17();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD18, new StringMapping() {
@@ -2217,11 +2218,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField18();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField18();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField18();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD19, new StringMapping() {
@@ -2241,11 +2242,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField19();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField19();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField19();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USERFIELD20, new StringMapping() {
@@ -2265,11 +2266,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUserField20();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUserField20();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUserField20();
 
-			}
+            }
         });
 
         mappings.put(ContactField.OBJECT_ID, new ContactMapping<Integer>() {
@@ -2289,11 +2290,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getObjectID();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeObjectID();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeObjectID();
 
-			}
+            }
         });
 
         mappings.put(ContactField.PRIVATE_FLAG, new ContactMapping<Boolean>() {
@@ -2313,10 +2314,10 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getPrivateFlag();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removePrivateFlag();
-			}
+            @Override
+            public void remove(Contact contact) {
+                contact.removePrivateFlag();
+            }
         });
 
         mappings.put(ContactField.NUMBER_OF_DISTRIBUTIONLIST, new ContactMapping<Integer>() {
@@ -2336,11 +2337,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getNumberOfDistributionLists();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeNumberOfDistributionLists();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeNumberOfDistributionLists();
 
-			}
+            }
         });
 
         mappings.put(ContactField.DISTRIBUTIONLIST, new ContactMapping<DistributionListEntryObject[]>() {
@@ -2361,73 +2362,73 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
 
             private void validateString(String value) throws OXException {
-            	if (null != value) {
-            		String result = Check.containsInvalidChars(value);
-					if (null != result) {
-						throw ContactExceptionCodes.BAD_CHARACTER.create(result, this.toString());
-					}
-            	}
+                if (null != value) {
+                    String result = Check.containsInvalidChars(value);
+                    if (null != result) {
+                        throw ContactExceptionCodes.BAD_CHARACTER.create(result, this.toString());
+                    }
+                }
             }
 
-			@Override
-			public void validate(Contact contact) throws OXException {
-				DistributionListEntryObject[] members = this.get(contact);
-				if (null != members && 0 < members.length) {
-					for (DistributionListEntryObject member : members) {
-						/*
-						 * Validate strings
-						 */
-						validateString(member.getDisplayname());
-						validateString(member.getEmailaddress());
-						validateString(member.getLastname());
-						validateString(member.getFirstname());
-						if (DistributionListEntryObject.INDEPENDENT == member.getEmailfield()) {
-	                        /*
-	                         * Independent entries ('one-offs') must contain a valid e-mail address
-	                         */
-							if (null == member.getEmailaddress() || 0 == member.getEmailaddress().trim().length()) {
-								throw ContactExceptionCodes.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS.create();
-							}
-							try {
-								new QuotedInternetAddress(member.getEmailaddress()).validate();
-							} catch (final AddressException e) {
-								throw ContactExceptionCodes.INVALID_EMAIL.create(e, member.getEmailaddress());
-							}
-						} else {
-						    /*
-	                         * Not-independent entries must contain at least an object ID reference
-	                         */
-						    if (0 == member.getEntryID()) {
-						        throw ContactExceptionCodes.OBJECT_ID_MANDATORY_FOR_REFERENCED_MEMBERS.create();
-						    }
-						}
-					}
-				}
-			}
+            @Override
+            public void validate(Contact contact) throws OXException {
+                DistributionListEntryObject[] members = this.get(contact);
+                if (null != members && 0 < members.length) {
+                    for (DistributionListEntryObject member : members) {
+                        /*
+                         * Validate strings
+                         */
+                        validateString(member.getDisplayname());
+                        validateString(member.getEmailaddress());
+                        validateString(member.getLastname());
+                        validateString(member.getFirstname());
+                        if (DistributionListEntryObject.INDEPENDENT == member.getEmailfield()) {
+                            /*
+                             * Independent entries ('one-offs') must contain a valid e-mail address
+                             */
+                            if (null == member.getEmailaddress() || 0 == member.getEmailaddress().trim().length()) {
+                                throw ContactExceptionCodes.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS.create();
+                            }
+                            try {
+                                new QuotedInternetAddress(member.getEmailaddress()).validate();
+                            } catch (final AddressException e) {
+                                throw ContactExceptionCodes.INVALID_EMAIL.create(e, member.getEmailaddress());
+                            }
+                        } else {
+                            /*
+                             * Not-independent entries must contain at least an object ID reference
+                             */
+                            if (0 == member.getEntryID()) {
+                                throw ContactExceptionCodes.OBJECT_ID_MANDATORY_FOR_REFERENCED_MEMBERS.create();
+                            }
+                        }
+                    }
+                }
+            }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeDistributionLists();
-			}
+            @Override
+            public void remove(Contact contact) {
+                contact.removeDistributionLists();
+            }
         });
 
-//        mappings.put(ContactField.LINKS, new ("") {
-//
-//            @Override
-//            public void set(Contact contact,  value) {
-//                contact.setLinks(value);
-//            }
-//
-//            @Override
-//            public boolean isSet(Contact contact) {
-//                return contact.containsLinks();
-//            }
-//
-//            @Override
-//            public  get(Contact contact) {
-//                return contact.getLinks();
-//            }
-//        });
+        //        mappings.put(ContactField.LINKS, new ("") {
+        //
+        //            @Override
+        //            public void set(Contact contact,  value) {
+        //                contact.setLinks(value);
+        //            }
+        //
+        //            @Override
+        //            public boolean isSet(Contact contact) {
+        //                return contact.containsLinks();
+        //            }
+        //
+        //            @Override
+        //            public  get(Contact contact) {
+        //                return contact.getLinks();
+        //            }
+        //        });
 
         mappings.put(ContactField.FOLDER_ID, new ContactMapping<Integer>() {
 
@@ -2446,11 +2447,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getParentFolderID();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeParentFolderID();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeParentFolderID();
 
-			}
+            }
         });
 
         mappings.put(ContactField.CONTEXTID, new ContactMapping<Integer>() {
@@ -2470,11 +2471,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getContextId();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeContextID();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeContextID();
 
-			}
+            }
         });
 
         mappings.put(ContactField.CREATED_BY, new ContactMapping<Integer>() {
@@ -2494,11 +2495,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCreatedBy();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCreatedBy();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCreatedBy();
 
-			}
+            }
         });
 
         mappings.put(ContactField.MODIFIED_BY, new ContactMapping<Integer>() {
@@ -2518,11 +2519,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getModifiedBy();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeModifiedBy();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeModifiedBy();
 
-			}
+            }
         });
 
         mappings.put(ContactField.CREATION_DATE, new ContactMapping<Date>() {
@@ -2542,11 +2543,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getCreationDate();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeCreationDate();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeCreationDate();
 
-			}
+            }
         });
 
         mappings.put(ContactField.LAST_MODIFIED, new ContactMapping<Date>() {
@@ -2566,11 +2567,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getLastModified();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeLastModified();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeLastModified();
 
-			}
+            }
         });
 
         mappings.put(ContactField.BIRTHDAY, new ContactMapping<Date>() {
@@ -2590,11 +2591,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getBirthday();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeBirthday();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeBirthday();
 
-			}
+            }
         });
 
         mappings.put(ContactField.ANNIVERSARY, new ContactMapping<Date>() {
@@ -2614,11 +2615,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getAnniversary();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeAnniversary();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeAnniversary();
 
-			}
+            }
         });
 
         mappings.put(ContactField.IMAGE1, new ContactMapping<byte[]>() {
@@ -2648,21 +2649,23 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getImage1();
             }
 
-			@Override
-			public void validate(Contact contact) throws OXException {
-                if (null != contact && 0 < getMaxImageSize()) {
+            @Override
+            public void validate(Contact contact) throws OXException {
+                int maxSize = getMaxImageSize();
+
+                if (null != contact && 0 < maxSize) {
                     byte[] image = contact.getImage1();
-                    if (null != image && image.length > getMaxImageSize()) {
-                        throw ContactExceptionCodes.IMAGE_TOO_LARGE.create(image.length, getMaxImageSize());
+                    if (null != image && image.length > maxSize) {
+                        throw ContactExceptionCodes.IMAGE_TOO_LARGE.create(UploadUtility.getSize(image.length), UploadUtility.getSize(maxSize));
                     }
                 }
-			}
+            }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeImage1();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeImage1();
 
-			}
+            }
         });
 
         mappings.put(ContactField.IMAGE_LAST_MODIFIED, new ContactMapping<Date>() {
@@ -2682,11 +2685,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getImageLastModified();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeImageLastModified();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeImageLastModified();
 
-			}
+            }
         });
 
         mappings.put(ContactField.IMAGE1_CONTENT_TYPE, new StringMapping() {
@@ -2706,11 +2709,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getImageContentType();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeImageContentType();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeImageContentType();
 
-			}
+            }
         });
 
         mappings.put(ContactField.INTERNAL_USERID, new ContactMapping<Integer>() {
@@ -2730,11 +2733,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getInternalUserId();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeInternalUserId();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeInternalUserId();
 
-			}
+            }
         });
 
         mappings.put(ContactField.COLOR_LABEL, new ContactMapping<Integer>() {
@@ -2754,11 +2757,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getLabel();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeLabel();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeLabel();
 
-			}
+            }
         });
 
         mappings.put(ContactField.FILE_AS, new StringMapping() {
@@ -2778,11 +2781,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getFileAs();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeFileAs();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeFileAs();
 
-			}
+            }
         });
 
         mappings.put(ContactField.DEFAULT_ADDRESS, new ContactMapping<Integer>() {
@@ -2802,11 +2805,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getDefaultAddress();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeDefaultAddress();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeDefaultAddress();
 
-			}
+            }
         });
 
         mappings.put(ContactField.MARK_AS_DISTRIBUTIONLIST, new ContactMapping<Boolean>() {
@@ -2826,15 +2829,15 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getMarkAsDistribtuionlist();
             }
 
-			@Override
-			public void validate(Contact contact) throws OXException {
-			}
+            @Override
+            public void validate(Contact contact) throws OXException {
+            }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeMarkAsDistributionlist();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeMarkAsDistributionlist();
 
-			}
+            }
         });
 
         mappings.put(ContactField.NUMBER_OF_ATTACHMENTS, new ContactMapping<Integer>() {
@@ -2854,11 +2857,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getNumberOfAttachments();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeNumberOfAttachments();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeNumberOfAttachments();
 
-			}
+            }
         });
 
         mappings.put(ContactField.YOMI_FIRST_NAME, new StringMapping() {
@@ -2878,11 +2881,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getYomiFirstName();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeYomiFirstName();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeYomiFirstName();
 
-			}
+            }
         });
 
         mappings.put(ContactField.YOMI_LAST_NAME, new StringMapping() {
@@ -2902,11 +2905,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getYomiLastName();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeYomiLastName();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeYomiLastName();
 
-			}
+            }
         });
 
         mappings.put(ContactField.YOMI_COMPANY, new StringMapping() {
@@ -2926,11 +2929,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getYomiCompany();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeYomiCompany();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeYomiCompany();
 
-			}
+            }
         });
 
         mappings.put(ContactField.NUMBER_OF_IMAGES, new ContactMapping<Integer>() {
@@ -2942,7 +2945,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public boolean isSet(Contact contact) {
-            	//TODO: create Contact.containsNumberOfImages() method
+                //TODO: create Contact.containsNumberOfImages() method
                 return contact.containsImage1();
             }
 
@@ -2951,11 +2954,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getNumberOfImages();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.setNumberOfImages(0);
+            @Override
+            public void remove(Contact contact) {
+                contact.setNumberOfImages(0);
 
-			}
+            }
         });
 
         mappings.put(ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new ContactMapping<Date>() {
@@ -2975,11 +2978,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getLastModifiedOfNewestAttachment();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeLastModifiedOfNewestAttachment();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeLastModifiedOfNewestAttachment();
 
-			}
+            }
         });
 
         mappings.put(ContactField.USE_COUNT, new ContactMapping<Integer>() {
@@ -2999,48 +3002,48 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUseCount();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUseCount();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUseCount();
 
-			}
+            }
         });
 
-//        mappings.put(ContactField.IMAGE1_URL, new StringMapping() {
-//
-//            @Override
-//            public void set(Contact contact, String value) {
-//                contact.setImage1Url(value);
-//            }
-//
-//            @Override
-//            public boolean isSet(Contact contact) {
-//                return contact.containsi.containsImage1Url();
-//            }
-//
-//            @Override
-//            public  get(Contact contact) {
-//                return contact.getImage1Url();
-//            }
-//        });
+        //        mappings.put(ContactField.IMAGE1_URL, new StringMapping() {
+        //
+        //            @Override
+        //            public void set(Contact contact, String value) {
+        //                contact.setImage1Url(value);
+        //            }
+        //
+        //            @Override
+        //            public boolean isSet(Contact contact) {
+        //                return contact.containsi.containsImage1Url();
+        //            }
+        //
+        //            @Override
+        //            public  get(Contact contact) {
+        //                return contact.getImage1Url();
+        //            }
+        //        });
 
-//        mappings.put(ContactField.LAST_MODIFIED_UTC, new DefaultMapping<Date>()) {
-//
-//            @Override
-//            public void set(Contact contact, Date value) {
-//                contact.setLastModifiedUtc(value);
-//            }
-//
-//            @Override
-//            public boolean isSet(Contact contact) {
-//                return contact.containsLastModifiedUtc();
-//            }
-//
-//            @Override
-//            public  get(Contact contact) {
-//                return contact.getLastModifiedUtc();
-//            }
-//        });
+        //        mappings.put(ContactField.LAST_MODIFIED_UTC, new DefaultMapping<Date>()) {
+        //
+        //            @Override
+        //            public void set(Contact contact, Date value) {
+        //                contact.setLastModifiedUtc(value);
+        //            }
+        //
+        //            @Override
+        //            public boolean isSet(Contact contact) {
+        //                return contact.containsLastModifiedUtc();
+        //            }
+        //
+        //            @Override
+        //            public  get(Contact contact) {
+        //                return contact.getLastModifiedUtc();
+        //            }
+        //        });
 
         mappings.put(ContactField.HOME_ADDRESS, new StringMapping() {
 
@@ -3059,11 +3062,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getAddressHome();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeAddressHome();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeAddressHome();
 
-			}
+            }
         });
 
         mappings.put(ContactField.BUSINESS_ADDRESS, new StringMapping() {
@@ -3083,11 +3086,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getAddressBusiness();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeAddressBusiness();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeAddressBusiness();
 
-			}
+            }
         });
 
         mappings.put(ContactField.OTHER_ADDRESS, new StringMapping() {
@@ -3107,11 +3110,11 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getAddressOther();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeAddressOther();
+            @Override
+            public void remove(Contact contact) {
+                contact.removeAddressOther();
 
-			}
+            }
         });
 
         mappings.put(ContactField.UID, new StringMapping() {
@@ -3131,10 +3134,10 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getUid();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeUid();
-			}
+            @Override
+            public void remove(Contact contact) {
+                contact.removeUid();
+            }
         });
 
         mappings.put(ContactField.FILENAME, new StringMapping() {
@@ -3154,12 +3157,12 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                 return contact.getFilename();
             }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeFilename();
-			}
+            @Override
+            public void remove(Contact contact) {
+                contact.removeFilename();
+            }
         });
 
-	}
+    }
 
 }

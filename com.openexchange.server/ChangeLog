@@ -1,3 +1,18 @@
+* 2014-05-28 - marc.arens@open-xchange.com
+
+ - Fix for bug 32798:  Use optService and check for availability, log proper error on unavailability
+ 
+* 2014-05-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32796: Proper handling of special "*" query during task search
+ - Fix for bug 32800: Respect index boundaries when adding SIEVE rules to a java.util.List
+ - Fix for bug 32802: Ensure storage instance is initialized during start-up
+ - Fix for bug 31539: Orderly signal an error if an identity check is encountered during crawler-based subscription of Google calendar
+
+* 2014-05-28 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32784: Prepare file sizes for error messages to be human readable
+
 * 2014-05-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 32732: Orderly detect a duplicate lead request

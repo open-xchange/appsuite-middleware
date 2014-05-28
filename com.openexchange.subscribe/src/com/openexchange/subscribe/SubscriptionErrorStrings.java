@@ -84,4 +84,9 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
     public static final String NO_OAUTH_ACCOUNT_GIVEN_DISPLAY = "You need to create an OAuth-account first to access this service.";
 
     public static final String NEED_VERIFICATION_DISPLAY = "Your account needs to be verified: %1$s";
+
+    // The service provider asked for an identity confirmation. This happens for some accounts and cannot fixed by us.
+    // It is in the provider's responsibility. For this reason, the subscription cannot be completed.
+    public static final String ABORT_IDENTITY_CONFIRMATION_DISPLAY = "The service provider asked for an identity confirmation. This happens for some accounts and cannot fixed by us. It is in the provider's responsibility. For this reason, the subscription cannot be completed.";
+
 }
