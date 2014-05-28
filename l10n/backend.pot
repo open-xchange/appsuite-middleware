@@ -7542,6 +7542,15 @@ msgstr ""
 msgid "Your account needs to be verified: %1$s"
 msgstr ""
 
+#. The service provider asked for an identity confirmation. This happens for some accounts and cannot fixed by us.
+#. It is in the provider's responsibility. For this reason, the subscription cannot be completed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:90
+msgid ""
+"The service provider asked for an identity confirmation. This happens for "
+"some accounts and cannot fixed by us. It is in the provider's "
+"responsibility. For this reason, the subscription cannot be completed."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."
 msgstr ""
