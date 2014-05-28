@@ -63,7 +63,6 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -786,9 +785,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         if (metaData instanceof com.openexchange.oauth.ScribeAware) {
             apiClass = ((com.openexchange.oauth.ScribeAware) metaData).getScribeService();
         } else {
-            final String serviceId = metaData.getId().toLowerCase(Locale.ENGLISH);
+            final String serviceId = Strings.asciiLowerCase(metaData.getId());
             if (serviceId.indexOf("twitter") >= 0) {
-                apiClass = TwitterApi.SSL.class;
+                apiClass = TwitterApi.class;
             } else if (serviceId.indexOf("linkedin") >= 0) {
                 apiClass = LinkedInApi.class;
             } else if (serviceId.indexOf("google") >= 0) {
