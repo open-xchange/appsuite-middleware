@@ -130,7 +130,7 @@ public class ImageComparingTest extends TestCase {
 
     public void testRotationSuccess_Bug26630() {
         try {
-            final File fileInput = new File(TEST_DATA_DIR, "26630_R90CW.jpg");
+            final File fileInput = new File(TEST_DATA_DIR, "Rotate_90CW.jpg");
 
             final FileHolder fileHolder = new FileHolder(fileInput);
             {
@@ -191,7 +191,7 @@ public class ImageComparingTest extends TestCase {
         }
     }
 
-    public void testAlphaChannelPictureIsNotTransformed_Bug28163() {
+    public void testAlphaChannelShouldNotGetTransformed_Bug28163() {
         try {
             final File fileInput = new File(TEST_DATA_DIR, "28163.jpg");
 
@@ -275,8 +275,7 @@ public class ImageComparingTest extends TestCase {
         }
     }
 
-    public void testReadImageWithCMYKProfile_Bug29147() throws IOException {
-
+    public void testReadImageWithCMYKProfile_Bug28082() throws IOException {
         final File file = new File(TEST_DATA_DIR, "28082.jpg");
         final FileHolder fileHolder = new FileHolder(file);
         {
