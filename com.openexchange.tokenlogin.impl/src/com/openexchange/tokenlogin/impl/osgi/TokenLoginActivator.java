@@ -61,6 +61,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -71,6 +72,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tokenlogin.TokenLoginService;
+import com.openexchange.tokenlogin.impl.HazelcastInstanceNotActiveExceptionHandler;
 import com.openexchange.tokenlogin.impl.Services;
 import com.openexchange.tokenlogin.impl.TokenLoginServiceImpl;
 
@@ -79,7 +81,7 @@ import com.openexchange.tokenlogin.impl.TokenLoginServiceImpl;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TokenLoginActivator extends HousekeepingActivator {
+public final class TokenLoginActivator extends HousekeepingActivator implements HazelcastInstanceNotActiveExceptionHandler {
 
     /** The logger */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TokenLoginActivator.class);
@@ -114,7 +116,7 @@ public final class TokenLoginActivator extends HousekeepingActivator {
         final int maxIdleTime = configService.getIntProperty("com.openexchange.tokenlogin.maxIdleTime", 300000);
 
         // Create service instance
-        final TokenLoginServiceImpl serviceImpl = new TokenLoginServiceImpl(maxIdleTime, configService);
+        final TokenLoginServiceImpl serviceImpl = new TokenLoginServiceImpl(maxIdleTime, configService, this);
 
         // Check Hazelcast stuff
         {
@@ -227,4 +229,13 @@ public final class TokenLoginActivator extends HousekeepingActivator {
         LOG.info("No distributed token-login map with mapPrefix {} in hazelcast configuration", mapPrefix);
         return null;
     }
+
+    @Override
+    public void propagateNotActive(HazelcastInstanceNotActiveException notActiveException) {
+        final BundleContext context = this.context;
+        if (null != context) {
+            context.registerService(HazelcastInstanceNotActiveException.class, notActiveException, null);
+        }
+    }
+
 }

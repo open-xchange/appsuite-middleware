@@ -63,6 +63,7 @@ import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.openexchange.concurrent.Blocker;
@@ -85,7 +86,7 @@ import com.openexchange.tokenlogin.TokenLoginService;
 
 /**
  * {@link TokenLoginServiceImpl} - Implementation of {@code TokenLoginService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TokenLoginServiceImpl implements TokenLoginService {
@@ -104,12 +105,21 @@ public class TokenLoginServiceImpl implements TokenLoginService {
 
     private final Map<String, TokenLoginSecret> secrets;
 
+    private final HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler;
+
     private volatile boolean useHzMap = false;
 
     /**
      * Initializes a new {@link TokenLoginServiceImpl}.
      */
     public TokenLoginServiceImpl(final int maxIdleTime, final ConfigurationService configService) throws OXException {
+        this(maxIdleTime, configService, null);
+    }
+
+    /**
+     * Initializes a new {@link TokenLoginServiceImpl}.
+     */
+    public TokenLoginServiceImpl(final int maxIdleTime, final ConfigurationService configService, final HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler) throws OXException {
         super();
         Validate.notNull(configService);
 
@@ -118,6 +128,8 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         sessionId2token = new ConcurrentLinkedHashMap<String, String>(1024, 0.75f, 16, Integer.MAX_VALUE, evictionPolicy);
         // Parse app secrets
         secrets = initSecrets(configService.getFileByName("tokenlogin-secrets"));
+
+        this.notActiveExceptionHandler = notActiveExceptionHandler;
     }
 
     // -------------------------------------------------------------------------------------------------------- //
@@ -206,7 +218,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
 
     /**
      * Sets the name of the Hazelcast map for sessionId2token.
-     * 
+     *
      * @param hzMapName The map name
      */
     public void setSessionId2tokenHzMapName(final String sessionId2tokenMapName) {
@@ -214,12 +226,22 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     /**
-     * Sets the name of the Hazelcast map for sessionId2token.
-     * 
+     * Sets the name of the Hazelcast map for token2sessionId.
+     *
      * @param hzMapName The map name
      */
     public void setToken2sessionIdMapNameHzMapName(final String token2sessionIdMapName) {
         this.token2sessionIdMapName = token2sessionIdMapName;
+    }
+
+    private void handleNotActiveException(HazelcastInstanceNotActiveException e) {
+        LOG.warn("Encountered a {} error.", HazelcastInstanceNotActiveException.class.getSimpleName());
+        changeBackingMapToLocalMap();
+
+        HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler = this.notActiveExceptionHandler;
+        if (null != notActiveExceptionHandler) {
+            notActiveExceptionHandler.propagateNotActive(e);
+        }
     }
 
     /**
@@ -235,7 +257,12 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             LOG.trace("Hazelcast instance is not available.");
             return null;
         }
-        return hazelcastInstance.getMap(mapIdentifier);
+        try {
+            return hazelcastInstance.getMap(mapIdentifier);
+        } catch (HazelcastInstanceNotActiveException e) {
+            handleNotActiveException(e);
+            return null;
+        }
     }
 
     private String removeFromHzMap(String mapIdentifier, String key) {
@@ -444,7 +471,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
 
     /**
      * Removes the token for specified session.
-     * 
+     *
      * @param session The session
      */
     public void removeTokenFor(final Session session) {
@@ -457,7 +484,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     /**
-     * 
+     *
      */
     public void changeBackingMapToLocalMap() {
         blocker.block();
@@ -471,7 +498,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     /**
-     * 
+     *
      */
     public void changeBackingMapToHz() {
         blocker.block();
