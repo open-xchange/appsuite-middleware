@@ -55,16 +55,17 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailfilter.ajax.Credentials;
-import com.openexchange.mailfilter.ajax.actions.MailfilterAction;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
+import com.openexchange.jsieve.export.SieveHandlerFactory;
+import com.openexchange.mailfilter.Credentials;
+import com.openexchange.mailfilter.ajax.actions.MailFilterAction;
+import com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.services.Services;
 
 
-public class MailfilterActionTest extends MailfilterAction {
+public class MailFilterActionTest extends MailFilterAction {
 
-    public MailfilterActionTest() {
+    public MailFilterActionTest() {
         super(null);
     }
 
@@ -83,10 +84,10 @@ public class MailfilterActionTest extends MailfilterAction {
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0);
         try {
-            getRightPassword(config, creds);
+            SieveHandlerFactory.getRightPassword(config, creds);
             Assert.fail("No exception thrown");
         } catch (final OXException e) {
-            Assert.assertTrue(OXMailfilterExceptionCode.NO_VALID_PASSWORDSOURCE.equals(e));
+            Assert.assertTrue(MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.equals(e));
         }
     }
 
@@ -96,7 +97,7 @@ public class MailfilterActionTest extends MailfilterAction {
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0);
-        final String rightPassword = getRightPassword(config, creds);
+        final String rightPassword = SieveHandlerFactory.getRightPassword(config, creds);
         Assert.assertEquals("Password should be equal to \"" + credsPW + "\"", credsPW, rightPassword);
     }
 
@@ -107,10 +108,10 @@ public class MailfilterActionTest extends MailfilterAction {
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0);
         try {
-            getRightPassword(config, creds);
+            SieveHandlerFactory.getRightPassword(config, creds);
             Assert.fail("No exception thrown");
         } catch (final OXException e) {
-            Assert.assertTrue(OXMailfilterExceptionCode.NO_MASTERPASSWORD_SET.equals(e));
+            Assert.assertTrue(MailFilterExceptionCode.NO_MASTERPASSWORD_SET.equals(e));
         }
     }
 
@@ -122,7 +123,7 @@ public class MailfilterActionTest extends MailfilterAction {
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String credsPW = "pw2";
         final Credentials creds = new Credentials("", credsPW, 0, 0);
-        final String rightPassword = getRightPassword(config, creds);
+        final String rightPassword = SieveHandlerFactory.getRightPassword(config, creds);
         Assert.assertEquals("Password should be equal to \"" + masterPW + "\"", masterPW, rightPassword);
     }
 

@@ -49,15 +49,15 @@
 
 package com.openexchange.mailfilter.ajax;
 
-import com.openexchange.mailfilter.ajax.actions.MailfilterAction;
-import com.openexchange.mailfilter.ajax.actions.MailfilterRequest;
+import com.openexchange.mailfilter.ajax.actions.MailFilterAction;
+import com.openexchange.mailfilter.ajax.actions.MailFilterRequest;
 import com.openexchange.session.Session;
 
 /**
  *
  * @author d7
  */
-public class MailfilterServlet extends AJAXServlet {
+public class MailFilterServlet extends AJAXServlet {
 
     /**
      *
@@ -67,17 +67,17 @@ public class MailfilterServlet extends AJAXServlet {
     /**
      * Default constructor.
      */
-    public MailfilterServlet() {
+    public MailFilterServlet() {
         super();
     }
 
     @Override
-    protected MailfilterAction createAction(final Session session) {
-        return MailfilterAction.valueFor(session);
+    protected MailFilterAction createAction(final Session session) {
+        return MailFilterAction.valueFor(session);
     }
 
     @Override
-    protected MailfilterRequest createRequest() {
-        return new MailfilterRequest();
+    protected MailFilterRequest createRequest() {
+        return new MailFilterRequest();
     }
 }

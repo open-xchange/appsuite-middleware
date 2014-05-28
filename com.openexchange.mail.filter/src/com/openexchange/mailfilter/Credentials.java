@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailfilter.ajax;
+package com.openexchange.mailfilter;
 
 /**
  * This class holds the credentials to login into the imap server.

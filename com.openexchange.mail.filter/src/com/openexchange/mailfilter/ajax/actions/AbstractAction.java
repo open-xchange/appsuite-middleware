@@ -53,7 +53,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.ajax.Action;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
+import com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.ajax.json.AbstractObject2JSON2Object;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -102,7 +102,7 @@ public abstract class AbstractAction<T, U extends AbstractRequest> {
                 retval = actionGetScript(request);
                 break;
             default:
-                throw OXMailfilterExceptionCode.PROBLEM.create("Unimplemented action.");
+                throw MailFilterExceptionCode.PROBLEM.create("Unimplemented action.");
         }
         return retval;
     }

@@ -55,7 +55,7 @@ import com.openexchange.i18n.LocalizableStrings;
 /**
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class MailfilterExceptionMessages implements LocalizableStrings {
+public class MailFilterExceptionMessages implements LocalizableStrings {
 
     public static final String INVALID_REDIRECT_ADDRESS_MSG = "The redirect address \"%1$s\" is not valid.";
 

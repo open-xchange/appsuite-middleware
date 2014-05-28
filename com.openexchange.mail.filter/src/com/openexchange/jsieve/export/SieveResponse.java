@@ -53,7 +53,7 @@ package com.openexchange.jsieve.export;
  * @author choeger
  *
  */
-public class SIEVEResponse {
+public class SieveResponse {
 
     public static enum Code {
         /*

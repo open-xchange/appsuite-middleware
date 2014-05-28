@@ -56,8 +56,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.mailfilter.ajax.Credentials;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
+import com.openexchange.mailfilter.Credentials;
+import com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.session.Session;
@@ -89,12 +89,12 @@ public final class SieveHandlerFactory {
         if (MailFilterProperties.LoginTypes.GLOBAL.name.equals(logintype)) {
             sieve_server = config.getProperty(MailFilterProperties.Values.SIEVE_SERVER.property);
             if (null == sieve_server) {
-                throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(MailFilterProperties.Values.SIEVE_SERVER.property);
+                throw MailFilterExceptionCode.PROPERTY_ERROR.create(MailFilterProperties.Values.SIEVE_SERVER.property);
             }
             try {
                 sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
             } catch (final RuntimeException e) {
-                throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
+                throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
             }
         } else if (MailFilterProperties.LoginTypes.USER.name.equals(logintype)) {
             storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
@@ -104,19 +104,19 @@ public final class SieveHandlerFactory {
                 try {
                     uri = URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP);
                 } catch (final URISyntaxException e) {
-                    throw OXMailfilterExceptionCode.NO_SERVERNAME_IN_SERVERURL.create(e, mailServerURL);
+                    throw MailFilterExceptionCode.NO_SERVERNAME_IN_SERVERURL.create(e, mailServerURL);
                 }
                 sieve_server = uri.getHost();
                 try {
                     sieve_port = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_PORT.property));
                 } catch (final RuntimeException e) {
-                    throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
+                    throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
                 }
             } else {
-                throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+                throw MailFilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
             }
         } else {
-            throw OXMailfilterExceptionCode.NO_VALID_LOGIN_TYPE.create();
+            throw MailFilterExceptionCode.NO_VALID_LOGIN_TYPE.create();
         }
         /*
          * Get SIEVE_AUTH_ENC property
@@ -146,7 +146,7 @@ public final class SieveHandlerFactory {
                 if (null != storageUser) {
                     authname = storageUser.getImapLogin();
                 } else {
-                    throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+                    throw MailFilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
                 }
             }
             final String username = creds.getUsername();
@@ -165,7 +165,7 @@ public final class SieveHandlerFactory {
                 if (null != storageUser) {
                     authname = storageUser.getMail();
                 } else {
-                    throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
+                    throw MailFilterExceptionCode.INVALID_CREDENTIALS.create("Could not get a valid user object for uid " + creds.getUserid() + " and contextid " + creds.getContextid());
                 }
             }
             final String username = creds.getUsername();
@@ -176,7 +176,7 @@ public final class SieveHandlerFactory {
                 sieveHandler = new SieveHandler(authname, password, sieve_server, sieve_port, authEnc);
             }
         } else {
-            throw OXMailfilterExceptionCode.NO_VALID_CREDSRC.create();
+            throw MailFilterExceptionCode.NO_VALID_CREDSRC.create();
         }
         return sieveHandler;
     }
@@ -212,18 +212,18 @@ public final class SieveHandlerFactory {
      * @return
      * @throws OXException
      */
-    protected static String getRightPassword(final ConfigurationService config, final Credentials creds) throws OXException {
+    public static String getRightPassword(final ConfigurationService config, final Credentials creds) throws OXException {
         final String passwordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
         if (MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
             return creds.getPassword();
         } else if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
             final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
             if (null == masterpassword || masterpassword.length() == 0) {
-                throw OXMailfilterExceptionCode.NO_MASTERPASSWORD_SET.create();
+                throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
             }
             return masterpassword;
         } else {
-            throw OXMailfilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+            throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
         }
     }
 }

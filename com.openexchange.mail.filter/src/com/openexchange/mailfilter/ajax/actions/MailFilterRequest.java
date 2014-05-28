@@ -53,12 +53,12 @@ package com.openexchange.mailfilter.ajax.actions;
  *
  * @author d7
  */
-public class MailfilterRequest extends AbstractRequest {
+public class MailFilterRequest extends AbstractRequest {
 
     /**
      * Default constructor.
      */
-    public MailfilterRequest() {
+    public MailFilterRequest() {
         super();
     }
 }

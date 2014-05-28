@@ -66,7 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mailfilter.ajax.actions.AbstractAction;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
+import com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -148,7 +148,7 @@ public abstract class AJAXServlet extends HttpServlet {
         try {
             final String sessionId = req.getParameter(PARAMETER_SESSION);
             if (sessionId == null) {
-                throw OXMailfilterExceptionCode.MISSING_PARAMETER.create("session");
+                throw MailFilterExceptionCode.MISSING_PARAMETER.create("session");
             }
 
             final SessiondService service = Services.getService(SessiondService.class);
@@ -170,6 +170,7 @@ public abstract class AJAXServlet extends HttpServlet {
 
             final AbstractRequest request = createRequest();
             request.setSession(session);
+            
 
             request.setParameters(new AbstractRequest.Parameters() {
                 @Override
@@ -235,7 +236,7 @@ public abstract class AJAXServlet extends HttpServlet {
 
             final AbstractRequest request = createRequest();
             request.setSession(session);
-
+            
             request.setParameters(new AbstractRequest.Parameters() {
                 @Override
                 public String getParameter(final Parameter param) throws OXException {

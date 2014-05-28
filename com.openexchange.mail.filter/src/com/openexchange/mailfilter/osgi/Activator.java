@@ -62,12 +62,14 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.mailfilter.ajax.actions.MailfilterAction;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
+import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.mailfilter.ajax.actions.MailFilterAction;
+import com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.internal.MailFilterChecker;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.internal.MailFilterReloadable;
+import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
 import com.openexchange.mailfilter.internal.MailFilterServletInit;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -119,7 +121,7 @@ public class Activator extends HousekeepingActivator {
 
                     private void handleDroppedSession(final Session session) {
                         if (!session.isTransient() && null == getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
-                            MailfilterAction.removeFor(session);
+                            MailFilterAction.removeFor(session);
                         }
                     }
                 };
@@ -136,6 +138,8 @@ public class Activator extends HousekeepingActivator {
             registerService(CapabilityChecker.class, new MailFilterChecker(), properties);
 
             registerService(Reloadable.class, new MailFilterReloadable(), null);
+            
+            registerService(MailFilterService.class, new MailFilterServiceImpl());
 
         } catch (final Exception e) {
             LOG.error("", e);
@@ -183,13 +187,13 @@ public class Activator extends HousekeepingActivator {
             if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {
                 final String masterpassword = config.getProperty(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property);
                 if (masterpassword.length() == 0) {
-                    throw OXMailfilterExceptionCode.NO_MASTERPASSWORD_SET.create();
+                    throw MailFilterExceptionCode.NO_MASTERPASSWORD_SET.create();
                 }
             } else if (!MailFilterProperties.PasswordSource.SESSION.name.equals(passwordsrc)) {
-                throw OXMailfilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+                throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
             }
         } else {
-            throw OXMailfilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
+            throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
         }
 
     }

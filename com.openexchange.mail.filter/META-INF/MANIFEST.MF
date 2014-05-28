@@ -54,6 +54,7 @@ Import-Package: com.openexchange.ajax,
 Export-Package: com.openexchange.jsieve.commands,
  com.openexchange.jsieve.export,
  com.openexchange.jsieve.export.exceptions,
+ com.openexchange.mailfilter,
  com.openexchange.mailfilter.ajax.exceptions,
  org.apache.jsieve,
  org.apache.jsieve.parser.generated

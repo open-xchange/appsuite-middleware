@@ -55,8 +55,8 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailfilter.ajax.MailfilterServlet;
-import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
+import com.openexchange.mailfilter.ajax.MailFilterServlet;
+import com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.server.Initialization;
 
@@ -120,12 +120,12 @@ public class MailFilterServletInit implements Initialization {
 			/*
 			 * Register mail filter servlet
 			 */
-			httpService.registerServlet(PREFIX.get().getPrefix()+"mailfilter", new MailfilterServlet(), null, null);
+			httpService.registerServlet(PREFIX.get().getPrefix()+"mailfilter", new MailFilterServlet(), null, null);
 		} catch (final ServletException e) {
-			throw OXMailfilterExceptionCode.SERVLET_REGISTRATION_FAILED.create(e, e
+			throw MailFilterExceptionCode.SERVLET_REGISTRATION_FAILED.create(e, e
 					.getMessage());
 		} catch (final NamespaceException e) {
-			throw OXMailfilterExceptionCode.SERVLET_REGISTRATION_FAILED.create(e, e
+			throw MailFilterExceptionCode.SERVLET_REGISTRATION_FAILED.create(e, e
 					.getMessage());
 		}
 	}

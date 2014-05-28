@@ -863,7 +863,7 @@ public class SieveHandler {
      * @deprecated use {@link #parseSIEVEResponse(String, String)} instead
      */
     @Deprecated
-    protected SIEVEResponse.Code parseSIEVEResponse(final String resp) {
+    protected SieveResponse.Code parseSIEVEResponse(final String resp) {
         return parseSIEVEResponse(resp, null);
     }
 
@@ -874,7 +874,7 @@ public class SieveHandler {
      * @param response line
      * @return null, if no response code in line, the @{SIEVEResponse.Code} otherwise.
      */
-    protected SIEVEResponse.Code parseSIEVEResponse(final String resp, final String multiline) {
+    protected SieveResponse.Code parseSIEVEResponse(final String resp, final String multiline) {
         if( ! useSIEVEResponseCodes ) {
             return null;
         }
@@ -884,7 +884,7 @@ public class SieveHandler {
         if( m.matches() ) {
             final int gcount = m.groupCount();
             if( gcount > 1 ) {
-                final SIEVEResponse.Code ret = SIEVEResponse.Code.getCode(m.group(1));
+                final SieveResponse.Code ret = SieveResponse.Code.getCode(m.group(1));
                 final String group = m.group(2);
                 if (group.startsWith("{")) {
                 	// Multi line, use the multiline parsed before here

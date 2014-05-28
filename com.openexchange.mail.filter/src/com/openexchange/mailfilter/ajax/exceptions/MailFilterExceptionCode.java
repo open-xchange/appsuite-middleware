@@ -49,26 +49,31 @@
 
 package com.openexchange.mailfilter.ajax.exceptions;
 
-import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.INVALID_REDIRECT_ADDRESS_MSG;
-import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.INVALID_SIEVE_RULE2_MSG;
-import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.INVALID_SIEVE_RULE_MSG;
-import static com.openexchange.mailfilter.ajax.exceptions.MailfilterExceptionMessages.REJECTED_REDIRECT_ADDRESS_MSG;
+import static com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionMessages.INVALID_REDIRECT_ADDRESS_MSG;
+import static com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionMessages.INVALID_SIEVE_RULE2_MSG;
+import static com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionMessages.INVALID_SIEVE_RULE_MSG;
+import static com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionMessages.REJECTED_REDIRECT_ADDRESS_MSG;
+import java.util.regex.Pattern;
+import org.apache.jsieve.SieveException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.java.Strings;
+import com.openexchange.jsieve.export.SieveResponse;
+import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
+import com.openexchange.mailfilter.Credentials;
 
 /**
- *
  * Mail filter error codes.
  */
-public enum OXMailfilterExceptionCode implements DisplayableOXExceptionCode {
+public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
 
-	/**
-	 * %s
-	 */
-	PROBLEM("%s", CATEGORY_ERROR, 1),
+    /**
+     * %s
+     */
+    PROBLEM("%s", CATEGORY_ERROR, 1),
     /**
      * %s
      */
@@ -176,34 +181,41 @@ public enum OXMailfilterExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Invalid SIEVE rule specified. Server response: %1$s
      */
-    INVALID_SIEVE_RULE2("Invalid SIEVE rule specified. Server response: %1$s", INVALID_SIEVE_RULE2_MSG, CATEGORY_USER_INPUT, 25), // Yapp, the same error code
+    INVALID_SIEVE_RULE2("Invalid SIEVE rule specified. Server response: %1$s", INVALID_SIEVE_RULE2_MSG, CATEGORY_USER_INPUT, 25), // Yapp,
+                                                                                                                                  // the
+                                                                                                                                  // same
+                                                                                                                                  // error
+                                                                                                                                  // code
     ;
 
     private final String message;
+
     private final String displayMessage;
+
     private final int detailNumber;
+
     private final Category category;
 
     /**
-     * Initializes a new {@link OXMailfilterExceptionCode}.
-     *
+     * Initializes a new {@link MailFilterExceptionCode}.
+     * 
      * @param message The (technical) error message
      * @param category The category
      * @param detailNumber The detail number
      */
-    private OXMailfilterExceptionCode(final String message, final Category category, final int detailNumber) {
+    private MailFilterExceptionCode(final String message, final Category category, final int detailNumber) {
         this(message, OXExceptionStrings.MESSAGE, category, detailNumber);
     }
 
     /**
-     * Initializes a new {@link OXMailfilterExceptionCode} containing a display message for the user.
-     *
+     * Initializes a new {@link MailFilterExceptionCode} containing a display message for the user.
+     * 
      * @param message The (technical) error message
      * @param displayMessage The display message for the enduser
      * @param category The category
      * @param detailNumber The detail number
      */
-    private OXMailfilterExceptionCode(String message, String displayMessage, Category category, int detailNumber) {
+    private MailFilterExceptionCode(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
         this.displayMessage = displayMessage;
         this.detailNumber = detailNumber;
@@ -242,7 +254,7 @@ public enum OXMailfilterExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -251,7 +263,7 @@ public enum OXMailfilterExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -261,13 +273,131 @@ public enum OXMailfilterExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /**
+     * The SIEVE parser is not very expressive when it comes to exceptions. This method analyses an exception message and throws a more
+     * detailed one if possible.
+     * 
+     * @param e the OXSieveHandlerException
+     * @param credentials the user credentials
+     * @param useSIEVEResponseCodes flag to communicate the condition of whether or not to use the sieve response codes
+     * @return
+     */
+    public static OXException handleParsingException(final OXSieveHandlerException e, final Credentials credentials, final boolean useSIEVEResponseCodes) {
+        final String message = e.toString();
+
+        if (message.contains("unexpected SUBJECT")) {
+            return MailFilterExceptionCode.EMPTY_MANDATORY_FIELD.create(e, "ADDRESS (probably)");
+        }
+        if (message.contains("address ''")) {
+            return MailFilterExceptionCode.EMPTY_MANDATORY_FIELD.create(e, "ADDRESS");
+        }
+
+        if (useSIEVEResponseCodes) {
+            final SieveResponse.Code code = e.getSieveResponseCode();
+            if (null != code) {
+                return new OXException(
+                    code.getDetailnumber(),
+                    code.getMessage(),
+                    e.getSieveHost(),
+                    Integer.valueOf(e.getSieveHostPort()),
+                    credentials.getRightUsername(),
+                    credentials.getContextString()).addCategory(sieveResponse2OXCategory(code)).setPrefix("MAIL_FILTER");
+            }
+
+            if (e.isParseError()) {
+                return MailFilterExceptionCode.INVALID_SIEVE_RULE2.create(e, saneMessage(e.getMessage()));
+            }
+
+            return MailFilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(
+                e,
+                e.getSieveHost(),
+                Integer.valueOf(e.getSieveHostPort()),
+                credentials.getRightUsername(),
+                credentials.getContextString());
+        }
+
+        if (e.isParseError()) {
+            return MailFilterExceptionCode.INVALID_SIEVE_RULE2.create(e, saneMessage(e.getMessage()));
+        }
+
+        return MailFilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(
+            e,
+            e.getSieveHost(),
+            Integer.valueOf(e.getSieveHostPort()),
+            credentials.getRightUsername(),
+            credentials.getContextString());
+    }
+
+    private static final Pattern CONTROL = Pattern.compile("[\\x00-\\x1F\\x7F]+");
+
+    /**
+     * Sanitize message
+     * 
+     * @param message
+     * @return
+     */
+    private static String saneMessage(final String message) {
+        if (Strings.isEmpty(message)) {
+            return "";
+        }
+
+        return CONTROL.matcher(message).replaceAll(" ");
+    }
+
+    /**
+     * Match the SieveResponse to an OXCategory
+     * 
+     * @param code
+     * @return
+     */
+    private static Category sieveResponse2OXCategory(final SieveResponse.Code code) {
+        switch (code) {
+        case ENCRYPT_NEEDED:
+        case QUOTA:
+        case REFERRAL:
+        case SASL:
+        case TRANSITION_NEEDED:
+        case TRYLATER:
+        case ACTIVE:
+        case ALREADYEXISTS:
+        case NONEXISTENT:
+        case TAG:
+            break;
+        case WARNINGS:
+            return Category.CATEGORY_USER_INPUT;
+
+        default:
+            break;
+        }
+        return Category.CATEGORY_ERROR;
+    }
+
+    /**
+     * Handle a SieveException
+     * 
+     * @param e the SieveException
+     * @return an OXException
+     */
+    public static OXException handleSieveException(final SieveException e) {
+        final String msg = e.getMessage();
+        return MailFilterExceptionCode.SIEVE_ERROR.create(e, msg);
+    }
+    
+    public static String getNANString(final NumberFormatException nfe) {
+        final String msg = nfe.getMessage();
+        if (msg != null && msg.startsWith("For input string: \"")) {
+            return msg.substring(19, msg.length() - 1);
+        }
+        return msg;
     }
 
 }
