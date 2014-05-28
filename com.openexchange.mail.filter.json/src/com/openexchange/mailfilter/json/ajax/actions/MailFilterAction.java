@@ -122,9 +122,6 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
      */
     public MailFilterAction() {
         super();
-        //final ConfigurationService config = Services.getService(ConfigurationService.class);
-        //scriptname = config.getProperty(MailFilterProperties.Values.SCRIPT_NAME.property);
-        //useSIEVEResponseCodes = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.USE_SIEVE_RESPONSE_CODES.property));
     }
 
     /**
