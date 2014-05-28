@@ -168,7 +168,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 
                 if (isVacationRule(rule)) {
                     // A vacation rule...
-                    final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
+                    final List<Rule> clientrules = clientrulesandrequire.getRules();
                     for (final Rule r : clientrules) {
                         if (isVacationRule(r)) {
                             throw MailFilterExceptionCode.DUPLICATE_VACATION_RULE.create();
@@ -178,20 +178,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
                 changeIncomingVacationRule(rule);
                 
-                // Now find the right position inside the array
-                int position = rule.getPosition();
-                final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
-                if (position >= clientrules.size()) {
-                    throw MailFilterExceptionCode.BAD_POSITION.create(Integer.valueOf(position));
-                }
-                final int nextuid = rules.getNextuid();
-                setUIDInRule(rule, nextuid);
-                if (position != -1) {
-                    clientrules.add(position, rule);
-                } else {
-                    clientrules.add(rule);
-                    position = clientrules.size() - 1;
-                }
+                final int nextuid = insertIntoPosition(rule, rules, clientrulesandrequire);
                 
                 final String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 log.debug("The following sieve script will be written:\n{}", writeback);
@@ -227,7 +214,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @see com.openexchange.mailfilter.MailFilterService#updateFilterRule(com.openexchange.mailfilter.Credentials, com.openexchange.jsieve.commands.Rule)
      */
     @Override
-    public final void updateFilterRule(final Credentials credentials, final Rule rule) throws OXException {
+    public final void updateFilterRule(final Credentials credentials, final Rule rule, int uid) throws OXException {
         synchronized (lock) {
             final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
             final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
@@ -238,9 +225,12 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 if (null != activeScript) {
                     final String script = fixParsingError(sieveHandler.getScript(activeScript));
                     final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
-                    final ClientRulesAndRequire clientRulesAndReq = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
-
+                    final List<Rule> ruleList = rules.getRulelist();
+                    
                     changeIncomingVacationRule(rule);
+                    ruleList.set(uid, rule);
+                    
+                    final ClientRulesAndRequire clientRulesAndReq = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
 
                     final String writeback = sieveTextFilter.writeback(clientRulesAndReq, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                     log.debug("The following sieve script will be written:\n{}", writeback);
@@ -290,7 +280,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     final RuleListAndNextUid rulesandid = sieveTextFilter.readScriptFromString(script);
                     final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rulesandid.getRulelist(), null, rulesandid.isError());
    
-                    final ArrayList<Rule> rules = clientrulesandrequire.getRules();
+                    final List<Rule> rules = clientrulesandrequire.getRules();
                     final RuleAndPosition deletedrule = getRightRuleForUniqueId(rules, uid);
                     rules.remove(deletedrule.getPosition());
                     final String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
@@ -404,7 +394,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     readScriptFromString.getRulelist(),
                     flag,
                     readScriptFromString.isError());
-                final ArrayList<Rule> clientRules = clientrulesandrequire.getRules();
+                final List<Rule> clientRules = clientrulesandrequire.getRules();
                 changeOutgoingVacationRule(clientRules);
                 return clientRules;
             } catch (SieveException e) {
@@ -449,7 +439,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
                     final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire( rules.getRulelist(), null, rules.isError());
 
-                    final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
+                    final List<Rule> clientrules = clientrulesandrequire.getRules();
                     for (int i = 0; i < uids.length; i++) {
                         int uniqueid = uids[i];
                         final RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, Integer.valueOf(uniqueid));
@@ -505,7 +495,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     final String script = fixParsingError(sieveHandler.getScript(activeScript));
                     final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
                     final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
-                    final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
+                    final List<Rule> clientrules = clientrulesandrequire.getRules();
                     final RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, uid);
 
                     return rightRule.getRule();
@@ -584,7 +574,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 argList.add(createTagArg("is"));
                 argList.add(createTagArg("domain"));
 
-                final ArrayList<String> header = new ArrayList<String>();
+                final List<String> header = new ArrayList<String>();
                 header.add("From");
 
                 final String[] split = Strings.splitByComma(vacationdomains);
@@ -599,7 +589,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     ifCommand.setTestcommand(newTestCommand);
                 } else {
                     // Found other tests
-                    final ArrayList<TestCommand> arrayList = new ArrayList<TestCommand>();
+                    final List<TestCommand> arrayList = new ArrayList<TestCommand>();
                     arrayList.add(newTestCommand);
                     arrayList.add(testcommand);
                     ifCommand.setTestcommand(new TestCommand(Commands.ALLOF, new ArrayList<Object>(), arrayList));
@@ -614,7 +604,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @param clientrules
      * @throws SieveException
      */
-    private void changeOutgoingVacationRule(final ArrayList<Rule> clientrules) throws SieveException {
+    private void changeOutgoingVacationRule(final List<Rule> clientrules) throws SieveException {
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
 
@@ -730,7 +720,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
      * @return
      * @throws OXException
      */
-    private RuleAndPosition getRightRuleForUniqueId(final ArrayList<Rule> clientrules, final Integer uniqueid) throws OXException {
+    private RuleAndPosition getRightRuleForUniqueId(final List<Rule> clientrules, final Integer uniqueid) throws OXException {
         for (int i = 0; i < clientrules.size(); i++) {
             final Rule rule = clientrules.get(i);
             if (uniqueid.intValue() == rule.getUniqueId()) {
@@ -779,5 +769,31 @@ public final class MailFilterServiceImpl implements MailFilterService {
         } catch (IOException e) {
             throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
         }
+    }
+
+    /**
+     * Find the correct position into the array
+     * 
+     * @param rule the rule to add
+     * @param rules the rules list
+     * @param clientrulesandrequire
+     * @return the UID of rule and hence the position
+     * @throws OXException
+     */
+    private int insertIntoPosition(final Rule rule, final RuleListAndNextUid rules, final ClientRulesAndRequire clientrulesandrequire) throws OXException {
+        int position = rule.getPosition();
+        final List<Rule> clientrules = clientrulesandrequire.getRules();
+        if (position >= clientrules.size()) {
+            throw MailFilterExceptionCode.BAD_POSITION.create(Integer.valueOf(position));
+        }
+        final int nextuid = rules.getNextuid();
+        setUIDInRule(rule, nextuid);
+        if (position != -1) {
+            clientrules.add(position, rule);
+        } else {
+            clientrules.add(rule);
+            position = clientrules.size() - 1;
+        }
+        return nextuid;
     }
 }

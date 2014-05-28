@@ -93,7 +93,7 @@ public final class SieveTextFilter {
      *
      */
     public class ClientRulesAndRequire {
-        private final ArrayList<Rule> rules;
+        private final List<Rule> rules;
 
         private final HashSet<String> require;
 
@@ -101,12 +101,12 @@ public final class SieveTextFilter {
          * @param rules
          * @param require
          */
-        public ClientRulesAndRequire(final ArrayList<Rule> rules, final HashSet<String> require) {
+        public ClientRulesAndRequire(final List<Rule> rules, final HashSet<String> require) {
             this.rules = rules;
             this.require = require;
         }
 
-        public final ArrayList<Rule> getRules() {
+        public final List<Rule> getRules() {
             return rules;
         }
 
@@ -306,8 +306,8 @@ public final class SieveTextFilter {
      *        we must keep the old requires line
      * @return
      */
-    public ClientRulesAndRequire splitClientRulesAndRequire(final ArrayList<Rule> rules, final String flag, final boolean error) {
-        final ArrayList<Rule> retval = new ArrayList<Rule>();
+    public ClientRulesAndRequire splitClientRulesAndRequire(final List<Rule> rules, final String flag, final boolean error) {
+        final List<Rule> retval = new ArrayList<Rule>();
         final HashSet<String> requires = new HashSet<String>();
         // The flag is checked here because if no flag is given we can omit some checks which increases performance
         if (null != flag) {
@@ -633,7 +633,7 @@ public final class SieveTextFilter {
         return false;
     }
 
-    private List<String> interweaving(final List<OwnType> noncommentedoutput, final List<OwnType> commentedoutput, final ArrayList<Rule> rules) {
+    private List<String> interweaving(final List<OwnType> noncommentedoutput, final List<OwnType> commentedoutput, final List<Rule> rules) {
         final List<String> retval = new ArrayList<String>();
         retval.add(FIRST_LINE + (new Date()).toString());
         for (final OwnType owntype : noncommentedoutput) {

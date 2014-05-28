@@ -263,7 +263,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
                 throw MailFilterExceptionCode.NO_SUCH_ID.create(uid, credentials.getRightUsername(), credentials.getContextString());
             }
             CONVERTER.parse(rule, json);
-            mailFilterService.updateFilterRule(credentials, rule);
+            mailFilterService.updateFilterRule(credentials, rule, uid);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
         } catch (SieveException e) {

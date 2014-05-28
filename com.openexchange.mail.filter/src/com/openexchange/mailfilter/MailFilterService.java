@@ -79,7 +79,7 @@ public interface MailFilterService {
      * @param uid the rule's UID
      * @throws OXException
      */
-    public void updateFilterRule(final Credentials credentials, final Rule rule) throws OXException;
+    public void updateFilterRule(final Credentials credentials, final Rule rule, int uid) throws OXException;
 
     /**
      * Delete the specified rule
