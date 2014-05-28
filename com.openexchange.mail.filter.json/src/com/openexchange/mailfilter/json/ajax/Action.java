@@ -47,57 +47,78 @@
  *
  */
 
-package com.openexchange.mailfilter.internal;
+package com.openexchange.mailfilter.json.ajax;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.mailfilter.osgi.Activator;
 
 /**
- * {@link MailFilterReloadable}
- * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * Enumeration of all possible AJAX servlet actions.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class MailFilterReloadable implements Reloadable {
+public enum Action {
+    /**
+     * Get config object
+     */
+    CONFIG("config"),
+    /**
+     * Uploads a new object to the server.
+     */
+    NEW("new"),
+    /**
+     * Reorders the rules on the server side
+     */
+    REORDER("reorder"),
+    /**
+     * Updates a single object.
+     */
+    UPDATE("update"),
+    /**
+     * Delete a single object.
+     */
+    DELETE("delete"),
+    /**
+     * Returns a list of a list of requested attributes. Request must contain
+     * a list of identifier of objects that attributes should be returned.
+     */
+    LIST("list"),
+    /**
+     * Deletes the whole script
+     */
+    DELETESCRIPT("deletescript"),
+    /**
+     * Gets the whole script as text
+     */
+    GETSCRIPT("getscript");
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
 
-    private static final String CONFIGFILE = "mailfilter.properties";
 
-    private static final String[] PROPERTIES = new String[] { "all properties in file" };
+    private String ajaxName;
+
+    private Action(final String name) {
+        this.ajaxName = name;
+    }
 
     /**
-     * Initializes a new {@link MailFilterReloadable}.
+     * @return the name
      */
-    public MailFilterReloadable() {
-        super();
+    public String getAjaxName() {
+        return ajaxName;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            Activator.checkConfigfile();
-        } catch (Exception e) {
-            LOG.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
+    private static final Map<String, Action> name2Action;
+
+    public static Action byName(final String ajaxName) {
+        return name2Action.get(ajaxName);
+    }
+
+    static {
+        final Map<String, Action> tmp = new HashMap<String, Action>(values()
+            .length, 1);
+        for (final Action action : values()) {
+            tmp.put(action.getAjaxName(), action);
         }
+        name2Action = Collections.unmodifiableMap(tmp);
     }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#getConfigfileNames()
-     */
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
-    }
-
 }

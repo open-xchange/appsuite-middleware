@@ -73,7 +73,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mailfilter.internal.MailFilterProperties;
+import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.services.Services;
 
 /**

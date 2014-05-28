@@ -47,57 +47,58 @@
  *
  */
 
-package com.openexchange.mailfilter.internal;
+package com.openexchange.mailfilter.json.ajax;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.mailfilter.osgi.Activator;
 
 /**
- * {@link MailFilterReloadable}
- * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class MailFilterReloadable implements Reloadable {
+public enum Parameter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
+    ACTION("action", true),
+    USERNAME("username", false),
+    FLAG("flag", false);
 
-    private static final String CONFIGFILE = "mailfilter.properties";
+    private final String name;
 
-    private static final String[] PROPERTIES = new String[] { "all properties in file" };
+    private final boolean required;
+
+    private Parameter(final String name, final boolean required) {
+        this.name = name;
+        this.required = required;
+    }
 
     /**
-     * Initializes a new {@link MailFilterReloadable}.
+     * @return the name
      */
-    public MailFilterReloadable() {
-        super();
+    public String getName() {
+        return name;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
+    /**
+     * @return the required
      */
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            Activator.checkConfigfile();
-        } catch (Exception e) {
-            LOG.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
+    public final boolean isRequired() {
+        return required;
+    }
+
+    private static final Map<String, Parameter> name2Parameter;
+
+    public static Parameter byName(final String name) {
+        return name2Parameter.get(name);
+    }
+
+    static {
+        final Map<String, Parameter> tmp = new HashMap<String, Parameter>(
+            values().length, 1);
+        for (final Parameter action : values()) {
+            tmp.put(action.getName(), action);
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#getConfigfileNames()
-     */
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+        name2Parameter = Collections.unmodifiableMap(tmp);
     }
 
 }

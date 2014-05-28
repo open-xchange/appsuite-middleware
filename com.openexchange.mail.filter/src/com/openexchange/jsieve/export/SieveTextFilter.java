@@ -74,7 +74,7 @@ import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
 import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionCode;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 
 /**
  * This class will be used to filter out special things which are not part of

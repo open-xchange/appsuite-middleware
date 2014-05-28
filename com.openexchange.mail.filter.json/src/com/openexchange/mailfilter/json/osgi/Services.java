@@ -47,57 +47,72 @@
  *
  */
 
-package com.openexchange.mailfilter.internal;
+package com.openexchange.mailfilter.json.osgi;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.mailfilter.osgi.Activator;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MailFilterReloadable}
- * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * {@link Services} - The static service lookup.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailFilterReloadable implements Reloadable {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
-
-    private static final String CONFIGFILE = "mailfilter.properties";
-
-    private static final String[] PROPERTIES = new String[] { "all properties in file" };
+public final class Services {
 
     /**
-     * Initializes a new {@link MailFilterReloadable}.
+     * Initializes a new {@link Services}.
      */
-    public MailFilterReloadable() {
+    private Services() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            Activator.checkConfigfile();
-        } catch (Exception e) {
-            LOG.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
-        }
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#getConfigfileNames()
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
      */
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.mailfilter\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

@@ -47,57 +47,42 @@
  *
  */
 
-package com.openexchange.mailfilter.internal;
+package com.openexchange.mailfilter.json.ajax.json;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.mailfilter.osgi.Activator;
+import org.json.JSONException;
+import com.openexchange.jsieve.commands.Rule;
+import com.openexchange.jsieve.commands.RuleComment;
+import com.openexchange.mailfilter.json.ajax.fields.RuleFields;
+import com.openexchange.mailfilter.json.ajax.json.AbstractObject2JSON2Object.Mapper;
 
-/**
- * {@link MailFilterReloadable}
- * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
- */
-public class MailFilterReloadable implements Reloadable {
+final class IDMapper implements Mapper<Rule> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
-
-    private static final String CONFIGFILE = "mailfilter.properties";
-
-    private static final String[] PROPERTIES = new String[] { "all properties in file" };
-
-    /**
-     * Initializes a new {@link MailFilterReloadable}.
-     */
-    public MailFilterReloadable() {
-        super();
+    @Override
+    public String getAttrName() {
+        return RuleFields.ID;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            Activator.checkConfigfile();
-        } catch (Exception e) {
-            LOG.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
+    public Object getAttribute(final Rule obj) throws JSONException {
+        final RuleComment ruleComment = obj.getRuleComment();
+        if (null != ruleComment) {
+            return Integer.valueOf(ruleComment.getUniqueid());
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isNull(final Rule obj) {
+        return ((null == obj.getRuleComment()) || (-1 == obj.getRuleComment().getUniqueid()));
+    }
+
+    @Override
+    public void setAttribute(final Rule obj, final Object attr) throws JSONException {
+        final RuleComment ruleComment = obj.getRuleComment();
+        if (null != ruleComment) {
+            ruleComment.setUniqueid(((Integer)attr).intValue());
+        } else {
+            obj.setRuleComments(new RuleComment(((Integer)attr).intValue()));
         }
     }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#getConfigfileNames()
-     */
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
-    }
-
 }

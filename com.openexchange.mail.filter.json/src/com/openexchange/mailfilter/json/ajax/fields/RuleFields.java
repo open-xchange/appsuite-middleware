@@ -46,58 +46,17 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.mailfilter.json.ajax.fields;
 
-package com.openexchange.mailfilter.internal;
+public class RuleFields {
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.mailfilter.osgi.Activator;
-
-/**
- * {@link MailFilterReloadable}
- * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
- */
-public class MailFilterReloadable implements Reloadable {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
-
-    private static final String CONFIGFILE = "mailfilter.properties";
-
-    private static final String[] PROPERTIES = new String[] { "all properties in file" };
-
-    /**
-     * Initializes a new {@link MailFilterReloadable}.
-     */
-    public MailFilterReloadable() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            Activator.checkConfigfile();
-        } catch (Exception e) {
-            LOG.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#getConfigfileNames()
-     */
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
-    }
-
+    public static final String ID = "id";
+    public static final String POSITION = "position";
+    public static final String RULENAME = "rulename";
+    public static final String ACTIVE = "active";
+    public static final String FLAGS = "flags";
+    public static final String TEST = "test";
+    public static final String ACTIONCMDS = "actioncmds";
+    public static final String TEXT = "text";
+    public static final String ERRORMSG = "errormsg";
 }

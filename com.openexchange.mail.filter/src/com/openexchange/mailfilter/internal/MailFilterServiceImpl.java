@@ -59,6 +59,7 @@ import java.util.Set;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
 import org.apache.jsieve.parser.generated.ParseException;
+import org.apache.jsieve.parser.generated.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
@@ -78,10 +79,9 @@ import com.openexchange.jsieve.export.SieveTextFilter.ClientRulesAndRequire;
 import com.openexchange.jsieve.export.SieveTextFilter.RuleListAndNextUid;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.mailfilter.Credentials;
+import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.mailfilter.ajax.actions.MailFilterAction;
-import com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionCode;
-import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.services.Services;
 
 /**
@@ -91,7 +91,7 @@ import com.openexchange.mailfilter.services.Services;
  */
 public final class MailFilterServiceImpl implements MailFilterService {
     
-    private static final Logger log = LoggerFactory.getLogger(MailFilterAction.class);
+    private static final Logger log = LoggerFactory.getLogger(MailFilterServiceImpl.class);
 
     private final Object lock;
 
@@ -575,8 +575,8 @@ public final class MailFilterServiceImpl implements MailFilterService {
             final IfCommand ifCommand = rule.getIfCommand();
             if (isVacationRule(rule)) {
                 final List<Object> argList = new ArrayList<Object>();
-                argList.add(Rule2JSON2Rule.createTagArg("is"));
-                argList.add(Rule2JSON2Rule.createTagArg("domain"));
+                argList.add(createTagArg("is"));
+                argList.add(createTagArg("domain"));
 
                 final ArrayList<String> header = new ArrayList<String>();
                 header.add("From");
@@ -615,8 +615,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
         if (null != vacationdomains && 0 != vacationdomains.length()) {
             for (final Rule rule : clientrules) {
                 final IfCommand ifCommand = rule.getIfCommand();
-                final RuleComment ruleComment = rule.getRuleComment();
-                if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(ifCommand.getFirstCommand())) {
+                if (isVacationRule(rule)) {
                     final TestCommand testcommand = ifCommand.getTestcommand();
                     if (Commands.ADDRESS.equals(testcommand.getCommand())) {
                         // Test command found now check if it's the right one...
@@ -680,7 +679,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
      */
     private boolean isVacationRule(final Rule rule) {
         final RuleComment ruleComment = rule.getRuleComment();
-        return (null != ruleComment) && (null != ruleComment.getFlags()) && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(rule.getIfCommand().getFirstCommand());
+        return (null != ruleComment) && (null != ruleComment.getFlags()) && ruleComment.getFlags().contains("vacation") && rule.getIfCommand() != null && ActionCommand.Commands.VACATION.equals(rule.getIfCommand().getFirstCommand());
     }
     
     /**
@@ -733,5 +732,11 @@ public final class MailFilterServiceImpl implements MailFilterService {
             }
         }
         return null;
+    }
+    
+    private TagArgument createTagArg(final String string) {
+        final Token token = new Token();
+        token.image = ":" + string;
+        return new TagArgument(token);
     }
 }

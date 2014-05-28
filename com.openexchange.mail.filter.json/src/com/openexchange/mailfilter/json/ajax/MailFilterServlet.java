@@ -47,57 +47,37 @@
  *
  */
 
-package com.openexchange.mailfilter.internal;
+package com.openexchange.mailfilter.json.ajax;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.mailfilter.osgi.Activator;
+import com.openexchange.mailfilter.json.ajax.actions.MailFilterAction;
+import com.openexchange.mailfilter.json.ajax.actions.MailFilterRequest;
+import com.openexchange.session.Session;
 
 /**
- * {@link MailFilterReloadable}
- * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ *
+ * @author d7
  */
-public class MailFilterReloadable implements Reloadable {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
-
-    private static final String CONFIGFILE = "mailfilter.properties";
-
-    private static final String[] PROPERTIES = new String[] { "all properties in file" };
+public class MailFilterServlet extends AJAXServlet {
 
     /**
-     * Initializes a new {@link MailFilterReloadable}.
+     *
      */
-    public MailFilterReloadable() {
+    private static final long serialVersionUID = 1472856427482243156L;
+
+    /**
+     * Default constructor.
+     */
+    public MailFilterServlet() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            Activator.checkConfigfile();
-        } catch (Exception e) {
-            LOG.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
-        }
+    protected MailFilterAction createAction(final Session session) {
+        return MailFilterAction.valueFor(session);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#getConfigfileNames()
-     */
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    protected MailFilterRequest createRequest() {
+        return new MailFilterRequest();
     }
-
 }

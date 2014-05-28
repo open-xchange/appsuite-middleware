@@ -46,58 +46,71 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.mailfilter;
 
-package com.openexchange.mailfilter.internal;
+public class MailFilterProperties {
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.mailfilter.osgi.Activator;
+    public enum LoginTypes {
+        GLOBAL("global"),
+        USER("user");
 
-/**
- * {@link MailFilterReloadable}
- * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
- */
-public class MailFilterReloadable implements Reloadable {
+        public final String name;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
-
-    private static final String CONFIGFILE = "mailfilter.properties";
-
-    private static final String[] PROPERTIES = new String[] { "all properties in file" };
-
-    /**
-     * Initializes a new {@link MailFilterReloadable}.
-     */
-    public MailFilterReloadable() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            Activator.checkConfigfile();
-        } catch (Exception e) {
-            LOG.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
+        private LoginTypes(final String name) {
+            this.name = name;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#getConfigfileNames()
-     */
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public enum Values {
+        SIEVE_CREDSRC("SIEVE_CREDSRC", CredSrc.SESSION.name),
+        SIEVE_LOGIN_TYPE("SIEVE_LOGIN_TYPE", LoginTypes.GLOBAL.name),
+        SIEVE_SERVER("SIEVE_SERVER", "localhost"),
+        SIEVE_PORT("SIEVE_PORT", "2000"),
+        SCRIPT_NAME("SCRIPT_NAME", "Open-Xchange"),
+        SIEVE_AUTH_ENC("SIEVE_AUTH_ENC", "UTF-8"),
+        NON_RFC_COMPLIANT_TLS_REGEX("NON_RFC_COMPLIANT_TLS_REGEX", "^Cyrus.*v([0-1]\\.[0-9].*|2\\.[0-2].*|2\\.3\\.[0-9]|2\\.3\\.[0-9][^0-9].*)$"),
+        TLS("TLS", "true"),
+        VACATION_DOMAINS("VACATION_DOMAINS", ""),
+        SIEVE_CONNECTION_TIMEOUT("com.openexchange.mail.filter.connectionTimeout", "30000"),
+        SIEVE_PASSWORDSRC("com.openexchange.mail.filter.passwordSource", PasswordSource.SESSION.name),
+        SIEVE_MASTERPASSWORD("com.openexchange.mail.filter.masterPassword", ""),
+        USE_UTF7_FOLDER_ENCODING("com.openexchange.mail.filter.useUTF7FolderEncoding", "false"),
+        PUNYCODE("com.openexchange.mail.filter.punycode", "false"),
+        USE_SIEVE_RESPONSE_CODES("com.openexchange.mail.filter.useSIEVEResponseCodes","false");
+
+        public final String property;
+
+        public final String def;
+
+        private Values(final String property, final String def) {
+            this.property = property;
+            this.def = def;
+        }
+
+    }
+
+    public enum CredSrc {
+        SESSION_FULL_LOGIN("session-full-login"),
+        SESSION("session"),
+        IMAP_LOGIN("imapLogin"),
+        MAIL("mail");
+
+        public final String name;
+
+        private CredSrc(final String name) {
+            this.name = name;
+        }
+    }
+
+    public enum PasswordSource {
+        SESSION("session"),
+        GLOBAL("global");
+
+        public final String name;
+
+        private PasswordSource(final String name) {
+            this.name = name;
+        }
     }
 
 }

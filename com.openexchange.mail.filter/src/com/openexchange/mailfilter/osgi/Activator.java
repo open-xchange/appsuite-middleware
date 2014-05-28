@@ -50,11 +50,7 @@ package com.openexchange.mailfilter.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Map;
 import java.util.Properties;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
@@ -62,19 +58,15 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.mailfilter.ajax.actions.MailFilterAction;
-import com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionCode;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.internal.MailFilterChecker;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
-import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.internal.MailFilterReloadable;
 import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
-import com.openexchange.mailfilter.internal.MailFilterServletInit;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 
 public class Activator extends HousekeepingActivator {
@@ -98,11 +90,11 @@ public class Activator extends HousekeepingActivator {
         try {
             Services.setServiceLookup(this);
 
-            MailFilterServletInit.getInstance().start();
+            //MailFilterServletInit.getInstance().start();
 
             checkConfigfile();
 
-            {
+/*            {
                 final EventHandler eventHandler = new EventHandler() {
 
                     @Override
@@ -128,7 +120,7 @@ public class Activator extends HousekeepingActivator {
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
                 dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
                 registerService(EventHandler.class, eventHandler, dict);
-            }
+            }*/
 
             registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
             getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
@@ -151,7 +143,7 @@ public class Activator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         try {
             super.stopBundle();
-            MailFilterServletInit.getInstance().stop();
+            //MailFilterServletInit.getInstance().stop();
             Services.setServiceLookup(null);
         } catch (final Exception e) {
             LOG.error("", e);

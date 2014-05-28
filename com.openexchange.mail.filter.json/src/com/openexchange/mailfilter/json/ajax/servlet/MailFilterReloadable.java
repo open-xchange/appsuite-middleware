@@ -47,13 +47,12 @@
  *
  */
 
-package com.openexchange.mailfilter.internal;
+package com.openexchange.mailfilter.json.ajax.servlet;
 
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.mailfilter.osgi.Activator;
 
 /**
  * {@link MailFilterReloadable}
@@ -82,10 +81,13 @@ public class MailFilterReloadable implements Reloadable {
      */
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            Activator.checkConfigfile();
-        } catch (Exception e) {
-            LOG.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
+        if (MailFilterServletInit.getInstance().isStarted()) {
+            MailFilterServletInit.getInstance().stop();
+            try {
+                MailFilterServletInit.getInstance().start();
+            } catch (Exception e) {
+                LOG.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
+            }
         }
     }
 

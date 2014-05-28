@@ -5,7 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailfilter.ajax.exceptions.MailFilterExceptionCode;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.osgi.Activator;
 
 

@@ -47,57 +47,22 @@
  *
  */
 
-package com.openexchange.mailfilter.internal;
+package com.openexchange.mailfilter.exceptions;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.mailfilter.osgi.Activator;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link MailFilterReloadable}
- * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class MailFilterReloadable implements Reloadable {
+public class MailFilterExceptionMessages implements LocalizableStrings {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
+    public static final String INVALID_REDIRECT_ADDRESS_MSG = "The redirect address \"%1$s\" is not valid.";
 
-    private static final String CONFIGFILE = "mailfilter.properties";
+    public static final String REJECTED_REDIRECT_ADDRESS_MSG = "The redirect address \"%1$s\" has been rejected.";
 
-    private static final String[] PROPERTIES = new String[] { "all properties in file" };
+    public static final String INVALID_SIEVE_RULE_MSG = "Invalid SIEVE rule specified. Please review your mail filter rules";
 
-    /**
-     * Initializes a new {@link MailFilterReloadable}.
-     */
-    public MailFilterReloadable() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            Activator.checkConfigfile();
-        } catch (Exception e) {
-            LOG.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#getConfigfileNames()
-     */
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
-    }
+    public static final String INVALID_SIEVE_RULE2_MSG = "Please review your mail filter rules as they seem to be invalid. Response from server: \"%1$s\"";
 
 }
