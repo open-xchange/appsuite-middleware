@@ -55,33 +55,37 @@ import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.action.Vacation;
 
-
 /**
  * MoveParserImpl
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class VacationParserImpl implements ActionParser {
 
-	@Override
+    @Override
     public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
-		final int days = jsonObject.getInt("days");
-		final JSONArray jsonAddressArray = jsonObject.getJSONArray("addresses");
-		final String[] addresses = new String[jsonAddressArray.length()];
-		for (int a = 0; a < addresses.length; a++) {
-			addresses[a] = jsonAddressArray.getString(a);
-		}
+        final int days = jsonObject.getInt("days");
+        final JSONArray jsonAddressArray = jsonObject.optJSONArray("addresses");
+        final String[] addresses;
+        if (jsonAddressArray != null) {
+            addresses = new String[jsonAddressArray.length()];
+            for (int a = 0; a < addresses.length; a++) {
+                addresses[a] = jsonAddressArray.getString(a);
+            }
+        } else {
+            addresses = new String[0];
+        }
 
-		String subject = null;
-		if (jsonObject.has("text")) {
-			subject = jsonObject.getString("subject");
-		}
+        String subject = null;
+        if (jsonObject.has("text")) {
+            subject = jsonObject.getString("subject");
+        }
 
-		String text = null;
-		if (jsonObject.has("text")) {
-			text = jsonObject.getString("text");
-		}
+        String text = null;
+        if (jsonObject.has("text")) {
+            text = jsonObject.getString("text");
+        }
 
-		return new Vacation(days, addresses, subject, text);
-	}
+        return new Vacation(days, addresses, subject, text);
+    }
 }
