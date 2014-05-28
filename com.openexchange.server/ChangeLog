@@ -1,6 +1,7 @@
 * 2014-05-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 32796: Proper handling of special "*" query during task search
+ - Fix for bug 32800: Respect index boundaries when adding SIEVE rules to a java.util.List
 
 * 2014-05-28 - martin.schneider@open-xchange.com
 

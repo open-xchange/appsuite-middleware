@@ -672,9 +672,14 @@ public final class SieveTextFilter {
                 final int line = ruleComment.getLine();
                 final String rulename2 = ruleComment.getRulename();
                 // The nth line is the n-1th position inside the array
-                retval.add(line - 1, FLAG_TAG + listToCommaSeparatedString(ruleComment.getFlags()) + SEPARATOR + UNIQUE_ID + ruleComment.getUniqueid() + SEPARATOR
-                        + RULENAME_TAG + ((null != rulename2) ? rulename2 : ""));
-                searchEmptyLineAndRemove(retval, line - 1);
+                int index = line - 1;
+                String sVal = new StringBuilder(128).append(FLAG_TAG).append(listToCommaSeparatedString(ruleComment.getFlags())).append(SEPARATOR).append(UNIQUE_ID).append(ruleComment.getUniqueid()).append(SEPARATOR).append(RULENAME_TAG).append(null == rulename2 ? "" : rulename2).toString();
+                if (index < 0 || index > retval.size()) {
+                    retval.add(sVal);
+                } else {
+                    retval.add(index, sVal);
+                    searchEmptyLineAndRemove(retval, index);
+                }
             }
         }
 
