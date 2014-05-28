@@ -51,7 +51,7 @@ package com.openexchange.tokenlogin.impl;
 
 import static org.mockito.Matchers.anyString;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -68,8 +68,10 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.hazelcast.core.IMap;
+import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
@@ -129,9 +131,17 @@ public class Bug32698Test {
      * Mock of the {@link IMap}
      */
     @Mock
-    private IMap<String, String> iMap;
+    private IMap<String, String> tokenIMap;
 
-    private HashMap<String, String> myMap = new HashMap<String, String>();
+    /**
+     * Mock of the {@link IMap}
+     */
+    @Mock
+    private IMap<String, String> SessionIMap;
+
+    private ConcurrentMap<String, String> myMap1 = new ConcurrentLinkedHashMap<String, String>();
+
+    private ConcurrentMap<String, String> myMap2 = new ConcurrentLinkedHashMap<String, String>();
 
     /**
      * A temporary folder that could be used by each mock.
@@ -148,31 +158,75 @@ public class Bug32698Test {
         PowerMockito.when(session.getContextId()).thenReturn(424242669);
         PowerMockito.when(session.getSessionID()).thenReturn("8a07c5a2e4974a75ae70bd9a36198f03");
 
-        PowerMockito.when(iMap, method(IMap.class, "put", String.class, String.class)).withArguments(anyString(), anyString()).thenAnswer(
+        PowerMockito.when(tokenIMap, method(IMap.class, "put", String.class, String.class)).withArguments(anyString(), anyString()).thenAnswer(
             new Answer<String>() {
 
                 @Override
                 public String answer(InvocationOnMock invocation) throws Throwable {
                     Object[] args = invocation.getArguments();
-                    return myMap.put((String) args[0], (String) args[1]);
+                    return myMap1.put((String) args[0], (String) args[1]);
                 }
             });
-        PowerMockito.when(iMap, method(IMap.class, "get", String.class)).withArguments(anyString()).thenAnswer(new Answer<String>() {
+        PowerMockito.when(tokenIMap, method(IMap.class, "get", String.class)).withArguments(anyString()).thenAnswer(new Answer<String>() {
 
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
-                return myMap.get((String) args[0]);
+                return myMap1.get((String) args[0]);
             }
         });
-        PowerMockito.when(iMap, method(IMap.class, "remove", String.class)).withArguments(anyString()).thenAnswer(new Answer<String>() {
+        PowerMockito.when(tokenIMap, method(IMap.class, "remove", String.class)).withArguments(anyString()).thenAnswer(new Answer<String>() {
 
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
-                return myMap.remove((String) args[0]);
+                return myMap1.remove((String) args[0]);
             }
         });
+        PowerMockito.when(tokenIMap, method(IMap.class, "putIfAbsent", String.class, String.class)).withArguments(anyString(), anyString()).thenAnswer(
+            new Answer<String>() {
+
+                @Override
+                public String answer(InvocationOnMock invocation) throws Throwable {
+                    Object[] args = invocation.getArguments();
+                    return myMap1.putIfAbsent((String) args[0], (String) args[1]);
+                }
+            });
+
+        PowerMockito.when(SessionIMap, method(IMap.class, "put", String.class, String.class)).withArguments(anyString(), anyString()).thenAnswer(
+            new Answer<String>() {
+
+                @Override
+                public String answer(InvocationOnMock invocation) throws Throwable {
+                    Object[] args = invocation.getArguments();
+                    return myMap2.put((String) args[0], (String) args[1]);
+                }
+            });
+        PowerMockito.when(SessionIMap, method(IMap.class, "get", String.class)).withArguments(anyString()).thenAnswer(new Answer<String>() {
+
+            @Override
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return myMap2.get((String) args[0]);
+            }
+        });
+        PowerMockito.when(SessionIMap, method(IMap.class, "remove", String.class)).withArguments(anyString()).thenAnswer(new Answer<String>() {
+
+            @Override
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return myMap2.remove((String) args[0]);
+            }
+        });
+        PowerMockito.when(SessionIMap, method(IMap.class, "putIfAbsent", String.class, String.class)).withArguments(anyString(), anyString()).thenAnswer(
+            new Answer<String>() {
+
+                @Override
+                public String answer(InvocationOnMock invocation) throws Throwable {
+                    Object[] args = invocation.getArguments();
+                    return myMap2.putIfAbsent((String) args[0], (String) args[1]);
+                }
+            });
     }
 
     @Test
@@ -181,6 +235,46 @@ public class Bug32698Test {
         PowerMockito.when(this.sessiondService.addSession((AddSessionParameter) Mockito.anyObject())).thenReturn(this.session);
         PowerMockito.when(Services.getService(SessiondService.class)).thenReturn(this.sessiondService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
+
+        configureTokenLoginServices();
+        this.tokenLoginServiceImpl.changeBackingMapToHz();
+        this.tokenLoginServiceImpl2.changeBackingMapToHz();
+
+        String localToken = this.tokenLoginServiceImpl.acquireToken(this.session);
+        Session returnedSession = this.tokenLoginServiceImpl2.redeemToken(localToken, "appSecret", "optClientId", "optAuthId", "optHash");
+        Assert.assertNotNull(returnedSession);
+        String localToken2 = this.tokenLoginServiceImpl.acquireToken(this.session);
+        Assert.assertFalse(localToken.equals(localToken2));
+
+        Mockito.verify(sessiondService, Mockito.times(1)).addSession((AddSessionParameter) Mockito.anyObject());
+    }
+
+    @Test(expected = OXException.class)
+    public void testTokenIsInvalidated() throws Exception {
+        PowerMockito.when(this.sessiondService.getSession(Matchers.anyString())).thenReturn(this.session);
+        PowerMockito.when(this.sessiondService.addSession((AddSessionParameter) Mockito.anyObject())).thenReturn(this.session);
+        PowerMockito.when(Services.getService(SessiondService.class)).thenReturn(this.sessiondService);
+        PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
+
+        configureTokenLoginServices();
+        this.tokenLoginServiceImpl.changeBackingMapToHz();
+        this.tokenLoginServiceImpl2.changeBackingMapToHz();
+
+        String localToken = this.tokenLoginServiceImpl.acquireToken(this.session);
+        Session returnedSession = this.tokenLoginServiceImpl2.redeemToken(localToken, "appSecret", "optClientId", "optAuthId", "optHash");
+        Assert.assertNotNull(returnedSession);
+        Session returnedSession2 = this.tokenLoginServiceImpl.redeemToken(localToken, "appSecret", "optClientId", "optAuthId", "optHash");
+
+        Assert.assertFalse(returnedSession.equals(returnedSession2));
+
+        Mockito.verify(sessiondService, Mockito.times(1)).addSession((AddSessionParameter) Mockito.anyObject());
+    }
+
+    /**
+     * @throws OXException
+     * @throws Exception
+     */
+    private void configureTokenLoginServices() throws OXException, Exception {
 
         this.tokenLoginServiceImpl = PowerMockito.spy(new TokenLoginServiceImpl(this.maxIdleTime, this.configService) {
 
@@ -197,30 +291,43 @@ public class Bug32698Test {
             }
         });
 
-        PowerMockito.when(tokenLoginServiceImpl, method(TokenLoginServiceImpl.class, "hzMap")).withNoArguments().thenAnswer(
-            new Answer<IMap<String, String>>() {
+        this.tokenLoginServiceImpl.setSessionId2tokenHzMapName("sessionId2tokenMapName");
+        this.tokenLoginServiceImpl.setToken2sessionIdMapNameHzMapName("token2sessionIdMapName");
+        this.tokenLoginServiceImpl2.setSessionId2tokenHzMapName("sessionId2tokenMapName");
+        this.tokenLoginServiceImpl2.setToken2sessionIdMapNameHzMapName("token2sessionIdMapName");
 
-                @Override
-                public IMap<String, String> answer(InvocationOnMock invocation) throws Throwable {
-                    return iMap;
-                }
-            });
-        PowerMockito.when(tokenLoginServiceImpl2, method(TokenLoginServiceImpl.class, "hzMap")).withNoArguments().thenAnswer(
-            new Answer<IMap<String, String>>() {
+        PowerMockito.when(tokenLoginServiceImpl, method(TokenLoginServiceImpl.class, "hzMap", String.class)).withArguments(
+            org.mockito.Matchers.eq("token2sessionIdMapName")).thenAnswer(new Answer<IMap<String, String>>() {
 
-                @Override
-                public IMap<String, String> answer(InvocationOnMock invocation) throws Throwable {
-                    return iMap;
-                }
-            });
+            @Override
+            public IMap<String, String> answer(InvocationOnMock invocation) throws Throwable {
+                return tokenIMap;
+            }
+        });
+        PowerMockito.when(tokenLoginServiceImpl, method(TokenLoginServiceImpl.class, "hzMap", String.class)).withArguments(
+            org.mockito.Matchers.eq("sessionId2tokenMapName")).thenAnswer(new Answer<IMap<String, String>>() {
 
-        String localToken = this.tokenLoginServiceImpl.acquireToken(this.session);
-        Session returnedSession = this.tokenLoginServiceImpl2.redeemToken(localToken, "appSecret", "optClientId", "optAuthId", "optHash");
-        Assert.assertNotNull(returnedSession);
-        String localToken2 = this.tokenLoginServiceImpl.acquireToken(this.session);
-        Assert.assertFalse(localToken.equals(localToken2));
+            @Override
+            public IMap<String, String> answer(InvocationOnMock invocation) throws Throwable {
+                return SessionIMap;
+            }
+        });
+        PowerMockito.when(tokenLoginServiceImpl2, method(TokenLoginServiceImpl.class, "hzMap", String.class)).withArguments(
+            org.mockito.Matchers.eq("token2sessionIdMapName")).thenAnswer(new Answer<IMap<String, String>>() {
 
-        Mockito.verify(sessiondService, Mockito.times(1)).addSession((AddSessionParameter) Mockito.anyObject());
+            @Override
+            public IMap<String, String> answer(InvocationOnMock invocation) throws Throwable {
+                return tokenIMap;
+            }
+        });
+        PowerMockito.when(tokenLoginServiceImpl2, method(TokenLoginServiceImpl.class, "hzMap", String.class)).withArguments(
+            org.mockito.Matchers.eq("sessionId2tokenMapName")).thenAnswer(new Answer<IMap<String, String>>() {
+
+            @Override
+            public IMap<String, String> answer(InvocationOnMock invocation) throws Throwable {
+                return SessionIMap;
+            }
+        });
     }
 
 }

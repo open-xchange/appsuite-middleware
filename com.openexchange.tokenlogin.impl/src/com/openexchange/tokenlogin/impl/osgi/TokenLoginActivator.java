@@ -126,6 +126,7 @@ public final class TokenLoginActivator extends HousekeepingActivator {
                     @Override
                     public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
                         removeService(HazelcastInstance.class);
+                        serviceImpl.changeBackingMapToLocalMap();
                         context.ungetService(reference);
                     }
 
@@ -138,13 +139,16 @@ public final class TokenLoginActivator extends HousekeepingActivator {
                     public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
                         final HazelcastInstance hazelcastInstance = context.getService(reference);
                         try {
-                            final String mapName = discoverHzMapName(hazelcastConfig.getConfig());
-                            if (null == mapName) {
+                            final String sessionId2tokenMapName = discoverHzMapName(hazelcastConfig.getConfig(),"sessionId2token");
+                            final String token2sessionIdMapName = discoverHzMapName(hazelcastConfig.getConfig(),"token2sessionId");
+                            if (null == sessionId2tokenMapName || null == token2sessionIdMapName) {
                                 context.ungetService(reference);
                                 return null;
                             }
                             addService(HazelcastInstance.class, hazelcastInstance);
-                            serviceImpl.setHzMapName(mapName);
+                            serviceImpl.setSessionId2tokenHzMapName(sessionId2tokenMapName);
+                            serviceImpl.setToken2sessionIdMapNameHzMapName(token2sessionIdMapName);
+                            serviceImpl.changeBackingMapToHz();
                             return hazelcastInstance;
                         } catch (final OXException e) {
                             LOG.warn("Couldn't initialize distributed token-login map.", e);
@@ -210,18 +214,17 @@ public final class TokenLoginActivator extends HousekeepingActivator {
      * @return
      * @throws IllegalStateException
      */
-    private String discoverHzMapName(final Config config) throws IllegalStateException {
+    private String discoverHzMapName(final Config config, String mapPrefix) throws IllegalStateException {
         final Map<String, MapConfig> mapConfigs = config.getMapConfigs();
         if (null != mapConfigs && !mapConfigs.isEmpty()) {
             for (final String mapName : mapConfigs.keySet()) {
-                if (mapName.startsWith("tokenlogin-")) {
+                if (mapName.startsWith(mapPrefix)) {
                     LOG.info("Using distributed token-login '{}'.", mapName);
                     return mapName;
                 }
             }
         }
-        LOG.info("No distributed token-login map found in hazelcast configuration");
+        LOG.info("No distributed token-login map with mapPrefix {} in hazelcast configuration", mapPrefix);
         return null;
     }
-
 }
