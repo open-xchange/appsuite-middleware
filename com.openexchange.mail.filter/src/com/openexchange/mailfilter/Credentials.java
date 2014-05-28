@@ -49,6 +49,8 @@
 
 package com.openexchange.mailfilter;
 
+import javax.security.auth.Subject;
+
 /**
  * This class holds the credentials to login into the imap server.
  */
@@ -65,6 +67,8 @@ public class Credentials {
     private final int contextid;
 
     private final boolean b_contextid;
+
+    private final Subject subject;
 
     /**
      * @param authname The user name for authentication.
@@ -84,6 +88,10 @@ public class Credentials {
      * @param username The user name of the effected user which configuration is beeing touched.
      */
     public Credentials(final String authname, final String password, final int userid, final int contextid, final String username) {
+        this(authname, password, userid, contextid, username, null);
+    }
+
+    public Credentials(final String authname, final String password, final int userid, final int contextid, final String username, final Subject subject) {
         super();
         this.authname = authname;
         this.password = password;
@@ -91,6 +99,7 @@ public class Credentials {
         this.contextid = contextid;
         this.username = username;
         b_contextid = true;
+        this.subject = subject;
     }
 
     /**
@@ -161,7 +170,7 @@ public class Credentials {
 
     /**
      * Gets the string value of context ID if a context ID is present; otherwise "unknown" is returned
-     *
+     * 
      * @return The string value of context ID if a context ID is present; otherwise "unknown" is returned
      */
     public final String getContextString() {
@@ -169,6 +178,15 @@ public class Credentials {
             return "unknown";
         }
         return String.valueOf(contextid);
+    }
+
+    /**
+     * Gets the subject
+     * 
+     * @return The subject
+     */
+    public Subject getSubject() {
+        return subject;
     }
 
     /*

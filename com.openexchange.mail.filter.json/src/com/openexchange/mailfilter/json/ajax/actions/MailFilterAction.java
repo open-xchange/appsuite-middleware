@@ -49,10 +49,6 @@
 
 package com.openexchange.mailfilter.json.ajax.actions;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -61,26 +57,20 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.security.auth.Subject;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.TestCommand;
-import com.openexchange.jsieve.export.SieveHandler;
-import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
-import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.Parameter;
 import com.openexchange.mailfilter.json.ajax.actions.AbstractRequest.Parameters;
-import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.json.AbstractObject2JSON2Object;
 import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule;
 import com.openexchange.mailfilter.json.osgi.Services;
@@ -95,7 +85,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
 
     private static final ConcurrentMap<Key, MailFilterAction> INSTANCES = new ConcurrentHashMap<Key, MailFilterAction>();
 
-    private static final String KERBEROS_SESSION_SUBJECT = "kerberosSubject";
+    
 
     /**
      * Gets the {@link MailFilterAction} instance for specified session.
@@ -107,11 +97,10 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         final Key key = new Key(session.getUserId(), session.getContextId());
         MailFilterAction action = INSTANCES.get(key);
         if (null == action) {
-            final Subject subject = (Subject)session.getParameter(KERBEROS_SESSION_SUBJECT);
-            final MailFilterAction newaction = new MailFilterAction(subject);
-            action = INSTANCES.putIfAbsent(key, newaction);
+            final MailFilterAction newAction = new MailFilterAction();
+            action = INSTANCES.putIfAbsent(key, newAction);
             if (null == action) {
-                action = newaction;
+                action = newAction;
             }
         }
         return action;
@@ -128,39 +117,14 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
 
     private static final AbstractObject2JSON2Object<Rule> CONVERTER = new Rule2JSON2Rule();
 
-    private final Object mutex;
-
-    private final String scriptname;
-
-    private boolean useSIEVEResponseCodes = false;
-
-    private final Subject krbSubject;
-
     /**
      * Default constructor.
      */
-    public MailFilterAction(final Subject krbSubject) {
+    public MailFilterAction() {
         super();
-        this.krbSubject = krbSubject;
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        scriptname = config.getProperty(MailFilterProperties.Values.SCRIPT_NAME.property);
-        useSIEVEResponseCodes = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.USE_SIEVE_RESPONSE_CODES.property));
-        mutex = new Object();
-    }
-
-    private void handlerConnect(final SieveHandler sieveHandler) throws UnsupportedEncodingException, IOException, OXSieveHandlerException, OXSieveHandlerInvalidCredentialsException, PrivilegedActionException {
-        if (null != krbSubject) {
-            Subject.doAs(krbSubject, new PrivilegedExceptionAction<Object>() {
-
-                @Override
-                public Object run() throws Exception {
-                    sieveHandler.initializeConnection();
-                    return null;
-                }
-            });
-        } else {
-            sieveHandler.initializeConnection();
-        }
+        //final ConfigurationService config = Services.getService(ConfigurationService.class);
+        //scriptname = config.getProperty(MailFilterProperties.Values.SCRIPT_NAME.property);
+        //useSIEVEResponseCodes = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.USE_SIEVE_RESPONSE_CODES.property));
     }
 
     /**
@@ -217,17 +181,15 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
      */
     @Override
     protected int actionNew(final MailFilterRequest request) throws OXException {
-        synchronized (mutex) {
-            final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
-            try {
-                final Credentials credentials = request.getCredentials();
-                final Rule rule = CONVERTER.parse(getJsonBody(request));
-                return mailFilterService.createFilterRule(credentials, rule);
-            } catch (final SieveException e) {
-                throw MailFilterExceptionCode.handleSieveException(e);
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
-            }
+        final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
+        try {
+            final Credentials credentials = request.getCredentials();
+            final Rule rule = CONVERTER.parse(getJsonBody(request));
+            return mailFilterService.createFilterRule(credentials, rule);
+        } catch (final SieveException e) {
+            throw MailFilterExceptionCode.handleSieveException(e);
+        } catch (final JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         }
     }
 

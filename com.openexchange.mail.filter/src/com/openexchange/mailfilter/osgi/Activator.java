@@ -51,12 +51,10 @@ package com.openexchange.mailfilter.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Properties;
-import org.osgi.service.http.HttpService;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
@@ -67,7 +65,6 @@ import com.openexchange.mailfilter.internal.MailFilterReloadable;
 import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
 
 public class Activator extends HousekeepingActivator {
 
@@ -82,7 +79,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class };
+        return new Class<?>[] { ConfigurationService.class, CapabilityService.class };
     }
 
     @Override

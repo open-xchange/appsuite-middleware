@@ -52,6 +52,7 @@ package com.openexchange.jsieve.export;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.mail.internet.idn.IDNA;
+import javax.security.auth.Subject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;

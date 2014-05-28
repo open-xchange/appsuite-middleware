@@ -1,4 +1,6 @@
+
 package com.openexchange.mail.filter.json;
+
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -48,8 +50,6 @@ package com.openexchange.mail.filter.json;
  *
  */
 
-
-
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -63,11 +63,10 @@ import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.actions.MailFilterAction;
 import com.openexchange.mailfilter.json.osgi.Services;
 
-
 public class MailFilterActionTest extends MailFilterAction {
 
     public MailFilterActionTest() {
-        super(null);
+        super();
     }
 
     @BeforeClass
@@ -83,7 +82,7 @@ public class MailFilterActionTest extends MailFilterAction {
     public void testGetRightPasswordNothing() throws OXException {
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String credsPW = "pw2";
-        final Credentials creds = new Credentials("", credsPW, 0, 0);
+        final Credentials creds = new Credentials("", credsPW, 0, 0, null);
         try {
             SieveHandlerFactory.getRightPassword(config, creds);
             Assert.fail("No exception thrown");
@@ -94,20 +93,24 @@ public class MailFilterActionTest extends MailFilterAction {
 
     @Test
     public void testGetRightPasswordSession() throws OXException {
-        Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, MailFilterProperties.PasswordSource.SESSION.name);
+        Common.simConfigurationService.stringProperties.put(
+            MailFilterProperties.Values.SIEVE_PASSWORDSRC.property,
+            MailFilterProperties.PasswordSource.SESSION.name);
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String credsPW = "pw2";
-        final Credentials creds = new Credentials("", credsPW, 0, 0);
+        final Credentials creds = new Credentials("", credsPW, 0, 0, null);
         final String rightPassword = SieveHandlerFactory.getRightPassword(config, creds);
         Assert.assertEquals("Password should be equal to \"" + credsPW + "\"", credsPW, rightPassword);
     }
 
     @Test
     public void testGetRightPasswordGlobalNoMasterPW() throws OXException {
-        Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, MailFilterProperties.PasswordSource.GLOBAL.name);
+        Common.simConfigurationService.stringProperties.put(
+            MailFilterProperties.Values.SIEVE_PASSWORDSRC.property,
+            MailFilterProperties.PasswordSource.GLOBAL.name);
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String credsPW = "pw2";
-        final Credentials creds = new Credentials("", credsPW, 0, 0);
+        final Credentials creds = new Credentials("", credsPW, 0, 0, null);
         try {
             SieveHandlerFactory.getRightPassword(config, creds);
             Assert.fail("No exception thrown");
@@ -119,11 +122,13 @@ public class MailFilterActionTest extends MailFilterAction {
     @Test
     public void testGetRightPasswordGlobal() throws OXException {
         final String masterPW = "masterPW";
-        Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, MailFilterProperties.PasswordSource.GLOBAL.name);
+        Common.simConfigurationService.stringProperties.put(
+            MailFilterProperties.Values.SIEVE_PASSWORDSRC.property,
+            MailFilterProperties.PasswordSource.GLOBAL.name);
         Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property, masterPW);
         final ConfigurationService config = Services.getService(ConfigurationService.class);
         final String credsPW = "pw2";
-        final Credentials creds = new Credentials("", credsPW, 0, 0);
+        final Credentials creds = new Credentials("", credsPW, 0, 0, null);
         final String rightPassword = SieveHandlerFactory.getRightPassword(config, creds);
         Assert.assertEquals("Password should be equal to \"" + masterPW + "\"", masterPW, rightPassword);
     }

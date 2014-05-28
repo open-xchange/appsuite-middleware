@@ -49,6 +49,7 @@
 
 package com.openexchange.mailfilter.json.ajax.actions;
 
+import javax.security.auth.Subject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.Credentials;
@@ -60,10 +61,11 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractRequest {
+
+    private static final String KERBEROS_SESSION_SUBJECT = "kerberosSubject";
 
     private Session session;
 
@@ -89,8 +91,7 @@ public abstract class AbstractRequest {
     }
 
     /**
-     * @param body
-     *                the body to set
+     * @param body the body to set
      */
     public void setBody(final String body) {
         this.body = body;
@@ -104,8 +105,7 @@ public abstract class AbstractRequest {
     }
 
     /**
-     * @param parameters
-     *                the parameters to set
+     * @param parameters the parameters to set
      */
     public void setParameters(final Parameters parameters) {
         this.parameters = parameters;
@@ -119,8 +119,7 @@ public abstract class AbstractRequest {
     }
 
     /**
-     * @param session
-     *                the session to set
+     * @param session the session to set
      */
     public void setSession(final Session session) {
         this.session = session;
@@ -138,12 +137,13 @@ public abstract class AbstractRequest {
         final String password = session.getPassword();
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
+        final Subject subject = (Subject) session.getParameter(KERBEROS_SESSION_SUBJECT);
 
         try {
             final String username = getUsername();
-            return new Credentials(loginName, password, userId, contextId, username);
+            return new Credentials(loginName, password, userId, contextId, username, subject);
         } catch (final OXException e) {
-            return new Credentials(loginName, password, userId, contextId);
+            return new Credentials(loginName, password, userId, contextId, null, subject);
         }
     }
 
@@ -154,15 +154,15 @@ public abstract class AbstractRequest {
     public Action getAction() throws OXException {
         final Parameter action = Parameter.ACTION;
         if (null == parameters) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( action.getName());
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(action.getName());
         }
         final String value = parameters.getParameter(Parameter.ACTION);
         if (null == value) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( action.getName());
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(action.getName());
         }
         final Action retval = Action.byName(value);
         if (null == retval) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( value);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(value);
         }
         return retval;
     }
@@ -171,13 +171,14 @@ public abstract class AbstractRequest {
         final Parameter pUsername = Parameter.USERNAME;
         final String username = parameters.getParameter(pUsername);
         if (username == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( pUsername);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(pUsername);
         }
 
         return username;
     }
 
     public interface Parameters {
+
         String getParameter(Parameter param) throws OXException;
     }
 }

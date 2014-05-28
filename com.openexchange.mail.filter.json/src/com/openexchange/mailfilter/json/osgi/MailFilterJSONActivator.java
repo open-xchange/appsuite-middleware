@@ -55,8 +55,11 @@ import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.json.ajax.actions.MailFilterAction;
 import com.openexchange.mailfilter.json.ajax.servlet.MailFilterServletInit;
@@ -86,7 +89,7 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailFilterService.class };
+        return new Class<?>[] { ConfigurationService.class, MailFilterService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class };
     }
 
     /*
@@ -95,7 +98,7 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-//        final Logger LOG = LoggerFactory.getLogger(MailFilterJSONActivator.class);
+        // final Logger LOG = LoggerFactory.getLogger(MailFilterJSONActivator.class);
         Services.setServiceLookup(this);
 
         MailFilterServletInit.getInstance().start();
