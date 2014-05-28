@@ -52,7 +52,6 @@ package com.openexchange.jsieve.export;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.mail.internet.idn.IDNA;
-import javax.security.auth.Subject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
@@ -180,29 +179,6 @@ public final class SieveHandlerFactory {
             throw MailFilterExceptionCode.NO_VALID_CREDSRC.create();
         }
         return sieveHandler;
-    }
-
-    /**
-     * Get a SieveHandler for the specified Session
-     * 
-     * @param session the server session
-     * @return a SieveHandler
-     * @throws OXException
-     */
-    public static SieveHandler getSieveHandler(final Session session) throws OXException {
-        final ConfigurationService config = Services.getService(ConfigurationService.class);
-        final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
-        final String loginName;
-        if (MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
-            loginName = session.getLogin();
-        } else {
-            loginName = session.getLoginName();
-        }
-        final String password = session.getPassword();
-        final int userId = session.getUserId();
-        final int contextId = session.getContextId();
-
-        return getSieveHandler(new Credentials(loginName, password, userId, contextId));
     }
 
     /**

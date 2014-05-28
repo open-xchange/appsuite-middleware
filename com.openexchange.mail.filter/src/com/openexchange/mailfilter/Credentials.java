@@ -50,6 +50,9 @@
 package com.openexchange.mailfilter;
 
 import javax.security.auth.Subject;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.mailfilter.services.Services;
+import com.openexchange.session.Session;
 
 /**
  * This class holds the credentials to login into the imap server.
@@ -69,6 +72,27 @@ public class Credentials {
     private final boolean b_contextid;
 
     private final Subject subject;
+    
+    /**
+     * Initializes a new {@link Credentials} out of a {@link ServerSession}
+     * 
+     * @param session ServerSession
+     */
+    public Credentials(final Session session) {
+        final ConfigurationService config = Services.getService(ConfigurationService.class);
+        final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
+        if (MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
+            authname = session.getLogin();
+        } else {
+            authname = session.getLoginName();
+        }
+        password = session.getPassword();
+        userid = session.getUserId();
+        contextid = session.getContextId();
+        subject = (Subject) session.getParameter("kerberosSubject");
+        username = null;
+        b_contextid = true;
+    }
 
     /**
      * @param authname The user name for authentication.
