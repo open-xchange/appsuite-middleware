@@ -4730,7 +4730,7 @@ msgid "Storing a contact with private flag in a shared folder is not allowed."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:111
-msgid "Image size too large. Image size: %1$d. Max. size: %2$d."
+msgid "Image size too large. Image size: %1$s. Max. size: %2$s."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:113
