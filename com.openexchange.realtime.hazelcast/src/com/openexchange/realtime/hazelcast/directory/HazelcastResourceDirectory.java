@@ -51,10 +51,10 @@ package com.openexchange.realtime.hazelcast.directory;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import com.google.common.base.Optional;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
@@ -73,16 +73,12 @@ import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.DefaultResourceDirectory;
 import com.openexchange.realtime.directory.Resource;
-import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.management.HazelcastResourceDirectoryMBean;
 import com.openexchange.realtime.hazelcast.management.HazelcastResourceDirectoryManagement;
-import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.util.IDMap;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link HazelcastResourceDirectory} - Keeps mappings of general {@link ID}s to full {@link ID}s and full {@link ID}s to {@link Resource}.
@@ -516,6 +512,32 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
      */
     public boolean removeResourceMappingEntryListener(String registrationId) throws OXException {
         return getResourceMapping().removeEntryListener(registrationId);
+    }
+
+    /**
+     * Find all Resources in this directory that are located on a given member node.
+     * 
+     * @param member The cluster member
+     * @return all Resources in this directory that are located on the given member node.
+     * @throws OXException
+     */
+    public IDMap<HazelcastResource> getResourcesOfMember(Member member)throws OXException {
+        IMap<String, Map<String, Object>> allResources = getResourceMapping();
+        MemberPredicate memberPredicate = new MemberPredicate(member.getInetSocketAddress());
+        Set<Entry<String,Map<String,Object>>> entrySet = allResources.entrySet(memberPredicate);
+        IDMap<HazelcastResource> foundIds = new IDMap<HazelcastResource>();
+        Iterator<Entry<String, Map<String, Object>>> iterator = entrySet.iterator();
+        while(iterator.hasNext()) {
+            try {
+                Entry<String, Map<String, Object>> next = iterator.next();
+                String key = next.getKey();
+                Map<String, Object> value = next.getValue();
+                foundIds.put(new ID(key), HazelcastResourceWrapper.unwrap(value));
+            } catch (Exception e) {
+                LOG.error("Couldn't add resource that was found for member {}", member, e);
+            }
+        }
+        return foundIds;
     }
 
 }

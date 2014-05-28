@@ -1,3 +1,4 @@
+opt/open-xchange/etc/hazelcast/rtCleanupLock.properties
 opt/open-xchange/etc/hazelcast/rtClientMapping.properties
 opt/open-xchange/etc/hazelcast/rtIDMapping.properties
 opt/open-xchange/etc/hazelcast/rtResourceDirectory.properties

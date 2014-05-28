@@ -61,16 +61,19 @@ import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.group.InactivityNotice;
+import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.group.commands.LeaveStanza;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerMBean;
 import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerManagement;
 import com.openexchange.realtime.hazelcast.serialization.PortableID;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
 import com.openexchange.realtime.util.Duration;
 import com.openexchange.realtime.util.IDMap;
@@ -86,6 +89,7 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedGroupManagerImpl.class);
     private final MessageDispatcher messageDispatcher;
+    private GlobalRealtimeCleanup globalCleanup;
     private final String client_map;
     private final String group_map;
     private final IDMap<Duration> inactivityMap;
@@ -95,12 +99,14 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
     /**
      * Initializes a new {@link DistributedGroupManagerImpl}.
      * 
-     * @param messageDispatcher The messageDispatcher 
+     * @param messageDispatcher The MessageDispatcher 
+     * @param globalCleanup The GlobalRealtimeCleanup
      * @param client_map The name of the client map
      * @param group_map The name of group map
      */
-    public DistributedGroupManagerImpl(MessageDispatcher messageDispatcher, String client_map, String group_map) {
+    public DistributedGroupManagerImpl(MessageDispatcher messageDispatcher, GlobalRealtimeCleanup globalCleanup, String client_map, String group_map) {
         this.messageDispatcher = messageDispatcher;
+        this.globalCleanup = globalCleanup;
         this.client_map=client_map;
         this.group_map=group_map;
         this.inactivityMap = new IDMap<Duration>(true);

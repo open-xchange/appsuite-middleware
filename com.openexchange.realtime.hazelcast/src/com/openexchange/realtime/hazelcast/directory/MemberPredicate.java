@@ -47,62 +47,38 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.group;
+package com.openexchange.realtime.hazelcast.directory;
 
+import java.net.InetSocketAddress;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.google.common.base.Optional;
-import com.hazelcast.core.EntryEvent;
+import java.util.Map.Entry;
 import com.hazelcast.query.Predicate;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
-import com.openexchange.realtime.hazelcast.directory.ResourceMappingEntryListener;
-import com.openexchange.realtime.packet.ID;
 
 
 /**
- * {@link DistributedGroupManagerCleaner} - Listens for eviction notifications on the ResourceMapping of the HazelcastResourceDirectory and
- * removes the matching client from the DistributedGroupManager.
- * 
+ * {@link MemberPredicate} - Filters resources that are located on a member node via a distributed query.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
-public class DistributedGroupManagerCleaner implements ResourceMappingEntryListener {
+public class MemberPredicate implements Predicate<String, Map<String, Object>> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DistributedGroupManagerCleaner.class);
-    Predicate<String, Map<String, Object>> notInternalPredicate;
-    private RealtimeJanitor janitor;
-    
-    public DistributedGroupManagerCleaner(RealtimeJanitor janitor) {
-        notInternalPredicate = new NotInternalPredicate();
-        this.janitor = janitor;
+    private static final long serialVersionUID = -290310576848501442L;
+
+    private final InetSocketAddress memberAddress;
+
+    public MemberPredicate(InetSocketAddress memberAddress) {
+        this.memberAddress = memberAddress;
     }
 
     @Override
-    public void entryAdded(EntryEvent<String, Map<String, Object>> event) {
-    }
-
-    @Override
-    public void entryRemoved(EntryEvent<String, Map<String, Object>> event) {
-        ID id = new ID(event.getKey());
-        LOG.debug("Removal of key {}", id);
-        janitor.cleanupForId(id);
-    }
-
-    @Override
-    public void entryUpdated(EntryEvent<String, Map<String, Object>> event) {
-    }
-
-    @Override
-    public void entryEvicted(EntryEvent<String, Map<String, Object>> event) {
-        ID id = new ID(event.getKey());
-        LOG.debug("Eviction of key {}", id);
-        janitor.cleanupForId(id);
-    }
-
-    @Override
-    public Optional<Predicate<String, Map<String, Object>>> getPredicate() {
-        return Optional.of(notInternalPredicate);
+    public boolean apply(Entry<String, Map<String, Object>> mapEntry) {
+        Map<String, Object> resourceMap = mapEntry.getValue();
+        if(resourceMap != null) {
+            HazelcastResource resource = HazelcastResourceWrapper.unwrap(resourceMap);
+            return memberAddress.equals(resource.getRoutingInfo().getInetSocketAddress());
+        }
+        return false;
     }
 
 }
