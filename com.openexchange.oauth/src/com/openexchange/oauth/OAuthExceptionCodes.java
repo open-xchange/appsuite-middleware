@@ -140,7 +140,12 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Could not get a valid response from the associated OAuth provider.
      */
-    NOT_A_VALID_RESPONSE("Could not get a valid response from the associated OAuth provider.", CATEGORY_ERROR, 17, OAuthExceptionMessages.NOT_A_VALID_RESPONSE_MSG)
+    NOT_A_VALID_RESPONSE("Could not get a valid response from the associated OAuth provider.", CATEGORY_ERROR, 17, OAuthExceptionMessages.NOT_A_VALID_RESPONSE_MSG),
+    /**
+     * There was a problem while creating a connection to the remote service.
+     */
+    CONNECT_ERROR("There was a problem while creating a connection to the remote service.", CATEGORY_CONNECTIVITY, 18, OAuthExceptionMessages.CONNECT_ERROR_MSG),
+
     ;
 
     private final Category category;
@@ -148,11 +153,15 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     private final String message;
     private String displayMessage;
 
+    private OAuthExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
     private OAuthExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.number = detailNumber;
         this.category = category;
-        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override

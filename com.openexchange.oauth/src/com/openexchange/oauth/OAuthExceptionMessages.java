@@ -90,6 +90,9 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // Could not get a valid response from the associated OAuth provider.
     public static final String NOT_A_VALID_RESPONSE_MSG = "Could not get a valid response from the associated OAuth provider.";
 
+    // There was a problem while creating a connection to the remote service.
+    public static final String CONNECT_ERROR_MSG = "There was a problem while creating a connection to the remote service.";
+
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */

@@ -86,6 +86,7 @@ public class OAuthProxyRequest {
 		put(API.TUMBLR, Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.tumblr\\.com")));
 		put(API.FLICKR, Arrays.asList(Pattern.compile("^https?:\\/\\/.*?\\.flickr\\.com")));
 		put(API.XING, Arrays.asList(Pattern.compile("^https:\\/\\/api\\.xing\\.com")));
+		put(API.GOOGLE, Arrays.asList(Pattern.compile("^https:\\/\\/www\\.googleapis\\.com")));
 	}};
 
 	public static enum HTTPMethod {

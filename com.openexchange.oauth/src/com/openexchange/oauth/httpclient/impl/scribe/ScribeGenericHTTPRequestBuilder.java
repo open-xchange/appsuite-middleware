@@ -58,6 +58,7 @@ import org.scribe.builder.api.Api;
 import org.scribe.builder.api.DropBoxApi;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FlickrApi;
+import org.scribe.builder.api.GoogleApi;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.builder.api.TumblrApi;
 import org.scribe.builder.api.TwitterApi;
@@ -137,6 +138,8 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
             return DropBoxApi.class;
         case XING:
             return XingApi.class;
+        case GOOGLE:
+            return GoogleApi.class;
         case VKONTAKTE:
             return VkontakteApi.class;
             // Add new API enums above

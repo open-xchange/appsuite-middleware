@@ -1189,6 +1189,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, msg);
             }
         }
+        if (e instanceof org.scribe.exceptions.OAuthConnectionException) {
+            return OAuthExceptionCodes.CONNECT_ERROR.create(e, e.getMessage());
+        }
         return OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
     }
 
