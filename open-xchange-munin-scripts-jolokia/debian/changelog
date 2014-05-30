@@ -1,3 +1,9 @@
+open-xchange-munin-scripts-jolokia (7.6.0-4) stable; urgency=low
+
+  * Fourth release candidate for 7.6.0
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Fri, 30 May 2014 13:47:13 +0200
+
 open-xchange-munin-scripts-jolokia (7.6.0-3) stable; urgency=low
 
   * Third release candidate for 7.6.0
