@@ -184,6 +184,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         oauthState.put(OAuthConstants.ARGUMENT_SECRET, requestToken.getSecret());
         oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrl);
         oauthState.put(OAuthConstants.ARGUMENT_CURRENT_HOST, currentHost);
+        oauthState.put(OAuthConstants.ARGUMENT_AUTH_URL, interaction.getAuthorizationURL());
         session.setParameter(uuid, oauthState);
         session.setParameter(Session.PARAM_TOKEN, oauthSessionToken);
         /*

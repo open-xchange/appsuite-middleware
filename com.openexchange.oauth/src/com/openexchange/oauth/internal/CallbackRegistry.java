@@ -103,9 +103,12 @@ public class CallbackRegistry implements CustomRedirectURLDetermination, Runnabl
         if (tokenMap.isEmpty()) {
             return null;
         }
-        final String token = req.getParameter("oauth_token");
+        String token = req.getParameter("oauth_token");
         if (null == token) {
-            return null;
+            token = req.getParameter("state");
+            if (null == token || !token.startsWith("__ox")) {
+                return null;
+            }
         }
         final UrlAndStamp urlAndStamp = tokenMap.remove(token);
         return null == urlAndStamp ? null : urlAndStamp.callbackUrl;

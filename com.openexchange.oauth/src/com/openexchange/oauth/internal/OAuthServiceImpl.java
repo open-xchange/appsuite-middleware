@@ -72,7 +72,7 @@ import org.scribe.builder.api.DropBoxApi;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FlickrApi;
 import org.scribe.builder.api.FoursquareApi;
-import org.scribe.builder.api.GoogleApi;
+import org.scribe.builder.api.Google2v2Api;
 import org.scribe.builder.api.LinkedInApi;
 import org.scribe.builder.api.TumblrApi;
 import org.scribe.builder.api.TwitterApi;
@@ -299,7 +299,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             {
                 final String scope = metaData.getScope();
-                if (scope != null) {
+                if (scope != null && authorizationURL.indexOf("&scope=") < 0) {
                     authorizationURL.append("&scope=").append(urlEncode(scope));
                 }
             }
@@ -310,17 +310,15 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Register deferrer
              */
-            if (metaData.registerTokenBasedDeferrer() && null != scribeToken) {
-                // Is only applicable if call-back URL is deferred; e.g. /ajax/defer?redirect=http:%2F%2Fmy.host.com%2Fpath...
-                if (isDeferrerAvailable(ds, userId, contextId)) {
-                    if (ds.seemsDeferred(cbUrl, userId, contextId)) {
-                        callbackRegistry.add(scribeToken.getToken(), cbUrl);
-                    } else {
-                        LOG.warn("Call-back URL cannot be registered as it is not deferred: {}", Strings.abbreviate(cbUrl, 32));
-                    }
+            if (metaData.registerTokenBasedDeferrer()) {
+                // Register by token
+                if (null != scribeToken) {
+                    registerTokenForDeferredAccess(scribeToken.getToken(), cbUrl, ds, userId, contextId);
                 } else {
-                    // No chance to check
-                    callbackRegistry.add(scribeToken.getToken(), cbUrl);
+                    String registerToken = metaData.getRegisterToken(authURL);
+                    if (null != registerToken) {
+                        registerTokenForDeferredAccess(registerToken, cbUrl, ds, userId, contextId);
+                    }
                 }
             }
             /*
@@ -334,6 +332,20 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             throw handleScribeOAuthException(e);
         } catch (final Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void registerTokenForDeferredAccess(final String token, String cbUrl, final DeferringURLService ds, final int userId, final int contextId) {
+        // Is only applicable if call-back URL is deferred; e.g. /ajax/defer?redirect=http:%2F%2Fmy.host.com%2Fpath...
+        if (isDeferrerAvailable(ds, userId, contextId)) {
+            if (ds.seemsDeferred(cbUrl, userId, contextId)) {
+                callbackRegistry.add(token, cbUrl);
+            } else {
+                LOG.warn("Call-back URL cannot be registered as it is not deferred: {}", Strings.abbreviate(cbUrl, 32));
+            }
+        } else {
+            // No chance to check
+            callbackRegistry.add(token, cbUrl);
         }
     }
 
@@ -791,7 +803,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             } else if (serviceId.indexOf("linkedin") >= 0) {
                 apiClass = LinkedInApi.class;
             } else if (serviceId.indexOf("google") >= 0) {
-                apiClass = GoogleApi.class;
+                apiClass = Google2v2Api.class;
             } else if (serviceId.indexOf("yahoo") >= 0) {
                 apiClass = YahooApi.class;
             } else if (serviceId.indexOf("foursquare") >= 0) {

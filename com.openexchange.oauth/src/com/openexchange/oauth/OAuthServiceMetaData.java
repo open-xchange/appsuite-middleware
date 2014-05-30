@@ -176,6 +176,7 @@ public interface OAuthServiceMetaData {
      * Gets the optional OAuth token.
      *
      * @param arguments The OAuth arguments
+     * @param session The associated session
      * @return The OAuth token or <code>null</code>
      * @throws OXException If an error occurs returning the token
      */
@@ -208,6 +209,15 @@ public interface OAuthServiceMetaData {
 	/**
 	 * Whether to register a token based deferrer.
 	 */
-	boolean registerTokenBasedDeferrer();
+    boolean registerTokenBasedDeferrer();
+
+    /**
+     * Gets an optional registration token in case {@link #registerTokenBasedDeferrer()} returns <code>true</code>, but there is no common
+     * <code>"oauth_token"</code>.
+     *
+     * @param authUrl The authorization URL from which to yield the token
+     * @return A registration token (starting with <code>"__ox"</code>) or <code>null</code>
+     */
+    String getRegisterToken(String authUrl);
 
 }
