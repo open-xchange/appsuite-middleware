@@ -545,6 +545,7 @@ Groupware Max Heap Size: $(cat /opt/open-xchange/etc/ox-scriptconf.sh | \
     grep -A 1 'groupware Java virtual machine' | \
     sed 's|.*-Xmx|-Xmx|g' | \
     sed 's|"||g' | \
+    sed 's| .*||g' | \
     tail -n 1)
 OX Log Storage: $(du -h ${OX_LOG_DIR})
 
