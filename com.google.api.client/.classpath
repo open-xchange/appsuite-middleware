@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-client-1.18.0-rc.jar" sourcepath="lib/source/google-api-client-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-client-appengine-1.18.0-rc.jar" sourcepath="lib/source/google-api-client-appengine-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-client-gson-1.18.0-rc.jar" sourcepath="lib/source/google-api-client-gson-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-client-jackson2-1.18.0-rc.jar" sourcepath="lib/source/google-api-client-jackson2-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-client-java6-1.18.0-rc.jar" sourcepath="lib/source/google-api-client-java6-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-client-protobuf-1.18.0-rc.jar" sourcepath="lib/source/google-api-client-protobuf-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-client-servlet-1.18.0-rc.jar" sourcepath="lib/source/google-api-client-servlet-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-client-xml-1.18.0-rc.jar" sourcepath="lib/source/google-api-client-xml-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-1.18.0-rc.jar" sourcepath="lib/source/google-http-client-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-appengine-1.18.0-rc.jar" sourcepath="lib/source/google-http-client-appengine-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-gson-1.18.0-rc.jar" sourcepath="lib/source/google-http-client-gson-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson-1.18.0-rc.jar" sourcepath="lib/source/google-http-client-jackson-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson2-1.18.0-rc.jar" sourcepath="lib/source/google-http-client-jackson2-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jdo-1.18.0-rc.jar" sourcepath="lib/source/google-http-client-jdo-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-protobuf-1.18.0-rc.jar" sourcepath="lib/source/google-http-client-protobuf-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-xml-1.18.0-rc.jar" sourcepath="lib/source/google-http-client-xml-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-1.18.0-rc.jar" sourcepath="lib/source/google-oauth-client-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-appengine-1.18.0-rc.jar" sourcepath="lib/source/google-oauth-client-appengine-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-java6-1.18.0-rc.jar" sourcepath="lib/source/google-oauth-client-java6-1.18.0-rc-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gson-2.1.jar" sourcepath="lib/source/gson-2.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/protobuf-java-2.4.1.jar" sourcepath="lib/source/protobuf-java-2.4.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-core-asl-1.9.11.jar" sourcepath="lib/source/jackson-core-asl-1.9.11-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-core-2.1.3.jar" sourcepath="lib/source/jackson-core-2.1.3-sources.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="output" path="build"/>
+</classpath>

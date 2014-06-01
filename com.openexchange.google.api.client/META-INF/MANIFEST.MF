@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The Open-Xchange Google API Client
+Bundle-SymbolicName: com.openexchange.google.api.client
+Bundle-Version: 7.6.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.google.api.client.googleapis.auth.oauth2,
+ com.google.api.client.googleapis.javanet,
+ com.google.api.client.http.javanet,
+ com.google.api.client.json,
+ com.google.api.client.json.jackson,
+ com.google.api.client.json.jackson2,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.oauth,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.osgi.util.tracker,
+ org.scribe.builder,
+ org.scribe.builder.api,
+ org.scribe.exceptions,
+ org.scribe.extractors,
+ org.scribe.model,
+ org.scribe.oauth,
+ org.scribe.services,
+ org.scribe.utils,
+ org.slf4j
+Bundle-Activator: com.openexchange.google.api.client.osgi.GoogleApiClientActivator
