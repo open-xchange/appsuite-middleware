@@ -126,7 +126,8 @@ Bundle-ClassPath: .,
  lib/google-http-client-xml-1.18.0-rc.jar,
  lib/google-oauth-client-1.18.0-rc.jar,
  lib/google-oauth-client-appengine-1.18.0-rc.jar,
- lib/google-oauth-client-java6-1.18.0-rc.jar
+ lib/google-oauth-client-java6-1.18.0-rc.jar,
+ lib/google-api-services-calendar-v3-rev84-1.18.0-rc.jar
 Export-Package: com.google.api.client.auth.oauth,
  com.google.api.client.auth.oauth2,
  com.google.api.client.auth.openidconnect,
