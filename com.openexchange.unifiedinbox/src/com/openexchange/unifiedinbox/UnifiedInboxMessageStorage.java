@@ -931,14 +931,15 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         final MailSortField effectiveSortField = determineSortFieldForSearch(fullName, sortField);
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             final List<MailAccount> accounts = getAccounts();
-            final MailField[] checkedFields = StorageUtility.prepareMailFieldsForSearch(fields, effectiveSortField).toArray();
+            final MailFields mfs = StorageUtility.prepareMailFieldsForSearch(fields, effectiveSortField);
+            final MailField[] checkedFields = mfs.toArray();
             // Create completion service for simultaneous access
             final int length = accounts.size();
             final int undelegatedAccountId = access.getAccountId();
             final Executor executor = ThreadPools.getThreadPool().getExecutor();
             // Check for continuation service
             final ContinuationRegistryService continuationRegistry = Services.optService(ContinuationRegistryService.class);
-            if (null != continuationRegistry && StorageUtility.prepareMailFieldsForSearch(fields, effectiveSortField).contains(MailField.SUPPORTS_CONTINUATION) && !StorageUtility.prepareMailFieldsForSearch(fields, effectiveSortField).contains(MailField.FULL) && !StorageUtility.prepareMailFieldsForSearch(fields, effectiveSortField).contains(MailField.BODY)) {
+            if (null != continuationRegistry && mfs.contains(MailField.SUPPORTS_CONTINUATION) && !mfs.contains(MailField.FULL) && !mfs.contains(MailField.BODY)) {
                 final ExecutorContinuation<MailMessage> executorContinuation;
                 {
                     final Locale locale = getLocale();
