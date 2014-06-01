@@ -55,6 +55,7 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
+import static com.openexchange.mail.utils.StorageUtility.prepareMailFieldsForSearch;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -1468,16 +1469,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
 
         return effectiveSortField;
-    }
-
-    private MailFields prepareMailFieldsForSearch(final MailField[] mailFields, final MailSortField effectiveSortField) {
-        final MailFields usedFields = new MailFields();
-        usedFields.addAll(mailFields);
-        usedFields.add(MailField.toField(effectiveSortField.getListField()));
-        // Second-level sort field
-        usedFields.add(MailField.RECEIVED_DATE);
-
-        return usedFields;
     }
 
     private MailMessage convertWithBody(final MailAccount mailAccount, final String fullName, final Message message) throws MessagingException, OXException {

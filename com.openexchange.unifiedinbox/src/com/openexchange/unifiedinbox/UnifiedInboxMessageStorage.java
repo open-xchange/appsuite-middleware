@@ -92,6 +92,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.threader.Conversation;
 import com.openexchange.mail.threader.Conversations;
 import com.openexchange.mail.utils.MailMessageComparator;
+import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
@@ -930,16 +931,14 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         final MailSortField effectiveSortField = determineSortFieldForSearch(fullName, sortField);
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             final List<MailAccount> accounts = getAccounts();
-            final MailFields mfs = new MailFields(fields);
-            mfs.add(MailField.getField(effectiveSortField.getField()));
-            final MailField[] checkedFields = mfs.toArray();
+            final MailField[] checkedFields = StorageUtility.prepareMailFieldsForSearch(fields, effectiveSortField).toArray();
             // Create completion service for simultaneous access
             final int length = accounts.size();
             final int undelegatedAccountId = access.getAccountId();
             final Executor executor = ThreadPools.getThreadPool().getExecutor();
             // Check for continuation service
             final ContinuationRegistryService continuationRegistry = Services.optService(ContinuationRegistryService.class);
-            if (null != continuationRegistry && mfs.contains(MailField.SUPPORTS_CONTINUATION) && !mfs.contains(MailField.FULL) && !mfs.contains(MailField.BODY)) {
+            if (null != continuationRegistry && StorageUtility.prepareMailFieldsForSearch(fields, effectiveSortField).contains(MailField.SUPPORTS_CONTINUATION) && !StorageUtility.prepareMailFieldsForSearch(fields, effectiveSortField).contains(MailField.FULL) && !StorageUtility.prepareMailFieldsForSearch(fields, effectiveSortField).contains(MailField.BODY)) {
                 final ExecutorContinuation<MailMessage> executorContinuation;
                 {
                     final Locale locale = getLocale();
@@ -1034,8 +1033,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
 
             // The old way
-            final TrackingCompletionService<List<MailMessage>> completionService =
-                new UnifiedInboxCompletionService<List<MailMessage>>(executor);
+            final TrackingCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<List<MailMessage>>(executor);
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
