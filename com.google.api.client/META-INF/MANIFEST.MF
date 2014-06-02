@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Google APIs Client Library for Java
 Bundle-SymbolicName: com.google.api.client
-Bundle-Version: 1.17.0
+Bundle-Version: 1.18.0
 Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.annotations,
