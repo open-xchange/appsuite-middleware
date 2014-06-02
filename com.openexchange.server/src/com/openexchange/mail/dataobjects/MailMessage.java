@@ -802,6 +802,13 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * @return <code>true</code> if flag \SEEN is not set; otherwise <code>false</code>
+     */
+    public boolean isUnseen() {
+        return !isSeen();
+    }
+
+    /**
      * @return <code>true</code> if virtual spam flag is set; otherwise <code>false</code>
      */
     public boolean isSpam() {

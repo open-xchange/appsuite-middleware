@@ -1412,6 +1412,72 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     @Override
+    public void updateMessageUserFlags(final String fullName, final String[] mailIds, final String[] flags, final boolean set) throws OXException {
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
+        }
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
+            // Parse mail IDs
+            final TIntObjectMap<Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
+            final int size = parsed.size();
+            final TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
+            // Collection of Callables
+            final Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
+            for (int i = size; i-- > 0;) {
+                iter.advance();
+                final int accountId = iter.key();
+                final Map<String, List<String>> folderUIDMap = iter.value();
+                collection.add(new LoggingCallable<Object>(session) {
+
+                    @Override
+                    public Object call() throws Exception {
+                        // Get account's mail access
+                        MailAccess<?, ?> mailAccess = null;
+                        try {
+                            mailAccess = MailAccess.getInstance(getSession(), accountId);
+                            mailAccess.connect();
+                            final int innersize = folderUIDMap.size();
+                            final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
+                            for (int j = 0; j < innersize; j++) {
+                                final Map.Entry<String, List<String>> e = inneriter.next();
+                                final String folder = e.getKey();
+                                final List<String> uids = e.getValue();
+                                // Update flags
+                                mailAccess.getMessageStorage().updateMessageUserFlags(folder, uids.toArray(new String[uids.size()]), flags, set);
+                            }
+                        } catch (final OXException e) {
+                            getLogger().debug("", e);
+                            return null;
+                        } finally {
+                            closeSafe(mailAccess);
+                        }
+                        return null;
+                    }
+                });
+            }
+            final ThreadPoolService executor = ThreadPools.getThreadPool();
+            try {
+                // Invoke all and wait for being executed
+                executor.invokeAll(collection);
+
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw MailExceptionCode.INTERRUPT_ERROR.create(e);
+            }
+        } else {
+            final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(fullName);
+            MailAccess<?, ?> mailAccess = null;
+            try {
+                mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+                mailAccess.connect();
+                mailAccess.getMessageStorage().updateMessageUserFlags(fa.getFullname(), mailIds, flags, set);
+            } finally {
+                closeSafe(mailAccess);
+            }
+        }
+    }
+
+    @Override
     public void updateMessageColorLabel(final String fullName, final String[] mailIds, final int colorLabel) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);

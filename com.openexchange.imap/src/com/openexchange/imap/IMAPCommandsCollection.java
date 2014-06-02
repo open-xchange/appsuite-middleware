@@ -1693,6 +1693,81 @@ public final class IMAPCommandsCollection {
         }))).booleanValue();
     }
 
+    /**
+     * Sets/Unsets specified user flags from messages which correspond to given UIDs.
+     *
+     * @param imapFolder The IMAP folder
+     * @param msgUIDs The message UIDs
+     * @param flags The flags to set/unset
+     * @param set <code>true</code> to set; <code>false</code> to unset flags
+     * @return <code>true</code> if everything went fine; otherwise <code>false</code>
+     * @throws MessagingException - if an error occurs in underlying protocol
+     */
+    public static boolean setUserFlags(final IMAPFolder imapFolder, final long[] msgUIDs, final String[] flags, final boolean set) throws MessagingException {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount <= 0) {
+            /*
+             * Empty folder...
+             */
+            return true;
+        }
+        return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                final String[] args;
+                final String format;
+                if (null == msgUIDs) {
+                    args = (1 == messageCount ? new String[] { "1" } : ARGS_ALL);
+                    format = TEMPL_STORE_FLAGS;
+                } else {
+                    args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false, 160);
+                    format = TEMPL_UID_STORE_FLAGS;
+                }
+                Response[] r = null;
+                Response response = null;
+                Next: for (int i = 0; i < args.length; i++) {
+
+                    final String command = String.format(format, args[i], set ? "+" : "-", userFlags2String(flags));
+                    r = performCommand(p, command);
+                    response = r[r.length - 1];
+                    if (response.isOK()) {
+                        notifyResponseHandlers(r, p);
+                        continue Next;
+                    } else if (response.isBAD()) {
+                        throw new BadCommandException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    } else if (response.isNO()) {
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(
+                            IMAPException.Code.PROTOCOL_ERROR,
+                            command,
+                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    } else {
+                        p.handleResult(response);
+                    }
+                }
+                return Boolean.TRUE;
+            }
+
+        }))).booleanValue();
+    }
+
+    static String userFlags2String(final String[] flags) {
+        final StringBuilder sb = new StringBuilder(64);
+        boolean first = true;
+        for (String flag : flags) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append(' ');
+            }
+            sb.append(flag);
+        }
+        return sb.toString();
+    }
+
     private static final String COMMAND_CLOSE = "CLOSE";
 
     /**

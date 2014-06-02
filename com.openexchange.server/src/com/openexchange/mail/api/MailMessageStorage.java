@@ -298,6 +298,11 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     }
 
     @Override
+    public void updateMessageUserFlags(String folder, String[] mailIds, String[] flags, boolean set) throws OXException {
+        // Empty body here
+    }
+
+    @Override
     public abstract void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws OXException;
 
     /**

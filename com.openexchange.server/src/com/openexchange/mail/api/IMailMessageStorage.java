@@ -315,6 +315,22 @@ public interface IMailMessageStorage {
     public void updateMessageColorLabel(String folder, String[] mailIds, int colorLabel) throws OXException;
 
     /**
+     * Updates the user flags of the messages specified by given mail IDs located in given folder. If parameter <code>set</code> is
+     * <code>true</code> the affected flags denoted by <code>flags</code> are added; otherwise removed.
+     * <p>
+     * If no mail could be found for a given mail ID, it is treated as a no-op.
+     * <p>
+     * Mail folder in question requires to support user flags (storing individual strings per message)
+     *
+     * @param folder The folder full name
+     * @param mailIds The mail IDs
+     * @param flags The user flags
+     * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
+     * @throws OXException If user flags cannot be updated
+     */
+    public void updateMessageUserFlags(String folder, String[] mailIds, String[] flags, boolean set) throws OXException;
+
+    /**
      * Updates the flags of the messages specified by given mail IDs located in given folder. If parameter <code>set</code> is
      * <code>true</code> the affected flags denoted by <code>flags</code> are added; otherwise removed.
      * <p>

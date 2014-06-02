@@ -519,6 +519,29 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     }
 
     @Override
+    public void updateMessageUserFlags(String folder, String[] mailIds, String[] flags, boolean set) throws OXException {
+        updateMessageUserFlagsLong(folder, uids2longs(mailIds), flags, set);
+    }
+
+    /**
+     * Updates the user flags of the messages specified by given mail IDs located in given folder. If parameter <code>set</code> is
+     * <code>true</code> the affected flags denoted by <code>flags</code> are added; otherwise removed.
+     * <p>
+     * If no mail could be found for a given mail ID, it is treated as a no-op.
+     * <p>
+     * Mail folder in question requires to support user flags (storing individual strings per message)
+     *
+     * @param folder The folder full name
+     * @param mailIds The mail IDs
+     * @param flags The user flags
+     * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
+     * @throws OXException If user flags cannot be updated
+     */
+    public void updateMessageUserFlagsLong(String folder, long[] mailIds, String[] flags, boolean set) throws OXException {
+        // Empty body here
+    }
+
+    @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         updateMessageFlagsLong(folder, uids2longs(mailIds), flags, set);
     }

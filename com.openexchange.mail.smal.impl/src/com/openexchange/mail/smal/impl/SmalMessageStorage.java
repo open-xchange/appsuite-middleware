@@ -388,6 +388,22 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     @Override
+    public void updateMessageUserFlags(String folder, String[] mailIds, String[] flags, boolean set) throws OXException {
+        smalMailAccess.getDelegateMailAccess().getMessageStorage().updateMessageUserFlags(folder, mailIds, flags, set);
+        /*
+         * Enqueue change job.
+         */
+        try {
+            final Builder builder = prepareJobBuilder(ChangeByIdsJob.class);
+            builder.folder(folder);
+            builder.addProperty(ChangeByIdsJob.IDS, mailIds);
+            submitJob(builder.build());
+        } catch (final Exception e) {
+            LOG.warn("Could not schedule indexing job.", e);
+        }
+    }
+
+    @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
         smalMailAccess.getDelegateMailAccess().getMessageStorage().updateMessageColorLabel(folder, mailIds, colorLabel);
         /*

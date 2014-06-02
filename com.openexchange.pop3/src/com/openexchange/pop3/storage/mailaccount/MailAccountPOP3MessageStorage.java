@@ -442,6 +442,11 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
     }
 
     @Override
+    public void updateMessageUserFlags(final String folder, final String[] mailIds, final String[] flags, final boolean set) throws OXException {
+        delegatee.updateMessageUserFlags(folder, mailIds, flags, set);
+    }
+
+    @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         delegatee.updateMessageFlags(getRealFullname(folder), mailIds, flags, set);
     }

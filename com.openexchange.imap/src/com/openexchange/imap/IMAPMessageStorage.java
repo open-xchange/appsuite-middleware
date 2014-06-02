@@ -3325,6 +3325,69 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
+    public void updateMessageUserFlagsLong(String fullName, long[] mailIds, String[] flags, boolean set) throws OXException {
+        if (null == mailIds || 0 == mailIds.length) {
+            // Nothing to do
+            return;
+        }
+        try {
+            if (!MailProperties.getInstance().isUserFlagsEnabled()) {
+                /*
+                 * User flags are disabled
+                 */
+                LOG.debug("User flags are disabled or not supported. Update of color flag ignored.");
+                return;
+            }
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
+            } catch (final MessagingException e) {
+                final Exception next = e.getNextException();
+                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
+            }
+            try {
+                if (!holdsMessages()) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolder.getFullName());
+                }
+                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
+                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                }
+            } catch (final MessagingException e) {
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
+            }
+            if (!UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId)) {
+                LOG.error("Folder \"{}\" does not support user-defined flags. Update of color flag ignored.", imapFolder.getFullName());
+                return;
+            }
+            final OperationKey opKey = new OperationKey(Type.MSG_USER_FLAGS_UPDATE, accountId, new Object[] { fullName });
+            final boolean marked = setMarker(opKey);
+            try {
+                /*
+                 * Remove all old color label flag(s) and set new color label flag
+                 */
+                imapFolderStorage.removeFromCache(fullName);
+                IMAPCommandsCollection.setUserFlags(imapFolder, mailIds, flags, set);
+
+                /*
+                 * Force JavaMail's cache update through folder closure
+                 */
+                imapFolder.close(false);
+                resetIMAPFolder();
+            } finally {
+                if (marked) {
+                    unsetMarker(opKey);
+                }
+            }
+        } catch (final MessagingException e) {
+            throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    @Override
     public void updateMessageColorLabelLong(final String fullName, final long[] msgUIDs, final int colorLabel) throws OXException {
         if (null == msgUIDs || 0 == msgUIDs.length) {
             // Nothing to do
