@@ -78,6 +78,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -1006,8 +1007,8 @@ public final class StructureMailMessageParser {
         if (contentType.startsWithAny("application/pkcs7-mime", "application/x-pkcs7-mime")) {
             return true;
         }
-        if (contentType.startsWith("multipart/signed")) {
-            final String protocol = LocaleTools.toLowerCase(contentType.getParameter("protocol"));
+        if (contentType.startsWith(PRIMARY_MULTI_SIGNED)) {
+            final String protocol = Strings.asciiLowerCase(contentType.getParameter("protocol"));
             if (null != protocol && ("application/pkcs7-signature".equals(protocol) || "application/x-pkcs7-signature".equals(protocol))) {
                 return true;
             }
