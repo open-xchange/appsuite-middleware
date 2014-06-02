@@ -141,6 +141,7 @@ import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.mail.IndexRange;
@@ -2757,7 +2758,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Try to set marker header
                  */
                 try {
-                    filteredMsgs.get(0).setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
+                    Message message = filteredMsgs.get(0);
+                    /*
+                     * Check for empty content
+                     */
+                    String lcct = Strings.asciiLowerCase(message.getContentType());
+                    if (null == lcct || lcct.startsWith("text/")) {
+                        if (LOG.isDebugEnabled()) {
+                            String content = null == lcct ? MessageUtility.readMimePart(message, "US-ASCII") : MessageUtility.readMimePart(message, new ContentType(lcct));
+                            if (Strings.isEmpty(content)) {
+                                LOG.debug("{} appends an empty message to mailbox '{}' on server {}", imapConfig.getLogin(), destFullName, imapConfig.getServer(), new Throwable("Append of empty message"));
+                            }
+                        }
+                    }
+                    /*
+                     * Set marker
+                     */
+                    message.setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
                 } catch (final Exception e) {
                     // Is read-only -- create a copy from first message
                     final MimeMessage newMessage;
