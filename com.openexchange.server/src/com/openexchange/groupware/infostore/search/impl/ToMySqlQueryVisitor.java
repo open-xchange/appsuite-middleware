@@ -215,14 +215,16 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private static final Set<Class<? extends SearchTerm<?>>> UNSUPPORTED = Collections.unmodifiableSet(new HashSet<Class<? extends SearchTerm<?>>>(Arrays.asList(ContentTerm.class, MetaTerm.class, SequenceNumberTerm.class)));
 
     private static List<SearchTerm<?>> prepareTerms(List<SearchTerm<?>> terms) {
-        List<SearchTerm<?>> retval = new ArrayList<SearchTerm<?>>(terms.size());
+        if (null == terms) {
+            return Collections.emptyList();
+        }
 
+        List<SearchTerm<?>> retval = new ArrayList<SearchTerm<?>>(terms.size());
         for (SearchTerm<?> term : terms) {
             if (!UNSUPPORTED.contains(term.getClass())) {
                retval.add(term);
             }
         }
-
         return retval;
     }
 
