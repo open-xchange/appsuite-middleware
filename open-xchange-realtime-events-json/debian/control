@@ -1,0 +1,13 @@
+Source: open-xchange-realtime-events-json
+Section: web
+Priority: optional
+Maintainer: Marc Arens <marc.arens@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-realtime-json (>= @OXVERSION@), open-xchange-realtime-events (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-realtime-events-json
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-realtime-events (>= @OXVERSION@), open-xchange-realtime-json (>= @OXVERSION@)
+Conflicts:
+Description: Realtime event pubsub implementations via a JSON channel

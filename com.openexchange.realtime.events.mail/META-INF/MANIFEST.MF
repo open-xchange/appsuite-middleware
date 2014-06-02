@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Mail RT Events
+Bundle-Name: Realtime event pubsub implementation for mail
 Bundle-SymbolicName: com.openexchange.realtime.events.mail
-Bundle-Version: 7.4.0
+Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.realtime.events.mail.osgi.RTMailEventsActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
