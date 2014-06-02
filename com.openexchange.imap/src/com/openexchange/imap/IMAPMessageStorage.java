@@ -137,11 +137,11 @@ import com.openexchange.imap.threader.references.Conversations;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
+import com.openexchange.imap.util.AppendEmptyMessageTracer;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.mail.IndexRange;
@@ -2762,15 +2762,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     /*
                      * Check for empty content
                      */
-                    String lcct = Strings.asciiLowerCase(message.getContentType());
-                    if (null == lcct || lcct.startsWith("text/")) {
-                        if (LOG.isDebugEnabled()) {
-                            String content = null == lcct ? MessageUtility.readMimePart(message, "US-ASCII") : MessageUtility.readMimePart(message, new ContentType(lcct));
-                            if (Strings.isEmpty(content)) {
-                                LOG.debug("{} appends an empty message to mailbox '{}' on server {}", imapConfig.getLogin(), destFullName, imapConfig.getServer(), new Throwable("Append of empty message"));
-                            }
-                        }
-                    }
+                    AppendEmptyMessageTracer.checkForEmptyMessage(message, destFullName, imapConfig);
                     /*
                      * Set marker
                      */
