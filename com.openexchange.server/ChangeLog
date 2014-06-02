@@ -1,3 +1,7 @@
+* 2014-06-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32555: Keep other Content-Type parameters when fixing Apple Mailer messages
+
 * 2014-05-28 - marc.arens@open-xchange.com
 
  - Fix for bug 32798:  Use optService and check for availability, log proper error on unavailability
