@@ -1,3 +1,7 @@
+* 2014-06-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 32438: Avoid conflicting library files in different packages.
+
 * 2014-06-03 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 32809: Workaround to negate boolean false filters for ldap

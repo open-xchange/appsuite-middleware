@@ -140,7 +140,7 @@ public class ConfigDiffCLT {
         } else {
             File output = new File(file);
 
-            FileUtils.write(output, diffResult.toString(), Charset.defaultCharset());
+            FileUtils.write(output, diffResult.toString());
         }
     }
 
