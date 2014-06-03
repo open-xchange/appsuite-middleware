@@ -149,6 +149,18 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
     }
 
     @Override
+    public Message getMimeMessage(String fullName, String id, boolean markSeen) throws OXException {
+        final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
+        if (messageStorage instanceof IMailMessageStorageMimeSupport) {
+            final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) messageStorage;
+            if (streamSupport.isMimeSupported()) {
+                return streamSupport.getMimeMessage(fullName, id, markSeen);
+            }
+        }
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+    }
+
+    @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
         final String[] newIds = smalMailAccess.getDelegateMailAccess().getMessageStorage().appendMessages(destFolder, msgs);
         /*

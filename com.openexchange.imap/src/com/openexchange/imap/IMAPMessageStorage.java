@@ -1111,6 +1111,85 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     };
 
     @Override
+    public Message getMimeMessage(String fullName, String id, boolean markSeen) throws OXException {
+        if (null == id) {
+            throw MailExceptionCode.MAIL_NOT_FOUND.create("null", fullName);
+        }
+        try {
+            final int desiredMode = markSeen ? READ_WRITE : READ_ONLY;
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
+            } catch (final MessagingException e) {
+                final Exception next = e.getNextException();
+                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
+            }
+            if (0 >= imapFolder.getMessageCount()) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            }
+            final long uid = parseUnsignedLong(id);
+            IMAPMessage msg;
+            try {
+                final long start = System.currentTimeMillis();
+                msg = (IMAPMessage) imapFolder.getMessageByUID(uid);
+                imapFolder.fetch(new Message[] {msg}, FETCH_PROFILE_ENVELOPE);
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            } catch (final java.lang.NullPointerException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            } catch (final java.lang.IndexOutOfBoundsException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            } catch (final MessageRemovedException e) {
+                /*
+                 * Obviously message was removed in the meantime
+                 */
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            } catch (final MessagingException e) {
+                final Exception cause = e.getNextException();
+                if (!(cause instanceof BadCommandException)) {
+                    throw e;
+                }
+                // Hm... Something weird with executed "UID FETCH" command; retry manually...
+                final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, new long[] { uid });
+                if ((null == seqNums) || (0 == seqNums.length)) {
+                    LOG.warn("No message with UID '{}' found in folder '{}'", id, fullName, cause);
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+                }
+                final int msgnum = seqNums[0];
+                if (msgnum < 1) {
+                    /*
+                     * message-numbers start at 1
+                     */
+                    LOG.warn("No message with UID '{}' found in folder '{}'", id, fullName, cause);
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+                }
+                msg = (IMAPMessage) imapFolder.getMessage(msgnum);
+            }
+            if (msg == null || msg.isExpunged()) {
+                // throw new OXException(OXException.Code.MAIL_NOT_FOUND,
+                // String.valueOf(msgUID), imapFolder
+                // .toString());
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            }
+            return msg;
+        } catch (final MessagingException e) {
+            if (ImapUtility.isInvalidMessageset(e)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
+            }
+            throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
         if (msgUID < 0) {
             return null;

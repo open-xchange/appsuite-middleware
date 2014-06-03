@@ -148,6 +148,17 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
     }
 
     @Override
+    public Message getMimeMessage(String fullName, String id, boolean markSeen) throws OXException {
+        if (delegatee instanceof IMailMessageStorageMimeSupport) {
+            final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) delegatee;
+            if (streamSupport.isMimeSupported()) {
+                return streamSupport.getMimeMessage(fullName, id, markSeen);
+            }
+        }
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+    }
+
+    @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
         /*
          * Append to mail account storage and return storage's IDs, NOT UIDLS!!!
