@@ -77,6 +77,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -88,6 +92,7 @@ import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -189,9 +194,12 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
             }
         }
 
+        fillMailConfig(accountDescription, fieldsToUpdate, jData.toObject(), session, id);
+
         // Check standard folder names against full names
         if (id != MailAccount.DEFAULT_ID) {
-            Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(id, session));
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccess(accountDescription, session, warnings);
+            Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(mailAccess));
         }
 
         // Update
@@ -281,4 +289,40 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);
     }
 
+    /**
+     * Fills the provided {@link MailAccountDescription} based on the given fieldsToUpdate with the new jData or the old {@link MailConfig}
+     * 
+     * @param accountDescription
+     * @param fieldsToUpdate
+     * @param jData
+     * @param session
+     * @param accountId
+     * @throws OXException
+     * @throws JSONException
+     */
+    private void fillMailConfig(final MailAccountDescription accountDescription, final Set<Attribute> fieldsToUpdate, final JSONObject jData, final Session session, final int accountId) throws OXException, JSONException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> instance = MailAccess.getInstance(session, accountId);
+        MailConfig mailConfig = instance.getMailConfig();
+
+        {
+            String login = fieldsToUpdate.contains(Attribute.LOGIN_LITERAL) ? jData.getString(Attribute.LOGIN_LITERAL.getName()) : mailConfig.getLogin();
+            accountDescription.setLogin(login);
+        }
+        {
+            String password = fieldsToUpdate.contains(Attribute.PASSWORD_LITERAL) ? jData.getString(Attribute.PASSWORD_LITERAL.getName()) : mailConfig.getPassword();
+            accountDescription.setPassword(password);
+        }
+        {
+            int port = fieldsToUpdate.contains(Attribute.MAIL_PORT_LITERAL) ? jData.getInt(Attribute.MAIL_PORT_LITERAL.getName()) : mailConfig.getPort();
+            accountDescription.setMailPort(port);
+        }
+        {
+            boolean secure = fieldsToUpdate.contains(Attribute.MAIL_SECURE_LITERAL) ? jData.getBoolean(Attribute.MAIL_SECURE_LITERAL.getName()) : mailConfig.isSecure();
+            accountDescription.setMailSecure(secure);
+        }
+        {
+            String server = fieldsToUpdate.contains(Attribute.MAIL_SERVER_LITERAL) ? jData.getString(Attribute.MAIL_SERVER_LITERAL.getName()) : mailConfig.getServer();
+            accountDescription.setMailServer(server);
+        }
+    }
 }
