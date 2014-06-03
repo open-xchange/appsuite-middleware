@@ -116,7 +116,8 @@ public class OXRESTRegistry implements SimpleRegistryListener<OXRESTServiceFacto
             if (path.startsWith(root)) {
                 String subpath = path.substring(root.length());
                 if (!subpath.startsWith("/")) {
-                    subpath = "/" + subpath;
+                    // Prepend slash '/' character
+                    subpath = new StringBuilder(subpath.length() + 1).append('/').append(subpath).toString();
                 }
 
                 // Iterate factories associated with matching root
