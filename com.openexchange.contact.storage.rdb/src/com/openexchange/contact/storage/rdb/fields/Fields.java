@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.storage.rdb.fields;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.EnumSet;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
@@ -78,7 +80,7 @@ public final class Fields {
      * An array of all contact fields as used by the contacts database table.
      */
     public static final ContactField[] CONTACT_DATABASE_ARRAY =
-        CONTACT_DATABASE.toArray(new ContactField[CONTACT_DATABASE.size()]);
+        sort(CONTACT_DATABASE.toArray(new ContactField[CONTACT_DATABASE.size()]));
 
     /**
      * A set of all contact fields that are only set once during creation and never change afterwards.
@@ -121,6 +123,32 @@ public final class Fields {
     public static final EnumSet<ContactField> DISTLIST_DATABASE_RELEVANT = EnumSet.of(ContactField.OBJECT_ID, ContactField.FOLDER_ID,
         ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,  ContactField.DISPLAY_NAME, ContactField.SUR_NAME,
         ContactField.GIVEN_NAME);
+
+    /**
+     * Sorts the supplied contact fields in an order appropriate for inserting / updating the backed columns in the database.
+     *
+     * @param fields The fields to sort
+     * @return The array for convenience
+     */
+    public static ContactField[] sort(ContactField[] fields) {
+        Arrays.sort(fields, new Comparator<ContactField>() {
+
+            @Override
+            public int compare(ContactField field1, ContactField field2) {
+                if (field1 == field2) {
+                    return 0;
+                } else if (null == field1 || ContactField.DISPLAY_NAME.equals(field1)) {
+                    return 1;
+                } else if (null == field2 || ContactField.DISPLAY_NAME.equals(field2)) {
+                    return -1;
+                } else {
+                    return field1.compareTo(field2);
+                }
+            }
+        });
+        return fields;
+    }
+
 
     private Fields() {
         // prevent instantiation

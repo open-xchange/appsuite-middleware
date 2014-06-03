@@ -471,7 +471,7 @@ public class RdbContactStorage extends DefaultContactStorage {
              * update contact data
              */
             if (0 == executor.update(connection, Table.CONTACTS, contextID, objectID, maxLastModified, contact,
-                    queryFields.getContactDataFields())) {
+                    Fields.sort(queryFields.getContactDataFields()))) {
                 //TODO: check imagelastmodified also?
                 throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(contextID, objectID);
             }

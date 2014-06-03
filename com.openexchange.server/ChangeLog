@@ -1,3 +1,7 @@
+* 2014-06-03 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31072: Ensure first- and lastname are supplied before displayname when inserting/updating records in the database
+
 * 2014-06-02 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 32874: Removed unsupported "file content" facet
