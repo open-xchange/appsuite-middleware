@@ -54,9 +54,7 @@ import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import java.util.concurrent.ConcurrentMap;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -80,7 +78,7 @@ import com.openexchange.tokenlogin.TokenLoginSecret;
 
 /**
  * Unit tests for {@link Bug32698Test}
- * 
+ *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  * @since 7.6
  */
@@ -139,15 +137,9 @@ public class Bug32698Test {
     @Mock
     private IMap<String, String> SessionIMap;
 
-    private ConcurrentMap<String, String> myMap1 = new ConcurrentLinkedHashMap<String, String>();
+    private final ConcurrentMap<String, String> myMap1 = new ConcurrentLinkedHashMap<String, String>();
 
-    private ConcurrentMap<String, String> myMap2 = new ConcurrentLinkedHashMap<String, String>();
-
-    /**
-     * A temporary folder that could be used by each mock.
-     */
-    @Rule
-    protected TemporaryFolder folder = new TemporaryFolder();
+    private final ConcurrentMap<String, String> myMap2 = new ConcurrentLinkedHashMap<String, String>();
 
     @Before
     public void setUp() throws Exception {
@@ -172,7 +164,7 @@ public class Bug32698Test {
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
-                return myMap1.get((String) args[0]);
+                return myMap1.get(args[0]);
             }
         });
         PowerMockito.when(tokenIMap, method(IMap.class, "remove", String.class)).withArguments(anyString()).thenAnswer(new Answer<String>() {
@@ -180,7 +172,7 @@ public class Bug32698Test {
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
-                return myMap1.remove((String) args[0]);
+                return myMap1.remove(args[0]);
             }
         });
         PowerMockito.when(tokenIMap, method(IMap.class, "putIfAbsent", String.class, String.class)).withArguments(anyString(), anyString()).thenAnswer(
@@ -207,7 +199,7 @@ public class Bug32698Test {
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
-                return myMap2.get((String) args[0]);
+                return myMap2.get(args[0]);
             }
         });
         PowerMockito.when(SessionIMap, method(IMap.class, "remove", String.class)).withArguments(anyString()).thenAnswer(new Answer<String>() {
@@ -215,7 +207,7 @@ public class Bug32698Test {
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
-                return myMap2.remove((String) args[0]);
+                return myMap2.remove(args[0]);
             }
         });
         PowerMockito.when(SessionIMap, method(IMap.class, "putIfAbsent", String.class, String.class)).withArguments(anyString(), anyString()).thenAnswer(
