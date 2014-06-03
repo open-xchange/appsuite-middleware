@@ -65,8 +65,8 @@ import java.util.Map;
  */
 public class OXRESTMatch {
 
-    private OXRESTRoute route;
     private final Map<String, String> parameters;
+    private OXRESTRoute route;
     private List<String> parameterNames;
 
     /**
@@ -75,6 +75,16 @@ public class OXRESTMatch {
     public OXRESTMatch() {
         super();
         parameters = new HashMap<String, String>(6);
+    }
+
+    /**
+     * Initializes a new {@link OXRESTMatch} with specified route.
+     *
+     * @param route The associated route
+     */
+    public OXRESTMatch(OXRESTRoute route) {
+        this();
+        this.route = route;
     }
 
     /**

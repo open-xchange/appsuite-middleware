@@ -51,6 +51,7 @@ package com.openexchange.rest.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -195,17 +196,20 @@ public class OXRESTRoute {
         }
 
         Matcher matcher = pattern.matcher(path);
-        if (matcher.find()) {
-            OXRESTMatch match = new OXRESTMatch();
-            match.setRoute(this);
-            for (int i = 0, size = variableNames.size(); i < size; i++) {
-                match.getParameters().put(variableNames.get(i), matcher.group(i + 1));
-            }
-            match.setParameterNames(new ArrayList<String>(variableNames));
-            return match;
+        if (!matcher.find()) {
+            return null;
         }
 
-        return null;
+        // Matches...
+        OXRESTMatch match = new OXRESTMatch(this);
+
+        Map<String, String> parameters = match.getParameters();
+        for (int i = variableNames.size(); i-- > 0;) {
+            parameters.put(variableNames.get(i), matcher.group(i + 1));
+        }
+
+        match.setParameterNames(new ArrayList<String>(variableNames));
+        return match;
     }
 
     @Override
