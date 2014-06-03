@@ -201,7 +201,7 @@ collect_logs() {
    fi
 
    if [ 'true' != "${SKIP_COMPRESSION}" ]; then
-       bzip2 -9 ${_logs_archive}
+       bzip2 ${_logs_archive}
    fi
 }
 
@@ -570,7 +570,7 @@ test -f ${OXFUNCTIONS} || {
 source ${OXFUNCTIONS}
 
 for tool in ${EARLY_NEEDED_TOOLS}; do
-    check_on_needed ${tool} >/dev/null
+    check_on_needed ${tool}
 done
 
 JAVA_VM_TYPE=$(get_java_vm_type)
