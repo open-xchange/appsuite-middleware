@@ -732,10 +732,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 if (charEnc == null) {
                     charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
                 }
-                return new String(baos.toByteArray(), Charsets.forName(charEnc));
+                return baos.toString(charEnc);
             } catch (final UnsupportedCharsetException e) {
                 LOG.error("Unsupported encoding in request", e);
-                return new String(baos.toByteArray(), Charsets.ISO_8859_1);
+                return baos.toString("ISO-8859-1");
             }
         } finally {
             Streams.close(inputStream);
