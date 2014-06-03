@@ -120,7 +120,7 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
              *    Reflection-based invocation via java.lang.reflect.Method inside ReflectiveServiceWrapper
              */
 
-            OXRESTServiceWrapper wrapper = retrieveWrapper(req.getMethod(), request.getPathInfo());
+            OXRESTServiceWrapper wrapper = REST_SERVICES.retrieve(req.getMethod(), request.getPathInfo());
             if (wrapper == null) {
                 resp.sendError(404, "No such REST service or method match found");
                 return;
@@ -157,11 +157,6 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
         for(Map.Entry<String, String> entry: match.getParameters().entrySet()) {
             request.putParameter(entry.getKey(), entry.getValue());
         }
-    }
-
-
-    private OXRESTServiceWrapper retrieveWrapper(String method, String path) {
-        return REST_SERVICES.retrieve(method, path);
     }
 
 }
