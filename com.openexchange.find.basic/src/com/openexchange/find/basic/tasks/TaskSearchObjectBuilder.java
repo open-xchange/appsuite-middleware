@@ -49,8 +49,11 @@
 
 package com.openexchange.find.basic.tasks;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
@@ -75,16 +78,52 @@ import com.openexchange.tools.session.ServerSession;
  * {@link TaskSearchBuilder}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TaskSearchObjectBuilder {
 
+    private static enum SupportedField {
+
+        TITLE("title"),
+        DESCRIPTION("description"),
+        STATUS("status"),
+        FOLDER_TYPE("folder_type"),
+        TYPE("type"),
+        PARTICIPANT("participant"),
+        ATTACHMENT("attachment"),
+        ATTACHMENT_NAME("attachment_name");
+
+        private final String fieldName;
+
+        private SupportedField(String fieldName) {
+            this.fieldName = fieldName;
+        }
+
+        private static final Map<String, SupportedField> MAPPING;
+        static {
+            SupportedField[] values = SupportedField.values();
+            Map<String, SupportedField> m = new HashMap<String, SupportedField>(values.length);
+            for (SupportedField value : values) {
+                m.put(value.fieldName, value);
+            }
+            MAPPING = Collections.unmodifiableMap(m);
+        }
+
+        /**
+         * Gets the field for given name
+         *
+         * @param fieldName The name
+         * @return The associated field or <code>null</code>
+         */
+        static SupportedField supportedFieldFor(String fieldName) {
+            return null == fieldName ? null : MAPPING.get(Strings.asciiLowerCase(fieldName));
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------- //
+
     private final TaskSearchObject searchObject;
-
     private final ServerSession session;
-
-    private enum SupportedFields {
-        title, description, status, folder_type, type, participant, attachment
-    };
 
     /**
      * Initializes a new {@link TaskSearchBuilder}.
@@ -108,8 +147,8 @@ public class TaskSearchObjectBuilder {
      * Add the specified {@link Filter}s to the search object
      *
      * @param filters
-     * @return
-     * @throws OXException if the provided {@Filter} contains an unsupported field (@see {@link SupportedFields}).
+     * @return This builder instance
+     * @throws OXException if the provided {@Filter} contains an unsupported field (@see {@link SupportedField}).
      */
     public TaskSearchObjectBuilder addFilters(List<Filter> filters) throws OXException {
         for (Filter f : filters) {
@@ -121,46 +160,47 @@ public class TaskSearchObjectBuilder {
     /**
      * Add a {@link Filter} to the search object
      *
-     * @param filter
-     * @return
-     * @throws OXException if the provided {@link Filter} either contains an unsupported field (@see {@link SupportedFields}) or a field
-     *             that is <code>null</code>.
+     * @param filter The filter to add
+     * @return This builder instance with filter added
+     * @throws OXException If the provided {@link Filter} either contains an unsupported field or a field that is <code>null</code>
      */
     public TaskSearchObjectBuilder addFilter(Filter filter) throws OXException {
-        for (String f : filter.getFields()) {
-            SupportedFields sf;
-            try {
-                sf = SupportedFields.valueOf(f);
-            } catch (IllegalArgumentException e) {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(f);
-            } catch (NullPointerException e) {
-                throw FindExceptionCode.NULL_FIELD.create(f);
+        for (String fieldName : filter.getFields()) {
+            if (null == fieldName) {
+                throw FindExceptionCode.NULL_FIELD.create(fieldName);
+            }
+
+            SupportedField sf = SupportedField.supportedFieldFor(fieldName);
+            if (null == sf) {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(fieldName);
             }
 
             switch (sf) {
-            case title:
+            case TITLE:
                 addTitleFilters(filter.getQueries());
                 break;
-            case description:
+            case DESCRIPTION:
                 addDescriptionFilters(filter.getQueries());
                 break;
-            case status:
+            case STATUS:
                 addStateFilters(filter.getQueries());
                 break;
-            case folder_type:
+            case FOLDER_TYPE:
                 addFolderTypeFilters(filter.getQueries());
                 break;
-            case type:
+            case TYPE:
                 addRecurrenceTypeFilters(filter.getQueries());
                 break;
-            case participant:
+            case PARTICIPANT:
                 addParticipantFilters(filter.getQueries());
                 break;
-            case attachment:
+            case ATTACHMENT:
+                /* fall-through */
+            case ATTACHMENT_NAME:
                 addAttachmentFilters(filter.getQueries());
                 break;
             default:
-                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(f);
+                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(fieldName);
             }
         }
         return this;
@@ -169,8 +209,8 @@ public class TaskSearchObjectBuilder {
     /**
      * Add the specified queries to the search object
      *
-     * @param queries
-     * @return
+     * @param queries The queries to add
+     * @return This builder instance with queries added
      */
     public TaskSearchObjectBuilder addQueries(List<String> queries) {
         for (String q : queries) {
@@ -184,7 +224,7 @@ public class TaskSearchObjectBuilder {
      *
      * @param folderID The folder ID to apply, or <code>null</code> if not specified
      * @param folderType The folder type for that all folder shall be applied; <code>null</code> if not specified.
-     * @return The builder
+     * @return This builder instance
      * @throws OXException
      */
     public TaskSearchObjectBuilder applyFolders(SearchRequest searchRequest) throws OXException {
@@ -198,8 +238,8 @@ public class TaskSearchObjectBuilder {
     /**
      * Add a query to the search object
      *
-     * @param query
-     * @return
+     * @param query The query to add
+     * @return This builder instance with query added
      */
     public TaskSearchObjectBuilder addQuery(String query) {
         Set<String> queries = searchObject.getQueries();
@@ -274,7 +314,7 @@ public class TaskSearchObjectBuilder {
     }
 
     /**
-     * Prefetch all relevant folder ids, according to the specified filters
+     * Pre-fetch all relevant folder identifiers, according to the specified filters
      *
      * @param filters
      * @throws OXException
@@ -291,11 +331,10 @@ public class TaskSearchObjectBuilder {
             } else {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(q, "folder_type");
             }
-            UserizedFolder[] folders =
-                Services.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, TaskContentType.getInstance(), t, false, session, null).getResponse();
+            UserizedFolder[] folders = Services.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, TaskContentType.getInstance(), t, false, session, null).getResponse();
             if (folders != null && folders.length > 0) {
                 for (UserizedFolder uf : folders) {
-                    searchObject.addFolder(Integer.valueOf(uf.getID()));
+                    searchObject.addFolder(Integer.parseInt(uf.getID()));
                 }
             }
         }
@@ -389,4 +428,5 @@ public class TaskSearchObjectBuilder {
         }
         return wrapped;
     }
+
 }

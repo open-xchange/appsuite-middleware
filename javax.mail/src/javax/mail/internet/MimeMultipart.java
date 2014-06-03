@@ -43,6 +43,7 @@ package javax.mail.internet;
 import javax.mail.*;
 import javax.activation.*;
 import java.util.*;
+import java.util.Map.Entry;
 import java.io.*;
 import com.sun.mail.util.LineOutputStream;
 import com.sun.mail.util.LineInputStream;
@@ -203,6 +204,19 @@ public class MimeMultipart extends Multipart {
      * MimeBodyParts may be added later.
      */
     public MimeMultipart(String subtype) {
+    this(subtype, Collections.<String, String> emptyMap());
+    }
+
+    /**
+     * Construct a MimeMultipart object of the given subtype.
+     * A unique boundary string is generated and this string is
+     * setup as the "boundary" parameter for the 
+     * <code>contentType</code> field.
+     * Calls the {@link #initializeProperties} method.<p>
+     *
+     * MimeBodyParts may be added later.
+     */
+    public MimeMultipart(String subtype, Map<String, String> parameters) {
 	super();
 	/*
 	 * Compute a boundary string.
@@ -210,6 +224,20 @@ public class MimeMultipart extends Multipart {
 	String boundary = UniqueValue.getUniqueBoundaryValue();
 	ContentType cType = new ContentType("multipart", subtype, null);
 	cType.setParameter("boundary", boundary);
+	/*
+	 * Other parameters - except "boundary"
+	 */
+	if (null != parameters) {
+        for (Entry<String, String> parameter : parameters.entrySet()) {
+            String key = parameter.getKey();
+            if (!"boundary".equals(key)) {
+                cType.setParameter(key, parameter.getValue());
+            }
+        }
+	}
+    /*
+     * Build content type
+     */
 	contentType = cType.toString();
 	initializeProperties();
     }

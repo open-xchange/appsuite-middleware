@@ -59,6 +59,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.java.Collators;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -75,7 +77,20 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     private static final String STR_EMPTY = "";
 
-    private final boolean descendingDir;
+    // ------------------------------------------------------------------------------------------------------------------------ //
+
+    /**
+     * Gets the prepared mail fields for search.
+     *
+     * @param mailFields The requested mail fields by client
+     * @param sortField The sort field
+     * @return The prepared mail fields for search
+     */
+    public static MailFields prepareMailFieldsForSearch(final MailField[] mailFields, final MailSortField sortField) {
+        return StorageUtility.prepareMailFieldsForSearch(mailFields, sortField);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------ //
 
     private static interface IFieldComparer {
 
@@ -113,7 +128,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------ //
+
     private final IFieldComparer fieldComparer;
+    private final boolean descendingDir;
 
     /**
      * Initializes a new {@link MailMessageComparator} sorting by header <code>Date</code> (a.k.a. sent date).
@@ -145,6 +163,18 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             fieldComparer = tmp;
         }
     }
+
+    @Override
+    public int compare(final MailMessage msg1, final MailMessage msg2) {
+        try {
+            return descendingDir ? fieldComparer.compareFieldsDesc(msg1, msg2) : fieldComparer.compareFields(msg1, msg2);
+        } catch (final MessagingException e) {
+            LOG.error("", e);
+            return 0;
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------ //
 
     static int compareAddrs(final Address[] addrs1, final Address[] addrs2, final Locale locale, final Collator collator) {
         if (isEmptyAddrArray(addrs1) && !isEmptyAddrArray(addrs2)) {
@@ -228,22 +258,13 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                 final boolean isSeen1 = msg1.isSeen();
-                final boolean isSeen2 = msg2.isSeen();
-                if (isSeen1 && isSeen2) {
-                    return compareByReceivedDate(msg1, msg2, false);
-                } else if (!isSeen1 && !isSeen2) {
-                    final boolean isRecent1 = msg1.isRecent();
-                    final boolean isRecent2 = msg2.isRecent();
-                    if ((isRecent1 && isRecent2) || (!isRecent1 && !isRecent2)) {
+                if (isSeen1) {
+                    if (msg2.isSeen()) {
                         return compareByReceivedDate(msg1, msg2, false);
-                    } else if (isRecent1 && !isRecent2) {
-                        return 1;
-                    } else if (!isRecent1 && isRecent2) {
-                        return -1;
                     }
-                } else if (isSeen1 && !isSeen2) {
                     return 1;
-                } else if (!isSeen1 && isSeen2) {
+                }
+                if (msg2.isSeen()) {
                     return -1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
@@ -369,16 +390,6 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             }
         }
         return COLOR_FLAG_MIN;
-    }
-
-    @Override
-    public int compare(final MailMessage msg1, final MailMessage msg2) {
-        try {
-            return descendingDir ? fieldComparer.compareFieldsDesc(msg1, msg2) : fieldComparer.compareFields(msg1, msg2);
-        } catch (final MessagingException e) {
-            LOG.error("", e);
-            return 0;
-        }
     }
 
 }

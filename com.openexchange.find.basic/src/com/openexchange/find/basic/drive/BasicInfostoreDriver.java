@@ -185,10 +185,10 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
                 .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix)
                 .withFilter(Filter.of(Constants.FIELD_FILE_DESC, prefixTokens))
                 .build());
-            facets.add(newSimpleBuilder(DriveFacetType.FILE_CONTENT)
-                .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix)
-                .withFilter(Filter.of(Constants.FIELD_FILE_CONTENT, prefixTokens))
-                .build());
+//            facets.add(newSimpleBuilder(DriveFacetType.FILE_CONTENT)
+//                .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix)
+//                .withFilter(Filter.of(Constants.FIELD_FILE_CONTENT, prefixTokens))
+//                .build());
         }
 
         // Add static file type facet

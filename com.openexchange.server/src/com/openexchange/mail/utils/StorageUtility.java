@@ -62,6 +62,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
+import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -283,6 +286,22 @@ public final class StorageUtility {
             }
         }
         return names;
+    }
+
+    /**
+     * Gets the prepared mail fields for search.
+     *
+     * @param mailFields The requested mail fields by client
+     * @param sortField The sort field
+     * @return The prepared mail fields for search
+     */
+    public static MailFields prepareMailFieldsForSearch(final MailField[] mailFields, final MailSortField sortField) {
+        final MailFields usedFields = new MailFields(mailFields);
+        usedFields.add(MailField.toField(sortField.getListField()));
+
+        // Second-level sort field
+        usedFields.add(MailField.RECEIVED_DATE);
+        return usedFields;
     }
 
 }

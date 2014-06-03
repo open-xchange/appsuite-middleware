@@ -92,6 +92,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.threader.Conversation;
 import com.openexchange.mail.threader.Conversations;
 import com.openexchange.mail.utils.MailMessageComparator;
+import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
@@ -930,8 +931,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         final MailSortField effectiveSortField = determineSortFieldForSearch(fullName, sortField);
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             final List<MailAccount> accounts = getAccounts();
-            final MailFields mfs = new MailFields(fields);
-            mfs.add(MailField.getField(effectiveSortField.getField()));
+            final MailFields mfs = StorageUtility.prepareMailFieldsForSearch(fields, effectiveSortField);
             final MailField[] checkedFields = mfs.toArray();
             // Create completion service for simultaneous access
             final int length = accounts.size();
@@ -1034,8 +1034,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
 
             // The old way
-            final TrackingCompletionService<List<MailMessage>> completionService =
-                new UnifiedInboxCompletionService<List<MailMessage>>(executor);
+            final TrackingCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<List<MailMessage>>(executor);
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 

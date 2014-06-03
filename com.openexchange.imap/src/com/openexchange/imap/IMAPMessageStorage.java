@@ -55,6 +55,7 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
+import static com.openexchange.mail.utils.StorageUtility.prepareMailFieldsForSearch;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -136,6 +137,7 @@ import com.openexchange.imap.threader.references.Conversations;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
+import com.openexchange.imap.util.AppendEmptyMessageTracer;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
@@ -1470,16 +1472,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return effectiveSortField;
     }
 
-    private MailFields prepareMailFieldsForSearch(final MailField[] mailFields, final MailSortField effectiveSortField) {
-        final MailFields usedFields = new MailFields();
-        usedFields.addAll(mailFields);
-        usedFields.add(MailField.toField(effectiveSortField.getListField()));
-        // Second-level sort field
-        usedFields.add(MailField.RECEIVED_DATE);
-
-        return usedFields;
-    }
-
     private MailMessage convertWithBody(final MailAccount mailAccount, final String fullName, final Message message) throws MessagingException, OXException {
         final IMAPMessage imapMessage = (IMAPMessage) message;
         final long msgUID = imapFolder.getUID(message);
@@ -2766,7 +2758,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Try to set marker header
                  */
                 try {
-                    filteredMsgs.get(0).setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
+                    Message message = filteredMsgs.get(0);
+                    /*
+                     * Check for empty content
+                     */
+                    AppendEmptyMessageTracer.checkForEmptyMessage(message, destFullName, imapConfig);
+                    /*
+                     * Set marker
+                     */
+                    message.setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
                 } catch (final Exception e) {
                     // Is read-only -- create a copy from first message
                     final MimeMessage newMessage;
