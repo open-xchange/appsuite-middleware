@@ -137,11 +137,16 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
     }
 
     private void sendResponse(Response response, HttpServletResponse resp) throws IOException {
+        // Set HTTP status code
         resp.setStatus(response.getStatus());
+
+        // Set headers
         for(Map.Entry<String, String> entry: response.getHeaders().entrySet()) {
             resp.setHeader(entry.getKey(), entry.getValue());
         }
         resp.setHeader("X-OX-ACHTUNG", "This is an internal API that may change without notice.");
+
+        // Write response body
         // TODO: Allow for binary streams
         Iterable<String> body = response.getBody();
         if (body != null) {
