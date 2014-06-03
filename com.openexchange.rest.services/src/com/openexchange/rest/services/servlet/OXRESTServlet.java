@@ -159,7 +159,7 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
     }
 
     private void enhance(OXRESTMatch match, AJAXRequestData request) {
-        for(Map.Entry<String, String> entry: match.getParameters().entrySet()) {
+        for (Map.Entry<String, String> entry : match.getParameters().entrySet()) {
             request.putParameter(entry.getKey(), entry.getValue());
         }
     }

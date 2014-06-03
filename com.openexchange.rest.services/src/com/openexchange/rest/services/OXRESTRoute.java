@@ -50,6 +50,7 @@
 package com.openexchange.rest.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -201,15 +202,14 @@ public class OXRESTRoute {
         }
 
         // Matches...
-        OXRESTMatch match = new OXRESTMatch(this);
+        int size = variableNames.size();
 
-        Map<String, String> parameters = match.getParameters();
-        for (int i = variableNames.size(); i-- > 0;) {
+        Map<String, String> parameters = new HashMap<String, String>(size);
+        for (int i = size; i-- > 0;) {
             parameters.put(variableNames.get(i), matcher.group(i + 1));
         }
 
-        match.setParameterNames(new ArrayList<String>(variableNames));
-        return match;
+        return new OXRESTMatch(this, parameters, new ArrayList<String>(variableNames));
     }
 
     @Override
