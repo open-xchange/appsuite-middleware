@@ -711,7 +711,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         try {
             final int buflen = BUF_SIZE;
             final byte[] buf = new byte[buflen];
-            final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(SB_SIZE);
+            final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(SB_SIZE);
             final int maxBodySize = getMaxBodySize();
             if (maxBodySize > 0) {
                 int count = 0;
