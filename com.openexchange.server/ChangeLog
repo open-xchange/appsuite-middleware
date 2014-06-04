@@ -1,4 +1,8 @@
-* 2014-06-06 - tobias.friedrich@open-xchange.com
+* 2014-06-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32899: Let 'Capability' class implement java.io.Serializable marker interface
+
+* 2014-06-03 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 32865: Don't anticipate upcoming ACKNOWLEDGE for the new version of server-side executed EDIT action 
 
