@@ -205,6 +205,7 @@ public final class MailMessageParser {
      */
     public MailMessageParser() {
         super();
+        handleAllAsParts = false;
         inlineDetector = LENIENT_DETECTOR;
         mimeFilter = null;
         warnings = new ArrayList<OXException>(2);
