@@ -91,6 +91,14 @@ public class ContactRequestTest extends AbstractAJAXSession {
         assertNotNull(joinResponse);
         assertTrue((Boolean) joinResponse.getData());
 
+        final ContactJoinRequest acceptJoin = new ContactJoinRequest(
+            "dimitribronkowitsch@googlemail.com",
+            XingTestAccount.EWALD_BARTOWIAK,
+            true);
+        final ContactJoinResponse acceptJoinResponse = client.execute(acceptJoin);
+        assertNotNull(acceptJoinResponse);
+        assertTrue((Boolean) acceptJoinResponse.getData());
+
         final ContactJoinRevokeRequest revokeRequest = new ContactJoinRevokeRequest(
             "dimitribronkowitsch@googlemail.com",
             XingTestAccount.EWALD_BARTOWIAK,
