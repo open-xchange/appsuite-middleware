@@ -195,6 +195,7 @@ public final class MailMessageParser {
     private InlineDetector inlineDetector;
     private String subject;
     private MimeFilter mimeFilter;
+    private boolean handleAllAsParts;
     private final List<OXException> warnings;
     private String mailId;
     private String folder;
@@ -228,6 +229,17 @@ public final class MailMessageParser {
      */
     public MailMessageParser addMimeFilter(final MimeFilter mimeFilter) {
         this.mimeFilter = mimeFilter;
+        return this;
+    }
+
+    /**
+     * Sets the <code>handleAllAsParts</code> flag (default id <code>false</code>).
+     *
+     * @param handleAllAsParts The <code>handleAllAsParts</code> flag to set
+     * @return This parser with new behavior applied
+     */
+    public MailMessageParser setHandleAllAsParts(boolean handleAllAsParts) {
+        this.handleAllAsParts = handleAllAsParts;
         return this;
     }
 
@@ -406,79 +418,99 @@ public final class MailMessageParser {
                 }
             }
         } else if (isText(lcct, fileName)) {
-            if (isInline) {
-                final String content = readContent(mailPart, contentType, mailId, folder);
-                final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-                if (uuencodedMP.isUUEncoded()) {
-                    /*
-                     * UUEncoded content detected. Handle normal text.
-                     */
-                    if (!handler.handleInlineUUEncodedPlainText(
-                        uuencodedMP.getCleanText(),
-                        contentType,
-                        uuencodedMP.getCleanText().length(),
-                        fileName,
-                        getSequenceId(prefix, partCount))) {
-                        stop = true;
-                        return;
-                    }
-                    /*
-                     * Now handle uuencoded attachments
-                     */
-                    final int count = uuencodedMP.getCount();
-                    if (count > 0) {
-                        for (int a = 0; a < count; a++) {
-                            /*
-                             * Increment part count by 1
-                             */
-                            partCount++;
-                            if (!handler.handleInlineUUEncodedAttachment(
-                                uuencodedMP.getBodyPart(a),
-                                MailMessageParser.getSequenceId(prefix, partCount))) {
-                                stop = true;
-                                return;
+            if (handleAllAsParts) {
+                if (!mailPart.containsSequenceId()) {
+                    mailPart.setSequenceId(getSequenceId(prefix, partCount));
+                }
+                if (!handler.handleAttachment(mailPart, isInline, lcct, fileName, mailPart.getSequenceId())) {
+                    stop = true;
+                    return;
+                }
+            } else {
+                if (isInline) {
+                    final String content = readContent(mailPart, contentType, mailId, folder);
+                    final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
+                    if (uuencodedMP.isUUEncoded()) {
+                        /*
+                         * UUEncoded content detected. Handle normal text.
+                         */
+                        if (!handler.handleInlineUUEncodedPlainText(
+                            uuencodedMP.getCleanText(),
+                            contentType,
+                            uuencodedMP.getCleanText().length(),
+                            fileName,
+                            getSequenceId(prefix, partCount))) {
+                            stop = true;
+                            return;
+                        }
+                        /*
+                         * Now handle uuencoded attachments
+                         */
+                        final int count = uuencodedMP.getCount();
+                        if (count > 0) {
+                            for (int a = 0; a < count; a++) {
+                                /*
+                                 * Increment part count by 1
+                                 */
+                                partCount++;
+                                if (!handler.handleInlineUUEncodedAttachment(
+                                    uuencodedMP.getBodyPart(a),
+                                    MailMessageParser.getSequenceId(prefix, partCount))) {
+                                    stop = true;
+                                    return;
+                                }
                             }
+                        }
+                    } else {
+                        /*
+                         * Just non-encoded plain text
+                         */
+                        if (!handler.handleInlinePlainText(
+                            content,
+                            contentType,
+                            size,
+                            fileName,
+                            MailMessageParser.getSequenceId(prefix, partCount))) {
+                            stop = true;
+                            return;
                         }
                     }
                 } else {
                     /*
-                     * Just non-encoded plain text
+                     * Non-Inline: Text attachment
                      */
-                    if (!handler.handleInlinePlainText(
-                        content,
-                        contentType,
-                        size,
-                        fileName,
-                        MailMessageParser.getSequenceId(prefix, partCount))) {
+                    if (!mailPart.containsSequenceId()) {
+                        mailPart.setSequenceId(getSequenceId(prefix, partCount));
+                    }
+                    if (!handler.handleAttachment(mailPart, false, lcct, fileName, mailPart.getSequenceId())) {
                         stop = true;
                         return;
                     }
                 }
-            } else {
-                /*
-                 * Non-Inline: Text attachment
-                 */
+            }
+        } else if (isHtml(lcct)) {
+            if (handleAllAsParts) {
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
-                if (!handler.handleAttachment(mailPart, false, lcct, fileName, mailPart.getSequenceId())) {
-                    stop = true;
-                    return;
-                }
-            }
-        } else if (isHtml(lcct)) {
-            if (!mailPart.containsSequenceId()) {
-                mailPart.setSequenceId(getSequenceId(prefix, partCount));
-            }
-            if (isInline) {
-                if (!handler.handleInlineHtml(readContent(mailPart, contentType, mailId, folder), contentType, size, fileName, mailPart.getSequenceId())) {
+                if (!handler.handleAttachment(mailPart, isInline, lcct, fileName, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
             } else {
-                if (!handler.handleAttachment(mailPart, false, lcct, fileName, mailPart.getSequenceId())) {
-                    stop = true;
-                    return;
+                if (!mailPart.containsSequenceId()) {
+                    mailPart.setSequenceId(getSequenceId(prefix, partCount));
+                }
+                if (isInline) {
+                    if (!handler.handleInlineHtml(readContent(mailPart, contentType, mailId, folder), contentType, size, fileName, mailPart.getSequenceId())) {
+                        stop = true;
+                        return;
+                    }
+                } else {
+                    if (!handler.handleAttachment(mailPart, false, lcct, fileName, mailPart.getSequenceId())) {
+                        stop = true;
+                        return;
+                    }
                 }
             }
         } else if (isImage(lcct)) {
