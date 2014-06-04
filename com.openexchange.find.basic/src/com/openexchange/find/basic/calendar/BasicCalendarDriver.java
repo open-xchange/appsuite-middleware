@@ -57,9 +57,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
@@ -270,7 +274,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             }
         }
         if (1 < appointments.size()) {
-            Collections.sort(appointments, STARTTIME_COMPARATOR);
+            Collections.sort(appointments, RANKING_BASED_COMPARATOR);
         }
         /*
          * construct search result
@@ -349,10 +353,66 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
                 appointment.setRecurrencePosition(result.getPosition());
             }
         }
+
         return appointment;
     }
 
-    private static final Comparator<Appointment> STARTTIME_COMPARATOR = new Comparator<Appointment>() {
+    /**
+     * A comparator that ranks appointments by how close their start date is to today. There is an additional
+     * degression factor that causes appointments in the past to be less relevant than upcoming ones.
+     */
+    private static final Comparator<Appointment> RANKING_BASED_COMPARATOR = new Comparator<Appointment>() {
+
+        private final Map<Integer, Double> rankings = new HashMap<Integer, Double>();
+
+        private final DateTime today = DateTime.now();
+
+        @Override
+        public int compare(Appointment o1, Appointment o2) {
+            Double ranking1 = rankings.get(o1.getObjectID());
+            if (ranking1 == null) {
+                ranking1 = calculateRanking(o1);
+                rankings.put(o1.getObjectID(), ranking1);
+            }
+
+            Double ranking2 = rankings.get(o2.getObjectID());
+            if (ranking2 == null) {
+                ranking2 = calculateRanking(o2);
+                rankings.put(o2.getObjectID(), ranking2);
+            }
+
+            if (ranking1 > ranking2) {
+                return 1;
+            } else if (ranking1 < ranking2) {
+                return -1;
+            }
+
+            return 0;
+        }
+
+        private double calculateRanking(Appointment appointment) {
+            double ranking;
+            Date d = appointment.getStartDate();
+            if (d == null) {
+                ranking = 0.0;
+            } else {
+                DateTime dateTime = new DateTime(d);
+                if (dateTime.isAfter(today)) {
+                    int range = Days.daysBetween(today, dateTime).getDays();
+                    ranking = Math.pow(range, 2.0);
+                } else if (dateTime.isBefore(today)) {
+                    int range = Days.daysBetween(dateTime, today).getDays();
+                    ranking = Math.pow((range * 1.1), 2.0);
+                } else {
+                    ranking = 0;
+                }
+            }
+
+            return ranking;
+        }
+    };
+
+    private static final Comparator<Appointment> DESC_STARTTIME_COMPARATOR = new Comparator<Appointment>() {
 
         @Override
         public int compare(Appointment appointment1, Appointment appointment2) {
@@ -367,6 +427,25 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
                 return -1;
             } else {
                 return date2.compareTo(date1);
+            }
+        }
+    };
+
+    private static final Comparator<Appointment> ASC_STARTTIME_COMPARATOR = new Comparator<Appointment>() {
+
+        @Override
+        public int compare(Appointment appointment1, Appointment appointment2) {
+            //TODO: startdate of whole day appts in user timezone
+            Date date1 = null != appointment1 ? appointment1.getStartDate() : null;
+            Date date2 = null != appointment2 ? appointment2.getStartDate() : null;
+            if (date1 == date2) {
+                return 0;
+            } else if (null == date1) {
+                return -1;
+            } else if (null == date2) {
+                return 1;
+            } else {
+                return date1.compareTo(date2);
             }
         }
     };
