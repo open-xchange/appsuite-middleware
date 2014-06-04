@@ -51,7 +51,7 @@ package com.openexchange.admin.diff;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import com.openexchange.admin.diff.file.FileHandler;
 import com.openexchange.admin.diff.file.provider.ConfFolderFileProvider;
 import com.openexchange.admin.diff.file.provider.JarFileProvider;
@@ -93,10 +93,10 @@ public class ConfigDiff {
     }
 
     public ConfigDiff(String originalFolder, String installationFolder) {
-        if (StringUtils.isNoneBlank(originalFolder)) {
+        if (StringUtils.isNotBlank(originalFolder)) {
             this.originalFolder = originalFolder;
         }
-        if (StringUtils.isNoneBlank(installationFolder)) {
+        if (StringUtils.isNotBlank(installationFolder)) {
             this.installationFolder = installationFolder;
         }
     }

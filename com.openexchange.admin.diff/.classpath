@@ -6,8 +6,7 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
 	<classpathentry kind="lib" path="lib/diffutils-1.2.1.jar" sourcepath="lib/source/diffutils-1.2.1-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.0.1.v201105210651.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.io.source_2.0.1.v201105210651.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang3-3.3.1.jar" sourcepath="lib/commons-lang3-3.3.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-collections4-4.0.jar" sourcepath="lib/source/commmons-collections4-4.0-sources"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201205030909.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201205030909.jar"/>
 	<classpathentry kind="lib" path="lib/xmlunit-1.5.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="output" path="bin"/>
