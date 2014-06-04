@@ -67,7 +67,7 @@ import com.openexchange.exception.OXException;
 public abstract class AbstractXingRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     public static final String XING_URL = "/ajax/xing";
-    
+
     protected final boolean failOnError;
 
     protected final String token;
@@ -78,14 +78,25 @@ public abstract class AbstractXingRequest<T extends AbstractAJAXResponse> implem
      * Initializes a new {@link AbstractXingRequest}.
      */
     public AbstractXingRequest(final boolean foe) {
+        this(foe, XingTestAccount.DIMITRI_BRONKOWITSCH);
+    }
+
+    /**
+     * Initializes a new {@link AbstractXingRequest}.
+     * 
+     * @param foe
+     * @param testAccount The identifier of the xingTestAccount
+     */
+    public AbstractXingRequest(final boolean foe, final XingTestAccount testAccount) {
         failOnError = foe;
         try {
             XingConfig.init();
         } catch (final OXException ex) {
             ex.printStackTrace();
         }
-        token = XingConfig.getProperty("com.openexchange.xing.test.token");
-        secret = XingConfig.getProperty("com.openexchange.xing.test.secret");
+
+        token = XingConfig.getProperty(testAccount.getToken());
+        secret = XingConfig.getProperty(testAccount.getSecret());
     }
 
     /*
@@ -96,7 +107,7 @@ public abstract class AbstractXingRequest<T extends AbstractAJAXResponse> implem
     public String getServletPath() {
         return XING_URL;
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.ajax.framework.AJAXRequest#getHeaders()

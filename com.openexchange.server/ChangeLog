@@ -1,3 +1,15 @@
+* 2014-06-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32745: Propagate result from EDIT action in following SYNC actions
+
+* 2014-06-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32899: Let 'Capability' class implement java.io.Serializable marker interface
+
+* 2014-06-04 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32923: Import javax.activation in bundles which use it
+
 * 2014-06-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 32438: Avoid conflicting library files in different packages.

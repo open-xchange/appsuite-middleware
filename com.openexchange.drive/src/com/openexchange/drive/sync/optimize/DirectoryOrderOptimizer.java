@@ -57,6 +57,7 @@ import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.EditDirectoryAction;
 import com.openexchange.drive.actions.RemoveDirectoryAction;
+import com.openexchange.drive.actions.SyncDirectoryAction;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.sync.IntermediateSyncResult;
@@ -104,6 +105,11 @@ public class DirectoryOrderOptimizer extends DirectoryActionOptimizer {
                         String newOldPath = newPath + actions.get(j).getVersion().getPath().substring(oldPath.length());
                         DirectoryVersion modifiedOldVersion = new SimpleDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
                         actions.set(j, new RemoveDirectoryAction(modifiedOldVersion, actions.get(j).getComparison()));
+                    } else if (Action.SYNC.equals(actions.get(j).getAction()) &&
+                        actions.get(j).getVersion().getPath().startsWith(oldPath + DriveConstants.PATH_SEPARATOR)) {
+                        String newOldPath = newPath + actions.get(j).getVersion().getPath().substring(oldPath.length());
+                        DirectoryVersion modifiedOldVersion = new SimpleDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
+                        actions.set(j, new SyncDirectoryAction(modifiedOldVersion, actions.get(j).getComparison()));
                     }
                 }
             }

@@ -103,18 +103,20 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
         }
         if (null != subscriptions && 0 < subscriptions.size()) {
             List<PayloadPerDevice> payloads = getPayloads(event, subscriptions);
-            PushedNotifications notifications = null;
-            try {
-                APNAccess access = getAccess();
-                notifications = Push.payloads(access.getKeystore(), access.getPassword(), access.isProduction(), payloads);
-            } catch (CommunicationException e) {
-                LOG.warn("error submitting push notifications", e);
-            } catch (KeystoreException e) {
-                LOG.warn("error submitting push notifications", e);
-            } catch (OXException e) {
-                LOG.warn("error submitting push notifications", e);
+            if (0 < payloads.size()) {
+                PushedNotifications notifications = null;
+                try {
+                    APNAccess access = getAccess();
+                    notifications = Push.payloads(access.getKeystore(), access.getPassword(), access.isProduction(), payloads);
+                } catch (CommunicationException e) {
+                    LOG.warn("error submitting push notifications", e);
+                } catch (KeystoreException e) {
+                    LOG.warn("error submitting push notifications", e);
+                } catch (OXException e) {
+                    LOG.warn("error submitting push notifications", e);
+                }
+                processNotificationResults(notifications);
             }
-            processNotificationResults(notifications);
         }
     }
 

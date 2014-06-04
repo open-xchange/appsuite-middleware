@@ -51,9 +51,7 @@ package com.openexchange.ajax.xing.actions;
 
 import java.io.IOException;
 import java.util.List;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -71,8 +69,8 @@ public class ContactJoinRequest extends AbstractXingRequest<ContactJoinResponse>
      * 
      * @param foe
      */
-    public ContactJoinRequest(final String email, boolean foe) {
-        super(foe);
+    public ContactJoinRequest(final String email, final XingTestAccount testAccount, boolean foe) {
+        super(foe, testAccount);
         this.email = email;
     }
 
