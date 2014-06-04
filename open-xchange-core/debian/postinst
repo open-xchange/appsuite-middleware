@@ -824,6 +824,10 @@ if ! grep -E '^html.style.combimap.background.*radial-gradient' $pfile > /dev/nu
     ox_set_property html.style.combimap.background \""${oval}radial-gradient,"\" $pfile
 fi
 
+# SoftwareChange_Request-2036
+VALUE=$(ox_read_property com.openexchange.hazelcast.network.symmetricEncryption /opt/open-xchange/etc/hazelcast.properties)
+ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" /opt/open-xchange/etc/hazelcast.properties
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT

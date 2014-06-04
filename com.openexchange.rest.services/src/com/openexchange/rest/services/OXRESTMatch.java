@@ -49,7 +49,7 @@
 
 package com.openexchange.rest.services;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -65,23 +65,22 @@ import java.util.Map;
  */
 public class OXRESTMatch {
 
-    private OXRESTRoute route;
     private final Map<String, String> parameters;
-    private List<String> parameterNames;
+    private final OXRESTRoute route;
+    private final List<String> parameterNames;
 
     /**
      * Initializes a new {@link OXRESTMatch}.
+     *
+     * @param route The associated route that creates this match
+     * @param parameters The parameter map
+     * @param parameterNames The parameter names (from left to right)
      */
-    public OXRESTMatch() {
+    public OXRESTMatch(OXRESTRoute route, Map<String, String> parameters, ArrayList<String> parameterNames) {
         super();
-        parameters = new HashMap<String, String>(6);
-    }
-
-    /**
-     * The route that created this match
-     */
-    public void setRoute(OXRESTRoute route) {
+        this.parameters = parameters;
         this.route = route;
+        this.parameterNames = parameterNames;
     }
 
     /**
@@ -92,17 +91,15 @@ public class OXRESTMatch {
     }
 
     /**
-     * The parameter names that were extracted from the path
-     */
-    public void setParameterNames(List<String> parameterNames) {
-        this.parameterNames = parameterNames;
-    }
-
-    /**
      * Get the parameter name (from left to right) by index
      */
     public String getParameterName(int index) {
-        return parameterNames.get(index);
+        try {
+            return parameterNames.get(index);
+        } catch (IndexOutOfBoundsException e) {
+            // No such parameter index
+            return null;
+        }
     }
 
     /**
