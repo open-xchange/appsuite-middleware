@@ -212,7 +212,7 @@ public final class MailMessageParser {
     }
 
     /**
-     * Switches the INLINE detector behavior.
+     * Switches the INLINE detector behavior (default is {@link #LENIENT_DETECTOR}).
      *
      * @param strict <code>true</code> to perform strict INLINE detector behavior; otherwise <code>false</code>
      * @return This parser with new behavior applied
@@ -223,7 +223,7 @@ public final class MailMessageParser {
     }
 
     /**
-     * Adds specified MIME filter.
+     * Adds specified MIME filter (default is <code>null</code>).
      *
      * @param mimeFilter The MIME filter
      * @return This parser with MIME filter applied
