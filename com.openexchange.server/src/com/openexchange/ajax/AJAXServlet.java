@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -68,7 +69,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -1152,43 +1152,32 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             /*
              * Parse the upload request
              */
-            items = new LinkedList<FileItem>();
-            {
-                boolean cleanUp = true;
-                try {
-                    // Check request's character encoding
-                    if (null == req.getCharacterEncoding()) {
-                        try {
-                            req.setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
-                        } catch (final Exception e) {
-                            // Ignore
-                        }
-                    }
-                    // Parse multipart request
-                    upload.parseRequest(new ServletRequestContext(req), items);
-                    cleanUp = false;
-                } catch (final FileUploadException e) {
-                    final Throwable cause = e.getCause();
-                    if (cause instanceof IOException) {
-                        final String message = cause.getMessage();
-                        if (null != message && message.startsWith("Max. byte count of ")) {
-                            // E.g. Max. byte count of 10240 exceeded.
-                            final int pos = message.indexOf(" exceeded", 19 + 1);
-                            final String limit = message.substring(19, pos);
-                            throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
-                        }
-                    } else if (cause instanceof EOFException) {
-                        // Stream closed/ended unexpectedly
-                        throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
-                    }
-                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
-                } finally {
-                    if (cleanUp) {
-                        for (final FileItem fileItem : items) {
-                            try { fileItem.delete(); } catch (final Exception e) { /* Ignore */ }
-                        }
+            try {
+                // Check request's character encoding
+                if (null == req.getCharacterEncoding()) {
+                    try {
+                        req.setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
+                    } catch (final Exception e) {
+                        // Ignore
                     }
                 }
+                // Parse multipart request
+                items = upload.parseRequest(new ServletRequestContext(req));
+            } catch (final FileUploadException e) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof IOException) {
+                    final String message = cause.getMessage();
+                    if (null != message && message.startsWith("Max. byte count of ")) {
+                        // E.g. Max. byte count of 10240 exceeded.
+                        final int pos = message.indexOf(" exceeded", 19 + 1);
+                        final String limit = message.substring(19, pos);
+                        throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true));
+                    }
+                } else if (cause instanceof EOFException) {
+                    // Stream closed/ended unexpectedly
+                    throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
+                }
+                throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
             }
             /*
              * Create the upload event
