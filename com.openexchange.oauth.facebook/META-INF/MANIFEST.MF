@@ -5,7 +5,15 @@ Bundle-SymbolicName: com.openexchange.oauth.facebook
 Bundle-Version: 7.6.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.capabilities,
+Import-Package: com.fasterxml.jackson.core,
+ com.fasterxml.jackson.core.base,
+ com.fasterxml.jackson.core.format,
+ com.fasterxml.jackson.core.io,
+ com.fasterxml.jackson.core.json,
+ com.fasterxml.jackson.core.sym,
+ com.fasterxml.jackson.core.type,
+ com.fasterxml.jackson.core.util,
+ com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.exception,

@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Jackson-core
+Bundle-SymbolicName: com.fasterxml.jackson.core.jackson-core
+Bundle-Version: 2.4.0
+Bundle-Vendor: FasterXML
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Description: Core Jackson abstractions, basic JSON streaming API implementation
+Export-Package: com.fasterxml.jackson.core;version="2.4.0",
+ com.fasterxml.jackson.core.base;version="2.4.0",
+ com.fasterxml.jackson.core.format;version="2.4.0",
+ com.fasterxml.jackson.core.io;version="2.4.0",
+ com.fasterxml.jackson.core.json;version="2.4.0",
+ com.fasterxml.jackson.core.sym;version="2.4.0",
+ com.fasterxml.jackson.core.type;version="2.4.0",
+ com.fasterxml.jackson.core.util;version="2.4.0"
+Bundle-ClassPath: lib/jackson-core-2.4.0.jar,
+ .

@@ -5,7 +5,15 @@ Bundle-SymbolicName: com.openexchange.groupware.settings.extensions
 Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.groupware.settings.extensions.osgi.Activator
 Bundle-Vendor: Open-Xchange GmbH
-Import-Package: com.openexchange.config.cascade,
+Import-Package: com.fasterxml.jackson.core,
+ com.fasterxml.jackson.core.base,
+ com.fasterxml.jackson.core.format,
+ com.fasterxml.jackson.core.io,
+ com.fasterxml.jackson.core.json,
+ com.fasterxml.jackson.core.sym,
+ com.fasterxml.jackson.core.type,
+ com.fasterxml.jackson.core.util,
+ com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,

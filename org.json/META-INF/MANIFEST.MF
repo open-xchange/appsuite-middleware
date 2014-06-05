@@ -6,3 +6,11 @@ Bundle-Version: 2.0.0
 Bundle-Vendor: JSON.org
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.json
+Import-Package: com.fasterxml.jackson.core,
+ com.fasterxml.jackson.core.base,
+ com.fasterxml.jackson.core.format,
+ com.fasterxml.jackson.core.io,
+ com.fasterxml.jackson.core.json,
+ com.fasterxml.jackson.core.sym,
+ com.fasterxml.jackson.core.type,
+ com.fasterxml.jackson.core.util

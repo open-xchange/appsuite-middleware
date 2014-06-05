@@ -5,7 +5,15 @@ Bundle-SymbolicName: com.google.api.client
 Bundle-Version: 1.18.0
 Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.google.common.annotations,
+Import-Package: com.fasterxml.jackson.core;version="2.4.0",
+ com.fasterxml.jackson.core.base;version="2.4.0",
+ com.fasterxml.jackson.core.format;version="2.4.0",
+ com.fasterxml.jackson.core.io;version="2.4.0",
+ com.fasterxml.jackson.core.json;version="2.4.0",
+ com.fasterxml.jackson.core.sym;version="2.4.0",
+ com.fasterxml.jackson.core.type;version="2.4.0",
+ com.fasterxml.jackson.core.util;version="2.4.0",
+ com.google.common.annotations,
  com.google.common.base,
  com.google.common.base.internal,
  com.google.common.cache,
@@ -105,7 +113,6 @@ Import-Package: com.google.common.annotations,
  org.xmlpull.v1
 Bundle-ClassPath: .,
  lib/gson-2.1.jar,
- lib/jackson-core-2.1.3.jar,
  lib/jackson-core-asl-1.9.11.jar,
  lib/protobuf-java-2.4.1.jar,
  lib/google-api-client-1.18.0-rc.jar,
