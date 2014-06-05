@@ -1008,7 +1008,7 @@ public final class StructureMailMessageParser {
             return true;
         }
         if (contentType.startsWith(PRIMARY_MULTI_SIGNED)) {
-            final String protocol = Strings.asciiLowerCase(contentType.getParameter("protocol"));
+            final String protocol = Strings.toLowerCase(contentType.getParameter("protocol"));
             if (null != protocol && ("application/pkcs7-signature".equals(protocol) || "application/x-pkcs7-signature".equals(protocol))) {
                 return true;
             }
