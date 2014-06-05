@@ -325,6 +325,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
         final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
         if (folderStorage instanceof IMailFolderStorageEnhanced) {
             ((IMailFolderStorageEnhanced) folderStorage).expungeFolder(ensureFullName(fullName), hardDelete);
+            return;
         }
         final IMailMessageStorage messageStorage = delegateMailAccess.getMessageStorage();
         final MailMessage[] messages = messageStorage.searchMessages(
