@@ -64,6 +64,8 @@ import com.openexchange.tools.iterator.SearchIterator;
 public final class AppointmentIteratorAdapter implements SearchIterator<Appointment> {
 
     private final SearchIterator<CalendarDataObject> delegate;
+    
+    private int count = 0;
 
     public AppointmentIteratorAdapter(final SearchIterator<CalendarDataObject> retval) {
         this.delegate = retval;
@@ -96,6 +98,7 @@ public final class AppointmentIteratorAdapter implements SearchIterator<Appointm
 
     @Override
     public Appointment next() throws OXException {
+        System.out.println(">>>>>>>>>>>>>>>>>> " + ++count);
         return delegate.next();
     }
 

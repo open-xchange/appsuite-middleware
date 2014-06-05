@@ -59,6 +59,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -145,6 +146,8 @@ public class CalendarSql implements AppointmentSQLInterface {
         Appointment.LAST_MODIFIED_UTC));
 
     public static final int[] EXCEPTION_FIELDS = new int[Appointment.ALL_COLUMNS.length - EXEMPT.size()];
+
+    private static int MAX_SEARCH_FOLDER = 100;
 
     static {
         int i = 0;
@@ -1246,14 +1249,27 @@ public class CalendarSql implements AppointmentSQLInterface {
             }
 
             final CalendarSqlImp cimp = CalendarSql.cimp;
-            stmt = cimp.getSearchStatement(user.getId(), searchObj, cfo, folderAccess, columnBuilder.toString(), orderBy, orderDir, ctx, readcon);
+            boolean exceedsFolderLimit = exceedsFolderLimit(searchObj, cfo);
+            Set<Integer> searchFolder = null;
+            if (exceedsFolderLimit) {
+                CalendarFolderObject emptyCFO = new CalendarFolderObject(user.getId(), ctx.getContextId(), true);
+                searchFolder = searchObj.getFolderIDs();
+                searchObj.setFolderIDs(Collections.<Integer>emptySet());
+                stmt = cimp.getSearchStatement(user.getId(), searchObj, emptyCFO, folderAccess, columnBuilder.toString(), orderBy, orderDir, ctx, readcon);
+            } else {
+                stmt = cimp.getSearchStatement(user.getId(), searchObj, cfo, folderAccess, columnBuilder.toString(), orderBy, orderDir, ctx, readcon);
+            }
             rs = cimp.getResultSet(stmt);
             co.setResultSet(rs, stmt, cols, cimp, readcon, 0, 0, session, ctx);
 
             // Don't close connection, it's used within the SearchIterator
             closeCon = false;
 
-            return new AppointmentIteratorAdapter(new CachedCalendarIterator(cfo, co, ctx, session.getUserId()));
+            SearchIterator<CalendarDataObject> iterator = new CachedCalendarIterator(cfo, co, ctx, session.getUserId());
+            if (exceedsFolderLimit) {
+                iterator = new FolderSearchAppointmentIterator(iterator, cfo, searchFolder, session.getUserId(), folderAccess);
+            }
+            return new AppointmentIteratorAdapter(iterator);
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         } finally {
@@ -1266,6 +1282,24 @@ public class CalendarSql implements AppointmentSQLInterface {
                 DBPool.push(ctx, readcon);
             }
         }
+    }
+
+    private boolean exceedsFolderLimit(AppointmentSearchObject searchObj, CalendarFolderObject cfo) {
+        if (searchObj.getFolderIDs() == null || searchObj.getFolderIDs().size() < 0) {
+            return false;
+        }
+
+        int readableFolder = 0;
+        readableFolder += cfo.getPrivateFolders().size();
+        readableFolder += cfo.getPublicReadableOwn().size();
+        readableFolder += cfo.getPublicReadableAll().size();
+        readableFolder += cfo.getSharedReadableOwn().size();
+        readableFolder += cfo.getSharedReadableAll().size();
+        if (MAX_SEARCH_FOLDER >= 0 && readableFolder > MAX_SEARCH_FOLDER) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -1475,6 +1509,10 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
                 LOG.debug("Using {} in CalendarSql", classname);
                 cimp = (CalendarSqlImp) Class.forName(classname).newInstance();
+            }
+            String maxFolder = CalendarConfig.getProperty("MAX_SEARCH_FOLDER");
+            if (maxFolder != null && !maxFolder.trim().equals("")) {
+                MAX_SEARCH_FOLDER = Integer.valueOf(maxFolder.trim());
             }
         } catch(final ConfigurationException ce) {
             LOG.error("", ce);
