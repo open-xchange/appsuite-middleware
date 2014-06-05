@@ -488,6 +488,9 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         if (source.containsBcc()) {
             composedMail.addBcc(source.getBcc());
         }
+        if (source.containsReplyTo()) {
+            composedMail.addReplyTo(source.getReplyTo());
+        }
         if (source.containsDispositionNotification()) {
             composedMail.setDispositionNotification(source.getDispositionNotification());
         }

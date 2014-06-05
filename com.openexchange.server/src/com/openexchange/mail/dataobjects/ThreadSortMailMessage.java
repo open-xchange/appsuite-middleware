@@ -90,6 +90,36 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
+    public void addReplyTo(final InternetAddress addr) {
+        delegatee.addReplyTo(addr);
+    }
+
+    @Override
+    public void addReplyTo(final InternetAddress[] addrs) {
+        delegatee.addReplyTo(addrs);
+    }
+
+    @Override
+    public boolean containsReplyTo() {
+        return delegatee.containsReplyTo();
+    }
+
+    @Override
+    public void removeReplyTo() {
+        delegatee.removeReplyTo();
+    }
+
+    @Override
+    public InternetAddress[] getReplyTo() {
+        return delegatee.getReplyTo();
+    }
+
+    @Override
+    public boolean isUnseen() {
+        return delegatee.isUnseen();
+    }
+
+    @Override
     public void setHeader(final String name, final String value) {
         delegatee.setHeader(name, value);
     }

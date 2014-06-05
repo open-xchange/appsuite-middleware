@@ -139,6 +139,36 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     }
 
     @Override
+    public void addReplyTo(final InternetAddress addr) {
+        delegatee.addReplyTo(addr);
+    }
+
+    @Override
+    public void addReplyTo(final InternetAddress[] addrs) {
+        delegatee.addReplyTo(addrs);
+    }
+
+    @Override
+    public boolean containsReplyTo() {
+        return delegatee.containsReplyTo();
+    }
+
+    @Override
+    public void removeReplyTo() {
+        delegatee.removeReplyTo();
+    }
+
+    @Override
+    public InternetAddress[] getReplyTo() {
+        return delegatee.getReplyTo();
+    }
+
+    @Override
+    public boolean isUnseen() {
+        return delegatee.isUnseen();
+    }
+
+    @Override
     public String getMessageId() {
         return delegatee.getMessageId();
     }

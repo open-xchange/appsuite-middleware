@@ -108,6 +108,9 @@ public final class CompositeMailMessage extends MailMessage {
         if (delegate.containsBcc()) {
             addBcc(delegate.getBcc());
         }
+        if (delegate.containsReplyTo()) {
+            addReplyTo(delegate.getReplyTo());
+        }
         if (delegate.containsCc()) {
             addCc(delegate.getCc());
         }

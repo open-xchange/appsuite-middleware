@@ -368,6 +368,13 @@ public abstract class MailMessage extends MailPart {
     private boolean b_bcc;
 
     /**
+     * Reply-To addresses.
+     */
+    private HashSet<InternetAddress> replyTo;
+
+    private boolean b_replyTo;
+
+    /**
      * The level in a communication thread.
      */
     private int threadLevel;
@@ -748,6 +755,73 @@ public abstract class MailMessage extends MailPart {
             }
         }
         return bcc == null ? EMPTY_ADDRS : bcc.toArray(new InternetAddress[bcc.size()]);
+    }
+
+    /**
+     * Adds an email address to <i>Reply-To</i>
+     *
+     * @param addr The address
+     */
+    public void addReplyTo(final InternetAddress addr) {
+        if (null == addr) {
+            b_replyTo = true;
+            return;
+        } else if (null == replyTo) {
+            replyTo = new LinkedHashSet<InternetAddress>();
+            b_replyTo = true;
+        }
+        replyTo.add(addr);
+    }
+
+    /**
+     * Adds email addresses to <i>Reply-To</i>
+     *
+     * @param addrs The addresses
+     */
+    public void addReplyTo(final InternetAddress[] addrs) {
+        if (null == addrs) {
+            b_replyTo = true;
+            return;
+        } else if (null == replyTo) {
+            replyTo = new LinkedHashSet<InternetAddress>();
+            b_replyTo = true;
+        }
+        replyTo.addAll(Arrays.asList(addrs));
+    }
+
+    /**
+     * @return <code>true</code> if <i>Reply-To</i> is set; otherwise <code>false</code>
+     */
+    public boolean containsReplyTo() {
+        return b_replyTo || containsHeader(MessageHeaders.HDR_REPLY_TO);
+    }
+
+    /**
+     * Removes the <i>Reply-To</i> addresses
+     */
+    public void removeReplyTo() {
+        replyTo = null;
+        removeHeader(MessageHeaders.HDR_REPLY_TO);
+        b_replyTo = false;
+    }
+
+    /**
+     * @return The <i>Reply-To</i> addresses
+     */
+    public InternetAddress[] getReplyTo() {
+        if (!b_replyTo) {
+            final String replyToStr = getFirstHeader(MessageHeaders.HDR_REPLY_TO);
+            if (replyToStr == null) {
+                return EMPTY_ADDRS;
+            }
+            try {
+                addReplyTo(QuotedInternetAddress.parse(replyToStr, true));
+            } catch (final AddressException e) {
+                LOG.debug("", e);
+                addReplyTo(new PlainTextAddress(replyToStr));
+            }
+        }
+        return replyTo == null ? EMPTY_ADDRS : replyTo.toArray(new InternetAddress[replyTo.size()]);
     }
 
     /**
