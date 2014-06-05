@@ -129,6 +129,66 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     }
 
     @Override
+    public void setHeader(final String name, final String value) {
+        delegatee.setHeader(name, value);
+    }
+
+    @Override
+    public MailPath getMailPath() {
+        return delegatee.getMailPath();
+    }
+
+    @Override
+    public String getMessageId() {
+        return delegatee.getMessageId();
+    }
+
+    @Override
+    public boolean containsMessageId() {
+        return delegatee.containsMessageId();
+    }
+
+    @Override
+    public void removeMessageId() {
+        delegatee.removeMessageId();
+    }
+
+    @Override
+    public void setMessageId(final String messageId) {
+        delegatee.setMessageId(messageId);
+    }
+
+    @Override
+    public String getInReplyTo() {
+        return delegatee.getInReplyTo();
+    }
+
+    @Override
+    public String[] getReferences() {
+        return delegatee.getReferences();
+    }
+
+    @Override
+    public boolean containsReferences() {
+        return delegatee.containsReferences();
+    }
+
+    @Override
+    public void removeReferences() {
+        delegatee.removeReferences();
+    }
+
+    @Override
+    public void setReferences(final String sReferences) {
+        delegatee.setReferences(sReferences);
+    }
+
+    @Override
+    public void setReferences(final String[] references) {
+        delegatee.setReferences(references);
+    }
+
+    @Override
     public void setMailId(final String id) {
         this.mailId = id;
     }
@@ -921,7 +981,7 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     @Override
     public int getUnreadMessages() {
         final Integer unreadCount = this.unreadCount;
-        return null == unreadCount ? -1 : unreadCount.intValue(); //delegatee.getUnreadMessages();
+        return null == unreadCount ? -1 : unreadCount.intValue(); // delegatee.getUnreadMessages();
     }
 
     @Override
