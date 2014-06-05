@@ -139,6 +139,10 @@ public final class MessageHeaders {
 
     public static final HeaderName X_MAILER = HeaderName.valueOf(HDR_X_MAILER);
 
+    public static final String HDR_X_ORIGINATING_CLIENT = "X-Originating-Client";
+
+    public static final HeaderName X_ORIGINATING_CLIENT = HeaderName.valueOf(HDR_X_ORIGINATING_CLIENT);
+
     public static final String HDR_X_OXMSGREF = "X-OXMsgref";
 
     public static final HeaderName X_OXMSGREF = HeaderName.valueOf(HDR_X_OXMSGREF);
