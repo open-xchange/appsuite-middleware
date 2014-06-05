@@ -90,6 +90,61 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
+    public void setHeader(final String name, final String value) {
+        delegatee.setHeader(name, value);
+    }
+
+    @Override
+    public String getMessageId() {
+        return delegatee.getMessageId();
+    }
+
+    @Override
+    public boolean containsMessageId() {
+        return delegatee.containsMessageId();
+    }
+
+    @Override
+    public void removeMessageId() {
+        delegatee.removeMessageId();
+    }
+
+    @Override
+    public void setMessageId(final String messageId) {
+        delegatee.setMessageId(messageId);
+    }
+
+    @Override
+    public String getInReplyTo() {
+        return delegatee.getInReplyTo();
+    }
+
+    @Override
+    public String[] getReferences() {
+        return delegatee.getReferences();
+    }
+
+    @Override
+    public boolean containsReferences() {
+        return delegatee.containsReferences();
+    }
+
+    @Override
+    public void removeReferences() {
+        delegatee.removeReferences();
+    }
+
+    @Override
+    public void setReferences(final String sReferences) {
+        delegatee.setReferences(sReferences);
+    }
+
+    @Override
+    public void setReferences(final String[] references) {
+        delegatee.setReferences(references);
+    }
+
+    @Override
     public void addBcc(final InternetAddress addr) {
         delegatee.addBcc(addr);
     }
