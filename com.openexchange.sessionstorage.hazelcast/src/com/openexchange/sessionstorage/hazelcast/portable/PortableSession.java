@@ -50,12 +50,15 @@
 package com.openexchange.sessionstorage.hazelcast.portable;
 
 import java.io.IOException;
+import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
-import org.slf4j.Logger;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.URLCodec;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAppender;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageConfiguration;
@@ -70,7 +73,28 @@ public class PortableSession extends StoredSession implements CustomPortable {
 
     private static final long serialVersionUID = -2346327568417617677L;
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
+    /**
+     * BitSet of www-form-url safe characters.
+     */
+    protected static final BitSet BIT_SET_PARAMS;
+
+    // Static initializer for BIT_SET_PARAMS
+    static {
+        final BitSet bitSet = new BitSet(256);
+
+        // Exclude ':' and '%' from printable ASCII characters
+        for (int i = 32; i < 37; i++) {
+            bitSet.set(i);
+        }
+        for (int i = 38; i < 58; i++) {
+            bitSet.set(i);
+        }
+        for (int i = 59; i < 127; i++) {
+            bitSet.set(i);
+        }
+
+        BIT_SET_PARAMS = bitSet;
+    }
 
     /** The unique portable class ID of the {@link PortableSession} */
     public static final int CLASS_ID = 1;
@@ -155,17 +179,13 @@ public class PortableSession extends StoredSession implements CustomPortable {
                     Object value = parameters.get(parameterName);
                     if (value instanceof String) {
                         String sValue = value.toString();
-                        if (sValue.indexOf(':') < 0) {
-                            if (null == names) {
-                                int capacity = remoteParameterNames.size() << 4;
-                                names = new StringAppender(':', capacity);
-                                values = new StringAppender(':', capacity);
-                            }
-                            names.append(parameterName);
-                            values.append(sValue);
-                        } else {
-                            LOGGER.warn("Illegal remote parameter value: {}", sValue);
+                        if (null == names) {
+                            int capacity = remoteParameterNames.size() << 4;
+                            names = new StringAppender(':', capacity);
+                            values = new StringAppender(':', capacity);
                         }
+                        names.append(parameterName);
+                        values.append(Charsets.toAsciiString(URLCodec.encodeUrl(BIT_SET_PARAMS, sValue.getBytes(Charsets.UTF_8))));
                     }
                 }
                 if (null != names) {
@@ -212,7 +232,11 @@ public class PortableSession extends StoredSession implements CustomPortable {
                 List<String> names = parseColonString(sNames);
                 List<String> values = parseColonString(reader.readUTF(PARAMETER_REMOTE_PARAMETER_VALUES)); // Expect them, too
                 for (int i = 0, size = names.size(); i < size; i++) {
-                    parameters.put(names.get(i), values.get(i));
+                    try {
+                        parameters.put(names.get(i), new String(URLCodec.decodeUrl(Charsets.toAsciiBytes(values.get(i))), Charsets.UTF_8));
+                    } catch (DecoderException e) {
+                        // Ignore
+                    }
                 }
             }
         }
@@ -233,5 +257,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
         }
         return retval;
     }
+
+
 
 }
