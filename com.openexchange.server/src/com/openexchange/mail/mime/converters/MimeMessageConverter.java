@@ -1240,7 +1240,7 @@ public final class MimeMessageConverter {
                         for (int j = 1; j < inReplyTo.length; j++) {
                             sb.append(", ").append(inReplyTo[j]);
                         }
-                        mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+                        mailMessage.addHeader(MessageHeaders.HDR_IN_REPLY_TO, sb.toString());
                         sb.setLength(0);
                     }
                 }
@@ -1561,7 +1561,7 @@ public final class MimeMessageConverter {
                         for (int j = 1; j < inReplyTo.length; j++) {
                             sb.append(", ").append(inReplyTo[j]);
                         }
-                        mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+                        mailMessage.addHeader(MessageHeaders.HDR_IN_REPLY_TO, sb.toString());
                         sb.setLength(0);
                     }
                 }

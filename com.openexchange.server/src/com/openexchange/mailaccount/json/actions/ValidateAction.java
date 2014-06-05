@@ -129,7 +129,9 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
 
             try {
                 final String password = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
-                accountDescription.setPassword(MailPasswordUtil.decrypt(password, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer()));
+                if (null != password) {
+                    accountDescription.setPassword(MailPasswordUtil.decrypt(password, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer()));
+                }
             } catch (final OXException e) {
                 if (!CryptoErrorMessage.BadPassword.equals(e)) {
                     throw e;
