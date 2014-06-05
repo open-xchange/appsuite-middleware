@@ -185,15 +185,15 @@ public class PortableSession extends StoredSession implements CustomPortable {
                             values = new StringAppender(':', capacity);
                         }
                         names.append(parameterName);
-                        values.append(Charsets.toAsciiString(URLCodec.encodeUrl(BIT_SET_PARAMS, sValue.getBytes(Charsets.UTF_8))));
+                        values.append(getSafeValue(sValue));
                     }
                 }
-                if (null != names) {
-                    writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, names.toString());
-                    writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, values.toString());
-                } else {
+                if (null == names) {
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
+                } else {
+                    writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, names.toString());
+                    writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, values.toString());
                 }
             }
         }
@@ -233,7 +233,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
                 List<String> values = parseColonString(reader.readUTF(PARAMETER_REMOTE_PARAMETER_VALUES)); // Expect them, too
                 for (int i = 0, size = names.size(); i < size; i++) {
                     try {
-                        parameters.put(names.get(i), new String(URLCodec.decodeUrl(Charsets.toAsciiBytes(values.get(i))), Charsets.UTF_8));
+                        parameters.put(names.get(i), decodeSafeValue(values.get(i)));
                     } catch (DecoderException e) {
                         // Ignore
                     }
@@ -258,6 +258,12 @@ public class PortableSession extends StoredSession implements CustomPortable {
         return retval;
     }
 
+    private static String getSafeValue(String sValue) {
+        return sValue.indexOf(':') < 0 ? sValue : Charsets.toAsciiString(URLCodec.encodeUrl(BIT_SET_PARAMS, sValue.getBytes(Charsets.UTF_8)));
+    }
 
+    private static String decodeSafeValue(String value) throws DecoderException {
+        return value.indexOf('%') < 0 ? value : new String(URLCodec.decodeUrl(Charsets.toAsciiBytes(value)), Charsets.UTF_8);
+    }
 
 }
