@@ -1,5 +1,11 @@
+* 2014-06-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32865: Don't anticipate upcoming ACKNOWLEDGE for the new version of server-side executed EDIT action 
+
 * 2014-06-06 - thorben.betten@open-xchange.com
 
+ - Fix for bug 32974: Cancel running IMAP-IDLE listener in case context has been deleted in the meantime +
+                      Improved handling in ReplicationMonitor class to avoid default retry mechanism in case a "DBP-0021" (Transaction counter is missing) occurs
  - Fix for bug 32942: Support separate namespaces for different IMAP users (do not globally cache root subfolder capability per IMAP server anymore)
 
 * 2014-06-04 - tobias.friedrich@open-xchange.com

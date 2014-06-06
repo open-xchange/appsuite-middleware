@@ -278,7 +278,13 @@ public final class Mp3CoverExtractor implements CoverExtractor {
         if (null == mimeType) {
             return false;
         }
-        return MP3_MIME_TYPES.contains(mimeType);
+        String mt = mimeType.trim();
+        for (String mp3MimeType : MP3_MIME_TYPES) {
+            if (mt.startsWith(mp3MimeType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static final Set<String> MIME_TYPES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
@@ -310,7 +316,13 @@ public final class Mp3CoverExtractor implements CoverExtractor {
         if (null == mimeType) {
             return false;
         }
-        return MIME_TYPES.contains(mimeType);
+        String mt = mimeType.trim();
+        for (String supportedMimeType : MIME_TYPES) {
+            if (mt.startsWith(supportedMimeType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
