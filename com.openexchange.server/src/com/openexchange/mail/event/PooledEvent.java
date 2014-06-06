@@ -255,6 +255,18 @@ public final class PooledEvent implements Delayed {
             return false;
         }
         final PooledEvent other = (PooledEvent) obj;
+        if (accountId != other.accountId) {
+            return false;
+        }
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        if (contentRelated != other.contentRelated) {
+            return false;
+        }
         if (topic == null) {
             if (other.topic != null) {
                 return false;
@@ -262,23 +274,11 @@ public final class PooledEvent implements Delayed {
         } else if (!topic.equals(other.topic)) {
             return false;
         }
-        if (accountId != other.accountId) {
-            return false;
-        }
-        if (contextId != other.contextId) {
-            return false;
-        }
         if (fullname == null) {
             if (other.fullname != null) {
                 return false;
             }
         } else if (!fullname.equals(other.fullname)) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
-        if (contentRelated != other.contentRelated) {
             return false;
         }
         return true;
@@ -312,9 +312,9 @@ public final class PooledEvent implements Delayed {
     }
 
     /**
-     * Gets the fullname
+     * Gets the full name
      *
-     * @return The fullname
+     * @return The full name
      */
     public String getFullname() {
         return fullname;
