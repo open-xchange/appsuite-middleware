@@ -162,6 +162,10 @@ public class ReplicationMonitor {
                 try {
                     clientTransaction = readTransaction(retval, assign.getContextId());
                 } catch (final OXException e) {
+                    if (DBPoolingExceptionCodes.TRANSACTION_MISSING.equals(e)) {
+                        // No such context exists
+                        throw e;
+                    }
                     LOG.warn("", e);
                     if (10 == tries) {
                         // Do a fall back to the master.
