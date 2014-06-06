@@ -1,3 +1,7 @@
+* 2014-06-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32865: Don't anticipate upcoming ACKNOWLEDGE for the new version of server-side executed EDIT action 
+
 * 2014-06-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 32743: Property was added in a patch and according post installation scripting should be contained in a patch, too.
