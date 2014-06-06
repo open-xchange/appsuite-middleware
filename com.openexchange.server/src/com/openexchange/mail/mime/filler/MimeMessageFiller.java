@@ -183,6 +183,7 @@ public class MimeMessageFiller {
 
     private static final String HDR_ORGANIZATION = MessageHeaders.HDR_ORGANIZATION;
     private static final String HDR_X_MAILER = MessageHeaders.HDR_X_MAILER;
+    private static final String HDR_X_ORIGINATING_CLIENT = MessageHeaders.HDR_X_ORIGINATING_CLIENT;
     private static final String HDR_MIME_VERSION = MessageHeaders.HDR_MIME_VERSION;
 
     private static final String PREFIX_PART = "part";
@@ -324,10 +325,7 @@ public class MimeMessageFiller {
                 final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                 final String organization = contactService.getOrganization(session);
                 if (null != organization && 0 < organization.length()) {
-                    final String encoded =
-                        MimeUtility.fold(
-                            14,
-                            MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
+                    final String encoded = MimeUtility.fold(14, MimeUtility.encodeText(organization, MailProperties.getInstance().getDefaultMimeCharset(), null));
                     mimeMessage.setHeader(HDR_ORGANIZATION, encoded);
                 }
             } catch (final Exception e) {
@@ -339,6 +337,17 @@ public class MimeMessageFiller {
          */
         if (MailProperties.getInstance().isAddClientIPAddress()) {
             addClientIPAddress(mimeMessage, session);
+        }
+        {
+            String client = session.getClient();
+            if (!Strings.isEmpty(client)) {
+                try {
+                    final String encoded = MimeUtility.fold(20, MimeUtility.encodeText(client, MailProperties.getInstance().getDefaultMimeCharset(), null));
+                    mimeMessage.setHeader(HDR_X_ORIGINATING_CLIENT, encoded);
+                } catch (final Exception e) {
+                    LOG.warn("Header \"X-Originating-Client\" could not be set", e);
+                }
+            }
         }
     }
 
