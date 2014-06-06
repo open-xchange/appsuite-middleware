@@ -1,3 +1,8 @@
+* 2014-06-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32974: Cancel running IMAP-IDLE listener in case context has been deleted in the meantime +
+                      Improved handling in ReplicationMonitor class to avoid default retry mechanism in case a "DBP-0021" (Transaction counter is missing) occurs
+
 * 2014-06-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32745: Propagate result from EDIT action in following SYNC actions

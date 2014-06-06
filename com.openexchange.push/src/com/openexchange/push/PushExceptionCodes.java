@@ -75,13 +75,13 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_PROPERTY("Invalid property value in property \"%1$s\": %2$s", Category.CATEGORY_ERROR, 3, null);
 
+    /** The exception code prefix */
+    public static final String PREFIX = "PUSH";
+
     private final Category category;
-
     private final int detailNumber;
-
     private final String message;
-    
-    private String displayMessage;
+    private final String displayMessage;
 
     private PushExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
@@ -92,7 +92,7 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "PUSH";
+        return PREFIX;
     }
 
     @Override
