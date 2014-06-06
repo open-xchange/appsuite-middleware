@@ -1,3 +1,7 @@
+* 2014-06-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32865: Don't anticipate upcoming ACKNOWLEDGE for the new version of server-side executed EDIT action 
+
 * 2014-06-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 32974: Cancel running IMAP-IDLE listener in case context has been deleted in the meantime +

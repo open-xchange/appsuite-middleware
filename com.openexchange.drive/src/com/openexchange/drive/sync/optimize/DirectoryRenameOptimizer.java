@@ -58,7 +58,9 @@ import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.AcknowledgeDirectoryAction;
 import com.openexchange.drive.actions.EditDirectoryAction;
+import com.openexchange.drive.actions.SyncDirectoryAction;
 import com.openexchange.drive.comparison.Change;
+import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.sync.IntermediateSyncResult;
@@ -112,7 +114,8 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
      * is detected and transformed to
      * <p/><code>
      * Server: EDIT [version=/heinz | d41d8cd98f00b204e9800998ecf8427e [79348], newVersion=/otto | d41d8cd98f00b204e9800998ecf8427e, parameters={}]
-     * Client: ACKNOWLEDGE [version=/heinz | d41d8cd98f00b204e9800998ecf8427e, newVersion=/otto | d41d8cd98f00b204e9800998ecf8427e, parameters={}]
+     * Client: ACKNOWLEDGE [version=/heinz | d41d8cd98f00b204e9800998ecf8427e, newVersion=null, parameters={}]
+     * Client: SYNC [version=/otto | d41d8cd98f00b204e9800998ecf8427e, newVersion=null, parameters={}]
      * </code><p/>
      *
      * @param result The current intermediate sync result
@@ -146,16 +149,22 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
                             optimizedActionsForClient, Action.SYNC, clientAction.getVersion(), Change.NEW, Change.NONE);
                         if (null != clientSync) {
                             /*
-                             * edit server directory instead, acknowledged client move/rename
+                             * edit server directory instead, insert adjusted ACK and SYNC actions for client (acks for edits are done automatically with next sync)
                              * EDIT [version=/vorher | d41d8cd98f00b204e9800998ecf8427e [59408], newVersion={"path":"/nachher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, parameters={}]
-                             * ACKNOWLEDGE [version={"path":"/vorher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, newVersion={"path":"/nachher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, parameters={}]
+                             * ACKNOWLEDGE [version={"path":"/vorher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, newVersion=null, parameters={}]
+                             * SYNC [version={"path":"/nachher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, newVersion=null, parameters={}]
                              */
-                            optimizedActionsForClient.remove(clientSync);
-                            optimizedActionsForClient.remove(clientAction);
                             optimizedActionsForServer.remove(serverAction);
-                            optimizedActionsForClient.add(new AcknowledgeDirectoryAction(clientAction.getVersion(), clientSync.getVersion(), null));
-                            EditDirectoryAction renameDirectoryAction = new EditDirectoryAction(serverAction.getVersion(), clientSync.getVersion(), null);
-                            optimizedActionsForServer.add(renameDirectoryAction);
+                            optimizedActionsForServer.add(new EditDirectoryAction(serverAction.getVersion(), clientSync.getVersion(), null));
+                            optimizedActionsForClient.remove(clientAction);
+                            ThreeWayComparison<DirectoryVersion> comparison = new ThreeWayComparison<DirectoryVersion>();
+                            comparison.setOriginalVersion(clientAction.getVersion());
+                            optimizedActionsForClient.add(new AcknowledgeDirectoryAction(clientAction.getVersion(), null, comparison));
+                            optimizedActionsForClient.remove(clientSync);
+                            comparison = new ThreeWayComparison<DirectoryVersion>();
+                            comparison.setClientVersion(clientSync.getVersion());
+                            comparison.setServerVersion(clientSync.getVersion());
+                            optimizedActionsForClient.add(new SyncDirectoryAction(clientSync.getVersion(), comparison));
                             /*
                              * restore any nested removes that are no longer valid after rename
                              */
