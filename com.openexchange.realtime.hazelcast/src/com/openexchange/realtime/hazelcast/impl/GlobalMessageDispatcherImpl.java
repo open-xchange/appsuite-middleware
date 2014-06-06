@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.hazelcast.impl;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -172,6 +173,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
             Map<ID, OXException> sent = Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
             if (Utils.shouldResend(sent, stanza)) {
                 resend(stanza);
+                //return empty map of exceptions when resending
                 return exceptions;
             }
             exceptions.putAll(sent);
@@ -220,23 +222,32 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
 
 
 
-    private final ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>> peerMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>>();
+    /*
+     * Map which client (sequencePrincipal) should use which sequence when sending to a given recipient node. Nodes are addressed via
+     * InetSocketAddress.
+     */
+    private final ConcurrentHashMap<ID, ConcurrentHashMap<InetSocketAddress, AtomicLong>> sequenceMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<InetSocketAddress, AtomicLong>>();
 
     /**
      *
-     * When delivering a Stanza to a different node, a new sequence number relative to that node is generated, so that stanza streams directed at different nodes still work. Consider:
+     * When delivering a Stanza to a different node, a new sequence number relative to that node is generated, so that stanza streams
+     * directed at different nodes still work.Consider client0 and client1 being connected to node1 and client2 being connected to node2.
+     * client0 wants to chat with client1 and client2 and sends messages with strictly ascending sequence numbers reaching node1 that he is
+     * connected to:
+     * 
      * <pre>
-     * Seq 0 delivered via node 1
-     * Seq 1 delivered via node 1
-     * Seq 2 delivered via node 2
-     * Seq 3 delivered via node 1
-     * Seq 4 delivered via node 2
+     * Seq 0 delivered to client1 via node 1
+     * Seq 1 delivered to client1 via node 1
+     * Seq 2 delivered to client2 via node 2
+     * Seq 3 delivered to client1 via node 1
+     * Seq 4 delivered to client2 via node 2
      * </pre>
      *
-     * Node 2 only sees messages 2 and 4 and would indefinetly wait for messages 0, 1 and 3. Therefore the system recasts sequence numbers:
+     * Node 2 only sees messages 2 and 4 and would indefinetly wait for messages 0, 1 and 3 to form a valid order of sequences. Therefore
+     * the realtime framework on node1 has to recast sequence numbers in a way that node2 sees a valid order.
      * <pre>
-     * Seq 0 is recast as Seq 0 for node 1
-     * Seq 1 is recast as Seq 1 for node 1
+     * Seq 0 remains      Seq 0 for node 1
+     * Seq 1 remains      Seq 1 for node 1
      * Seq 2 is recast as Seq 0 for node 2
      * Seq 3 is recast as Seq 2 for node 1
      * Seq 4 is recast as Seq 1 for node 2
@@ -248,42 +259,44 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
      */
     private void ensureSequence(Stanza stanza, Member receiver) throws OXException {
         if (stanza.getSequenceNumber() != -1) {
+            InetSocketAddress receiverAddress = receiver.getInetSocketAddress();
+            ID sequencePrincipal = stanza.getSequencePrincipal();
             if(LOG.isDebugEnabled()) {
-                LOG.debug("peerMapsPerID before ensuring Sequence: " + peerMapPerID);
-                LOG.debug("SequencePrincipal for peerMapPerID lookup is: " + stanza.getSequencePrincipal());
+                LOG.debug("peerMapsPerID before ensuring Sequence: {} ", sequenceMapPerID);
+                LOG.debug("SequencePrincipal for peerMapPerID lookup is {} and receiverAddress is {}", sequencePrincipal, receiverAddress);
             }
-            ConcurrentHashMap<String, AtomicLong> peerMap = peerMapPerID.get(stanza.getSequencePrincipal());
-            if (peerMap == null) {
-                peerMap = new ConcurrentHashMap<String, AtomicLong>();
-                ConcurrentHashMap<String, AtomicLong> otherPeerMap = peerMapPerID.putIfAbsent(stanza.getSequencePrincipal(), peerMap);
-                if(otherPeerMap != null) {
-                    LOG.debug("Found other peerMap for SequencePrincipal: {} with value {}", stanza.getSequencePrincipal(), otherPeerMap);
-                    peerMap = otherPeerMap;
+            ConcurrentHashMap<InetSocketAddress, AtomicLong> sequenceMap = sequenceMapPerID.get(sequencePrincipal);
+            if (sequenceMap == null) {
+                sequenceMap = new ConcurrentHashMap<InetSocketAddress, AtomicLong>();
+                ConcurrentHashMap<InetSocketAddress, AtomicLong> otherSequenceMap = sequenceMapPerID.putIfAbsent(sequencePrincipal, sequenceMap);
+                if(otherSequenceMap != null) {
+                    LOG.debug("Found other sequenceMap for SequencePrincipal: {} with value {}", sequencePrincipal, otherSequenceMap);
+                    sequenceMap = otherSequenceMap;
                 }
             }
-            AtomicLong nextNumber = peerMap.get(receiver.getUuid());
+            AtomicLong nextNumber = sequenceMap.get(receiverAddress);
             if (nextNumber == null) {
                 nextNumber = new AtomicLong(0);
-                AtomicLong otherNextNumber = peerMap.putIfAbsent(receiver.getUuid(), nextNumber);
+                AtomicLong otherNextNumber = sequenceMap.putIfAbsent(receiverAddress, nextNumber);
                 nextNumber = (otherNextNumber != null) ? otherNextNumber : nextNumber;
                 if(otherNextNumber != null) {
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug("Found other nextNumber to use for receiver: {}, nextNumber {}", receiver.getUuid(), otherNextNumber);
+                        LOG.debug("Found other nextNumber to use for receiver: {}, nextNumber {}", receiverAddress, otherNextNumber);
                     }
                     nextNumber = otherNextNumber;
                 }
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("nextNumber for receiver {} was null, adding nextNumber: {}", receiver.getUuid(), nextNumber);
+                    LOG.debug("nextNumber for receiver {} was null, adding nextNumber: {}", receiverAddress, nextNumber);
                 }
             }
             Long ensuredSequence = nextNumber.incrementAndGet() - 1;
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Updating sequence number for {}: {}", receiver.getUuid(), ensuredSequence);
+                LOG.debug("Updating sequence number for {}: {}", receiverAddress, ensuredSequence);
             }
             stanza.setSequenceNumber(ensuredSequence);
-            stanza.trace("Updating sequence number for " + receiver.getUuid() + ": " + ensuredSequence);
+            stanza.trace("Updating sequence number for " + receiverAddress + ": " + ensuredSequence);
             if(LOG.isDebugEnabled()) {
-                LOG.debug("peerMapsPerID after ensuring Sequence: {}", peerMapPerID);
+                LOG.debug("peerMapsPerID after ensuring Sequence: {}", sequenceMapPerID);
             }
         }
     }
@@ -291,6 +304,6 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
     @Override
     public void cleanupForId(ID id) {
         LOG.debug("Cleanup for ID: {}. Removing SequencePrincipal from peerMapPerID lookup table.", id);
-        peerMapPerID.remove(id);
+        sequenceMapPerID.remove(id);
     }
 }
