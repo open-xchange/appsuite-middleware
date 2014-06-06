@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.hazelcast.impl;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -220,14 +219,11 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
         send(stanza);
     }
 
-
-
     /*
      * Map which client (sequencePrincipal) should use which sequence when sending to a given recipient node. Nodes are addressed via
      * InetSocketAddress.
      */
-    private final ConcurrentHashMap<ID, ConcurrentHashMap<InetSocketAddress, AtomicLong>> sequenceMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<InetSocketAddress, AtomicLong>>();
-
+    private final ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>> peerMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>>();
     /**
      *
      * When delivering a Stanza to a different node, a new sequence number relative to that node is generated, so that stanza streams
@@ -259,44 +255,42 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
      */
     private void ensureSequence(Stanza stanza, Member receiver) throws OXException {
         if (stanza.getSequenceNumber() != -1) {
-            InetSocketAddress receiverAddress = receiver.getInetSocketAddress();
-            ID sequencePrincipal = stanza.getSequencePrincipal();
             if(LOG.isDebugEnabled()) {
-                LOG.debug("peerMapsPerID before ensuring Sequence: {} ", sequenceMapPerID);
-                LOG.debug("SequencePrincipal for peerMapPerID lookup is {} and receiverAddress is {}", sequencePrincipal, receiverAddress);
+                LOG.debug("peerMapsPerID before ensuring Sequence: " + peerMapPerID);
+                LOG.debug("SequencePrincipal for peerMapPerID lookup is: " + stanza.getSequencePrincipal());
             }
-            ConcurrentHashMap<InetSocketAddress, AtomicLong> sequenceMap = sequenceMapPerID.get(sequencePrincipal);
-            if (sequenceMap == null) {
-                sequenceMap = new ConcurrentHashMap<InetSocketAddress, AtomicLong>();
-                ConcurrentHashMap<InetSocketAddress, AtomicLong> otherSequenceMap = sequenceMapPerID.putIfAbsent(sequencePrincipal, sequenceMap);
-                if(otherSequenceMap != null) {
-                    LOG.debug("Found other sequenceMap for SequencePrincipal: {} with value {}", sequencePrincipal, otherSequenceMap);
-                    sequenceMap = otherSequenceMap;
+            ConcurrentHashMap<String, AtomicLong> peerMap = peerMapPerID.get(stanza.getSequencePrincipal());
+            if (peerMap == null) {
+                peerMap = new ConcurrentHashMap<String, AtomicLong>();
+                ConcurrentHashMap<String, AtomicLong> otherPeerMap = peerMapPerID.putIfAbsent(stanza.getSequencePrincipal(), peerMap);
+                if(otherPeerMap != null) {
+                    LOG.debug("Found other peerMap for SequencePrincipal: {} with value {}", stanza.getSequencePrincipal(), otherPeerMap);
+                    peerMap = otherPeerMap;
                 }
             }
-            AtomicLong nextNumber = sequenceMap.get(receiverAddress);
+            AtomicLong nextNumber = peerMap.get(receiver.getUuid());
             if (nextNumber == null) {
                 nextNumber = new AtomicLong(0);
-                AtomicLong otherNextNumber = sequenceMap.putIfAbsent(receiverAddress, nextNumber);
+                AtomicLong otherNextNumber = peerMap.putIfAbsent(receiver.getUuid(), nextNumber);
                 nextNumber = (otherNextNumber != null) ? otherNextNumber : nextNumber;
                 if(otherNextNumber != null) {
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug("Found other nextNumber to use for receiver: {}, nextNumber {}", receiverAddress, otherNextNumber);
+                        LOG.debug("Found other nextNumber to use for receiver: {}, nextNumber {}", receiver.getUuid(), otherNextNumber);
                     }
                     nextNumber = otherNextNumber;
                 }
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("nextNumber for receiver {} was null, adding nextNumber: {}", receiverAddress, nextNumber);
+                    LOG.debug("nextNumber for receiver {} was null, adding nextNumber: {}", receiver.getUuid(), nextNumber);
                 }
             }
             Long ensuredSequence = nextNumber.incrementAndGet() - 1;
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Updating sequence number for {}: {}", receiverAddress, ensuredSequence);
+                LOG.debug("Updating sequence number for {}: {}", receiver.getUuid(), ensuredSequence);
             }
             stanza.setSequenceNumber(ensuredSequence);
-            stanza.trace("Updating sequence number for " + receiverAddress + ": " + ensuredSequence);
+            stanza.trace("Updating sequence number for " + receiver.getUuid() + ": " + ensuredSequence);
             if(LOG.isDebugEnabled()) {
-                LOG.debug("peerMapsPerID after ensuring Sequence: {}", sequenceMapPerID);
+                LOG.debug("peerMapsPerID after ensuring Sequence: {}", peerMapPerID);
             }
         }
     }
@@ -304,6 +298,6 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
     @Override
     public void cleanupForId(ID id) {
         LOG.debug("Cleanup for ID: {}. Removing SequencePrincipal from peerMapPerID lookup table.", id);
-        sequenceMapPerID.remove(id);
+        peerMapPerID.remove(id);
     }
 }
