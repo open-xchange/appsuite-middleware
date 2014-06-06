@@ -2699,7 +2699,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         } else if (showPersonalBelowInfoStore(session, altNames) && id.equals(getDefaultInfoStoreFolderId(session))) {
             folder.setParentID(INFOSTORE);
             folder.setName(FolderStrings.DEFAULT_FILES_FOLDER_NAME);
-        } else if (MODULE_FILE == folder.getContentType().getModule() && TrashType.getInstance().equals(folder.getType())) {
+        } else if (MODULE_FILE == folder.getContentType().getModule() && TrashType.getInstance().equals(folder.getType()) && folder.isDefault()) {
             folder.setParentID(INFOSTORE);
             folder.setName(altNames ? FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME : FolderStrings.SYSTEM_TRASH_INFOSTORE_FOLDER_NAME);
         }
