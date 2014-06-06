@@ -399,19 +399,19 @@ public class XingSubscribeService extends AbstractSubscribeService {
         {
             final String s = xingUser.getDisplayName();
             if (isNotNull(s)) {
-                oxContact.setDisplayName(s);
+                oxContact.setDisplayName(Strings.abbreviate(s, 320));
             }
         }
         {
             final String s = xingUser.getFirstName();
             if (isNotNull(s)) {
-                oxContact.setGivenName(s);
+                oxContact.setGivenName(Strings.abbreviate(s, 128));
             }
         }
         {
             final String s = xingUser.getLastName();
             if (isNotNull(s)) {
-                oxContact.setSurName(s);
+                oxContact.setSurName(Strings.abbreviate(s, 128));
             }
         }
         {
@@ -446,13 +446,13 @@ public class XingSubscribeService extends AbstractSubscribeService {
                     // Name
                     String s = (String) primaryCompany.get("name");
                     if (isNotNull(s)) {
-                        oxContact.setCompany(s);
+                        oxContact.setCompany(Strings.abbreviate(s, 512));
                     }
 
                     // Title
                     s = (String) primaryCompany.get("title");
                     if (isNotNull(s)) {
-                        oxContact.setPosition(s);
+                        oxContact.setPosition(Strings.abbreviate(s, 128));
                     }
                 }
             }
@@ -466,7 +466,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         {
             final String s = xingUser.getPermalink();
             if (isNotNull(s)) {
-                oxContact.setURL(s);
+                oxContact.setURL(Strings.abbreviate(s, 128));
             }
         }
         {
@@ -481,45 +481,45 @@ public class XingSubscribeService extends AbstractSubscribeService {
             if (null != a) {
                 String s = a.getCity();
                 if (isNotNull(s)) {
-                    oxContact.setCityBusiness(s);
+                    oxContact.setCityBusiness(Strings.abbreviate(s, 64));
                 }
                 s = a.getCountry();
                 if (isNotNull(s)) {
-                    oxContact.setCountryBusiness(s);
+                    oxContact.setCountryBusiness(Strings.abbreviate(s, 64));
                 }
                 s = a.getEmail();
                 if (isNotNull(s)) {
                     if (email1Set) {
-                        oxContact.setEmail2(s);
+                        oxContact.setEmail2(Strings.abbreviate(s, 256));
                         email2Set = true;
                     } else {
-                        oxContact.setEmail1(s);
+                        oxContact.setEmail1(Strings.abbreviate(s, 256));
                         email1Set = true;
                     }
                 }
                 s = a.getFax();
                 if (isNotNull(s)) {
-                    oxContact.setFaxBusiness(s);
+                    oxContact.setFaxBusiness(Strings.abbreviate(s, 64));
                 }
                 s = a.getMobilePhone();
                 if (isNotNull(s)) {
-                    oxContact.setCellularTelephone1(s);
+                    oxContact.setCellularTelephone1(Strings.abbreviate(s, 64));
                 }
                 s = a.getPhone();
                 if (isNotNull(s)) {
-                    oxContact.setTelephoneBusiness1(s);
+                    oxContact.setTelephoneBusiness1(Strings.abbreviate(s, 64));
                 }
                 s = a.getProvince();
                 if (isNotNull(s)) {
-                    oxContact.setStateBusiness(s);
+                    oxContact.setStateBusiness(Strings.abbreviate(s, 64));
                 }
                 s = a.getStreet();
                 if (isNotNull(s)) {
-                    oxContact.setStreetBusiness(s);
+                    oxContact.setStreetBusiness(Strings.abbreviate(s, 64));
                 }
                 s = a.getZipCode();
                 if (isNotNull(s)) {
-                    oxContact.setPostalCodeBusiness(s);
+                    oxContact.setPostalCodeBusiness(Strings.abbreviate(s, 64));
                 }
             }
         }
@@ -528,49 +528,49 @@ public class XingSubscribeService extends AbstractSubscribeService {
             if (null != a) {
                 String s = a.getCity();
                 if (isNotNull(s)) {
-                    oxContact.setCityHome(s);
+                    oxContact.setCityHome(Strings.abbreviate(s, 64));
                 }
                 s = a.getCountry();
                 if (isNotNull(s)) {
-                    oxContact.setCountryHome(s);
+                    oxContact.setCountryHome(Strings.abbreviate(s, 64));
                 }
                 s = a.getEmail();
                 if (isNotNull(s)) {
                     if (email1Set) {
                         if (email2Set) {
-                            oxContact.setEmail3(s);
+                            oxContact.setEmail3(Strings.abbreviate(s, 256));
                         } else {
-                            oxContact.setEmail2(s);
+                            oxContact.setEmail2(Strings.abbreviate(s, 256));
                             email2Set = true;
                         }
                     } else {
-                        oxContact.setEmail1(s);
+                        oxContact.setEmail1(Strings.abbreviate(s, 256));
                         email1Set = true;
                     }
                 }
                 s = a.getFax();
                 if (isNotNull(s)) {
-                    oxContact.setFaxHome(s);
+                    oxContact.setFaxHome(Strings.abbreviate(s, 64));
                 }
                 s = a.getMobilePhone();
                 if (isNotNull(s)) {
-                    oxContact.setCellularTelephone2(s);
+                    oxContact.setCellularTelephone2(Strings.abbreviate(s, 64));
                 }
                 s = a.getPhone();
                 if (isNotNull(s)) {
-                    oxContact.setTelephoneHome1(s);
+                    oxContact.setTelephoneHome1(Strings.abbreviate(s, 64));
                 }
                 s = a.getProvince();
                 if (isNotNull(s)) {
-                    oxContact.setStateHome(s);
+                    oxContact.setStateHome(Strings.abbreviate(s, 64));
                 }
                 s = a.getStreet();
                 if (isNotNull(s)) {
-                    oxContact.setStreetHome(s);
+                    oxContact.setStreetHome(Strings.abbreviate(s, 64));
                 }
                 s = a.getZipCode();
                 if (isNotNull(s)) {
-                    oxContact.setPostalCodeHome(s);
+                    oxContact.setPostalCodeHome(Strings.abbreviate(s, 64));
                 }
             }
         }
@@ -579,11 +579,11 @@ public class XingSubscribeService extends AbstractSubscribeService {
             if (null != instantMessagingAccounts) {
                 final String skypeId = instantMessagingAccounts.get("skype");
                 if (isNotNull(skypeId)) {
-                    oxContact.setInstantMessenger1(skypeId);
+                    oxContact.setInstantMessenger1(Strings.abbreviate(skypeId, 64));
                 }
                 for (final Map.Entry<String, String> e : instantMessagingAccounts.entrySet()) {
                     if (!"skype".equals(e.getKey()) && !"null".equals(e.getValue())) {
-                        oxContact.setInstantMessenger2(e.getValue());
+                        oxContact.setInstantMessenger2(Strings.abbreviate(e.getValue(), 64));
                         break;
                     }
                 }
