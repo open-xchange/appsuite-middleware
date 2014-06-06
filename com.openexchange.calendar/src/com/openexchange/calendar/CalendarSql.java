@@ -1285,16 +1285,19 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     private boolean exceedsFolderLimit(AppointmentSearchObject searchObj, CalendarFolderObject cfo) {
+        if (searchObj == null || cfo == null) {
+            return false;
+        }
         if (searchObj.getFolderIDs() == null || searchObj.getFolderIDs().size() < 0) {
             return false;
         }
 
         int readableFolder = 0;
-        readableFolder += cfo.getPrivateFolders().size();
-        readableFolder += cfo.getPublicReadableOwn().size();
-        readableFolder += cfo.getPublicReadableAll().size();
-        readableFolder += cfo.getSharedReadableOwn().size();
-        readableFolder += cfo.getSharedReadableAll().size();
+        readableFolder += cfo.getPrivateFolders() == null ? 0 : cfo.getPrivateFolders().size();
+        readableFolder += cfo.getPublicReadableOwn() == null ? 0 : cfo.getPublicReadableOwn().size();
+        readableFolder += cfo.getPublicReadableAll() == null ? 0 : cfo.getPublicReadableAll().size();
+        readableFolder += cfo.getSharedReadableOwn() == null ? 0 : cfo.getSharedReadableOwn().size();
+        readableFolder += cfo.getSharedReadableAll() == null ? 0 : cfo.getSharedReadableAll().size();
         if (MAX_SEARCH_FOLDER >= 0 && readableFolder > MAX_SEARCH_FOLDER) {
             return true;
         }
