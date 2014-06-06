@@ -1,3 +1,7 @@
+* 2014-06-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32942: Support separate namespaces for different IMAP users (do not globally cache root subfolder capability per IMAP server anymore)
+
 * 2014-06-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32745: Propagate result from EDIT action in following SYNC actions
