@@ -51,6 +51,10 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
@@ -65,16 +69,21 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.InterruptibleInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.preview.ContentTypeChecker;
+import com.openexchange.preview.Delegating;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
+import com.openexchange.preview.RemoteInternalPreviewService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -87,6 +96,58 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
     /** The logger constant */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreviewImageResultConverter.class);
+
+    // ----------------------------------------------------------------------------------------------------------------------//
+
+    static PreviewDocument getPreviewDocument(IFileHolder fileHolder, InputStream stream, AJAXRequestData requestData, String previewLanguage, PreviewOutput previewOutput, ServerSession session, PreviewService previewService) throws OXException {
+        try {
+            // Obtain preview
+            final DataProperties dataProperties = new DataProperties(12);
+            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
+            dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
+            dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+            dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
+            dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
+            dataProperties.put("PreviewWidth", requestData.getParameter("width"));
+            dataProperties.put("PreviewHeight", requestData.getParameter("height"));
+            dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
+            dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
+            dataProperties.put("PreviewLanguage", previewLanguage);
+            return previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), previewOutput, session, 1);
+        } catch (RuntimeException rte) {
+            throw PreviewExceptionCodes.ERROR.create(rte, rte.getMessage());
+        }
+    }
+
+    private static final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
+
+        private final AJAXRequestData requestData;
+        private final IFileHolder fileHolder;
+        private final String previewLanguage;
+        private final PreviewOutput previewOutput;
+        private final ServerSession session;
+        private final InputStream stream;
+        private final PreviewService previewService;
+
+        PreviewDocumentCallable(IFileHolder fileHolder, InputStream stream, AJAXRequestData requestData, String previewLanguage, PreviewOutput previewOutput, ServerSession session, PreviewService previewService) {
+            super();
+            this.fileHolder = fileHolder;
+            this.stream = stream;
+            this.requestData = requestData;
+            this.previewLanguage = previewLanguage;
+            this.previewOutput = previewOutput;
+            this.session = session;
+            this.previewService = previewService;
+        }
+
+        @Override
+        public PreviewDocument call() throws OXException {
+            return getPreviewDocument(fileHolder, stream, requestData, previewLanguage, previewOutput, session, previewService);
+        }
+
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------//
 
     /**
      * Initializes a new {@link PreviewImageResultConverter}.
@@ -149,10 +210,11 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             }
 
             // No cached preview available -- get the preview document from appropriate 'PreviewService'
-            final PreviewDocument previewDocument;
+            PreviewDocument previewDocument = null;
             {
                 InputStream stream = null;
                 IFileHolder fileHolder = null;
+                Future<PreviewDocument> submittedTask = null;
                 try {
                     final Object resultObject = result.getResultObject();
                     if (!(resultObject instanceof IFileHolder)) {
@@ -179,20 +241,54 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                         stream = ref.getValue();
                     }
 
-                    // Obtain preview
-                    final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
-                    final DataProperties dataProperties = new DataProperties(12);
-                    dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
-                    dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
-                    dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
-                    dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
-                    dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
-                    dataProperties.put("PreviewWidth", requestData.getParameter("width"));
-                    dataProperties.put("PreviewHeight", requestData.getParameter("height"));
-                    dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
-                    dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
-                    dataProperties.put("PreviewLanguage", previewLanguage);
-                    previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), getOutput(), session, 1);
+                    // Obtain preview either using running or separate thread
+                    PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
+                    boolean useCurrentThread = true;
+                    if (previewService instanceof Delegating) {
+                        String mimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
+
+                        // Determine candidate
+                        {
+                            PreviewService candidate = ((Delegating) previewService).getBestFitOrDelegate(mimeType, getOutput());
+                            if (null == candidate) {
+                                throw PreviewExceptionCodes.NO_PREVIEW_SERVICE.create(null == mimeType ? "" :  mimeType);
+                            }
+                            previewService = candidate;
+                        }
+
+                        if (previewService instanceof RemoteInternalPreviewService) {
+                            long timeToWaitMillis = ((RemoteInternalPreviewService) previewService).getTimeToWaitMillis();
+                            if (timeToWaitMillis > 0) {
+                                // Perform with separate thread
+                                useCurrentThread = false;
+                                InterruptibleInputStream iis = new InterruptibleInputStream(stream);
+                                try {
+                                    PreviewDocumentCallable task = new PreviewDocumentCallable(fileHolder, iis, requestData, previewLanguage, getOutput(), session, previewService);
+                                    submittedTask = ThreadPools.getThreadPool().submit(task, CallerRunsBehavior.<PreviewDocument> getInstance());
+                                    previewDocument = submittedTask.get(timeToWaitMillis, TimeUnit.MILLISECONDS);
+                                } catch (TimeoutException e) {
+                                    // Preview image has not been generated in time
+                                    iis.interrupt();
+                                    submittedTask.cancel(true);
+                                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create(e, new Object[0]);
+                                } catch (InterruptedException e) {
+                                    // Keep interrupted state
+                                    Thread.currentThread().interrupt();
+                                    throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+                                } catch (ExecutionException e) {
+                                    // Failed to generate preview image
+                                    throw ThreadPools.launderThrowable(e, OXException.class);
+                                }
+                            }
+                        }
+                    }
+
+                    if (useCurrentThread) {
+                        // Perform with this thread
+                        previewDocument = getPreviewDocument(fileHolder, stream, requestData, previewLanguage, getOutput(), session, previewService);
+                    }
+                } catch (RuntimeException rte) {
+                    throw PreviewExceptionCodes.ERROR.create(rte, rte.getMessage());
                 } finally {
                     Streams.close(stream, fileHolder);
                 }
@@ -213,7 +309,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             }
 
             // Prepare response
-            if(previewDocument.getClass().getName().equals("com.openexchange.documentpreview.OfficePreviewDocument")) {
+            if("com.openexchange.documentpreview.OfficePreviewDocument".equals(previewDocument.getClass().getName())) {
                 requestData.putParameter("transformationNeeded", "false");
             }
 
