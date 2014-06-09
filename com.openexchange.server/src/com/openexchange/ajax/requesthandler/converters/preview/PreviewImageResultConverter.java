@@ -245,10 +245,9 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                     PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
                     boolean useCurrentThread = true;
                     if (previewService instanceof Delegating) {
-                        String mimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
-
                         // Determine candidate
                         {
+                            String mimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
                             PreviewService candidate = ((Delegating) previewService).getBestFitOrDelegate(mimeType, getOutput());
                             if (null == candidate) {
                                 throw PreviewExceptionCodes.NO_PREVIEW_SERVICE.create(null == mimeType ? "" :  mimeType);
@@ -256,6 +255,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                             previewService = candidate;
                         }
 
+                        // Check for possible RemoteInternalPreviewService instance
                         if (previewService instanceof RemoteInternalPreviewService) {
                             long timeToWaitMillis = ((RemoteInternalPreviewService) previewService).getTimeToWaitMillis();
                             if (timeToWaitMillis > 0) {
