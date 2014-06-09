@@ -151,8 +151,7 @@ public class PreviewActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final TikaPreviewService tikaPreviewService = new TikaPreviewService(this);
-        final DelegationPreviewService delegationPreviewService = new DelegationPreviewService(tikaPreviewService);
+        final DelegationPreviewService delegationPreviewService = new DelegationPreviewService(new TikaPreviewService(this));
         registerService(PreviewService.class, delegationPreviewService);
         /*
          * Trackers
