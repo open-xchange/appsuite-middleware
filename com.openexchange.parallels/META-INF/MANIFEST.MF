@@ -6,15 +6,7 @@ Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.custom.parallels.osgi.SoapParallelsActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.fasterxml.jackson.core,
- com.fasterxml.jackson.core.base,
- com.fasterxml.jackson.core.format,
- com.fasterxml.jackson.core.io,
- com.fasterxml.jackson.core.json,
- com.fasterxml.jackson.core.sym,
- com.fasterxml.jackson.core.type,
- com.fasterxml.jackson.core.util,
- com.openexchange.admin.rmi,
+Import-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.extensions,

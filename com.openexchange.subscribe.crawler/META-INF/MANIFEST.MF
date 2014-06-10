@@ -6,15 +6,7 @@ Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.subscribe.crawler.osgi.CrawlersActivator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.fasterxml.jackson.core,
- com.fasterxml.jackson.core.base,
- com.fasterxml.jackson.core.format,
- com.fasterxml.jackson.core.io,
- com.fasterxml.jackson.core.json,
- com.fasterxml.jackson.core.sym,
- com.fasterxml.jackson.core.type,
- com.fasterxml.jackson.core.util,
- com.openexchange.config,
+Import-Package: com.openexchange.config,
  com.openexchange.data.conversion.ical,
  com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
