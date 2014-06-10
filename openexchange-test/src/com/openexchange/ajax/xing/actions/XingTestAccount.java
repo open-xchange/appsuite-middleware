@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,65 +49,43 @@
 
 package com.openexchange.ajax.xing.actions;
 
-import java.io.IOException;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-
 
 /**
- * {@link ContactJoinRevokeRequest}
+ * {@link XingTestAccount}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @since v7.6.0
  */
-public class ContactJoinRevokeRequest extends AbstractXingRequest<ContactJoinRevokeResponse> {
+public enum XingTestAccount {
+    DIMITRI_BRONKOWITSCH(0, "com.openexchange.xing.test.tokenDimitri", "com.openexchange.xing.test.secretDimitri"),
 
-    final String recipientMail;
-    
+    EWALD_BARTOWIAK(1, "com.openexchange.xing.test.tokenEwald", "com.openexchange.xing.test.secretEwald");
+
+    private int id;
+
+    private String secret;
+
+    private String token;
+
     /**
-     * Initializes a new {@link ContactJoinRevokeRequest}.
-     * 
-     * @param recipientMail the xing user mail which contact request should be revoked
-     * @param testAccount - The test account to use for this test
-     * @param foe failOnError
+     * Initializes a new {@link XingTestAccount}.
      */
-    public ContactJoinRevokeRequest(final String recipientMail, final XingTestAccount testAccount, boolean foe) {
-        super(foe, testAccount);
-        this.recipientMail = recipientMail;
+    private XingTestAccount(int id, final String token, final String secret) {
+        this.id = id;
+        this.secret = secret;
+        this.token = token;
     }
 
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
+    public int getId() {
+        return id;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public AbstractAJAXParser<? extends ContactJoinRevokeResponse> getParser() {
-        return new ContactJoinRevokeParser(failOnError);
+    public String getSecret() {
+        return secret;
+
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
+    public String getToken() {
+        return token;
     }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
-     */
-    @Override
-    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "revoke_contact_request"));
-        params.add(new URLParameter("email", recipientMail));
-    }
-
 }

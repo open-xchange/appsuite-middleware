@@ -57,7 +57,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Locale;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
@@ -91,6 +90,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -333,15 +333,13 @@ public final class Mp3ImageDataSource implements ImageDataSource {
         try {
             final com.openexchange.file.storage.File mp3File = fileAccess.getFileMetadata(fileId, FileStorageFileAccess.CURRENT_VERSION);
             // Check MIME type
-            String fileMIMEType = mp3File.getFileMIMEType();
-            fileMIMEType = null == fileMIMEType ? null : fileMIMEType.toLowerCase(Locale.ENGLISH);
+            String fileMIMEType = Strings.asciiLowerCase(mp3File.getFileMIMEType());
             if (null != fileMIMEType) {
                 if (!isSupported(fileMIMEType)) {
                     throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File is not a supported audio file: " + fileMIMEType);
                 }
             } else {
-                String fileName = mp3File.getFileName();
-                fileName = null == fileName ? null : fileName.toLowerCase(Locale.ENGLISH);
+                String fileName = Strings.asciiLowerCase(mp3File.getFileName());
                 if (null != fileName && !isSupportedFileExt(fileName)) {
                     throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File is not a supported audio file: " + fileMIMEType);
                 }

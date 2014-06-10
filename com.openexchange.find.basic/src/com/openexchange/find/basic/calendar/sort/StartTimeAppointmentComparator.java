@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.xing.actions;
+package com.openexchange.find.basic.calendar.sort;
 
-import java.io.IOException;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import java.util.Comparator;
+import java.util.Date;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link ContactJoinRevokeRequest}
+ * {@link StartTimeAppointmentComparator}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ContactJoinRevokeRequest extends AbstractXingRequest<ContactJoinRevokeResponse> {
+public class StartTimeAppointmentComparator implements Comparator<Appointment> {
 
-    final String recipientMail;
-    
+    private final boolean ascending;
+
     /**
-     * Initializes a new {@link ContactJoinRevokeRequest}.
-     * 
-     * @param recipientMail the xing user mail which contact request should be revoked
-     * @param testAccount - The test account to use for this test
-     * @param foe failOnError
+     * Initializes a new {@link StartTimeAppointmentComparator} using a descending order, i.e. future appointments are ordered first.
      */
-    public ContactJoinRevokeRequest(final String recipientMail, final XingTestAccount testAccount, boolean foe) {
-        super(foe, testAccount);
-        this.recipientMail = recipientMail;
+    public StartTimeAppointmentComparator() {
+        this(false);
+    }
+
+    /**
+     * Initializes a new {@link StartTimeAppointmentComparator}, using the supplied relative date.
+     *
+     * @param ascending <code>true</code> to use an ascending order, <code>false</code>, otherwise
+     */
+    public StartTimeAppointmentComparator(boolean ascending) {
+        super();
+        this.ascending = ascending;
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public AbstractAJAXParser<? extends ContactJoinRevokeResponse> getParser() {
-        return new ContactJoinRevokeParser(failOnError);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
-     */
-    @Override
-    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "revoke_contact_request"));
-        params.add(new URLParameter("email", recipientMail));
+    public int compare(Appointment appointment1, Appointment appointment2) {
+        //TODO: startdate of whole day appts in user timezone
+        Date date1 = null != appointment1 ? appointment1.getStartDate() : null;
+        Date date2 = null != appointment2 ? appointment2.getStartDate() : null;
+        int result;
+        if (date1 == date2) {
+            result = 0;
+        } else if (null == date1) {
+            result = 1;
+        } else if (null == date2) {
+            result = -1;
+        } else {
+            result = date2.compareTo(date1);
+        }
+        return ascending ? -result : result;
     }
 
 }

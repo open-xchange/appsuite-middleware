@@ -47,67 +47,26 @@
  *
  */
 
-package com.openexchange.ajax.xing.actions;
+package com.openexchange.preview;
 
-import java.io.IOException;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link ContactJoinRevokeRequest}
+ * {@link Delegating} - Implemented by delegating preview service.
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContactJoinRevokeRequest extends AbstractXingRequest<ContactJoinRevokeResponse> {
+public interface Delegating extends PreviewService {
 
-    final String recipientMail;
-    
     /**
-     * Initializes a new {@link ContactJoinRevokeRequest}.
-     * 
-     * @param recipientMail the xing user mail which contact request should be revoked
-     * @param testAccount - The test account to use for this test
-     * @param foe failOnError
+     * Gets the best fitting candidate for specified arguments.
+     *
+     * @param mimeType The MIME type
+     * @param output The output
+     * @return The best fitting candidate or <code>null</code>
+     * @throws OXException If best fitting candidate cannot be returned
      */
-    public ContactJoinRevokeRequest(final String recipientMail, final XingTestAccount testAccount, boolean foe) {
-        super(foe, testAccount);
-        this.recipientMail = recipientMail;
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public AbstractAJAXParser<? extends ContactJoinRevokeResponse> getParser() {
-        return new ContactJoinRevokeParser(failOnError);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
-     */
-    @Override
-    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "revoke_contact_request"));
-        params.add(new URLParameter("email", recipientMail));
-    }
+    PreviewService getBestFitOrDelegate(String mimeType, PreviewOutput output) throws OXException;
 
 }

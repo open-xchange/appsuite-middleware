@@ -52,7 +52,6 @@ package com.openexchange.ajax.requesthandler;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -225,7 +224,6 @@ public class AJAXRequestDataTools {
                 }
             }
         }
-        
         return retval;
     }
 

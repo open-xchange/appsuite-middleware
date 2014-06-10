@@ -77,3 +77,5 @@ Import-Package: com.davekoelle,
  org.slf4j
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.find.basic.drive
+Bundle-ClassPath: .,
+ lib/joda-time-2.3.jar

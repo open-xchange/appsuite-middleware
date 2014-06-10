@@ -1390,13 +1390,13 @@ public class CalendarMySQL implements CalendarSqlImp {
             searchParameters.add(contextID);
             searchParameters.add(contextID);
         }
-        sb.append(" WHERE ");
 
         /*
          * folder ids
          */
         Set<Integer> folderIDs = searchObj.getFolderIDs();
         if (null != folderIDs && 0 < folderIDs.size()) {
+            sb.append(" WHERE ");
             Integer[] folders = folderIDs.toArray(new Integer[folderIDs.size()]);
             sb.append('(');
             for (int i = 0; i < folders.length; i++) {
@@ -1433,13 +1433,12 @@ public class CalendarMySQL implements CalendarSqlImp {
         } else {
             // Perform search over all folders in which the user has the right to see elements.
 
-            sb.append('(');
-
             // Look into the users private folders
             boolean first = true;
             for (final TIntIterator iter = cfo.getPrivateFolders().iterator(); iter.hasNext();) {
                 final int folder = iter.next();
                 if (first) {
+                    sb.append(" WHERE (");
                     sb.append("(pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + uid + ")");
                     first = false;
                 } else {
@@ -1454,6 +1453,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     final int folder = iter.next();
                     final int owner = folderAccess.getFolderOwner(folder);
                     if (first) {
+                        sb.append(" WHERE (");
                         sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + ")");
                         first = false;
                     } else {
@@ -1465,6 +1465,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     final int folder = iter.next();
                     final int owner = folderAccess.getFolderOwner(folder);
                     if (first) {
+                        sb.append(" WHERE (");
                         sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
                         first = false;
                     } else {
@@ -1476,6 +1477,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 for (final TIntIterator iter = cfo.getPublicReadableAll().iterator(); iter.hasNext();) {
                     final int folder = iter.next();
                     if (first) {
+                        sb.append(" WHERE (");
                         sb.append("(pd.fid = " + folder + ")");
                         first = false;
                     } else {
@@ -1486,6 +1488,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 for (final TIntIterator iter = cfo.getPublicReadableOwn().iterator(); iter.hasNext();) {
                     final int folder = iter.next();
                     if (first) {
+                        sb.append(" WHERE (");
                         sb.append("(pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
                         first = false;
                     } else {
@@ -1493,7 +1496,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                     }
                 }
             }
-            sb.append(')');
+            if (!first) {
+                sb.append(')');
+            }
         }
         /*
          * general queries

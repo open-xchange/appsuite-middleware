@@ -58,37 +58,33 @@ import static org.junit.Assert.*;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OXRESTRouteTest {
-    
-    
+
     @Test
     public void testVerbatimMatch() {
         OXRESTRoute route = new OXRESTRoute("GET", "some/path");
-        
+
         assertNull("Expected no match", route.match("GET", "/some/other/path"));
         assertNull("Expected no match", route.match("POST", "/some/path"));
-        
+
         assertNotNull("Expected match", route.match("GET", "/some/path"));
         assertNotNull("Expected match", route.match("GET", "/some/path"));
-        
-        
     }
-    
+
     @Test
     public void testMatchWithVariables() {
         OXRESTRoute route = new OXRESTRoute("GET", "some/path/:id/:subId/someMethod/:someArgument");
         OXRESTMatch match = route.match("GET", "/some/path/12/42/someMethod/goGetEm");
-        
+
         assertNotNull(match);
         assertEquals("12", match.getParameters().get("id"));
         assertEquals("42", match.getParameters().get("subId"));
         assertEquals("goGetEm", match.getParameters().get("someArgument"));
-    
+
         assertEquals("id", match.getParameterName(0));
         assertEquals("subId", match.getParameterName(1));
         assertEquals("someArgument", match.getParameterName(2));
-        
+
         assertNull(route.match("GET", "/some/path/12/42/someMethod/goGetEm/somethingElse"));
-        
     }
-    
+
 }

@@ -59,7 +59,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.DriveService;
-import com.openexchange.drive.checksum.events.ChecksumEventListener;
 import com.openexchange.drive.checksum.events.DelayedChecksumEventListener;
 import com.openexchange.drive.checksum.rdb.DirectoryChecksumsAddUserAndETagColumnTask;
 import com.openexchange.drive.checksum.rdb.DriveCreateTableService;
@@ -124,7 +123,7 @@ public class DriveActivator extends HousekeepingActivator {
          * register event handler
          */
         Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-        serviceProperties.put(EventConstants.EVENT_TOPIC, ChecksumEventListener.getHandledTopics());
+        serviceProperties.put(EventConstants.EVENT_TOPIC, DelayedChecksumEventListener.getHandledTopics());
         registerService(EventHandler.class, DelayedChecksumEventListener.getInstance(), serviceProperties);
         DelayedChecksumEventListener.getInstance().start();
     }

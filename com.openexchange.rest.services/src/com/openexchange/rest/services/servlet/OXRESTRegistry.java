@@ -50,6 +50,7 @@
 package com.openexchange.rest.services.servlet;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -102,18 +103,27 @@ public class OXRESTRegistry implements SimpleRegistryListener<OXRESTServiceFacto
         list.remove(service);
     }
 
+    /**
+     * Yields a new <tt>OXRESTServiceWrapper</tt> instance from passed method and path.
+     *
+     * @param method The associated method; e.g. <tt>"GET"</tt>
+     * @param path The path; e.g. <tt>"/myservice/v1/resource/12"</tt>
+     * @return The newly created <tt>OXRESTServiceWrapper</tt> instance or <code>null</code> if there is no suitable <tt>OXRESTMatch</tt>
+     */
     public OXRESTServiceWrapper retrieve(String method, String path) {
-        for(String root: factories.keySet()) {
+        for (Map.Entry<String, List<OXRESTServiceFactory>> rootEntry: factories.entrySet()) {
+            String root = rootEntry.getKey();
             if (path.startsWith(root)) {
                 String subpath = path.substring(root.length());
                 if (!subpath.startsWith("/")) {
-                    subpath = "/" + subpath;
+                    // Prepend slash '/' character
+                    subpath = new StringBuilder(subpath.length() + 1).append('/').append(subpath).toString();
                 }
 
-                List<OXRESTServiceFactory> list = factories.get(root);
-                for (OXRESTServiceFactory factory : list) {
-                    List<OXRESTRoute> routes = factory.getRoutes();
-                    for (OXRESTRoute route: routes) {
+                // Iterate factories associated with matching root
+                for (OXRESTServiceFactory factory : rootEntry.getValue()) {
+                    // Now iterate current factory's routes and check each for a possible match
+                    for (OXRESTRoute route: factory.getRoutes()) {
                         OXRESTMatch match = route.match(method, subpath);
                         if (match != null) {
                             return factory.newWrapper(match);

@@ -56,6 +56,7 @@ import com.openexchange.ajax.xing.actions.ContactJoinRequest;
 import com.openexchange.ajax.xing.actions.ContactJoinResponse;
 import com.openexchange.ajax.xing.actions.ContactJoinRevokeRequest;
 import com.openexchange.ajax.xing.actions.ContactJoinRevokeResponse;
+import com.openexchange.ajax.xing.actions.XingTestAccount;
 import com.openexchange.exception.OXException;
 
 /**
@@ -82,13 +83,28 @@ public class ContactRequestTest extends AbstractAJAXSession {
      * @throws JSONException
      */
     public void testContactRequestAction() throws OXException, IOException, JSONException {
-        final ContactJoinRevokeRequest revokeRequest = new ContactJoinRevokeRequest("ewaldbartkowiak@googlemail.com", true);
-        final ContactJoinRevokeResponse revokeResponse = client.execute(revokeRequest);
-        assertNotNull(revokeResponse);
-        assertTrue((Boolean) revokeResponse.getData());
-        final ContactJoinRequest joinRequest = new ContactJoinRequest("ewaldbartkowiak@googlemail.com", true);
+        final ContactJoinRequest joinRequest = new ContactJoinRequest(
+            "ewaldbartkowiak@googlemail.com",
+            XingTestAccount.DIMITRI_BRONKOWITSCH,
+            true);
         final ContactJoinResponse joinResponse = client.execute(joinRequest);
         assertNotNull(joinResponse);
         assertTrue((Boolean) joinResponse.getData());
+
+        final ContactJoinRequest acceptJoin = new ContactJoinRequest(
+            "dimitribronkowitsch@googlemail.com",
+            XingTestAccount.EWALD_BARTOWIAK,
+            true);
+        final ContactJoinResponse acceptJoinResponse = client.execute(acceptJoin);
+        assertNotNull(acceptJoinResponse);
+        assertTrue((Boolean) acceptJoinResponse.getData());
+
+        final ContactJoinRevokeRequest revokeRequest = new ContactJoinRevokeRequest(
+            "dimitribronkowitsch@googlemail.com",
+            XingTestAccount.EWALD_BARTOWIAK,
+            true);
+        final ContactJoinRevokeResponse revokeResponse = client.execute(revokeRequest);
+        assertNotNull(revokeResponse);
+        assertTrue((Boolean) revokeResponse.getData());
     }
 }

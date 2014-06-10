@@ -600,14 +600,25 @@ public final class Tools {
      * @throws OXException If separator character retrieval fails
      */
     public static char getSeparator(final int accountId, final ServerSession session) throws OXException {
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = null;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(session, accountId);
+
+        return getSeparator(mailAccess);
+    }
+
+    /**
+     * Gets the separator character from associated MailAccess.
+     * 
+     * @param mailAccess - {@link MailAccess} to get the separator from.
+     * @return The separator character
+     * @throws OXException If separator character retrieval fails
+     */
+    public static char getSeparator(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         try {
-            access = MailAccess.getInstance(session, accountId);
-            access.connect(false);
-            return access.getFolderStorage().getFolder("INBOX").getSeparator();
+            mailAccess.connect(false);
+            return mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
         } finally {
-            if (null != access) {
-                access.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
             }
         }
     }
@@ -625,5 +636,4 @@ public final class Tools {
         }
         return fullName.substring(fullName.lastIndexOf(separator) + 1);
     }
-
 }

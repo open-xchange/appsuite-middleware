@@ -47,67 +47,28 @@
  *
  */
 
-package com.openexchange.ajax.xing.actions;
-
-import java.io.IOException;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+package com.openexchange.preview;
 
 /**
- * {@link ContactJoinRevokeRequest}
+ * {@link RemoteInternalPreviewService} - An interface for preview services that schedule a remote job.
+ * <p>
+ * If an <tt>InternalPreviewService</tt> implements this interface, the caller attempts to delegate retrieval of a preview document to a
+ * separate thread to mitigate any unresponsive service behavior.
+ * <p>
+ * However, the implementing class can control that behavior through {@link #getTimeToWaitMillis()} return value; a value of less than or
+ * equal to 0 (zero) implies that {@link Thread#currentThread() current thread} is supposed to be used for preview document retrieval.
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContactJoinRevokeRequest extends AbstractXingRequest<ContactJoinRevokeResponse> {
+public interface RemoteInternalPreviewService extends InternalPreviewService {
 
-    final String recipientMail;
-    
     /**
-     * Initializes a new {@link ContactJoinRevokeRequest}.
-     * 
-     * @param recipientMail the xing user mail which contact request should be revoked
-     * @param testAccount - The test account to use for this test
-     * @param foe failOnError
+     * Gets the time to wait in milliseconds.
+     * <p>
+     * A value of less than or equal to 0 (zero) implies that current thread is supposed to be used for preview document retrieval.
+     *
+     * @return The time to wait in milliseconds or <code>-1L</code>
      */
-    public ContactJoinRevokeRequest(final String recipientMail, final XingTestAccount testAccount, boolean foe) {
-        super(foe, testAccount);
-        this.recipientMail = recipientMail;
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    @Override
-    public AbstractAJAXParser<? extends ContactJoinRevokeResponse> getParser() {
-        return new ContactJoinRevokeParser(failOnError);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.xing.actions.AbstractXingRequest#setMoreParameters(java.util.List)
-     */
-    @Override
-    protected void setMoreParameters(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
-        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "revoke_contact_request"));
-        params.add(new URLParameter("email", recipientMail));
-    }
+    long getTimeToWaitMillis();
 
 }

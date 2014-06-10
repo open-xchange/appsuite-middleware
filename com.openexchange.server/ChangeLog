@@ -1,3 +1,31 @@
+* 2014-06-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32946: Don't query trash folders when performing the "recently changed files" search
+ - Fix for bug 32554: Exclude trash folders when searching without explicitly specified folder list
+ - Fix for bug 33018: Don't consider folders below trash as "not seen in tree view" 
+
+* 2014-06-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32865: Don't anticipate upcoming ACKNOWLEDGE for the new version of server-side executed EDIT action 
+
+* 2014-06-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32642: Ensure no database boundaries are exceeded when converting a XING user to a contact entry
+ - Fix for bug 32974: Cancel running IMAP-IDLE listener in case context has been deleted in the meantime +
+                      Improved handling in ReplicationMonitor class to avoid default retry mechanism in case a "DBP-0021" (Transaction counter is missing) occurs
+
+* 2014-06-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32745: Propagate result from EDIT action in following SYNC actions
+
+* 2014-06-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32899: Let 'Capability' class implement java.io.Serializable marker interface
+
+* 2014-06-04 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32923: Import javax.activation in bundles which use it
+
 * 2014-06-03 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 32809: Workaround to negate boolean false filters for ldap
@@ -5,6 +33,10 @@
 * 2014-06-03 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31072: Ensure first- and lastname are supplied before displayname when inserting/updating records in the database
+
+* 2014-06-03 - martin.schneider@open-xchange.com
+
+ - Fix for bug 32883: Use up to date account information to get folder separator
 
 * 2014-06-02 - jan.bauerdick@open-xchange.com
 
