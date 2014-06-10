@@ -909,13 +909,25 @@ public final class SessionHandler {
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
     protected static SessionControl getSession(final String sessionId, final boolean considerSessionStorage) {
+        return getSession(sessionId, true, considerSessionStorage);
+    }
+
+    /**
+     * Gets the session associated with given session ID
+     *
+     * @param sessionId The session ID
+     * @param considerLocalStorage <code>true</code> to consider local storage; otherwise <code>false</code>
+     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise <code>false</code>
+     * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
+     */
+    protected static SessionControl getSession(final String sessionId, final boolean considerLocalStorage, final boolean considerSessionStorage) {
         LOG.debug("getSession <{}>", sessionId);
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
         }
-        final SessionControl sessionControl = sessionData.getSession(sessionId);
+        final SessionControl sessionControl = considerLocalStorage ? sessionData.getSession(sessionId) : null;
         if (considerSessionStorage && null == sessionControl) {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
