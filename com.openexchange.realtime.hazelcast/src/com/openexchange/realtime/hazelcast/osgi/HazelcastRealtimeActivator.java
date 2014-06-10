@@ -147,39 +147,16 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
             }
         });
 
-        track(GlobalRealtimeCleanup.class, new SimpleRegistryListener<GlobalRealtimeCleanup>() {
-
-            @Override
-            public void added(ServiceReference<GlobalRealtimeCleanup> ref, GlobalRealtimeCleanup service) {
-                addService(GlobalRealtimeCleanup.class, service);
-            }
-
-            @Override
-            public void removed(ServiceReference<GlobalRealtimeCleanup> ref, GlobalRealtimeCleanup service) {
-                removeService(GlobalRealtimeCleanup.class);
-            }
-        });
-
-        track(MessageDispatcher.class, new SimpleRegistryListener<MessageDispatcher>() {
-
-            @Override
-            public void added(ServiceReference<MessageDispatcher> ref, MessageDispatcher service) {
-                addService(MessageDispatcher.class, service);
-            }
-
-            @Override
-            public void removed(ServiceReference<MessageDispatcher> ref, MessageDispatcher service) {
-                removeService(MessageDispatcher.class);
-            }
-        });
-
         openTrackers();
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
+        addService(MessageDispatcher.class, globalDispatcher);
         registerService(RealtimeJanitor.class, globalDispatcher);
         registerService(StanzaStorage.class, new HazelcastStanzaStorage());
         registerService(Channel.class, globalDispatcher.getChannel());
         registerService(GlobalRealtimeCleanup.class, globalCleanup);
+        addService(GlobalRealtimeCleanup.class, globalCleanup);
+        
 
         String client_map = discoverMapName(config, "rtClientMapping-");
         String group_map = discoverMapName(config, "rtGroupMapping-");
