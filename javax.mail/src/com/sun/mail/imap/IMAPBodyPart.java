@@ -41,12 +41,11 @@
 package com.sun.mail.imap;
 
 import java.io.*;
-
 import java.util.Enumeration;
+import java.util.Locale;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.activation.*;
-
 import com.sun.mail.util.*;
 import com.sun.mail.iap.*;
 import com.sun.mail.imap.protocol.*;
@@ -408,7 +407,8 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
                 if (!checkExists(message, p)) {
                     throw new MessageRemovedException("Message "+seqnum+" has been removed");
                 }
-                throw new MessagingException("Failed to fetch headers");
+                // Previously: throw new MessagingException("Failed to fetch headers");
+                throw new MessageRemovedException("Message "+seqnum+" has been removed");
             }
 
 		    ByteArrayInputStream bis = b.getByteArrayInputStream();
@@ -416,7 +416,8 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
                 if (!checkExists(message, p)) {
                     throw new MessageRemovedException("Message "+seqnum+" has been removed");
                 }
-                throw new MessagingException("Failed to fetch headers");
+                // Previously: throw new MessagingException("Failed to fetch headers");
+                throw new MessageRemovedException("Message "+seqnum+" has been removed");
             }
 
 		    headers.load(bis);
@@ -445,6 +446,8 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 	    } catch (ConnectionException cex) {
 		throw new FolderClosedException(
 			    message.getFolder(), cex.getMessage());
+	    } catch (BadCommandException bex) {
+	    throw handleBadCommandException(bex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
@@ -474,4 +477,15 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
         return false;
     }
 
+    protected MessagingException handleBadCommandException(BadCommandException bex) {
+        String sResponse = bex.getMessage();
+        if (null == sResponse) {
+            return new MessagingException(bex.getMessage(), bex);
+        }
+        sResponse = sResponse.toLowerCase(Locale.US);
+        if (sResponse.indexOf("invalid messageset") >= 0 || sResponse.indexOf("invalid uidset") >= 0) {
+            return new MessageRemovedException("Message "+message.getSequenceNumber()+" has been removed");
+        }
+        return new MessagingException(bex.getMessage(), bex);
+    }
 }
