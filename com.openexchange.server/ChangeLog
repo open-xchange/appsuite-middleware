@@ -1,3 +1,7 @@
+* 2014-06-10 - marc.arens@open-xchange.com
+
+ - Fix for bug 32875: Properly clean distributed state and remove sequencenumber when resending to previously offline resource
+ 
 * 2014-06-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32946: Don't query trash folders when performing the "recently changed files" search
