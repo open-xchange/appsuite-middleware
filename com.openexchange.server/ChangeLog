@@ -1,3 +1,9 @@
+* 2014-06-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32946: Don't query trash folders when performing the "recently changed files" search
+ - Fix for bug 32554: Exclude trash folders when searching without explicitly specified folder list
+ - Fix for bug 33018: Don't consider folders below trash as "not seen in tree view" 
+
 * 2014-06-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 32865: Don't anticipate upcoming ACKNOWLEDGE for the new version of server-side executed EDIT action 

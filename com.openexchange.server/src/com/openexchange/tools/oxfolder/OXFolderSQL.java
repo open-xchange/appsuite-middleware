@@ -64,10 +64,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -102,6 +104,8 @@ import com.openexchange.tools.sql.DBUtils;
 public final class OXFolderSQL {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderSQL.class);
+
+    private static final int UPDATE_CHUNK_SIZE = 100;
 
     /**
      * Initializes a new OXFolderSQL
@@ -471,6 +475,91 @@ public final class OXFolderSQL {
             }
             closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
         }
+    }
+
+    /**
+     * Updates the "type" of one or more folders identified by their identifiers. Usually used when moving a folder (and its subfolders)
+     * from or to the trash folder.
+     *
+     * @param writeConnection A writable connection or <code>null</code> to fetch a new one from pool
+     * @param context The context
+     * @param type The type to set
+     * @param folderIDs The IDs of the folders to update
+     * @return The number of updated entries in the database
+     */
+    public static int updateFolderType(Connection writeConnection, Context context, int type, List<Integer> folderIDs) throws OXException, SQLException {
+        if (null == folderIDs || 0 == folderIDs.size()) {
+            return 0;
+        }
+        int updated = 0;
+        boolean closeWriteConnection = false;
+        boolean rollback = false;
+        boolean startedTransaction = false;
+        try {
+            /*
+             * fetch connection if needed
+             */
+            if (null == writeConnection) {
+                writeConnection = DBPool.pickupWriteable(context);
+                closeWriteConnection = true;
+            }
+            startedTransaction = writeConnection.getAutoCommit();
+            if (startedTransaction) {
+                writeConnection.setAutoCommit(false);
+                rollback = true;
+            }
+            /*
+             * perform update chunkwise
+             */
+            for (int i = 0; i < folderIDs.size(); i += UPDATE_CHUNK_SIZE) {
+                int length = Math.min(folderIDs.size(), i + UPDATE_CHUNK_SIZE) - i;
+                List<Integer> ids = folderIDs.subList(i, i + length);
+                StringBuilder stringBuilder = new StringBuilder("UPDATE oxfolder_tree SET type=? WHERE cid=? AND fuid");
+                if (1 == ids.size()) {
+                    stringBuilder.append("=?;");
+                } else {
+                    stringBuilder.append(" IN (?");
+                    for (int j = 1; j < ids.size(); j++) {
+                        stringBuilder.append(",?");
+                    }
+                    stringBuilder.append(");");
+                }
+                PreparedStatement stmt = null;
+                try {
+                    stmt = writeConnection.prepareStatement(stringBuilder.toString());
+                    stmt.setInt(1, type);
+                    stmt.setInt(2, context.getContextId());
+                    for (int j = 0; j < ids.size(); j++) {
+                        stmt.setInt(j + 3, ids.get(j).intValue());
+                    }
+                    updated += executeUpdate(stmt);
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+            }
+            /*
+             * commit if appropriate
+             */
+            if (startedTransaction) {
+                writeConnection.commit();
+                rollback = false;
+                writeConnection.setAutoCommit(true);
+            }
+        } finally {
+            /*
+             * cleanup
+             */
+            if (startedTransaction && rollback) {
+                if (null != writeConnection) {
+                    writeConnection.rollback();
+                    writeConnection.setAutoCommit(true);
+                }
+            }
+            if (closeWriteConnection) {
+                DBPool.closeWriterSilent(context, writeConnection);
+            }
+        }
+        return updated;
     }
 
     private static final String SQL_UPDATE_NAME = "UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?";
@@ -955,6 +1044,70 @@ public final class OXFolderSQL {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
         return retval;
+    }
+
+    /**
+     * Gets the IDs of all folders whose parent folder ID equals the supplied one, i.e. the IDs of all subfolders.
+     *
+     * @param folderId The ID of the parent folder to get the subfolder IDs for
+     * @param readConnection A connection with read capability, or <code>null</code> to fetch from pool dynamically
+     * @param context The context
+     * @param recursive <code>true</code> to lookup subfolder IDs recursively, <code>false</code>, otherwise
+     * @return The subfolder IDs, or an empty list if none were found
+     */
+    public static List<Integer> getSubfolderIDs(int folderId, Connection readConnection, Context context, boolean recursive) throws OXException, SQLException {
+        List<Integer> subfolderIDs = new ArrayList<Integer>();
+        boolean closeReadConnection = false;
+        try {
+            /*
+             * acquire local read connection if not supplied
+             */
+            if (null == readConnection) {
+                readConnection = DBPool.pickup(context);
+                closeReadConnection = true;
+            }
+            List<Integer> parentFolderIDs = new ArrayList<Integer>();
+            parentFolderIDs.add(folderId);
+            do {
+                /*
+                 * build statement for current parent folder IDs
+                 */
+                StringBuilder stringBuilder = new StringBuilder("SELECT fuid FROM oxfolder_tree WHERE cid=? AND parent");
+                if (1 == parentFolderIDs.size()) {
+                    stringBuilder.append("=?;");
+                } else {
+                    stringBuilder.append(" IN (?");
+                    for (int i = 1; i < parentFolderIDs.size(); i++) {
+                        stringBuilder.append(",?");
+                    }
+                    stringBuilder.append(");");
+                }
+                /*
+                 * execute
+                 */
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = readConnection.prepareStatement(stringBuilder.toString());
+                    stmt.setInt(1, context.getContextId());
+                    for (int i = 0; i < parentFolderIDs.size(); i++) {
+                        stmt.setInt(i + 2, parentFolderIDs.get(i).intValue());
+                    }
+                    parentFolderIDs.clear();
+                    rs = executeQuery(stmt);
+                    while (rs.next()) {
+                        Integer folderID = Integer.valueOf(rs.getInt(1));
+                        subfolderIDs.add(folderID);
+                        parentFolderIDs.add(folderID);
+                    }
+                } finally {
+                    closeSQLStuff(rs, stmt);
+                }
+            } while (recursive && false == parentFolderIDs.isEmpty());
+        } finally {
+            closeResources(null, null, closeReadConnection ? readConnection : null, true, context);
+        }
+        return subfolderIDs;
     }
 
     private static final String SQL_UDTSUBFLDFLG = "UPDATE oxfolder_tree SET subfolder_flag = ?, changing_date = ? WHERE cid = ? AND fuid = ?";
