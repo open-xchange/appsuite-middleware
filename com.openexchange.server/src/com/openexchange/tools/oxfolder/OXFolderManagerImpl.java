@@ -64,6 +64,7 @@ import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -1232,6 +1233,28 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 lastModified);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        }
+        /*
+         * Inherit folder type recursively if move from or to trash folder
+         */
+        if (FolderObject.TRASH == storageDest.getType() && FolderObject.TRASH != storageSrc.getType() ||
+            FolderObject.TRASH != storageDest.getType() && FolderObject.TRASH == storageSrc.getType()) {
+            try {
+                List<Integer> folderIDs;
+                if (false == storageSrc.hasSubfolders()) {
+                    folderIDs = Collections.singletonList(Integer.valueOf(folderId));
+                } else {
+                    folderIDs = new ArrayList<Integer>();
+                    folderIDs.add(Integer.valueOf(folderId));
+                    folderIDs.addAll(OXFolderSQL.getSubfolderIDs(folderId, readCon, ctx, true));
+                }
+                OXFolderSQL.updateFolderType(writeCon, ctx, storageDest.getType(), folderIDs);
+                if (null != writeCon && !writeCon.getAutoCommit()) {
+                    writeCon.commit();
+                }
+            } catch (SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            }
         }
         /*
          * Update last-modified time stamps

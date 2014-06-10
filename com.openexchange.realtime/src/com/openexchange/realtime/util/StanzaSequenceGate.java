@@ -242,7 +242,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                 /* Stanzas got out of sync, enqueue until we receive the Stanza matching threshold */
                 if (threshold.get() > stanza.getSequenceNumber()) {
                     stanza.trace("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
-                    LOG.debug("Discarded as this sequence number has already successfully passed this gate: {}", stanza.getSequenceNumber());
+                    LOG.debug("Discarded as this sequence number has already successfully passed this gate: {}, {}", stanza.getSequenceNumber(), stanza);
                     return true;
                 }
 

@@ -605,14 +605,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             type = FolderObject.PUBLIC;
         } else {
             type = getFolderAccess(ctx, con).getFolderType(pid);
-            /*
-             * Folders below trash will have the module's default type
-             */
-            if (FolderObject.TRASH == type) {
-                if (FolderObject.INFOSTORE == module) {
-                    type = FolderObject.PUBLIC;
-                }
-            }
         }
         return type;
     }

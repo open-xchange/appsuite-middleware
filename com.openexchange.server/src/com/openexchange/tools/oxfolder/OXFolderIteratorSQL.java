@@ -53,7 +53,6 @@ import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2Strin
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import gnu.trove.iterator.TIntIntIterator;
-import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
@@ -66,17 +65,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Deque;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
@@ -85,7 +80,6 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -2313,62 +2307,6 @@ public final class OXFolderIteratorSQL {
             }
         }
         return StringCollection.getSqlInString(userId, groups);
-    }
-
-    /**
-     * Get all subfolders from the specified parent
-     *
-     * @param folderId parent
-     * @param user the user
-     * @param userPermissions user permission bits
-     * @param ctx context
-     * @param con read-only connection
-     * @return a set with all subfolders
-     * @throws OXException
-     */
-    public static Set<Integer> getAllSubfolders(final int folderId, final User user, final UserPermissionBits userPermissions, final Context ctx, final Connection con) throws OXException {
-        final Set<Integer> allSubFolders = new HashSet<Integer>();
-        final Deque<Integer> deck = new ArrayDeque<Integer>();
-        deck.addLast(folderId);
-        do {
-            final Integer i = deck.removeFirst();
-            allSubFolders.add(i);
-            final TIntList list = OXFolderIteratorSQL.getVisibleSubfolders(i, user.getId(), user.getGroups(), userPermissions.getAccessibleModules(), ctx, con);
-            if (!list.isEmpty()) {
-                TIntIterator iter = list.iterator();
-                while (iter.hasNext()) {
-                    deck.addLast(iter.next());
-                }
-            }
-        } while (!deck.isEmpty());
-        return Collections.unmodifiableSet(allSubFolders);
-    }
-
-    /**
-     * Returns a HashSet with all trashed folders for the specified modules
-     *
-     * @param user
-     * @param userPermissions
-     * @param ctx
-     * @param con
-     * @return
-     * @throws OXException
-     */
-    public static Set<Integer> getTrashFolders(final User user, final UserPermissionBits userPermissions, final Context ctx, final Connection con, final int[] modules) throws OXException {
-        final List<FolderObject> trashFolders = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
-            user.getId(),
-            user.getGroups(),
-            userPermissions.getAccessibleModules(),
-            FolderObject.TRASH,
-            modules,
-            ctx)).asList();
-        final Set<Integer> ignore = new HashSet<Integer>();
-        for (FolderObject fo : trashFolders) {
-            if (fo.hasSubfolders()) {
-                ignore.addAll(getAllSubfolders(fo.getObjectID(), user, userPermissions, ctx, con));
-            }
-        }
-        return Collections.unmodifiableSet(ignore);
     }
 
 }

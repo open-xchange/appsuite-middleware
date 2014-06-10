@@ -150,10 +150,13 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         openTrackers();
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
+        addService(MessageDispatcher.class, globalDispatcher);
         registerService(RealtimeJanitor.class, globalDispatcher);
         registerService(StanzaStorage.class, new HazelcastStanzaStorage());
         registerService(Channel.class, globalDispatcher.getChannel());
         registerService(GlobalRealtimeCleanup.class, globalCleanup);
+        addService(GlobalRealtimeCleanup.class, globalCleanup);
+        
 
         String client_map = discoverMapName(config, "rtClientMapping-");
         String group_map = discoverMapName(config, "rtGroupMapping-");

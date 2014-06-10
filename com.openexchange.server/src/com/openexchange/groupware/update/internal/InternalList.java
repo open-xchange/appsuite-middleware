@@ -732,6 +732,9 @@ public final class InternalList {
         // Checks and drops obsolete tables possibly created for managing POP3 accounts
         list.add(new com.openexchange.groupware.update.tasks.POP3CheckAndDropObsoleteTablesTask());
 
+        // Ensures that each folder located below a user's default infostore trash folder is of type 16
+        list.add(new com.openexchange.groupware.update.tasks.FolderInheritTrashFolderTypeTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }
