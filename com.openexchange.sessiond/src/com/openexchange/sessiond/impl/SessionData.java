@@ -761,7 +761,6 @@ final class SessionData {
                     control = container.removeSessionById(sessionId);
                     if (null != control) {
                         sessionList.getFirst().putSessionControl(control);
-                        LOG.trace("Moved from container {} to first one.", i);
                     }
                 }
             }
