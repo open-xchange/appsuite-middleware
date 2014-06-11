@@ -123,7 +123,8 @@ public class AbstractFileHandlerTest {
         noExtensionHandler.getFileDiffs(diffResult, lOriginalFiles, lInstalledFiles);
 
         Assert.assertEquals(1, diffResult.getMissingFiles().size());
-        Assert.assertEquals("file2.properties", diffResult.getMissingFiles().get(0));
+        Assert.assertEquals("file2.properties", diffResult.getMissingFiles().get(0).getName());
+        Assert.assertEquals("/opt/open-xchange/bundles/jar!/conffile2.properties", diffResult.getMissingFiles().get(0).getFullFilePathWithExtension());
     }
 
     @Test

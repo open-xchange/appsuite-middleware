@@ -48,14 +48,16 @@ public class ConfFileHandlerTest {
     public void testAddConfigurationFile_noConfigurationFile_fileAdded() {
         String fileName = "aaaa.dfdsf";
         String content = "content";
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, "noConfigFileExtension", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(NoConfigFileHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -63,14 +65,17 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.CCF.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.CCF.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         CcfHandler.getInstance().addFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(CcfHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
+
     }
 
     @Test
@@ -78,14 +83,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.CNF.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.CONF.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(ConfHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -93,14 +100,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.CONF.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.CONF.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(ConfHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -108,14 +117,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.PROPERTY.getFileExtension() + "." + ConfigurationFileTypes.IN.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.PROPERTY.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(PropertyHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -123,14 +134,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.NO_EXTENSION.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.NO_EXTENSION.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(NoExtensionHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -138,14 +151,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.PERFMAP.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.PERFMAP.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(PerfmapHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -153,14 +168,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.PROPERTY.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.PROPERTY.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(PropertyHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -168,14 +185,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.SH.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.SH.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(ShHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -183,14 +202,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.TYPES.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.TYPES.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(TypesHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -198,14 +219,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.XML.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.XML.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(XmlHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -213,14 +236,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.YAML.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.YAML.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(YamlHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -228,14 +253,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.YML.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, false);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.YML.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, false);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> installedFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(YamlHandler.getInstance(), "installedFiles");
         Assert.assertEquals(1, installedFiles.size());
         String string = installedFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = installedFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
 
@@ -244,14 +271,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.CCF.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, true);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.CCF.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, true);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> originalFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(CcfHandler.getInstance(), "originalFiles");
         Assert.assertEquals(1, originalFiles.size());
         String string = originalFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = originalFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -259,14 +288,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.CNF.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, true);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.CNF.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, true);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> originalFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(ConfHandler.getInstance(), "originalFiles");
         Assert.assertEquals(1, originalFiles.size());
         String string = originalFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = originalFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -274,14 +305,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.CONF.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, true);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.CONF.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, true);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> originalFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(ConfHandler.getInstance(), "originalFiles");
         Assert.assertEquals(1, originalFiles.size());
         String string = originalFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = originalFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -289,14 +322,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.SH.getFileExtension() + "." + ConfigurationFileTypes.IN.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, true);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.SH.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, true);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> originalFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(ShHandler.getInstance(), "originalFiles");
         Assert.assertEquals(1, originalFiles.size());
         String string = originalFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = originalFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -304,14 +339,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.NO_EXTENSION.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, true);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.NO_EXTENSION.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, true);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> originalFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(NoExtensionHandler.getInstance(), "originalFiles");
         Assert.assertEquals(1, originalFiles.size());
         String string = originalFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = originalFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -319,14 +356,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.PERFMAP.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, true);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.PERFMAP.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, true);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> originalFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(PerfmapHandler.getInstance(), "originalFiles");
         Assert.assertEquals(1, originalFiles.size());
         String string = originalFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = originalFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -334,14 +373,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.PROPERTY.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, true);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.PROPERTY.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, true);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> originalFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(PropertyHandler.getInstance(), "originalFiles");
         Assert.assertEquals(1, originalFiles.size());
         String string = originalFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = originalFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -349,14 +390,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.SH.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, true);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.SH.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, true);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> originalFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(ShHandler.getInstance(), "originalFiles");
         Assert.assertEquals(1, originalFiles.size());
         String string = originalFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = originalFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -364,14 +407,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.TYPES.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, true);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.TYPES.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, true);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> originalFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(TypesHandler.getInstance(), "originalFiles");
         Assert.assertEquals(1, originalFiles.size());
         String string = originalFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = originalFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -379,14 +424,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.XML.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, true);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.XML.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, true);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> originalFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(XmlHandler.getInstance(), "originalFiles");
         Assert.assertEquals(1, originalFiles.size());
         String string = originalFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = originalFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -394,14 +441,16 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.YAML.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, true);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.YAML.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, true);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> originalFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(YamlHandler.getInstance(), "originalFiles");
         Assert.assertEquals(1, originalFiles.size());
         String string = originalFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = originalFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 
     @Test
@@ -409,13 +458,15 @@ public class ConfFileHandlerTest {
         String fileName = "aaaa." + ConfigurationFileTypes.YML.getFileExtension();
         String content = "content";
 
-        configurationFile = new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", content, true);
+        configurationFile = new ConfigurationFile(fileName, ConfigurationFileTypes.YML.getFileExtension(), "/opt/open-xchange/bundles", "/jar!/conf", content, true);
 
         ConfFileHandler.addConfigurationFile(new DiffResult(), configurationFile);
 
         List<ConfigurationFile> originalFiles = (List<ConfigurationFile>) MockUtils.getValueFromField(YamlHandler.getInstance(), "originalFiles");
         Assert.assertEquals(1, originalFiles.size());
         String string = originalFiles.get(0).getName();
-        Assert.assertEquals(content, string);
+        Assert.assertEquals(fileName, string);
+        String stringContent = originalFiles.get(0).getContent();
+        Assert.assertEquals(content, stringContent);
     }
 }
