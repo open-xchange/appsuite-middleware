@@ -93,11 +93,12 @@ public class NoConfigFileHandler extends AbstractFileHandler {
 
     /**
      * {@inheritDoc<br>
-     * <br> 
+     * <br>
      * Files indicated as non-configuration-files do not need to get compared.
      */
     @Override
     protected void getFileDiffs(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
-        diffResult.getNonConfigurationFiles().addAll(lInstalledFiles);
+        // nothing to to. already added by com.openexchange.admin.diff.file.handler.impl.NoConfigFileHandler.getDiff(DiffResult,
+        // List<ConfigurationFile>, List<ConfigurationFile>)
     }
 }

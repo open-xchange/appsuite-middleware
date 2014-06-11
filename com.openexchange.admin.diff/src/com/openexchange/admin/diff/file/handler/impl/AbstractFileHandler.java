@@ -98,17 +98,14 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
                 final String fileName = orgFile.getName();
                 if (fileName.equalsIgnoreCase(configurationFile.getName())) {
                     diffresult.getDuplicateFiles().add(configurationFile);
-                    // TODO - handle duplicate files: insert more than just the filename
                 }
             }
-
             originalFiles.add(configurationFile);
         } else {
             for (ConfigurationFile instFile : this.installedFiles) {
                 final String fileName = instFile.getName();
                 if (fileName.equalsIgnoreCase(configurationFile.getName())) {
                     diffresult.getDuplicateFiles().add(configurationFile);
-                    // TODO - handle duplicate files: insert more than just the filename
                 }
             }
             installedFiles.add(configurationFile);
