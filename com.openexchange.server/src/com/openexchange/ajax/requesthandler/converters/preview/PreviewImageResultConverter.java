@@ -270,7 +270,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                                     // Preview image has not been generated in time
                                     iis.interrupt();
                                     submittedTask.cancel(true);
-                                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create(e, new Object[0]);
+                                    throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
                                 } catch (InterruptedException e) {
                                     // Keep interrupted state
                                     Thread.currentThread().interrupt();
