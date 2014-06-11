@@ -780,7 +780,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final MailMessageComparator COMPARATOR_DESC = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     @Override
-    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(final String folder, final boolean includeSent, final boolean cache, final int sortCol, final int order, final int[] fields, final int[] fromToIndices, final long max) throws OXException {
+    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(final String folder, final boolean includeSent, final boolean cache, final int sortCol, final int order, final int[] fields, final int[] fromToIndices, final long lookAhead) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -800,7 +800,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     mergeWithSent,
                     cache,
                     null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-                        max,
+                        lookAhead,
                         MailSortField.getField(sortCol),
                         OrderDirection.getOrderDirection(order),
                         mailFields.toArray());
@@ -821,14 +821,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
                 @Override
                 public List<MailMessage> call() throws Exception {
-                    return Conversations.messagesFor(sentFolder, (int) max, mailFields, messageStorage);
+                    return Conversations.messagesFor(sentFolder, (int) lookAhead, mailFields, messageStorage);
                 }
             });
         } else {
             messagesFromSentFolder = null;
         }
         // For actual folder
-        final List<Conversation> conversations = Conversations.conversationsFor(fullName, (int) max, mailFields, messageStorage);
+        final List<Conversation> conversations = Conversations.conversationsFor(fullName, (int) lookAhead, mailFields, messageStorage);
         // Retrieve from sent folder
         if (null != messagesFromSentFolder) {
             final List<MailMessage> sentMessages = getFrom(messagesFromSentFolder);
