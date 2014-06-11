@@ -47,31 +47,36 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type.impl;
+package com.openexchange.admin.diff.file.handler.impl;
 
-import java.util.Map;
+import java.util.List;
 import com.openexchange.admin.diff.ConfigDiff;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
 import com.openexchange.admin.diff.result.DiffResult;
+import com.openexchange.admin.diff.result.writer.DiffMatchPatchWriter;
+import com.openexchange.admin.diff.result.writer.DiffWriter;
+
+
 
 /**
- * Handler for .ccf configuration files
+ * Handler for .yaml and .yml configuration files
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class CcfHandler extends AbstractFileHandler {
+public class YamlHandler extends AbstractFileHandler {
 
-    private volatile static CcfHandler instance;
+    private volatile static YamlHandler instance;
 
-    private CcfHandler() {
+    private YamlHandler() {
         ConfigDiff.register(this);
     }
 
-    public static synchronized CcfHandler getInstance() {
+    public static synchronized YamlHandler getInstance() {
         if (instance == null) {
-            synchronized (CcfHandler.class) {
+            synchronized (YamlHandler.class) {
                 if (instance == null) {
-                    instance = new CcfHandler();
+                    instance = new YamlHandler();
                 }
             }
         }
@@ -82,7 +87,10 @@ public class CcfHandler extends AbstractFileHandler {
      * {@inheritDoc}
      */
     @Override
-    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
-        return PropertyHandler.getInstance().getDiff(diffResult, lOriginalFiles, lInstalledFiles);
+    public DiffResult getDiff(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
+        DiffWriter diffMatchPatchWriter = new DiffMatchPatchWriter();
+        diffMatchPatchWriter.addOutputToDiffResult(diffResult, lOriginalFiles, lInstalledFiles);
+
+        return diffResult;
     }
 }

@@ -47,50 +47,57 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type.impl;
+package com.openexchange.admin.diff.result.writer;
 
-import java.util.Map;
-import com.openexchange.admin.diff.ConfigDiff;
+import java.util.LinkedList;
+import java.util.List;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
 import com.openexchange.admin.diff.result.DiffResult;
-import com.openexchange.admin.diff.result.output.DiffMatchPatchWriter;
-import com.openexchange.admin.diff.result.output.DiffWriter;
+import com.openexchange.admin.diff.result.domain.PropertyDiff;
+import com.openexchange.admin.diff.util.ConfigurationFileSearch;
+import com.openexchange.admin.diff.util.DiffMatchPatch;
+import com.openexchange.admin.diff.util.DiffMatchPatch.Diff;
+import com.openexchange.admin.diff.util.DiffMatchPatch.Operation;
 
 
 
 /**
- * Handler for .types configuration files
- * 
+ * {@link DiffMatchPatchWriter}
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class TypesHandler extends AbstractFileHandler {
-
-    private volatile static TypesHandler instance;
-
-    private TypesHandler() {
-        ConfigDiff.register(this);
-    }
-
-    public static synchronized TypesHandler getInstance() {
-        if (instance == null) {
-            synchronized (TypesHandler.class) {
-                if (instance == null) {
-                    instance = new TypesHandler();
-                }
-            }
-        }
-        return instance;
-    }
+public class DiffMatchPatchWriter implements DiffWriter {
 
     /**
-     * 
      * {@inheritDoc}
      */
     @Override
-    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
-        DiffWriter diffMatchPatchWriter = new DiffMatchPatchWriter();
-        diffMatchPatchWriter.addOutputToDiffResult(diffResult, lOriginalFiles, lInstalledFiles);
+    public void addOutputToDiffResult(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
 
-        return diffResult;
+        for (ConfigurationFile origFile : lOriginalFiles) {
+            final String fileName = origFile.getName();
+
+            List<ConfigurationFile> result = new ConfigurationFileSearch().search(lInstalledFiles, fileName);
+
+            if (result.isEmpty()) {
+                // Missing in installation, but already tracked in file diff
+                continue;
+            }
+
+            DiffMatchPatch diffMatchPatch = new DiffMatchPatch();
+            LinkedList<Diff> diff_main = diffMatchPatch.diff_main(origFile.getContent(), result.get(0).getContent(), false);
+            diffMatchPatch.diff_cleanupSemantic(diff_main);
+
+            if (diff_main.size() > 1) {
+                String difference = "";
+                for (Diff d : diff_main) {
+                    if (d.operation != Operation.EQUAL) {
+                        difference = difference.concat("\n" + d.operation + ": " + d.text);
+                    }
+                }
+                diffResult.getChangedProperties().add(new PropertyDiff(origFile.getFileNameWithExtension(), difference, null));
+            }
+        }
     }
 }

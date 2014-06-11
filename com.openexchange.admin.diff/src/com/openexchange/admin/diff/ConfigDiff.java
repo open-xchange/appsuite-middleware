@@ -52,11 +52,11 @@ package com.openexchange.admin.diff;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
-import com.openexchange.admin.diff.file.FileHandler;
+import com.openexchange.admin.diff.file.handler.FileHandler;
+import com.openexchange.admin.diff.file.handler.IConfFileHandler;
 import com.openexchange.admin.diff.file.provider.ConfFolderFileProvider;
 import com.openexchange.admin.diff.file.provider.JarFileProvider;
 import com.openexchange.admin.diff.file.provider.RecursiveFileProvider;
-import com.openexchange.admin.diff.file.type.IConfFileHandler;
 import com.openexchange.admin.diff.result.DiffResult;
 
 
@@ -64,7 +64,7 @@ import com.openexchange.admin.diff.result.DiffResult;
  * Main class that is invoked to execute the configuration diffs.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
 public class ConfigDiff {
 

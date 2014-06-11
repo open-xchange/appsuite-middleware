@@ -47,50 +47,69 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type.impl;
+package com.openexchange.admin.diff.file.handler;
 
-import java.util.Map;
-import com.openexchange.admin.diff.ConfigDiff;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.admin.diff.file.provider.IConfigurationFileProvider;
+import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
 import com.openexchange.admin.diff.result.DiffResult;
-import com.openexchange.admin.diff.result.output.DiffMatchPatchWriter;
-import com.openexchange.admin.diff.result.output.DiffWriter;
-
 
 
 /**
- * Handler for .conf and .cnf configuration files
+ * Executes the given IConfigurationFileProvider to read configuration files and add them to the diff queue.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class ConfHandler extends AbstractFileHandler {
+public class FileHandler {
 
-    private volatile static ConfHandler instance;
-
-    private ConfHandler() {
-        ConfigDiff.register(this);
-    }
-
-    public static synchronized ConfHandler getInstance() {
-        if (instance == null) {
-            synchronized (ConfHandler.class) {
-                if (instance == null) {
-                    instance = new ConfHandler();
-                }
-            }
+    /**
+     * Walk through the given rootDirectory handled by the provided IConfigurationFileProvider. The read files will also be added to diff
+     * working queue.
+     * 
+     * @param rootDirectory is a valid directory, which can be read.
+     * @throws IOException
+     */
+    public void readConfFiles(DiffResult diffResult, String rootDirectory, boolean isOriginal, IConfigurationFileProvider... configurationFileProviders) {
+        if (configurationFileProviders == null) {
+            return;
         }
-        return instance;
+
+        try {
+            validateDirectory(new File(rootDirectory));
+        } catch (FileNotFoundException e) {
+
+            diffResult.getProcessingErrors().add("Error in validating directory " + rootDirectory + "\n" + e.getLocalizedMessage() + "\n");
+            return;
+        }
+
+        List<File> confFiles = new ArrayList<File>();
+
+        for (IConfigurationFileProvider configurationFileProvider : configurationFileProviders) {
+            confFiles = configurationFileProvider.readConfigurationFiles(diffResult, rootDirectory, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
+            configurationFileProvider.addFilesToDiffQueue(diffResult, rootDirectory, confFiles, isOriginal);
+        }
     }
 
     /**
-     * 
-     * {@inheritDoc}
+     * Directory is valid if it exists, does not represent a file, and can be read.
      */
-    @Override
-    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
-        DiffWriter diffMatchPatchWriter = new DiffMatchPatchWriter();
-        diffMatchPatchWriter.addOutputToDiffResult(diffResult, lOriginalFiles, lInstalledFiles);
-
-        return diffResult;
+    protected void validateDirectory(File directory) throws FileNotFoundException {
+        if (directory == null) {
+            throw new IllegalArgumentException("Directory should not be null.");
+        }
+        if (!directory.exists()) {
+            throw new FileNotFoundException("Directory does not exist: " + directory);
+        }
+        if (!directory.isDirectory()) {
+            throw new IllegalArgumentException("Is not a directory: " + directory);
+        }
+        if (!directory.canRead()) {
+            throw new IllegalArgumentException("Directory cannot be read: " + directory);
+        }
     }
 }

@@ -47,18 +47,19 @@
  *
  */
 
-package com.openexchange.admin.diff.result.output;
+package com.openexchange.admin.diff.result.writer;
 
-import java.util.Map;
+import java.util.List;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
 import com.openexchange.admin.diff.result.DiffResult;
 
 /**
  * {@link DiffWriter}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
 public interface DiffWriter {
 
-    public void addOutputToDiffResult(DiffResult diff, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles);
+    public void addOutputToDiffResult(DiffResult diff, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles);
 }

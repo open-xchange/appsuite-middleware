@@ -20,7 +20,8 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.admin.diff.file.type.ConfFileHandler;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
+import com.openexchange.admin.diff.file.handler.ConfFileHandler;
 import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
 import com.openexchange.admin.diff.result.DiffResult;
 
@@ -28,7 +29,7 @@ import com.openexchange.admin.diff.result.DiffResult;
  * {@link ConfFolderFileProviderTest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ FileUtils.class, ConfFileHandler.class })
@@ -77,10 +78,10 @@ public class ConfFolderFileProviderTest {
 
     @Test
     public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() throws IOException {
-        fileProvider.addFilesToDiffQueue(new DiffResult(), null, true);
+        fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, null, true);
 
         PowerMockito.verifyStatic(Mockito.never());
-        ConfFileHandler.addConfigurationFile(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean());
+        ConfFileHandler.addConfigurationFile((DiffResult) Matchers.any(), (ConfigurationFile) Matchers.any());
     }
 
     @Test
@@ -91,10 +92,10 @@ public class ConfFolderFileProviderTest {
         files.add(newFile);
         files.add(newFile2);
 
-        fileProvider.addFilesToDiffQueue(new DiffResult(), files, true);
+        fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, files, true);
 
         PowerMockito.verifyStatic(Mockito.never());
-        ConfFileHandler.addConfigurationFile(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean());
+        ConfFileHandler.addConfigurationFile((DiffResult) Matchers.any(), (ConfigurationFile) Matchers.any());
     }
 
     @Test
@@ -113,9 +114,9 @@ public class ConfFolderFileProviderTest {
         files.add(newFile);
         files.add(newFile2);
 
-        fileProvider.addFilesToDiffQueue(new DiffResult(), files, true);
+        fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, files, true);
 
         PowerMockito.verifyStatic(Mockito.times(2));
-        ConfFileHandler.addConfigurationFile(Matchers.anyString(), Matchers.anyString(), Matchers.anyBoolean());
+        ConfFileHandler.addConfigurationFile((DiffResult) Matchers.any(), (ConfigurationFile) Matchers.any());
     }
 }

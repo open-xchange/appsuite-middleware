@@ -51,20 +51,17 @@ package com.openexchange.admin.diff.result;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import com.openexchange.admin.diff.util.CaseInsensitiveSorter;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
+import com.openexchange.admin.diff.result.domain.PropertyDiff;
+import com.openexchange.admin.diff.util.ConfigurationFileByNameSorter;
+import com.openexchange.admin.diff.util.PropertyDiffByFileNameSorter;
 
 /**
  * Presents the results of diff processing
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
 public class DiffResult {
 
@@ -74,46 +71,39 @@ public class DiffResult {
     private List<String> processingErrors = new ArrayList<String>();
 
     /**
-     * Includes configuration files missing in the installation<br>
-     * <br>
-     * TODO change to data object (that must be defined) list to get to know where the file was found in the original installation
+     * Includes configuration files missing in the installation
      */
-    private List<String> missingFiles = new ArrayList<String>();
+    private List<ConfigurationFile> missingFiles = new ArrayList<ConfigurationFile>();
 
     /**
      * Includes configuration files that are duplicate within the installation
      */
-    private List<String> duplicateFiles = new ArrayList<String>();
+    private List<ConfigurationFile> duplicateFiles = new ArrayList<ConfigurationFile>();
 
     /**
      * Includes non configuration files within the installation
      */
-    private List<String> nonConfigurationFiles = new ArrayList<String>();
+    private List<ConfigurationFile> nonConfigurationFiles = new ArrayList<ConfigurationFile>();
 
     /**
      * Includes additional configuration files and its content
      */
-    private Map<String, String> additionalFiles = new HashMap<String, String>();
+    private List<ConfigurationFile> additionalFiles = new ArrayList<ConfigurationFile>();
 
     /**
      * Includes additional properties and its files
      */
-    private Map<String, PropertyDiffResultSet> additionalProperties = new HashMap<String, PropertyDiffResultSet>();
+    private List<PropertyDiff> additionalProperties = new ArrayList<PropertyDiff>();
 
     /**
      * Includes properties that are missing in a configuration file
      */
-    private Map<String, String> missingProperties = new HashMap<String, String>();
-
-    /**
-     * Includes properties that are duplicate
-     */
-    private Map<String, String> duplicateProperties = new HashMap<String, String>();
+    private List<PropertyDiff> missingProperties = new ArrayList<PropertyDiff>();
 
     /**
      * Includes properties/configurations that have been changed
      */
-    private Map<String, PropertyDiffResultSet> changedProperties = new HashMap<String, PropertyDiffResultSet>();
+    private List<PropertyDiff> changedProperties = new ArrayList<PropertyDiff>();
 
     /**
      * Gets the processingErrors
@@ -129,7 +119,7 @@ public class DiffResult {
      * 
      * @return The missingFiles
      */
-    public List<String> getMissingFiles() {
+    public List<ConfigurationFile> getMissingFiles() {
         return missingFiles;
     }
 
@@ -138,7 +128,7 @@ public class DiffResult {
      * 
      * @return The duplicateFiles
      */
-    public List<String> getDuplicateFiles() {
+    public List<ConfigurationFile> getDuplicateFiles() {
         return duplicateFiles;
     }
 
@@ -147,7 +137,7 @@ public class DiffResult {
      * 
      * @return The nonConfigurationFiles
      */
-    public List<String> getNonConfigurationFiles() {
+    public List<ConfigurationFile> getNonConfigurationFiles() {
         return nonConfigurationFiles;
     }
 
@@ -156,7 +146,7 @@ public class DiffResult {
      * 
      * @return The additionalFiles
      */
-    public Map<String, String> getAdditionalFiles() {
+    public List<ConfigurationFile> getAdditionalFiles() {
         return additionalFiles;
     }
 
@@ -165,7 +155,7 @@ public class DiffResult {
      * 
      * @return The additionalProperties
      */
-    public Map<String, PropertyDiffResultSet> getAdditionalProperties() {
+    public List<PropertyDiff> getAdditionalProperties() {
         return additionalProperties;
     }
 
@@ -174,18 +164,8 @@ public class DiffResult {
      * 
      * @return The missingProperties
      */
-    public Map<String, String> getMissingProperties() {
+    public List<PropertyDiff> getMissingProperties() {
         return missingProperties;
-    }
-
-
-    /**
-     * Gets the duplicateProperties
-     * 
-     * @return The duplicateProperties
-     */
-    public Map<String, String> getDuplicateProperties() {
-        return duplicateProperties;
     }
 
     /**
@@ -193,7 +173,7 @@ public class DiffResult {
      * 
      * @return The changedProperties
      */
-    public Map<String, PropertyDiffResultSet> getChangedProperties() {
+    public List<PropertyDiff> getChangedProperties() {
         return changedProperties;
     }
 
@@ -212,45 +192,38 @@ public class DiffResult {
         }
 
         builder.append("---------- Missing configuration files: " + missingFiles.size() + " ---------- \n");
-        for (String missingFile : missingFiles) {
-            builder.append(missingFile + "\n");
+        for (ConfigurationFile missingFile : missingFiles) {
+            builder.append(missingFile.toString());
         }
 
         builder.append("---------- Missing properties: " + missingProperties.size() + " ---------- \n");
-        for (Entry<String, String> missingProperty : missingProperties.entrySet()) {
-            builder.append(missingProperty.getKey() + ": " + missingProperty.getValue() + "\n");
+        for (PropertyDiff missingProperty : missingProperties) {
+            builder.append(missingProperty.toString());
         }
 
         builder.append("---------- Additional configuration files: " + additionalFiles.size() + " ---------- \n");
-        for (Entry<String, String> additionalFile : additionalFiles.entrySet()) {
-            builder.append(additionalFile.getKey() + "\n");
+        for (ConfigurationFile additionalFile : additionalFiles) {
+            builder.append(additionalFile.toString());
         }
 
         builder.append("---------- Additional properties: " + additionalProperties.size() + " ---------- \n");
-        for (Entry<String, PropertyDiffResultSet> additionalProperty : additionalProperties.entrySet()) {
-            PropertyDiffResultSet propertyAdded = additionalProperty.getValue();
-            builder.append(propertyAdded.getFileName() + ": " + propertyAdded.getPropertyNameAndValue() + "\n");
+        for (PropertyDiff additionalProperty : additionalProperties) {
+            builder.append(additionalProperty.toString());
         }
 
         builder.append("---------- Duplicate configuration files: " + duplicateFiles.size() + " ---------- \n");
-        for (String duplicateFile : duplicateFiles) {
-            builder.append(duplicateFile + "\n");
-        }
-
-        builder.append("---------- Duplicate properties: " + duplicateProperties.size() + " ---------- \n");
-        for (Entry<String, String> duplicateProperty : duplicateProperties.entrySet()) {
-            builder.append(duplicateProperty.getKey() + ": " + duplicateProperty.getValue() + "\n");
+        for (ConfigurationFile duplicateFile : duplicateFiles) {
+            builder.append(duplicateFile.toString());
         }
 
         builder.append("---------- Non configuration files: " + nonConfigurationFiles.size() + " ---------- \n");
-        for (String nonConfigurationFile : nonConfigurationFiles) {
-            builder.append(nonConfigurationFile + "\n");
+        for (ConfigurationFile nonConfigurationFile : nonConfigurationFiles) {
+            builder.append(nonConfigurationFile.toString());
         }
 
         builder.append("---------- Changed properties: " + changedProperties.size() + " ---------- \n");
-        for (Entry<String, PropertyDiffResultSet> changedProperty : changedProperties.entrySet()) {
-            PropertyDiffResultSet propertyChanged = changedProperty.getValue();
-            builder.append(propertyChanged.getFileName() + ": " + propertyChanged.getPropertyNameAndValue() + "\n");
+        for (PropertyDiff changedProperty : changedProperties) {
+            builder.append(changedProperty.toString());
         }
 
         return builder.toString();
@@ -260,46 +233,37 @@ public class DiffResult {
      * Sort all maps based on keys for output
      */
     private void sortMaps() {
-        Map<String, String> sortedAdditionalFiles = sortByKeys(this.additionalFiles);
-        this.additionalFiles = sortedAdditionalFiles;
+        sortFilesByFileName(this.additionalFiles);
+        sortFilesByFileName(this.missingFiles);
+        sortFilesByFileName(this.nonConfigurationFiles);
+        sortFilesByFileName(this.duplicateFiles);
 
-        Map<String, PropertyDiffResultSet> sortedAdditionalProperties = sortByKeys(this.additionalProperties);
-        this.additionalProperties = sortedAdditionalProperties;
+        sortProperties(this.additionalProperties);
+        sortProperties(this.changedProperties);
+        // Map<String, PropertyDiff> sortedChangedProperties = sortByKeys(this.changedProperties);
+        // this.changedProperties = sortedChangedProperties;
+        //
+        // Map<String, String> sortedDuplicateProperties = sortByKeys(this.duplicateProperties);
+        // this.duplicateProperties = sortedDuplicateProperties;
+        //
+        // Collections.sort(this.missingFiles, new ConfigurationFileByNameSorter());
+        //
+        // Map<String, String> sortedMissingProperties = sortByKeys(this.missingProperties);
+        // this.missingProperties = sortedMissingProperties;
+        //
+        // Collections.sort(this.processingErrors, new ConfigurationFileByNameSorter());
+    }
 
-        Map<String, PropertyDiffResultSet> sortedChangedProperties = sortByKeys(this.changedProperties);
-        this.changedProperties = sortedChangedProperties;
-
-        Collections.sort(this.duplicateFiles, new CaseInsensitiveSorter());
-
-        Map<String, String> sortedDuplicateProperties = sortByKeys(this.duplicateProperties);
-        this.duplicateProperties = sortedDuplicateProperties;
-
-        Collections.sort(this.missingFiles, new CaseInsensitiveSorter());
-
-        Map<String, String> sortedMissingProperties = sortByKeys(this.missingProperties);
-        this.missingProperties = sortedMissingProperties;
-
-        Collections.sort(this.nonConfigurationFiles, new CaseInsensitiveSorter());
-        Collections.sort(this.processingErrors, new CaseInsensitiveSorter());
+    private void sortProperties(List<PropertyDiff> properties) {
+        Collections.sort(properties, new PropertyDiffByFileNameSorter());
     }
 
     /**
-     * Sorts the given Map based on the keys
+     * Sorts the given list of configuration files based on the file names
      * 
-     * @param map to sort
-     * @return Sorted map
+     * @param list with ConfigurationFiles to sort
      */
-    private static <K extends Comparable<?>, V extends Comparable<?>> Map<K, V> sortByKeys(Map<K, V> map) {
-        List<K> keys = new LinkedList<K>(map.keySet());
-        Collections.sort(keys, (Comparator) new CaseInsensitiveSorter());
-
-        // LinkedHashMap will keep the keys in the order they are inserted
-        // which is currently sorted on natural ordering
-        Map<K, V> sortedMap = new LinkedHashMap<K, V>();
-        for (K key : keys) {
-            sortedMap.put(key, map.get(key));
-        }
-
-        return sortedMap;
+    private static void sortFilesByFileName(List<ConfigurationFile> list) {
+        Collections.sort(list, new ConfigurationFileByNameSorter());
     }
 }

@@ -52,23 +52,23 @@ package com.openexchange.admin.diff;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.diff.file.FileHandlerTest;
+import com.openexchange.admin.diff.file.handler.FileHandlerTest;
+import com.openexchange.admin.diff.file.handler.impl.AbstractFileHandlerTest;
+import com.openexchange.admin.diff.file.handler.impl.PropertyHandlerTest;
 import com.openexchange.admin.diff.file.provider.ConfFolderFileProviderTest;
 import com.openexchange.admin.diff.file.provider.JarFileProviderTest;
 import com.openexchange.admin.diff.file.provider.RecursiveFileProviderTest;
 import com.openexchange.admin.diff.file.type.ConfFileHandlerTest;
-import com.openexchange.admin.diff.file.type.impl.AbstractFileHandlerTest;
-import com.openexchange.admin.diff.file.type.impl.PropertyHandlerTest;
 
 
 /**
  * Unit tests for c.o.admin.diff module.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
 @RunWith(Suite.class)
-@SuiteClasses({ 
+@SuiteClasses({
     ConfigDiffTest.class,
     FileHandlerTest.class,
     ConfFileHandlerTest.class,

@@ -47,50 +47,46 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type.impl;
+package com.openexchange.admin.diff.file.handler;
 
-import java.util.Map;
-import com.openexchange.admin.diff.ConfigDiff;
+import java.util.List;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
 import com.openexchange.admin.diff.result.DiffResult;
-import com.openexchange.admin.diff.result.output.DiffMatchPatchWriter;
-import com.openexchange.admin.diff.result.output.DiffWriter;
-
-
 
 /**
- * Handler for .yaml and .yml configuration files
+ * This interface defines all method to implement for new configurationFileHandler that deals with the given configuration file formats.
+ * Each handler is responsible for one file format.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class YamlHandler extends AbstractFileHandler {
-
-    private volatile static YamlHandler instance;
-
-    private YamlHandler() {
-        ConfigDiff.register(this);
-    }
-
-    public static synchronized YamlHandler getInstance() {
-        if (instance == null) {
-            synchronized (YamlHandler.class) {
-                if (instance == null) {
-                    instance = new YamlHandler();
-                }
-            }
-        }
-        return instance;
-    }
+public interface IConfFileHandler {
 
     /**
-     * {@inheritDoc}
+     * This method is used from internal files
+     * 
+     * @param diffResult - The {@link DiffResult} the processing results of the current handler will be attached.
+     * @return The {@link DiffResult} with all results of the previously given and the results of this handler.
      */
-    @Override
-    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
-        DiffWriter diffMatchPatchWriter = new DiffMatchPatchWriter();
-        diffMatchPatchWriter.addOutputToDiffResult(diffResult, lOriginalFiles, lInstalledFiles);
+    public DiffResult getDiff(DiffResult diffResult);
 
-        return diffResult;
-    }
+    /**
+     * This method might be used from different handlers<br>
+     * <br>
+     * Hint: only use provided objects for processing within this method and do not work on singleton members!
+     * 
+     * @param diffResult - the object that will be aerated with the results
+     * @param lOriginalFiles - original files to diff
+     * @param lInstalledFiles - installed files to diff
+     * @return
+     */
+    public DiffResult getDiff(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles);
 
+    /**
+     * Add a file for processing to get a diff result.
+     * 
+     * @param diffResult - the object that will be aerated with the results
+     * @param configurationFile - the file that should be processed
+     */
+    public void addFile(DiffResult diffResult, ConfigurationFile configurationFile);
 }

@@ -47,40 +47,34 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type.impl;
+package com.openexchange.admin.diff.file.handler.impl;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.custommonkey.xmlunit.DetailedDiff;
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.Difference;
-import org.custommonkey.xmlunit.XMLUnit;
-import org.xml.sax.SAXException;
+import java.util.List;
 import com.openexchange.admin.diff.ConfigDiff;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
+import com.openexchange.admin.diff.file.handler.impl.AbstractFileHandler;
+import com.openexchange.admin.diff.file.handler.impl.PropertyHandler;
 import com.openexchange.admin.diff.result.DiffResult;
-import com.openexchange.admin.diff.result.PropertyDiffResultSet;
 
 /**
- * Handler for .xml configuration files
+ * Handler for .ccf configuration files
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class XmlHandler extends AbstractFileHandler {
+public class CcfHandler extends AbstractFileHandler {
 
-    private volatile static XmlHandler instance;
+    private volatile static CcfHandler instance;
 
-    private XmlHandler() {
+    private CcfHandler() {
         ConfigDiff.register(this);
     }
 
-    public static synchronized XmlHandler getInstance() {
+    public static synchronized CcfHandler getInstance() {
         if (instance == null) {
-            synchronized (XmlHandler.class) {
+            synchronized (CcfHandler.class) {
                 if (instance == null) {
-                    instance = new XmlHandler();
+                    instance = new CcfHandler();
                 }
             }
         }
@@ -91,46 +85,7 @@ public class XmlHandler extends AbstractFileHandler {
      * {@inheritDoc}
      */
     @Override
-    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
-        configureXMLUnitComparator();
-
-        Iterator<Entry<String, String>> it = lOriginalFiles.entrySet().iterator();
-
-        while (it.hasNext()) {
-            Entry<String, String> pairs = it.next();
-            String originalFileContent = pairs.getValue();
-            String installedFileContent = lInstalledFiles.get(pairs.getKey());
-
-            if (installedFileContent == null) {
-                // Missing in installation but already tracked in file diff
-                continue;
-            }
-
-            try {
-                DetailedDiff xmlDetailedDiff = new DetailedDiff(new Diff(originalFileContent, installedFileContent));
-
-                if (xmlDetailedDiff.getAllDifferences().isEmpty()) {
-                    continue;
-                }
-                String difference = "";
-                Iterator<Difference> iterator = xmlDetailedDiff.getAllDifferences().iterator();
-                while (iterator.hasNext()) {
-                    Difference next = iterator.next();
-                    difference = difference.concat(next.toString() + "\n");
-                }
-                diffResult.getChangedProperties().put(pairs.getKey(), new PropertyDiffResultSet(pairs.getKey(), difference));
-            } catch (SAXException e) {
-                diffResult.getProcessingErrors().add("Error while xml diff: " + e.getLocalizedMessage() + "\n");
-            } catch (IOException e) {
-                diffResult.getProcessingErrors().add("Error while xml diff: " + e.getLocalizedMessage() + "\n");
-            }
-        }
-        return diffResult;
-    }
-
-    private void configureXMLUnitComparator() {
-        XMLUnit.setNormalizeWhitespace(true);
-        XMLUnit.setIgnoreComments(true);
-        XMLUnit.setIgnoreWhitespace(true);
+    public DiffResult getDiff(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
+        return PropertyHandler.getInstance().getDiff(diffResult, lOriginalFiles, lInstalledFiles);
     }
 }

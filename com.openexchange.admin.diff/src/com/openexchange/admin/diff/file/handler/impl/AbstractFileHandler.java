@@ -47,22 +47,21 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type.impl;
+package com.openexchange.admin.diff.file.handler.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.admin.diff.file.type.IConfFileHandler;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
+import com.openexchange.admin.diff.file.handler.IConfFileHandler;
 import com.openexchange.admin.diff.result.DiffResult;
+import com.openexchange.admin.diff.util.ConfigurationFileSearch;
 
 /**
  * {@link AbstractFileHandler}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
 public abstract class AbstractFileHandler implements IConfFileHandler {
 
@@ -71,38 +70,48 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
      */
     private List<String> ignoredFiles = new ArrayList<String>(Arrays.asList(new String[] {
         "mpasswd",
+        "secrets",
         ""
     }));
 
     /**
      * Registered installed files
      */
-    protected Map<String, String> installedFiles = new ConcurrentHashMap<String, String>();
+    protected List<ConfigurationFile> installedFiles = new ArrayList<ConfigurationFile>();
 
     /**
      * Registered original files
      */
-    protected Map<String, String> originalFiles = new ConcurrentHashMap<String, String>();
+    protected List<ConfigurationFile> originalFiles = new ArrayList<ConfigurationFile>();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void addFile(String fileName, String content, boolean isOriginal) {
-        if (ignoredFiles.contains(fileName)) {
+    public void addFile(DiffResult diffresult, ConfigurationFile configurationFile) {
+        if (ignoredFiles.contains(configurationFile.getName())) {
             return;
         }
 
-        if (isOriginal) {
-            if (installedFiles.containsKey(fileName)) {
-                // TODO - handle duplicate files: add to processing error map?
+        if (configurationFile.isOriginal()) {
+            for (ConfigurationFile orgFile : this.originalFiles) {
+                final String fileName = orgFile.getName();
+                if (fileName.equalsIgnoreCase(configurationFile.getName())) {
+                    diffresult.getDuplicateFiles().add(configurationFile);
+                    // TODO - handle duplicate files: insert more than just the filename
+                }
             }
-            originalFiles.put(fileName, content);
+
+            originalFiles.add(configurationFile);
         } else {
-            if (installedFiles.containsKey(fileName)) {
-                // TODO - handle duplicate files: add to processing error map?
+            for (ConfigurationFile instFile : this.installedFiles) {
+                final String fileName = instFile.getName();
+                if (fileName.equalsIgnoreCase(configurationFile.getName())) {
+                    diffresult.getDuplicateFiles().add(configurationFile);
+                    // TODO - handle duplicate files: insert more than just the filename
+                }
             }
-            installedFiles.put(fileName, content);
+            installedFiles.add(configurationFile);
         }
     }
 
@@ -111,31 +120,37 @@ public abstract class AbstractFileHandler implements IConfFileHandler {
      */
     @Override
     public DiffResult getDiff(DiffResult diffResult) {
-        getFileDiffs(diffResult, new HashMap<String, String>(this.originalFiles), new HashMap<String, String>(this.installedFiles));
+        getFileDiffs(diffResult, new ArrayList<ConfigurationFile>(this.originalFiles), new ArrayList<ConfigurationFile>(this.installedFiles));
 
         return getDiff(diffResult, this.originalFiles, this.installedFiles);
     }
 
     /**
-     * Returns the diffs that belong to files. This method is called for each configuration file extension.
+     * Returns the diffs that belong to files. This method is called for each configuration file type.
      * 
-     * @param diff - the diff objet to add file diff results
+     * @param diff - the diff object to add file diff results
      * @param lOriginalFiles - original files that should be compared
      * @param lInstalledFiles - installed files the original ones should be compared with
      */
-    protected void getFileDiffs(DiffResult diffResult, final Map<String, String> lOriginalFiles, final Map<String, String> lInstalledFiles) {
+    protected void getFileDiffs(DiffResult diffResult, final List<ConfigurationFile> lOriginalFiles, final List<ConfigurationFile> lInstalledFiles) {
 
-        for (String origFile : lOriginalFiles.keySet()) {
-            if (!lInstalledFiles.keySet().contains(origFile)) {
+        for (ConfigurationFile origFile : lOriginalFiles) {
+            final String fileName = origFile.getName();
+            List<ConfigurationFile> result = new ConfigurationFileSearch().search(lInstalledFiles, fileName);
+
+            // Not found in installation folder
+            if (result.isEmpty()) {
                 diffResult.getMissingFiles().add(origFile);
+                continue;
             }
-            lInstalledFiles.remove(origFile);
+
+            if (lInstalledFiles.size() > 0) {
+                lInstalledFiles.remove(result.get(0));
+            }
         }
 
         if (lInstalledFiles.size() > 0) {
-            for (String installedFile : lInstalledFiles.keySet()) {
-                diffResult.getAdditionalFiles().put(installedFile, lInstalledFiles.get(installedFile));
-            }
+            diffResult.getAdditionalFiles().addAll(lInstalledFiles);
         }
     }
 }

@@ -9,7 +9,7 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import com.openexchange.admin.diff.file.type.IConfFileHandler;
+import com.openexchange.admin.diff.file.handler.IConfFileHandler;
 import com.openexchange.admin.diff.result.DiffResult;
 import com.openexchange.test.mock.MockUtils;
 
@@ -18,7 +18,7 @@ import com.openexchange.test.mock.MockUtils;
  * Unit tests for {@link ConfigDiff}
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
 public class ConfigDiffTest {
 

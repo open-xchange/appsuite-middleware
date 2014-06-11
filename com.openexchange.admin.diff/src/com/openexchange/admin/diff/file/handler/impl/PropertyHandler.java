@@ -47,45 +47,34 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type.impl;
+package com.openexchange.admin.diff.file.handler.impl;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import com.openexchange.admin.diff.ConfigDiff;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
 import com.openexchange.admin.diff.result.DiffResult;
-import com.openexchange.admin.diff.result.PropertyDiffResultSet;
+import com.openexchange.admin.diff.result.domain.PropertyDiff;
+import com.openexchange.admin.diff.util.ConfigurationFileSearch;
 
 /**
  * Handler for .properties configuration files
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
 public class PropertyHandler extends AbstractFileHandler {
 
     private volatile static PropertyHandler instance;
 
     private List<String> criticalProperties = new ArrayList<String>(Arrays.asList(new String[] {
-        "com.openexchange.oauth.yahoo.apiKey",
-        "com.openexchange.oauth.xing.consumerKey",
-        "com.openexchange.socialplugin.linkedin.apikey",
-        "com.openexchange.facebook.secretKey",
-        "com.openexchange.oauth.xing.consumerSecret",
-        "com.openexchange.oauth.xing.apiKey",
-        "com.openexchange.oauth.yahoo.apiSecret",
-        "com.openexchange.oauth.xing.apiSecret",
-        "com.openexchange.socialplugin.linkedin.apisecret",
-        "com.openexchange.facebook.apiKey",
-        "",
-        "",
+        // Fill in some special property names which do
+        // not match '.*consumerKey.*|.*apiKey.*|.*secretKey.*|.*consumerSecret.*|.*apiSecret.*'
+        "writeProperty.2", "readProperty.2",
         "",
         "",
         "",
@@ -114,8 +103,8 @@ public class PropertyHandler extends AbstractFileHandler {
      * {@inheritDoc}
      */
     @Override
-    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
-        getPropertyDiffsPerFile(diffResult, new HashMap<String, String>(lOriginalFiles), new HashMap<String, String>(lInstalledFiles));
+    public DiffResult getDiff(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
+        getPropertyDiffsPerFile(diffResult, new ArrayList<ConfigurationFile>(lOriginalFiles), new ArrayList<ConfigurationFile>(lInstalledFiles));
 
         return diffResult;
     }
@@ -127,25 +116,26 @@ public class PropertyHandler extends AbstractFileHandler {
      * @param lOriginalFiles - original files to diff
      * @param lInstalledFiles - installed files to diff
      */
-    protected void getPropertyDiffsPerFile(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
-        Iterator<Entry<String, String>> it = lOriginalFiles.entrySet().iterator();
+    protected void getPropertyDiffsPerFile(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
 
-        while (it.hasNext()) {
-            Entry<String, String> pairs = it.next();
+        for (ConfigurationFile origFile : lOriginalFiles) {
             try {
-                String originalFileContent = pairs.getValue();
+                String originalFileContent = origFile.getContent();
                 Properties originalProperty = new Properties();
                 originalProperty.load(new StringReader(originalFileContent));
 
-                String installedFileContent = lInstalledFiles.get(pairs.getKey());
-                if (installedFileContent == null) {
-                    // File not available in installation. See PropertyHandler.getFileDiffs(DiffResult, HashSet<String>, HashSet<String>)
+                final String fileName = origFile.getName();
+                List<ConfigurationFile> result = new ConfigurationFileSearch().search(lInstalledFiles, fileName);
+
+                if (result.isEmpty()) {
+                    // Missing in installation, but already tracked in file diff
                     continue;
                 }
-                Properties installedProperty = new Properties();
-                installedProperty.load(new StringReader(installedFileContent));
 
-                getDiffProperties(diffResult, pairs.getKey(), originalProperty, installedProperty);
+                Properties installedProperty = new Properties();
+                installedProperty.load(new StringReader(result.get(0).getContent()));
+
+                getDiffProperties(diffResult, fileName, originalProperty, installedProperty);
             } catch (IOException e) {
                 diffResult.getProcessingErrors().add("Error while property diff per file: " + e.getLocalizedMessage() + "\n");
             }
@@ -166,16 +156,16 @@ public class PropertyHandler extends AbstractFileHandler {
             String originalPropertyValue = originalProperties.getProperty(key);
 
             if (installedProperties.getProperty(key) == null) {
-                diffResult.getMissingProperties().put(fileName, key);
+                diffResult.getMissingProperties().add(new PropertyDiff(fileName, key, null));
                 originalProperties.remove(key);
                 continue;
             }
 
             String installedPropertyValue = installedProperties.getProperty(key);
             if (!originalPropertyValue.equalsIgnoreCase(installedPropertyValue)) {
-                diffResult.getChangedProperties().put(key, new PropertyDiffResultSet(fileName, key + "=" + obscure(key, installedPropertyValue)));
+                diffResult.getChangedProperties().add(new PropertyDiff(fileName, key, obscure(key, installedPropertyValue)));
             } else if (installedPropertyValue == null) {
-                diffResult.getMissingProperties().put(fileName, key);
+                diffResult.getMissingProperties().add(new PropertyDiff(fileName, key, null));
             }
 
             installedProperties.remove(key);
@@ -184,7 +174,7 @@ public class PropertyHandler extends AbstractFileHandler {
 
         if (!installedProperties.isEmpty()) {
             for (String key : installedProperties.stringPropertyNames()) {
-                diffResult.getAdditionalProperties().put(fileName, new PropertyDiffResultSet(fileName, key + "=" + installedProperties.getProperty(key)));
+                diffResult.getAdditionalProperties().add(new PropertyDiff(fileName, key, installedProperties.getProperty(key)));
             }
         }
     }
@@ -197,7 +187,9 @@ public class PropertyHandler extends AbstractFileHandler {
      * @return - the given string if not included in the criticalProperties List or ******** if it is critical
      */
     protected String obscure(String key, String propertyValue) {
-        if (criticalProperties.contains(key)) {
+        if (key.toLowerCase().matches(".*consumerKey.*|.*apiKey.*|.*secretKey.*|.*consumerSecret.*|.*apiSecret.*|.*password.*".toLowerCase())) {
+            propertyValue = OBSCURED_PROPERTY;
+        } else if (criticalProperties.contains(key)) {
             propertyValue = OBSCURED_PROPERTY;
         }
         return propertyValue;

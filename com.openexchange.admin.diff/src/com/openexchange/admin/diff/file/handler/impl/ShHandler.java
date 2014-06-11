@@ -47,69 +47,43 @@
  *
  */
 
-package com.openexchange.admin.diff.file;
+package com.openexchange.admin.diff.file.handler.impl;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.admin.diff.file.provider.IConfigurationFileProvider;
-import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
+import com.openexchange.admin.diff.ConfigDiff;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
 import com.openexchange.admin.diff.result.DiffResult;
 
-
 /**
- * Executes the given IConfigurationFileProvider to read configuration files and add them to the diff queue.
+ * Handler for .sh configuration files
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class FileHandler {
+public class ShHandler extends AbstractFileHandler {
 
-    /**
-     * Walk through the given rootDirectory handled by the provided IConfigurationFileProvider. The read files will also be added to diff
-     * working queue.
-     * 
-     * @param rootDirectory is a valid directory, which can be read.
-     * @throws IOException
-     */
-    public void readConfFiles(DiffResult diffResult, String rootDirectory, boolean isOriginal, IConfigurationFileProvider... configurationFileProviders) {
-        if (configurationFileProviders == null) {
-            return;
+    private volatile static ShHandler instance;
+
+    private ShHandler() {
+        ConfigDiff.register(this);
+    }
+
+    public static synchronized ShHandler getInstance() {
+        if (instance == null) {
+            synchronized (ShHandler.class) {
+                if (instance == null) {
+                    instance = new ShHandler();
+                }
+            }
         }
-
-        try {
-            validateDirectory(new File(rootDirectory));
-        } catch (FileNotFoundException e) {
-
-            diffResult.getProcessingErrors().add("Error in validating directory " + rootDirectory + "\n" + e.getLocalizedMessage() + "\n");
-            return;
-        }
-
-        List<File> confFiles = new ArrayList<File>();
-
-        for (IConfigurationFileProvider configurationFileProvider : configurationFileProviders) {
-            confFiles = configurationFileProvider.readConfigurationFiles(diffResult, rootDirectory, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE);
-            configurationFileProvider.addFilesToDiffQueue(diffResult, confFiles, isOriginal);
-        }
+        return instance;
     }
 
     /**
-     * Directory is valid if it exists, does not represent a file, and can be read.
+     * {@inheritDoc}
      */
-    protected void validateDirectory(File directory) throws FileNotFoundException {
-        if (directory == null) {
-            throw new IllegalArgumentException("Directory should not be null.");
-        }
-        if (!directory.exists()) {
-            throw new FileNotFoundException("Directory does not exist: " + directory);
-        }
-        if (!directory.isDirectory()) {
-            throw new IllegalArgumentException("Is not a directory: " + directory);
-        }
-        if (!directory.canRead()) {
-            throw new IllegalArgumentException("Directory cannot be read: " + directory);
-        }
+    @Override
+    public DiffResult getDiff(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
+        return PropertyHandler.getInstance().getDiff(diffResult, lOriginalFiles, lInstalledFiles);
     }
 }

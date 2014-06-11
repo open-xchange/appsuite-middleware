@@ -47,78 +47,19 @@
  *
  */
 
-package com.openexchange.admin.diff.result;
+package com.openexchange.admin.diff.file.provider.util;
 
 
 /**
- * {@link PropertyDiffResultSet}
+ * {@link FileProviderUtil}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class PropertyDiffResultSet implements Comparable<PropertyDiffResultSet> {
+public class FileProviderUtil {
 
-    private String fileName;
-
-    private String propertyNameAndValue;
-
-    /**
-     * Initializes a new {@link PropertyDiffResultSet}.
-     * 
-     * @param fileName
-     * @param propertyNameAndValue
-     */
-    public PropertyDiffResultSet(String fileName, String propertyNameAndValue) {
-        this.fileName = fileName;
-        this.propertyNameAndValue = propertyNameAndValue;
-    }
-
-    /**
-     * Gets the fileName
-     * 
-     * @return The fileName
-     */
-    public String getFileName() {
-        return fileName;
-    }
-
-    /**
-     * Sets the fileName
-     * 
-     * @param fileName The fileName to set
-     */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-
-    /**
-     * Gets the propertyNameAndValue
-     * 
-     * @return The propertyNameAndValue
-     */
-    public String getPropertyNameAndValue() {
-        return propertyNameAndValue;
-    }
-
-
-    /**
-     * Sets the propertyNameAndValue
-     * 
-     * @param propertyNameAndValue The propertyNameAndValue to set
-     */
-    public void setPropertyNameAndValue(String propertyNameAndValue) {
-        this.propertyNameAndValue = propertyNameAndValue;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int compareTo(PropertyDiffResultSet paramT) {
-        String a1 = paramT.getFileName();
-        String b1 = this.getFileName();
-        return a1.compareTo(b1);
+    public static String removeRootFolder(String fileWithFullPath, String rootFolder) {
+        return fileWithFullPath.substring(rootFolder.length() - 1);
     }
 
 }

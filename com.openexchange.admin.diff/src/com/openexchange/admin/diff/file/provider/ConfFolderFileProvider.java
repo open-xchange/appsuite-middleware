@@ -57,9 +57,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import com.openexchange.admin.diff.file.type.ConfFileHandler;
-import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
+import com.openexchange.admin.diff.file.handler.ConfFileHandler;
+import com.openexchange.admin.diff.file.provider.util.FileProviderUtil;
 import com.openexchange.admin.diff.result.DiffResult;
 
 
@@ -67,7 +69,7 @@ import com.openexchange.admin.diff.result.DiffResult;
  * Provides configuration files by recursive traversing the given folder and considering file extension.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
 public class ConfFolderFileProvider implements IConfigurationFileProvider {
 
@@ -76,19 +78,20 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
      */
     @Override
     public List<File> readConfigurationFiles(DiffResult diffResult, String rootFolder, String[] fileExtension) {
-        Collection<File> listFiles = FileUtils.listFiles(new File(rootFolder), ConfigurationFileTypes.CONFIGURATION_FILE_TYPE, true);
+        Collection<File> listFiles = FileUtils.listFiles(new File(rootFolder), fileExtension, true);
 
-        if (listFiles != null) {
-            return new ArrayList<File>(listFiles);
-        }
-        return new ArrayList<File>();
+        List<File> displayDirectoryContents = new ArrayList<File>();
+        getFilesWithoutExtension(new File(rootFolder), displayDirectoryContents);
+        listFiles.addAll(displayDirectoryContents);
+
+        return new ArrayList<File>(listFiles);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void addFilesToDiffQueue(DiffResult diffResult, List<File> filesToAdd, boolean isOriginal) {
+    public void addFilesToDiffQueue(DiffResult diffResult, String rootDirectory, List<File> filesToAdd, boolean isOriginal) {
         if (filesToAdd == null) {
             return;
         }
@@ -98,7 +101,9 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
                 String fileContent;
                 try {
                     fileContent = IOUtils.toString(new FileReader(currentFile));
-                    ConfFileHandler.addConfigurationFile(currentFile.getName(), fileContent, isOriginal);
+
+                    ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), FilenameUtils.getExtension(currentFile.getAbsolutePath()), rootDirectory, FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory)), fileContent, isOriginal);
+                    ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
                 } catch (FileNotFoundException e) {
                     diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n");
                 } catch (IOException e) {
@@ -106,5 +111,28 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
                 }
             }
         }
+    }
+
+    /**
+     * This method is a hack because FileUtils.listFiles(...) is not able to return files that have no extension.
+     * 
+     * @param dir
+     * @param listToFill
+     * @return
+     */
+    public List<File> getFilesWithoutExtension(File dir, List<File> listToFill) {
+
+        File[] files = dir.listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                getFilesWithoutExtension(file, listToFill);
+            } else {
+                if (file.isFile() && FilenameUtils.getExtension(file.getName()).equalsIgnoreCase("")) {
+                    listToFill.add(file);
+                }
+            }
+        }
+
+        return listToFill;
     }
 }

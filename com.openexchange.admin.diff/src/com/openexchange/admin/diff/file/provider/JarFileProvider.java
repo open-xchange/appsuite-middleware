@@ -65,7 +65,9 @@ import org.apache.commons.io.filefilter.AndFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
-import com.openexchange.admin.diff.file.type.ConfFileHandler;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
+import com.openexchange.admin.diff.file.handler.ConfFileHandler;
+import com.openexchange.admin.diff.file.provider.util.FileProviderUtil;
 import com.openexchange.admin.diff.file.type.ConfigurationFileTypes;
 import com.openexchange.admin.diff.result.DiffResult;
 
@@ -76,6 +78,8 @@ import com.openexchange.admin.diff.result.DiffResult;
  * eligible jars.
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.1
  */
 public class JarFileProvider implements IConfigurationFileProvider {
 
@@ -98,7 +102,7 @@ public class JarFileProvider implements IConfigurationFileProvider {
      * {@inheritDoc}
      */
     @Override
-    public void addFilesToDiffQueue(DiffResult diffResult, List<File> filesToAdd, boolean isOriginal) {
+    public void addFilesToDiffQueue(DiffResult diffResult, String rootDirectory, List<File> filesToAdd, boolean isOriginal) {
         if (filesToAdd == null) {
             return;
         }
@@ -122,7 +126,10 @@ public class JarFileProvider implements IConfigurationFileProvider {
                         if (!"".equalsIgnoreCase(entryExt) && FilenameUtils.isExtension(entryExt, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE)) {
                             InputStream inputStream = jarFile.getInputStream(entry);
                             String fileContent = IOUtils.toString(inputStream);
-                            ConfFileHandler.addConfigurationFile(entryExt, fileContent, isOriginal);
+
+                            String pathWithoutRootFolder = FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath() + "!/" + entryName, rootDirectory);
+                            ConfigurationFile configurationFile = new ConfigurationFile(entryExt, FilenameUtils.getExtension(entryExt), rootDirectory, FilenameUtils.getFullPath(pathWithoutRootFolder), fileContent, isOriginal);
+                            ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
                         }
                     }
                 }

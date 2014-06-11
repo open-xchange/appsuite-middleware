@@ -57,7 +57,7 @@ import com.openexchange.admin.diff.result.DiffResult;
  * Provides configuration files and adds them to the diff queue.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
 public interface IConfigurationFileProvider {
 
@@ -75,9 +75,10 @@ public interface IConfigurationFileProvider {
      * Adds the given files to the diff queue
      * 
      * @param diffResult
+     * @param rootFolder - the folder to start reading
      * @param filesToAdd - the files to add to the queue
      * @param isOriginal - flag if the files to add are from original installation folder or if they are currently installed
      */
-    public void addFilesToDiffQueue(DiffResult diffResult, List<File> filesToAdd, boolean isOriginal);
+    public void addFilesToDiffQueue(DiffResult diffResult, String rootFolder, List<File> filesToAdd, boolean isOriginal);
 
 }

@@ -47,42 +47,60 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type.impl;
+package com.openexchange.admin.diff.file.handler;
 
-import java.util.Map;
-import com.openexchange.admin.diff.ConfigDiff;
+import java.io.File;
+import java.io.IOException;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import com.openexchange.admin.diff.file.provider.IConfigurationFileProvider;
 import com.openexchange.admin.diff.result.DiffResult;
 
 /**
- * Handler for .sh configuration files
- * 
+ * {@link FileHandlerTest}
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class ShHandler extends AbstractFileHandler {
+public class FileHandlerTest {
 
-    private volatile static ShHandler instance;
+    @Spy
+    private FileHandler fileHandler;
 
-    private ShHandler() {
-        ConfigDiff.register(this);
+    @Mock
+    private IConfigurationFileProvider configurationFileProvider;
+
+    private final String rootDirectory = "/opt/open-xchange/etc";
+
+    private final boolean isOriginal = false;
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
     }
 
-    public static synchronized ShHandler getInstance() {
-        if (instance == null) {
-            synchronized (ShHandler.class) {
-                if (instance == null) {
-                    instance = new ShHandler();
-                }
-            }
-        }
-        return instance;
+    @Test
+    public void testReadConfFiles_noConfigurationFileProvider_doNothing() throws IOException {
+        Mockito.doNothing().when(fileHandler).validateDirectory((File) Matchers.any());
+
+        fileHandler.readConfFiles(new DiffResult(), rootDirectory, isOriginal, null);
+
+        Mockito.verify(configurationFileProvider, Mockito.never()).addFilesToDiffQueue(Matchers.<DiffResult> any(), Matchers.anyString(), Matchers.anyList(), Matchers.anyBoolean());
+        Mockito.verify(configurationFileProvider, Mockito.never()).readConfigurationFiles(Matchers.<DiffResult> any(), Matchers.anyString(), Matchers.any(String[].class));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
-        return PropertyHandler.getInstance().getDiff(diffResult, lOriginalFiles, lInstalledFiles);
+    @Test
+    public void testReadConfFiles_configurationFileProvider_readAndAddFiles() throws IOException {
+        Mockito.doNothing().when(fileHandler).validateDirectory((File) Matchers.any());
+
+        fileHandler.readConfFiles(new DiffResult(), rootDirectory, isOriginal, configurationFileProvider);
+
+        Mockito.verify(configurationFileProvider, Mockito.times(1)).addFilesToDiffQueue(Matchers.<DiffResult> any(), Matchers.anyString(), Matchers.anyList(), Matchers.anyBoolean());
+        Mockito.verify(configurationFileProvider, Mockito.times(1)).readConfigurationFiles(Matchers.<DiffResult> any(), Matchers.anyString(), Matchers.any(String[].class));
     }
 }

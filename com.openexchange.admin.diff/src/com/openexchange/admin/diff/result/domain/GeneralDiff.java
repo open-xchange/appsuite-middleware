@@ -47,49 +47,15 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type.impl;
-
-import java.util.Map;
-import com.openexchange.admin.diff.ConfigDiff;
-import com.openexchange.admin.diff.result.DiffResult;
-import com.openexchange.admin.diff.result.output.DiffMatchPatchWriter;
-import com.openexchange.admin.diff.result.output.DiffWriter;
-
+package com.openexchange.admin.diff.result.domain;
 
 
 /**
- * Handler for configuration files with no file extension
+ * {@link GeneralDiff}
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class NoExtensionHandler extends AbstractFileHandler {
+public class GeneralDiff {
 
-    private volatile static NoExtensionHandler instance;
-
-    private NoExtensionHandler() {
-        ConfigDiff.register(this);
-    }
-
-    public static synchronized NoExtensionHandler getInstance() {
-        if (instance == null) {
-            synchronized (NoExtensionHandler.class) {
-                if (instance == null) {
-                    instance = new NoExtensionHandler();
-                }
-            }
-        }
-        return instance;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
-        DiffWriter diffMatchPatchWriter = new DiffMatchPatchWriter();
-        diffMatchPatchWriter.addOutputToDiffResult(diffResult, lOriginalFiles, lInstalledFiles);
-
-        return diffResult;
-    }
 }

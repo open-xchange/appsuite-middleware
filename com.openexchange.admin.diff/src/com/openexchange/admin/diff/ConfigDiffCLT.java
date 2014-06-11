@@ -51,7 +51,6 @@ package com.openexchange.admin.diff;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -70,17 +69,8 @@ import com.openexchange.admin.diff.result.DiffResult;
 @SuppressWarnings("static-access")
 public class ConfigDiffCLT {
 
-    /**
-     * Default folder for original configuration files
-     */
-    private static String originalFolder = "/opt/open-xchange/bundles";
-
-    /**
-     * Default folder for installed configuration files
-     */
-    private static String installationFolder = "/opt/open-xchange/etc";
-
     private static final Options options = new Options();
+
     static {
         options.addOption(OptionBuilder.withLongOpt("original").hasArgs(1).withDescription("The original configuration folder provided by OX; '/opt/open-xchange/bundles/' if nothing provided.").isRequired(false).create("o"));
         options.addOption(OptionBuilder.withLongOpt("installed").hasArgs(1).withDescription("The installed configuration folder; '/opt/open-xchange/etc/' if nothing provided.").isRequired(false).create("i"));
@@ -107,13 +97,17 @@ public class ConfigDiffCLT {
             } else {
                 file = null;
             }
+
+            String originalFolder = null;
             if (cl.hasOption("o")) {
-                ConfigDiffCLT.originalFolder = cl.getOptionValue("o");
+                originalFolder = cl.getOptionValue("o");
             }
+
+            String installationFolder = null;
             if (cl.hasOption("i")) {
-                ConfigDiffCLT.installationFolder = cl.getOptionValue("i");
+                installationFolder = cl.getOptionValue("i");
             }
-            executeDiff(ConfigDiffCLT.originalFolder, ConfigDiffCLT.installationFolder, file);
+            executeDiff(originalFolder, installationFolder, file);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             printUsage(-1);

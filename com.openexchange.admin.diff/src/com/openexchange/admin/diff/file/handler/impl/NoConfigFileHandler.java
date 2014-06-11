@@ -47,46 +47,57 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type;
+package com.openexchange.admin.diff.file.handler.impl;
 
-import java.util.Map;
+import java.util.List;
+import com.openexchange.admin.diff.ConfigDiff;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
 import com.openexchange.admin.diff.result.DiffResult;
 
+
+
 /**
- * This interface defines all method to implement for new configurationFileHandler that deals with the given configuration file formats.
- * Each handler is responsible for one file format.
+ * Handler for files in configuration folders that are not defined as configuration files (per file extension)
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public interface IConfFileHandler {
+public class NoConfigFileHandler extends AbstractFileHandler {
+
+    private volatile static NoConfigFileHandler instance;
+
+    private NoConfigFileHandler() {
+        ConfigDiff.register(this);
+    }
+
+    public static synchronized NoConfigFileHandler getInstance() {
+        if (instance == null) {
+            synchronized (NoConfigFileHandler.class) {
+                if (instance == null) {
+                    instance = new NoConfigFileHandler();
+                }
+            }
+        }
+        return instance;
+    }
 
     /**
-     * This method is used from internal files
-     * 
-     * @param diffResult - The {@link DiffResult} the processing results of the current handler will be attached.
-     * @return The {@link DiffResult} with all results of the previously given and the results of this handler.
+     * {@inheritDoc}
      */
-    public DiffResult getDiff(DiffResult diffResult);
+    @Override
+    public DiffResult getDiff(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
+        diffResult.getNonConfigurationFiles().addAll(lInstalledFiles);
+
+        return diffResult;
+    }
 
     /**
-     * This method might be used from different handlers<br>
-     * <br>
-     * Hint: only use provided objects for processing within this method and do not work on singleton members!
-     * 
-     * @param diffResult - the object that will be aerated with the results
-     * @param lOriginalFiles - original files to diff
-     * @param lInstalledFiles - installed files to diff
-     * @return
+     * {@inheritDoc<br>
+     * <br> 
+     * Files indicated as non-configuration-files do not need to get compared.
      */
-    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles);
-
-    /**
-     * Add a file for processing to get a diff result.
-     * 
-     * @param fileName - File name of the file to get processed
-     * @param content - Content of the file that should be processed
-     * @param isOriginal - boolean if this file is a original file or it it is installed on the system
-     */
-    public void addFile(String fileName, String content, boolean isOriginal);
+    @Override
+    protected void getFileDiffs(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
+        diffResult.getNonConfigurationFiles().addAll(lInstalledFiles);
+    }
 }

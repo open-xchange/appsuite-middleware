@@ -47,26 +47,51 @@
  *
  */
 
-package com.openexchange.admin.diff.util;
+package com.openexchange.admin.diff.file.handler.impl;
 
-import java.util.Comparator;
+import java.util.List;
+import com.openexchange.admin.diff.ConfigDiff;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
+import com.openexchange.admin.diff.result.DiffResult;
+import com.openexchange.admin.diff.result.writer.DiffMatchPatchWriter;
+import com.openexchange.admin.diff.result.writer.DiffWriter;
+
 
 
 /**
- * Sorts given Strings independently from given cases.
+ * Handler for .conf and .cnf configuration files
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class CaseInsensitiveSorter implements Comparator<String> {
+public class ConfHandler extends AbstractFileHandler {
+
+    private volatile static ConfHandler instance;
+
+    private ConfHandler() {
+        ConfigDiff.register(this);
+    }
+
+    public static synchronized ConfHandler getInstance() {
+        if (instance == null) {
+            synchronized (ConfHandler.class) {
+                if (instance == null) {
+                    instance = new ConfHandler();
+                }
+            }
+        }
+        return instance;
+    }
 
     /**
+     * 
      * {@inheritDoc}
      */
     @Override
-    public final int compare(String a, String b) {
-        String a1 = a.toLowerCase();
-        String b1 = b.toLowerCase();
-        return a1.compareTo(b1);
+    public DiffResult getDiff(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
+        DiffWriter diffMatchPatchWriter = new DiffMatchPatchWriter();
+        diffMatchPatchWriter.addOutputToDiffResult(diffResult, lOriginalFiles, lInstalledFiles);
+
+        return diffResult;
     }
 }

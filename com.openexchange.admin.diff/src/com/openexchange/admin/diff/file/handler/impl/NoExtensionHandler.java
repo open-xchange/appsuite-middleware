@@ -47,81 +47,50 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type;
+package com.openexchange.admin.diff.file.handler.impl;
+
+import java.util.List;
+import com.openexchange.admin.diff.ConfigDiff;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
+import com.openexchange.admin.diff.result.DiffResult;
+import com.openexchange.admin.diff.result.writer.DiffMatchPatchWriter;
+import com.openexchange.admin.diff.result.writer.DiffWriter;
+
+
 
 /**
- * Defines all configuration files that are handled from the configuration diff tool.
+ * Handler for configuration files with no file extension
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public enum ConfigurationFileTypes {
+public class NoExtensionHandler extends AbstractFileHandler {
 
-    PROPERTY("properties"),
+    private volatile static NoExtensionHandler instance;
 
-    IN("in"),
-
-    YAML("yaml"),
-
-    YML("yml"),
-
-    CONF("conf"),
-
-    CNF("cnf"),
-
-    CCF("ccf"),
-
-    XML("xml"),
-
-    SH("sh"),
-
-    PERFMAP("perfMap"),
-
-    TYPES("types"),
-
-    NO_EXTENSION(""),
-
-    ;
-
-    /**
-     * Array with all configuration files that can be diffed.
-     */
-    public static String[] CONFIGURATION_FILE_TYPE = new String[ConfigurationFileTypes.values().length];
-    static {
-        for (int i = 0; i < ConfigurationFileTypes.values().length; i++) {
-            CONFIGURATION_FILE_TYPE[i] = ConfigurationFileTypes.values()[i].fileExtension;
-        }
+    private NoExtensionHandler() {
+        ConfigDiff.register(this);
     }
 
-    /**
-     * Array with all configuration files that can be diffed with dot.
-     */
-    public static String[] CONFIGURATION_FILE_TYPE_WITH_DOT = new String[ConfigurationFileTypes.values().length];
-    static {
-        for (int i = 0; i < ConfigurationFileTypes.values().length; i++) {
-            String fileExtension = ConfigurationFileTypes.values()[i].fileExtension;
-            if (!fileExtension.equalsIgnoreCase("")) {
-                fileExtension = "." + fileExtension;
+    public static synchronized NoExtensionHandler getInstance() {
+        if (instance == null) {
+            synchronized (NoExtensionHandler.class) {
+                if (instance == null) {
+                    instance = new NoExtensionHandler();
+                }
             }
-            CONFIGURATION_FILE_TYPE_WITH_DOT[i] = fileExtension;
         }
+        return instance;
     }
 
     /**
-     * The extension of the file
+     * {@inheritDoc}
      */
-    private final String fileExtension;
+    @Override
+    public DiffResult getDiff(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
+        DiffWriter diffMatchPatchWriter = new DiffMatchPatchWriter();
+        diffMatchPatchWriter.addOutputToDiffResult(diffResult, lOriginalFiles, lInstalledFiles);
 
-    /**
-     * Initializes a new {@link ConfigurationFileTypes}.
-     * 
-     * @param fileExtension
-     */
-    private ConfigurationFileTypes(String fileExtension) {
-        this.fileExtension = fileExtension;
-    }
-
-    public final String getFileExtension() {
-        return fileExtension;
+        return diffResult;
     }
 }

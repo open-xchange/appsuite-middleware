@@ -57,8 +57,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import com.openexchange.admin.diff.file.type.ConfFileHandler;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
+import com.openexchange.admin.diff.file.handler.ConfFileHandler;
+import com.openexchange.admin.diff.file.provider.util.FileProviderUtil;
 import com.openexchange.admin.diff.result.DiffResult;
 
 
@@ -66,7 +69,7 @@ import com.openexchange.admin.diff.result.DiffResult;
  * {@link RecursiveFileProvider}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
 public class RecursiveFileProvider implements IConfigurationFileProvider {
 
@@ -88,7 +91,7 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
      * {@inheritDoc}
      */
     @Override
-    public void addFilesToDiffQueue(DiffResult diffResult, List<File> filesToAdd, boolean isOriginal) {
+    public void addFilesToDiffQueue(DiffResult diffResult, String rootDirectory, List<File> filesToAdd, boolean isOriginal) {
         if (filesToAdd == null) {
             return;
         }
@@ -97,7 +100,9 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
             String fileContent;
             try {
                 fileContent = IOUtils.toString(new FileReader(currentFile));
-                ConfFileHandler.addConfigurationFile(currentFile.getName(), fileContent, isOriginal);
+
+                ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), FilenameUtils.getExtension(currentFile.getAbsolutePath()), rootDirectory, FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory)), fileContent, isOriginal);
+                ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
             } catch (FileNotFoundException e) {
                 diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n");
             } catch (IOException e) {

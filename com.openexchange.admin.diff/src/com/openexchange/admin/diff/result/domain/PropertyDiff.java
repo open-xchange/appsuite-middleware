@@ -47,81 +47,71 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type;
+package com.openexchange.admin.diff.result.domain;
+
 
 /**
- * Defines all configuration files that are handled from the configuration diff tool.
- * 
+ * {@link PropertyDiff}
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
-public enum ConfigurationFileTypes {
+public class PropertyDiff {
 
-    PROPERTY("properties"),
+    private final String fileName;
 
-    IN("in"),
+    private final String propertyName;
 
-    YAML("yaml"),
-
-    YML("yml"),
-
-    CONF("conf"),
-
-    CNF("cnf"),
-
-    CCF("ccf"),
-
-    XML("xml"),
-
-    SH("sh"),
-
-    PERFMAP("perfMap"),
-
-    TYPES("types"),
-
-    NO_EXTENSION(""),
-
-    ;
+    private final String propertyValue;
 
     /**
-     * Array with all configuration files that can be diffed.
-     */
-    public static String[] CONFIGURATION_FILE_TYPE = new String[ConfigurationFileTypes.values().length];
-    static {
-        for (int i = 0; i < ConfigurationFileTypes.values().length; i++) {
-            CONFIGURATION_FILE_TYPE[i] = ConfigurationFileTypes.values()[i].fileExtension;
-        }
-    }
-
-    /**
-     * Array with all configuration files that can be diffed with dot.
-     */
-    public static String[] CONFIGURATION_FILE_TYPE_WITH_DOT = new String[ConfigurationFileTypes.values().length];
-    static {
-        for (int i = 0; i < ConfigurationFileTypes.values().length; i++) {
-            String fileExtension = ConfigurationFileTypes.values()[i].fileExtension;
-            if (!fileExtension.equalsIgnoreCase("")) {
-                fileExtension = "." + fileExtension;
-            }
-            CONFIGURATION_FILE_TYPE_WITH_DOT[i] = fileExtension;
-        }
-    }
-
-    /**
-     * The extension of the file
-     */
-    private final String fileExtension;
-
-    /**
-     * Initializes a new {@link ConfigurationFileTypes}.
+     * Initializes a new {@link PropertyDiff}.
      * 
-     * @param fileExtension
+     * @param fileName
+     * @param propertyName
+     * @param propertyValue
      */
-    private ConfigurationFileTypes(String fileExtension) {
-        this.fileExtension = fileExtension;
+    public PropertyDiff(String fileName, String propertyName, String propertyValue) {
+        this.fileName = fileName;
+        this.propertyName = propertyName;
+        this.propertyValue = propertyValue;
     }
 
-    public final String getFileExtension() {
-        return fileExtension;
+    /**
+     * Gets the fileName
+     * 
+     * @return The fileName
+     */
+    public String getFileName() {
+        return fileName;
+    }
+
+    /**
+     * Gets the propertyName
+     * 
+     * @return The propertyName
+     */
+    protected String getPropertyName() {
+        return propertyName;
+    }
+
+    /**
+     * Gets the propertyValue
+     * 
+     * @return The propertyValue
+     */
+    protected String getPropertyValue() {
+        return propertyValue;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        if (this.propertyValue == null) {
+            return this.fileName + ": " + this.propertyName + "\n";
+        }
+        return this.fileName + ": " + this.propertyName + "=" + this.propertyValue + "\n";
     }
 }

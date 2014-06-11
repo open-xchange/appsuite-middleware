@@ -47,34 +47,36 @@
  *
  */
 
-package com.openexchange.admin.diff.file.type.impl;
+package com.openexchange.admin.diff.file.handler.impl;
 
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 import com.openexchange.admin.diff.ConfigDiff;
+import com.openexchange.admin.diff.file.domain.ConfigurationFile;
 import com.openexchange.admin.diff.result.DiffResult;
+import com.openexchange.admin.diff.result.writer.DiffMatchPatchWriter;
+import com.openexchange.admin.diff.result.writer.DiffWriter;
 
 
 
 /**
- * Handler for files in configuration folders that are not defined as configuration files (per file extension)
+ * Handler for .perfmap configuration files
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @since 7.6.1
  */
-public class NoConfigFileHandler extends AbstractFileHandler {
+public class PerfmapHandler extends AbstractFileHandler {
 
-    private volatile static NoConfigFileHandler instance;
+    private volatile static PerfmapHandler instance;
 
-    private NoConfigFileHandler() {
+    private PerfmapHandler() {
         ConfigDiff.register(this);
     }
 
-    public static synchronized NoConfigFileHandler getInstance() {
+    public static synchronized PerfmapHandler getInstance() {
         if (instance == null) {
-            synchronized (NoConfigFileHandler.class) {
+            synchronized (PerfmapHandler.class) {
                 if (instance == null) {
-                    instance = new NoConfigFileHandler();
+                    instance = new PerfmapHandler();
                 }
             }
         }
@@ -85,10 +87,10 @@ public class NoConfigFileHandler extends AbstractFileHandler {
      * {@inheritDoc}
      */
     @Override
-    public DiffResult getDiff(DiffResult diffResult, Map<String, String> lOriginalFiles, Map<String, String> lInstalledFiles) {
-        for (Entry<String, String> installedNonconfigurationFile : lInstalledFiles.entrySet()) {
-            diffResult.getNonConfigurationFiles().add(installedNonconfigurationFile.getKey());
-        }
+    public DiffResult getDiff(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles) {
+        DiffWriter diffMatchPatchWriter = new DiffMatchPatchWriter();
+        diffMatchPatchWriter.addOutputToDiffResult(diffResult, lOriginalFiles, lInstalledFiles);
+
         return diffResult;
     }
 }
