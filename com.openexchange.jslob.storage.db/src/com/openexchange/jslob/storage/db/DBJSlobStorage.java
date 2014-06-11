@@ -103,6 +103,8 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
  */
 public final class DBJSlobStorage implements JSlobStorage {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBJSlobStorage.class);
+
     private static final String ID = "io.ox.wd.jslob.storage.db";
 
     private final ServiceLookup services;
@@ -471,11 +473,8 @@ public final class DBJSlobStorage implements JSlobStorage {
                 try {
                     map.put(sId, new DefaultJSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(new JSlobId(serviceId, sId, user, contextId)));
                 } catch (final JSONException e) {
-                    final Throwable cause = e.getCause();
-                    if (null == cause || !"com.fasterxml.jackson.core.JsonParseException".equals(cause.getClass().getName())) {
-                        throw e;
-                    }
                     // JSON garbage contained in BLOB - provide an empty JSlob
+                    LOG.warn("Error deserializing stored JSlob data - falling back to empty JSlob", e);
                     if (null != failedOnes) {
                         failedOnes.add(sId);
                     }
@@ -493,8 +492,6 @@ public final class DBJSlobStorage implements JSlobStorage {
             return list;
         } catch (final SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final JSONException e) {
-            throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
@@ -978,13 +975,10 @@ public final class DBJSlobStorage implements JSlobStorage {
             if (asyncJsonWrite) {
                 stmt.setBinaryStream(pos, getStreamFrom(jObject));
             } else {
-                if (null == jObject || jObject.isEmpty()) {
-                    stmt.setBinaryStream(pos, Streams.EMPTY_INPUT_STREAM);
-                } else {
-                    final ByteArrayOutputStream buf = Streams.newByteArrayOutputStream(65536);
-                    jObject.write(new AsciiWriter(buf), true);
-                    stmt.setBinaryStream(pos, Streams.asInputStream(buf));
-                }
+                JSONObject json = null != jObject ? jObject : new JSONObject(0);
+                final ByteArrayOutputStream buf = Streams.newByteArrayOutputStream(65536);
+                json.write(new AsciiWriter(buf), true);
+                stmt.setBinaryStream(pos, Streams.asInputStream(buf));
             }
         } catch (final SQLException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -994,9 +988,7 @@ public final class DBJSlobStorage implements JSlobStorage {
     }
 
     private InputStream getStreamFrom(final JSONObject jObject) throws OXException {
-        if (null == jObject || jObject.isEmpty()) {
-            return Streams.EMPTY_INPUT_STREAM;
-        }
+        final JSONObject json = null != jObject ? jObject : new JSONObject(0);
         try {
             final PipedOutputStream pos = new PipedOutputStream();
             final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 32768);
@@ -1006,7 +998,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                 @Override
                 public void run() {
                     try {
-                        jObject.write(new AsciiWriter(pos), true);
+                        json.write(new AsciiWriter(pos), true);
                     } catch (final Exception e) {
                         pin.setException(e);
                     } finally {
