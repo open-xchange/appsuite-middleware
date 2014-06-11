@@ -1593,6 +1593,20 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Gets the <i>References</i> in first order, falls back to <i>In-Reply-To</i> value if absent
+     *
+     * @return Either the <i>References</i>/<i>In-Reply-To</i> value or <code>null</code> if none available
+     */
+    public String[] getReferencesOrInReplyTo() {
+        String[] references = getReferences();
+        if (null != references) {
+            return references;
+        }
+        String inReplyTo = getInReplyTo();
+        return null == inReplyTo ? null : new String[] { inReplyTo };
+    }
+
+    /**
      * @return <code>true</code> if <i>References</i> is set; otherwise <code>false</code>
      */
     public boolean containsReferences() {
