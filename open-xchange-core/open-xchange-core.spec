@@ -985,7 +985,6 @@ ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" 
 # SoftwareChange_Request-2037
 PFILE=/opt/open-xchange/etc/sessiond.properties
 ox_add_property com.openexchange.sessiond.remoteParameterNames "" $PFILE
-ox_comment com.openexchange.sessiond.remoteParameterNames= add $PFILE
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
