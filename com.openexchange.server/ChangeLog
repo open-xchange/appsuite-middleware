@@ -5,6 +5,7 @@
 * 2014-06-11 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33038: Check existence of default folder within same transaction 
+ - Fix for bug 33066: Fall back to an empty JSON object on encountered exceptions during deserialization  
 
 * 2014-06-10 - marc.arens@open-xchange.com
 
