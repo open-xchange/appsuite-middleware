@@ -1128,7 +1128,9 @@ public final class MimeReply {
                 }
                 found = true;
             } else if (partContentType.startsWith(MULTIPART)) {
-                found |= gatherAllTextContents(part, partContentType, accountId, pc);
+                if (!found || !multipartPart.getContentType().startsWith("multipart/alternative")) {
+                    found |= gatherAllTextContents(part, partContentType, accountId, pc);
+                }
             }
         }
         return found;
