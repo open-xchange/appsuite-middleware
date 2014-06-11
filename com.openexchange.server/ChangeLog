@@ -1,3 +1,7 @@
+* 2014-06-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33061: Ignore alternative HTML part nested inside multipart/related part if text-only is user's preference
+
 * 2014-06-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 32974: Cancel running IMAP-IDLE listener in case context has been deleted in the meantime +
