@@ -34,7 +34,7 @@ import com.openexchange.admin.diff.result.DiffResult;
  * @since 7.6.1
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ FileUtils.class })
+@PrepareForTest({ FileUtils.class, ConfFileHandler.class })
 public class JarFileProviderTest {
 
     @InjectMocks
@@ -48,15 +48,18 @@ public class JarFileProviderTest {
 
     List<File> configurationFiles = new ArrayList<File>();
 
-    private final String rootFolder = "/opt/open-xchange/etc";
+    private File rootFolder;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(FileUtils.class);
+        PowerMockito.mockStatic(ConfFileHandler.class);
 
         configurationFiles.add(configurationFile);
+
+        rootFolder = Mockito.mock(File.class);
     }
 
     @Test

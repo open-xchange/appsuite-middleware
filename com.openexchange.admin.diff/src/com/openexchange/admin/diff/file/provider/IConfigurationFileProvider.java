@@ -69,7 +69,7 @@ public interface IConfigurationFileProvider {
      * @param fileExtension - the file extensions to look at
      * @return List with the configuration files read or an empty List if no file was found. Never returns null!
      */
-    public List<File> readConfigurationFiles(DiffResult diffResult, String rootFolder, String[] fileExtension);
+    public List<File> readConfigurationFiles(DiffResult diffResult, File rootFolder, String[] fileExtension);
 
     /**
      * Adds the given files to the diff queue
@@ -79,6 +79,6 @@ public interface IConfigurationFileProvider {
      * @param filesToAdd - the files to add to the queue
      * @param isOriginal - flag if the files to add are from original installation folder or if they are currently installed
      */
-    public void addFilesToDiffQueue(DiffResult diffResult, String rootFolder, List<File> filesToAdd, boolean isOriginal);
+    public void addFilesToDiffQueue(DiffResult diffResult, File rootFolder, List<File> filesToAdd, boolean isOriginal);
 
 }

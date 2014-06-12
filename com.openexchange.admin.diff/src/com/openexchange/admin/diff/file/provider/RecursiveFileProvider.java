@@ -77,9 +77,9 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
      * {@inheritDoc}
      */
     @Override
-    public List<File> readConfigurationFiles(DiffResult diffResult, String rootFolder, String[] fileExtension) {
+    public List<File> readConfigurationFiles(DiffResult diffResult, File rootFolder, String[] fileExtension) {
         // read all file types and not those in ConfigurationFileTypes.CONFIGURATION_FILE_TYPE to get unexpected files
-        Collection<File> listFiles = FileUtils.listFiles(new File(rootFolder), null, true);
+        Collection<File> listFiles = FileUtils.listFiles(rootFolder, null, true);
 
         if (listFiles != null) {
             return new ArrayList<File>(listFiles);
@@ -91,7 +91,7 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
      * {@inheritDoc}
      */
     @Override
-    public void addFilesToDiffQueue(DiffResult diffResult, String rootDirectory, List<File> filesToAdd, boolean isOriginal) {
+    public void addFilesToDiffQueue(DiffResult diffResult, File rootDirectory, List<File> filesToAdd, boolean isOriginal) {
         if (filesToAdd == null) {
             return;
         }
@@ -101,7 +101,7 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
             try {
                 fileContent = IOUtils.toString(new FileReader(currentFile));
 
-                ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), FilenameUtils.getExtension(currentFile.getAbsolutePath()), rootDirectory, FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory)), fileContent, isOriginal);
+                ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), FilenameUtils.getExtension(currentFile.getAbsolutePath()), rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory.getAbsolutePath())), fileContent, isOriginal);
                 ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
             } catch (FileNotFoundException e) {
                 diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n");

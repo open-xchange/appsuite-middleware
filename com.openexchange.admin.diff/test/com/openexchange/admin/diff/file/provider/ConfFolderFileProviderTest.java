@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -46,7 +45,7 @@ public class ConfFolderFileProviderTest {
 
     List<File> configurationFiles = new ArrayList<File>();
 
-    private final String rootFolder = "/opt/open-xchange/etc";
+    private File rootFolder;
 
     @Before
     public void setUp() throws Exception {
@@ -56,6 +55,9 @@ public class ConfFolderFileProviderTest {
         PowerMockito.mockStatic(ConfFileHandler.class);
 
         configurationFiles.add(configurationFile);
+
+        rootFolder = Mockito.mock(File.class);
+        Mockito.when(rootFolder.listFiles()).thenReturn(new File[] {});
     }
 
     @Test
@@ -95,28 +97,6 @@ public class ConfFolderFileProviderTest {
         fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, files, true);
 
         PowerMockito.verifyStatic(Mockito.never());
-        ConfFileHandler.addConfigurationFile((DiffResult) Matchers.any(), (ConfigurationFile) Matchers.any());
-    }
-
-    @Test
-    public void testAddFilesToDiffQueue_filesInConfFolder_addedToQueue() throws IOException {
-        File newFolder = folder.newFolder("/conf/");
-
-        File newFile = folder.newFile("file1.properties");
-        FileUtils.writeStringToFile(newFile, RandomStringUtils.randomAlphanumeric(100));
-        FileUtils.moveFileToDirectory(newFile, newFolder, true);
-
-        File newFile2 = folder.newFile("file2.properties");
-        FileUtils.writeStringToFile(newFile2, RandomStringUtils.randomAlphanumeric(100));
-        FileUtils.moveFileToDirectory(newFile2, newFolder, true);
-
-        List<File> files = new ArrayList<File>();
-        files.add(newFile);
-        files.add(newFile2);
-
-        fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, files, true);
-
-        PowerMockito.verifyStatic(Mockito.times(2));
         ConfFileHandler.addConfigurationFile((DiffResult) Matchers.any(), (ConfigurationFile) Matchers.any());
     }
 }

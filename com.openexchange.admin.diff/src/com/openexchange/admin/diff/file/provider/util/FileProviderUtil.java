@@ -49,16 +49,28 @@
 
 package com.openexchange.admin.diff.file.provider.util;
 
+import com.openexchange.admin.diff.file.provider.IConfigurationFileProvider;
+
 
 /**
- * {@link FileProviderUtil}
- *
+ * Util methods that can be used from the {@link IConfigurationFileProvider} implementations
+ * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
 public class FileProviderUtil {
 
+    /**
+     * Removes the root folder from the given String
+     * 
+     * @param fileWithFullPath - String which includes the root folder
+     * @param rootFolder - root folder that will be removed
+     * @return String without the root folder or the given String in case rootFolder param is null
+     */
     public static String removeRootFolder(String fileWithFullPath, String rootFolder) {
+        if (rootFolder == null) {
+            return fileWithFullPath;
+        }
         return fileWithFullPath.substring(rootFolder.length() - 1);
     }
 

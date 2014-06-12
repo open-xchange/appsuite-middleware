@@ -12,6 +12,13 @@ import com.openexchange.admin.diff.file.domain.ConfigurationFile;
  */
 public class ConfigurationFileSearch {
 
+    /**
+     * Search within a list of ConfigurationFiles to find the file with the given file name
+     * 
+     * @param lInstalledFiles - List to search within
+     * @param fileName - file name to search for
+     * @return List<ConfigurationFile> with the search results
+     */
     public List<ConfigurationFile> search(List<ConfigurationFile> lInstalledFiles, final String fileName) {
         return searchIn(lInstalledFiles, new Matcher<ConfigurationFile>() {
 

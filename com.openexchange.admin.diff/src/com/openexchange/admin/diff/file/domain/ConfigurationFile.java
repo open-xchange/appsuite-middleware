@@ -49,11 +49,9 @@
 
 package com.openexchange.admin.diff.file.domain;
 
-
-
 /**
- * {@link ConfigurationFile}
- *
+ * Domain object that reflects a file marked as configuration file
+ * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
@@ -71,6 +69,16 @@ public class ConfigurationFile {
 
     private final boolean isOriginal;
 
+    /**
+     * Initializes a new {@link ConfigurationFile}.
+     * 
+     * @param name
+     * @param extension
+     * @param rootDirectory
+     * @param pathBelowRootDirectory
+     * @param content
+     * @param isOriginal
+     */
     public ConfigurationFile(final String name, final String extension, final String rootDirectory, final String pathBelowRootDirectory, final String content, final boolean isOriginal) {
         this.name = name;
         this.extension = extension;

@@ -78,7 +78,7 @@ public interface IConfFileHandler {
      * @param diffResult - the object that will be aerated with the results
      * @param lOriginalFiles - original files to diff
      * @param lInstalledFiles - installed files to diff
-     * @return
+     * @return The {@link DiffResult} with all results of the previously given and the results of this handler.
      */
     public DiffResult getDiff(DiffResult diffResult, List<ConfigurationFile> lOriginalFiles, List<ConfigurationFile> lInstalledFiles);
 

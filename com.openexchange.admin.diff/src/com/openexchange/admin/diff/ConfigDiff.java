@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.diff;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
@@ -104,8 +105,8 @@ public class ConfigDiff {
     public DiffResult run() {
         DiffResult diffResult = new DiffResult();
 
-        this.fileHandler.readConfFiles(diffResult, this.originalFolder, true, new JarFileProvider(), new ConfFolderFileProvider());
-        this.fileHandler.readConfFiles(diffResult, this.installationFolder, false, new RecursiveFileProvider());
+        this.fileHandler.readConfFiles(diffResult, new File(this.originalFolder), true, new JarFileProvider(), new ConfFolderFileProvider());
+        this.fileHandler.readConfFiles(diffResult, new File(this.installationFolder), false, new RecursiveFileProvider());
 
         return getDiffs(diffResult);
     }

@@ -89,8 +89,8 @@ public class JarFileProvider implements IConfigurationFileProvider {
      * @throws IOException
      */
     @Override
-    public List<File> readConfigurationFiles(DiffResult diffResult, String rootFolder, String[] fileExtension) {
-        Collection<File> listFiles = FileUtils.listFiles(new File(rootFolder), new AndFileFilter(new PrefixFileFilter("com.openexchange."), new SuffixFileFilter(".jar")), TrueFileFilter.TRUE);
+    public List<File> readConfigurationFiles(DiffResult diffResult, File rootFolder, String[] fileExtension) {
+        Collection<File> listFiles = FileUtils.listFiles(rootFolder, new AndFileFilter(new PrefixFileFilter("com.openexchange."), new SuffixFileFilter(".jar")), TrueFileFilter.TRUE);
 
         if (listFiles != null) {
             return new ArrayList<File>(listFiles);
@@ -102,7 +102,7 @@ public class JarFileProvider implements IConfigurationFileProvider {
      * {@inheritDoc}
      */
     @Override
-    public void addFilesToDiffQueue(DiffResult diffResult, String rootDirectory, List<File> filesToAdd, boolean isOriginal) {
+    public void addFilesToDiffQueue(DiffResult diffResult, File rootDirectory, List<File> filesToAdd, boolean isOriginal) {
         if (filesToAdd == null) {
             return;
         }
@@ -127,8 +127,8 @@ public class JarFileProvider implements IConfigurationFileProvider {
                             InputStream inputStream = jarFile.getInputStream(entry);
                             String fileContent = IOUtils.toString(inputStream);
 
-                            String pathWithoutRootFolder = FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath() + "!/" + entryName, rootDirectory);
-                            ConfigurationFile configurationFile = new ConfigurationFile(entryExt, FilenameUtils.getExtension(entryExt), rootDirectory, FilenameUtils.getFullPath(pathWithoutRootFolder), fileContent, isOriginal);
+                            String pathWithoutRootFolder = FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath() + "!/" + entryName, rootDirectory.getAbsolutePath());
+                            ConfigurationFile configurationFile = new ConfigurationFile(entryExt, FilenameUtils.getExtension(entryExt), rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(pathWithoutRootFolder), fileContent, isOriginal);
                             ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
                         }
                     }

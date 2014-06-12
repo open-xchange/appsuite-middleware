@@ -51,7 +51,6 @@ package com.openexchange.admin.diff.file.handler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.admin.diff.file.provider.IConfigurationFileProvider;
@@ -71,16 +70,18 @@ public class FileHandler {
      * Walk through the given rootDirectory handled by the provided IConfigurationFileProvider. The read files will also be added to diff
      * working queue.
      * 
-     * @param rootDirectory is a valid directory, which can be read.
-     * @throws IOException
+     * @param diffResult - The {@link DiffResult} the processing results of the current handler will be attached.
+     * @param rootDirectory - root directory to read from; is a valid directory, which can be read.
+     * @param isOriginal - indicates if the provided files will be from original or installed configuration.
+     * @param configurationFileProviders - providers that should be executed to gather all files.
      */
-    public void readConfFiles(DiffResult diffResult, String rootDirectory, boolean isOriginal, IConfigurationFileProvider... configurationFileProviders) {
+    public void readConfFiles(DiffResult diffResult, File rootDirectory, boolean isOriginal, IConfigurationFileProvider... configurationFileProviders) {
         if (configurationFileProviders == null) {
             return;
         }
 
         try {
-            validateDirectory(new File(rootDirectory));
+            validateDirectory(rootDirectory);
         } catch (FileNotFoundException e) {
 
             diffResult.getProcessingErrors().add("Error in validating directory " + rootDirectory + "\n" + e.getLocalizedMessage() + "\n");
@@ -97,6 +98,8 @@ public class FileHandler {
 
     /**
      * Directory is valid if it exists, does not represent a file, and can be read.
+     * 
+     * @param directory - the directory that should be validated.
      */
     protected void validateDirectory(File directory) throws FileNotFoundException {
         if (directory == null) {

@@ -31,7 +31,7 @@ import com.openexchange.admin.diff.result.DiffResult;
  * @since 7.6.1
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ FileUtils.class })
+@PrepareForTest({ FileUtils.class, ConfFileHandler.class })
 public class RecursiveFileProviderTest {
 
     @InjectMocks
@@ -45,15 +45,18 @@ public class RecursiveFileProviderTest {
 
     List<File> configurationFiles = new ArrayList<File>();
 
-    private final String rootFolder = "/opt/open-xchange/etc";
+    private File rootFolder;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(FileUtils.class);
+        PowerMockito.mockStatic(ConfFileHandler.class);
 
         configurationFiles.add(configurationFile);
+
+        rootFolder = Mockito.mock(File.class);
     }
 
     @Test
@@ -75,7 +78,7 @@ public class RecursiveFileProviderTest {
     }
 
     @Test
-    public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() throws IOException {
+    public void testAddFilesToDiffQueue_filesNull_noFileAddedToQueue() {
         fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, null, true);
 
         PowerMockito.verifyStatic(Mockito.never());
@@ -83,7 +86,7 @@ public class RecursiveFileProviderTest {
     }
 
     @Test
-    public void testAddFilesToDiffQueue_filesNotInConfFolder_noFileAddedToQueue() throws IOException {
+    public void testAddFilesToDiffQueue_filesProvided_addedToQueue() throws IOException {
         File newFile = folder.newFile("file1");
         File newFile2 = folder.newFile("file2");
         List<File> files = new ArrayList<File>();
@@ -92,7 +95,7 @@ public class RecursiveFileProviderTest {
 
         fileProvider.addFilesToDiffQueue(new DiffResult(), rootFolder, files, true);
 
-        PowerMockito.verifyStatic(Mockito.never());
+        PowerMockito.verifyStatic(Mockito.times(2));
         ConfFileHandler.addConfigurationFile((DiffResult) Matchers.any(), (ConfigurationFile) Matchers.any());
     }
 }
