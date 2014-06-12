@@ -1,3 +1,7 @@
+* 2014-06-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32962: Use a fix-size look-ahead and only adjust if boundaries reached
+
 * 2014-06-12 - tobias.friedrich@open-xchange.com
 
  - Fix for bug Bug 33000: Abstain from transactions again to prevent cluster deadlock of documents

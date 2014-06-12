@@ -124,12 +124,14 @@ public final class Conversations {
         FetchProfile fp = new FetchProfile();
         fp.add("References");
         fp.add(UIDFolder.FetchProfileItem.UID);
-        for (MailField field : fields) {
-            if (!MimeStorageUtility.isEnvelopeField(field)) {
-                MimeStorageUtility.addFetchItem(fp, field);
+        fp.add(MailMessageFetchIMAPCommand.ENVELOPE_ONLY);
+        if (null != fields) {
+            for (MailField field : fields) {
+                if (!MimeStorageUtility.isEnvelopeField(field)) {
+                    MimeStorageUtility.addFetchItem(fp, field);
+                }
             }
         }
-        fp.add(MailMessageFetchIMAPCommand.ENVELOPE_ONLY);
         return fp;
     }
 

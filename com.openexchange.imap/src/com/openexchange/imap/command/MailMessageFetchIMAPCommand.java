@@ -422,19 +422,19 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, lastHandlers, determineAttachmentByHeader);
     }
 
-    private static MailMessage handleFetchRespone(final IDMailMessage mail1, final FetchResponse fetchResponse, final String fullName, final char separator, final Set<FetchItemHandler> lastHandlers, final boolean determineAttachmentByHeader) throws MessagingException, OXException {
-        final IDMailMessage mail;
-        if (null == mail1) {
-            mail = new IDMailMessage(null, fullName);
+    private static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, final char separator, final Set<FetchItemHandler> lastHandlers, final boolean determineAttachmentByHeader) throws MessagingException, OXException {
+        final IDMailMessage m;
+        if (null == mail) {
+            m = new IDMailMessage(null, fullName);
         } else {
-            mail = mail1;
-            mail.setFolder(fullName);
+            m = mail;
+            m.setFolder(fullName);
         }
         // mail.setRecentCount(recentCount);
         if (separator != '\0') {
-            mail.setSeparator(separator);
+            m.setSeparator(separator);
         }
-        mail.setSeqnum(fetchResponse.getNumber());
+        m.setSeqnum(fetchResponse.getNumber());
         final int itemCount = fetchResponse.getItemCount();
         final Map<Class<? extends Item>, FetchItemHandler> map = MAP;
         for (int j = 0; j < itemCount; j++) {
@@ -448,22 +448,22 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     if (null != lastHandlers) {
                         lastHandlers.add(itemHandler);
                     }
-                    itemHandler.handleItem(item, mail, LOG);
+                    itemHandler.handleItem(item, m, LOG);
                 }
             } else {
                 if (null != lastHandlers) {
                     lastHandlers.add(itemHandler);
                 }
-                itemHandler.handleItem(item, mail, LOG);
+                itemHandler.handleItem(item, m, LOG);
             }
         }
         if (determineAttachmentByHeader) {
-            final String cts = mail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
+            final String cts = m.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
             if (null != cts) {
-                mail.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
+                m.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
             }
         }
-        return mail;
+        return m;
     }
 
     private static FetchItemHandler getItemHandlerByItem(final Item item) {
