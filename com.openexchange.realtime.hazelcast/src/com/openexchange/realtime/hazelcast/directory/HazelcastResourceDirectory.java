@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import com.google.common.base.Optional;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
@@ -62,10 +61,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
-import com.hazelcast.core.TransactionalMap;
-import com.hazelcast.core.TransactionalMultiMap;
 import com.hazelcast.query.Predicate;
-import com.hazelcast.transaction.TransactionContext;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentSet;
 import com.openexchange.management.ManagementAware;
@@ -73,16 +69,12 @@ import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.DefaultResourceDirectory;
 import com.openexchange.realtime.directory.Resource;
-import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.management.HazelcastResourceDirectoryMBean;
 import com.openexchange.realtime.hazelcast.management.HazelcastResourceDirectoryManagement;
-import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.util.IDMap;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link HazelcastResourceDirectory} - Keeps mappings of general {@link ID}s to full {@link ID}s and full {@link ID}s to {@link Resource}.
@@ -267,11 +259,9 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             }
         }
 
-        TransactionContext tx = newTransaction();
-        tx.beginTransaction();
         try {
-            TransactionalMultiMap<String, String> idMapping = tx.getMultiMap(id_map);
-            TransactionalMap<String, Map<String, Object>> allResources = tx.getMap(resource_map);
+            MultiMap<String, String> idMapping = getIDMapping();
+            IMap<String, Map<String, Object>> allResources = getResourceMapping();
             if (!resourceIds.isEmpty()) {
                 for (ID id : resourceIds) {
                     idMapping.remove(id.toGeneralForm().toString(), id.toString());
@@ -295,10 +285,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                     }
                 }
             }
-
-            tx.commitTransaction();
         } catch (Throwable t) {
-            tx.rollbackTransaction();
             throw new OXException(t);
         }
         LOG.debug("Removed Resource(s) from HazelcastResourceDirectory: {}", removedResources);
@@ -309,11 +296,9 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     protected IDMap<Resource> doRemove(ID id) throws OXException {
         LOG.debug("Removing ID from HazelcastResourceDirectory: {}", id);
         IDMap<Resource> removedResources = new IDMap<Resource>();
-        TransactionContext tx = newTransaction();
-        tx.beginTransaction();
         try {
-            TransactionalMultiMap<String, String> idMapping = tx.getMultiMap(id_map);
-            TransactionalMap<String, Map<String, Object>> allResources = tx.getMap(resource_map);
+            MultiMap<String, String> idMapping = getIDMapping();
+            IMap<String, Map<String, Object>> allResources = getResourceMapping();
             if (id.isGeneralForm()) {
                 Collection<String> toRemove = idMapping.remove(id.toString());
                 if (toRemove != null) {
@@ -333,9 +318,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                     removedResources.put(id, removedResource);
                 }
             }
-            tx.commitTransaction();
         } catch (Throwable t) {
-            tx.rollbackTransaction();
             throw new OXException(t);
         }
         LOG.debug("Removed Resource(s) from HazelcastResourceDirectory: {}", removedResources);
@@ -351,12 +334,9 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         HazelcastResource hazelcastResource = new HazelcastResource(resource);
 
         HazelcastResource previousResource = null;
-        TransactionContext tx = newTransaction();
-        tx.beginTransaction();
         try {
-            TransactionalMultiMap<String, String> idMapping = tx.getMultiMap(id_map);
-            TransactionalMap<String, Map<String, Object>> allResources = tx.getMap(resource_map);
-            LOG.debug(String.format("Starting transaction: %1$s for resource: %2$s", tx, hazelcastResource));
+            MultiMap<String, String> idMapping = getIDMapping();
+            IMap<String, Map<String, Object>> allResources = getResourceMapping();
             idMapping.put(id.toGeneralForm().toString(), id.toString());
 
             // don't overwrite exisiting Presence Data
@@ -386,17 +366,10 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 }
                 previousResource = HazelcastResourceWrapper.unwrap(previousResourceMap);
             }
-
-            LOG.debug(String.format("Committing transaction %1$s for resource %2$s", tx, hazelcastResource));
-            tx.commitTransaction();
         } catch (Throwable t) {
-            LOG.debug(String.format("Rolling back transaction: %1$s for resource: %2$s", tx, hazelcastResource));
-            tx.rollbackTransaction();
             throw new OXException(t);
         }
         return previousResource;
-        // return resource
-
     }
 
     @Override
@@ -469,16 +442,6 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     public IMap<String, Map<String, Object>> getResourceMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMap(resource_map);
-    }
-
-    /**
-     * Creates a new transaction.
-     *
-     * @return The newly created transaction
-     * @throws OXException If an error occurs while creating the transaction
-     */
-    protected static TransactionContext newTransaction() throws OXException {
-        return HazelcastAccess.getHazelcastInstance().newTransactionContext();
     }
 
     @Override

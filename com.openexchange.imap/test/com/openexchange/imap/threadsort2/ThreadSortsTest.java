@@ -50,8 +50,8 @@
 package com.openexchange.imap.threadsort2;
 
 import java.util.List;
-import com.openexchange.mail.dataobjects.MailMessage;
 import junit.framework.TestCase;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 
 /**
@@ -74,10 +74,10 @@ public class ThreadSortsTest extends TestCase {
 
             List<List<MailMessage>> conversations = ThreadSorts.parseConversations(s, "INBOX");
 
-            assertEquals("Unpected number of conversations", 634, conversations.size());
+            assertEquals("Unpected number of conversations", 578, conversations.size());
 
-            List<MailMessage> firstConversation = conversations.get(0);
-            assertEquals("Unpected number of conversation size", 1, firstConversation.size());
+            List<? extends MailMessage> firstConversation = conversations.get(0);
+            assertEquals("Unpected number of conversation size", 43, firstConversation.size());
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

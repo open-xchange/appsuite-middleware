@@ -1,3 +1,15 @@
+* 2014-06-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32962: Use a fix-size look-ahead and only adjust if boundaries reached
+
+* 2014-06-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug Bug 33000: Abstain from transactions again to prevent cluster deadlock of documents
+ 
+* 2014-06-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33094: Invalidate folder and subfolders in cache folder storage on "clear" operation  
+
 * 2014-06-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 33061: Ignore alternative HTML part nested inside multipart/related part if text-only is user's preference
