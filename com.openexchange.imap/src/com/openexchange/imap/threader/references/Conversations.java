@@ -428,8 +428,7 @@ public final class Conversations {
         int i = 0;
         while (iter.hasNext()) {
             foldInto(iter.next(), iter);
-            i++;
-            iter = toFold.listIterator(i);
+            iter = toFold.listIterator(++i);
         }
         return toFold;
     }
