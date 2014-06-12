@@ -144,6 +144,8 @@ public final class ThreadSorts {
 
     /**
      * Parses the IMAP THREAD response to a conversation listing.
+     * <p>
+     * The {@link MailMessage} instances only have identifier and folder full name set.
      *
      * @param threadList The IMAP THREAD response
      * @param fullName The full name of the folder associated with the IMAP THREAD response
@@ -163,21 +165,14 @@ public final class ThreadSorts {
             }
 
             int end = findMatchingBracket(threadList, off + 1);
-            end = end < 0 ? length : end;
+            end = end < 0 ? length : end + 1;
 
-            if (threadList.charAt(off + 1) == '(') {
-                List<List<MailMessage>> subconversations = parseConversations(threadList.substring(off+1, end), fullName);
-                conversations.addAll(subconversations);
-            } else {
-                String substring = threadList.substring(off, end+1);
-                System.out.println(substring);
+            // System.out.println(threadList.substring(off, end));
 
+            List<MailMessage> conversation = parseConversationList(threadList.substring(off, end), fullName);
+            conversations.add(conversation);
 
-                List<MailMessage> conversation = parseConversationList(substring, fullName);
-                conversations.add(conversation);
-            }
-
-            off = end+1;
+            off = end;
         }
 
         return conversations;
