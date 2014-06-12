@@ -240,20 +240,14 @@ public class DiffResult {
 
         sortProperties(this.additionalProperties);
         sortProperties(this.changedProperties);
-        // Map<String, PropertyDiff> sortedChangedProperties = sortByKeys(this.changedProperties);
-        // this.changedProperties = sortedChangedProperties;
-        //
-        // Map<String, String> sortedDuplicateProperties = sortByKeys(this.duplicateProperties);
-        // this.duplicateProperties = sortedDuplicateProperties;
-        //
-        // Collections.sort(this.missingFiles, new ConfigurationFileByNameSorter());
-        //
-        // Map<String, String> sortedMissingProperties = sortByKeys(this.missingProperties);
-        // this.missingProperties = sortedMissingProperties;
-        //
-        // Collections.sort(this.processingErrors, new ConfigurationFileByNameSorter());
+        sortProperties(this.missingProperties);
     }
 
+    /**
+     * Sorts the given list of property diffs based on the file names the diff occurs in
+     * 
+     * @param list with PropertyDiffs to sort
+     */
     private void sortProperties(List<PropertyDiff> properties) {
         Collections.sort(properties, new PropertyDiffByFileNameSorter());
     }
@@ -263,7 +257,7 @@ public class DiffResult {
      * 
      * @param list with ConfigurationFiles to sort
      */
-    private static void sortFilesByFileName(List<ConfigurationFile> list) {
+    private void sortFilesByFileName(List<ConfigurationFile> list) {
         Collections.sort(list, new ConfigurationFileByNameSorter());
     }
 }
