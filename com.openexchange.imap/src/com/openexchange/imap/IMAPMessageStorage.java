@@ -1573,7 +1573,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Do list append
                  */
-                final List<Conversation> conversations;
+                List<Conversation> conversations;
                 final boolean concurrent = false;
                 if (body || concurrent) {
                     Future<List<MailMessage>> messagesFromSentFolder = null;
@@ -1639,6 +1639,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 for (final Conversation conversation : conversations) {
                     list.add(conversation.getMessages(threadComparator));
                 }
+                conversations = null;
                 // Sort root elements
                 {
                     final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
