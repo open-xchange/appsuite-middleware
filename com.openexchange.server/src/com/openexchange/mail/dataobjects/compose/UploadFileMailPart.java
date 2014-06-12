@@ -191,7 +191,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         if (cachedContent != null) {
             return cachedContent;
         }
-        if (getContentType().isMimeType(MimeTypes.MIME_TEXT_ALL)) {
+        if (getContentType().startsWith(TEXT)) {
             String charset = getContentType().getCharsetParameter();
             if (charset == null) {
                 try {
