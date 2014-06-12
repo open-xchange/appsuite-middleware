@@ -1730,7 +1730,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
         final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
         if (body && mergeWithSent) {
-            throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+            throw MailExceptionCode.ILLEGAL_ARGUMENT.create();
         }
         final boolean byEnvelope = byEnvelope();
         final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
@@ -1843,7 +1843,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
         final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
         if (body && mergeWithSent) {
-            throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+            throw MailExceptionCode.ILLEGAL_ARGUMENT.create();
         }
         final boolean byEnvelope = byEnvelope();
         final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
