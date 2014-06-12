@@ -109,7 +109,7 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
                 try {
                     fileContent = IOUtils.toString(new FileReader(currentFile));
 
-                    ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), FilenameUtils.getExtension(currentFile.getAbsolutePath()), rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory.getAbsolutePath())), fileContent, isOriginal);
+                    ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory.getAbsolutePath())), fileContent, isOriginal);
                     ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
                 } catch (FileNotFoundException e) {
                     diffResult.getProcessingErrors().add("Error adding configuration file to queue" + e.getLocalizedMessage() + "\n");

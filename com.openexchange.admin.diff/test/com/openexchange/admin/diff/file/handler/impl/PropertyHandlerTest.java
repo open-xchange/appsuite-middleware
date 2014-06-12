@@ -32,11 +32,11 @@ public class PropertyHandlerTest {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
-        lOriginalFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile1=valueFile1", true));
-        lOriginalFiles.add(new ConfigurationFile("file2.properties", "properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile2=valueFile2", true));
+        lOriginalFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile1=valueFile1", true));
+        lOriginalFiles.add(new ConfigurationFile("file2.properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile2=valueFile2", true));
 
         List<ConfigurationFile> lInstalledFiles = new ArrayList<ConfigurationFile>();
-        lInstalledFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/etc", "/jar!/conf", "keyFile1=valueFile1", false));
+        lInstalledFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/etc", "/jar!/conf", "keyFile1=valueFile1", false));
 
         propertyHandler.getPropertyDiffsPerFile(diffResult, lOriginalFiles, lInstalledFiles);
 
@@ -50,10 +50,10 @@ public class PropertyHandlerTest {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
-        lOriginalFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile1=valueFile1", true));
+        lOriginalFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile1=valueFile1", true));
 
         List<ConfigurationFile> lInstalledFiles = new ArrayList<ConfigurationFile>();
-        lInstalledFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/etc", "/jar!/conf", "keyFile1=valueFile5", false));
+        lInstalledFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/etc", "/jar!/conf", "keyFile1=valueFile5", false));
 
         propertyHandler.getPropertyDiffsPerFile(diffResult, lOriginalFiles, lInstalledFiles);
 
@@ -67,10 +67,10 @@ public class PropertyHandlerTest {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
-        lOriginalFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile1=valueFile1", true));
+        lOriginalFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile1=valueFile1", true));
 
         List<ConfigurationFile> lInstalledFiles = new ArrayList<ConfigurationFile>();
-        lInstalledFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/etc", "/jar!/conf", "", false));
+        lInstalledFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/etc", "/jar!/conf", "", false));
 
         propertyHandler.getPropertyDiffsPerFile(diffResult, lOriginalFiles, lInstalledFiles);
 
@@ -84,10 +84,10 @@ public class PropertyHandlerTest {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
-        lOriginalFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile1=valueFile1", true));
+        lOriginalFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/bundles", "/jar!/conf", "keyFile1=valueFile1", true));
 
         List<ConfigurationFile> lInstalledFiles = new ArrayList<ConfigurationFile>();
-        lInstalledFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/etc", "/jar!/conf", "keyFile1=valueFile1\nkeyFile2=newProperty", false));
+        lInstalledFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/etc", "/jar!/conf", "keyFile1=valueFile1\nkeyFile2=newProperty", false));
 
         propertyHandler.getPropertyDiffsPerFile(diffResult, lOriginalFiles, lInstalledFiles);
 

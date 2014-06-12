@@ -128,7 +128,7 @@ public class JarFileProvider implements IConfigurationFileProvider {
                             String fileContent = IOUtils.toString(inputStream);
 
                             String pathWithoutRootFolder = FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath() + "!/" + entryName, rootDirectory.getAbsolutePath());
-                            ConfigurationFile configurationFile = new ConfigurationFile(entryExt, FilenameUtils.getExtension(entryExt), rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(pathWithoutRootFolder), fileContent, isOriginal);
+                            ConfigurationFile configurationFile = new ConfigurationFile(entryExt, rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(pathWithoutRootFolder), fileContent, isOriginal);
                             ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
                         }
                     }

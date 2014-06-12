@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.diff.file.domain;
 
+import org.apache.commons.io.FilenameUtils;
+
 /**
  * Domain object that reflects a file marked as configuration file
  * 
@@ -72,16 +74,15 @@ public class ConfigurationFile {
     /**
      * Initializes a new {@link ConfigurationFile}.
      * 
-     * @param name
-     * @param extension
-     * @param rootDirectory
-     * @param pathBelowRootDirectory
-     * @param content
-     * @param isOriginal
+     * @param name - the name of the file (includes possible file extensions)
+     * @param rootDirectory - root directory of the files
+     * @param pathBelowRootDirectory - location of the file below the root directory
+     * @param content - content of the file
+     * @param isOriginal - marker if the file is an original configuration file (true) or from the installation (false)
      */
-    public ConfigurationFile(final String name, final String extension, final String rootDirectory, final String pathBelowRootDirectory, final String content, final boolean isOriginal) {
+    public ConfigurationFile(final String name, final String rootDirectory, final String pathBelowRootDirectory, final String content, final boolean isOriginal) {
         this.name = name;
-        this.extension = extension;
+        this.extension = FilenameUtils.getExtension(name);
         this.rootDirectory = rootDirectory;
         this.pathBelowRootDirectory = pathBelowRootDirectory;
         this.content = content;

@@ -87,7 +87,7 @@ public class AbstractFileHandlerTest {
 
     @Test
     public void testAddFile_originalFile_fileAdded() {
-        noExtensionHandler.addFile(new DiffResult(), new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", true));
+        noExtensionHandler.addFile(new DiffResult(), new ConfigurationFile(fileName, "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", true));
 
         Assert.assertEquals(1, noExtensionHandler.originalFiles.size());
         Assert.assertEquals(0, noExtensionHandler.installedFiles.size());
@@ -95,7 +95,7 @@ public class AbstractFileHandlerTest {
 
     @Test
     public void testAddFile_installedFile_fileAdded() {
-        noExtensionHandler.addFile(new DiffResult(), new ConfigurationFile(fileName, "properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", false));
+        noExtensionHandler.addFile(new DiffResult(), new ConfigurationFile(fileName, "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", false));
 
         Assert.assertEquals(0, noExtensionHandler.originalFiles.size());
         Assert.assertEquals(1, noExtensionHandler.installedFiles.size());
@@ -103,7 +103,7 @@ public class AbstractFileHandlerTest {
 
     @Test
     public void testAddFile_fileToIgnore_fileNotAdded() {
-        noExtensionHandler.addFile(new DiffResult(), new ConfigurationFile(mpasswd, "properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", true));
+        noExtensionHandler.addFile(new DiffResult(), new ConfigurationFile(mpasswd, "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", true));
 
         Assert.assertEquals(0, noExtensionHandler.originalFiles.size());
         Assert.assertEquals(0, noExtensionHandler.installedFiles.size());
@@ -114,11 +114,11 @@ public class AbstractFileHandlerTest {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
-        lOriginalFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", true));
-        lOriginalFiles.add(new ConfigurationFile("file2.properties", "properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile2", true));
+        lOriginalFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", true));
+        lOriginalFiles.add(new ConfigurationFile("file2.properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile2", true));
 
         List<ConfigurationFile> lInstalledFiles = new ArrayList<ConfigurationFile>();
-        lInstalledFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/etc", "/jar!/conf", "valueFile1", false));
+        lInstalledFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/etc", "/jar!/conf", "valueFile1", false));
 
         noExtensionHandler.getFileDiffs(diffResult, lOriginalFiles, lInstalledFiles);
 
@@ -132,11 +132,11 @@ public class AbstractFileHandlerTest {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
-        lOriginalFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", true));
+        lOriginalFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", true));
 
         List<ConfigurationFile> lInstalledFiles = new ArrayList<ConfigurationFile>();
-        lInstalledFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/etc", "/jar!/conf", "valueFile1", false));
-        lInstalledFiles.add(new ConfigurationFile("file2.properties", "properties", "/opt/open-xchange/etc", "/jar!/conf", "valueFile2", true));
+        lInstalledFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/etc", "/jar!/conf", "valueFile1", false));
+        lInstalledFiles.add(new ConfigurationFile("file2.properties", "/opt/open-xchange/etc", "/jar!/conf", "valueFile2", true));
 
         noExtensionHandler.getFileDiffs(diffResult, lOriginalFiles, lInstalledFiles);
 
@@ -150,12 +150,12 @@ public class AbstractFileHandlerTest {
         DiffResult diffResult = new DiffResult();
 
         List<ConfigurationFile> lOriginalFiles = new ArrayList<ConfigurationFile>();
-        lOriginalFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", true));
-        lOriginalFiles.add(new ConfigurationFile("file2.properties", "properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile2", true));
+        lOriginalFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile1", true));
+        lOriginalFiles.add(new ConfigurationFile("file2.properties", "/opt/open-xchange/bundles", "/jar!/conf", "valueFile2", true));
 
         List<ConfigurationFile> lInstalledFiles = new ArrayList<ConfigurationFile>();
-        lInstalledFiles.add(new ConfigurationFile("file1.properties", "properties", "/opt/open-xchange/etc", "/jar!/conf", "valueFile1", false));
-        lInstalledFiles.add(new ConfigurationFile("file2.properties", "properties", "/opt/open-xchange/etc", "/jar!/conf", "valueFile2", true));
+        lInstalledFiles.add(new ConfigurationFile("file1.properties", "/opt/open-xchange/etc", "/jar!/conf", "valueFile1", false));
+        lInstalledFiles.add(new ConfigurationFile("file2.properties", "/opt/open-xchange/etc", "/jar!/conf", "valueFile2", true));
 
         noExtensionHandler.getFileDiffs(diffResult, lOriginalFiles, lInstalledFiles);
 
