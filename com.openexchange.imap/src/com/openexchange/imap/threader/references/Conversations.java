@@ -223,29 +223,29 @@ public final class Conversations {
      * Retrieves <b><small>UNFOLDED</small></b> conversations for specified IMAP folder.
      *
      * @param imapFolder The IMAP folder
-     * @param limit The limit
+     * @param lookAhead The limit
      * @param order The order direction that controls which chunk (oldest vs. most recent) to select
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
      * @return The unfolded conversations
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit, final OrderDirection order, final boolean byEnvelope) throws MessagingException {
-        return conversationsFor(imapFolder, limit, order, null, byEnvelope);
+    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int lookAhead, final OrderDirection order, final boolean byEnvelope) throws MessagingException {
+        return conversationsFor(imapFolder, lookAhead, order, null, byEnvelope);
     }
 
     /**
      * Retrieves <b><small>UNFOLDED</small></b> conversations for specified IMAP folder.
      *
      * @param imapFolder The IMAP folder
-     * @param limit The limit
+     * @param lookAhead The limit
      * @param order The order direction that controls which chunk (oldest vs. most recent) to select
      * @param fetchProfile The fetch profile
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
      * @return The unfolded conversations
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int limit, final OrderDirection order, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
-        final List<MailMessage> messages = messagesFor(imapFolder, limit, order, fetchProfile, byEnvelope);
+    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int lookAhead, final OrderDirection order, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
+        final List<MailMessage> messages = messagesFor(imapFolder, lookAhead, order, fetchProfile, byEnvelope);
         if (null == messages || messages.isEmpty()) {
             return Collections.<Conversation> emptyList();
         }
@@ -260,7 +260,7 @@ public final class Conversations {
      * Retrieves messages for specified IMAP folder.
      *
      * @param imapFolder The IMAP folder
-     * @param limit The limit
+     * @param lookAhead The limit
      * @param order The order direction that controls which chunk (oldest vs. most recent) to select
      * @param fetchProfile The fetch profile
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
@@ -268,7 +268,7 @@ public final class Conversations {
      * @throws MessagingException If a messaging error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<MailMessage> messagesFor(final IMAPFolder imapFolder, final int limit, final OrderDirection order, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
+    public static List<MailMessage> messagesFor(final IMAPFolder imapFolder, final int lookAhead, final OrderDirection order, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -288,13 +288,13 @@ public final class Conversations {
                     if (1 == messageCount) {
                         sb.append("1");
                     } else {
-                        if (limit < 0 || limit >= messageCount) {
+                        if (lookAhead < 0 || lookAhead >= messageCount) {
                             sb.append("1:*");
                         } else {
                             if (OrderDirection.DESC.equals(order)) {
-                                sb.append(messageCount - limit + 1).append(':').append('*');
+                                sb.append(messageCount - lookAhead + 1).append(':').append('*');
                             } else {
-                                sb.append(1).append(':').append(limit);
+                                sb.append(1).append(':').append(lookAhead);
                             }
                         }
                     }

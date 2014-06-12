@@ -1,3 +1,16 @@
+* 2014-06-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 33061: Ignore alternative HTML part nested inside multipart/related part if text-only is user's preference
+
+* 2014-06-11 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 32769: Show appointments for public folders just once.
+
+* 2014-06-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33038: Check existence of default folder within same transaction 
+ - Fix for bug 33066: Fall back to an empty JSON object on encountered exceptions during deserialization  
+
 * 2014-06-10 - marc.arens@open-xchange.com
 
  - Fix for bug 32875: Properly clean distributed state and remove sequencenumber when resending to previously offline resource

@@ -274,7 +274,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     fromToIndices = new int[] { start, end };
                 }
             }
-            final long max = req.getMax();
+            final long lookAhead = req.getMax();
             final boolean includeSent = req.optBool("includeSent", false);
             final boolean ignoreSeen = req.optBool("unseen", false);
             final boolean ignoreDeleted = !req.optBool("deleted", true);
@@ -319,11 +319,11 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                         sortCol,
                         orderDir,
                         columns,
-                        fromToIndices, max);
+                        fromToIndices, lookAhead);
                 return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             }
             List<List<MailMessage>> mails =
-                mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null, max);
+                mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null, lookAhead);
             boolean cached = false;
             int more = -1;
             if (mails instanceof PropertizedList) {
