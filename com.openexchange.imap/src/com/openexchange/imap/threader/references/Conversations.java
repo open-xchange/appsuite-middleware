@@ -66,10 +66,12 @@ import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
@@ -110,6 +112,25 @@ public final class Conversations {
         fp.add(UIDFolder.FetchProfileItem.UID);
         fp.add(MailMessageFetchIMAPCommand.ENVELOPE_ONLY);
         FETCH_PROFILE_CONVERSATION_BY_ENVELOPE = fp;
+    }
+
+    /**
+     * Gets the <i>"by envelope"</i> fetch profile including specified fields.
+     *
+     * @param fields The fields to add
+     * @return The <i>"by envelope"</i> fetch profile
+     */
+    public static FetchProfile getFetchProfileConversationByEnvelope(MailField... fields) {
+        FetchProfile fp = new FetchProfile();
+        fp.add("References");
+        fp.add(UIDFolder.FetchProfileItem.UID);
+        for (MailField field : fields) {
+            if (!MimeStorageUtility.isEnvelopeField(field)) {
+                MimeStorageUtility.addFetchItem(fp, field);
+            }
+        }
+        fp.add(MailMessageFetchIMAPCommand.ENVELOPE_ONLY);
+        return fp;
     }
 
     /**
@@ -302,6 +323,7 @@ public final class Conversations {
                     sb.append(" (").append(getFetchCommand(protocol.isREV1(), fp, false)).append(')');
                     command = sb.toString();
                     sb = null;
+                    // Execute command
                     final long start = System.currentTimeMillis();
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
@@ -426,19 +448,6 @@ public final class Conversations {
                 conversation.join(other);
             }
         }
-    }
-
-    /** Checks for an empty string */
-    static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
 }
