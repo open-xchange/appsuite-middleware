@@ -721,24 +721,6 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
-    public void clearFolder1(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
-        final Lock lock = readLockFor(treeId, storageParameters);
-        acquire(lock);
-        try {
-            final Session session = storageParameters.getSession();
-            /*
-             * Perform clear operation via non-cache storage
-             */
-            if (null == session) {
-                new ClearPerformer(storageParameters.getUser(), storageParameters.getContext(), registry).doClear(treeId, folderId);
-            } else {
-                new ClearPerformer(ServerSessionAdapter.valueOf(session), registry).doClear(treeId, folderId);
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
     @Override
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         final Lock lock = writeLockFor(treeId, storageParameters);
