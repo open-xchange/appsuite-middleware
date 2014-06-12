@@ -71,7 +71,7 @@ public class FileProviderUtil {
         if (rootFolder == null) {
             return fileWithFullPath;
         }
-        return fileWithFullPath.substring(rootFolder.length() - 1);
+        return fileWithFullPath.substring(rootFolder.length());
     }
 
 }

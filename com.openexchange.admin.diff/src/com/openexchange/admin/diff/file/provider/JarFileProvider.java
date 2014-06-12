@@ -123,7 +123,7 @@ public class JarFileProvider implements IConfigurationFileProvider {
                     if (slashIdx > 0) {
                         final String entryExt = entryName.substring(slashIdx + 1);
 
-                        if (!"".equalsIgnoreCase(entryExt) && FilenameUtils.isExtension(entryExt, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE)) {
+                        if (!"".equalsIgnoreCase(entryExt) && FilenameUtils.isExtension(entryExt, ConfigurationFileTypes.CONFIGURATION_FILE_TYPE) && entryName.contains("conf/")) {
                             InputStream inputStream = jarFile.getInputStream(entry);
                             String fileContent = IOUtils.toString(inputStream);
 
