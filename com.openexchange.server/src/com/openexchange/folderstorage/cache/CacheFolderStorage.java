@@ -723,17 +723,68 @@ public final class CacheFolderStorage implements FolderStorage {
 
     @Override
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
-        final Lock lock = readLockFor(treeId, storageParameters);
+        final Lock lock = writeLockFor(treeId, storageParameters);
         acquire(lock);
         try {
+            final boolean cacheable;
+            final boolean global;
+            final int contextId = storageParameters.getContextId();
+            final int userId = storageParameters.getUserId();
             final Session session = storageParameters.getSession();
+            final String sContextId = Integer.toString(contextId);
+            final String[] subfolderIDs;
+            {
+                final Folder clearMe = getFolder(treeId, folderId, storageParameters);
+                /*
+                 * Load all subfolders
+                 */
+                subfolderIDs = loadAllSubfolders(treeId, clearMe, false, storageParameters);
+                {
+                    final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
+                    folderMapManagement.dropFor(folderId, treeId, userId, contextId, session);
+                    folderMapManagement.dropFor(folderId, realTreeId, userId, contextId, session);
+                    folderMapManagement.dropFor(clearMe.getParentID(), treeId, userId, contextId, session);
+                    folderMapManagement.dropFor(clearMe.getParentID(), realTreeId, userId, contextId, session);
+                }
+                cacheable = clearMe.isCacheable();
+                global = clearMe.isGlobalID();
+            }
+            if (cacheable) {
+                /*
+                 * Delete from cache
+                 */
+                if (global) {
+                    globalCache.removeFromGroup(newCacheKey(folderId, treeId), sContextId);
+                } else {
+                    FolderMapManagement.getInstance().dropFor(folderId, treeId, userId, contextId, session);
+                }
+            }
             /*
-             * Perform clear operation via non-cache storage
+             * Drop subfolders from cache
+             */
+            {
+                for (final String subfolderId : subfolderIDs) {
+                    removeSingleFromCache(subfolderId, treeId, userId, contextId, true, session);
+                }
+            }
+            /*
+             * Perform clear
              */
             if (null == session) {
                 new ClearPerformer(storageParameters.getUser(), storageParameters.getContext(), registry).doClear(treeId, folderId);
             } else {
                 new ClearPerformer(ServerSessionAdapter.valueOf(session), registry).doClear(treeId, folderId);
+            }
+            /*
+             * Refresh
+             */
+            try {
+                final Folder clearedFolder = loadFolder(realTreeId, folderId, StorageType.WORKING, true, storageParameters);
+                if (clearedFolder.isCacheable()) {
+                    putFolder(clearedFolder, realTreeId, storageParameters, true);
+                }
+            } catch (final Exception e) {
+                // Ignore
             }
         } finally {
             lock.unlock();

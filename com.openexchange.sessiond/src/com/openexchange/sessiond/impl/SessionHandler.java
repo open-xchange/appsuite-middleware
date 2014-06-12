@@ -687,7 +687,7 @@ public final class SessionHandler {
         final SessionImpl currentSession = sessionControl.getSession();
         currentSession.setPassword(newPassword);
         final SessionStorageService sessionStorage = getServiceRegistry().getService(SessionStorageService.class);
-        if (null != sessionStorage) {
+        if (null != sessionStorage && useSessionStorage(currentSession)) {
             final Task<Void> c = new AbstractTask<Void>() {
 
                 @Override
@@ -746,25 +746,27 @@ public final class SessionHandler {
         if (null != session) {
             try {
                 session.setLocalIp(localIp, false);
-                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-                if (sessionStorageService != null) {
-                    final AbstractTask<Void> c = new AbstractTask<Void>() {
+                if (useSessionStorage(session)) {
+                    final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                    if (sessionStorageService != null) {
+                        final AbstractTask<Void> c = new AbstractTask<Void>() {
 
-                        @Override
-                        public Void call() throws Exception {
-                            try {
-                                sessionStorageService.setLocalIp(session.getSessionID(), localIp);
-                            } catch (final OXException e) {
-                                if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
-                                    throw e;
+                            @Override
+                            public Void call() throws Exception {
+                                try {
+                                    sessionStorageService.setLocalIp(session.getSessionID(), localIp);
+                                } catch (final OXException e) {
+                                    if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                                        throw e;
+                                    }
+                                    // No such session held in session storage
+                                    LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
                                 }
-                                // No such session held in session storage
-                                LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                                return null;
                             }
-                            return null;
-                        }
-                    };
-                    submit(c);
+                        };
+                        submit(c);
+                    }
                 }
             } catch (final RuntimeException e) {
                 throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
@@ -783,17 +785,19 @@ public final class SessionHandler {
         if (null != session) {
             try {
                 session.setClient(client, false);
-                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-                if (sessionStorageService != null) {
-                    final AbstractTask<Void> c = new AbstractTask<Void>() {
+                if (useSessionStorage(session)) {
+                    final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                    if (sessionStorageService != null) {
+                        final AbstractTask<Void> c = new AbstractTask<Void>() {
 
-                        @Override
-                        public Void call() throws Exception {
-                            sessionStorageService.setClient(session.getSessionID(), client);
-                            return null;
-                        }
-                    };
-                    submit(c);
+                            @Override
+                            public Void call() throws Exception {
+                                sessionStorageService.setClient(session.getSessionID(), client);
+                                return null;
+                            }
+                        };
+                        submit(c);
+                    }
                 }
             } catch (final RuntimeException e) {
                 throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
@@ -812,17 +816,19 @@ public final class SessionHandler {
         if (null != session) {
             try {
                 session.setHash(hash, false);
-                final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-                if (sessionStorageService != null) {
-                    final AbstractTask<Void> c = new AbstractTask<Void>() {
+                if (useSessionStorage(session)) {
+                    final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+                    if (sessionStorageService != null) {
+                        final AbstractTask<Void> c = new AbstractTask<Void>() {
 
-                        @Override
-                        public Void call() throws Exception {
-                            sessionStorageService.setHash(session.getSessionID(), hash);
-                            return null;
-                        }
-                    };
-                    submit(c);
+                            @Override
+                            public Void call() throws Exception {
+                                sessionStorageService.setHash(session.getSessionID(), hash);
+                                return null;
+                            }
+                        };
+                        submit(c);
+                    }
                 }
             } catch (final RuntimeException e) {
                 throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
@@ -887,12 +893,14 @@ public final class SessionHandler {
         // Put this session into the normal session container
         final SessionControl sessionControl = sessionData.addSession(activatedSession, noLimit);
         final SessionImpl addedSession = sessionControl.getSession();
-        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-        if (sessionStorageService != null) {
-            if (asyncPutToSessionStorage) {
-                storeSessionAsync(addedSession, sessionStorageService, false);
-            } else {
-                storeSessionSync(addedSession, sessionStorageService, false);
+        if (useSessionStorage(addedSession)) {
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                if (asyncPutToSessionStorage) {
+                    storeSessionAsync(addedSession, sessionStorageService, false);
+                } else {
+                    storeSessionSync(addedSession, sessionStorageService, false);
+                }
             }
         }
         // Post event for created session
@@ -909,13 +917,25 @@ public final class SessionHandler {
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
     protected static SessionControl getSession(final String sessionId, final boolean considerSessionStorage) {
+        return getSession(sessionId, true, considerSessionStorage);
+    }
+
+    /**
+     * Gets the session associated with given session ID
+     *
+     * @param sessionId The session ID
+     * @param considerLocalStorage <code>true</code> to consider local storage; otherwise <code>false</code>
+     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise <code>false</code>
+     * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
+     */
+    protected static SessionControl getSession(final String sessionId, final boolean considerLocalStorage, final boolean considerSessionStorage) {
         LOG.debug("getSession <{}>", sessionId);
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
         }
-        final SessionControl sessionControl = sessionData.getSession(sessionId);
+        final SessionControl sessionControl = considerLocalStorage ? sessionData.getSession(sessionId) : null;
         if (considerSessionStorage && null == sessionControl) {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {

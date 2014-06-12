@@ -212,7 +212,8 @@ public class ActivityTest extends AbstractAJAXSession {
     public void testShareLinkAndDelete() throws OXException, IOException, JSONException {
         final ShareLinkRequest request = new ShareLinkRequest("http://www.google.de", true);
         final ShareLinkResponse response = client.execute(request);
-        assertNotNull(response);
+        assertNull("Got an exception: " + response.getException(), response.getException());
+        assertNotNull(response.getData());
         assertTrue((Boolean) response.getData());
     }
 
@@ -235,6 +236,8 @@ public class ActivityTest extends AbstractAJAXSession {
                 fail(exc.getMessage());
             }
         }
+        assertNull("Got an exception: " + response.getException(), response.getException());
+        assertNotNull(response.getData());
         assertTrue((Boolean) response.getData());
         deleteActivity(false);
     }

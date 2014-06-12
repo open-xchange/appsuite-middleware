@@ -1374,7 +1374,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         List<Object> searchParameters = new ArrayList<Object>();
         Integer contextID = Integer.valueOf(ctx.getContextId());
         final StringBuilder sb = new StringBuilder(512);
-        sb.append("SELECT ");
+        sb.append("SELECT DISTINCT ");
         sb.append(columns);
         sb.append(", pdm.pfid");
         sb.append(" FROM prg_dates pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ? AND pdm.cid = ?");

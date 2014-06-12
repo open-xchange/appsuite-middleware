@@ -52,6 +52,7 @@ package com.openexchange.mail.dataobjects;
 import java.io.InputStream;
 import javax.activation.DataHandler;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.utils.StorageUtility;
 
 /**
  * {@link IDMailMessage} - Supports only {@link #getMailId()} and {@link #getFolder()}.
@@ -102,11 +103,7 @@ public final class IDMailMessage extends MailMessage {
         if (null == mailId) {
             uid = -1L;
         } else {
-            try {
-                uid = Long.parseLong(mailId);
-            } catch (final NumberFormatException e) {
-                uid = -1L;
-            }
+            uid = StorageUtility.parseUnsignedLong(mailId);
         }
         setFolder(folder);
     }
@@ -127,11 +124,7 @@ public final class IDMailMessage extends MailMessage {
         if (null == id) {
             uid = -1L;
         } else {
-            try {
-                uid = Long.parseLong(id);
-            } catch (final NumberFormatException e) {
-                uid = -1L;
-            }
+            uid = StorageUtility.parseUnsignedLong(mailId);
         }
     }
 
@@ -151,6 +144,9 @@ public final class IDMailMessage extends MailMessage {
      */
     public void setUid(final long uid) {
         this.uid = uid;
+        if (uid > 0) {
+            mailId = Long.toString(uid);
+        }
     }
 
     /**

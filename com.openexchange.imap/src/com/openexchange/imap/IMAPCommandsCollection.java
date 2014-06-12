@@ -3550,7 +3550,7 @@ public final class IMAPCommandsCollection {
      * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
      * @see #getItemOf(Class, FetchResponse, String)
      */
-    protected static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
+    public static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
         final int len = fetchResponse.getItemCount();
         for (int i = 0; i < len; i++) {
             final Item item = fetchResponse.getItem(i);

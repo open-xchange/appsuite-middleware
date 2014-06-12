@@ -400,11 +400,36 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @throws OXException If an OX error occurs
      */
     public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
-        return handleFetchRespone(fetchResponse, fullName, separator, null, false);
+        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, null, false);
+    }
+
+    /**
+     * Applies given FETCH response to an given {@link MailMessage} instance.
+     *
+     * @param mail The message to apply to
+     * @param fetchResponse The FETCH response to handle
+     * @param fullName The full name of associated folder
+     * @param separator The separator character
+     * @return The resulting mail message
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If an OX error occurs
+     */
+    public static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
+        return handleFetchRespone(mail, fetchResponse, fullName, separator, null, false);
     }
 
     private static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final char separator, final Set<FetchItemHandler> lastHandlers, final boolean determineAttachmentByHeader) throws MessagingException, OXException {
-        final IDMailMessage mail = new IDMailMessage(null, fullName);
+        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, lastHandlers, determineAttachmentByHeader);
+    }
+
+    private static MailMessage handleFetchRespone(final IDMailMessage mail1, final FetchResponse fetchResponse, final String fullName, final char separator, final Set<FetchItemHandler> lastHandlers, final boolean determineAttachmentByHeader) throws MessagingException, OXException {
+        final IDMailMessage mail;
+        if (null == mail1) {
+            mail = new IDMailMessage(null, fullName);
+        } else {
+            mail = mail1;
+            mail.setFolder(fullName);
+        }
         // mail.setRecentCount(recentCount);
         if (separator != '\0') {
             mail.setSeparator(separator);

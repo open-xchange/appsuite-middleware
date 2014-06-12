@@ -1535,7 +1535,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (0 >= messageCount || (null != indexRange && (indexRange.end - indexRange.start) < 1)) {
                 return Collections.emptyList();
             }
-            final int limit = max <= 0 ? -1 : (messageCount <= max ? -1 : (int) max);
+            final int lookAhead = max <= 0 ? -1 : (messageCount <= max ? -1 : (int) max);
             final boolean mergeWithSent = includeSent && !sentFullName.equals(fullName);
             /*
              * Sort messages by thread reference
@@ -1554,13 +1554,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Parse THREAD response to a list structure and extract sequence numbers
                  */
                 final String sortRange;
-                if (limit <= 0) {
+                if (lookAhead <= 0) {
                     sortRange = "ALL";
                 } else {
                     if (OrderDirection.DESC.equals(order)) {
-                        sortRange = (Integer.toString(messageCount - limit + 1) + ':' + Integer.toString(messageCount));
+                        sortRange = (Integer.toString(messageCount - lookAhead + 1) + ':' + Integer.toString(messageCount));
                     } else {
-                        sortRange = ("1:" + Integer.toString(limit));
+                        sortRange = ("1:" + Integer.toString(lookAhead));
                     }
                 }
                 final String threadResponse = ThreadSortUtil.getThreadResponse(imapFolder, sortRange);
@@ -1573,7 +1573,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Do list append
                  */
-                final List<Conversation> conversations;
+                List<Conversation> conversations;
                 final boolean concurrent = false;
                 if (body || concurrent) {
                     Future<List<MailMessage>> messagesFromSentFolder = null;
@@ -1586,12 +1586,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
                             @Override
                             public List<MailMessage> call() throws Exception {
-                                return Conversations.messagesFor(zentFolder, limit, order, clonedFetchProfile, byEnvelope);
+                                return Conversations.messagesFor(zentFolder, lookAhead, order, clonedFetchProfile, byEnvelope);
                             }
                         });
                     }
                     // Retrieve from actual folder
-                    conversations = Conversations.conversationsFor(imapFolder, limit, order, fetchProfile, byEnvelope);
+                    conversations = Conversations.conversationsFor(imapFolder, lookAhead, order, fetchProfile, byEnvelope);
                     // Retrieve from sent folder
                     if (null != messagesFromSentFolder) {
                         final List<MailMessage> sentMessages = getFrom(messagesFromSentFolder);
@@ -1607,7 +1607,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                 } else {
                     // Retrieve from actual folder
-                    conversations = Conversations.conversationsFor(imapFolder, limit, order, fetchProfile, byEnvelope);
+                    conversations = Conversations.conversationsFor(imapFolder, lookAhead, order, fetchProfile, byEnvelope);
                     // Retrieve from sent folder
                     if (mergeWithSent) {
                         // Switch folder
@@ -1620,7 +1620,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             }
                             throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
                         }
-                        final List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, limit, order, fetchProfile, byEnvelope);
+                        final List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, lookAhead, order, fetchProfile, byEnvelope);
                         for (final Conversation conversation : conversations) {
                             for (final MailMessage sentMessage : sentMessages) {
                                 if (conversation.referencesOrIsReferencedBy(sentMessage)) {
@@ -1639,6 +1639,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 for (final Conversation conversation : conversations) {
                     list.add(conversation.getMessages(threadComparator));
                 }
+                conversations = null;
                 // Sort root elements
                 {
                     final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
@@ -1679,12 +1680,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
                             @Override
                             public ThreadableResult call() throws Exception {
-                                return getThreadableFor(sent, false, cache, limit, accountId, session);
+                                return getThreadableFor(sent, false, cache, lookAhead, accountId, session);
                             }
 
                         });
                     }
-                    final ThreadableResult threadableResult = getThreadableFor(imapFolder, false, cache, limit, accountId, session);
+                    final ThreadableResult threadableResult = getThreadableFor(imapFolder, false, cache, lookAhead, accountId, session);
                     final ThreadableResult sentThreadableResult = getFrom(future);
                     Threadable threadable = threadableResult.threadable;
                     Threadables.append(threadable, sentThreadableResult.threadable);
@@ -1697,7 +1698,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     // Mark as merged
                     merged = true;
                 } else {
-                    final ThreadableResult threadableResult = getThreadableFor(imapFolder, false, cache, limit, accountId, session);
+                    final ThreadableResult threadableResult = getThreadableFor(imapFolder, false, cache, lookAhead, accountId, session);
                     Threadable threadable = threadableResult.threadable;
                     threadable = applyThreaderTo(threadable);
                     threadList = Threadables.toNodeList(threadable);
@@ -1732,7 +1733,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     threadList,
                     fetchProfile,
                     descending,
-                    limit);
+                    lookAhead);
             }
             /*-
              * --------------------------------------------------------------------------------------------------------
@@ -1865,7 +1866,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return listComparator;
     }
 
-    private List<List<MailMessage>> threadedMessagesWithoutBody(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final IMAPFolder sentFolder, final int messageCount, final boolean mergeWithSent, final boolean merged, final boolean cached, final List<ThreadSortNode> threadList, final FetchProfile fetchProfile, final boolean descending, final int limit) throws MessagingException, OXException {
+    private List<List<MailMessage>> threadedMessagesWithoutBody(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final IMAPFolder sentFolder, final int messageCount, final boolean mergeWithSent, final boolean merged, final boolean cached, final List<ThreadSortNode> threadList, final FetchProfile fetchProfile, final boolean descending, final int lookAhead) throws MessagingException, OXException {
         Future<ThreadableMapping> submittedTask = null;
         final Map<MessageInfo, MailMessage> mapping;
         if (mergeWithSent && merged) {
@@ -1895,7 +1896,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         } else {
             if (mergeWithSent && !merged) {
-                submittedTask = getThreadableMapping(sentFolder, limit, fetchProfile, byEnvelope());
+                submittedTask = getThreadableMapping(sentFolder, lookAhead, fetchProfile, byEnvelope());
             }
             final TIntList seqNums = ThreadSortUtil.extractSeqNumsAsList(threadList);
             final TLongObjectMap<MailMessage> messages =
@@ -1967,7 +1968,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             Integer.valueOf(messageCount));
     }
 
-    private static Future<ThreadableMapping> getThreadableMapping(final IMAPFolder sentFolder, final int limit, final FetchProfile fetchProfile, final boolean byEnvelope) {
+    private static Future<ThreadableMapping> getThreadableMapping(final IMAPFolder sentFolder, final int lookAhead, final FetchProfile fetchProfile, final boolean byEnvelope) {
         Conversations.checkFetchProfile(fetchProfile, byEnvelope);
         // Get ThreadableMapping
         final IMAPFolder sent = sentFolder;
@@ -1975,7 +1976,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
             @Override
             public ThreadableMapping call() throws Exception {
-                final List<MailMessage> mails = Threadables.getAllMailsFrom(sent, limit, fetchProfile);
+                final List<MailMessage> mails = Threadables.getAllMailsFrom(sent, lookAhead, fetchProfile);
                 return new ThreadableMapping(64).initWith(mails);
             }
 

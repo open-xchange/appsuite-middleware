@@ -88,7 +88,7 @@ public class Bug32004Test extends AbstractInfostoreTest {
             folder = loadFolder(api, folder.getObjectID());
             assertNotNull("folder not found", folder);
             assertEquals("folder name wrong", name, folder.getFolderName());
-            assertEquals("folder type wrong", FolderObject.PUBLIC, folder.getType());
+            assertEquals("folder type wrong", FolderObject.TRASH, folder.getType());
         }
     }
 
