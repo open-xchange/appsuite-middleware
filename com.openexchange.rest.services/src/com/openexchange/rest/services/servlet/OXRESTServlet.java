@@ -65,6 +65,7 @@ import com.openexchange.rest.services.OXRESTMatch;
 import com.openexchange.rest.services.OXRESTService;
 import com.openexchange.rest.services.Response;
 import com.openexchange.rest.services.internal.OXRESTServiceWrapper;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 
@@ -141,10 +142,18 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
         resp.setStatus(response.getStatus());
 
         // Set headers
-        for(Map.Entry<String, String> entry: response.getHeaders().entrySet()) {
+        for (Map.Entry<String, String> entry : response.getHeaders().entrySet()) {
             resp.setHeader(entry.getKey(), entry.getValue());
         }
         resp.setHeader("X-OX-ACHTUNG", "This is an internal API that may change without notice.");
+
+        // Ensure a Content-Type is set
+        if (!resp.containsHeader("Content-Type")) {
+            resp.setContentType(OXRESTService.CONTENT_TYPE_JAVASCRIPT);
+        }
+
+        // Disable caching
+        Tools.disableCaching(resp);
 
         // Write response body
         // TODO: Allow for binary streams

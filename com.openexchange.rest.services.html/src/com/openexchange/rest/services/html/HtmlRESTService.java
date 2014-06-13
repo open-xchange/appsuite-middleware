@@ -114,12 +114,14 @@ public class HtmlRESTService extends OXRESTService<HtmlService> {
     public Object getSanitizedHtmlContentWithoutExternalImages() throws OXException {
         Object data = request.getData();
         if (data instanceof String) {
+            response.setHeader("Content-Type", OXRESTService.CONTENT_TYPE_HTML);
             return context.sanitize((String) data, null, false, new boolean[1], null);
         }
 
         if (data instanceof JSONObject) {
             try {
                 final String sanitized = context.sanitize(((JSONObject) data).getString("content"), null, false, new boolean[1], null);
+                response.setContentType(OXRESTService.CONTENT_TYPE_JAVASCRIPT);
                 return new JSONObject(2).put("content", sanitized);
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
