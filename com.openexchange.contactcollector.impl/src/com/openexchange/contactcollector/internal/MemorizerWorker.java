@@ -454,15 +454,17 @@ public final class MemorizerWorker {
     }
 
     private static boolean isEnabled(final Session session) {
-        Boolean enabled = null;
-        boolean enabledRight = false;
         try {
-            enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
-            enabledRight = ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
+            if (!ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses()) {
+                return false;
+            }
+
+            Boolean enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
+            return enabled != null && enabled.booleanValue();
         } catch (final OXException e) {
             LOG.error("", e);
         }
-        return enabledRight && enabled != null && enabled.booleanValue();
+        return false;
     }
 
     private static int getFolderId(final Session session) {

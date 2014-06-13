@@ -49,9 +49,10 @@
 
 package com.openexchange.rest.services;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
+import com.openexchange.java.Strings;
 
 /**
  * A simple {@link Response} object for RESTful services.
@@ -62,7 +63,8 @@ public class Response {
 
     private Iterable<String> body;
     private int status = 200;
-    private Map<String, String> headers;
+    private final Map<String, String> headers;
+    private boolean disableCaching;
 
     /**
      * Initializes a new {@link Response}.
@@ -70,6 +72,7 @@ public class Response {
     public Response() {
         super();
         headers = new HashMap<String, String>(8);
+        disableCaching = true;
     }
 
     /**
@@ -90,6 +93,7 @@ public class Response {
 
     /**
      * The status code
+     *
      * @return
      */
     public int getStatus() {
@@ -106,19 +110,89 @@ public class Response {
     }
 
     /**
-     * The response headers
+     * Gets the response headers as an unmodifiable map.
+     *
+     * @return The response headers as an unmodifiable map
      */
     public Map<String, String> getHeaders() {
-        return headers;
+        return null == headers ? Collections.<String, String> emptyMap() : Collections.unmodifiableMap(headers);
     }
 
     /**
-     * Sets the response headers
+     * Gets the denoted header's value
+     *
+     * @return The header value or <code>null</code> if there is no such header
+     */
+    public String getHeader(String name) {
+        return Strings.isEmpty(name) ? null : headers.get(name);
+    }
+
+    /**
+     * Sets the response header.
+     *
+     * @param name The header name
+     * @param value The header value
+     */
+    public void setHeader(String name, String value) {
+        if (Strings.isEmpty(name)) {
+            return;
+        }
+        headers.put(name, Strings.isEmpty(value) ? "" : value);
+    }
+
+    /**
+     * Sets the response's <i>Content-Type</i> header;<br>
+     * e.g. <code>application/json; charset=UTF-8</code>
+     *
+     * @param contentType The <i>Content-Type</i> value
+     */
+    public void setContentType(String contentType) {
+        if (Strings.isEmpty(contentType)) {
+            return;
+        }
+        headers.put("Content-Type", contentType);
+    }
+
+    /**
+     * Sets the response's <i>Content-Disposition</i> header;<br>
+     * e.g. <code>attachment; filename="readme.txt"</code>
+     *
+     * @param contentDisposition The <i>Content-Disposition</i> value
+     */
+    public void setContentDisposition(String contentDisposition) {
+        if (Strings.isEmpty(contentDisposition)) {
+            return;
+        }
+        headers.put("Content-Disposition", contentDisposition);
+    }
+
+    /**
+     * Sets the response headers.
      *
      * @param headers The response headers
      */
     public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
+        this.headers.putAll(headers);
+    }
+
+    /**
+     * Sets if the server response <i>shall not</i> be cached by a Proxy or a Browser; default is <code>true</code>.
+     *
+     * @param disableCaching The flag to set
+     */
+    public void setDisableCaching(boolean disableCaching) {
+        this.disableCaching = disableCaching;
+    }
+
+    /**
+     * Checks if the server response <i>shall not</i> be cached by a Proxy or a Browser; default is <code>true</code>.
+     * <p>
+     * The HTTP response headers "Pragma", "Cache-Control" and "Expiry" are supposed to be modified appropriately.
+     *
+     * @return <code>true</code> to disable caching; otherwise <code>false</code>
+     */
+    public boolean isDisableCaching() {
+        return disableCaching;
     }
 
 }

@@ -1224,15 +1224,15 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         /*
-         * Now treat as an insert after actual move
+         * Now treat as an insert after actual move if not moved below trash
          */
-        try {
-            processInsertedFolderThroughMove(
-                getFolderFromMaster(folderId),
-                new CheckPermissionOnInsert(session, writeCon, ctx),
-                lastModified);
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        if (FolderObject.TRASH != storageDest.getType()) {
+            try {
+                processInsertedFolderThroughMove(
+                    getFolderFromMaster(folderId), new CheckPermissionOnInsert(session, writeCon, ctx), lastModified);
+            } catch (final SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            }
         }
         /*
          * Inherit folder type recursively if move from or to trash folder

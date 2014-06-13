@@ -269,6 +269,20 @@ public abstract class OXRESTService<T> {
     // --------------------------------------------------------------------------------------------------------------------------- //
 
     /**
+     * The content type if the response body contains JSON data. Set it with
+     * <code>response.setContentType(OXRESTService.CONTENT_TYPE_JAVASCRIPT)</code> .
+     */
+    public static final String CONTENT_TYPE_JAVASCRIPT = "text/javascript; charset=UTF-8";
+
+    /**
+     * The content type if the response body contains HTML content. Set it with
+     * <code>response.setContentType(OXRESTService.CONTENT_TYPE_HTML)</code> .
+     */
+    public static final String CONTENT_TYPE_HTML = "text/html; charset=UTF-8";
+
+    // --------------------------------------------------------------------------------------------------------------------------- //
+
+    /**
      * The response that should be constructed by the action methods
      */
     protected Response response = new Response();
@@ -431,7 +445,7 @@ public abstract class OXRESTService<T> {
      * Sets a header in the response
      */
     public void header(String name, String value) {
-        this.response.getHeaders().put(name, value);
+        this.response.setHeader(name, value);
     }
 
     /**
