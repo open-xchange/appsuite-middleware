@@ -107,6 +107,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
@@ -1171,11 +1172,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                     if (maxPerMsg > 0 && size > maxPerMsg) {
                         final String fileName = origMail.getSubject();
-                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(Long.valueOf(maxPerMsg), null == fileName ? "" : fileName, Long.valueOf(size));
+                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(UploadUtility.getSize(maxPerMsg), null == fileName ? "" : fileName, UploadUtility.getSize(size));
                     }
                     total += size;
                     if (max > 0 && total > max) {
-                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(max));
+                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(max));
                     }
                     if (i < mlength && !fullName.equals(arguments[i + 1].getFullname())) {
                         origMail.loadContent();

@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 25
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -44,6 +44,8 @@ if [ ${1:-0} -eq 2 ]; then
 
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc pop3.properties
 
+    PFILE=/opt/open-xchange/etc/pop3.properties
+
     # SoftwareChange_Request-1229
     pfile=/opt/open-xchange/etc/pop3.properties
     if ! ox_exists_property com.openexchange.pop3.allowPing $pfile; then
@@ -52,6 +54,9 @@ if [ ${1:-0} -eq 2 ]; then
     if ! ox_exists_property com.openexchange.pop3.logDeniedPing $pfile; then
         ox_set_property com.openexchange.pop3.logDeniedPing true $pfile
     fi
+
+    # SoftwareChange_Request-2016
+    ox_add_property com.openexchange.pop3.ssl.ciphersuites "" $PFILE
 fi
 
 %clean
@@ -68,6 +73,8 @@ fi
 
 
 %changelog
+* Thu Jun 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-06-16
 * Thu May 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-05-26
 * Fri May 16 2014 Marcus Klein <marcus.klein@open-xchange.com>

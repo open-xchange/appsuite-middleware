@@ -52,9 +52,16 @@ package com.openexchange.mail.mime;
 import static com.openexchange.mail.mime.converters.MimeMessageConverter.multipartFor;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -126,6 +133,10 @@ public final class MimeStructureFixer {
         final ContentType contentType = message.getContentType();
         if (!contentType.startsWith("multipart/")) {
             // Nothing to filter
+            return message;
+        }
+        if (contentType.startsWith("multipart/signed")) {
+            // Don't touch
             return message;
         }
         // Check mailer/boundary for "Apple"
@@ -215,7 +226,7 @@ public final class MimeStructureFixer {
     private MimeMessage process0(final MimeMessage mimeMessage, final ContentType contentType) throws OXException {
         try {
             // Start to check & fix multipart structure
-            final MimeMultipart newMultipart = new MimeMultipart(contentType.getSubType());
+            final MimeMultipart newMultipart = new MimeMultipart(contentType.getSubType(), getParametersFrom(contentType, EXCLUDE_BOUNDARY));
             final String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
             // Possible root multipart for unexpectedly found file attachments
             final AtomicReference<MimeMultipart> artificialRoot = new AtomicReference<MimeMultipart>();
@@ -597,6 +608,26 @@ public final class MimeStructureFixer {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    private static final Set<String> EXCLUDE_BOUNDARY = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("boundary")));
+
+    private static Map<String, String> getParametersFrom(final ContentType contentType, final Set<String> exclude) {
+        Map<String, String> retval = new LinkedHashMap<String, String>(4);
+        if (null == exclude || exclude.isEmpty()) {
+            for (Iterator<String> it = contentType.getParameterNames(); it.hasNext();) {
+                String name = it.next();
+                retval.put(name, contentType.getParameter(name));
+            }
+        } else {
+            for (Iterator<String> it = contentType.getParameterNames(); it.hasNext();) {
+                String name = it.next();
+                if (!exclude.contains(name)) {
+                    retval.put(name, contentType.getParameter(name));
+                }
+            }
+        }
+        return retval;
     }
 
 }

@@ -17,7 +17,8 @@ define("com.openexchange.oauth.linkedin.json/main", ["osgi", "httpAPI"], functio
             inbox: function (req, session) {
                 var account = utils.getAccount(req, session);
                 if (!account) {
-                    throw new Packages.com.openexchange.exception.OXException();
+                    // Formerly: throw new Packages.com.openexchange.exception.OXException();
+                	return;
                 }
                 var messages = li.getMessageInbox(session, session.getUserId(), session.getContextId(), account.getId());
                 return new Packages.com.openexchange.ajax.requesthandler.AJAXRequestResult(messages, "json");
@@ -25,7 +26,8 @@ define("com.openexchange.oauth.linkedin.json/main", ["osgi", "httpAPI"], functio
             updates: function (req, session) {
                 var account = utils.getAccount(req, session);
                 if (!account) {
-                    throw new Packages.com.openexchange.exception.OXException();
+                     // Formerly: throw new Packages.com.openexchange.exception.OXException();
+                     return;
                 }
                 var messages = li.getNetworkUpdates(session, session.getUserId(), session.getContextId(), account.getId());
                 return new Packages.com.openexchange.ajax.requesthandler.AJAXRequestResult(messages, "json");
@@ -33,7 +35,8 @@ define("com.openexchange.oauth.linkedin.json/main", ["osgi", "httpAPI"], functio
             fullProfile: function (req, session) {
                 var account = utils.getAccount(req, session);
                 if (!account) {
-                    throw new Packages.com.openexchange.exception.OXException();
+                     // Formerly: throw new Packages.com.openexchange.exception.OXException();
+                     return;
                 }
                 var id = req.getParameter("id");
                 var profileData = li.getFullProfileById(id, session, session.getUserId(), session.getContextId(), account.getId());

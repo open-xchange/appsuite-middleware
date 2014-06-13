@@ -51,6 +51,7 @@ package com.openexchange.mail.json.parser;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -85,21 +86,18 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
         if (doAction) {
             final long size = attachment.getSize();
             if (size <= 0) {
-                LOG.debug("Missing size: {}", size, new Throwable());
+                LOG.debug("Missing size: {}", Long.valueOf(size), new Throwable());
             }
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
                 final String fileName = attachment.getFileName();
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(
-                    Long.valueOf(uploadQuotaPerFile),
-                    null == fileName ? "" : fileName,
-                    Long.valueOf(size));
+                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(UploadUtility.getSize(uploadQuotaPerFile), null == fileName ? "" : fileName, UploadUtility.getSize(size));
             }
             /*
              * Add current file size
              */
             consumed += size;
             if (uploadQuota > 0 && consumed > uploadQuota) {
-                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
+                throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(uploadQuota));
             }
         }
         attachments.add(attachment);

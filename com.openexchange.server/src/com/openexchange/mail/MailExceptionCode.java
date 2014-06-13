@@ -189,8 +189,7 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Upload quota (%1$s) exceeded for file %2$s (size=%3$s)
      */
-    UPLOAD_QUOTA_EXCEEDED_FOR_FILE("Upload quota (%1$s) exceeded for file %2$s (size=%3$s)",
-        MailExceptionStrings.UPLOAD_QUOTA_EXCEEDED_FOR_FILE_MSG, CATEGORY_USER_INPUT, 28),
+    UPLOAD_QUOTA_EXCEEDED_FOR_FILE("Upload quota (%1$s) exceeded for file %2$s (size=%3$s)", MailExceptionStrings.UPLOAD_QUOTA_EXCEEDED_FOR_FILE_MSG, CATEGORY_USER_INPUT, 28),
     /**
      * Upload quota (%1$s) exceeded
      */
