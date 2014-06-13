@@ -64,6 +64,7 @@ public class Response {
     private Iterable<String> body;
     private int status = 200;
     private final Map<String, String> headers;
+    private boolean disableCaching;
 
     /**
      * Initializes a new {@link Response}.
@@ -71,6 +72,7 @@ public class Response {
     public Response() {
         super();
         headers = new HashMap<String, String>(8);
+        disableCaching = true;
     }
 
     /**
@@ -171,6 +173,26 @@ public class Response {
      */
     public void setHeaders(Map<String, String> headers) {
         this.headers.putAll(headers);
+    }
+
+    /**
+     * Sets if the server response <i>shall not</i> be cached by a Proxy or a Browser; default is <code>true</code>.
+     *
+     * @param disableCaching The flag to set
+     */
+    public void setDisableCaching(boolean disableCaching) {
+        this.disableCaching = disableCaching;
+    }
+
+    /**
+     * Checks if the server response <i>shall not</i> be cached by a Proxy or a Browser; default is <code>true</code>.
+     * <p>
+     * The HTTP response headers "Pragma", "Cache-Control" and "Expiry" are supposed to be modified appropriately.
+     *
+     * @return <code>true</code> to disable caching; otherwise <code>false</code>
+     */
+    public boolean isDisableCaching() {
+        return disableCaching;
     }
 
 }

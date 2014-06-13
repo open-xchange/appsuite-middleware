@@ -153,7 +153,9 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
         }
 
         // Disable caching
-        Tools.disableCaching(resp);
+        if (response.isDisableCaching()) {
+            Tools.disableCaching(resp);
+        }
 
         // Write response body
         // TODO: Allow for binary streams
