@@ -303,15 +303,17 @@ public class Memorizer implements Runnable {
     }
 
     private boolean isEnabled() {
-        Boolean enabled = null;
-        boolean enabledRight = false;
         try {
-            enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
-            enabledRight = ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
+            if (!ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses()) {
+                return false;
+            }
+
+            Boolean enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
+            return enabled != null && enabled.booleanValue();
         } catch (final OXException e) {
             LOG.error("", e);
         }
-        return enabledRight && enabled != null && enabled.booleanValue();
+        return false;
     }
 
     private Contact transformInternetAddress(final InternetAddress address) throws ParseException, UnsupportedEncodingException {
