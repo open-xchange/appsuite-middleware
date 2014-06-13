@@ -225,6 +225,8 @@ public class ActivityTest extends AbstractAJAXSession {
      * @throws JSONException
      */
     public void testShareActivityAndDelete() throws OXException, IOException, JSONException {
+        final ChangeStatusRequest createRequest = new ChangeStatusRequest("My new status", true);
+        client.execute(createRequest);
         final String activityId = getActivityIdContainingPermission("SHARE");
         final ShareActivityRequest request = new ShareActivityRequest(activityId, "My shared activity", false);
         final ShareActivityResponse response = client.execute(request);
