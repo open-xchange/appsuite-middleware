@@ -69,10 +69,6 @@ public class HealthProbeActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        trackService(ConfigurationService.class);
-        trackService(HttpService.class);
-        openTrackers();
-
         ConfigurationService configService = getService(ConfigurationService.class);
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
