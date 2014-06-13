@@ -46,6 +46,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-1967
     ox_add_property com.openexchange.soap.cxf.entityExpansionLimit 128000 /opt/open-xchange/etc/soap-cxf.properties
+
+    # SoftwareChange_Request-2025
+    ox_add_property com.openexchange.soap.cxf.disableAddressUpdates true /opt/open-xchange/etc/soap-cxf.properties
 fi
 
 %clean
