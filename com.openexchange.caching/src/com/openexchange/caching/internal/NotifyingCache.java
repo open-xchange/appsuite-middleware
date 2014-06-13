@@ -143,6 +143,7 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     @Override
     public void clear() throws OXException {
         delegate.clear();
+        fireClear();
     }
 
     @Override
@@ -316,6 +317,9 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
                         delegate.remove(cacheEvent.getKey());
                     }
                     break;
+                case CLEAR:
+                    delegate.clear();
+                    break;
                 default:
                     LOG.warn("Unknown cache event operation: {}", cacheEvent.getOperation());
                 }
@@ -341,6 +345,14 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
             CacheEvent event = CacheEvent.INVALIDATE(region, groupName, key);
             LOG.debug("fireInvalidate: {}", event);
+            eventService.notify(this, event, false);
+        }
+    }
+
+    private void fireClear() {
+        if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
+            CacheEvent event = CacheEvent.CLEAR(region);
+            LOG.debug("fireClear: {}", event);
             eventService.notify(this, event, false);
         }
     }

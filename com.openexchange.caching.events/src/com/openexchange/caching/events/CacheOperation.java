@@ -51,7 +51,7 @@ package com.openexchange.caching.events;
 
 /**
  * {@link CacheOperation}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public enum CacheOperation {
@@ -64,7 +64,13 @@ public enum CacheOperation {
     /**
      * Invalidation of a cache group
      */
-    INVALIDATE_GROUP("invalidate_group");
+    INVALIDATE_GROUP("invalidate_group"),
+
+    /**
+     * Clear cache
+     */
+    CLEAR("clear"),
+    ;
 
     private final String id;
 
@@ -74,7 +80,7 @@ public enum CacheOperation {
 
     /**
      * Gets the identifier
-     * 
+     *
      * @return The identifier
      */
     public String getId() {
@@ -83,7 +89,7 @@ public enum CacheOperation {
 
     /**
      * Gets the cache operation for given identifier.
-     * 
+     *
      * @param id The identifier
      * @return The cache operation or <code>null</code>
      */

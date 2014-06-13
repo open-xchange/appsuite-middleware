@@ -55,14 +55,14 @@ import java.util.Map;
 
 /**
  * {@link CacheEvent}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CacheEvent implements Serializable {
 
     /**
      * Creates a new {@link CacheOperation#INVALIDATE} event.
-     * 
+     *
      * @param region The cache region
      * @param groupName The cache group name
      * @param key The key of the affected cache entry
@@ -74,7 +74,7 @@ public class CacheEvent implements Serializable {
 
     /**
      * Creates a new {@link CacheOperation#INVALIDATE_GROUP} event.
-     * 
+     *
      * @param region The cache region
      * @param groupName The cache group name
      * @return The cache event
@@ -84,8 +84,18 @@ public class CacheEvent implements Serializable {
     }
 
     /**
+     * Creates a new {@link CacheOperation#CLEAR} event.
+     *
+     * @param region The cache region
+     * @return The cache event
+     */
+    public static CacheEvent CLEAR(String region) {
+        return new CacheEvent(CacheOperation.CLEAR, region, null, null);
+    }
+
+    /**
      * Creates a new cache event from POJO map.
-     * 
+     *
      * @param map The POJO map
      * @return The resulting cache event
      */
@@ -98,6 +108,8 @@ public class CacheEvent implements Serializable {
         return cacheEvent;
     }
 
+    // ----------------------------------------------------------------------------------------------------------- //
+
     private static final long serialVersionUID = 7172029773641345572L;
 
     private CacheOperation operation;
@@ -107,7 +119,7 @@ public class CacheEvent implements Serializable {
 
     /**
      * Initializes a new {@link CacheEvent}.
-     * 
+     *
      * @param operation The cache operation
      * @param region The cache region
      * @param groupName The cache group name
@@ -123,7 +135,7 @@ public class CacheEvent implements Serializable {
 
     /**
      * Initializes a new {@link CacheEvent}.
-     * 
+     *
      * @param map The POJO map
      */
     private CacheEvent() {
@@ -188,7 +200,7 @@ public class CacheEvent implements Serializable {
 
     /**
      * Gets the operation
-     * 
+     *
      * @return The operation
      */
     public CacheOperation getOperation() {
@@ -197,7 +209,7 @@ public class CacheEvent implements Serializable {
 
     /**
      * Sets the operation
-     * 
+     *
      * @param operation The operation to set
      */
     public void setOperation(CacheOperation operation) {
@@ -206,7 +218,7 @@ public class CacheEvent implements Serializable {
 
     /**
      * Gets the key
-     * 
+     *
      * @return The key
      */
     public Serializable getKey() {
@@ -215,7 +227,7 @@ public class CacheEvent implements Serializable {
 
     /**
      * Sets the key
-     * 
+     *
      * @param key The key to set
      */
     public void setKey(Serializable key) {
@@ -224,7 +236,7 @@ public class CacheEvent implements Serializable {
 
     /**
      * Gets the groupName
-     * 
+     *
      * @return The groupName
      */
     public String getGroupName() {
@@ -233,7 +245,7 @@ public class CacheEvent implements Serializable {
 
     /**
      * Sets the groupName
-     * 
+     *
      * @param groupName The groupName to set
      */
     public void setGroupName(String groupName) {
@@ -242,7 +254,7 @@ public class CacheEvent implements Serializable {
 
     /**
      * Gets the region
-     * 
+     *
      * @return The region
      */
     public String getRegion() {
@@ -251,7 +263,7 @@ public class CacheEvent implements Serializable {
 
     /**
      * Sets the region
-     * 
+     *
      * @param region The region to set
      */
     public void setRegion(String region) {

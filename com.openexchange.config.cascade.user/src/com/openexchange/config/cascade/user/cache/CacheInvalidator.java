@@ -96,6 +96,8 @@ public class CacheInvalidator implements CacheListener, ServiceTrackerCustomizer
                     }
                 } else if (operation == CacheOperation.INVALIDATE_GROUP) {
                     invalidateContext(contextId);
+                } else if (operation == CacheOperation.CLEAR) {
+                    clear();
                 }
             }
 
@@ -129,6 +131,10 @@ public class CacheInvalidator implements CacheListener, ServiceTrackerCustomizer
 
     public void invalidateContext(int contextId) {
         PropertyMapManagement.getInstance().dropFor(contextId);
+    }
+
+    public void clear() {
+        PropertyMapManagement.getInstance().clear();
     }
 
 }
