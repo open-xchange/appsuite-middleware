@@ -132,7 +132,9 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         managementHouseKeeper.addManagementObject(directory.getManagementObject());
 
         GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
-        GlobalRealtimeCleanup globalCleanup = new GlobalRealtimeCleanupImpl(directory);
+
+        GlobalRealtimeCleanupImpl globalCleanup = new GlobalRealtimeCleanupImpl(directory);
+        managementHouseKeeper.addManagementObject(globalCleanup.getManagementObject());
 
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 
