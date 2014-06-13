@@ -489,18 +489,15 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Maximum message size is exceeded. Max. is %1$s.
      */
-    MAX_MESSAGE_SIZE_EXCEEDED("Maximum message size is exceeded. Max. is %1$s.", MailExceptionStrings.MAX_MESSAGE_SIZE_EXCEEDED_MSG,
-        CATEGORY_USER_INPUT, 88),
+    MAX_MESSAGE_SIZE_EXCEEDED("Maximum message size is exceeded. Max. is %1$s.", MailExceptionStrings.MAX_MESSAGE_SIZE_EXCEEDED_MSG, CATEGORY_USER_INPUT, 88),
     /**
      * Re-sending message denied because message is not located in %1$s folder.
      */
-    RESEND_DENIED("Re-sending message denied because message is not located in %1$s folder.", MailExceptionStrings.RESEND_DENIED_MSG,
-        CATEGORY_USER_INPUT, 89),
+    RESEND_DENIED("Re-sending message denied because message is not located in %1$s folder.", MailExceptionStrings.RESEND_DENIED_MSG, CATEGORY_USER_INPUT, 89),
     /**
      * Ping to server %1$s failed for login %2$s with reason: %3$s
      */
-    PING_FAILED("Ping to server %1$s failed for login %2$s with reason: %3$s", MailExceptionStrings.PING_FAILED_MSG,
-        CATEGORY_WARNING, 90),
+    PING_FAILED("Ping to server %1$s failed for login %2$s with reason: %3$s", MailExceptionStrings.PING_FAILED_MSG, CATEGORY_WARNING, 90),
     /**
      * Ping to server %1$s failed with login %2$s due to invalid credentials.
      */
@@ -509,8 +506,11 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Server %1$s does not support being accessed using a secure connection.
      */
-    NON_SECURE_DENIED("Server %1$s does not support being accessed using a secure connection.",
-        MailExceptionStrings.NON_SECURE_DENIED_MSG, CATEGORY_WARNING, 92),
+    NON_SECURE_DENIED("Server %1$s does not support being accessed using a secure connection.", MailExceptionStrings.NON_SECURE_DENIED_MSG, CATEGORY_WARNING, 92),
+    /**
+     * Invalid argument(s) supplied
+     */
+    ILLEGAL_ARGUMENT("Invalid argument(s) supplied.", CATEGORY_ERROR, 93),
     ;
 
     private static String PREFIX = "MSG";
