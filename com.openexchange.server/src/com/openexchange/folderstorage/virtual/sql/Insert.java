@@ -259,8 +259,7 @@ public final class Insert {
              */
             return;
         }
-        EventPool.getInstance().put(
-            new PooledEvent(session.getContextId(), session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, session));
+        EventPool.getInstance().put(new PooledEvent(session.getContextId(), session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, true, session));
     }
 
     private static int unsignedInt(final String sInteger) {
