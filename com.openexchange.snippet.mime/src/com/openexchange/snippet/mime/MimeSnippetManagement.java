@@ -53,7 +53,6 @@ import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
 import static com.openexchange.snippet.SnippetUtils.sanitizeContent;
 import static com.openexchange.snippet.mime.Services.getService;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -163,19 +162,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
         return getService(ContextService.class).getContext(session.getContextId());
     }
 
-    private static final ConcurrentTIntObjectHashMap<QuotaFileStorage> FILE_STORE_CACHE = new ConcurrentTIntObjectHashMap<QuotaFileStorage>();
-
     private static QuotaFileStorage getFileStorage(final Context ctx) throws OXException {
-        final int key = ctx.getContextId();
-        QuotaFileStorage qfs = FILE_STORE_CACHE.get(key);
-        if (null == qfs) {
-            final QuotaFileStorage quotaFileStorage = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
-            qfs = FILE_STORE_CACHE.putIfAbsent(key, quotaFileStorage);
-            if (null == qfs) {
-                qfs = quotaFileStorage;
-            }
-        }
-        return qfs;
+        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
     private final int contextId;
