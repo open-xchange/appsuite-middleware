@@ -57,9 +57,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
+import javax.mail.Store;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.imap.DefaultFolder;
@@ -116,6 +119,33 @@ public final class RootSubfoldersEnabledCache {
         map.clear();
     }
 
+    private static volatile Boolean namespacePerUser;
+    private static boolean namespacePerUser() {
+        Boolean tmp = namespacePerUser;
+        if (null == tmp) {
+            synchronized (RootSubfoldersEnabledCache.class) {
+                tmp = namespacePerUser;
+                if (null == tmp) {
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
+                    boolean defaultValue = true;
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.imap.namespacePerUser", defaultValue));
+                    namespacePerUser = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    private static String getKeyFor(Store store, IMAPConfig imapConfig) {
+        if (namespacePerUser()) {
+            return store.getURLName().toString();
+        }
+        return new StringBuilder(24).append(imapConfig.isSecure() ? "imaps://" : "imap://").append(imapConfig.getServer()).append(':').append(imapConfig.getPort()).toString();
+    }
+
     /**
      * Checks if root sub-folders capability is enabled for given IMAP account.
      *
@@ -126,7 +156,7 @@ public final class RootSubfoldersEnabledCache {
      */
     public static boolean isRootSubfoldersEnabled(final IMAPConfig imapConfig, final IMAPStore imapStore) throws OXException {
         try {
-            return isRootSubfoldersEnabled0(imapStore.getURLName().toString(), imapConfig, (DefaultFolder) imapStore.getDefaultFolder());
+            return isRootSubfoldersEnabled0(getKeyFor(imapStore, imapConfig), imapConfig, (DefaultFolder) imapStore.getDefaultFolder());
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig);
         }
@@ -141,18 +171,18 @@ public final class RootSubfoldersEnabledCache {
      * @throws OXException If a mail error occurs
      */
     public static boolean isRootSubfoldersEnabled(final IMAPConfig imapConfig, final DefaultFolder imapDefaultFolder) throws OXException {
-        return isRootSubfoldersEnabled0(imapDefaultFolder.getStore().getURLName().toString(), imapConfig, imapDefaultFolder);
+        return isRootSubfoldersEnabled0(getKeyFor(imapDefaultFolder.getStore(), imapConfig), imapConfig, imapDefaultFolder);
     }
 
     /**
      * Checks if root sub-folders capability is enabled for given IMAP account.
      */
-    private static boolean isRootSubfoldersEnabled0(final String urlName, final IMAPConfig imapConfig, final DefaultFolder imapDefaultFolder) throws OXException {
+    private static boolean isRootSubfoldersEnabled0(final String key, final IMAPConfig imapConfig, final DefaultFolder imapDefaultFolder) throws OXException {
         final ConcurrentMap<String, Future<Boolean>> map = MAP;
-        Future<Boolean> f = map.get(urlName);
+        Future<Boolean> f = map.get(key);
         if (null == f) {
             final FutureTask<Boolean> ft = new FutureTask<Boolean>(new RootSubfoldersEnabledCallable(imapDefaultFolder));
-            f = map.putIfAbsent(urlName, ft);
+            f = map.putIfAbsent(key, ft);
             if (null == f) {
                 f = ft;
                 ft.run();
