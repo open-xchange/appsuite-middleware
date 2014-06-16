@@ -1,7 +1,3 @@
-* 2014-06-11 - martin.herfurth@open-xchange.com
-
- - Fix for bug 33092: Templating issue, bad lable width.
-
 * 2014-06-13 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33134: Don't auto-insert system-folder permission for possible non-visible parent folders when moving to trash  
@@ -25,6 +21,7 @@
 * 2014-06-11 - martin.herfurth@open-xchange.com
 
  - Fix for bug 32769: Show appointments for public folders just once.
+ - Fix for bug 33092: Templating issue, bad lable width.
 
 * 2014-06-11 - tobias.friedrich@open-xchange.com
 
@@ -74,6 +71,10 @@
 * 2014-06-03 - martin.schneider@open-xchange.com
 
  - Fix for bug 32883: Use up to date account information to get folder separator
+
+* 2014-06-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 32743: Property was added in a patch and according post installation scripting should be contained in a patch, too.
 
 * 2014-06-02 - jan.bauerdick@open-xchange.com
 
@@ -282,6 +283,10 @@
 
  - Fix for bug 30843: Introduced properties for IMAP, POP3, and SMTP to specify the SSL cipher suites that will be enabled for SSL connections
  - Fix for bug 32466: Ignore transport credentials on primary mail account update
+ 
+* 2014-05-07 - ioannis.chouklis@open-xchange.com
+
+ -Fix for bug 31253: Escape the 'OK' literal at the beginning of each newline with '_OK_'
 
 * 2014-05-05 - thorben.betten@open-xchange.com
 
@@ -306,6 +311,7 @@
  - Fix for bug 32211: Removed usage of removed String constructor in JSON bundle + Proper reflection-wise look-up of "extendedProvider" field in Java8
  - Fix for bug 31842: Provide human-readable quota information
  - Fix for bug 32238: Do not pre-acquire Writer from HTTP response to leave room for error responses
+ - Fix for bug 31842: Provide human-readable quota information
  - Fix for bug 32239: Filter associated account's address from recipient list
 
 * 2014-04-28 - martin.herfurth@open-xchange.com
