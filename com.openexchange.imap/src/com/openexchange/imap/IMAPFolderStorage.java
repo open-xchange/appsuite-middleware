@@ -100,7 +100,7 @@ import com.openexchange.imap.cache.ListLsubRuntimeException;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
-import com.openexchange.imap.cache.RootSubfolderCache;
+import com.openexchange.imap.cache.RootSubfoldersEnabledCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
@@ -1065,7 +1065,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (imapConfig.isSupportsACLs()) {
                     try {
                         if (isParentDefault) {
-                            if (!(RootSubfolderCache.canCreateSubfolders((DefaultFolder) parent, true, session, accountId).booleanValue())) {
+                            if (!(RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, (DefaultFolder) parent))) {
                                 throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, DEFAULT_FOLDER_ID);
                             }
                         } else {
@@ -1562,7 +1562,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         if (imapConfig.isSupportsACLs() && ((destFolder.getType() & Folder.HOLDS_MESSAGES) > 0)) {
                             try {
                                 if (isDestRoot) {
-                                    if (!(RootSubfolderCache.canCreateSubfolders((DefaultFolder) destFolder, true, session, accountId).booleanValue())) {
+                                    if (!(RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, (DefaultFolder) destFolder))) {
                                         throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, DEFAULT_FOLDER_ID);
                                     }
                                 } else {
@@ -2362,7 +2362,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private String prefixByInferiors() throws OXException {
         try {
             final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
-            if (!RootSubfolderCache.canCreateSubfolders(defaultFolder, true, session, accountId).booleanValue() || MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace()) {
+            if (!RootSubfoldersEnabledCache.isRootSubfoldersEnabled(imapConfig, defaultFolder) || MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace()) {
                 return new StringBuilder(STR_INBOX).append(defaultFolder.getSeparator()).toString();
             }
             return "";
@@ -3195,6 +3195,23 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private ListLsubEntry getLSUBEntry(final String fullName, final IMAPFolder imapFolder) throws OXException, MessagingException {
         return ListLsubCache.getCachedLSUBEntry(fullName, accountId, imapFolder, session);
+    }
+
+    /**
+     * Gets the separator character.
+     *
+     * @param imapStore The IMAP store
+     * @return The separator character
+     * @throws OXException If an error occurs
+     */
+    public char getSeparator(final IMAPStore imapStore) throws OXException {
+        try {
+            return getLISTEntry(STR_INBOX, (IMAPFolder) imapStore.getDefaultFolder()).getSeparator();
+        } catch (final MessagingException e) {
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
     }
 
     /**
