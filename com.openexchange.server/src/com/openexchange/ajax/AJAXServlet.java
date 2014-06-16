@@ -69,7 +69,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -1027,7 +1026,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         final ServletFileUpload upload = newFileUploadBase();
         List<FileItem> items = null;
         try {
-            // Parse the upload request
+            /*
+             * Parse the upload request
+             */
             try {
                 // Check request's character encoding
                 if (null == req.getCharacterEncoding()) {

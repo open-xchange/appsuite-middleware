@@ -360,8 +360,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(CalendarObject.RECURRENCE_ID), new StatementFiller() {
-
-            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws OXException, SQLException {
                 if (cdao.getRecurrenceID() > 0) {
                     stmt.setInt(pos, cdao.getRecurrenceID());
@@ -392,8 +390,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(CalendarObject.RECURRENCE_POSITION), new StatementFiller() {
-
-            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws OXException, SQLException {
                 if (cdao.getRecurrencePosition() >= 0) {
                     stmt.setInt(pos, cdao.getRecurrencePosition());

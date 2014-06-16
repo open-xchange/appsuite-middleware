@@ -56,9 +56,19 @@ import com.openexchange.session.Session;
 import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetService;
 
-
 /**
- * {@link MimeSnippetService}
+ * {@link MimeSnippetService} - The "filestore" using snippet service.
+ * <p>
+ * <b>&nbsp;&nbsp;How SnippetService selection works</b>
+ * <hr>
+ * <p>
+ * The check if "filestore" capability is available/permitted as per CapabilityService is performed through examining
+ * "MimeSnippetService.neededCapabilities()" method in "SnippetAction.getSnippetService()".
+ * <p>
+ * Available SnippetServices are sorted rank-wise, with RdbSnippetService having default (0) ranking and MimeSnippetService with a rank of
+ * 10. Thus MimeSnippetService is preferred provided that "filestore" capability is indicated by CapabilityService.
+ * <p>
+ * If missing, RdbSnippetService is selected.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -80,7 +90,5 @@ public final class MimeSnippetService implements SnippetService {
     public List<String> neededCapabilities() {
         return Collections.singletonList("filestore");
     }
-
-
 
 }

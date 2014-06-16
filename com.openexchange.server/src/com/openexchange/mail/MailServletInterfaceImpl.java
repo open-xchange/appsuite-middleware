@@ -685,7 +685,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         if (!hardDelete) {
             // New folder in trash folder
-            postEvent(accountId, trashFullname, false);
+            postEventRemote(accountId, trashFullname, false);
         }
         postEvent4Subfolders(accountId, subfolders);
         return retval;
@@ -700,7 +700,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (!m.isEmpty()) {
                 postEvent4Subfolders(accountId, m);
             }
-            postEvent(accountId, entry.getKey(), false);
+            postEventRemote(accountId, entry.getKey(), false);
         }
     }
 
@@ -2492,7 +2492,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         fullName = mailAccess.getFolderStorage().moveFolder(fullName, newFullname.toString());
                         movePerformed = true;
                         postEvent4Subfolders(accountId, subfolders);
-                        postEvent(accountId, newParent, false, true);
+                        postEventRemote(accountId, newParent, false, true);
                     }
                 } else {
                     // Move to another account
@@ -2523,7 +2523,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             p.getSeparator(),
                             session.getUserId(),
                             otherAccess.getMailConfig().getCapabilities().hasPermissions());
-                        postEvent(parentAccountID, newParent, false, true);
+                        postEventRemote(parentAccountID, newParent, false, true);
                         // Delete source
                         final Map<String, Map<?, ?>> subfolders = subfolders(fullName);
                         mailAccess.getFolderStorage().deleteFolder(fullName, true);
@@ -2545,14 +2545,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 final String newName = mailFolder.getName();
                 if (!newName.equals(oldName)) { // rename
                     fullName = mailAccess.getFolderStorage().renameFolder(fullName, newName);
-                    postEvent(accountId, fullName, false, true);
+                    postEventRemote(accountId, fullName, false, true);
                 }
             }
             /*
              * Handle update of permission or subscription
              */
             final String prepareFullname = prepareFullname(accountId, mailAccess.getFolderStorage().updateFolder(fullName, mailFolder));
-            postEvent(accountId, fullName, false, true);
+            postEventRemote(accountId, fullName, false, true);
             return prepareFullname;
         }
         /*
@@ -2561,7 +2561,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int accountId = mailFolder.getParentAccountId();
         initConnection(accountId);
         final String prepareFullname = prepareFullname(accountId, mailAccess.getFolderStorage().createFolder(mailFolder));
-        postEvent(accountId, mailFolder.getParentFullname(), false, true);
+        postEventRemote(accountId, mailFolder.getParentFullname(), false, true);
         return prepareFullname;
     }
 
@@ -3496,6 +3496,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         postEvent(accountId, fullName, contentRelated, false);
     }
 
+    private void postEventRemote(final int accountId, final String fullName, final boolean contentRelated) {
+        postEventRemote(accountId, fullName, contentRelated, false);
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------- //
+
     private void postEvent(final int accountId, final String fullName, final boolean contentRelated, final boolean immediateDelivery) {
         if (MailAccount.DEFAULT_ID != accountId) {
             /*
@@ -3503,9 +3509,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             return;
         }
-        EventPool.getInstance().put(
-            new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, session));
+        EventPool.getInstance().put(new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, false, session));
     }
+
+    private void postEventRemote(final int accountId, final String fullName, final boolean contentRelated, final boolean immediateDelivery) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            /*
+             * TODO: No event for non-primary account?
+             */
+            return;
+        }
+        EventPool.getInstance().put(new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, true, session));
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------- //
 
     private void postEvent(final int accountId, final String fullName, final boolean contentRelated, final boolean immediateDelivery, final boolean async) {
         if (MailAccount.DEFAULT_ID != accountId) {
@@ -3515,8 +3532,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             return;
         }
         EventPool.getInstance().put(
-            new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, session).setAsync(async));
+            new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, false, session).setAsync(async));
     }
+
+    private void postEventRemote(final int accountId, final String fullName, final boolean contentRelated, final boolean immediateDelivery, final boolean async) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            /*
+             * TODO: No event for non-primary account?
+             */
+            return;
+        }
+        EventPool.getInstance().put(
+            new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, true, session).setAsync(async));
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------- //
 
     private void postEvent(final String topic, final int accountId, final String fullName, final boolean contentRelated, final boolean immediateDelivery) {
         if (MailAccount.DEFAULT_ID != accountId) {
@@ -3525,8 +3555,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             return;
         }
-        EventPool.getInstance().put(new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, session));
+        EventPool.getInstance().put(new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, false, session));
     }
+
+    private void postEventRemote(final String topic, final int accountId, final String fullName, final boolean contentRelated, final boolean immediateDelivery) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            /*
+             * TODO: No event for non-primary account?
+             */
+            return;
+        }
+        EventPool.getInstance().put(new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, true, session));
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------- //
 
     private void postEvent(final String topic, final int accountId, final String fullName, final boolean contentRelated, final boolean immediateDelivery, final boolean async) {
         if (MailAccount.DEFAULT_ID != accountId) {
@@ -3535,9 +3577,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             return;
         }
-        final PooledEvent pooledEvent = new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, session);
+        final PooledEvent pooledEvent = new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, false, session);
         EventPool.getInstance().put(pooledEvent.setAsync(async));
     }
+
+    private void postEventRemote(final String topic, final int accountId, final String fullName, final boolean contentRelated, final boolean immediateDelivery, final boolean async) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            /*
+             * TODO: No event for non-primary account?
+             */
+            return;
+        }
+        final PooledEvent pooledEvent = new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, true, session);
+        EventPool.getInstance().put(pooledEvent.setAsync(async));
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------- //
 
     private void postEvent(final String topic, final int accountId, final String fullName, final boolean contentRelated, final boolean immediateDelivery, final boolean async, final Map<String, Object> moreProperties) {
         if (MailAccount.DEFAULT_ID != accountId) {
@@ -3546,7 +3601,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             return;
         }
-        final PooledEvent pooledEvent = new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, session);
+        final PooledEvent pooledEvent = new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, false, session);
+        if (null != moreProperties) {
+            for (final Entry<String, Object> entry : moreProperties.entrySet()) {
+                pooledEvent.putProperty(entry.getKey(), entry.getValue());
+            }
+        }
+        EventPool.getInstance().put(pooledEvent.setAsync(async));
+    }
+
+    private void postEventRemote(final String topic, final int accountId, final String fullName, final boolean contentRelated, final boolean immediateDelivery, final boolean async, final Map<String, Object> moreProperties) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            /*
+             * TODO: No event for non-primary account?
+             */
+            return;
+        }
+        final PooledEvent pooledEvent = new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullName), contentRelated, immediateDelivery, true, session);
         if (null != moreProperties) {
             for (final Entry<String, Object> entry : moreProperties.entrySet()) {
                 pooledEvent.putProperty(entry.getKey(), entry.getValue());

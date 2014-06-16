@@ -198,6 +198,68 @@ public class SMIMEStructureTest extends AbstractMailTest {
         }
     }
 
+    public void testYetAnotherMIMEStructure2() {
+        try {
+            getSession();
+
+            final byte[] smime = (
+                "From: asdsad@gmx.de\n" +
+                "Content-Type: multipart/signed; boundary=\"Apple-Mail=_7F65DE4D-4C06-49D2-BFA0-63F9B3D3E350\"; protocol=\"application/pkcs7-signature\"; micalg=sha1\n" +
+                "Date: Wed, 14 May 2014 08:56:15 -0400\n" +
+                "Subject: My subject\n" +
+                "To: hgjjgh@open-xchange.com\n" +
+                "Message-Id: <7029863B-C54D-403B-B29C-9BAFD00E0DBABE@gmx.de>\n" +
+                "Mime-Version: 1.0 (Mac OS X Mail 7.2 \\(1874\\))\n" +
+                "X-Mailer: Apple Mail (2.1874)\n" +
+                "\n" +
+                "\n" +
+                "--Apple-Mail=_7F65DE4D-4C06-49D2-BFA0-63F9B3D3E350\n" +
+                "Content-Transfer-Encoding: 7bit\n" +
+                "Content-Type: text/plain;\n" +
+                "    charset=us-ascii\n" +
+                "\n" +
+                "Hi stefan\n" +
+                ";)\n" +
+                "stefan\n" +
+                "--Apple-Mail=_7F65DE4D-4C06-49D2-BFA0-63F9B3D3E350\n" +
+                "Content-Disposition: attachment;\n" +
+                "    filename=smime.p7s\n" +
+                "Content-Type: application/pkcs7-signature;\n" +
+                "    name=smime.p7s\n" +
+                "Content-Transfer-Encoding: base64\n" +
+                "\n" +
+                "MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIIO2TCCBIow\n" +
+                "ggNyoAMCAQICECf06hH0eobEbp27bqkXBwcwDQYJKoZIhvcNAQEFBQAwbzELMAkGA1UEBhMCU0Ux\n" +
+                "FDASBgNVBAoTC0FkZFRydXN0IEFCMSYwJAYDVQQLEx1BZGRUcnVzdCBFeHRlcm5hbCBUVFAgTmV0\n" +
+                "GTppEtDs5R1PU3gYbpis78Ay9ZhjHpmM7ip3IX+PAGqsO3K7ASfZk68yeqpyuBy8mr3jA4cbymMh\n" +
+                "pAHl6SOzA2VJqEhh+CxDWfBlzdMm3v/JXAIE4WJAUhiD7XW3lqX1O2RBTwLHUypPAx3/8B1to6Gn\n" +
+                "Bvjl9VXHCRRbimvMR6+mRXJaXdyF9Q8kyBtQ1YQMpgPln+C5svwRQK5znMMDow6ky6zCnVPvx6TA\n" +
+                "dRqQbotPXRhJYf2hYV62t5QMZuz4Y7fHB6k6+VVdhC1Kms3J1YxnQX52Fr7HQcOgKeRKvluug2wV\n" +
+                "EkJjJDoENHQAAAAAAAA=\n" +
+                "\n" +
+                "--Apple-Mail=_7F65DE4D-4C06-49D2-BFA0-63F9B3D3E350--\n" +
+                "").getBytes();
+
+            final MailMessage mail = MimeMessageConverter.convertMessage(smime);
+
+            final MIMEStructureHandler handler = new MIMEStructureHandler(-1L);
+            new StructureMailMessageParser().parseMailMessage(mail, handler);
+
+            final JSONObject jsonMailObject = handler.getJSONMailObject();
+            assertNotNull("Structured JSON mail object is null.", jsonMailObject);
+
+            // System.out.println(jsonMailObject.toString(2));
+
+            assertTrue("Detected a body object, but shouldn't be there.", !jsonMailObject.hasAndNotNull("body"));
+
+            assertTrue("Missing S/MIME body text.", jsonMailObject.hasAndNotNull("smime_body_text"));
+            assertTrue("Missing S/MIME body data.", jsonMailObject.hasAndNotNull("smime_body_data"));
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
     public void testYetAnotherMIMEStructure() {
         try {
             getSession();
@@ -312,68 +374,6 @@ public class SMIMEStructureTest extends AbstractMailTest {
                 "EkJjJDoENHQAAAAAAAA=\n" +
                 "\n" +
                 "--Apple-Mail=_7F65DE4D-4C06-49D2-BFA0-63F9B3D3E350--\n").getBytes();
-
-            final MailMessage mail = MimeMessageConverter.convertMessage(smime);
-
-            final MIMEStructureHandler handler = new MIMEStructureHandler(-1L);
-            new StructureMailMessageParser().parseMailMessage(mail, handler);
-
-            final JSONObject jsonMailObject = handler.getJSONMailObject();
-            assertNotNull("Structured JSON mail object is null.", jsonMailObject);
-
-            // System.out.println(jsonMailObject.toString(2));
-
-            assertTrue("Detected a body object, but shouldn't be there.", !jsonMailObject.hasAndNotNull("body"));
-
-            assertTrue("Missing S/MIME body text.", jsonMailObject.hasAndNotNull("smime_body_text"));
-            assertTrue("Missing S/MIME body data.", jsonMailObject.hasAndNotNull("smime_body_data"));
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-    }
-
-    public void testYetAnotherMIMEStructure2() {
-        try {
-            getSession();
-
-            final byte[] smime = (
-                "From: asdsad@gmx.de\n" +
-                "Content-Type: multipart/signed; boundary=\"Apple-Mail=_7F65DE4D-4C06-49D2-BFA0-63F9B3D3E350\"; protocol=\"application/pkcs7-signature\"; micalg=sha1\n" +
-                "Date: Wed, 14 May 2014 08:56:15 -0400\n" +
-                "Subject: My subject\n" +
-                "To: hgjjgh@open-xchange.com\n" +
-                "Message-Id: <7029863B-C54D-403B-B29C-9BAFD00E0DBABE@gmx.de>\n" +
-                "Mime-Version: 1.0 (Mac OS X Mail 7.2 \\(1874\\))\n" +
-                "X-Mailer: Apple Mail (2.1874)\n" +
-                "\n" +
-                "\n" +
-                "--Apple-Mail=_7F65DE4D-4C06-49D2-BFA0-63F9B3D3E350\n" +
-                "Content-Transfer-Encoding: 7bit\n" +
-                "Content-Type: text/plain;\n" +
-                "    charset=us-ascii\n" +
-                "\n" +
-                "Hi stefan\n" +
-                ";)\n" +
-                "stefan\n" +
-                "--Apple-Mail=_7F65DE4D-4C06-49D2-BFA0-63F9B3D3E350\n" +
-                "Content-Disposition: attachment;\n" +
-                "    filename=smime.p7s\n" +
-                "Content-Type: application/pkcs7-signature;\n" +
-                "    name=smime.p7s\n" +
-                "Content-Transfer-Encoding: base64\n" +
-                "\n" +
-                "MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIIO2TCCBIow\n" +
-                "ggNyoAMCAQICECf06hH0eobEbp27bqkXBwcwDQYJKoZIhvcNAQEFBQAwbzELMAkGA1UEBhMCU0Ux\n" +
-                "FDASBgNVBAoTC0FkZFRydXN0IEFCMSYwJAYDVQQLEx1BZGRUcnVzdCBFeHRlcm5hbCBUVFAgTmV0\n" +
-                "GTppEtDs5R1PU3gYbpis78Ay9ZhjHpmM7ip3IX+PAGqsO3K7ASfZk68yeqpyuBy8mr3jA4cbymMh\n" +
-                "pAHl6SOzA2VJqEhh+CxDWfBlzdMm3v/JXAIE4WJAUhiD7XW3lqX1O2RBTwLHUypPAx3/8B1to6Gn\n" +
-                "Bvjl9VXHCRRbimvMR6+mRXJaXdyF9Q8kyBtQ1YQMpgPln+C5svwRQK5znMMDow6ky6zCnVPvx6TA\n" +
-                "dRqQbotPXRhJYf2hYV62t5QMZuz4Y7fHB6k6+VVdhC1Kms3J1YxnQX52Fr7HQcOgKeRKvluug2wV\n" +
-                "EkJjJDoENHQAAAAAAAA=\n" +
-                "\n" +
-                "--Apple-Mail=_7F65DE4D-4C06-49D2-BFA0-63F9B3D3E350--\n" +
-                "").getBytes();
 
             final MailMessage mail = MimeMessageConverter.convertMessage(smime);
 

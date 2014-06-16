@@ -76,7 +76,7 @@ public class ThreadSortsTest extends TestCase {
 
             assertEquals("Unpected number of conversations", 578, conversations.size());
 
-            List<MailMessage> firstConversation = conversations.get(0);
+            List<? extends MailMessage> firstConversation = conversations.get(0);
             assertEquals("Unpected number of conversation size", 43, firstConversation.size());
         } catch (Exception e) {
             e.printStackTrace();

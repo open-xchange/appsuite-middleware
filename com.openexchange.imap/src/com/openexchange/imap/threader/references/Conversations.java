@@ -124,12 +124,14 @@ public final class Conversations {
         FetchProfile fp = new FetchProfile();
         fp.add("References");
         fp.add(UIDFolder.FetchProfileItem.UID);
-        for (MailField field : fields) {
-            if (!MimeStorageUtility.isEnvelopeField(field)) {
-                MimeStorageUtility.addFetchItem(fp, field);
+        fp.add(MailMessageFetchIMAPCommand.ENVELOPE_ONLY);
+        if (null != fields) {
+            for (MailField field : fields) {
+                if (!MimeStorageUtility.isEnvelopeField(field)) {
+                    MimeStorageUtility.addFetchItem(fp, field);
+                }
             }
         }
-        fp.add(MailMessageFetchIMAPCommand.ENVELOPE_ONLY);
         return fp;
     }
 
@@ -422,20 +424,11 @@ public final class Conversations {
      * @return The folded conversations
      */
     public static List<Conversation> fold(final List<Conversation> toFold) {
-        int lastProcessed = -1;
         Iterator<Conversation> iter = toFold.iterator();
         int i = 0;
         while (iter.hasNext()) {
-            if (i > lastProcessed) {
-                foldInto(iter.next(), iter);
-                lastProcessed = i;
-                iter = toFold.iterator();
-                i = 0;
-            } else {
-                // Consume iterator until proper position reached
-                iter.next();
-                i++;
-            }
+            foldInto(iter.next(), iter);
+            iter = toFold.listIterator(++i);
         }
         return toFold;
     }

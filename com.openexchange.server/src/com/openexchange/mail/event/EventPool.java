@@ -66,6 +66,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
+import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.push.PushEventConstants;
@@ -278,17 +279,19 @@ public final class EventPool implements Runnable {
         PushEventConstants.PROPERTY_FOLDER,
         PushEventConstants.PROPERTY_IMMEDIATELY,
         PushEventConstants.PROPERTY_SESSION,
-        PushEventConstants.PROPERTY_USER)));
+        PushEventConstants.PROPERTY_USER,
+        CommonEvent.PUBLISH_MARKER)));
 
     private void broadcastEvent(final PooledEvent pooledEvent) {
         final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
         properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(pooledEvent.getContextId()));
         properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(pooledEvent.getUserId()));
         properties.put(PushEventConstants.PROPERTY_SESSION, pooledEvent.getSession());
-        properties.put(PushEventConstants.PROPERTY_FOLDER, MailFolderUtility.prepareFullname(
-            pooledEvent.getAccountId(),
-            pooledEvent.getFullname()));
+        properties.put(PushEventConstants.PROPERTY_FOLDER, MailFolderUtility.prepareFullname(pooledEvent.getAccountId(), pooledEvent.getFullname()));
         properties.put(PushEventConstants.PROPERTY_CONTENT_RELATED, Boolean.valueOf(pooledEvent.isContentRelated()));
+        if (pooledEvent.isRemote()) {
+            properties.put(CommonEvent.PUBLISH_MARKER, Boolean.TRUE);
+        }
         /*
          * Check for additional properties
          */

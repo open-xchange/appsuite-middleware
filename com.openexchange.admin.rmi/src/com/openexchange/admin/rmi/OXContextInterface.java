@@ -120,7 +120,7 @@ public interface OXContextInterface extends Remote {
      * in the corresponding database or filestore.
      * The assigned limits to the database/filestore are ignored, though.
      *
-     * @param ctx Context object
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param admin_user User data of administrative user account for this context
      * @param auth Credentials for authenticating against server.
      *
@@ -140,7 +140,7 @@ public interface OXContextInterface extends Remote {
      * @param access_combination_name String Access combination name!
      * @param auth Credentials for authenticating against server.
      *
-     * @return Context object.
+     * @return A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
@@ -156,7 +156,7 @@ public interface OXContextInterface extends Remote {
      * @param access UserModuleAccess Access rights!
      * @param auth Credentials for authenticating against server.
      *
-     * @return Context object.
+     * @return A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
@@ -171,7 +171,7 @@ public interface OXContextInterface extends Remote {
      * Note: Deleting a context will delete all data which the context include (all users, groups, appointments, ... )
      *
      * @param auth Credentials for authenticating against server.
-     * @param ctx Context object
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
      *
@@ -186,7 +186,7 @@ public interface OXContextInterface extends Remote {
      * If context was changed, call this method to flush data
      * which is no longer needed due to access permission changes!
      *
-     * @param ctx Context object
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth Credentials for authenticating against server.
      * @throws RemoteException General RMI Exception
      * @throws InvalidCredentialsException
@@ -205,7 +205,7 @@ public interface OXContextInterface extends Remote {
      *         in the background. To query the progress and the result of the actual
      *         task, the AdminJobExecutor interface must be used.
      *
-     * @param ctx Context object
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param dst_filestore_id Id of the Filestore to move the context in.
      * @param auth Credentials for authenticating against server.
      * @return Job id which can be used for retrieving progress information.
@@ -225,7 +225,7 @@ public interface OXContextInterface extends Remote {
     /**
      * Move all data of a context contained in a database to another database
      *
-     * @param ctx Context object
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param dst_database_id ID of a registered Database to move all data of this context in.
      * @param auth Credentials for authenticating against server.
      * @return String containing return queue id to query status of job.
@@ -250,7 +250,7 @@ public interface OXContextInterface extends Remote {
     /**
      * Disable given context.<br>
      *
-     * @param ctx Context object.
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
@@ -268,7 +268,7 @@ public interface OXContextInterface extends Remote {
      * Enable given context.
      *
      * @param auth Credentials for authenticating against server.
-     * @param ctx Context object.
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
      * @throws RemoteException General RMI Exception
@@ -336,7 +336,7 @@ public interface OXContextInterface extends Remote {
     /**
      * Get specified context details
      *
-     * @param ctx
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. The context IDs of these objects should be set.
      * @param auth
      * @return
      * @throws RemoteException
@@ -350,7 +350,7 @@ public interface OXContextInterface extends Remote {
     /**
      * Get specified context details
      *
-     * @param ctx With context ID set.
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. The context ID of this object should be set.
      * @param auth Credentials for authenticating against server.
      * @return Data for the requested context.
      * @throws RemoteException
@@ -374,7 +374,8 @@ public interface OXContextInterface extends Remote {
      *
      * Change storage data informations - Change filestore infos for context. Normally NO need to change!
      *
-     * @param ctx
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. Beside the context ID 
+     * or name for identifying the context itself the object should only contain those field which need to be changed.
      * @param auth
      * @throws RemoteException
      * @throws InvalidCredentialsException
@@ -387,7 +388,7 @@ public interface OXContextInterface extends Remote {
     /**
      * Gets specified context's capabilities.
      *
-     * @param ctx The context
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth The credentials
      * @return The capabilities
      * @throws RemoteException
@@ -401,7 +402,7 @@ public interface OXContextInterface extends Remote {
     /**
      * Changes specified context's capabilities.
      *
-     * @param ctx The context
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param capsToAdd The capabilities to add
      * @param capsToRemove The capabilities to remove
      * @param capsToDrop The capabilities to drop; e.g. clean from storage
@@ -417,7 +418,7 @@ public interface OXContextInterface extends Remote {
     /**
      * Changes specified context's capabilities.
      *
-     * @param ctx The context
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param module The module to apply quota to
      * @param quotaValue The quota value to set
      * @param auth The credentials
@@ -437,7 +438,7 @@ public interface OXContextInterface extends Remote {
      * This method modifies ONLY the access rights of the context!
      *
      *
-     * @param ctx
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param access
      * @param auth
      * @throws RemoteException
@@ -456,7 +457,7 @@ public interface OXContextInterface extends Remote {
      *
      * This method modifies ONLY the access rights of the context!
      *
-     * @param ctx
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param access
      * @param auth
      * @throws RemoteException
@@ -470,7 +471,7 @@ public interface OXContextInterface extends Remote {
     /**
      * Get current module access rights of the context based on the rights of the admin user!
      *
-     * @param ctx
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth
      * @return Current module access rights!
      * @throws RemoteException
@@ -485,7 +486,7 @@ public interface OXContextInterface extends Remote {
      * Get current access combination name of the context based on the rights of the admin user!
      *
      *
-     * @param ctx
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth
      * @return Access combination name or null if current access rights cannot be mapped to an access combination name.
      * @throws RemoteException
@@ -529,7 +530,8 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Determines the user ID of the admin user for a given context
-     * @param ctx The context for which the userId of the admin should be determined.
+     * 
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. This context will be used for determining the userId of the admin.
      * @param auth Credentials for authenticating against the server.
      * @return The userId of the admin user
      * @throws RemoteException General RMI Exception
@@ -541,7 +543,8 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Determines whether a context already exists.
-     * @param ctx The context we're interested in
+     * 
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth Credentials for authenticating against the server.
      * @return Whether the given context exists or not
      */
@@ -549,7 +552,8 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Determines whether a context already exists.
-     * @param ctx The context we're interested in
+     * 
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth Credentials for authenticating against the server.
      * @return Whether the given context exists or not
      * @deprecated
