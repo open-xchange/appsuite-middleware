@@ -57,11 +57,15 @@ import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
+import com.openexchange.management.ManagementAware;
+import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
+import com.openexchange.realtime.hazelcast.management.GlobalRealtimeCleanupMBean;
+import com.openexchange.realtime.hazelcast.management.GlobalRealtimeCleanupManagement;
 import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
 
@@ -70,10 +74,11 @@ import com.openexchange.realtime.packet.ID;
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
+public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, ManagementAware<GlobalRealtimeCleanupMBean> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GlobalRealtimeCleanupImpl.class);
     private final HazelcastResourceDirectory hazelcastResourceDirectory;
+    private final GlobalRealtimeCleanupManagement management;
 
     /**
      * Initializes a new {@link GlobalRealtimeCleanupImpl}.
@@ -82,6 +87,7 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
     public GlobalRealtimeCleanupImpl(HazelcastResourceDirectory hazelcastResourceDirectory) {
         super();
         this.hazelcastResourceDirectory = hazelcastResourceDirectory;
+        management = new GlobalRealtimeCleanupManagement(this, hazelcastResourceDirectory);
     }
 
     @Override
@@ -133,6 +139,11 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
     @Override
     public Collection<ID> removeFromResourceDirectory(Collection<ID> ids) throws OXException {
         return hazelcastResourceDirectory.remove(ids).keySet();
+    }
+
+    @Override
+    public ManagementObject<GlobalRealtimeCleanupMBean> getManagementObject() {
+        return management;
     }
 
 }

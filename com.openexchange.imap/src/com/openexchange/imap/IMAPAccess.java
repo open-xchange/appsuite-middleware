@@ -79,6 +79,7 @@ import com.openexchange.imap.acl.ACLExtensionInit;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.MBoxEnabledCache;
+import com.openexchange.imap.cache.RootSubfoldersEnabledCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPProperties;
@@ -1055,6 +1056,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         initMaps();
         IMAPCapabilityAndGreetingCache.init();
         MBoxEnabledCache.init();
+        RootSubfoldersEnabledCache.init();
         ACLExtensionInit.getInstance().start();
         Entity2ACLInit.getInstance().start();
         maxCountCache = new NonBlockingHashMap<String, Integer>(16);
@@ -1156,6 +1158,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         ACLExtensionInit.getInstance().stop();
         IMAPCapabilityAndGreetingCache.tearDown();
         MBoxEnabledCache.tearDown();
+        RootSubfoldersEnabledCache.tearDown();
         IMAPSessionProperties.resetDefaultSessionProperties();
         IMAPNotifierMessageRecentListener.dropFullNameChecker();
         dropMaps();

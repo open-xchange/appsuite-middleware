@@ -78,6 +78,10 @@
 
  - Fix for bug 32883: Use up to date account information to get folder separator
 
+* 2014-06-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 32743: Property was added in a patch and according post installation scripting should be contained in a patch, too.
+
 * 2014-06-02 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 32874: Removed unsupported "file content" facet
