@@ -3197,8 +3197,31 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return ListLsubCache.getCachedLSUBEntry(fullName, accountId, imapFolder, session);
     }
 
-    private char getSeparator(final IMAPFolder imapFolder) throws OXException, MessagingException {
-        return getLISTEntry(STR_INBOX, imapFolder).getSeparator();
+    /**
+     * Gets the separator character.
+     *
+     * @param imapFolder The IMAP folder
+     * @return The separator character
+     * @throws OXException If an error occurs
+     */
+    public char getSeparator(final IMAPFolder imapFolder) throws OXException {
+        try {
+            return getLISTEntry(STR_INBOX, imapFolder).getSeparator();
+        } catch (final MessagingException e) {
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", imapFolder.getFullName()));
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    /**
+     * Handles specified {@link MessagingException} instance.
+     *
+     * @param e The {@link MessagingException} instance
+     * @return The appropriate {@link OXException} instance
+     */
+    public OXException handleMessagingException(final MessagingException e) {
+        return IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
     }
 
     private String getNameOf(final IMAPFolder imapFolder) throws OXException, MessagingException {
