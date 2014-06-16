@@ -34,6 +34,12 @@ open-xchange-report-client (7.6.0-0) unstable; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 Feb 2014 09:36:30 +0100
 
+open-xchange-report-client (7.4.2-25) stable; urgency=low
+
+  * Build for patch 2014-06-16
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 05 Jun 2014 16:02:23 +0200
+
 open-xchange-report-client (7.4.2-24) stable; urgency=low
 
   * Build for patch 2014-05-26

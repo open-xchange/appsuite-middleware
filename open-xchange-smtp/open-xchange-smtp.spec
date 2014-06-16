@@ -45,7 +45,7 @@ if [ ${1:-0} -eq 2 ]; then
     PFILE=/opt/open-xchange/etc/smtp.properties
 
     # SoftwareChange_Request-1795
-    ox_add_property com.openexchange.smtp.logTransport false $PFILE
+    ox_add_property com.openexchange.smtp.logTransport false /opt/open-xchange/etc/smtp.properties
 
     # SoftwareChange_Request-1931
     ox_add_property com.openexchange.smtp.ssl.protocols "SSLv3 TLSv1" $PFILE
@@ -69,6 +69,8 @@ fi
 %changelog
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 7.6.0
+* Thu Jun 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-06-16
 * Fri May 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth release candidate for 7.6.0
 * Thu May 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
