@@ -178,7 +178,11 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
-        directory.removeResourceMappingEntryListener(cleanerRegistrationId);
+        try {
+            directory.removeResourceMappingEntryListener(cleanerRegistrationId);
+        } catch (OXException oxe) {
+            LOG.info("Unable to remove ResourceMappingEntryListener.");
+        }
         ManagementHouseKeeper.getInstance().cleanup();
         Services.setServiceLookup(null);
         super.stopBundle();
