@@ -1045,10 +1045,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         b_fullName = false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.container.DataObject#reset()
-     */
     @Override
     public final void reset() {
         super.reset();
@@ -1060,10 +1056,11 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         removeFolderName();
         removeSubfolderFlag();
         removeSubfolderIds();
+        removeFullName();
     }
 
     /**
-     * Fills this folder with all availbable values from given folder and returns itself.
+     * Fills this folder with all available values from given folder and returns itself.
      *
      * @return filled folder
      */

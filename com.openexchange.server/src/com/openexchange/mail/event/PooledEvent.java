@@ -72,6 +72,7 @@ public final class PooledEvent implements Delayed {
     private final Session session;
     private final boolean contentRelated;
     private final boolean immediateDelivery;
+    private final boolean remote;
     private final int hash;
     private boolean async;
     private final Map<String, Object> properties;
@@ -87,8 +88,8 @@ public final class PooledEvent implements Delayed {
      * @param immediateDelivery <code>true</code> for immediate delivery; otherwise <code>false</code>
      * @param session The session
      */
-    public PooledEvent(final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final Session session) {
-        this(PushEventConstants.TOPIC, contextId, userId, accountId, fullname, contentRelated, immediateDelivery, session);
+    public PooledEvent(final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final boolean remote, final Session session) {
+        this(PushEventConstants.TOPIC, contextId, userId, accountId, fullname, contentRelated, immediateDelivery, remote, session);
     }
 
     /**
@@ -102,7 +103,7 @@ public final class PooledEvent implements Delayed {
      * @param immediateDelivery <code>true</code> for immediate delivery; otherwise <code>false</code>
      * @param session The session
      */
-    public PooledEvent(final String topic, final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final Session session) {
+    public PooledEvent(final String topic, final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final boolean remote, final Session session) {
         super();
         properties = new HashMap<String, Object>(4);
         async = true;
@@ -115,6 +116,7 @@ public final class PooledEvent implements Delayed {
         this.contentRelated = contentRelated;
         this.immediateDelivery = immediateDelivery;
         this.session = session;
+        this.remote = remote;
         // Hash code
         final int prime = 31;
         int result = 1;
@@ -336,6 +338,15 @@ public final class PooledEvent implements Delayed {
      */
     public boolean isContentRelated() {
         return contentRelated;
+    }
+
+    /**
+     * Checks if this event is supposed to be distributed remotely.
+     *
+     * @return <code>true</code> for remote distribution; otherwise <code>false</code>
+     */
+    public boolean isRemote() {
+        return remote;
     }
 
 }
