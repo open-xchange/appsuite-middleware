@@ -80,33 +80,33 @@ public class CacheInvalidator implements CacheListener, ServiceTrackerCustomizer
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if ("UserConfiguration".equals(cacheEvent.getRegion())) {
-            Serializable key = cacheEvent.getKey();
-            if (CacheKey.class.isInstance(key)) {
-                CacheOperation operation = cacheEvent.getOperation();
-                CacheKey cacheKey = (CacheKey) key;
-                int contextId = cacheKey.getContextId();
-                if (operation == CacheOperation.INVALIDATE) {
-                    if (cacheKey.getKeys().length == 1) {
-                        Serializable zero = cacheKey.getKeys()[0];
-                        if (Integer.class.isInstance(zero)) {
-                            // Beg for this being the userId...
-                            int userId = ((Integer) zero).intValue();
-                            invalidateUser(userId, contextId);
+            CacheOperation operation = cacheEvent.getOperation();
+            if (operation == CacheOperation.CLEAR) {
+                clear();
+            } else {
+                Serializable key = cacheEvent.getKey();
+                if (CacheKey.class.isInstance(key)) {
+                    CacheKey cacheKey = (CacheKey) key;
+                    int contextId = cacheKey.getContextId();
+                    if (operation == CacheOperation.INVALIDATE) {
+                        if (cacheKey.getKeys().length == 1) {
+                            Serializable zero = cacheKey.getKeys()[0];
+                            if (Integer.class.isInstance(zero)) {
+                                // Beg for this being the userId...
+                                int userId = ((Integer) zero).intValue();
+                                invalidateUser(userId, contextId);
+                            }
                         }
+                    } else if (operation == CacheOperation.INVALIDATE_GROUP) {
+                        invalidateContext(contextId);
                     }
-                } else if (operation == CacheOperation.INVALIDATE_GROUP) {
-                    invalidateContext(contextId);
-                } else if (operation == CacheOperation.CLEAR) {
-                    clear();
                 }
             }
-
         }
     }
 
-    /*
-     * ServiceTrackerCustomizer
-     */
+    // -------------------------------------------------------------------------------------------------------------------------- //
+
     @Override
     public CacheEventService addingService(ServiceReference<CacheEventService> reference) {
         CacheEventService service = context.getService(reference);
@@ -115,12 +115,16 @@ public class CacheInvalidator implements CacheListener, ServiceTrackerCustomizer
     }
 
     @Override
-    public void modifiedService(ServiceReference<CacheEventService> reference, CacheEventService service) {}
+    public void modifiedService(ServiceReference<CacheEventService> reference, CacheEventService service) {
+        // Nothing to do
+    }
 
     @Override
     public void removedService(ServiceReference<CacheEventService> reference, CacheEventService service) {
         service.removeListener("UserConfiguration", this);
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------- //
 
     /*
      * Cache invalidation
