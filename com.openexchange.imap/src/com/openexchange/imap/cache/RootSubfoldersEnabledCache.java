@@ -148,9 +148,6 @@ public final class RootSubfoldersEnabledCache {
      * Checks if root sub-folders capability is enabled for given IMAP account.
      */
     private static boolean isRootSubfoldersEnabled0(final String urlName, final IMAPConfig imapConfig, final DefaultFolder imapDefaultFolder) throws OXException {
-
-        System.out.println("RootSubfoldersEnabledCache.isRootSubfoldersEnabled0() with " + urlName);
-
         final ConcurrentMap<String, Future<Boolean>> map = MAP;
         Future<Boolean> f = map.get(urlName);
         if (null == f) {
