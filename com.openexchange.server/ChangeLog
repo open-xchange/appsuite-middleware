@@ -1,3 +1,12 @@
+* 2014-06-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 32743: Property was added in a patch and according post installation scripting should be contained in a patch, too.
+
+* 2014-06-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32555: Keep other Content-Type parameters when fixing Apple Mailer messages
+ - Fix for bug 32625: Keep subscription statuses when moving IMAP folders
+
 * 2014-05-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 32677: Do net set SMTP credentials if not explicitly set + several sanitizing operations to ensure SMTP authentication does still work
@@ -5,6 +14,10 @@
 * 2014-05-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 32226: Fixed regex used for look-up of referenced inline images
+
+* 2014-05-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 32481: Ignore requests to LinkedIn JSON API if no LinkedIn OAuth account is available for associated user
 
 * 2014-05-14 - thorben.betten@open-xchange.com
 
@@ -18,6 +31,10 @@
 
  - Fix for bug 30843: Introduced properties for IMAP, POP3, and SMTP to specify the SSL cipher suites that will be enabled for SSL connections
  - Fix for bug 32466: Ignore transport credentials on primary mail account update
+ 
+* 2014-05-07 - ioannis.chouklis@open-xchange.com
+
+ -Fix for bug 31253: Escape the 'OK' literal at the beginning of each newline with '_OK_'
 
 * 2014-05-05 - thorben.betten@open-xchange.com
 
@@ -34,6 +51,7 @@
 
 * 2014-04-29 - thorben.betten@open-xchange.com
 
+ - Fix for bug 31842: Provide human-readable quota information
  - Fix for bug 32239: Filter associated account's address from recipient list
 
 * 2014-04-25 - thorben.betten@open-xchange.com
@@ -47,6 +65,10 @@
 * 2014-04-10 - marc.arens@open-xchange.com
 
  - Fix for bug 31942: Fix for unconsumed request remainders and configure that we want to accept payloads for methods where a payload is currently undefined but not forbidden.
+
+* 2014-04-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31962: Fixed request watcher runs
  
 * 2014-04-07 - tobias.friedrich@open-xchange.com
 
@@ -55,10 +77,6 @@
 * 2014-04-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31912: Don't apply personal reminder setting for appointments in shared folders  
-
-* 2014-04-09 - thorben.betten@open-xchange.com
-
- - Fix for bug 31962: Fixed request watcher runs
 
 * 2014-04-02 - ioannis.chouklis@open-xchange.com
 

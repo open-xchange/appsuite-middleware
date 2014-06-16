@@ -84,6 +84,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
@@ -163,18 +164,13 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         if (doAction && !exceeded) {
             final long size = attachment.getSize();
             if (size <= 0) {
-                LOG.debug("Missing size: {}", size, new Throwable());
+                LOG.debug("Missing size: {}", Long.valueOf(size), new Throwable());
             }
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
                 if (LOG.isDebugEnabled()) {
                     final String fileName = attachment.getFileName();
-                    final OXException e =
-                        MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(
-                            Long.valueOf(uploadQuotaPerFile),
-                            null == fileName ? "" : fileName,
-                            Long.valueOf(size));
-                    LOG.debug("Per-file quota ({}) exceeded. Message is going to be sent with links to publishing infostore folder.", getSize(uploadQuotaPerFile, 2, false, true),
-                        e);
+                    final OXException e = MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(getSize(uploadQuotaPerFile), null == fileName ? "" : fileName, getSize(size));
+                    LOG.debug("Per-file quota ({}) exceeded. Message is going to be sent with links to publishing infostore folder.", getSize(uploadQuotaPerFile), e);
                 }
                 exceeded = true;
             }
@@ -184,9 +180,8 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             consumed += size;
             if (uploadQuota > 0 && consumed > uploadQuota) {
                 if (LOG.isDebugEnabled()) {
-                    final OXException e = MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
-                    LOG.debug("Overall quota ({}) exceeded. Message is going to be sent with links to publishing infostore folder.", getSize(uploadQuota, 2, false, true),
-                        e);
+                    final OXException e = MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(getSize(uploadQuota));
+                    LOG.debug("Overall quota ({}) exceeded. Message is going to be sent with links to publishing infostore folder.", getSize(uploadQuota), e);
                 }
                 exceeded = true;
             }
@@ -232,7 +227,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         target = discoveryService.getTarget("com.openexchange.publish.online.infostore.document");
         if (null == target) {
             LOG.warn("Missing publication target for ID \"com.openexchange.publish.online.infostore.document\".\nThrowing quota-exceeded exception instead.");
-            throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
+            throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(uploadQuota));
         }
         /*
          * ... and in turn target's publication service

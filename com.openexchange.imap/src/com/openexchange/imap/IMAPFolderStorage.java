@@ -57,12 +57,15 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.Flags;
@@ -2541,10 +2544,15 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, getNameOf(newFolder));
         }
         /*
+         * Examine
+         */
+        Set<String> entityNames = imapConfig.isSupportsACLs() ? new HashSet<String>(8) : null;
+        Set<String> oldFullNames = new HashSet<String>(8);
+        Map<String, Boolean> subscriptions = new HashMap<String, Boolean>(8);
+        gatherFolderInfo(toMove, moveFullname.length(), newFolder.getFullName(), subscriptions, oldFullNames, entityNames, new StringBuilder(32));
+        /*
          * Perform RENAME
          */
-        final ACL[] acls = imapConfig.isSupportsACLs() ? getACLSafe(toMove) : null;
-        final boolean subscribed = toMove.isSubscribed();
         if (!toMove.renameTo(newFolder)) {
             throw IMAPException.create(
                 IMAPException.Code.FOLDER_CREATION_FAILED,
@@ -2556,11 +2564,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         /*
          * Apply original subscription status
          */
-        newFolder.setSubscribed(subscribed);
+        for (Entry<String, Boolean> entry : subscriptions.entrySet()) {
+            String fullName = entry.getKey();
+            try {
+                imapStore.getFolder(fullName).setSubscribed(entry.getValue().booleanValue());
+            } catch (Exception e) {
+                // Restoring subscription status failed
+                LOG.warn("Could not restore subscription status for folder {} during IMAP folder move operation", fullName, e);
+            }
+        }
         /*
          * Delete/unsubscribe old folder
          */
-        IMAPCommandsCollection.forceSetSubscribed(imapStore, moveFullname, false);
+        for (String oldFullName : oldFullNames) {
+            IMAPCommandsCollection.forceSetSubscribed(imapStore, oldFullName, false);
+        }
         /*
          * Notify message storage
          */
@@ -2576,9 +2594,25 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, moveFullname);
         }
         // Affected users, too
-        dropListLsubCachesForOther(acls);
+        dropListLsubCachesForOther(entityNames);
 
         return newFolder;
+    }
+
+    private void gatherFolderInfo(final IMAPFolder folder, final int oldPathLen, final String newPath, final Map<String, Boolean> subscriptions, final Set<String> oldFullNames, final Set<String> entityNames, final StringBuilder sb) throws MessagingException {
+        if (null != entityNames) {
+            extractEntityNames(getACLSafe(folder), entityNames);
+        }
+        {
+            String fullName = folder.getFullName();
+            oldFullNames.add(fullName);
+            sb.setLength(0);
+            fullName = sb.append(newPath).append(fullName.substring(oldPathLen)).toString();
+            subscriptions.put(fullName, Boolean.valueOf(folder.isSubscribed()));
+        }
+        for (Folder subfolder : folder.list()) {
+            gatherFolderInfo((IMAPFolder) subfolder, oldPathLen, newPath, subscriptions, oldFullNames, entityNames, sb);
+        }
     }
 
     private ACL[] permissions2ACL(final OCLPermission[] perms, final IMAPFolder imapFolder) throws OXException, MessagingException {
@@ -2690,6 +2724,47 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         LOG.debug("Could not resolve users for entity name {}", entityName, e);
                     }
                 }
+            }
+        }
+    }
+
+    private void dropListLsubCachesForOther(final Collection<String> entityNames) {
+        if (null == entityNames || entityNames.isEmpty()) {
+            return;
+        }
+        final CacheEventService cacheEventService = Services.optService(CacheEventService.class);
+        final UserStorage us = UserStorage.getInstance();
+        for (final String entityName : entityNames) {
+            if (null != entityName) {
+                if (!imapConfig.getLogin().equals(entityName)) {
+                    try {
+                        final User[] users = us.searchUserByMailLogin(entityName, ctx);
+                        for (final User user : users) {
+                            final int userId = user.getId();
+                            if (userId != session.getUserId()) {
+                                ListLsubCache.dropFor(userId, ctx.getContextId());
+                                if (null != cacheEventService) {
+                                    final CacheEvent event = newCacheEventFor(userId);
+                                    LOG.debug("fireInvalidate: {}", event);
+                                    cacheEventService.notify(this, event, false);
+                                }
+                            }
+                        }
+                    } catch (final OXException e) {
+                        LOG.debug("Could not resolve users for entity name {}", entityName, e);
+                    }
+                }
+            }
+        }
+    }
+
+    private void extractEntityNames(final ACL[] acls, final Collection<String> entityNames) {
+        if (null == acls || 0 == acls.length) {
+            return;
+        }
+        for (final ACL acl : acls) {
+            if (null != acl) {
+                entityNames.add(acl.getName());
             }
         }
     }

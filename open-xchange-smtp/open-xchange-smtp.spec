@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 25
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -42,8 +42,13 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    PFILE=/opt/open-xchange/etc/smtp.properties
+
     # SoftwareChange_Request-1795
     ox_add_property com.openexchange.smtp.logTransport false /opt/open-xchange/etc/smtp.properties
+
+    # SoftwareChange_Request-2016
+    ox_add_property com.openexchange.smtp.ssl.ciphersuites "" $PFILE
 fi
 
 %clean
@@ -59,6 +64,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Jun 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-06-16
 * Thu May 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-05-26
 * Fri May 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
