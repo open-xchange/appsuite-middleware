@@ -812,9 +812,13 @@ public class Strings {
         }
 
         // Check for a sign.
+        final int len = s.length();
+        if (len <= 0) {
+            throw new NumberFormatException("Empty string");
+        }
+
         int num = 0;
         int sign = -1;
-        final int len = s.length();
         final char ch = s.charAt(0);
         if (ch == '-') {
             if (len == 1) {
@@ -844,6 +848,60 @@ public class Strings {
             num *= 10;
             if (num < (max + d)) {
                 throw new NumberFormatException("Over/underflow:  " + s);
+            }
+            num -= d;
+        }
+
+        return sign * num;
+    }
+
+    /**
+     * Fast parsing to a positive integer
+     *
+     * @param s The string to parse
+     * @return The <code>int</code> value or <code>-1</code> if string appears not be a positive integer
+     */
+    public static int parsePositiveInt(final String s) {
+        if (s == null) {
+            return -1;
+        }
+
+        // Check for a sign.
+        final int len = s.length();
+        if (len <= 0) {
+            return -1;
+        }
+
+        final char ch = s.charAt(0);
+        if (ch == '-') {
+            return -1;
+        }
+
+        int num;
+        {
+            final int d = ch - '0';
+            if (d < 0 || d > 9) {
+                return -1;
+            }
+            num = -d;
+        }
+
+        // Build the number.
+        final int sign = -1;
+        final int max = -Integer.MAX_VALUE;
+        final int multmax = max / 10;
+        int i = 1;
+        while (i < len) {
+            final int d = s.charAt(i++) - '0';
+            if (d < 0 || d > 9) {
+                return -1;
+            }
+            if (num < multmax) {
+                return -1;
+            }
+            num *= 10;
+            if (num < (max + d)) {
+                return -1;
             }
             num -= d;
         }
