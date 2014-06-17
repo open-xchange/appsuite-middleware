@@ -3668,7 +3668,7 @@ public final class IMAPCommandsCollection {
      * @param r The response(s)
      * @param protocol The IMAP protocol
      */
-    protected static void notifyResponseHandlers(final Response[] r, final IMAPProtocol protocol) {
+    public static void notifyResponseHandlers(final Response[] r, final IMAPProtocol protocol) {
         final Response[] rs = new Response[1];
         for (int i = 0; i < r.length; i++) {
             final Response response = r[i];
