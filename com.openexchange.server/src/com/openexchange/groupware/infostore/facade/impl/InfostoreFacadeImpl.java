@@ -148,6 +148,7 @@ import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
@@ -232,21 +233,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return addNumberOfVersions(addLocked(load(id, version, session.getContext()), allLocks, session), session.getContext());
     }
 
-    DocumentMetadata load(final int id, final int version, final Context ctx) throws OXException {
-        final InfostoreIterator iter = InfostoreIterator.loadDocumentIterator(id, version, getProvider(), ctx);
-        if (!iter.hasNext()) {
-            throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create();
-        }
-        DocumentMetadata dm;
-        try {
-            dm = iter.next();
-            iter.close();
-        } catch (final OXException e) {
-            throw e;
-        }
-        return dm;
-    }
-
     @Override
     public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final ServerSession session) throws OXException {
         saveDocument(document, null, sequenceNumber, session);
@@ -270,8 +256,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
         final DocumentMetadata dm = load(id, version, session.getContext());
         final FileStorage fs = getFileStorage(session.getContext());
-        if (dm.getFilestoreLocation() == null) {
-            return Streams.newByteArrayInputStream(new byte[0]);
+        if (null == dm.getFilestoreLocation()) {
+            return Streams.EMPTY_INPUT_STREAM;
         }
         if (0 == offset && -1 == length) {
             return fs.getFile(dm.getFilestoreLocation());
@@ -381,6 +367,40 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             usage = getFileStorage(session.getContext()).getUsage();
         }
         return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.STORAGE);
+    }
+
+    /**
+     * Loads the current version of a document with all available metadata from the database.
+     *
+     * @param id The ID of the document to load
+     * @param ctx The context
+     * @return The loaded document
+     * @throws OXException
+     */
+    protected DocumentMetadata load(int id, Context ctx) throws OXException {
+        return load(id, CURRENT_VERSION, ctx);
+    }
+
+    /**
+     * Loads a document in a specific version with all available metadata from the database.
+     *
+     * @param id The ID of the document to load
+     * @param version The version to load
+     * @param ctx The context
+     * @return The loaded document
+     * @throws OXException
+     */
+    protected DocumentMetadata load(final int id, final int version, final Context ctx) throws OXException {
+        InfostoreIterator iterator = null;
+        try {
+            iterator = InfostoreIterator.loadDocumentIterator(id, version, getProvider(), ctx);
+            if (false == iterator.hasNext()) {
+                throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create();
+            }
+            return iterator.next();
+        } finally {
+            SearchIterators.close(iterator);
+        }
     }
 
     private Delta<DocumentMetadata> addLocked(final Delta<DocumentMetadata> delta, final Map<Integer, List<Lock>> locks, final ServerSession session) throws OXException {
@@ -1043,17 +1063,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         removeFromIndex(context, sessionObj.getUserId(), delVers);
     }
 
+    /**
+     * Removes the supplied file from the underlying storage. If a transaction is active, the file is remembered to be deleted during
+     * the {@link #commit()}-phase - otherwise it's deleted from the storage directly.
+     *
+     * @param context The context
+     * @param filestoreLocation The location referencing the file to be deleted in the storage
+     * @throws OXException
+     */
     private void removeFile(final Context context, final String filestoreLocation) throws OXException {
-        if (filestoreLocation == null) {
-            return;
-        }
-        if (fileIdRemoveList.get() != null) {
-            fileIdRemoveList.get().add(filestoreLocation);
-            ctxHolder.set(context);
-        } else {
-            final QuotaFileStorage qfs = getFileStorage(context);
-            qfs.deleteFile(filestoreLocation);
-        }
+        removeFiles(context, Collections.singletonList(filestoreLocation));
     }
 
     /**
@@ -1352,11 +1371,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public int[] removeVersion(final int id, final int[] versionIds, final ServerSession session) throws OXException {
-        if (null == versionIds) {
+        if (null == versionIds || 0 == versionIds.length) {
             return new int[0];
-        }
-        if (versionIds.length <= 0) {
-            return versionIds;
         }
 
         final Context context = session.getContext();
@@ -1445,26 +1461,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 updatedFields.add(Metadata.TITLE_LITERAL);
             }
         }
-        final UpdateDocumentAction updateDocument = new UpdateDocumentAction();
-        updateDocument.setContext(context);
-        updateDocument.setDocuments(Collections.singletonList(update));
-        updateDocument.setModified(updatedFields.toArray(new Metadata[updatedFields.size()]));
-        updateDocument.setOldDocuments(Collections.singletonList(metadata));
-        updateDocument.setProvider(this);
-        updateDocument.setQueryCatalog(QUERIES);
-        updateDocument.setTimestamp(Long.MAX_VALUE);
-
-        perform(updateDocument, true);
+        perform(new UpdateDocumentAction(this, QUERIES, context, update, metadata,
+            updatedFields.toArray(new Metadata[updatedFields.size()]), Long.MAX_VALUE), true);
 
         // Remove Versions
-
-        final DeleteVersionAction deleteVersion = new DeleteVersionAction();
-        deleteVersion.setContext(context);
-        deleteVersion.setDocuments(allVersions);
-        deleteVersion.setProvider(this);
-        deleteVersion.setQueryCatalog(QUERIES);
-
-        perform(deleteVersion, true);
+        perform(new DeleteVersionAction(this, QUERIES, context, allVersions), true);
 
         final int[] retval = new int[versionSet.size()];
         int i = 0;
