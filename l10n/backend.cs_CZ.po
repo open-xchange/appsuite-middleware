@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: errors.cs_CZ.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-05-18 11:04+0200\n"
+"PO-Revision-Date: 2014-06-07 14:05+0200\n"
 "Last-Translator: Robert Kratky <rkratky@gmail.com>\n"
 "Language-Team: Czech <>\n"
 "Language: cs\n"
@@ -93,12 +93,12 @@ msgstr "Komentáře"
 
 #. Status
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:95
 msgid "Accepted"
 msgstr "Přijal(a)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:97
 msgid "Declined"
 msgstr "Odmítl(a)"
 
@@ -1329,7 +1329,7 @@ msgstr "UID"
 
 #. Search in file name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:159
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:68
 msgid "File name"
 msgstr "Název souboru"
 
@@ -2332,83 +2332,109 @@ msgid ""
 "The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not "
 "be used within one request."
 msgstr ""
-"Druhy aspektů „%1$s“ a „%2$s“ jsou ve vzájemném konfliktu a nelze je používat "
-"v rámci jednoho požadavku."
+"Druhy aspektů „%1$s“ a „%2$s“ jsou ve vzájemném konfliktu a nelze je "
+"používat v rámci jednoho požadavku."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:61
-msgid "%1$s <i>in appointments</i>"
-msgstr "%1$s <i>ve schůzkách</i>"
+#. You are not allowed to search in module \"%1$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:99
+msgid "You are not allowed to search in module \"%1$s\"."
+msgstr "Nemáte oprávnění k vyhledávání v modulu „%1$s“."
 
-#. Search in mail field subject.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:68
-msgid "%1$s <i>in subject</i>"
-msgstr "%1$s <i>v předmětu</i>"
+#. Context: Searching in appointments.
+#. Displayed as: [Search for] 'user input' in appointments.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:64
+msgid "in appointments"
+msgstr "ve schůzkách"
 
-#. Search in task description
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:82
-msgid "%1$s <i>in description</i>"
-msgstr "%1$s <i>v popisu</i>"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:67
-msgid "%1$s <i>in location</i>"
-msgstr "%1$s <i>v umístění</i>"
-
-#. Search in task attachment name
+#. Context: Searching in appointments.
+#. Displayed as: [Search for] 'user input' in subject.
+#. The 'user input' part is always prepended, please heed this in translations.
+#. Context: Searching in mail.
+#. Displayed as: [Search for] 'user input' in subject.
+#. The 'user input' part is always prepended, please heed this in translations.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:85
-msgid "%1$s <i>in attachment name</i>"
-msgstr "%1$s <i>v názvu přílohy</i>"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:72
+msgid "in subject"
+msgstr "v předmětu"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:71
+#. Context: Searching in appointments.
+#. Displayed as: [Search for] 'user input' in description.
+#. The 'user input' part is always prepended, please heed this in translations.
+#. Context: Searching in tasks.
+#. Displayed as: [Search for] 'user input' in description.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:88
+msgid "in description"
+msgstr "v popisu"
+
+#. Context: Searching in appointments.
+#. Displayed as: [Search for] 'user input' in location.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:79
+msgid "in location"
+msgstr "v umístění"
+
+#. Context: Searching in appointments.
+#. Displayed as: [Search for] 'user input' in appointments.
+#. The 'user input' part is always prepended, please heed this in translations.
+#. Context: Searching in tasks.
+#. Displayed as: [Search for] 'user input' in attachment name.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:93
+msgid "in attachment name"
+msgstr "v názvu přílohy"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:86
 msgid "My Status"
 msgstr "Můj stav"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:88
 msgid "Date"
 msgstr "Datum"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:62
 msgid "Type"
 msgstr "Druh"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:92
 msgid "Participant"
 msgstr "Účastník"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:99
 msgid "Tentative"
 msgstr "Prozatímní"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:101
 msgid "None"
 msgstr "Žádný"
 
 #. Relative date
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:104
 msgid "Coming"
 msgstr "Nadcházející"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:106
 msgid "Past"
 msgstr "Dřívější"
 
 #. Recurring type
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:109
 msgid "Single"
 msgstr "Jediný"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:96
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:111
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:109
 msgid "Series"
 msgstr "Série"
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Search in folder type (private, public, shared, external)
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:80
 msgid "Folder type"
 msgstr "Druh složky"
 
@@ -2429,241 +2455,267 @@ msgstr "Veřejná"
 msgid "Shared"
 msgstr "Sdílená"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:83
-msgid "External"
-msgstr "Externí"
-
-#. ------------------------- i18n strings for contact types ------------------------------------- //
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:87
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:91
 msgid "Contact"
 msgstr "Kontakt"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:89
+#. Context: Searching in contacts.
+#. Displayed as: [Search for] 'user input' in contacts.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:69
+msgid "in contacts"
+msgstr "v kontaktech"
+
+#. Context: Searching in contacts.
+#. Displayed as: [Search for] 'user input' in names.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:74
+msgid "in names"
+msgstr "ve jménech"
+
+#. Context: Searching in contacts.
+#. Displayed as: [Search for] 'user input' in e-mail addresses.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:79
+msgid "in e-mail addresses"
+msgstr "v e-mailových adresách"
+
+#. Context: Searching in contacts.
+#. Displayed as: [Search for] 'user input' in phone numbers.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:84
+msgid "in phone numbers"
+msgstr "v telefonních číslech"
+
+#. Context: Searching in contacts.
+#. Displayed as: [Search for] 'user input' in addresses.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:89
+msgid "in addresses"
+msgstr "v adresách"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:93
 msgid "Distribution List"
 msgstr "Distribuční seznam"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:66
-msgid "%1$s <i>in contacts</i>"
-msgstr "%1$s <i>v kontaktech</i>"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:68
-msgid "%1$s <i>in names</i>"
-msgstr "%1$s <i>ve jménech</i>"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:70
-msgid "%1$s <i>in e-mail addresses</i>"
-msgstr "%1$s <i>v e-mailových adresách</i>"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:72
-msgid "%1$s <i>in phone numbers</i>"
-msgstr "%1$s <i>v telefonních číslech</i>"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:74
-msgid "%1$s <i>in addresses</i>"
-msgstr "%1$s <i>v adresách</i>"
-
-#. Search in drive
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:63
-msgid "%1$s <i>in drive</i>"
-msgstr "%1$s <i>v Drive</i>"
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in drive.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:65
+msgid "in drive"
+msgstr "v Drive"
 
 #. Search in file content.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:71
 msgid "File content"
 msgstr "Obsah souboru"
 
 #. Search in folders.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:74
 msgid "Folders"
 msgstr "Složky"
 
 #. Search in Persons.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:77
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
 msgstr "Kontakty"
 
 #. Search in file description.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:83
 msgid "File description"
 msgstr "Popis souboru"
 
 #. Search in file type.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:86
 msgid "File type"
 msgstr "Druh souboru"
 
 #. Search in file size
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:89
 msgid "File size"
 msgstr "Velikost souboru"
 
 #. Search criteria time
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:90
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
 msgid "Time"
 msgstr "Čas"
 
 #. -------------------------- i18n strings for file types ---------------------------- //
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:96
 msgid "Images"
 msgstr "Obrázky"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:96
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:98
 msgid "Audio"
 msgstr "Audio"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:98
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:100
 msgid "Video"
 msgstr "Video"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:102
 msgid "Documents"
 msgstr "Dokumenty"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:102
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
 msgid "Other"
 msgstr "Jiné"
 
 #. ---------------------------------------------------------------------------------- //
 #. Public folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:109
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
 msgid "Public folders"
 msgstr "Veřejné složky"
 
 #. Private folders
 #. Name of the parent folder for the private user folders.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:112
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
 msgstr "Soukromé složky"
 
 #. Shared folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:115
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
 msgid "Shared folders"
 msgstr "Sdílené složky"
 
-#. Search in file field file name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:116
-msgid "%1$s <i>in file name</i>"
-msgstr "%1$s <i>v názvu souboru</i>"
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in file name.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:120
+msgid "in file name"
+msgstr "v názvu souboru"
 
-#. Search in file field file description.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:119
-msgid "%1$s <i>in file description</i>"
-msgstr "%1$s <i>v popisu souboru</i>"
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in file description.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:125
+msgid "in file description"
+msgstr "v popisu souboru"
 
-#. Search in file field file content.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:122
-msgid "%1$s <i>in file content</i>"
-msgstr "%1$s <i>v obsahu souboru</i>"
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in file content.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:130
+msgid "in file content"
+msgstr "v obsahu souboru"
 
 #. ------------------------------- Time --------------------------------------------- //
 #. Search mails from last week
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:127
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:135
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:92
 msgid "last week"
 msgstr "minulý týden"
 
 #. Search mails from last month
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:130
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:138
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:95
 msgid "last month"
 msgstr "minulý měsíc"
 
 #. Search mails from last year
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:133
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:141
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:98
 msgid "last year"
 msgstr "minulý rok"
 
-#. Search in emails
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:65
-msgid "%1$s <i>in emails</i>"
-msgstr "%1$s <i>v e-mailech</i>"
+#. Context: Searching in mail.
+#. Displayed as: [Search for] 'user input' in emails.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:67
+msgid "in emails"
+msgstr "v e-mailech"
 
-#. Search in mail field text.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:71
-msgid "%1$s <i>in mail text</i>"
-msgstr "%1$s <i>v textu zprávy</i>"
+#. Context: Searching in mail.
+#. Displayed as: [Search for] 'user input' in mail text.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:77
+msgid "in mail text"
+msgstr "v textu zprávy"
 
 #. Search in senders and recipients.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:80
 msgid "Sender/Recipient"
 msgstr "Odesílatel/příjemce"
 
 #. Search in for sender.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
 msgid "Sender"
 msgstr "Odesílatel"
 
 #. Search in for recipient.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
 msgid "Recipient"
 msgstr "Příjemce"
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
-#. Search in tasks
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:64
-msgid "%1$s <i>in tasks</i>"
-msgstr "%1$s <i>v úkolech</i>"
+#. Context: Searching in tasks.
+#. Displayed as: [Search for] 'user input' in tasks.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:66
+msgid "in tasks"
+msgstr "v úkolech"
 
-#. Search in task name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:67
-msgid "%1$s <i>in title</i>"
-msgstr "%1$s <i>v titulu</i>"
+#. Context: Searching in tasks.
+#. Displayed as: [Search for] 'user input' in title.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:71
+msgid "in title"
+msgstr "v titulu"
 
 #. Search in folders.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:74
 msgid "Task folders"
 msgstr "Složky úkolů"
 
 #. Search in persons.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:77
 msgid "Task participants"
 msgstr "Účastníci úkolů"
 
 #. Search in task type.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:80
 msgid "Task type"
 msgstr "Druh úkolu"
 
 #. Search in task status
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:83
 msgid "Task status"
 msgstr "Stav úkolu"
 
 #. ------------------------- i18n strings for folder types ------------------------------------- //
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:97
 msgid "Not Started"
 msgstr "Nezapočaté"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:99
 msgid "In Progress"
 msgstr "Probíhá"
 
 #. Done
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:101
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:768
 msgid "Done"
 msgstr "Hotovo"
 
 #. Waiting
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:103
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:771
 msgid "Waiting"
 msgstr "Čekám"
 
 #. Deferred
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:105
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:774
 msgid "Deferred"
 msgstr "Odloženo"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:107
 msgid "Single Task"
 msgstr "Jeden úkol"
 
@@ -4310,6 +4362,11 @@ msgstr "Neplatná URL RSS - nebo URL %1$s poskytla špatně formátovaný XML ob
 msgid "HTTP error %1$s while loading RSS feed from URL: %2$s."
 msgstr "HTTP chyba %1$s při načítání RSS zdroje z URL: %2$s."
 
+#. Timeout while reading the RSS feed from URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:69
+msgid "Timeout while reading the RSS feed from URL: %1$s"
+msgstr "Vypršel čas při načítání RSS zdroje z URL: %1$s"
+
 #. *
 #. * The value you inserted for %2$s is not correct
 #.
@@ -4920,8 +4977,8 @@ msgstr ""
 "Ukládání kontaktu se soukromým příznakem ve sdílené složce není povolené."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:111
-msgid "Image size too large. Image size: %1$d. Max. size: %2$d."
-msgstr "Obrázek je příliš velký. Velikost obrázku: %1$d. Max. velikost: %2$d."
+msgid "Image size too large. Image size: %1$s. Max. size: %2$s."
+msgstr "Obrázek je příliš velký. Velikost obrázku: %1$s. Max. velikost: %2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:113
 msgid "Primary E-Mail address in system contact must not be edited."
@@ -8264,6 +8321,18 @@ msgstr "Pro přístup k této službě si musíte nejprve vytvořit účet OAuth
 msgid "Your account needs to be verified: %1$s"
 msgstr "Váš účet je nutné ověřit: %1$s"
 
+#. The service provider asked for an identity confirmation. This happens for some accounts and cannot fixed by us.
+#. It is in the provider's responsibility. For this reason, the subscription cannot be completed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:90
+msgid ""
+"The service provider asked for an identity confirmation. This happens for "
+"some accounts and cannot fixed by us. It is in the provider's "
+"responsibility. For this reason, the subscription cannot be completed."
+msgstr ""
+"Poskytovatel služby si vyžádal potvrzení totožnosti. To se u některých účtů "
+"stává a my to nemůžeme ovlivnit. Záleží to na poskytovateli. Z tohoto důvodu "
+"nelze přihlášení k odběru dokončit."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."
 msgstr "Přístup k souboru zamítnut."
@@ -8482,6 +8551,11 @@ msgstr "V těle požadavku chybí povinný parametr „%1$s“"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:113
 msgid "The XING server is not available."
 msgstr "Server XING není k dispozici."
+
+#. A XING account has already been requested for E-Mail address %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:116
+msgid "A XING account has already been requested for E-Mail address %1$s."
+msgstr "Pro e-mailovou adresu %1$s už bylo požádáno o účet XING."
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
@@ -10566,6 +10640,45 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "%1$s <i>in appointments</i>"
+#~ msgstr "%1$s <i>ve schůzkách</i>"
+
+#~ msgid "%1$s <i>in subject</i>"
+#~ msgstr "%1$s <i>v předmětu</i>"
+
+#~ msgid "%1$s <i>in description</i>"
+#~ msgstr "%1$s <i>v popisu</i>"
+
+#~ msgid "%1$s <i>in location</i>"
+#~ msgstr "%1$s <i>v umístění</i>"
+
+#~ msgid "External"
+#~ msgstr "Externí"
+
+#~ msgid "%1$s <i>in contacts</i>"
+#~ msgstr "%1$s <i>v kontaktech</i>"
+
+#~ msgid "%1$s <i>in names</i>"
+#~ msgstr "%1$s <i>ve jménech</i>"
+
+#~ msgid "%1$s <i>in drive</i>"
+#~ msgstr "%1$s <i>v Drive</i>"
+
+#~ msgid "%1$s <i>in file name</i>"
+#~ msgstr "%1$s <i>v názvu souboru</i>"
+
+#~ msgid "%1$s <i>in file description</i>"
+#~ msgstr "%1$s <i>v popisu souboru</i>"
+
+#~ msgid "%1$s <i>in file content</i>"
+#~ msgstr "%1$s <i>v obsahu souboru</i>"
+
+#~ msgid "%1$s <i>in tasks</i>"
+#~ msgstr "%1$s <i>v úkolech</i>"
+
+#~ msgid "%1$s <i>in title</i>"
+#~ msgstr "%1$s <i>v titulu</i>"
 
 #~ msgid "Unknown problem: \"%1$s\"."
 #~ msgstr "Neznámý problém: „%1$s“."
