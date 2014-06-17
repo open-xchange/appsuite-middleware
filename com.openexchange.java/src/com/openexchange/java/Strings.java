@@ -413,10 +413,10 @@ public class Strings {
      * @return new instance of trimmed string - or reference to old one if unchanged
      */
     public static String trimBOM(final String str) {
-        final byte[][] byteOrderMarks =
-            new byte[][] {
-                new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 },
-                new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }, new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
+        final byte[][] byteOrderMarks = new byte[][] {
+            new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF },
+            new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF },
+            new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
 
         final byte[] bytes = str.getBytes();
         for (final byte[] bom : byteOrderMarks) {
@@ -563,7 +563,7 @@ public class Strings {
      * @return The un-parenthized value or <code>null</code>
      */
     public static String unparenthize(final String s) {
-        if (!isEmpty(s) && ((s.startsWith("(") && s.endsWith(")")) || (s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]")) )) {
+        if (!isEmpty(s) && ((s.startsWith("(") && s.endsWith(")")) || (s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]")))) {
             return s.substring(1, s.length() - 1);
         }
         return s;
@@ -656,22 +656,14 @@ public class Strings {
     }
 
     private static char[] lowercases = {
-        '\000','\001','\002','\003','\004','\005','\006','\007',
-        '\010','\011','\012','\013','\014','\015','\016','\017',
-        '\020','\021','\022','\023','\024','\025','\026','\027',
-        '\030','\031','\032','\033','\034','\035','\036','\037',
-        '\040','\041','\042','\043','\044','\045','\046','\047',
-        '\050','\051','\052','\053','\054','\055','\056','\057',
-        '\060','\061','\062','\063','\064','\065','\066','\067',
-        '\070','\071','\072','\073','\074','\075','\076','\077',
-        '\100','\141','\142','\143','\144','\145','\146','\147',
-        '\150','\151','\152','\153','\154','\155','\156','\157',
-        '\160','\161','\162','\163','\164','\165','\166','\167',
-        '\170','\171','\172','\133','\134','\135','\136','\137',
-        '\140','\141','\142','\143','\144','\145','\146','\147',
-        '\150','\151','\152','\153','\154','\155','\156','\157',
-        '\160','\161','\162','\163','\164','\165','\166','\167',
-        '\170','\171','\172','\173','\174','\175','\176','\177' };
+        '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
+        '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037',
+        '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057',
+        '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077',
+        '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
+        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137',
+        '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
+        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177' };
 
     /**
      * Fast lower-case conversion.
@@ -739,7 +731,6 @@ public class Strings {
         return trimmedSplits;
     }
 
-
     /**
      * Gets a value indicating whether the supplied strings are equal, using their {@link Form#NFC} normalization from, i.e. canonical
      * decomposition, followed by canonical composition.
@@ -759,8 +750,8 @@ public class Strings {
     }
 
     /**
-     * Gets a value indicating whether the supplied strings are equal ignoring case, using their {@link Form#NFC} normalization from,
-     * i.e. canonical decomposition, followed by canonical composition.
+     * Gets a value indicating whether the supplied strings are equal ignoring case, using their {@link Form#NFC} normalization from, i.e.
+     * canonical decomposition, followed by canonical composition.
      *
      * @param s1 The first string
      * @param s2 The second string
@@ -806,6 +797,58 @@ public class Strings {
             }
         }
         return true;
+    }
+
+    /**
+     * Fast parsing to an integer
+     *
+     * @param s The string to parse
+     * @return The <code>int</code> value
+     * @throws NumberFormatException If string appears not be an integer
+     */
+    public static int parseInt(final String s) {
+        if (s == null) {
+            throw new NumberFormatException("Null string");
+        }
+
+        // Check for a sign.
+        int num = 0;
+        int sign = -1;
+        final int len = s.length();
+        final char ch = s.charAt(0);
+        if (ch == '-') {
+            if (len == 1) {
+                throw new NumberFormatException("Missing digits:  " + s);
+            }
+            sign = 1;
+        } else {
+            final int d = ch - '0';
+            if (d < 0 || d > 9) {
+                throw new NumberFormatException("Malformed:  " + s);
+            }
+            num = -d;
+        }
+
+        // Build the number.
+        final int max = (sign == -1) ? -Integer.MAX_VALUE : Integer.MIN_VALUE;
+        final int multmax = max / 10;
+        int i = 1;
+        while (i < len) {
+            int d = s.charAt(i++) - '0';
+            if (d < 0 || d > 9) {
+                throw new NumberFormatException("Malformed:  " + s);
+            }
+            if (num < multmax) {
+                throw new NumberFormatException("Over/underflow:  " + s);
+            }
+            num *= 10;
+            if (num < (max + d)) {
+                throw new NumberFormatException("Over/underflow:  " + s);
+            }
+            num -= d;
+        }
+
+        return sign * num;
     }
 
 }
