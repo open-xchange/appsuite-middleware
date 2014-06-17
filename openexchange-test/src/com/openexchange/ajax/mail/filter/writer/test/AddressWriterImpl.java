@@ -52,8 +52,11 @@ package com.openexchange.ajax.mail.filter.writer.test;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.mail.filter.comparison.AbstractComparison;
 import com.openexchange.ajax.mail.filter.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.test.AddressTest;
+import com.openexchange.ajax.mail.filter.writer.comparison.ComparisonWriter;
+import com.openexchange.ajax.mail.filter.writer.comparison.ComparisonWriterFactory;
 
 
 /**
@@ -69,19 +72,24 @@ public class AddressWriterImpl implements TestWriter {
 		final AddressTest addressTest = (AddressTest)abstractTest;
 
 		jsonObj.put("id", name);
+		
+		final AbstractComparison abstractComp = addressTest.getComparison();
+        final String comparisonName = abstractComp.getName();
+        final ComparisonWriter compWriter = ComparisonWriterFactory.getWriter(comparisonName);
+        compWriter.writeComparison(comparisonName, abstractComp, jsonObj);
 
 		final String[] headers = addressTest.getHeaders();
 		final String[] values = addressTest.getValues();
 
 		final JSONArray jsonHeaderArray = new JSONArray();
-		for (int a = 0; a < jsonHeaderArray.length(); a++) {
+		for (int a = 0; a < headers.length; a++) {
 			jsonHeaderArray.put(headers[a]);
 		}
 
 		jsonObj.put("headers", jsonHeaderArray);
 
 		final JSONArray jsonValueArray = new JSONArray();
-		for (int a = 0; a < jsonValueArray.length(); a++) {
+		for (int a = 0; a < values.length; a++) {
 			jsonValueArray.put(values[a]);
 		}
 
