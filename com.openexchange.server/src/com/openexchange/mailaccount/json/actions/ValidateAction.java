@@ -129,7 +129,9 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
 
             try {
                 final String password = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
-                accountDescription.setPassword(MailPasswordUtil.decrypt(password, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer()));
+                if (null != password) {
+                    accountDescription.setPassword(MailPasswordUtil.decrypt(password, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer()));
+                }
             } catch (final OXException e) {
                 if (!CryptoErrorMessage.BadPassword.equals(e)) {
                     throw e;
@@ -258,8 +260,19 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             }
             fillTransportServerCredentials(accountDescription, session, true);
         }
-        transportConfig.setLogin(accountDescription.getTransportLogin());
-        transportConfig.setPassword(accountDescription.getTransportPassword());
+        // Credentials
+        {
+            String login = accountDescription.getTransportLogin();
+            String password = accountDescription.getTransportPassword();
+            if (!seemsValid(login)) {
+                login = accountDescription.getLogin();
+            }
+            if (!seemsValid(password)) {
+                password = accountDescription.getPassword();
+            }
+            transportConfig.setLogin(login);
+            transportConfig.setPassword(password);
+        }
         // Set server and port
         final URI uri;
         try {
@@ -354,4 +367,13 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             accountDescription.setTransportPassword(password);
         }
     }
+
+    private static boolean seemsValid(final String str) {
+        if (isEmpty(str)) {
+            return false;
+        }
+
+        return !"null".equalsIgnoreCase(str);
+    }
+
 }

@@ -827,7 +827,7 @@ public final class MessageParser {
     }
 
     private static void handleMultipleRefs(final TransportProvider provider, final Session session, final MailPath parentMsgRef, final Set<String> contentIds, final boolean prepare4Transport, final Map<String, String> groupedSeqIDs, final Map<String, ReferencedMailPart> retval, final MailAccess<?, ?> access) throws OXException {
-        final MailPath pMsgRef = prepareMsgref(parentMsgRef);
+        final MailPath pMsgRef = /*prepareMsgref(*/parentMsgRef/*)*/;
         MailMessage referencedMail = access.getMessageStorage().getMessage(pMsgRef.getFolder(), pMsgRef.getMailID(), false);
         if (null == referencedMail) {
             throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(pMsgRef.getMailID(), pMsgRef.getFolder());

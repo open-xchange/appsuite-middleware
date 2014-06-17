@@ -103,7 +103,7 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
      *
      * @return The infostore search term
      */
-    public com.openexchange.groupware.infostore.search.SearchTerm<?> getInfstoreTerm() {
+    public com.openexchange.groupware.infostore.search.SearchTerm<?> getInfostoreTerm() {
         return infstoreTerm;
     }
 
@@ -116,7 +116,7 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
             final SearchTerm<?> searchTerm = terms.get(i);
             final ToInfostoreTermVisitor newVisitor = new ToInfostoreTermVisitor();
             searchTerm.visit(newVisitor);
-            infostoreTerms.add(newVisitor.getInfstoreTerm());
+            infostoreTerms.add(newVisitor.getInfostoreTerm());
         }
         infstoreTerm = new com.openexchange.groupware.infostore.search.AndTerm(infostoreTerms);
     }
@@ -130,7 +130,7 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
             final SearchTerm<?> searchTerm = terms.get(i);
             final ToInfostoreTermVisitor newVisitor = new ToInfostoreTermVisitor();
             searchTerm.visit(newVisitor);
-            infostoreTerms.add(newVisitor.getInfstoreTerm());
+            infostoreTerms.add(newVisitor.getInfostoreTerm());
         }
         infstoreTerm = new com.openexchange.groupware.infostore.search.OrTerm(infostoreTerms);
     }
@@ -139,7 +139,7 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     public void visit(final NotTerm term) throws OXException {
         final ToInfostoreTermVisitor newVisitor = new ToInfostoreTermVisitor();
         term.getPattern().visit(newVisitor);
-        infstoreTerm = new com.openexchange.groupware.infostore.search.NotTerm(newVisitor.getInfstoreTerm());
+        infstoreTerm = new com.openexchange.groupware.infostore.search.NotTerm(newVisitor.getInfostoreTerm());
     }
 
     @Override

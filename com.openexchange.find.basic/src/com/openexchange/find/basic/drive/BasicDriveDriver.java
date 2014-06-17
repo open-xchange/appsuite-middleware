@@ -192,7 +192,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             List<String> prefixTokens = tokenize(prefix);
             // Add simple facets
             facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
-                .withFormattableDisplayItem(DriveStrings.FACET_GLOBAL, prefix)
+                .withSimpleDisplayItem(prefix)
                 .withFilter(Filter.of(Constants.FIELD_GLOBAL, prefixTokens))
                 .build());
             facets.add(newSimpleBuilder(DriveFacetType.FILE_NAME)

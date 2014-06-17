@@ -142,8 +142,8 @@ public final class UpdatesAction extends AbstractFolderAction {
                 ignoreDeleted,
                 includeMail ? new ContentType[] { ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class).getByString(
                     "mail") } : null,
-                session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session)));
+                    session,
+                    new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session)));
         /*
          * Determine last-modified time stamp
          */
@@ -163,10 +163,12 @@ public final class UpdatesAction extends AbstractFolderAction {
                 lastModified = ((lastModified >= time) ? lastModified : time);
             }
         }
+
         /*
          * Write subfolders as JSON arrays to JSON array
          */
         final JSONArray resultArray = FolderWriter.writeMultiple2Array(columns, result[0], session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+
         try {
             final JSONArray jsonArray2 =
                 FolderWriter.writeMultiple2Array(
@@ -186,5 +188,4 @@ public final class UpdatesAction extends AbstractFolderAction {
          */
         return new AJAXRequestResult(resultArray, 0 == lastModified ? null : new Date(lastModified)).addWarnings(resultObject.getWarnings());
     }
-
 }

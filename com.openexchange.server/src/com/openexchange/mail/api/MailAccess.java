@@ -99,6 +99,22 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccess.class);
 
+    // --------------------------------------------------------------------------------------------------------------------------------- //
+
+    static final class FastThrowable extends Throwable {
+
+        FastThrowable() {
+            super("tracked mail connection usage");
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------- //
+
     /*-
      * ############### MEMBERS ###############
      */
@@ -804,7 +820,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                      * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
                      * MailAccessWatcher.
                      */
-                    final Throwable thr = new Throwable();
+                    final Throwable thr = new FastThrowable();
                     thr.setStackTrace(trace);
                     log.info(sBuilder.toString(), thr);
                 }

@@ -188,15 +188,15 @@ public final class Threadables {
      * @param imapFolder The IMAP folder
      * @param sorted Whether the returned <tt>Threadable</tt> is supposed to be thread-sorted
      * @param cache <code>true</code> to immediately return a possibly cached element; otherwise <code>false</code>
-     * @param limit The max. number of messages
+     * @param lookAhead The max. number of messages
      * @param accountId The account identifier
      * @param session The associated user session
      * @return The <tt>Threadable</tt> either from cache or newly generated
      * @throws MessagingException If <tt>Threadable</tt> cannot be returned for any reason
      */
-    public static ThreadableResult getThreadableFor(final IMAPFolder imapFolder, final boolean sorted, final boolean cache, final int limit, final int accountId, final Session session) throws MessagingException {
+    public static ThreadableResult getThreadableFor(final IMAPFolder imapFolder, final boolean sorted, final boolean cache, final int lookAhead, final int accountId, final Session session) throws MessagingException {
         if (!ThreadableCache.isThreadableCacheEnabled()) {
-            Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
+            Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
             if (sorted) {
                 if (useCommonsNetThreader()) {
                     threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -213,7 +213,7 @@ public final class Threadables {
         synchronized (entry) {
             TLongCollection uids = null;
             if (null == entry.getThreadable() || sorted != entry.isSorted()) {
-                Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
+                Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
                 if (sorted) {
                     if (useCommonsNetThreader()) {
                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -233,7 +233,7 @@ public final class Threadables {
                         @Override
                         public void run() {
                             try {
-                                Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
+                                Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
                                 if (sorted) {
                                     if (useCommonsNetThreader()) {
                                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(
@@ -251,7 +251,7 @@ public final class Threadables {
                     ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(task));
                     return new ThreadableResult((Threadable) retval.clone(), true);
                 }
-                Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
+                Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
                 if (sorted) {
                     if (useCommonsNetThreader()) {
                         threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
@@ -410,12 +410,12 @@ public final class Threadables {
      * Gets the <tt>Threadable</tt>s for given IMAP folder.
      *
      * @param imapFolder The IMAP folders
-     * @param limit The max. number of messages or <code>-1</code>
+     * @param lookAhead The max. number of messages or <code>-1</code>
      * @return The fetched <tt>Threadable</tt>s
      * @throws MessagingException If an error occurs
      */
-    public static Threadable getAllThreadablesFrom(final IMAPFolder imapFolder, final int limit) throws MessagingException {
-        return getAllThreadablesFrom(imapFolder, limit, false);
+    public static Threadable getAllThreadablesFrom(final IMAPFolder imapFolder, final int lookAhead) throws MessagingException {
+        return getAllThreadablesFrom(imapFolder, lookAhead, false);
     }
 
     /**

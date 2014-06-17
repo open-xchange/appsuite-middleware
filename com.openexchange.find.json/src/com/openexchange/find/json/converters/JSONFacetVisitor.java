@@ -50,7 +50,6 @@
 package com.openexchange.find.json.converters;
 
 import static com.openexchange.ajax.AJAXUtility.sanitizeParam;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import org.json.JSONArray;
@@ -90,28 +89,12 @@ public class JSONFacetVisitor implements FacetVisitor {
 
     @Override
     public void visit(SimpleFacet facet) {
-        /*
-         * TODO: Discuss with UI team to simplify this type to
-         * {
-         *   "id":"facet_type_id",
-         *   "display_name":"...",
-         *   "filter":{
-         *     "fields":[], "queries":[]
-         *   },
-         *   "flags":[]
-         * }
-         */
         try {
             FacetType type = facet.getType();
             result.put("id", type.getId());
             result.put("style", facet.getStyle());
-            result.put("field_facet", true);
-
-            JSONObject jValue = new JSONObject();
-            jValue.put("id", type.getId());
-            addDisplayItem(jValue, locale, facet.getDisplayItem());
-            jValue.put("filter", convertFilter(facet.getFilter()));
-            result.put("values", new JSONArray(Collections.singletonList(jValue)));
+            addDisplayItem(result, locale, facet.getDisplayItem());
+            result.put("filter", convertFilter(facet.getFilter()));
 
             addFlags(facet);
         } catch (JSONException e) {

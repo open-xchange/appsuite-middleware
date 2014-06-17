@@ -172,6 +172,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
             Map<ID, OXException> sent = Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
             if (Utils.shouldResend(sent, stanza)) {
                 resend(stanza);
+                //return empty map of exceptions when resending
                 return exceptions;
             }
             exceptions.putAll(sent);
@@ -218,25 +219,31 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
         send(stanza);
     }
 
-
-
+    /*
+     * Map which client (sequencePrincipal) should use which sequence when sending to a given recipient node. Nodes are addressed via
+     * InetSocketAddress.
+     */
     private final ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>> peerMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>>();
-
     /**
      *
-     * When delivering a Stanza to a different node, a new sequence number relative to that node is generated, so that stanza streams directed at different nodes still work. Consider:
+     * When delivering a Stanza to a different node, a new sequence number relative to that node is generated, so that stanza streams
+     * directed at different nodes still work.Consider client0 and client1 being connected to node1 and client2 being connected to node2.
+     * client0 wants to chat with client1 and client2 and sends messages with strictly ascending sequence numbers reaching node1 that he is
+     * connected to:
+     * 
      * <pre>
-     * Seq 0 delivered via node 1
-     * Seq 1 delivered via node 1
-     * Seq 2 delivered via node 2
-     * Seq 3 delivered via node 1
-     * Seq 4 delivered via node 2
+     * Seq 0 delivered to client1 via node 1
+     * Seq 1 delivered to client1 via node 1
+     * Seq 2 delivered to client2 via node 2
+     * Seq 3 delivered to client1 via node 1
+     * Seq 4 delivered to client2 via node 2
      * </pre>
      *
-     * Node 2 only sees messages 2 and 4 and would indefinetly wait for messages 0, 1 and 3. Therefore the system recasts sequence numbers:
+     * Node 2 only sees messages 2 and 4 and would indefinetly wait for messages 0, 1 and 3 to form a valid order of sequences. Therefore
+     * the realtime framework on node1 has to recast sequence numbers in a way that node2 sees a valid order.
      * <pre>
-     * Seq 0 is recast as Seq 0 for node 1
-     * Seq 1 is recast as Seq 1 for node 1
+     * Seq 0 remains      Seq 0 for node 1
+     * Seq 1 remains      Seq 1 for node 1
      * Seq 2 is recast as Seq 0 for node 2
      * Seq 3 is recast as Seq 2 for node 1
      * Seq 4 is recast as Seq 1 for node 2

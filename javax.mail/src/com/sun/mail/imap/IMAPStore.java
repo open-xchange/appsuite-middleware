@@ -2282,6 +2282,15 @@ public class IMAPStore extends Store
     public int getPort() {
         return port;
     }
+    
+    /**
+     * Gets the user/login currently associated with this IMAP store.
+     *
+     * @return The user/login identifier
+     */
+    public String getUser() {
+        return user;
+    }
 
     /**
      * Is this IMAP store currently connected?

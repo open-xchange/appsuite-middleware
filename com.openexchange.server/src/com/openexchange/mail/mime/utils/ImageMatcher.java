@@ -51,7 +51,6 @@ package com.openexchange.mail.mime.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.image.ImageActionFactory;
 
@@ -65,8 +64,6 @@ import com.openexchange.image.ImageActionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageMatcher {
-
-    private static final String DEFAULT_ALT_PREFIX = DispatcherPrefixService.DEFAULT_ALT_PREFIX;
 
     /**
      * Creates a new image matcher from given content.
@@ -107,14 +104,7 @@ public final class ImageMatcher {
         if (null == prefixService) {
             PATTERN_REF_IMG = null;
         } else {
-            String prefix = DefaultDispatcherPrefixService.getInstance().getPrefix();
-            if (prefix.charAt(0) == '/') {
-                prefix = prefix.substring(1);
-            }
-            final String altPrefix = DEFAULT_ALT_PREFIX.substring(1);
-            if (!altPrefix.equalsIgnoreCase(prefix)) {
-                prefix = "(?:" + prefix + "|" + altPrefix + ")";
-            }
+            String prefix = "[a-zA-Z_0-9&-.]+/";
             final String regexImageUrl =
                 "(<img[^>]*?)(src=\")(?:[^>]*?)" + prefix + ImageActionFactory.ALIAS_APPENDIX + "([^\"]+?)(?:\\?|&amp;|&)(uid=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)";
             final String regexFileUrl =

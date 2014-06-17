@@ -108,7 +108,7 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public final static String PFLAG_IN_PUBLIC_FOLDER_DISPLAY = "Storing a contact with private flag in a shared folder is not allowed.";
 
-    public final static String IMAGE_TOO_LARGE_DISPLAY = "Image size too large. Image size: %1$d. Max. size: %2$d.";
+    public final static String IMAGE_TOO_LARGE_DISPLAY = "Image size too large. Image size: %1$s. Max. size: %2$s.";
 
     public final static String NO_PRIMARY_EMAIL_EDIT_DISPLAY = "Primary E-Mail address in system contact must not be edited.";
 

@@ -680,6 +680,10 @@ public class Strings {
      * @return The lower-case string
      */
     public static String asciiLowerCase(String s) {
+        if (null == s) {
+            return null;
+        }
+
         char[] c = null;
         int i = s.length();
 
@@ -770,6 +774,38 @@ public class Strings {
             return false;
         }
         return Normalizer.normalize(s1, Form.NFC).equalsIgnoreCase(Normalizer.normalize(s2, Form.NFC));
+    }
+
+    /**
+     * Fast check if passed string is numeric.
+     * <p>
+     * <b>Note</b>: Does no honor possible overflow error; e.g. in case parsed as <code>int</code> value
+     *
+     * @param str The string to check
+     * @return <code>true</code> if string is numeric; otherwise <code>false</code>
+     */
+    public static boolean isNumeric(String str) {
+        if (str == null) {
+            return false;
+        }
+        int length = str.length();
+        if (length == 0) {
+            return false;
+        }
+        int i = 0;
+        if (str.charAt(0) == '-') {
+            if (length == 1) {
+                return false;
+            }
+            i = 1;
+        }
+        for (; i < length; i++) {
+            char c = str.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

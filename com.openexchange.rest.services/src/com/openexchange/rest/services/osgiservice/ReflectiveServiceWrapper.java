@@ -52,6 +52,7 @@ package com.openexchange.rest.services.osgiservice;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.json.JSONException;
+import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -60,8 +61,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.OXRESTMatch;
 import com.openexchange.rest.services.OXRESTService;
 import com.openexchange.rest.services.OXRESTService.HALT;
-import com.openexchange.rest.services.internal.OXRESTServiceWrapper;
 import com.openexchange.rest.services.Response;
+import com.openexchange.rest.services.internal.OXRESTServiceWrapper;
 
 
 /**
@@ -135,16 +136,28 @@ public class ReflectiveServiceWrapper implements OXRESTServiceWrapper {
                     delegate.body((String) result);
                 } else {
                     try {
-                        delegate.body(JSONCoercion.coerceToJSON(result).toString());
+                        if (false && (result instanceof JSONValue)) {
+                            JSONValue jsonValue = (JSONValue) result;
+                            if (jsonValue.isObject()) {
+                                delegate.body(jsonValue.toObject().toString(true));
+                            } else {
+                                delegate.body(jsonValue.toArray().toString(true));
+                            }
+                        } else {
+                            delegate.header("Content-Type", "application/json; charset=UTF-8");
+                            delegate.body(JSONCoercion.coerceToJSON(result).toString());
+                        }
                     } catch (JSONException x) {
                         delegate.body(result.toString());
                     }
                 }
             }
         } catch (final InvocationTargetException x) {
-            if (x.getCause() instanceof OXException) {
-                throw (OXException) x.getCause();
-            } else if (x.getCause() instanceof HALT) {
+            final Throwable cause = x.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            if (cause instanceof HALT) {
                 // processing has finished
             } else {
                 LOGGER.error("Error invoking method {} of REST service {}", method.getName(), delegate.getClass().getSimpleName(), x);

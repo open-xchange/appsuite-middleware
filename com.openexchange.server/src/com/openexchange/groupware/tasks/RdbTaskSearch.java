@@ -72,6 +72,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 /**
  * Implementation of search for tasks interface using a relational database
  * currently MySQL.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> (find method)
  */
@@ -221,7 +222,7 @@ public class RdbTaskSearch extends TaskSearch {
         builder.append(" FROM task AS t ");
         builder.append(" LEFT JOIN task_folder AS tf ON (tf.id = t.id AND tf.cid = t.cid)");
         builder.append(" LEFT JOIN prg_attachment AS a ON (t.cid = a.cid AND t.id = a.attached)");
-        
+
         if (searchObject.hasInternalParticipants()) {
             builder.append(" LEFT JOIN task_participant AS tp ON (t.cid = tp.cid AND t.id = tp.task)");
         }
@@ -229,11 +230,11 @@ public class RdbTaskSearch extends TaskSearch {
         if (searchObject.hasExternalParticipants()) {
             builder.append(" LEFT JOIN task_eparticipant AS etp ON (t.cid = etp.cid AND t.id = etp.task)");
         }
-        
+
         builder.append(" WHERE ");
         builder.append(" t.cid = ? AND ");
         builder.append(SQL.allFoldersWhere(all, own, shared));
-        
+
         //set titles
         Set<String> titleFilters = searchObject.getTitles();
         if (titleFilters != null && titleFilters.size() > 0) {
@@ -244,7 +245,7 @@ public class RdbTaskSearch extends TaskSearch {
                 searchParameters.add(preparedPattern);
             }
         }
-        
+
         //set descriptions
         Set<String> descriptionFilters = searchObject.getNotes();
         if (descriptionFilters != null && descriptionFilters.size() > 0) {
@@ -255,7 +256,7 @@ public class RdbTaskSearch extends TaskSearch {
                 searchParameters.add(preparedPattern);
             }
         }
-        
+
         //set status
         Set<Integer> statusFilters = searchObject.getStateFilters();
         if (statusFilters != null && statusFilters.size() > 0) {
@@ -270,7 +271,7 @@ public class RdbTaskSearch extends TaskSearch {
             }
             builder.append(" ) ");
         }
-        
+
         //set attachment
         Set<String> attachmentFilters = searchObject.getAttachmentNames();
         if (attachmentFilters != null && attachmentFilters.size() > 0) {
@@ -281,21 +282,21 @@ public class RdbTaskSearch extends TaskSearch {
                 searchParameters.add(preparedPattern);
             }
         }
-        
+
         //set queries
         Set<String> queries = searchObject.getQueries();
         if (queries != null && queries.size() > 0) {
             for(String q : queries) {
                 String preparedPattern = StringCollection.prepareForSearch(q, true, true);
-                builder.append(containsWildcards(preparedPattern) ? 
-                                                    " AND (t.description LIKE ? OR t.title LIKE ? OR a.filename LIKE ? ) " : 
+                builder.append(containsWildcards(preparedPattern) ?
+                                                    " AND (t.description LIKE ? OR t.title LIKE ? OR a.filename LIKE ? ) " :
                                                     " AND (t.description = ? OR t.title = ? OR a.filename = ?) ");
                 searchParameters.add(preparedPattern);
                 searchParameters.add(preparedPattern);
                 searchParameters.add(preparedPattern);
             }
         }
-        
+
         //set participants
         if (searchObject.hasParticipants()) {
             builder.append(" AND ( ");
@@ -320,16 +321,16 @@ public class RdbTaskSearch extends TaskSearch {
             }
             builder.append(" ) ");
         }
-        
+
         //set the recurrence type (mutually exclusive)
         if (searchObject.isSingleOccurenceFilter()) {
             builder.append(" AND t.recurrence_type = 0 ");
         } else if (searchObject.isSeriesFilter()) {
             builder.append(" AND t.recurrence_type > 0 ");
         }
-        
+
         builder.append(SQL.getOrder(orderBy, order)).append(SQL.getLimit(searchObject.getStart(), searchObject.getSize()));
-        
+
         //set parameters
         StatementSetter ss = new StatementSetter() {
             @Override
@@ -353,19 +354,21 @@ public class RdbTaskSearch extends TaskSearch {
                 }
             }
         };
-        
+
         TaskIterator it = new TaskIterator2(context, userID, builder.toString(), ss, -1, columns, StorageType.ACTIVE);
-        
+
         return it;
     }
-    
+
+    private static final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
+
     /**
-     * Verify whether the given pattern contains wildcards.
-     * @param pattern
-     * @return
+     * Verify whether the given pattern contains wild-cards.
+     *
+     * @param pattern The pattern to check
+     * @return <code>true</code> if pattern contains wild-card; otherwise <code>false</code>
      */
     private static boolean containsWildcards(String pattern) {
-        final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
-        return WILDCARD_PATTERN.matcher(pattern).find();
+        return null != pattern && WILDCARD_PATTERN.matcher(pattern).find();
     }
 }

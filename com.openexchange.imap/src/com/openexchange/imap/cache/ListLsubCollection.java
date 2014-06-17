@@ -791,7 +791,7 @@ final class ListLsubCollection {
         {
             final String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
             r = performCommand(protocol, sCmd);
-            LOG.debug("{} cache filled with >>{1}<< which returned {} response line(s).", (command), sCmd, r.length);
+            LOG.debug("{} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, r.length);
         }
         final Response response = r[r.length - 1];
         if (response.isOK()) {

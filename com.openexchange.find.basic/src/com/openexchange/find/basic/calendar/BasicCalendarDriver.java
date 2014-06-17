@@ -55,7 +55,6 @@ import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -70,6 +69,7 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.basic.calendar.sort.RankedAppointmentComparator;
 import com.openexchange.find.calendar.CalendarDocument;
 import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.calendar.CalendarFacetValues;
@@ -154,7 +154,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             List<String> prefixTokens = tokenize(prefix);
             if (!prefixTokens.isEmpty()) {
                 facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
-                    .withFormattableDisplayItem(CalendarStrings.GLOBAL, prefix)
+                    .withSimpleDisplayItem(prefix)
                     .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
                     .build());
                 facets.add(newSimpleBuilder(CalendarFacetType.SUBJECT)
@@ -247,7 +247,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         AppointmentSearchObject appointmentSearch = searchBuilder
             .applyFilters(searchRequest.getFilters())
             .applyQueries(searchRequest.getQueries())
-            .applyFolders(searchRequest.getFolderId(), searchRequest.getFolderType())
+            .applyFolders(searchRequest)
             .build();
         if (searchBuilder.isFalse()) {
             return SearchResult.EMPTY;
@@ -270,7 +270,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             }
         }
         if (1 < appointments.size()) {
-            Collections.sort(appointments, STARTTIME_COMPARATOR);
+            Collections.sort(appointments, new RankedAppointmentComparator());
         }
         /*
          * construct search result
@@ -349,27 +349,9 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
                 appointment.setRecurrencePosition(result.getPosition());
             }
         }
+
         return appointment;
     }
-
-    private static final Comparator<Appointment> STARTTIME_COMPARATOR = new Comparator<Appointment>() {
-
-        @Override
-        public int compare(Appointment appointment1, Appointment appointment2) {
-            //TODO: startdate of whole day appts in user timezone
-            Date date1 = null != appointment1 ? appointment1.getStartDate() : null;
-            Date date2 = null != appointment2 ? appointment2.getStartDate() : null;
-            if (date1 == date2) {
-                return 0;
-            } else if (null == date1) {
-                return 1;
-            } else if (null == date2) {
-                return -1;
-            } else {
-                return date2.compareTo(date1);
-            }
-        }
-    };
 
     private List<FacetValue> getParticipantValues(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         /*

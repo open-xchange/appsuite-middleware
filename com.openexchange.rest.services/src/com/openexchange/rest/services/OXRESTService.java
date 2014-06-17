@@ -58,10 +58,10 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.annotations.DELETE;
-import com.openexchange.rest.services.annotations.PATCH;
 import com.openexchange.rest.services.annotations.GET;
 import com.openexchange.rest.services.annotations.LINK;
 import com.openexchange.rest.services.annotations.OPTIONS;
+import com.openexchange.rest.services.annotations.PATCH;
 import com.openexchange.rest.services.annotations.POST;
 import com.openexchange.rest.services.annotations.PUT;
 import com.openexchange.rest.services.annotations.ROOT;
@@ -197,6 +197,20 @@ public abstract class OXRESTService<T> {
         }
 
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * The content type if the response body contains JSON data. Set it with
+     * <code>response.setContentType(OXRESTService.CONTENT_TYPE_JAVASCRIPT)</code> .
+     */
+    public static final String CONTENT_TYPE_JAVASCRIPT = "text/javascript; charset=UTF-8";
+
+    /**
+     * The content type if the response body contains HTML content. Set it with
+     * <code>response.setContentType(OXRESTService.CONTENT_TYPE_HTML)</code> .
+     */
+    public static final String CONTENT_TYPE_HTML = "text/html; charset=UTF-8";
 
     // --------------------------------------------------------------------------------------------------------------------------- //
 
@@ -363,7 +377,7 @@ public abstract class OXRESTService<T> {
      * Sets a header in the response
      */
     public void header(String name, String value) {
-        this.response.getHeaders().put(name, value);
+        this.response.setHeader(name, value);
     }
 
     /**

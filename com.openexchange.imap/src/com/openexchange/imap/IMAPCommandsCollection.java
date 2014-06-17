@@ -232,7 +232,8 @@ public final class IMAPCommandsCollection {
                  */
                 final String fname = new StringBuilder("probe").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
                 final String mboxName = prepareStringArgument(fname);
-                LOG.debug("Trying to probe IMAP server {} for root subfolder capability with mbox name: {}", p.getHost(), mboxName);
+                final String login = ((IMAPStore) rootFolder.getStore()).getUser();
+                LOG.debug("Trying to probe IMAP server {} on behalf of {} for root subfolder capability with mbox name: {}", p.getHost(), login, mboxName);
                 /*
                  * Perform command: CREATE
                  */
@@ -253,7 +254,7 @@ public final class IMAPCommandsCollection {
                             }
                         }
                         if (!found) {
-                            LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} failed as test folder was not created at expected position. Thus assuming no root subfolder capability", p.getHost(), mboxName);
+                            LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} failed as test folder was not created at expected position. Thus assuming no root subfolder capability", p.getHost(), login, mboxName);
                         }
                         retval = found;
                     }
@@ -261,7 +262,7 @@ public final class IMAPCommandsCollection {
                     sb.setLength(0);
                     performCommand(p, sb.append("DELETE ").append(mboxName).toString());
                     if (retval) {
-                        LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} succeeded. Thus assuming root subfolder capability", p.getHost(), mboxName);
+                        LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} succeeded. Thus assuming root subfolder capability", p.getHost(), login, mboxName);
                     }
                     return Boolean.valueOf(retval);
                 }
@@ -271,7 +272,7 @@ public final class IMAPCommandsCollection {
                         // Creating folder failed due to a exceeded quota exception. Thus assume "true".
                         return Boolean.TRUE;
                     }
-                    LOG.info("Probe of IMAP server {} for root subfolder capability with mbox name {} failed (\"NO {}\"). Thus assuming no root subfolder capability", p.getHost(), mboxName, rest);
+                    LOG.info("Probe of IMAP server {} on behalf of {} for root subfolder capability with mbox name {} failed (\"NO {}\"). Thus assuming no root subfolder capability", p.getHost(), login, mboxName, rest);
                 }
                 return Boolean.FALSE;
             }
@@ -3550,7 +3551,7 @@ public final class IMAPCommandsCollection {
      * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
      * @see #getItemOf(Class, FetchResponse, String)
      */
-    protected static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
+    public static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
         final int len = fetchResponse.getItemCount();
         for (int i = 0; i < len; i++) {
             final Item item = fetchResponse.getItem(i);

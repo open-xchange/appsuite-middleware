@@ -4730,7 +4730,7 @@ msgid "Storing a contact with private flag in a shared folder is not allowed."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:111
-msgid "Image size too large. Image size: %1$d. Max. size: %2$d."
+msgid "Image size too large. Image size: %1$s. Max. size: %2$s."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:113
@@ -7542,6 +7542,15 @@ msgstr ""
 msgid "Your account needs to be verified: %1$s"
 msgstr ""
 
+#. The service provider asked for an identity confirmation. This happens for some accounts and cannot fixed by us.
+#. It is in the provider's responsibility. For this reason, the subscription cannot be completed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:90
+msgid ""
+"The service provider asked for an identity confirmation. This happens for "
+"some accounts and cannot fixed by us. It is in the provider's "
+"responsibility. For this reason, the subscription cannot be completed."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."
 msgstr ""
@@ -7754,6 +7763,11 @@ msgstr ""
 #. The XING server is not available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:113
 msgid "The XING server is not available."
+msgstr ""
+
+#. A XING account has already been requested for E-Mail address %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:116
+msgid "A XING account has already been requested for E-Mail address %1$s."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2

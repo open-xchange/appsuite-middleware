@@ -87,6 +87,56 @@ public class ContentAwareMailMessage extends MailMessage {
         this.primaryContent = primaryContent;
     }
 
+    @Override
+    public String getMessageId() {
+        return message.getMessageId();
+    }
+
+    @Override
+    public boolean containsMessageId() {
+        return message.containsMessageId();
+    }
+
+    @Override
+    public void removeMessageId() {
+        message.removeMessageId();
+    }
+
+    @Override
+    public void setMessageId(final String messageId) {
+        message.setMessageId(messageId);
+    }
+
+    @Override
+    public String getInReplyTo() {
+        return message.getInReplyTo();
+    }
+
+    @Override
+    public String[] getReferences() {
+        return message.getReferences();
+    }
+
+    @Override
+    public boolean containsReferences() {
+        return message.containsReferences();
+    }
+
+    @Override
+    public void removeReferences() {
+        message.removeReferences();
+    }
+
+    @Override
+    public void setReferences(final String sReferences) {
+        message.setReferences(sReferences);
+    }
+
+    @Override
+    public void setReferences(final String[] references) {
+        message.setReferences(references);
+    }
+
     /**
      * Gets the primary content
      *
@@ -94,16 +144,6 @@ public class ContentAwareMailMessage extends MailMessage {
      */
     public String getPrimaryContent() {
         return primaryContent;
-    }
-
-    @Override
-    public int hashCode() {
-        return message.hashCode();
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return message.equals(obj);
     }
 
     @Override

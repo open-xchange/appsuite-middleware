@@ -65,6 +65,7 @@ import com.openexchange.rest.services.OXRESTMatch;
 import com.openexchange.rest.services.OXRESTService;
 import com.openexchange.rest.services.Response;
 import com.openexchange.rest.services.internal.OXRESTServiceWrapper;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 
@@ -120,7 +121,7 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
              *    Reflection-based invocation via java.lang.reflect.Method inside ReflectiveServiceWrapper
              */
 
-            OXRESTServiceWrapper wrapper = retrieveWrapper(req.getMethod(), request.getPathInfo());
+            OXRESTServiceWrapper wrapper = REST_SERVICES.retrieve(req.getMethod(), request.getPathInfo());
             if (wrapper == null) {
                 resp.sendError(404, "No such REST service or method match found");
                 return;
@@ -137,11 +138,26 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
     }
 
     private void sendResponse(Response response, HttpServletResponse resp) throws IOException {
+        // Set HTTP status code
         resp.setStatus(response.getStatus());
-        for(Map.Entry<String, String> entry: response.getHeaders().entrySet()) {
+
+        // Set headers
+        for (Map.Entry<String, String> entry : response.getHeaders().entrySet()) {
             resp.setHeader(entry.getKey(), entry.getValue());
         }
         resp.setHeader("X-OX-ACHTUNG", "This is an internal API that may change without notice.");
+
+        // Ensure a Content-Type is set
+        if (!resp.containsHeader("Content-Type")) {
+            resp.setContentType(OXRESTService.CONTENT_TYPE_JAVASCRIPT);
+        }
+
+        // Disable caching
+        if (response.isDisableCaching()) {
+            Tools.disableCaching(resp);
+        }
+
+        // Write response body
         // TODO: Allow for binary streams
         Iterable<String> body = response.getBody();
         if (body != null) {
@@ -154,14 +170,9 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
     }
 
     private void enhance(OXRESTMatch match, AJAXRequestData request) {
-        for(Map.Entry<String, String> entry: match.getParameters().entrySet()) {
+        for (Map.Entry<String, String> entry : match.getParameters().entrySet()) {
             request.putParameter(entry.getKey(), entry.getValue());
         }
-    }
-
-
-    private OXRESTServiceWrapper retrieveWrapper(String method, String path) {
-        return REST_SERVICES.retrieve(method, path);
     }
 
 }

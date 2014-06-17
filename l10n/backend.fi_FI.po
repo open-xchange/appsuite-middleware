@@ -7,7 +7,7 @@ msgid ""
 msgstr "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-04-14 12:35+0100\n"
+"PO-Revision-Date: 2014-05-08 13:52+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: fi_FI\n"
@@ -15,7 +15,7 @@ msgstr "Project-Id-Version: backend\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.6.4\n"
+"X-Generator: Poedit 1.6.5\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -2229,6 +2229,23 @@ msgstr "Fasetti \"%1$s\" on pakollinen ja se on asetettava."
 msgid "Could not parse \"%1$s\"."
 msgstr "\"%1$s\" ei voitu jäsentää."
 
+#. The folder id \"%1$s\" is invalid for module \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:90
+msgid "The folder id \"%1$s\" is invalid for module \"%2$s\"."
+msgstr "Kansiotunniste \"%1$s\" on epäkelpo moduulille \"%2$s\"."
+
+#. The folder type \"%1$s\" is not supported.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:93
+msgid "The folder type \"%1$s\" is not supported."
+msgstr "Kansiotyyppi \"%1$s\" ei ole tuettu."
+
+#. The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:96
+msgid ""
+"The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not "
+"be used within one request."
+msgstr "Fasetin tyypit \"%1$s\" ja \"%2$s\" ovat ristiriitaisia eikä niitä voi käyttää samassa pyynnössä."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:61
 msgid "%1$s <i>in appointments</i>"
 msgstr "%1$s <i>tapaamisissa</i>"
@@ -2393,61 +2410,86 @@ msgstr "Tiedostotyyppi"
 msgid "File size"
 msgstr "Tiedostokoko"
 
+#. Search criteria time
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
+msgid "Time"
+msgstr "Aika"
+
 #. -------------------------- i18n strings for file types ---------------------------- //
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:94
 msgid "Images"
 msgstr "Kuvat"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:96
 msgid "Audio"
 msgstr "Ääni"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:98
 msgid "Video"
 msgstr "Video"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:100
 msgid "Documents"
 msgstr "Asiakirjat"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:102
 msgid "Other"
 msgstr "Muut"
 
 #. ---------------------------------------------------------------------------------- //
 #. Public folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
 msgid "Public folders"
 msgstr "Julkiset kansiot"
 
 #. Private folders
 #. Name of the parent folder for the private user folders.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:110
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
 msgstr "Yksityiset kansiot"
 
 #. Shared folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:113
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
 msgid "Shared folders"
 msgstr "Jaetut kansiot"
 
 #. Search in file field file name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:116
 msgid "%1$s <i>in file name</i>"
 msgstr "%1$s <i>tiedostonimessä</i>"
 
 #. Search in file field file description.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:119
 msgid "%1$s <i>in file description</i>"
 msgstr "%1$s <i>tiedostokuvauksessa</i>"
 
 #. Search in file field file content.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:119
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:122
 msgid "%1$s <i>in file content</i>"
 msgstr "%1$s <i>tiedostosisällössä</i>"
+
+#. ------------------------------- Time --------------------------------------------- //
+#. Search mails from last week
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:127
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
+msgid "last week"
+msgstr "viimeisin viikko"
+
+#. Search mails from last month
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
+msgid "last month"
+msgstr "viimeisin kuukausi"
+
+#. Search mails from last year
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:133
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:92
+msgid "last year"
+msgstr "viimeisin vuosi"
 
 #. Search in emails
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:65
@@ -2473,26 +2515,6 @@ msgstr "Lähettäjä"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:80
 msgid "Recipient"
 msgstr "Vastaanottaja"
-
-#. Search criteria time
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:83
-msgid "Time"
-msgstr "Aika"
-
-#. Search mails from last week
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
-msgid "last week"
-msgstr "viimeisin viikko"
-
-#. Search mails from last month
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
-msgid "last month"
-msgstr "viimeisin kuukausi"
-
-#. Search mails from last year
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:92
-msgid "last year"
-msgstr "viimeisin vuosi"
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Search in tasks
@@ -3378,24 +3400,35 @@ msgstr "Osoite %1$s ei ole sallittujen listalla %2$s OAuth API:lle"
 msgid "The request sent was missing its body"
 msgstr "Lähetetystä pyynnöstä puuttui runko"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:75
+#. The account is invalid, please recreate it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:76
 msgid "The account is invalid, please recreate it."
 msgstr "Tili on epäkelpo. Luo se uudestaan, ole hyvä."
 
+#. The account "%1$s" is invalid, please recreate it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:79
+msgid "The account \"%1$s\" is invalid, please recreate it."
+msgstr "Tili \"%1$s\" on epäkelpo. Ole hyvä ja luo se uudelleen."
+
 #. Please provide a display name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:82
 msgid "Please provide a display name."
 msgstr "Anna kutsumanimi."
 
 #. The associated OAuth provider denied the request: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:85
 msgid "The associated OAuth provider denied the request: %1$s."
 msgstr "Tähän liitetty OAuth-tuottaja hylkäsi pyynnön: %1$s."
 
 #. The OAuth authentication process has been canceled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
 msgid "The OAuth authentication process has been canceled."
 msgstr "OAuth tunnistautuminen on peruttu."
+
+#. Could not get a valid response from the associated OAuth provider.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:91
+msgid "Could not get a valid response from the associated OAuth provider."
+msgstr "OAuth-tuottajalta ei saatu käypää vastausta."
 
 #. *
 #. * New password too short.
@@ -3819,13 +3852,15 @@ msgid ""
 msgstr "POP3 taltion polku on epäkelpo. POP3 taltion polkua \"%1$s\" ei voida luoda käyttäjälle %2$s"
 
 #. *
-#. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.
+#. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work. Please be advised that while it is safe to ignore this warning, the POP3 account might not work if the supplied credentials are invalid.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:295
 msgid ""
 "Validation of POP3 credentials is disabled due to possible login "
-"restrictions by provider. Otherwise subsequent login attempt might not work."
-msgstr "Palveluntarjoajasi mahdollisten kirjautumisrajoitusten vuoksi POP3-valtuuksien validointi on pois päältä. Muuten myöhemmät kirjautumisyritykset voivat epäonnistua."
+"restrictions by provider. Otherwise subsequent login attempt might not work. "
+"Please be advised that while it is safe to ignore this warning, the POP3 "
+"account might not work if the supplied credentials are invalid."
+msgstr "Palveluntarjoajasi mahdollisesti asettamien kirjautumisrajoitusten vuoksi POP3-valtuuksien validointi on pois päältä. Muuten myöhemmät kirjautumisyritykset voivat epäonnistua. Tämän varoituksen voi jättää huomiotta, mutta mikäli annetut annetut valtuustiedot ovat väärin, POP3-tili ei välttämättä toimi."
 
 #. POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:298
@@ -3908,7 +3943,7 @@ msgstr "ylläpitäjä"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:63
 msgid "Publish Infostore document"
-msgstr "Julkaise Infostore-dokumentti"
+msgstr "Julkaise Infostore-asiakirja"
 
 #. Cannot find the requested publication site.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:63
@@ -3926,7 +3961,7 @@ msgstr "Sinulla ei ole tarvittavia valtuuksia valittuun toimintoon."
 msgid ""
 "The published document has been deleted in the meantime and therefore is no "
 "longer available."
-msgstr "Julkaistu dokumentti on sillä välin poistettu eikä siksi enää saatavissa."
+msgstr "Julkaistu asiakirja on sillä välin poistettu eikä siksi enää saatavissa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:62
 msgid ""
@@ -4043,6 +4078,11 @@ msgstr "Et ole jäsenenä joukossa GroupDispatcher: %1$s. Ole hyvä ja liity ens
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
 msgstr "Epäkelpo RSS URL tai annettu URL ei sisällä oikean muotoista XML-sisältöä: %1$s"
+
+#. HTTP error %1$s while loading RSS feed from URL: %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:66
+msgid "HTTP error %1$s while loading RSS feed from URL: %2$s."
+msgstr "HTTP-virhe %1$s ladattaessa RSS-syötettä URL:sta: %2$s."
 
 #. *
 #. * The value you inserted for %2$s is not correct
@@ -4661,7 +4701,7 @@ msgstr "Yhteystietoja ei voi poistaa."
 msgid ""
 "Number of documents attached to this contact is below zero. You can not "
 "remove any more attachments."
-msgstr "Tähän yhteystietoon on liitetty vähemmän kuin nolla dokumenttia. Et voi poistaa enempää liitteitä."
+msgstr "Tähän yhteystietoon on liitetty vähemmän kuin nolla asiakirjaa. Et voi poistaa enempää liitteitä."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:129
 msgid "Setting %s requires at least a contact and a value."
@@ -6093,12 +6133,12 @@ msgstr "Rikkinäinen CSV-tiedosto."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:98
 msgid "The document you requested does not exist."
-msgstr "Pyytämääsi dokumenttia ei ole olemassa."
+msgstr "Pyytämääsi asiakirjaa ei ole olemassa."
 
 #. Unable to load the document(s). Please try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:65
 msgid "Unable to load the document(s). Please try again."
-msgstr "Dokumentteja ei voitu ladata. Yritä uudelleen."
+msgstr "Asiakirjoja ei voitu ladata. Yritä uudelleen."
 
 #. The folder %1$s you requested is not an Infostore folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:68
@@ -6125,7 +6165,7 @@ msgstr "Sinulla ei ole tarvittavia valtuuksia dokumentin päivittämiseen."
 #. Unable to delete all documents. Please try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:80
 msgid "Unable to delete all documents. Please try again."
-msgstr "Kaikkia dokumentteja ei voitu poistaa. Yritä uudelleen."
+msgstr "Kaikkia asiakirjoja ei voitu poistaa. Yritä uudelleen."
 
 #. You do not have the appropriate permissions to delete this version.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:83
@@ -6135,7 +6175,7 @@ msgstr "Sinulla ei ole tarvittavia valtuuksia tämän version poistamiseen."
 #. The document is already locked. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:86
 msgid "The document is already locked. Please try again later."
-msgstr "Dokumentti on jo lukittu. Yritä uudelleen myöhemmin, ole hyvä."
+msgstr "Asiakirja on jo lukittu. Yritä uudelleen myöhemmin, ole hyvä."
 
 #. You do not have the appropriate permissions to unlock the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:89
@@ -6172,7 +6212,7 @@ msgstr "Haun tekemiseen vaaditaan %1$s tai useampi merkki."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:110
 msgid ""
 "The document could not be updated because it was modified. Please try again."
-msgstr "Dokumenttia ei voitu päivittää, koska sitä on muutettu. Yritä uudelleen."
+msgstr "Asiakirjaa ei voitu päivittää, koska sitä on muutettu. Yritä uudelleen."
 
 #. The file name must not contain slashes.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:113
@@ -6194,7 +6234,7 @@ msgstr "Uusia tiedostoja ei voi tallentaa käyttäen tiedostokohtaa (file offset
 msgid ""
 "This folder is a virtual folder that cannot contain documents. Please choose "
 "another folder."
-msgstr "Tämä kansio on virtuaalinen. Se ei voi sisältää dokumentteja. Ole hyvä ja valitse toinen kansio."
+msgstr "Tämä kansio on virtuaalinen. Se ei voi sisältää asiakirjoja. Ole hyvä ja valitse toinen kansio."
 
 #. *
 #. * Problem putting an object into the cache.
@@ -7601,7 +7641,7 @@ msgstr "Sinulla ei ole tarvittavia valtuuksia kansion \"%2$s\" uudelleen nimeäm
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
 msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr "Kansiota \"%1$s\" ei voida poistaa, koska se sisältää lukittuja dokumentteja."
+msgstr "Kansiota \"%1$s\" ei voida poistaa, koska se sisältää lukittuja asiakirjoja."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
@@ -8011,6 +8051,11 @@ msgstr "Viesti ylittää 140 merkin suurimman sallitun pituuden."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:110
 msgid "The mandatory parameter \"%1$s\" is missing in the request body"
 msgstr "Pyynnön rungosta puuttuu pakollinen parametri \"%1$s\""
+
+#. The XING server is not available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:113
+msgid "The XING server is not available."
+msgstr "XING-palvelin ei ole saatavilla."
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
@@ -14342,9 +14387,6 @@ msgstr "Zulu"
 
 #~ msgid "No such token: %1$s"
 #~ msgstr "Lipuketta ei ole: %1$s"
-
-#~ msgid "Token login service is not available."
-#~ msgstr "Palvelu lipukekirjautumiseen ei ole saatavilla."
 
 #~ msgid "No such session for token: %1$s"
 #~ msgstr "Lipukkeelle ei ole istuntoa: %1$s"

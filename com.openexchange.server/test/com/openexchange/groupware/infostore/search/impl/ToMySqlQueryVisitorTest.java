@@ -49,10 +49,20 @@
 
 package com.openexchange.groupware.infostore.search.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.infostore.search.AndTerm;
+import com.openexchange.groupware.infostore.search.ComparablePattern;
+import com.openexchange.groupware.infostore.search.ComparisonType;
+import com.openexchange.groupware.infostore.search.ContentTerm;
 import com.openexchange.groupware.infostore.search.DescriptionTerm;
 import com.openexchange.groupware.infostore.search.FileNameTerm;
+import com.openexchange.groupware.infostore.search.FileSizeTerm;
+import com.openexchange.groupware.infostore.search.OrTerm;
+import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 
@@ -63,8 +73,8 @@ import com.openexchange.groupware.infostore.utils.Metadata;
  */
 public class ToMySqlQueryVisitorTest extends TestCase {
 
-    private final static Pattern PATTERN1 = Pattern.compile("AND[ \t\r\n\f]*OR");
-    private final static Pattern PATTERN2 = Pattern.compile("[ ]{2,}");
+    private final static Pattern WRONG_OPERATORS = Pattern.compile("AND[ \t\r\n\f]*OR|AND[ \\t\\r\\n\\f]*AND|OR[ \\t\\r\\n\\f]*OR");
+    private final static Pattern MULTIPLE_WHITESPACE = Pattern.compile("[ ]{2,}");
 
     /**
      * Initializes a new {@link ToMySqlQueryVisitorTest}.
@@ -79,42 +89,42 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         String result = visitor.getMySqlQuery();
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query: " + result, result.endsWith("UPPER(infostore_document.description) LIKE UPPER('%bluber blah_foo%')"));
 
         dtz = new DescriptionTerm("bluber blah?foo", false, true);
         visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         result = visitor.getMySqlQuery();
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE '%bluber blah_foo%'"));
 
         dtz = new DescriptionTerm("*bluber %blah?foo*", false, false);
         visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         result = visitor.getMySqlQuery();
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE '%bluber \\%blah_foo%'"));
 
         dtz = new DescriptionTerm("bluber_blah", false, false);
         visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         result = visitor.getMySqlQuery();
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description = 'bluber_blah'"));
 
         dtz = new DescriptionTerm("bluber_blah", false, true);
         visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         result = visitor.getMySqlQuery();
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description LIKE '%bluber\\_blah%'"));
 
         dtz = new DescriptionTerm("bluber\\blah", false, false);
         visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         result = visitor.getMySqlQuery();
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query: " + result, result.endsWith("infostore_document.description = 'bluber\\\\blah'"));
 
     }
@@ -124,7 +134,7 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(new int[] { 119 }, new int[] {120}, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         String result = visitor.getMySqlQuery();
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query", result.endsWith("AND (infostore.folder_id = 119 OR (infostore.folder_id = 120 AND"
             + " infostore.created_by = 1)) AND infostore_document.description LIKE '%bluber blah_foo%'"));
     }
@@ -134,16 +144,16 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(null, new int[] {120}, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         String result = visitor.getMySqlQuery();
-        assertFalse("Invalid SQL query", PATTERN1.matcher(result).matches());
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query", result.endsWith("AND (infostore.folder_id = 120 AND"
             + " infostore.created_by = 1) AND infostore_document.description LIKE '%bluber blah_foo%'"));
 
         visitor = new ToMySqlQueryVisitor(new int[0], new int[] {120}, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         result = visitor.getMySqlQuery();
-        assertFalse("Invalid SQL query", PATTERN1.matcher(result).matches());
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query", result.endsWith("AND (infostore.folder_id = 120 AND"
             + " infostore.created_by = 1) AND infostore_document.description LIKE '%bluber blah_foo%'"));
     }
@@ -153,15 +163,15 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(new int[] { 119 }, null, 1, 1, "SELECT field01");
         visitor.visit(dtz);
         String result = visitor.getMySqlQuery();
-        assertFalse("Invalid SQL query", PATTERN1.matcher(result).matches());
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query", result.endsWith("AND infostore.folder_id = 119 AND infostore_document.description LIKE '%bluber blah_foo%'"));
 
         visitor = new ToMySqlQueryVisitor(new int[] { 119 }, new int[0], 1, 1, "SELECT field01");
         visitor.visit(dtz);
         result = visitor.getMySqlQuery();
-        assertFalse("Invalid SQL query", PATTERN1.matcher(result).matches());
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query", result.endsWith("AND infostore.folder_id = 119 AND infostore_document.description LIKE '%bluber blah_foo%'"));
     }
 
@@ -171,8 +181,8 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(new int[] { 119 }, new int[] { 120 }, 1, 1, "SELECT field01", 0, 5);
         visitor.visit(term);
         String result = visitor.getMySqlQuery();
-        assertFalse("Invalid SQL query", PATTERN1.matcher(result).matches());
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query", result.equals(EXPECTED1));
     }
 
@@ -182,9 +192,43 @@ public class ToMySqlQueryVisitorTest extends TestCase {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(new int[] { 119 }, new int[] { 120 }, 1, 1, "SELECT field01", Metadata.LAST_MODIFIED_LITERAL, SearchEngineImpl.ASC, 0, 5);
         visitor.visit(term);
         String result = visitor.getMySqlQuery();
-        assertFalse("Invalid SQL query", PATTERN1.matcher(result).matches());
-        assertFalse("Unneccessary whitespaces in query", PATTERN2.matcher(result).matches());
+        assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
         assertTrue("Unexpected SQL query", result.equals(EXPECTED2));
+    }
+
+    // see bug 32874
+    public void testUnsupportedTerms() throws OXException {
+        ContentTerm term1 = new ContentTerm("test123", false, false);
+        FileSizeTerm term2 = new FileSizeTerm(new ComparablePattern<Number>() {
+
+            @Override
+            public Number getPattern() {
+                return 1024 * 1024 * 10;
+            }
+
+            @Override
+            public ComparisonType getComparisonType() {
+                return ComparisonType.GREATER_THAN;
+            }
+        });
+        List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(2);
+        terms.add(term1);
+        terms.add(term2);
+        OrTerm orTerm = new OrTerm(terms);
+        AndTerm andTerm = new AndTerm(terms);
+
+        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(new int[] { 119 }, new int[] { 120 }, 1, 1, "SELECT field01", Metadata.LAST_MODIFIED_LITERAL, SearchEngineImpl.ASC, 0, 5);
+        visitor.visit(andTerm);
+        String result = visitor.getMySqlQuery();
+        assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
+
+        visitor = new ToMySqlQueryVisitor(new int[] { 119 }, new int[] { 120 }, 1, 1, "SELECT field01", Metadata.LAST_MODIFIED_LITERAL, SearchEngineImpl.ASC, 0, 5);
+        visitor.visit(orTerm);
+        result = visitor.getMySqlQuery();
+        assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
+        assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
     }
 
 }

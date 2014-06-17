@@ -49,13 +49,10 @@
 
 package com.openexchange.find.facet;
 
-import java.util.Collections;
-
-
-
 /**
- * A {@link SimpleFacet} is a special facet that has no meaningful values and provides
- * only a single filter. The facet generally references a logical field like
+ * A {@link SimpleFacet} is a special facet that has exactly one value. The facets
+ * type and its value are strictly coupled, in a way that a display name for both,
+ * facet and value would be redundant. A simple facet generally denotes a logical field like
  * 'phone number'. Internally this logical field can map to several internal fields
  * (e.g. 'phone_private', 'phone_mobile', 'phone_business'). In clients the facet as
  * a whole can be displayed as a single item. Example: "Search for 'term' in field 'phone
@@ -81,7 +78,7 @@ public class SimpleFacet extends AbstractFacet{
     public SimpleFacet(FacetType type, DisplayItem displayItem, String filterField, String filterValue) {
         super(type);
         this.displayItem = displayItem;
-        filter = new Filter(Collections.singletonList(filterField), filterValue);
+        filter = Filter.of(filterField, filterValue);
     }
 
     /**

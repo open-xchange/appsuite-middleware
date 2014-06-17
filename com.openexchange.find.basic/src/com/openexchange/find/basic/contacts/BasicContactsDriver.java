@@ -69,25 +69,17 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
+import com.openexchange.find.basic.Folders;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.contacts.ContactsFacetType;
-import com.openexchange.find.contacts.ContactsStrings;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Facets.ExclusiveFacetBuilder;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.folderstorage.FolderResponse;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.ContactContentType;
-import com.openexchange.folderstorage.type.PrivateType;
-import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
@@ -155,19 +147,11 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             }
         }
         /*
-         * restrict to specific folder if set
+         * restrict to specific folders if set
          */
-        String folderID = searchRequest.getFolderId();
-        if (null == folderID) {
-            SearchTerm<?> folderTypeTerm = getFolderTypeTerm(session, searchRequest.getFolderType());
-            if (folderTypeTerm != null) {
-                searchTerm.addSearchTerm(folderTypeTerm);
-            }
-        } else {
-            SingleSearchTerm folderIdTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-            folderIdTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-            folderIdTerm.addOperand(new ConstantOperand<String>(folderID));
-            searchTerm.addSearchTerm(folderIdTerm);
+        SearchTerm<?> folderTypeTerm = getFolderTypeTerm(searchRequest, session);
+        if (folderTypeTerm != null) {
+            searchTerm.addSearchTerm(folderTypeTerm);
         }
         /*
          * combine with addressbook queries
@@ -185,32 +169,41 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * extract requested contact fields
          */
-        boolean excludeAdmin = false == searchRequest.getOptions().includeContextAdmin();
         ContactField[] contactFields;
         int[] columnIDs = searchRequest.getColumns();
         if (null == columnIDs || 0 == columnIDs.length) {
             columnIDs = ColumnParser.parseColumns("list");
         }
-        contactFields = excludeAdmin ?
-            ColumnParser.getFieldsToQuery(columnIDs, ContactField.INTERNAL_USERID) : ColumnParser.getFieldsToQuery(columnIDs);
+
+        /*
+         * exclude context admin if requested
+         */
+        if (searchRequest.getOptions().includeContextAdmin()) {
+            contactFields = ColumnParser.getFieldsToQuery(columnIDs);
+        } else {
+            contactFields = ColumnParser.getFieldsToQuery(columnIDs, ContactField.INTERNAL_USERID);
+            SingleSearchTerm t = new SingleSearchTerm(SingleOperation.NOT_EQUALS);
+            t.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+            t.addOperand(new ConstantOperand<Integer>(session.getContext().getMailadmin()));
+            searchTerm.addSearchTerm(t);
+        }
+
         /*
          * search
          */
         List<Document> contactDocuments = new ArrayList<Document>();
         SortOptions sortOptions = new SortOptions(searchRequest.getStart(), searchRequest.getSize());
-        int excludedAdminID = excludeAdmin ? session.getContext().getMailadmin() : -1;
         SearchIterator<Contact> searchIterator = null;
         try {
             searchIterator = Services.getContactService().searchContacts(session, searchTerm, contactFields, sortOptions);
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
-                if (excludedAdminID != contact.getInternalUserId()) {
-                    contactDocuments.add(new ContactsDocument(contact));
-                }
+                contactDocuments.add(new ContactsDocument(contact));
             }
         } finally {
             SearchIterators.close(searchIterator);
         }
+
         return new SearchResult(-1, searchRequest.getStart(), contactDocuments, searchRequest.getActiveFacets());
     }
 
@@ -228,7 +221,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             List<String> prefixTokens = tokenize(prefix);
             if (!prefixTokens.isEmpty()) {
                 facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
-                    .withFormattableDisplayItem(ContactsStrings.FACET_GLOBAL, prefix)
+                    .withSimpleDisplayItem(prefix)
                     .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
                     .build());
                 facets.add(new NameFacet(prefix, prefixTokens));
@@ -263,42 +256,28 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         return new AutocompleteResult(facets);
     }
 
-    private SearchTerm<?> getFolderTypeTerm(ServerSession session, FolderType folderType) throws OXException {
-        if (folderType == null) {
+    private SearchTerm<?> getFolderTypeTerm(SearchRequest searchRequest, ServerSession session) throws OXException {
+        List<String> folderIDs = Folders.getStringIDs(searchRequest, getModule(), session);
+        if (folderIDs == null) {
             return null;
         }
 
-        Type type = null;
-        if (FolderType.PRIVATE == folderType) {
-            type = PrivateType.getInstance();
-        } else if (FolderType.PUBLIC == folderType) {
-            type = PublicType.getInstance();
-        } else if (FolderType.SHARED == folderType) {
-            type = SharedType.getInstance();
-        }
-
-        if (type != null) {
-            FolderResponse<UserizedFolder[]> visibleFolders = Services.getFolderService().getVisibleFolders(
-                FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, false, session, null);
-            UserizedFolder[] folders = visibleFolders.getResponse();
-            if (null != folders && 0 < folders.length) {
-                if (1 == folders.length) {
-                    String folderID = folders[0].getID();
+        if (null != folderIDs && 0 < folderIDs.size()) {
+            if (1 == folderIDs.size()) {
+                String folderID = folderIDs.get(0);
+                SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+                searchTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+                searchTerm.addOperand(new ConstantOperand<String>(folderID));
+                return searchTerm;
+            } else {
+                CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+                for (String folderID : folderIDs) {
                     SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
                     searchTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
                     searchTerm.addOperand(new ConstantOperand<String>(folderID));
-                    return searchTerm;
-                } else {
-                    CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-                    for (UserizedFolder folder : folders) {
-                        String folderID = folder.getID();
-                        SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-                        searchTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-                        searchTerm.addOperand(new ConstantOperand<String>(folderID));
-                        orTerm.addSearchTerm(searchTerm);
-                    }
-                    return orTerm;
+                    orTerm.addSearchTerm(searchTerm);
                 }
+                return orTerm;
             }
         }
 

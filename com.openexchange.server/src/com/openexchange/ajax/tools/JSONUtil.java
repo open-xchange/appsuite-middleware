@@ -129,10 +129,10 @@ public final class JSONUtil {
         for (final Iterator<String> keys2 = j2.keys(); keys2.hasNext();) {
             final String key = keys2.next();
             final Object object2 = j2.get(key);
-            if (object2 instanceof JSONObject) {
+            if (isJSONObject(object2)) {
                 if (j1.hasAndNotNull(key)) {
                     final Object object1 = j1.get(key);
-                    if (!(object1 instanceof JSONObject)) {
+                    if (!isJSONObject(object1)) {
                         throw new JSONException("JSON merge failed for key \"" + key + "\": Incompatible values " + object1.getClass().getSimpleName() + " != " + object2.getClass().getSimpleName());
                     }
                     mergeInto((JSONObject) object1, (JSONObject) object2);
@@ -140,10 +140,10 @@ public final class JSONUtil {
                 } else {
                     j1.put(key, object2);
                 }
-            } else if (object2 instanceof JSONArray) {
+            } else if (isJSONArray(object2)) {
                 if (j1.hasAndNotNull(key)) {
                     final Object object1 = j1.get(key);
-                    if (!(object1 instanceof JSONArray)) {
+                    if (!isJSONArray(object1)) {
                         throw new JSONException("JSON merge failed for key \"" + key + "\": Incompatible values " + object1.getClass().getSimpleName() + " != " + object2.getClass().getSimpleName());
                     }
                     mergeInto((JSONArray) object1, (JSONArray) object2);
@@ -156,6 +156,14 @@ public final class JSONUtil {
             }
         }
 
+    }
+
+    private static boolean isJSONObject(Object o) {
+        return (o instanceof JSONObject);
+    }
+
+    private static boolean isJSONArray(Object o) {
+        return (o instanceof JSONArray);
     }
 
     private static void mergeInto(final JSONArray a1, final JSONArray a2) throws JSONException {

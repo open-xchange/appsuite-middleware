@@ -63,7 +63,9 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.Language;
 import com.openexchange.xing.LeadDescription;
 import com.openexchange.xing.XingAPI;
+import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.exception.XingException;
+import com.openexchange.xing.exception.XingLeadAlreadyExistsException;
 import com.openexchange.xing.json.XingRequest;
 import com.openexchange.xing.session.AppKeyPair;
 import com.openexchange.xing.session.ConsumerPair;
@@ -111,9 +113,13 @@ public class CreateProfileAction extends AbstractXingAction {
         OAuthServiceMetaData m = oauthService.getMetaDataRegistry().getService("com.openexchange.oauth.xing", req.getSession().getUserId(), req.getSession().getContextId());
         WebAuthSession session = new WebAuthSession(new AppKeyPair(m.getAPIKey(req.getSession()), m.getAPISecret(req.getSession())), new ConsumerPair(m.getConsumerKey(), m.getConsumerSecret()));
 
-        XingAPI<WebAuthSession> xingAPI = new XingAPI<WebAuthSession>(session);
-        Map<String, Object> lead = xingAPI.signUpLead(leadDescription);
-        return new AJAXRequestResult(JSONCoercion.coerceToJSON(lead));
+        try {
+            XingAPI<WebAuthSession> xingAPI = new XingAPI<WebAuthSession>(session);
+            Map<String, Object> lead = xingAPI.signUpLead(leadDescription);
+            return new AJAXRequestResult(JSONCoercion.coerceToJSON(lead));
+        } catch (XingLeadAlreadyExistsException e) {
+            throw XingExceptionCodes.LEAD_ALREADY_EXISTS.create(e, e.getEmail());
+        }
     }
 
 }

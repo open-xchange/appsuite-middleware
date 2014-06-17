@@ -69,10 +69,11 @@ public class ContactJoinRevokeRequest extends AbstractXingRequest<ContactJoinRev
      * Initializes a new {@link ContactJoinRevokeRequest}.
      * 
      * @param recipientMail the xing user mail which contact request should be revoked
+     * @param testAccount - The test account to use for this test
      * @param foe failOnError
      */
-    public ContactJoinRevokeRequest(final String recipientMail, boolean foe) {
-        super(foe);
+    public ContactJoinRevokeRequest(final String recipientMail, final XingTestAccount testAccount, boolean foe) {
+        super(foe, testAccount);
         this.recipientMail = recipientMail;
     }
 

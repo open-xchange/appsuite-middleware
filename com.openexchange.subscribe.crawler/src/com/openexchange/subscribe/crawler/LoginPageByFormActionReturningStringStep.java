@@ -139,11 +139,12 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
                    if (debuggingEnabled){
                        openPageInBrowser(pageAfterLogin);
                    }
-                   String htmlPage = pageAfterLogin.toString();
                    Pattern p = Pattern.compile(".*\\((.*LoginVerification.*)\\).*");
-                   Matcher m = p.matcher(htmlPage);
+                   Matcher m = p.matcher(pageAfterLogin.toString());
                    if (m.find()) {
-                       throw SubscriptionErrorMessage.NEED_VERIFICATION.create(m.group(1));
+                       // Reached identity verification, not possible to continue crawling
+                       throw SubscriptionErrorMessage.ABORT_IDENTITY_CONFIRMATION.create();
+                       // throw SubscriptionErrorMessage.NEED_VERIFICATION.create(m.group(1));
                    }
                    throw SubscriptionErrorMessage.INVALID_LOGIN.create();
                }

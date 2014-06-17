@@ -49,6 +49,7 @@
 
 package com.openexchange.preview.internal;
 
+import static com.openexchange.java.Strings.toLowerCase;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,6 +70,7 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.preview.Delegating;
 import com.openexchange.preview.InternalPreviewService;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewExceptionCodes;
@@ -84,7 +86,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DelegationPreviewService implements PreviewService, SimpleRegistryListener<InternalPreviewService> {
+public class DelegationPreviewService implements Delegating, SimpleRegistryListener<InternalPreviewService> {
 
     private final PreviewService delegate;
 
@@ -126,7 +128,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
              */
             final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output);
             if (previewService == null) {
-                throw new OXException();
+                throw PreviewExceptionCodes.NO_PREVIEW_SERVICE.create(null == mimeType ? "" :  mimeType);
             }
             return previewService.getPreviewFor(arg, output, session, pages);
         } catch (final IOException e) {
@@ -188,7 +190,8 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
         }
     }
 
-    private PreviewService getBestFitOrDelegate(final String mimeType, final PreviewOutput output) {
+    @Override
+    public PreviewService getBestFitOrDelegate(final String mimeType, final PreviewOutput output) {
         final Map<PreviewOutput, BlockingQueue<InternalPreviewService>> map = serviceMap.get(mimeType);
         if (map == null) {
             return null;
@@ -231,19 +234,6 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
             return o1Quality - o2Quality;
         }
 
-    }
-
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
 }

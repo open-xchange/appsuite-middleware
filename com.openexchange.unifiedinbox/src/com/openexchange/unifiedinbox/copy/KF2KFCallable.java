@@ -103,8 +103,8 @@ final class KF2KFCallable implements Task<Object> {
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
-            final String realSource = UnifiedInboxUtility.determineAccountFullname(mailAccess, sourceFolder);
-            final String realDest = UnifiedInboxUtility.determineAccountFullname(mailAccess, destFolder);
+            final String realSource = UnifiedInboxUtility.determineAccountFullName(mailAccess, sourceFolder);
+            final String realDest = UnifiedInboxUtility.determineAccountFullName(mailAccess, destFolder);
             final String[] results;
             if (move) {
                 results = mailAccess.getMessageStorage().moveMessages(realSource, realDest, idList.toArray(new String[idList.size()]), fast);

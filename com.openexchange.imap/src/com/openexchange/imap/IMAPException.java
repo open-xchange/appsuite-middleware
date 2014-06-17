@@ -170,7 +170,7 @@ public final class IMAPException extends OXException {
          */
         DUPLICATE_FOLDER(IMAPCode.DUPLICATE_FOLDER),
         /**
-         * Mail folder "%1$s" could not be created (maybe due to insufficient CATEGORY_PERMISSION_DENIED on parent folder %2$s or due to an invalid folder
+         * Mail folder "%1$s" could not be created (maybe due to insufficient permission on parent folder %2$s or due to an invalid folder
          * name)
          */
         FOLDER_CREATION_FAILED(IMAPCode.FOLDER_CREATION_FAILED),

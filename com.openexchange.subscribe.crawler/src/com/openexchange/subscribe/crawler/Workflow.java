@@ -181,7 +181,7 @@ public class Workflow {
                     currentStep.setInput(previousStep.getOutput());
                 }
                 currentStep.setWorkflow(this);
-                LOG.info("Current Step : {}", currentStep.getClass());
+                LOG.debug("Current Step : {}", currentStep.getClass());
                 if (currentStep.isSwitchUserAgent()){
                     crawlerConnection.switchUserAgent();
                 }

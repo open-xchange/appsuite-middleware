@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.hazelcast.config,
  com.hazelcast.core,
  com.javacodegeeks.concurrent,
+ com.openexchange.concurrent,
  com.openexchange.config,
  com.openexchange.context,
  com.openexchange.exception,

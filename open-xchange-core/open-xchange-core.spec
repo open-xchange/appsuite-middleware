@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -965,6 +965,23 @@ ox_add_property com.openexchange.quota.attachment -1 /opt/open-xchange/etc/quota
 # SoftwareChagne_Request-2002
 ox_add_property com.openexchange.infostore.zipDocumentsCompressionLevel -1 /opt/open-xchange/etc/infostore.properties
 
+# SoftwareChange_Request-2027
+pfile=/opt/open-xchange/etc/whitelist.properties
+if ! grep -E '^html.tag.table.*height' $pfile > /dev/null; then
+    oval=$(ox_read_property html.tag.table ${pfile})
+    oval=${oval//\"/}
+    ox_set_property html.tag.table \""${oval}height,"\" $pfile
+fi
+if ! grep -E '^html.style.combimap.background.*radial-gradient' $pfile > /dev/null; then
+    oval=$(ox_read_property html.style.combimap.background ${pfile})
+    oval=${oval//\"/}
+    ox_set_property html.style.combimap.background \""${oval}radial-gradient,"\" $pfile
+fi
+
+# SoftwareChange_Request-2036
+VALUE=$(ox_read_property com.openexchange.hazelcast.network.symmetricEncryption /opt/open-xchange/etc/hazelcast.properties)
+ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" /opt/open-xchange/etc/hazelcast.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1004,6 +1021,16 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 7.6.0
+* Thu Jun 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-06-16
+* Fri May 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 7.6.0
+* Thu May 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-05-26
+* Fri May 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-05-26
 * Fri May 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Third release candidate for 7.6.0
 * Wed May 07 2014 Marcus Klein <marcus.klein@open-xchange.com>

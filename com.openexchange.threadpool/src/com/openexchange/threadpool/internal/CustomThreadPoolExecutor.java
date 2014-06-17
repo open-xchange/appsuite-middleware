@@ -2419,7 +2419,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
          */
         @Override
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor e) {
-            throw new RejectedExecutionException();
+            throw new RejectedExecutionException("Thread pool is overloaded!");
         }
     }
 

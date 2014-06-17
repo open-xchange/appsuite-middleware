@@ -205,6 +205,10 @@ public final class SieveTextFilter {
     private static final String MATCH_STRING = "([^" + SEPARATOR_REGEX + "]*?)";
 
     private static final Pattern PATTERN = Pattern.compile("^" + FLAG_TAG + MATCH_STRING + SEPARATOR_REGEX + UNIQUE_ID + MATCH_STRING + SEPARATOR_REGEX + RULENAME_TAG + "(.*?)$");
+    
+    private static final String OK = "\nOK";
+    
+    private static final String ESCAPED_OK = "\n_OK_";
 
     private final String username;
 
@@ -220,9 +224,10 @@ public final class SieveTextFilter {
         boolean errorsinscript = false;
         // The following line strips off the first line of the script
         // final String first = readFileToString.replaceAll("^.*(\r)?\n", "");
-        final String commentedlines = diffremovenotcommentedlines(kickcommentsright(readFileToString), readFileToString);
+        final String unescaped = readFileToString.replaceAll(ESCAPED_OK, OK);
+        final String commentedlines = diffremovenotcommentedlines(kickcommentsright(unescaped), unescaped);
 
-        final Node uncommented = new SieveParser(new StringReader(readFileToString)).start();
+        final Node uncommented = new SieveParser(new StringReader(unescaped)).start();
         // final List<OwnType> jjtAccept = (List<OwnType>)
         // uncommented.jjtAccept(new Visitor(), null);
         // log.debug(jjtAccept);
@@ -231,16 +236,16 @@ public final class SieveTextFilter {
         // final List<OwnType> jjtAccept2 = (List<OwnType>)
         // commented.jjtAccept(new Visitor(), null);
         // log.debug(jjtAccept2);
-        final ArrayList<RuleComment> rulenames = getRulenames(readFileToString);
+        final ArrayList<RuleComment> rulenames = getRulenames(unescaped);
         final ArrayList<Rule> rules = (ArrayList<Rule>) uncommented.jjtAccept(new InternalVisitor(), Boolean.FALSE);
         final ArrayList<Rule> rules2 = (ArrayList<Rule>) commented.jjtAccept(new InternalVisitor(), Boolean.TRUE);
         // Attention: After merging the manipulation of finalrules also
         // manipulates rules and rules2
         final ArrayList<Rule> finalrules = mergerules(rules, rules2);
-        if (addRulenameToFittingCommandAndSetErrors(rulenames, finalrules, readFileToString, commentedlines)) {
+        if (addRulenameToFittingCommandAndSetErrors(rulenames, finalrules, unescaped, commentedlines)) {
             errorsinscript = true;
         }
-        final NextUidAndError nextuidanderror = setPosAndMissingErrortextsAndIds(finalrules, readFileToString, commentedlines);
+        final NextUidAndError nextuidanderror = setPosAndMissingErrortextsAndIds(finalrules, unescaped, commentedlines);
         if (nextuidanderror.isError()) {
             errorsinscript = true;
         }
@@ -634,11 +639,12 @@ public final class SieveTextFilter {
         for (final OwnType owntype : noncommentedoutput) {
             final int linenumber = owntype.getLinenumber();
             final String string = owntype.getOutput().toString();
+            final String escaped = string.replaceAll(OK, ESCAPED_OK);
             final int size = retval.size();
             if (linenumber > size + 1) {
                 fillup(retval, linenumber - (size + 1));
             }
-            retval.addAll(stringToList(string));
+            retval.addAll(stringToList(escaped));
         }
         for (final OwnType owntype : commentedoutput) {
             int linenumber = owntype.getLinenumber() - 1;
@@ -672,9 +678,14 @@ public final class SieveTextFilter {
                 final int line = ruleComment.getLine();
                 final String rulename2 = ruleComment.getRulename();
                 // The nth line is the n-1th position inside the array
-                retval.add(line - 1, FLAG_TAG + listToCommaSeparatedString(ruleComment.getFlags()) + SEPARATOR + UNIQUE_ID + ruleComment.getUniqueid() + SEPARATOR
-                        + RULENAME_TAG + ((null != rulename2) ? rulename2 : ""));
-                searchEmptyLineAndRemove(retval, line - 1);
+                int index = line - 1;
+                String sVal = new StringBuilder(128).append(FLAG_TAG).append(listToCommaSeparatedString(ruleComment.getFlags())).append(SEPARATOR).append(UNIQUE_ID).append(ruleComment.getUniqueid()).append(SEPARATOR).append(RULENAME_TAG).append(null == rulename2 ? "" : rulename2).toString();
+                if (index < 0 || index > retval.size()) {
+                    retval.add(sVal);
+                } else {
+                    retval.add(index, sVal);
+                    searchEmptyLineAndRemove(retval, index);
+                }
             }
         }
 

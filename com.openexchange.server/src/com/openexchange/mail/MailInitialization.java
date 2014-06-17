@@ -152,6 +152,8 @@ public final class MailInitialization implements Initialization, CacheAvailabili
                     // Nope
                 }
             }, startedStack);
+            // Ensure storage instance is initialized during start-up
+            UserSettingMailStorage.getInstance();
             /*
              * Add to cache availability registry
              */

@@ -51,26 +51,19 @@ package com.openexchange.groupware.infostore.search.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.TIntList;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Deque;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-import java.util.Stack;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.configuration.ServerConfig;
@@ -89,7 +82,6 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
@@ -98,6 +90,7 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.sql.SearchStrings;
@@ -133,42 +126,16 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             security.setProvider(provider);
         }
     }
-    
+
     @Override
     public SearchIterator<DocumentMetadata> search(final int[] folderIds, final SearchTerm<?> searchTerm, final Metadata[] cols, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
-
         Connection con = getReadConnection(ctx);
-
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
         if (folderIds == null || folderIds.length == 0) {
-            
-            final Set<Integer> ignoredTrashedFolders = OXFolderIteratorSQL.getIgnoredTrashFolders(user, userPermissions, ctx, con, FolderObject.TRASH, new int[] { FolderObject.INFOSTORE });
-            final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
-                user.getId(),
-                user.getGroups(),
-                userPermissions.getAccessibleModules(),
-                FolderObject.INFOSTORE,
-                ctx,
-                con)).asQueue();
-            
-            for (final FolderObject folder : queue) {
-                // Exclude trash folder if not set explicitly
-                if (folder.getType() == FolderObject.TRASH || ignoredTrashedFolders.contains(folder.getObjectID())) {
-                    continue;
-                }
-
-                final EffectivePermission perm = folder.getEffectiveUserPermission(user.getId(), userPermissions);
-                if (perm.canReadAllObjects()) {
-                    all.add(Integer.valueOf(folder.getObjectID()));
-                } else if (perm.canReadOwnObjects()) {
-                    own.add(Integer.valueOf(folder.getObjectID()));
-                }
-            }
+            gatherVisibleFolders(con, ctx, user, userPermissions, all, own);
         } else {
             for (int folderId : folderIds) {
-                // Optionally get all subfolders?
-                // final Set<Integer> folders = getAllSubfolders(folderId, user, userPermissions, ctx, con);
                 final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
                 if (perm.canReadAllObjects()) {
                     all.add(Integer.valueOf(folderId));
@@ -225,28 +192,8 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         {
             Connection con = getReadConnection(ctx);
             try {
-                final int userId = user.getId();
-                if (folderId == NOT_SET || folderId == NO_FOLDER) {
-                    final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
-                        userId,
-                        user.getGroups(),
-                        userPermissions.getAccessibleModules(),
-                        FolderObject.INFOSTORE,
-                        ctx,
-                        con)).asQueue();
-                    for (final FolderObject folder : queue) {
-                        // Exclude trash folder if not set explicitly
-                        if (folder.getType() == FolderObject.TRASH) {
-                            continue;
-                        }
-
-                        final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userPermissions);
-                        if (perm.canReadAllObjects()) {
-                            all.add(Integer.valueOf(folder.getObjectID()));
-                        } else if (perm.canReadOwnObjects()) {
-                            own.add(Integer.valueOf(folder.getObjectID()));
-                        }
-                    }
+                if (NOT_SET == folderId || NO_FOLDER == folderId) {
+                    gatherVisibleFolders(con, ctx, user, userPermissions, all, own);
                 } else {
                     final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
                     if (perm.canReadAllObjects()) {
@@ -613,6 +560,38 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             retval = retval.substring(0, retval.lastIndexOf(", "));
         }
         return retval;
+    }
+
+
+    /**
+     * Collects all infostore folders visible to a user and puts their folder IDs into the supplied lists, depending on the user being
+     * allowed to read all contained items or only own ones.
+     *
+     * @param connection A readable connection to the database
+     * @param context The context
+     * @param user The user
+     * @param userPermissions The user's permission bits
+     * @param all A collection to add the IDs of folder the user is able to read "all" items from
+     * @param own A collection to add the IDs of folder the user is able to read only "own" items from
+     * @throws OXException
+     */
+    private static void gatherVisibleFolders(Connection connection, Context context, User user, UserPermissionBits userPermissions, Collection<Integer> all, Collection<Integer> own) throws OXException {
+        SearchIterator<FolderObject> searchIterator = null;
+        try {
+            searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(user.getId(), user.getGroups(),
+                userPermissions.getAccessibleModules(), FolderObject.PUBLIC, new int[] { FolderObject.INFOSTORE }, context, connection);
+            while (searchIterator.hasNext()) {
+                FolderObject folder = searchIterator.next();
+                EffectivePermission perm = folder.getEffectiveUserPermission(user.getId(), userPermissions);
+                if (perm.canReadAllObjects()) {
+                    all.add(Integer.valueOf(folder.getObjectID()));
+                } else if (perm.canReadOwnObjects()) {
+                    own.add(Integer.valueOf(folder.getObjectID()));
+                }
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
     }
 
     public static class InfostoreSearchIterator implements SearchIterator<DocumentMetadata> {

@@ -168,6 +168,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
     private final ConcurrentMap<Integer, Object> alignmentRequests = new ConcurrentHashMap<Integer, Object>();
 
     private boolean save(final String id, final byte[] bytes, final String optName, final String optType, final int userId, final int contextId) throws OXException {
+        LOG.debug("Trying to cache resource {}.", id);
         final ResourceCacheMetadataStore metadataStore = getMetadataStore();
         final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         final DatabaseService dbService = getDBService();
@@ -191,6 +192,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             ResourceCacheMetadata existingMetadata = null;
             boolean committed = false;
             boolean triggerAlignment = false;
+            long start = System.currentTimeMillis();
             try {
                 /*
                  * We have to deal with high concurrency here. Selecting an entry with FOR UPDATE leads to
@@ -225,7 +227,14 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             } catch (final DataTruncation e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             } catch (final SQLException e) {
-                throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+                // duplicate key conflict
+                if (e.getErrorCode() == 1022) {
+                    long transactionDuration = System.currentTimeMillis() - start;
+                    LOG.warn("Caching a resource failed due to a duplicate key conflict, this should happen very rarely otherwise this may indicate a performance problem."
+                        + " The transaction lasted {}ms. Original message: {}.", transactionDuration, e.getMessage());
+                } else {
+                    throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+                }
             } finally {
                 if (committed) {
                     Databases.autocommit(con);

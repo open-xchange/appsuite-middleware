@@ -49,7 +49,12 @@
 
 package com.openexchange.groupware.infostore.search.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.owasp.esapi.codecs.MySQLCodec;
 import org.owasp.esapi.codecs.MySQLCodec.Mode;
 import com.openexchange.exception.OXException;
@@ -207,9 +212,25 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         return sb.toString();
     }
 
+    private static final Set<Class<? extends SearchTerm<?>>> UNSUPPORTED = Collections.unmodifiableSet(new HashSet<Class<? extends SearchTerm<?>>>(Arrays.asList(ContentTerm.class, MetaTerm.class, SequenceNumberTerm.class)));
+
+    private static List<SearchTerm<?>> prepareTerms(List<SearchTerm<?>> terms) {
+        if (null == terms) {
+            return Collections.emptyList();
+        }
+
+        List<SearchTerm<?>> retval = new ArrayList<SearchTerm<?>>(terms.size());
+        for (SearchTerm<?> term : terms) {
+            if (!UNSUPPORTED.contains(term.getClass())) {
+               retval.add(term);
+            }
+        }
+        return retval;
+    }
+
     @Override
     public void visit(AndTerm andTerm) throws OXException {
-        final List<SearchTerm<?>> terms = andTerm.getPattern();
+        final List<SearchTerm<?>> terms = prepareTerms(andTerm.getPattern());
         final int size = terms.size();
 
         // Empty?
@@ -235,7 +256,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(OrTerm orTerm) throws OXException {
-        final List<SearchTerm<?>> terms = orTerm.getPattern();
+        final List<SearchTerm<?>> terms = prepareTerms(orTerm.getPattern());
         final int size = terms.size();
 
         // Empty?

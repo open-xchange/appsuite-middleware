@@ -57,20 +57,33 @@ import static com.openexchange.find.contacts.ContactsFacetType.NAME;
 import static com.openexchange.find.contacts.ContactsFacetType.PHONE;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.find.PropDocument;
+import com.openexchange.ajax.find.actions.AutocompleteRequest;
+import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.QueryRequest;
 import com.openexchange.ajax.find.actions.QueryResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.ExclusiveFacet;
+import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
+import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.container.FolderObject;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 
@@ -227,6 +240,135 @@ public class QueryTest extends ContactsFindTest {
         SearchResult result = queryResponse.getSearchResult();
         List<Document> documents = result.getDocuments();
         assertEquals("Documents were found", 0, documents.size());
+    }
+
+    public void testFolderTypeFacet() throws Exception {
+        AJAXClient client2 = new AJAXClient(User.User2);
+        try {
+            FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
+            AJAXClient[] clients = new AJAXClient[] { client, client, client2 };
+            FolderObject[] folders = new FolderObject[3];
+            folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
+                randomUID(),
+                FolderObject.CONTACT,
+                client.getValues().getPrivateContactFolder(),
+                client.getValues().getUserId()));
+            folders[1] = folderManager.insertFolderOnServer(folderManager.generatePublicFolder(
+                randomUID(),
+                FolderObject.CONTACT,
+                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+                client.getValues().getUserId()));
+            folders[2] = folderManager.insertFolderOnServer(folderManager.generateSharedFolder(
+                randomUID(),
+                FolderObject.CONTACT,
+                client.getValues().getPrivateContactFolder(),
+                client.getValues().getUserId(),
+                client2.getValues().getUserId()));
+
+            Contact[] contacts = new Contact[3];
+            contacts[0] = manager.newAction(randomContact(folders[0].getObjectID()));
+            contacts[1] = manager.newAction(randomContact(folders[1].getObjectID()));
+            contacts[2] = manager.newAction(randomContact(folders[2].getObjectID()));
+
+            for (int i = 0; i < 3; i++) {
+                FolderType folderType = typesInOrder[i];
+                List<Facet> facets = autocomplete(clients[i], "");
+                ExclusiveFacet folderTypeFacet = (ExclusiveFacet) findByType(CommonFacetType.FOLDER_TYPE, facets);
+                FacetValue typeValue = findByValueId(folderType.getIdentifier(), folderTypeFacet);
+                List<PropDocument> docs = query(clients[i], Collections.singletonList(createActiveFacet(folderTypeFacet, typeValue)));
+                PropDocument[] foundDocs = new PropDocument[3];
+                for (PropDocument doc : docs) {
+                    Map<String, Object> props = doc.getProps();
+                    if (contacts[0].getSurName().equals(props.get("last_name"))) {
+                        foundDocs[0] = doc;
+                        continue;
+                    } else if (contacts[1].getSurName().equals(props.get("last_name"))) {
+                        foundDocs[1] = doc;
+                        continue;
+                    } else if (contacts[2].getSurName().equals(props.get("last_name"))) {
+                        foundDocs[2] = doc;
+                        continue;
+                    }
+                }
+
+                switch (folderType) {
+                    case PRIVATE:
+                        assertNotNull("Private contact not found", foundDocs[0]);
+                        assertNull("Public contact found but should not", foundDocs[1]);
+                        assertNotNull("Shared contact not found", foundDocs[2]);
+                        break;
+
+                    case PUBLIC:
+                        assertNull("Private contact found but should not", foundDocs[0]);
+                        assertNotNull("Public contact not found", foundDocs[1]);
+                        assertNull("Shared contact found but should not", foundDocs[2]);
+                        break;
+
+                    case SHARED:
+                        assertNull("Private contact found but should not", foundDocs[0]);
+                        assertNull("Public contact found but should not", foundDocs[1]);
+                        assertNotNull("Shared contact not found", foundDocs[2]);
+                        break;
+                }
+            }
+        } finally {
+            client2.logout();
+        }
+    }
+
+    public void testPaging() throws Exception {
+        int numberOfContacts = client.execute(new AllRequest(6, AllRequest.GUI_COLUMNS)).getArray().length - 1;
+        Set<Integer> names = new HashSet<Integer>();
+        ActiveFacet folderFacet = createActiveFacet(CommonFacetType.FOLDER, 6, Filter.NO_FILTER);
+
+        int start = 0;
+        int size = numberOfContacts / 2;
+        Map<String, String> options = Collections.singletonMap("admin", "false");
+        List<PropDocument> results = query(Collections.singletonList(folderFacet), start, size, options);
+        assertEquals("Wrong number of results", size, results.size());
+        for (PropDocument result : results) {
+            names.add((Integer) result.getProps().get("id"));
+        }
+        assertEquals("Wrong number of unique results", size, names.size());
+
+        start = size;
+        size = numberOfContacts - start;
+        results = query(Collections.singletonList(folderFacet), start, size, options);
+        assertEquals("Wrong number of results", size, results.size());
+        for (PropDocument result : results) {
+            names.add((Integer) result.getProps().get("id"));
+        }
+        assertEquals("Wrong number of unique results", numberOfContacts, names.size());
+    }
+
+    protected List<Facet> autocomplete(AJAXClient client, String prefix) throws Exception {
+        AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier());
+        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        return autocompleteResponse.getFacets();
+    }
+
+    protected List<PropDocument> query(AJAXClient client, List<ActiveFacet> facets) throws Exception {
+        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, Module.CONTACTS.getIdentifier());
+        QueryResponse queryResponse = client.execute(queryRequest);
+        SearchResult result = queryResponse.getSearchResult();
+        List<PropDocument> propDocuments = new ArrayList<PropDocument>();
+        List<Document> documents = result.getDocuments();
+        for (Document document : documents) {
+            propDocuments.add((PropDocument) document);
+        }
+        return propDocuments;
+    }
+
+    protected List<PropDocument> query(List<ActiveFacet> facets, int start, int size, Map<String, String> options) throws Exception {
+        QueryRequest queryRequest = new QueryRequest(true, start, size, facets, options, Module.CONTACTS.getIdentifier(), null);
+        QueryResponse queryResponse = client.execute(queryRequest);
+        SearchResult result = queryResponse.getSearchResult();
+        List<PropDocument> propDocuments = new ArrayList<PropDocument>();
+        List<Document> documents = result.getDocuments();
+        for (Document document : documents) {
+            propDocuments.add((PropDocument) document);
+        }
+        return propDocuments;
     }
 
 }

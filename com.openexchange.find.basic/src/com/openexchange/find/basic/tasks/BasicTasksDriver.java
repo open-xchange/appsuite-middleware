@@ -137,7 +137,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         TaskSearchObject searchObject = new TaskSearchObjectBuilder(session)
             .addFilters(searchRequest.getFilters())
             .addQueries(searchRequest.getQueries())
-            .applyFolders(searchRequest.getFolderId(), searchRequest.getFolderType())
+            .applyFolders(searchRequest)
             .build();
         searchObject.setStart(searchRequest.getStart());
         searchObject.setSize(searchRequest.getSize());
@@ -168,7 +168,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
             prefixTokens = tokenize(prefix);
             if (!prefixTokens.isEmpty()) {
                 facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
-                    .withFormattableDisplayItem(TasksStrings.FACET_GLOBAL, prefix)
+                    .withSimpleDisplayItem(prefix)
                     .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
                     .build());
 

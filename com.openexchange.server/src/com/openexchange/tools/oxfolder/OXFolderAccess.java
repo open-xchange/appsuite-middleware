@@ -468,6 +468,9 @@ public class OXFolderAccess {
      */
     public final FolderObject getDefaultFolder(final int userId, final int module, final int type) throws OXException {
         try {
+            /*
+             * Read out default folder
+             */
             int folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx) :
                 OXFolderSQL.getUserDefaultFolder(userId, module, type, readCon, ctx);
             if (-1 == folderId) {
@@ -478,18 +481,39 @@ public class OXFolderAccess {
                         Integer.valueOf(ctx.getContextId()));
                 }
                 /*
-                 * Re-Create default infostore / infostore trash folder
+                 * (Re-)Create default infostore / infostore trash folder on demand
                  */
                 User user = UserStorage.getInstance().getUser(userId, ctx);
                 final Connection wc = DBPool.pickupWriteable(ctx);
+                boolean rollback = false;
+                boolean created = false;
                 try {
-                    if (FolderObject.TRASH == type) {
-                        folderId = addUserTrashToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
-                    } else {
-                        folderId = addUserToInfoStore(userId, user.getDisplayName(), ctx.getContextId(), wc);
+                    wc.setAutoCommit(false);
+                    rollback = true;
+                    /*
+                     * Check existence again within this transaction to avoid race conditions
+                     */
+                    folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, wc, ctx) :
+                        OXFolderSQL.getUserDefaultFolder(userId, module, type, wc, ctx);
+                    if (-1 == folderId) {
+                        /*
+                         * Not found, create default folder
+                         */
+                        if (FolderObject.TRASH == type) {
+                            folderId = new OXFolderAdminHelper().addUserTrashToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
+                        } else {
+                            folderId = new OXFolderAdminHelper().addUserToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
+                        }
+                        created = true;
                     }
+                    wc.commit();
+                    rollback = false;
                 } finally {
-                    if (folderId > 0) {
+                    if (rollback) {
+                        DBUtils.rollback(wc);
+                    }
+                    DBUtils.autocommit(wc);
+                    if (created) {
                         DBPool.closeWriterSilent(ctx, wc);
                     } else {
                         DBPool.closeWriterAfterReading(ctx, wc);
@@ -503,46 +527,6 @@ public class OXFolderAccess {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
-        }
-    }
-
-    private final int addUserTrashToInfoStore(final int userId, final String language, final int contextId, final Connection writeCon) throws OXException, SQLException {
-        boolean rollback = false;
-        try {
-            writeCon.setAutoCommit(false);
-            rollback = true;
-
-            final int fuid = new OXFolderAdminHelper().addUserTrashToInfoStore(userId, language, contextId, writeCon);
-
-            writeCon.commit();
-            rollback = false;
-
-            return fuid;
-        } finally {
-            if (rollback) {
-                DBUtils.rollback(writeCon);
-            }
-            DBUtils.autocommit(writeCon);
-        }
-    }
-
-    private final int addUserToInfoStore(final int userId, final String displayName, final int contextId, final Connection writeCon) throws OXException, SQLException {
-        boolean rollback = false;
-        try {
-            writeCon.setAutoCommit(false);
-            rollback = true;
-
-            final int fuid = new OXFolderAdminHelper().addUserToInfoStore(userId, displayName, contextId, writeCon);
-
-            writeCon.commit();
-            rollback = false;
-
-            return fuid;
-        } finally {
-            if (rollback) {
-                DBUtils.rollback(writeCon);
-            }
-            DBUtils.autocommit(writeCon);
         }
     }
 

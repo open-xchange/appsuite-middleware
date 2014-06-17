@@ -119,7 +119,9 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         managementHouseKeeper.addManagementObject(directory.getManagementObject());
 
         GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
-        GlobalRealtimeCleanup globalCleanup = new GlobalRealtimeCleanupImpl(directory);
+
+        GlobalRealtimeCleanupImpl globalCleanup = new GlobalRealtimeCleanupImpl(directory);
+        managementHouseKeeper.addManagementObject(globalCleanup.getManagementObject());
 
         String lock_map = discoverMapName(config, "rtCleanupLock-");
         CleanupMemberShipListener cleanupListener = new CleanupMemberShipListener(lock_map, directory, globalCleanup);
@@ -140,10 +142,13 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
+        addService(MessageDispatcher.class, globalDispatcher);
         registerService(RealtimeJanitor.class, globalDispatcher);
         registerService(StanzaStorage.class, new HazelcastStanzaStorage());
         registerService(Channel.class, globalDispatcher.getChannel());
         registerService(GlobalRealtimeCleanup.class, globalCleanup);
+        addService(GlobalRealtimeCleanup.class, globalCleanup);
+        
 
         String client_map = discoverMapName(config, "rtClientMapping-");
         String group_map = discoverMapName(config, "rtGroupMapping-");
@@ -165,7 +170,11 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
-        directory.removeResourceMappingEntryListener(cleanerRegistrationId);
+        try {
+            directory.removeResourceMappingEntryListener(cleanerRegistrationId);
+        } catch (OXException oxe) {
+            LOG.info("Unable to remove ResourceMappingEntryListener.");
+        }
         ManagementHouseKeeper.getInstance().cleanup();
         Services.setServiceLookup(null);
         super.stopBundle();

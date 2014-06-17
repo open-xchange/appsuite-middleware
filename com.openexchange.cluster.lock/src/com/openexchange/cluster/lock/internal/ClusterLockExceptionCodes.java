@@ -61,10 +61,19 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
+    /**
+     * Cluster is locked for action \"%1$s\". Try again later.
+     */
     CLUSTER_LOCKED("Cluster is locked for action \"%1$s\". Try again later.", Category.CATEGORY_TRY_AGAIN, 1),
 
+    /**
+     * Cluster is locked for the period \"%1$s\" for action \"%2$s\". Try again in \"%3$s.
+     */
     CLUSTER_PERIODIC_LOCKED("Cluster is locked for the period \"%1$s\" for action \"%2$s\". Try again in \"%3$s.", Category.CATEGORY_TRY_AGAIN, 2), 
     
+    /**
+     * Timed-out while waiting to acquire lock. Try again
+     */
     TIMEOUT("Timed-out while waiting to acquire lock. Try again", CATEGORY_TRY_AGAIN, 3),
 
     ;

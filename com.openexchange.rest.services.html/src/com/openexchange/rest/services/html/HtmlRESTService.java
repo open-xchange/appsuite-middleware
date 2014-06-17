@@ -64,7 +64,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @ROOT("/htmlproc/v1")
-public class HtmlRESTService extends OXRESTService<HtmlService>{
+public class HtmlRESTService extends OXRESTService<HtmlService> {
 
     /**
      * Initializes a new {@link HtmlRESTService}.
@@ -86,12 +86,42 @@ public class HtmlRESTService extends OXRESTService<HtmlService>{
     public Object getSanitizedHtmlContent() throws OXException {
         Object data = request.getData();
         if (data instanceof String) {
-            return context.sanitize((String)data, null, true, new boolean[1], null);
+            return context.sanitize((String) data, null, true, new boolean[1], null);
         }
 
         if (data instanceof JSONObject) {
             try {
                 final String sanitized = context.sanitize(((JSONObject) data).getString("content"), null, true, new boolean[1], null);
+                return new JSONObject(2).put("content", sanitized);
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+    }
+
+    /**
+     * <pre>
+     * PUT /rest/htmlproc/v1/sanitizeKeepImages
+     * &lt;HTML-content&gt;
+     * </pre>
+     *
+     * Retrieves the sanitized version of passed content.<br>
+     * Return an Object with a property to value mapping or a status 404 if a property is not set.
+     */
+    @PUT("/sanitizeKeepImages")
+    public Object getSanitizedHtmlContentWithoutExternalImages() throws OXException {
+        Object data = request.getData();
+        if (data instanceof String) {
+            response.setHeader("Content-Type", OXRESTService.CONTENT_TYPE_HTML);
+            return context.sanitize((String) data, null, false, new boolean[1], null);
+        }
+
+        if (data instanceof JSONObject) {
+            try {
+                final String sanitized = context.sanitize(((JSONObject) data).getString("content"), null, false, new boolean[1], null);
+                response.setContentType(OXRESTService.CONTENT_TYPE_JAVASCRIPT);
                 return new JSONObject(2).put("content", sanitized);
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());

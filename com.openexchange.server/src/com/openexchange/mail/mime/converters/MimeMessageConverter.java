@@ -181,7 +181,7 @@ public final class MimeMessageConverter {
             MessageHeaders.HDR_X_OX_NOTIFICATION };
 
         public static final String[] ALREADY_INSERTED_HEADERS = {
-            MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_REFERENCES };
+            MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.HDR_REFERENCES };
 
         public static final org.slf4j.Logger LOG1 =
             org.slf4j.LoggerFactory.getLogger(MailMessageFieldFiller.class);
@@ -1240,7 +1240,7 @@ public final class MimeMessageConverter {
                         for (int j = 1; j < inReplyTo.length; j++) {
                             sb.append(", ").append(inReplyTo[j]);
                         }
-                        mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+                        mailMessage.addHeader(MessageHeaders.HDR_IN_REPLY_TO, sb.toString());
                         sb.setLength(0);
                     }
                 }
@@ -1561,7 +1561,7 @@ public final class MimeMessageConverter {
                         for (int j = 1; j < inReplyTo.length; j++) {
                             sb.append(", ").append(inReplyTo[j]);
                         }
-                        mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+                        mailMessage.addHeader(MessageHeaders.HDR_IN_REPLY_TO, sb.toString());
                         sb.setLength(0);
                     }
                 }

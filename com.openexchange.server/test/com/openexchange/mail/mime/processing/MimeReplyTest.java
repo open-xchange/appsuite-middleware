@@ -52,8 +52,12 @@ package com.openexchange.mail.mime.processing;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.mail.internet.MimeMessage;
 import junit.framework.TestCase;
+import com.openexchange.html.HtmlService;
+import com.openexchange.html.SimHtmlService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -61,6 +65,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionObject;
 
 
@@ -76,6 +81,112 @@ public final class MimeReplyTest extends TestCase {
      */
     public MimeReplyTest() {
         super();
+    }
+
+    public void testForBug33061() {
+        final byte[] bytes = ("Date: Tue, 10 Jun 2014 15:54:55 +0200 (CEST)\n" +
+            "From: aaa@open-xchange.com\n" +
+            "To: bbb@open-xchange.com\n" +
+            "Message-ID: <12345678>\n" +
+            "Subject: Blah\n" +
+            "MIME-Version: 1.0\n" +
+            "Content-Type: multipart/alternative; boundary=\"----=_Part_163_136634806.1402408495930\"\n" +
+            "X-Priority: 3\n" +
+            "Importance: Medium\n" +
+            "X-Mailer: Open-Xchange Mailer v7.6.0-Rev4\n" +
+            "X-Originating-Client: open-xchange-appsuite\n" +
+            "\n" +
+            "------=_Part_163_136634806.1402408495930\n" +
+            "MIME-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=UTF-8\n" +
+            "Content-Transfer-Encoding: quoted-printable\n" +
+            "\n" +
+            "blah blah blah blah\n" +
+            "\n" +
+            "\n" +
+            "------=_Part_163_136634806.1402408495930\n" +
+            "Content-Type: multipart/related; \n" +
+            "    boundary=\"----=_Part_164_761165799.1402408495931\"\n" +
+            "\n" +
+            "------=_Part_164_761165799.1402408495931\n" +
+            "MIME-Version: 1.0\n" +
+            "Content-Type: text/html; charset=UTF-8\n" +
+            "Content-Transfer-Encoding: 7bit\n" +
+            "\n" +
+            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\n" +
+            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
+            " \n" +
+            " </head><body>\n" +
+            " \n" +
+            "  <p>blah blah blah blah</p>\n" +
+            " \n" +
+            "</body></html>\n" +
+            "------=_Part_164_761165799.1402408495931\n" +
+            "Content-Type: image/png; name=\"Screen Shot 2014-06-10 at 15.54.06.png\"\n" +
+            "Content-Transfer-Encoding: base64\n" +
+            "Content-ID: <e654a06fd06b4a6ea2788e79dd908b19@Open-Xchange>\n" +
+            "Content-Disposition: inline; filename=\"Screen Shot 2014-06-10 at\n" +
+            " 15.54.06.png\"\n" +
+            "\n" +
+            "iVBORw0KGgoAAAANSUhEUgAABboAAAPgCAYAAAD0pMq/AAAYI2lDQ1BJQ0MgUHJvZmlsZQAAWIWV\n" +
+            "eQdUFE2zds/OBliWJeeck+QMknPOGYEl55xRiSJBRRBQBFRQQVDBQBIxIUgQEVTAgEgwkFRQQBGQ\n" +
+            "OwR9v/+9/z333D5nZp6trqp5uqu6Z2oHADZmUnh4MIoagJDQ6EhrA21uRydnbtwYwAIUYALkgIzk\n" +
+            "FRWuZWlpCv7HtjIMoK3rc/EtX/+z3v+30Xj7RHkBAFki2NM7yisEwQ0AoFm9wiOjAcAMIHK+uOjw\n" +
+            "LbyEYPpIhCAAWLIt7LeD2bew5w6W2taxtdZBsC4AZAQSKdIPAOKWf+5YLz/EDzEc6aMN9Q4IRVQz\n" +
+            "EKzu5U/yBoC1A9HZExIStoUXECzs+R9+/P4fn55/fZJIfn/xzli2G5luQFR4MCnh/zgd/3sLCY75\n" +
+            "cw9e5CD4Rxpab40ZmbdLQWEmW5iA4LZQT3MLBNMiuDvAe1t/C7/2jzG029Wf94rSQeYMMAIk2N4k\n" +
+            "XRMEI3OJYowJstPaxTKkyG1bRB9lHhBtZLuLPSPDrHf9o2J9ovRs/mB/HyPTXZ9ZocHmf/AZ3wB9\n" +
+            "AhCAAAQgAAEIQAACEIAABCAAAQhAAAIQgAAEIAABCEAAAhCAAAQgAAEIQAACEIAABCAAAQhAAAIQ\n" +
+            "gAAEIAABCEAAAhCAAAQgAAEIQAACEIAABCAAAQhAAAIQgAAEIAABCEAAAhCAAAQgAAEIQAACEIDA\n" +
+            "QCPw/wNsHbPpztp8EAAAAABJRU5ErkJggg==\n" +
+            "------=_Part_164_761165799.1402408495931--\n" +
+            "\n" +
+            "------=_Part_163_136634806.1402408495930--\n").getBytes();
+
+        try {
+            final javax.mail.Session mailSession = MimeDefaultSession.getDefaultSession();
+            final MimeMessage originalMessage = new MimeMessage(mailSession, Streams.newByteArrayInputStream(bytes));
+            // Convert
+            final MailMessage mailMessage = MimeMessageConverter.convertMessage(originalMessage);
+            // More parameters
+            final List<String> list = new LinkedList<String>();
+            final ContentType retvalContentType = new ContentType();
+            final Locale locale = Locale.US;
+            final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, "Europe/Berlin");
+
+            final UserSettingMail usm = new UserSettingMail(17, 1337);
+            usm.parseBits(381191);
+            usm.setDisplayHtmlInlineContent(false);
+
+            final SessionObject session = new SessionObject("Bug31644");
+            session.setContextId(1337);
+            session.setUsername("17");
+
+            ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
+
+            MimeReply.generateReplyText(mailMessage, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, session, 0, list);
+
+            assertEquals("Unexpected number of reply texts", 1, list.size());
+
+            final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
+            for (int i = list.size() - 1; i >= 0; i--) {
+                replyTextBuilder.append(list.get(i));
+            }
+
+            // System.out.println(replyTextBuilder.toString());
+
+            Pattern p = Pattern.compile(Pattern.quote("blah"));
+            Matcher m = p.matcher(replyTextBuilder.toString());
+            int cnt = 0;
+            while (m.find()) {
+                cnt++;
+            }
+
+            assertEquals("Unexpected reply text", 4, cnt);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
     public void testForBug31644() {

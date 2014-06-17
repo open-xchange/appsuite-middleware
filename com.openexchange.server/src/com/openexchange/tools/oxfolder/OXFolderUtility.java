@@ -666,11 +666,7 @@ public final class OXFolderUtility {
             enforcedType = FolderObject.PUBLIC;
             break;
         default:
-            if (FolderObject.TRASH == parentFolder.getType() && FolderObject.INFOSTORE == parentFolder.getModule()) {
-                enforcedType = FolderObject.PUBLIC;
-            } else {
-                enforcedType = parentFolder.getType();
-            }
+            enforcedType = parentFolder.getType();
             break;
         }
         return (newFolderType == enforcedType);

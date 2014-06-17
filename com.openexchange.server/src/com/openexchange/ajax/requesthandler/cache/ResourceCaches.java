@@ -103,11 +103,12 @@ public class ResourceCaches {
      * @param optParameters Optional parameters to consider
      * @return The appropriate cache key
      */
-    public static String generatePreviewCacheKey(final String eTag, final AJAXRequestData requestData) {
+    public static String generatePreviewCacheKey(final String eTag, final AJAXRequestData requestData, final String... additionalParams) {
         final StringBuilder sb = new StringBuilder(512);
         sb.append(requestData.getModule());
         sb.append('-').append(requestData.getAction());
         sb.append('-').append(requestData.getSession().getContextId());
+
         // Append sorted parameters
         {
             final List<String> parameters = new ArrayList<String>(requestData.getParameters().keySet());
@@ -122,6 +123,16 @@ public class ResourceCaches {
                 }
             }
         }
+
+        // Append additional parameters, if given
+        if (null != additionalParams) {
+            for (final String additionalParam : additionalParams) {
+                if (!Strings.isEmpty(additionalParam)) {
+                    sb.append('-').append(additionalParam);
+                }
+            }
+        }
+
         // Generate MD5 sum
         try {
             final byte[] md5Bytes = sb.toString().getBytes("UTF-8");

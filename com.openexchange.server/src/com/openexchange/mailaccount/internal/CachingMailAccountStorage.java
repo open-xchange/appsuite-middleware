@@ -226,7 +226,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 cache.put(key, mailAccount, false);
                 return mailAccount;
             } finally {
-                Database.back(cid, true, wcon);
+                Database.backAfterReading(cid, wcon);
             }
         }
     }

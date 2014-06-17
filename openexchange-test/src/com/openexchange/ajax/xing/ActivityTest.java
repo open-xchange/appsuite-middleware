@@ -50,6 +50,8 @@
 package com.openexchange.ajax.xing;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -212,7 +214,8 @@ public class ActivityTest extends AbstractAJAXSession {
     public void testShareLinkAndDelete() throws OXException, IOException, JSONException {
         final ShareLinkRequest request = new ShareLinkRequest("http://www.google.de", true);
         final ShareLinkResponse response = client.execute(request);
-        assertNotNull(response);
+        assertNull("Got an exception: " + response.getException(), response.getException());
+        assertNotNull(response.getData());
         assertTrue((Boolean) response.getData());
     }
 
@@ -224,19 +227,24 @@ public class ActivityTest extends AbstractAJAXSession {
      * @throws JSONException
      */
     public void testShareActivityAndDelete() throws OXException, IOException, JSONException {
-        final String activityId = getActivityIdContainingPermission("SHARE");
-        final ShareActivityRequest request = new ShareActivityRequest(activityId, "My shared activity", false);
-        final ShareActivityResponse response = client.execute(request);
-        assertNotNull(response);
-
-        if (response.hasError()) {
-            final OXException exc = response.getException();
-            if (!"XING".equals(exc.getPrefix()) || 2 != exc.getCode()) {
-                fail(exc.getMessage());
+        List<String> activities = getActivitiesIdContainingPermission("SHARE");
+        ShareActivityResponse response = null;
+        for (String activityId : activities) {
+            final ShareActivityRequest request = new ShareActivityRequest(activityId, "My shared activity", false);
+            response = client.execute(request);
+            if (response.hasError()) {
+                final OXException exc = response.getException();
+                if (!"XING".equals(exc.getPrefix()) || 2 != exc.getCode()) {
+                    fail(exc.getMessage());
+                }
+            } else {
+                break;
             }
         }
+        assertNotNull(response);
+        assertNull("Got an exception: " + response.getException(), response.getException());
+        assertNotNull(response.getData());
         assertTrue((Boolean) response.getData());
-        deleteActivity(false);
     }
 
     /**
@@ -304,5 +312,36 @@ public class ActivityTest extends AbstractAJAXSession {
         }
         assertTrue("An activity with permission " + permission + " could not being found ", found);
         return activityId;
+    }
+
+    /**
+     * Gets a list of activities ids which contains the needed possible actions.
+     * 
+     * @param permission the permission which should be present. Possible permissions are COMMENT, LIKE, SHARE or IGNORE
+     * @return a list of activity ids containing the permission, fails if no such permission exist
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    private List<String> getActivitiesIdContainingPermission(final String permission) throws OXException, IOException, JSONException {
+        JSONObject json = (JSONObject) client.execute(new UserFeedRequest(XING_OWNER, -1, -1, new int[0], true)).getData();
+        JSONArray networkActivities = json.getJSONArray("network_activities");
+        assertNotNull(networkActivities);
+
+        List<String> activitiesIds = new ArrayList<String>();
+        for (int i = 0; i < networkActivities.length(); i++) {
+            JSONObject activity = (JSONObject) networkActivities.get(i);
+            assertTrue("Attribute \"ids\" not found", activity.hasAndNotNull("ids"));
+            assertTrue("Attribute \"possible_actions\" not found", activity.hasAndNotNull("possible_actions"));
+            JSONArray possibleActionsJSON = activity.getJSONArray("possible_actions");
+            for (int j = 0; j < possibleActionsJSON.length(); j++) {
+                String possibleActionObj = (String) possibleActionsJSON.get(j);
+                if (possibleActionObj.equals(permission)) {
+                    activitiesIds.add(activity.getJSONArray("ids").getString(0));
+                }
+            }
+        }
+        assertTrue("An activity with permission " + permission + " could not being found ", activitiesIds.size() > 0);
+        return activitiesIds;
     }
 }
