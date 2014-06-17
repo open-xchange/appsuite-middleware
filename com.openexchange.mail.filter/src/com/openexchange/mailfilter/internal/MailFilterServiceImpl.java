@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.security.auth.Subject;
 import org.apache.jsieve.SieveException;
@@ -381,22 +382,55 @@ public final class MailFilterServiceImpl implements MailFilterService {
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 final String activeScript = sieveHandler.getActiveScript();
-                final String script;
-                if (null != activeScript) {
-                    script = sieveHandler.getScript(activeScript);
-                } else {
-                    script = "";
-                }
+                final String script = null != activeScript ? sieveHandler.getScript(activeScript) : "";
                 log.debug("The following sieve script will be parsed:\n{}", script);
                 final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-                final RuleListAndNextUid readScriptFromString = sieveTextFilter.readScriptFromString(script);
-                final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(
-                    readScriptFromString.getRulelist(),
-                    flag,
-                    readScriptFromString.isError());
+                final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
+                final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), flag, rules.isError());
                 final List<Rule> clientRules = clientrulesandrequire.getRules();
                 changeOutgoingVacationRule(clientRules);
                 return clientRules;
+            } catch (SieveException e) {
+                throw MailFilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
+            } catch (ParseException e) {
+                throw MailFilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
+            } catch (UnsupportedEncodingException e) {
+                throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
+            } catch (OXSieveHandlerException e) {
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
+            } catch (IOException e) {
+                throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
+            } finally {
+                if (null != sieveHandler) {
+                    try {
+                        sieveHandler.close();
+                    } catch (final UnsupportedEncodingException e) {
+                        throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
+                    } catch (final IOException e) {
+                        throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e);
+                    }
+                }
+            }
+        }
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.mailfilter.MailFilterService#listRules(com.openexchange.mailfilter.Credentials, java.util.List)
+     */
+    @Override
+    public List<Rule> listRules(Credentials credentials, List<String> exclusionFlags) throws OXException {
+        synchronized (lock) {
+            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            try {
+                handlerConnect(sieveHandler, credentials.getSubject());
+                final String activeScript = sieveHandler.getActiveScript();
+                final String script = null != activeScript ? sieveHandler.getScript(activeScript) : "";
+                log.debug("The following sieve script will be parsed:\n{}", script);
+                final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
+                final RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
+                final ClientRulesAndRequire splittedRules = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
+                
+                return exclude(splittedRules.getFlaggedRules(), exclusionFlags);
             } catch (SieveException e) {
                 throw MailFilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
             } catch (ParseException e) {
@@ -557,6 +591,17 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     // ----------------------------------------------------------------------------------------------------------------------- //
 
+    private List<Rule> exclude(final Map<String, List<Rule>> flagged, List<String> exclusionFlags) {
+        final List<Rule> ret = new ArrayList<Rule>();
+        for(String flag : exclusionFlags) {
+            flagged.remove(flag);
+        }
+        for(List<Rule> l : flagged.values()) {
+            ret.addAll(l);
+        }
+        return ret;
+    }
+    
     /**
      * Change a vacation rule
      * 
@@ -796,4 +841,5 @@ public final class MailFilterServiceImpl implements MailFilterService {
         }
         return nextuid;
     }
+
 }

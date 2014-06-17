@@ -53,8 +53,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -93,6 +95,9 @@ public final class SieveTextFilter {
      *
      */
     public class ClientRulesAndRequire {
+        
+        private final Map<String, List<Rule>> flaggedRules;
+        
         private final List<Rule> rules;
 
         private final HashSet<String> require;
@@ -101,9 +106,13 @@ public final class SieveTextFilter {
          * @param rules
          * @param require
          */
-        public ClientRulesAndRequire(final List<Rule> rules, final HashSet<String> require) {
-            this.rules = rules;
+        public ClientRulesAndRequire(final HashSet<String> require, final Map<String, List<Rule>> flagged) {
             this.require = require;
+            flaggedRules = flagged;
+            rules = new ArrayList<Rule>();
+            for(List<Rule> list : flaggedRules.values()) {
+                rules.addAll(list);
+            }
         }
 
         public final List<Rule> getRules() {
@@ -113,7 +122,11 @@ public final class SieveTextFilter {
         public final HashSet<String> getRequire() {
             return require;
         }
-
+        
+        public final Map<String, List<Rule>> getFlaggedRules() {
+            return flaggedRules;
+        }
+        
 
     }
 
@@ -309,6 +322,7 @@ public final class SieveTextFilter {
     public ClientRulesAndRequire splitClientRulesAndRequire(final List<Rule> rules, final String flag, final boolean error) {
         final List<Rule> retval = new ArrayList<Rule>();
         final HashSet<String> requires = new HashSet<String>();
+        final Map<String, List<Rule>> flagged = new HashMap<String, List<Rule>>();
         // The flag is checked here because if no flag is given we can omit some checks which increases performance
         if (null != flag) {
             for (final Rule rule : rules) {
@@ -318,6 +332,12 @@ public final class SieveTextFilter {
                     requires.addAll(requireCommand.getList().get(0));
                 } else if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains(flag)) {
                     retval.add(rule);
+                    List<Rule> fl = flagged.get(flag);
+                    if (fl == null) {
+                        fl = new ArrayList<Rule>();
+                    }
+                    fl.add(rule);
+                    flagged.put(flag, fl);
                 }
             }
         } else {
@@ -331,9 +351,9 @@ public final class SieveTextFilter {
             }
         }
         if (error) {
-            return new ClientRulesAndRequire(retval, requires);
+            return new ClientRulesAndRequire(requires, flagged);
         }
-        return new ClientRulesAndRequire(retval, new HashSet<String>());
+        return new ClientRulesAndRequire(new HashSet<String>(), flagged);
     }
 
 
