@@ -21,6 +21,9 @@
                 color: #fff;
                 text-align: center;
             }
+            #data-container {
+            	display: none;
+            }
             #content-container {
                 display: inline-block;
                 width: 100%;
@@ -142,7 +145,7 @@
                 <#--Check, that the file is not hidden-->
                 <#if item.fileName?? && !item.fileName!?starts_with('_') && !item.fileName!?starts_with('.') >
                     <#--Check for the correct file type-->
-                    <#if (item.fileName!?last_index_of('.') >= 0) && item.fileName!?substring(item.fileName!?last_index_of('.') + 1)?matches('(gif|bmp|tiff|jpe?g|png)')>
+                    <#if (item.fileName!?last_index_of('.') >= 0) && (item.fileName!?substring(item.fileName!?last_index_of('.') + 1)?lower_case)?matches('(gif|bmp|tiff|jpe?g|png)')>
                         {url: '${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, item)!?html}',
                         name: '${item.fileName!?substring(0, item.fileName!?last_index_of('.'))}'}<#if item_has_next>,</#if>
                     </#if>
@@ -522,6 +525,29 @@
     <body>
         <header>
         </header>
+        <div id="data-container">
+        	<#list infostore as item>
+                <#--Check, that the file is not hidden-->
+                <#if item.fileName?? && !item.fileName!?starts_with('_') && !item.fileName!?starts_with('.') >
+                    <#--Check for the correct file type-->
+                    <#if (item.fileName!?last_index_of('.') >= 0) && (item.fileName!?substring(item.fileName!?last_index_of('.') + 1)?lower_case)?matches('(gif|bmp|tiff|jpe?g|png)')>
+                	    <div class="oxmf-information ox_infoitem">
+                			<span class="ox_file">${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, item)!?html}</span>
+                			<span class="ox_title">${item.title!""}</span>
+                			<span class="ox_url">${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, item)!?html}</span>
+                			<span class="ox_version">${item.version!""}</span>
+                			<span class="ox_creationDate">${timeFormat.format(item.creationDate)}</span>
+                			<span class="ox_lastModified">${timeFormat.format(item.lastModified)}</span>
+                			<span class="ox_tags">${item.categories!""}</span>
+                			<span class="ox_comment">${htmlService.htmlFormat(item.description!"")}</span>
+                			<span class="ox_fileName">${item.fileName!""}</span>
+                			<span class="ox_fileSize">${item.fileSize!""}</span>
+                			<span class="ox_MIMEType">${item.fileMIMEType!""}</span>
+                		</div>
+                    </#if>
+                </#if>
+            </#list>
+        </div>
         <div id="content-container">
             <div id="content">
             </div>
