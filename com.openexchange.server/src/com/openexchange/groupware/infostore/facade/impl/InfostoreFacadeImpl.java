@@ -336,31 +336,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             final Context context = sessionObj.getContext();
             final DocumentMetadata oldDocument = load(id, CURRENT_VERSION, context);
             final DocumentMetadata document = new DocumentMetadataImpl(oldDocument);
+            Metadata[] modifiedColums = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL };
+            long sequenceNumber = oldDocument.getSequenceNumber();
 
             document.setLastModified(new Date());
             document.setModifiedBy(sessionObj.getUserId());
-
-            final UpdateDocumentAction updateDocument = new UpdateDocumentAction();
-            updateDocument.setContext(context);
-            updateDocument.setDocuments(Collections.singletonList(document));
-            updateDocument.setModified(Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL);
-            updateDocument.setOldDocuments(Collections.singletonList(oldDocument));
-            updateDocument.setProvider(this);
-            updateDocument.setQueryCatalog(QUERIES);
-            updateDocument.setTimestamp(oldDocument.getSequenceNumber());
-
-            perform(updateDocument, true);
-
-            final UpdateVersionAction updateVersion = new UpdateVersionAction();
-            updateVersion.setContext(context);
-            updateVersion.setDocuments(Collections.singletonList(document));
-            updateVersion.setModified(Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL);
-            updateVersion.setOldDocuments(Collections.singletonList(oldDocument));
-            updateVersion.setProvider(this);
-            updateVersion.setQueryCatalog(QUERIES);
-            updateVersion.setTimestamp(oldDocument.getSequenceNumber());
-
-            perform(updateVersion, true);
+            perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedColums, sequenceNumber), true);
+            perform(new UpdateVersionAction(this, QUERIES, context, document, oldDocument, modifiedColums, sequenceNumber), true);
         } catch (final OXException x) {
             throw x;
         } catch (final Exception e) {
@@ -618,13 +600,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     document.setVersion(0);
                 }
 
-                final CreateDocumentAction createAction = new CreateDocumentAction();
-                createAction.setContext(context);
-                createAction.setDocuments(Collections.singletonList(document));
-                createAction.setProvider(this);
-                createAction.setQueryCatalog(QUERIES);
-
-                perform(createAction, true);
+                perform(new CreateDocumentAction(this, QUERIES, context, Collections.singletonList(document)), true);
 
                 final DocumentMetadata version0 = new DocumentMetadataImpl(document);
                 version0.setFileName(null);
@@ -634,13 +610,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 version0.setVersion(0);
                 version0.setFilestoreLocation(null);
 
-                CreateVersionAction createVersionAction = new CreateVersionAction();
-                createVersionAction.setContext(context);
-                createVersionAction.setDocuments(Collections.singletonList(version0));
-                createVersionAction.setProvider(this);
-                createVersionAction.setQueryCatalog(QUERIES);
-
-                perform(createVersionAction, true);
+                perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(version0)), true);
 
                 if (data != null) {
                     SaveFileAction saveFile = new SaveFileAction(getFileStorage(context), data, document.getFileSize());
@@ -650,13 +620,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     document.setFileMD5Sum(saveFile.getChecksum());
                     document.setFileSize(saveFile.getByteCount());
 
-                    createVersionAction = new CreateVersionAction();
-                    createVersionAction.setContext(context);
-                    createVersionAction.setDocuments(Collections.singletonList(document));
-                    createVersionAction.setProvider(this);
-                    createVersionAction.setQueryCatalog(QUERIES);
-
-                    perform(createVersionAction, true);
+                    perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(document)), true);
                 }
 
                 indexDocument(context, session.getUserId(), document.getId(), -1L, wasCreation);
@@ -953,22 +917,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     document.setVersion(oldDocument.getVersion());
                     updatedCols.add(Metadata.VERSION_LITERAL);
                     updatedCols.add(Metadata.FILESTORE_LOCATION_LITERAL);
-
-                    final UpdateVersionAction updateVersionAction = new UpdateVersionAction();
-                    updateVersionAction.setContext(context);
-                    updateVersionAction.setDocuments(Collections.singletonList(document));
-                    updateVersionAction.setOldDocuments(Collections.singletonList(oldDocument));
-                    updateVersionAction.setProvider(this);
-                    updateVersionAction.setQueryCatalog(QUERIES);
-                    updateVersionAction.setModified(updatedCols.toArray(new Metadata[updatedCols.size()]));
-                    updateVersionAction.setTimestamp(sequenceNumber);
+                    action = new UpdateVersionAction(this, QUERIES, context, document, oldDocument,
+                        updatedCols.toArray(new Metadata[updatedCols.size()]), sequenceNumber);
 
                     // Remove old file "version" if not appended
                     if (0 >= offset) {
                         removeFile(context, oldDocument.getFilestoreLocation());
                     }
-
-                    action = updateVersionAction;
                 } else {
                     Connection con = null;
                     try {
@@ -984,13 +939,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         releaseReadConnection(context, con);
                     }
 
-                    final CreateVersionAction createVersionAction = new CreateVersionAction();
-                    createVersionAction.setContext(context);
-                    createVersionAction.setDocuments(Collections.singletonList(document));
-                    createVersionAction.setProvider(this);
-                    createVersionAction.setQueryCatalog(QUERIES);
-
-                    action = createVersionAction;
+                    action = new CreateVersionAction(this, QUERIES, context, Collections.singletonList(document));
                 }
                 // Perform action
                 perform(action, true);
@@ -998,28 +947,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 if (!updatedCols.contains(Metadata.VERSION_LITERAL)) {
                     document.setVersion(oldDocument.getVersion());
                 }
-                final UpdateVersionAction updateVersionAction = new UpdateVersionAction();
-                updateVersionAction.setContext(context);
-                updateVersionAction.setDocuments(Collections.singletonList(document));
-                updateVersionAction.setOldDocuments(Collections.singletonList(oldDocument));
-                updateVersionAction.setProvider(this);
-                updateVersionAction.setQueryCatalog(QUERIES);
-                updateVersionAction.setModified(modifiedCols);
-                updateVersionAction.setTimestamp(sequenceNumber);
-                perform(updateVersionAction, true);
+                perform(new UpdateVersionAction(this, QUERIES, context, document, oldDocument, modifiedCols, sequenceNumber), true);
             }
 
             modifiedCols = updatedCols.toArray(new Metadata[updatedCols.size()]);
             if (QUERIES.updateDocument(modifiedCols)) {
-                final UpdateDocumentAction updateAction = new UpdateDocumentAction();
-                updateAction.setContext(context);
-                updateAction.setDocuments(Collections.singletonList(document));
-                updateAction.setOldDocuments(Collections.singletonList(oldDocument));
-                updateAction.setProvider(this);
-                updateAction.setQueryCatalog(QUERIES);
-                updateAction.setModified(modifiedCols);
-                updateAction.setTimestamp(Long.MAX_VALUE);
-                perform(updateAction, true);
+                perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedCols, Long.MAX_VALUE), true);
             }
 
             // insert tombstone row to del_infostore table in case of move operations to aid folder based synchronizations
@@ -1027,12 +960,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 DocumentMetadataImpl tombstoneDocument = new DocumentMetadataImpl(oldDocument);
                 tombstoneDocument.setLastModified(document.getLastModified());
                 tombstoneDocument.setModifiedBy(document.getModifiedBy());
-                ReplaceDocumentIntoDelTableAction tombstoneAction = new ReplaceDocumentIntoDelTableAction();
-                tombstoneAction.setContext(context);
-                tombstoneAction.setDocuments(Arrays.asList(new DocumentMetadata[] { tombstoneDocument }));
-                tombstoneAction.setProvider(this);
-                tombstoneAction.setQueryCatalog(QUERIES);
-                perform(tombstoneAction, true);
+                perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, session.getContext(), tombstoneDocument), true);
             }
 
             final long indexFolderId = document.getFolderId() == oldDocument.getFolderId() ? -1L : oldDocument.getFolderId();
@@ -1086,13 +1014,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         /*
          * Move records into del_* tables
          */
-        ReplaceDocumentIntoDelTableAction replaceIntoDel = new ReplaceDocumentIntoDelTableAction();
-        replaceIntoDel.setContext(context);
-        replaceIntoDel.setDocuments(delDocs);
-        replaceIntoDel.setProvider(this);
-        replaceIntoDel.setQueryCatalog(QUERIES);
-        perform(replaceIntoDel, true);
-
+        perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, context, delDocs), true);
         /*
          * Remove referenced files from underlying storage
          */
@@ -1111,12 +1033,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         /*
          * Delete documents and all versions from database
          */
-        DeleteDocumentAction deleteDocument = new DeleteDocumentAction();
-        deleteDocument.setContext(context);
-        deleteDocument.setDocuments(delDocs);
-        deleteDocument.setProvider(this);
-        deleteDocument.setQueryCatalog(QUERIES);
-        perform(deleteDocument, true);
+        perform(new DeleteDocumentAction(this, QUERIES, context, delDocs), true);
 
         /*
          * Remove from index
@@ -1284,39 +1201,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 /*
                  * perform tombstone creations
                  */
-                ReplaceDocumentIntoDelTableAction tombstoneAction = new ReplaceDocumentIntoDelTableAction();
-                tombstoneAction.setContext(session.getContext());
-                tombstoneAction.setDocuments(tombstoneDocuments);
-                tombstoneAction.setProvider(this);
-                tombstoneAction.setQueryCatalog(QUERIES);
-                perform(tombstoneAction, true);
+                perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, session.getContext(), tombstoneDocuments), true);
                 /*
                  * perform document move
                  */
-                UpdateDocumentAction updateAction = new UpdateDocumentAction();
-                updateAction.setContext(session.getContext());
-                updateAction.setDocuments(documentsToUpdate);
-                updateAction.setOldDocuments(sourceDocuments);
-                updateAction.setProvider(this);
-                updateAction.setQueryCatalog(QUERIES);
-                updateAction.setModified(new Metadata[] {
-                    Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL
-                });
-                updateAction.setTimestamp(sequenceNumber);
-                perform(updateAction, true);
+                perform(new UpdateDocumentAction(this, QUERIES, session.getContext(), documentsToUpdate, sourceDocuments, new Metadata[] {
+                    Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL, Metadata.FOLDER_ID_LITERAL }, sequenceNumber), true);
                 /*
                  * perform version update (only required in case of adjusted filenames)
                  */
                 if (0 < versionsToUpdate.size()) {
-                    UpdateVersionAction updateVersionAction = new UpdateVersionAction();
-                    updateVersionAction.setContext(session.getContext());
-                    updateVersionAction.setDocuments(versionsToUpdate);
-                    updateVersionAction.setOldDocuments(sourceDocuments);
-                    updateVersionAction.setProvider(this);
-                    updateVersionAction.setQueryCatalog(QUERIES);
-                    updateVersionAction.setModified(new Metadata[] { Metadata.FILENAME_LITERAL, Metadata.TITLE_LITERAL });
-                    updateVersionAction.setTimestamp(sequenceNumber);
-                    perform(updateVersionAction, true);
+                    perform(new UpdateVersionAction(this, QUERIES, session.getContext(), versionsToUpdate, sourceDocuments,
+                        new Metadata[] { Metadata.FILENAME_LITERAL, Metadata.TITLE_LITERAL }, sequenceNumber), true);
                 }
                 /*
                  * re-index moved documents
@@ -1527,21 +1423,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             version0.setVersion(0);
             version0.setFileMIMEType("");
 
-            final UpdateVersionAction updateVersion = new UpdateVersionAction();
-            updateVersion.setContext(context);
-            updateVersion.setDocuments(Collections.singletonList(version0));
-            updateVersion.setModified(
-                Metadata.DESCRIPTION_LITERAL,
-                Metadata.TITLE_LITERAL,
-                Metadata.URL_LITERAL,
-                Metadata.LAST_MODIFIED_LITERAL,
-                Metadata.MODIFIED_BY_LITERAL,
-                Metadata.FILE_MIMETYPE_LITERAL);
-            updateVersion.setOldDocuments(Collections.singletonList(oldVersion0));
-            updateVersion.setProvider(this);
-            updateVersion.setQueryCatalog(QUERIES);
-            updateVersion.setTimestamp(Long.MAX_VALUE);
-            perform(updateVersion, true);
+            perform(new UpdateVersionAction(this, QUERIES, context, version0, oldVersion0, new Metadata[] {
+                Metadata.DESCRIPTION_LITERAL, Metadata.TITLE_LITERAL, Metadata.URL_LITERAL, Metadata.LAST_MODIFIED_LITERAL,
+                Metadata.MODIFIED_BY_LITERAL, Metadata.FILE_MIMETYPE_LITERAL }, Long.MAX_VALUE), true);
 
             // Set new Version Number
             update.setVersion(db.getMaxActiveVersion(metadata.getId(), context, allVersions));

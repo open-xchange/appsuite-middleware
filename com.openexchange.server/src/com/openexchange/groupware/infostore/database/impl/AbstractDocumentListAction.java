@@ -55,7 +55,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -64,6 +66,30 @@ import com.openexchange.tools.sql.DBUtils;
 public abstract class AbstractDocumentListAction extends AbstractInfostoreAction {
 
     private List<DocumentMetadata> documents;
+
+    /**
+     * Initializes a new {@link AbstractDocumentListAction}.
+     */
+    protected AbstractDocumentListAction() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link AbstractDocumentListAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param documents The documents to create
+     */
+    protected AbstractDocumentListAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
+        List<DocumentMetadata> documents) {
+        super();
+        setQueryCatalog(queryCatalog);
+        setContext(context);
+        setProvider(provider);
+        setDocuments(documents);
+    }
 
     public int doUpdates(final String query, final Metadata[] fields, final List<DocumentMetadata> docs) throws OXException {
         final UpdateBlock[] updates = new UpdateBlock[docs.size()];

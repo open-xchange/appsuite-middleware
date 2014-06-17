@@ -51,12 +51,55 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
+
+    /**
+     * Initializes a new {@link UpdateDocumentAction}.
+     */
+    public UpdateDocumentAction() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link UpdateDocumentAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param document The document to update
+     * @param oldDocument The document being updated
+     * @param modifiedColums The columns to update
+     * @param The sequence number to catch concurrent modifications
+     */
+    public UpdateDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, DocumentMetadata document,
+        DocumentMetadata oldDocument, Metadata[] modifiedColums, long sequenceNumber) {
+        this(provider, queryCatalog, context, Collections.singletonList(document), Collections.singletonList(oldDocument), modifiedColums, sequenceNumber);
+    }
+
+    /**
+     * Initializes a new {@link UpdateDocumentAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param documents The documents to update
+     * @param oldDocuments The documents being updated
+     * @param modifiedColums The columns to update
+     * @param The sequence number to catch concurrent modifications
+     */
+    public UpdateDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
+        List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, Metadata[] modifiedColums, long sequenceNumber) {
+        super(provider, queryCatalog, context, documents, oldDocuments, modifiedColums, sequenceNumber);
+    }
 
     @Override
     protected void undoAction() throws OXException {

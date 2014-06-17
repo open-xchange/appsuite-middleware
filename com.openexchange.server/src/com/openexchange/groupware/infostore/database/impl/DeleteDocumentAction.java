@@ -51,13 +51,48 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 public class DeleteDocumentAction extends AbstractDocumentListAction {
 
     private static final int batchSize = 1000;
+
+    /**
+     * Initializes a new {@link DeleteDocumentAction}.
+     */
+    public DeleteDocumentAction() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link DeleteDocumentAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param document The document to delete
+     */
+    public DeleteDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, DocumentMetadata document) {
+        this(provider, queryCatalog, context, Collections.singletonList(document));
+    }
+
+    /**
+     * Initializes a new {@link DeleteDocumentAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param documents The documents to delete
+     */
+    public DeleteDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
+        List<DocumentMetadata> documents) {
+        super(provider, queryCatalog, context, documents);
+    }
 
     @Override
     protected void undoAction() throws OXException {

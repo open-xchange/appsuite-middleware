@@ -53,10 +53,32 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 public class CreateDocumentAction extends AbstractDocumentListAction {
+
+    /**
+     * Initializes a new {@link CreateDocumentAction}.
+     */
+    public CreateDocumentAction() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link CreateDocumentAction}.
+     *
+     * @param provider The database provider
+     * @param queryCatalog The query catalog
+     * @param context The context
+     * @param documents The documents to create
+     */
+    public CreateDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
+        List<DocumentMetadata> documents) {
+        super(provider, queryCatalog, context, documents);
+    }
 
     @Override
     protected void undoAction() throws OXException {
