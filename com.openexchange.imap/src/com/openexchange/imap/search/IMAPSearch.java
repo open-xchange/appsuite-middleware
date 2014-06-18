@@ -271,7 +271,7 @@ public final class IMAPSearch {
      * @return The matching messages as an array
      * @throws MessagingException If a messaging error occurs
      */
-    private static int[] issueNonWildcardSearch(final SearchTerm term, final IMAPFolder imapFolder) throws MessagingException {
+    public static int[] issueNonWildcardSearch(final SearchTerm term, final IMAPFolder imapFolder) throws MessagingException {
         /*-
          * JavaMail already searches dependent on whether pattern contains non-ascii characters. If yes a charset is used:
          * SEARCH CHARSET UTF-8 <one or more search criteria>
