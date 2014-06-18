@@ -70,6 +70,7 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
+import com.openexchange.mail.api.IMailMessageStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
@@ -102,7 +103,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure, IMailMessageStorageMimeSupport {
+public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageDelegator, IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure, IMailMessageStorageMimeSupport {
 
     /**
      * Initializes a new {@link SmalMessageStorage}.
@@ -111,6 +112,11 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
      */
     public SmalMessageStorage(final Session session, final int accountId, final SmalMailAccess smalMailAccess) throws OXException {
         super(session, accountId, smalMailAccess);
+    }
+
+    @Override
+    public IMailMessageStorage getDelegateMessageStorage() throws OXException {
+        return smalMailAccess.getDelegateMailAccess().getMessageStorage();
     }
 
     @Override
