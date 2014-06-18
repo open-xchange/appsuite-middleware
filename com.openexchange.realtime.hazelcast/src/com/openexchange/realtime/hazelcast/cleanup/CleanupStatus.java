@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.impl;
+package com.openexchange.realtime.hazelcast.cleanup;
 
 import java.io.Serializable;
 import java.net.InetSocketAddress;

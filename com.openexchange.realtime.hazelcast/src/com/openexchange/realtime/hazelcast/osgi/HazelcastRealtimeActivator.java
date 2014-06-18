@@ -70,13 +70,14 @@ import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.handle.StanzaStorage;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
+import com.openexchange.realtime.hazelcast.cleanup.CleanupMemberShipListener;
 import com.openexchange.realtime.hazelcast.cleanup.GlobalRealtimeCleanupImpl;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl;
-import com.openexchange.realtime.hazelcast.impl.CleanupMemberShipListener;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.hazelcast.impl.HazelcastStanzaStorage;
 import com.openexchange.realtime.hazelcast.management.ManagementHouseKeeper;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -94,7 +95,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { HazelcastInstance.class, LocalMessageDispatcher.class, ManagementService.class, TimerService.class,
-            LocalRealtimeCleanup.class };
+            LocalRealtimeCleanup.class, ThreadPoolService.class };
     }
 
     @Override

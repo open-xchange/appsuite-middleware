@@ -47,52 +47,50 @@
  *
  */
 
-package com.openexchange.realtime.json.mock;
+package com.openexchange.realtime.hazelcast.group;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
-import com.openexchange.realtime.json.protocol.RTClientState;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.group.commands.LeaveStanza;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadRenamer;
 
 
 /**
- * {@link NoOpGlobalRealtimeCleanup}
+ * {@link SendLeaveTask} Asynchronously send a leave 
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.6.1
  */
-public class NoOpGlobalRealtimeCleanup implements GlobalRealtimeCleanup {
+public class SendLeaveTask extends AbstractTask<Void> {
 
-    private ConcurrentHashMap<ID, RTClientState> states;
+    private MessageDispatcher messageDispatcher;
+    private ID client;
+    private ID group;
 
     /**
-     * Initializes a new {@link NoOpGlobalRealtimeCleanup}.
-     * @param states
+     * Initializes a new {@link SendLeaveTask}.
+     * @param messageDispatcher The {@link MessageDispatcher} to use for executing the leave
+     * @param client The leaving client
+     * @param group The group left by the client
      */
-    public NoOpGlobalRealtimeCleanup(ConcurrentHashMap<ID, RTClientState> states) {
+    public SendLeaveTask(MessageDispatcher messageDispatcher, ID client, ID group) {
         super();
-        this.states = states;
+        this.messageDispatcher = messageDispatcher;
+        this.client = client;
+        this.group = group;
     }
 
     @Override
-    public void cleanForId(ID id) {
-        states.remove(id);
+    public void setThreadName(ThreadRenamer threadRenamer) {
+        threadRenamer.renamePrefix("SendLeave");
     }
 
     @Override
-    public Collection<ID> removeFromResourceDirectory(ID id) throws OXException {
+    public Void call() throws Exception {
+        messageDispatcher.send(new LeaveStanza(client, group));
         return null;
-    }
-
-    @Override
-    public Collection<ID> removeFromResourceDirectory(Collection<ID> ids) throws OXException {
-        return null;
-    }
-
-    @Override
-    public void cleanForId(ID id, long timestamp) {
-        
     }
 
 }

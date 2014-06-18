@@ -54,6 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,6 +70,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.group.helper.MessageDispatcherMock;
 import com.openexchange.realtime.hazelcast.group.helper.PortableFactoryAdapter;
@@ -93,6 +95,7 @@ public class DistributedGroupManagerImplTest {
     private static HazelcastInstance hzInstance;
     private static ID user1, user2, user3;
     private static ID group1, group2, group3;
+    GlobalRealtimeCleanup grcMock;
     private static DistributedGroupManagerImpl groupManager;
     //Stanzas the messageDispatcher sent during the test
     private Multimap<ID, Stanza> sentStanzas;
@@ -117,7 +120,8 @@ public class DistributedGroupManagerImplTest {
     public void setUp() {
         sentStanzas = HashMultimap.create();
         messageDispatcher  = new MessageDispatcherMock(sentStanzas);
-        groupManager = new DistributedGroupManagerImpl(messageDispatcher, CLIENT_MAP, GROUP_MAP);
+        grcMock = mock(GlobalRealtimeCleanup.class);
+        groupManager = new DistributedGroupManagerImpl(messageDispatcher, grcMock, CLIENT_MAP, GROUP_MAP);
     }
 
     /**

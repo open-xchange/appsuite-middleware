@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.impl;
+package com.openexchange.realtime.hazelcast.cleanup;
 
 import java.util.Map.Entry;
 import org.slf4j.Logger;
@@ -114,16 +114,16 @@ public class CleanupMemberShipListener implements MembershipListener {
                     cleanupStatus = new CleanupStatus(HazelcastAccess.getLocalMember());
                     //do actual cleanup
                     IDMap<HazelcastResource> resourcesOfMember = directory.getResourcesOfMember(member);
-                    LOG.info("Found the following resources to clean up: {}", resourcesOfMember);
+                    LOG.debug("Found the following resources to clean up: {}", resourcesOfMember);
                     for (Entry<ID, HazelcastResource> entry : resourcesOfMember.entrySet()) {
                         ID id = entry.getKey();
-                        //TODO: cleanup if Resource still matches in transaction
-                        globalCleanup.cleanForId(id);
+                        HazelcastResource hzResource = entry.getValue();
+                        globalCleanup.cleanForId(id, hzResource.getTimestamp().getTime());
                     }
                     //update status and put to map
                     cleanupStatus.setCleaningFinishTime(System.currentTimeMillis());
                     cleanupMapping.put(uuid, cleanupStatus);
-                    LOG.info("CleanupMapping after cleanup: {}", cleanupMapping.entrySet());
+                    LOG.debug("CleanupMapping after cleanup: {}", cleanupMapping.entrySet());
                 } else {
                     LOG.info(
                         "Cleanup was already started: {}", cleanupStatus);

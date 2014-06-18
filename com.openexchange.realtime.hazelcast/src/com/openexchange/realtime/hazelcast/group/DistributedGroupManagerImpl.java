@@ -67,16 +67,17 @@ import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.group.InactivityNotice;
 import com.openexchange.realtime.group.commands.LeaveCommand;
-import com.openexchange.realtime.group.commands.LeaveStanza;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerMBean;
 import com.openexchange.realtime.hazelcast.management.DistributedGroupManagerManagement;
+import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.hazelcast.serialization.PortableID;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
 import com.openexchange.realtime.util.Duration;
 import com.openexchange.realtime.util.IDMap;
+import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
@@ -146,11 +147,12 @@ public class DistributedGroupManagerImpl implements ManagementAware<DistributedG
     private void sendLeave(ID client, Collection<ID> groups) {
         Validate.notNull(client, "Client must not be null");
         Validate.notNull(groups, "Groups must not be null");
+        ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
         for (ID group : groups) {
             try {
                 LOG.debug("Sending leave on behalf of {} to {}.", client, group);
-                messageDispatcher.send(new LeaveStanza(client, group));
-            } catch (OXException e) {
+                threadPoolService.submit(new SendLeaveTask(messageDispatcher, client, group));
+            } catch (Exception e) {
                 LOG.error("Unable to remove client {} from group {}.", client, group, e);
             }
         }

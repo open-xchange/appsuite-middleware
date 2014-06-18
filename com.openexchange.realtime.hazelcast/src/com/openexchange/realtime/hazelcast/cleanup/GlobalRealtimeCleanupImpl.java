@@ -51,6 +51,8 @@ package com.openexchange.realtime.hazelcast.cleanup;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +63,7 @@ import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
+import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
@@ -68,6 +71,7 @@ import com.openexchange.realtime.hazelcast.management.GlobalRealtimeCleanupMBean
 import com.openexchange.realtime.hazelcast.management.GlobalRealtimeCleanupManagement;
 import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.util.IDMap;
 
 /**
  * {@link GlobalRealtimeCleanupImpl}
@@ -132,6 +136,27 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, Managem
     }
 
     @Override
+    public void cleanForId(ID id, long timestamp) {
+        try {
+            IDMap<Resource> idMap = hazelcastResourceDirectory.get(id);
+            Set<ID> validIDs = new HashSet<ID>();
+            Iterator<Entry<ID, Resource>> mapIter = idMap.entrySet().iterator();
+            while (mapIter.hasNext()) {
+                Entry<ID, Resource> next = mapIter.next();
+                if (next.getValue().getTimestamp().getTime() <= timestamp) {
+                    validIDs.add(next.getKey());
+                }
+            }
+            hazelcastResourceDirectory.remove(validIDs);
+            for (ID idToClean : validIDs) {
+                doCleanupForId(idToClean);
+            }
+        } catch (OXException oxe) {
+            LOG.error("Failed to clean for ID {}", id, oxe);
+        }
+    }
+
+    @Override
     public Collection<ID> removeFromResourceDirectory(ID id) throws OXException {
         return hazelcastResourceDirectory.remove(id).keySet();
     }
@@ -139,6 +164,36 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, Managem
     @Override
     public Collection<ID> removeFromResourceDirectory(Collection<ID> ids) throws OXException {
         return hazelcastResourceDirectory.remove(ids).keySet();
+    }
+    
+    private void doCleanupForId(ID id) {
+        // Do the local cleanup via a simple service call
+        LocalRealtimeCleanup localRealtimeCleanup = Services.optService(LocalRealtimeCleanup.class);
+        if (localRealtimeCleanup == null) {
+            LOG.error(
+                "Unable to start local cleanup. Shutting down?",
+                RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class));
+        } else {
+            localRealtimeCleanup.cleanForId(id);
+        }
+
+        // Remote cleanup via distributed MultiTask to remaining members of the cluster
+        HazelcastInstance hazelcastInstance;
+        try {
+            hazelcastInstance = HazelcastAccess.getHazelcastInstance();
+            Member localMember = HazelcastAccess.getLocalMember();
+            Set<Member> clusterMembers = new HashSet<Member>(hazelcastInstance.getCluster().getMembers());
+            if (!clusterMembers.remove(localMember)) {
+                LOG.warn("Couldn't remove local member from cluster members.");
+            }
+            if (!clusterMembers.isEmpty()) {
+                hazelcastInstance.getExecutorService("default").submitToMembers(new CleanupDispatcher(id), clusterMembers);
+            } else {
+                LOG.debug("No other cluster members besides the local member. No further clean up necessary.");
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to issue remote cleanup for {}.", id, e);
+        }
     }
 
     @Override
