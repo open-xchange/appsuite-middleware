@@ -365,6 +365,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    /**
+     * Gets the associated IMAP store.
+     *
+     * @return The IMAP store
+     */
+    public IMAPStore getImapStore() {
+        return imapStore;
+    }
+
     @Override
     public void clearCache() throws OXException {
         IMAPFolderWorker.clearCache(imapFolder);
