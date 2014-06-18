@@ -191,6 +191,21 @@ public class FileCopyOptimizer extends FileActionOptimizer {
                 } catch (OXException e) {
                     LOG.warn("unexpected error during file lookup by checksum", e);
                 }
+                checksumsToQuery.removeAll(matchingFileVersions.keySet());
+                /*
+                 * search in trash, too, if available
+                 */
+                if (0 < checksumsToQuery.size()) {
+                    try {
+                        if (session.getStorage().hasTrashFolder() && null != session.getStorage().getTrashFolder()) {
+                            String trashFolderID = session.getStorage().getTrashFolder().getId();
+                            matchingFileVersions.putAll(searchMatchingFileVersions(
+                                session, Collections.singletonList(trashFolderID), checksumsToQuery));
+                        }
+                    } catch (OXException e) {
+                        LOG.warn("unexpected error during file lookup by checksum", e);
+                    }
+                }
             }
         }
         return matchingFileVersions;
@@ -205,6 +220,19 @@ public class FileCopyOptimizer extends FileActionOptimizer {
      * @throws OXException
      */
     private static Map<String, ServerFileVersion> searchMatchingFileVersions(final SyncSession session, final List<String> checksums) throws OXException {
+        return searchMatchingFileVersions(session, null, checksums);
+    }
+
+    /**
+     * Searches for files matching the supplied checksums in the storage.
+     *
+     * @param session The sync session
+     * @param folderIDs The IDs of the folder to search, or <code>null</code> to search in all visible folders
+     * @param checksums The checksums to lookup
+     * @return The found file versions, each mapped to the matching checksum
+     * @throws OXException
+     */
+    private static Map<String, ServerFileVersion> searchMatchingFileVersions(final SyncSession session, final List<String> folderIDs, final List<String> checksums) throws OXException {
         Map<String, ServerFileVersion> matchingFileVersions = new HashMap<String, ServerFileVersion>();
         if (0 < checksums.size()) {
             List<FileChecksum> checksumsToInsert = new ArrayList<FileChecksum>();
@@ -215,7 +243,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
                     @Override
                     public SearchIterator<File> call() throws OXException {
                         return session.getStorage().getFileAccess().search(
-                            null, getSearchTermForChecksums(checksums), DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT,
+                            folderIDs, getSearchTermForChecksums(checksums), DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT,
                             FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
                     }
                 });
