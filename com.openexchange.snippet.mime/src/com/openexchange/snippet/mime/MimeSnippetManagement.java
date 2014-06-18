@@ -431,7 +431,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Content part
                 {
                     final MimeBodyPart textPart = new MimeBodyPart();
-                    MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", buildContentType(misc).getSubType(), textPart);
+                    MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", null == misc ? "plain" : determineContentSubtype(misc), textPart);
                     // textPart.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
                     multipart.addBodyPart(textPart);
                 }
@@ -457,10 +457,9 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
                 // Apply multipart
                 MessageUtility.setContent(multipart, mimeMessage);
-                // mimeMessage.setContent(multipart);
             } else {
-                MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", buildContentType(misc).getSubType(), mimeMessage);
-                // mimeMessage.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
+                // The variable "misc" can only be null at this location
+                MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain", mimeMessage);
             }
             // Save
             mimeMessage.saveChanges();
@@ -701,7 +700,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 final Multipart primaryMultipart = new MimeMultipart();
                 // Add text part
                 final MimeBodyPart textPart = new MimeBodyPart();
-                MessageUtility.setText(sanitizeContent(content), "UTF-8", "plain", textPart);
+                MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", null == miscPart ? "plain" : determineContentSubtype(MessageUtility.readMimePart(miscPart, "UTF-8")), textPart);
                 // textPart.setText(sanitizeContent(content), "UTF-8", "plain");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 primaryMultipart.addBodyPart(textPart);
@@ -933,9 +932,12 @@ public final class MimeSnippetManagement implements SnippetManagement {
     private static boolean isEmpty(final String string) {
         return com.openexchange.java.Strings.isEmpty(string);
     }
-    
-    private static ContentType buildContentType(final Object misc) throws OXException {
-        final String ct = (misc != null) ? SnippetUtils.parseContentTypeFromMisc(misc.toString()) : "text/plain";
-        return new ContentType(ct);
+
+    private static String determineContentSubtype(final Object misc) throws OXException {
+        if (misc == null) {
+            return "plain";
+        }
+        final String ct = SnippetUtils.parseContentTypeFromMisc(misc);
+        return new ContentType(ct).getSubType();
     }
 }

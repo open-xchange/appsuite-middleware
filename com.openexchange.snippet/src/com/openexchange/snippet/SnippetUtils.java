@@ -60,7 +60,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link SnippetUtils} - Some utility methods for Snippet module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SnippetUtils {
@@ -76,7 +76,7 @@ public final class SnippetUtils {
 
     /**
      * Sanitizes given Snippet content.
-     * 
+     *
      * @param content The content
      * @return The sanitized content
      */
@@ -99,24 +99,49 @@ public final class SnippetUtils {
     }
 
     /**
-     * Parse the content type from misc
-     * 
-     * @param m
-     * @return
-     * @throws OXException
+     * Parses the content type from miscellaneous JSON data.
+     *
+     * @param misc The miscellaneous JSON object
+     * @return The extracted content type information or <code>"text/plain"</code> as fall-back
+     * @throws OXException If content type cannot be extracted
      */
-    public static String parseContentTypeFromMisc(final String m) throws OXException {
+    public static String parseContentTypeFromMisc(final Object misc) throws OXException {
+        if (misc instanceof JSONObject) {
+            return parseContentTypeFromMisc((JSONObject) misc);
+        }
+
         try {
-            final JSONObject misc = new JSONObject(m);
-            final String key = "content-type";
-            if (misc.hasAndNotNull(key)) {
-                final String ct = misc.getString(key);
-                return (ct != null) ? ct : "text/plain";
-            } else {
-                return "text/plain";
-            }
+            return parseContentTypeFromMisc(new JSONObject(misc.toString()));
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
         }
     }
+
+    /**
+     * Parses the content type from miscellaneous JSON data.
+     *
+     * @param misc The miscellaneous JSON object
+     * @return The extracted content type information or <code>"text/plain"</code> as fall-back
+     * @throws OXException If content type cannot be extracted
+     */
+    public static String parseContentTypeFromMisc(final String misc) throws OXException {
+        try {
+            return parseContentTypeFromMisc(new JSONObject(misc));
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
+        }
+    }
+
+    /**
+     * Parses the content type from miscellaneous JSON data.
+     *
+     * @param misc The miscellaneous JSON object
+     * @return The extracted content type information or <code>"text/plain"</code> as fall-back
+     * @throws OXException If content type cannot be extracted
+     */
+    public static String parseContentTypeFromMisc(final JSONObject misc) {
+        String cts = misc.optString("content-type", null);
+        return null == cts ? "text/plain" : cts;
+    }
+
 }
