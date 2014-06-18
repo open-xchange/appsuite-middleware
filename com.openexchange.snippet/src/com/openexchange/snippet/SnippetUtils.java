@@ -50,13 +50,17 @@
 package com.openexchange.snippet;
 
 import java.util.regex.Pattern;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.snippet.internal.Services;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link SnippetUtils} - Some utility methods for Snippet module.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SnippetUtils {
@@ -72,7 +76,7 @@ public final class SnippetUtils {
 
     /**
      * Sanitizes given Snippet content.
-     *
+     * 
      * @param content The content
      * @return The sanitized content
      */
@@ -91,6 +95,28 @@ public final class SnippetUtils {
         } catch (final Exception e) {
             // Ignore
             return content;
+        }
+    }
+
+    /**
+     * Parse the content type from misc
+     * 
+     * @param m
+     * @return
+     * @throws OXException
+     */
+    public static String parseContentTypeFromMisc(final String m) throws OXException {
+        try {
+            final JSONObject misc = new JSONObject(m);
+            final String key = "content-type";
+            if (misc.hasAndNotNull(key)) {
+                final String ct = misc.getString(key);
+                return (ct != null) ? ct : "text/plain";
+            } else {
+                return "text/plain";
+            }
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
         }
     }
 }

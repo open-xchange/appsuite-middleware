@@ -108,6 +108,7 @@ import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
+import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
@@ -430,7 +431,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Content part
                 {
                     final MimeBodyPart textPart = new MimeBodyPart();
-                    MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain", textPart);
+                    MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", buildContentType(misc).getSubType(), textPart);
                     // textPart.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
                     multipart.addBodyPart(textPart);
                 }
@@ -458,7 +459,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 MessageUtility.setContent(multipart, mimeMessage);
                 // mimeMessage.setContent(multipart);
             } else {
-                MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain", mimeMessage);
+                MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", buildContentType(misc).getSubType(), mimeMessage);
                 // mimeMessage.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
             }
             // Save
@@ -931,5 +932,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
 
     private static boolean isEmpty(final String string) {
         return com.openexchange.java.Strings.isEmpty(string);
+    }
+    
+    private static ContentType buildContentType(final Object misc) throws OXException {
+        final String ct = (misc != null) ? SnippetUtils.parseContentTypeFromMisc(misc.toString()) : "text/plain";
+        return new ContentType(ct);
     }
 }
