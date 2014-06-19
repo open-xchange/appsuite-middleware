@@ -43,6 +43,7 @@ package com.sun.mail.imap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -1127,7 +1128,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     /**
      * Prefetch attributes, based on the given FetchProfile.
      */
-    public synchronized void fetch(Message[] msgs, FetchProfile fp, Collection<String> extensions)
+    public synchronized void fetch(Message[] msgs, FetchProfile fp, Map<String, Item> extensions)
 			throws MessagingException {
 	checkOpened();
 
@@ -1193,7 +1194,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	 * Add specified extensions
 	 */
 	if (null != extensions) {
-	    for (String extension : extensions) {
+	    for (String extension : extensions.keySet()) {
 	        if (first) {
 	            first = false;
             } else {
