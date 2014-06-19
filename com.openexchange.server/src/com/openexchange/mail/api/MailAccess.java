@@ -485,6 +485,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * Closes specified <tt>MailAccess</tt> instance with the attempt to put it into cache for subsequent reuse.
      *
      * @param mailAccess The <tt>MailAccess</tt> instance to close
+     * @since v7.6.0
      */
     public static void closeInstance(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         closeInstance(mailAccess, true);
@@ -495,6 +496,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      * @param mailAccess The <tt>MailAccess</tt> instance to close
      * @param put2Cache true to try to put this mail connection into cache; otherwise false
+     * @since v7.6.0
      */
     public static void closeInstance(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final boolean put2Cache) {
         if (null != mailAccess) {
