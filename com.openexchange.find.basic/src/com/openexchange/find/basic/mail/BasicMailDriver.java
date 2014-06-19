@@ -258,9 +258,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
             return new SearchResult(-1, searchRequest.getStart(), documents, searchRequest.getActiveFacets());
         } finally {
-            if (mailAccess != null) {
-                mailAccess.close(true);
-            }
+            MailAccess.closeInstance(mailAccess);
         }
     }
 
