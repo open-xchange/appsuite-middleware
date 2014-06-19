@@ -96,6 +96,7 @@ import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.RFC822SIZE;
 import com.sun.mail.imap.protocol.UID;
+import com.sun.mail.imap.protocol.X_REAL_UID;
 
 /**
  * {@link MailMessageFetchIMAPCommand} - performs a prefetch of messages in given folder with only those fields set that need to be present for
@@ -481,6 +482,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             return SIZE_ITEM_HANDLER;
         } else if (item instanceof BODYSTRUCTURE) {
             return BODYSTRUCTURE_ITEM_HANDLER;
+        } else if (item instanceof X_REAL_UID) {
+            return X_REAL_UID_ITEM_HANDLER;
+        } else if (item instanceof com.sun.mail.imap.protocol.X_MAILBOX) {
+            return X_MAILBOX_ITEM_HANDLER;
         } else {
             return null;
         }
@@ -992,11 +997,39 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
     };
 
+    private static final FetchItemHandler X_REAL_UID_ITEM_HANDLER = new FetchItemHandler() {
+
+        @Override
+        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+            msg.setUid(((X_REAL_UID) item).uid);
+        }
+
+        @Override
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+            // Nothing
+        }
+    };
+
+    private static final FetchItemHandler X_MAILBOX_ITEM_HANDLER = new FetchItemHandler() {
+
+        @Override
+        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+            msg.setFolder(((com.sun.mail.imap.protocol.X_MAILBOX) item).mailbox);
+        }
+
+        @Override
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+            // Nothing
+        }
+    };
+
     private static final Map<Class<? extends Item>, FetchItemHandler> MAP;
 
     static {
         MAP = new HashMap<Class<? extends Item>, FetchItemHandler>(8);
         MAP.put(UID.class, UID_ITEM_HANDLER);
+        MAP.put(X_REAL_UID.class, X_REAL_UID_ITEM_HANDLER);
+        MAP.put(com.sun.mail.imap.protocol.X_MAILBOX.class, X_MAILBOX_ITEM_HANDLER);
         MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
         MAP.put(FLAGS.class, FLAGS_ITEM_HANDLER);
         MAP.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
@@ -1030,6 +1063,16 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * To, Cc, Bcc, ReplyTo, Subject and Date. More items may be included as well.
      */
     public static final FetchProfile.Item ENVELOPE_ONLY = new FetchItem("ENVELOPE_ONLY");
+
+    /**
+     * This is the X-MAILBOX item.
+     */
+    public static final FetchProfile.Item X_MAILBOX = new FetchItem("X-MAILBOX");
+
+    /**
+     * This is the X-REAL-UID item.
+     */
+    public static final FetchProfile.Item X_REAL_UID = new FetchItem("X-REAL-UID");
 
     /**
      * Turns given fetch profile into FETCH items to craft a FETCH command.
@@ -1069,6 +1112,12 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         if (fp.contains(UIDFolder.FetchProfileItem.UID)) {
             command.append(" UID");
+        }
+        if (fp.contains(X_MAILBOX)) {
+            command.append(" X-MAILBOX");
+        }
+        if (fp.contains(X_REAL_UID)) {
+            command.append(" X-REAL-UID");
         }
         boolean allHeaders = false;
         if (fp.contains(IMAPFolder.FetchProfileItem.HEADERS) && !loadBody) {
