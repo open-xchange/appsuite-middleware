@@ -41,6 +41,7 @@
 package com.sun.mail.imap;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -1119,6 +1120,14 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      */
     @Override
     public synchronized void fetch(Message[] msgs, FetchProfile fp)
+            throws MessagingException {
+        fetch(msgs, fp, null);
+    }
+
+    /**
+     * Prefetch attributes, based on the given FetchProfile.
+     */
+    public synchronized void fetch(Message[] msgs, FetchProfile fp, Collection<String> extensions)
 			throws MessagingException {
 	checkOpened();
 
@@ -1178,6 +1187,20 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    command.append(" ");
 		command.append(fitems[i].getName());
 	    }
+	}
+
+	/*
+	 * Add specified extensions
+	 */
+	if (null != extensions) {
+	    for (String extension : extensions) {
+	        if (first) {
+	            first = false;
+            } else {
+                command.append(' ');
+            }
+	        command.append(extension);
+        }
 	}
 
 	Utility.Condition condition =
