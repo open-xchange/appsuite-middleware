@@ -54,8 +54,8 @@ public class BODY implements Item {
     
     static final char[] name = {'B','O','D','Y'};
 
-    public int msgno;
-    public ByteArray data;
+    public final int msgno;
+    public final ByteArray data;
     public String section;
     public int origin = 0;
 

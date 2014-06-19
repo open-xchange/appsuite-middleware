@@ -40,27 +40,27 @@
 
 package com.sun.mail.imap.protocol;
 
-import com.sun.mail.iap.*; 
+import com.sun.mail.iap.*;
 
 /**
- * This class represents the UID data item
+ * This class represents the X-MAILBOX data item
  *
- * @author  John Mani
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+public class X_MAILBOX implements Item {
 
-public class UID implements Item {
-    
-    static final char[] name = {'U','I','D'};
+    static final char[] name = { 'X', '-', 'M', 'A', 'I', 'L', 'B', 'O', 'X' };
+
     public final int seqnum;
-
-    public final long uid;
+    public final String mailbox;
 
     /**
      * Constructor
      */
-    public UID(FetchResponse r) throws ParsingException {
-	seqnum = r.getNumber();
-	r.skipSpaces();
-	uid = r.readLong();
+    public X_MAILBOX(FetchResponse r) throws ParsingException {
+        seqnum = r.getNumber();
+        r.skipSpaces();
+        mailbox = BASE64MailboxDecoder.decode(r.readAtomString());
     }
+
 }

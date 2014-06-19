@@ -52,9 +52,9 @@ import com.sun.mail.iap.*;
 public class MODSEQ implements Item {
     
     static final char[] name = {'M','O','D','S','E','Q'};
-    public int seqnum;
+    public final int seqnum;
 
-    public long modseq;
+    public final long modseq;
 
     /**
      * Constructor

@@ -58,7 +58,7 @@ public class BODYSTRUCTURE implements Item {
     
     static final char[] name =
 	{'B','O','D','Y','S','T','R','U','C','T','U','R','E'};
-    public int msgno;
+    public final int msgno;
 
     public String type;		// Type
     public String subtype;	// Subtype
