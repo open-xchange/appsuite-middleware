@@ -1128,7 +1128,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     /**
      * Prefetch attributes, based on the given FetchProfile.
      */
-    public synchronized void fetch(Message[] msgs, FetchProfile fp, Map<String, Item> extensions)
+    public synchronized void fetch(Message[] msgs, FetchProfile fp, Collection<String> extensions)
 			throws MessagingException {
 	checkOpened();
 
@@ -1194,7 +1194,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	 * Add specified extensions
 	 */
 	if (null != extensions) {
-	    for (String extension : extensions.keySet()) {
+	    for (String extension : extensions) {
 	        if (first) {
 	            first = false;
             } else {
