@@ -58,6 +58,8 @@ ox_update_permissions /opt/open-xchange/etc/eas-provisioning-sms.properties root
 %changelog
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 7.6.0
+* Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-06-23
 * Thu Jun 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-06-16
 * Fri May 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
