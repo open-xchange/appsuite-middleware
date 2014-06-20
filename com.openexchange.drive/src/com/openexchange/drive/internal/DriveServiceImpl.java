@@ -318,7 +318,7 @@ public class DriveServiceImpl implements DriveService {
                      */
                     String alternativeName = RenameTools.findRandomAlternativeName(originalVersion.getName());
                     FileVersion renamedVersion = new SimpleFileVersion(alternativeName, originalVersion.getChecksum());
-                    syncResult.addActionForClient(new EditFileAction(newVersion, renamedVersion, null, path));
+                    syncResult.addActionForClient(new EditFileAction(newVersion, renamedVersion, null, path, false));
                     syncResult.addActionForClient(new ErrorFileAction(newVersion, renamedVersion, null, path, quotaException, true));
                     /*
                      * ... then download the server version afterwards

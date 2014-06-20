@@ -1,3 +1,7 @@
+* 2014-06-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32323: Introduced "acknowledge" parameter for EDIT actions to prevent implicit client-side acknowledgments of unknown files  
+
 * 2014-06-18 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33182: Also consider trash folder in the file copy optimizer  
