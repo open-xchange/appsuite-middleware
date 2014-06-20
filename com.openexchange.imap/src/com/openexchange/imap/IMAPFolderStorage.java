@@ -387,7 +387,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
 
-            return IMAPFolderConverter.convertFolder(f, session, imapAccess, ctx).asMailFolderInfo(accountId);
+
+            ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, f, session);
+            return null == listEntry ? IMAPFolderConverter.convertFolder(f, session, imapAccess, ctx).asMailFolderInfo(accountId) : toFolderInfo(listEntry);
         } catch (final MessagingException e) {
             throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, new HashMap<String, Object>(0));
         } catch (final RuntimeException e) {
@@ -512,7 +514,15 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         mfi.setHoldsFolders(entry.hasInferiors());
         mfi.setHoldsMessages(entry.canOpen());
         mfi.setSubscribed(true);
-        mfi.setSubfolders(entry.hasChildren());
+
+        if (entry.hasChildren()) {
+            mfi.setSubfolders(true);
+            mfi.setNumSubfolders(entry.getChildren().size());
+        } else {
+            mfi.setSubfolders(false);
+            mfi.setNumSubfolders(0);
+        }
+
         mfi.setSubscribedSubfolders(entry.hasChildren());
 
         if (0 == fullName.length()) {

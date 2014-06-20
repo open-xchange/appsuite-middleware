@@ -116,12 +116,16 @@ public class MailFolderInfo implements Serializable, Cloneable {
     private String displayName;
     private String cachedFullDisplayName;
 
+    private int numSubfolders;
+    private boolean b_numSubfolders;
+
     /**
      * Initializes a new {@link MailFolderInfo}
      */
     public MailFolderInfo() {
         super();
         defaulFolderType = MailFolder.DefaultFolderType.NONE;
+        numSubfolders = -1;
     }
 
     @Override
@@ -680,6 +684,44 @@ public class MailFolderInfo implements Serializable, Cloneable {
     public void setDefaultFolder(final boolean defaultFolder) {
         this.defaultFolder = defaultFolder;
         b_defaultFolder = true;
+    }
+
+    /**
+     * Gets the number of sub-folders.
+     *
+     * @return The number of sub-folders.
+     */
+    public int getNumSubfolders() {
+        return numSubfolders;
+    }
+
+    /**
+     * Checks if number of sub-folders was set through {@link #setNumSubfolders(int)}.
+     *
+     * @return <code>true</code> if number of sub-folders is set; otherwise <code>false</code>
+     */
+    public boolean containsNumSubfolders() {
+        return b_numSubfolders;
+    }
+
+    /**
+     * Removes the number of sub-folders information.
+     */
+    public void removeNumSubfolders() {
+        numSubfolders = -1;
+        b_numSubfolders = false;
+    }
+
+    /**
+     * Sets the number of sub-folders.
+     *
+     * @param numSubfolders The number of sub-folders.
+     * @return This reference
+     */
+    public MailFolderInfo setNumSubfolders(final int numSubfolders) {
+        this.numSubfolders = numSubfolders;
+        b_numSubfolders = true;
+        return this;
     }
 
     @Override
