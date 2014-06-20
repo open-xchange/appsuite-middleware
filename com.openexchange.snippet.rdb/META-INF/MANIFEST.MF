@@ -48,4 +48,3 @@ Import-Package: com.openexchange.cache,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Require-Bundle: ch.qos.logback.classic
