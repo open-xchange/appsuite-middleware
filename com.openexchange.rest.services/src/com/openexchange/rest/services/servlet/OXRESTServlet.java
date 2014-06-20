@@ -60,11 +60,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.rest.services.OXRESTMatch;
 import com.openexchange.rest.services.OXRESTService;
 import com.openexchange.rest.services.Response;
 import com.openexchange.rest.services.internal.OXRESTServiceWrapper;
+import com.openexchange.rest.services.internal.Services;
+import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -85,6 +89,12 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
      */
     public static final OXRESTRegistry REST_SERVICES = new OXRESTRegistry();
 
+    // ---------------------------------------------------------------------------------------------------------------------------------------------- //
+
+    private volatile boolean doBasicAuth;
+    private volatile String authLogin;
+    private volatile String authPassword;
+
     /**
      * Initializes a new {@link OXRESTServlet}.
      */
@@ -93,8 +103,72 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
     }
 
     @Override
+    public void init() throws ServletException {
+        super.init();
+
+        ConfigurationService service = Services.getService(ConfigurationService.class);
+        if (null == service) {
+            throw new ServletException("Missing configuration service");
+        }
+
+        String authLogin = service.getProperty("com.openexchange.rest.services.basic-auth.login");
+        String authPassword = service.getProperty("com.openexchange.rest.services.basic-auth.password");
+        if (!Strings.isEmpty(authLogin) && !Strings.isEmpty(authPassword)) {
+            doBasicAuth = true;
+            this.authLogin = authLogin;
+            this.authPassword = authPassword;
+        }
+    }
+
+    /**
+     * Authentication identifier.
+     */
+    private static final String basicRealm = "OX REST";
+
+    /**
+     * Adds the header to the response message for authorization. Only add this header if the authorization of the user failed.
+     *
+     * @param resp the response to that the header should be added.
+     */
+    protected static void addUnauthorizedHeader(final HttpServletResponse resp) {
+        final StringBuilder builder = new StringBuilder(64);
+        builder.append("Basic realm=\"").append(basicRealm).append("\", encoding=\"UTF-8\"");
+        resp.setHeader("WWW-Authenticate", builder.toString());
+    }
+
+    private boolean authenticated(HttpServletRequest req) {
+        if (false == doBasicAuth) {
+            return true;
+        }
+
+        final String auth = req.getHeader("authorization");
+        if (null == auth) {
+            // Authorization header missing
+            return false;
+        }
+        if (com.openexchange.tools.servlet.http.Authorization.checkForBasicAuthorization(auth)) {
+            final Credentials creds = com.openexchange.tools.servlet.http.Authorization.decode(auth);
+            if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(creds.getPassword())) {
+                // Empty password
+                return false;
+            }
+            // Check parsed credentials
+            return authLogin.equals(creds.getLogin()) && authPassword.equals(creds.getPassword());
+        }
+
+        // Unsupported auth scheme
+        return false;
+    }
+
+    @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
+            if (!authenticated(req)) {
+                addUnauthorizedHeader(resp);
+                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
+                return;
+            }
+
             AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(0, 0), PREFIX, resp);
 
             for (@SuppressWarnings("unchecked") final Enumeration<String> headers = req.getHeaderNames(); headers.hasMoreElements();) {

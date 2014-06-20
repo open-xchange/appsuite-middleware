@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.tools,
  com.openexchange.annotation,
+ com.openexchange.config,
  com.openexchange.conversion.simple,
  com.openexchange.exception,
  com.openexchange.java,
