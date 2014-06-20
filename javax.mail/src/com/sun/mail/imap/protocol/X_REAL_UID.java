@@ -40,27 +40,26 @@
 
 package com.sun.mail.imap.protocol;
 
-import com.sun.mail.iap.*; 
+import com.sun.mail.iap.*;
 
 /**
- * This class represents the UID data item
+ * This class represents the X-REAL-UID data item
  *
- * @author  John Mani
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+public class X_REAL_UID implements Item {
 
-public class UID implements Item {
-    
-    static final char[] name = {'U','I','D'};
+    static final char[] name = { 'X', '-', 'R', 'E', 'A', 'L', '-', 'U', 'I', 'D' };
+
     public final int seqnum;
-
     public final long uid;
 
     /**
      * Constructor
      */
-    public UID(FetchResponse r) throws ParsingException {
-	seqnum = r.getNumber();
-	r.skipSpaces();
-	uid = r.readLong();
+    public X_REAL_UID(FetchResponse r) throws ParsingException {
+        seqnum = r.getNumber();
+        r.skipSpaces();
+        uid = r.readLong();
     }
 }

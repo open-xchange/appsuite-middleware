@@ -62,16 +62,16 @@ public class ENVELOPE implements Item {
     static final char[] name = {'E','N','V','E','L','O','P','E'};
     public int msgno;
 
-    public Date date = null;
-    public String subject;
-    public InternetAddress[] from;
-    public InternetAddress[] sender;
-    public InternetAddress[] replyTo;
-    public InternetAddress[] to;
-    public InternetAddress[] cc;
-    public InternetAddress[] bcc;
-    public String inReplyTo;
-    public String messageId;
+    public final Date date;
+    public final String subject;
+    public final InternetAddress[] from;
+    public final InternetAddress[] sender;
+    public final InternetAddress[] replyTo;
+    public final InternetAddress[] to;
+    public final InternetAddress[] cc;
+    public final InternetAddress[] bcc;
+    public final String inReplyTo;
+    public final String messageId;
 
     // Used to parse dates
     private static MailDateFormat mailDateFormat = new MailDateFormat();
@@ -84,6 +84,8 @@ public class ENVELOPE implements Item {
 	if (r.readByte() != '(')
 	    throw new ParsingException("ENVELOPE parse error");
 	
+	{
+	Date date = null;
 	String s = r.readString();
 	if (s != null) {
 	    try {
@@ -97,6 +99,8 @@ public class ENVELOPE implements Item {
 		// exception (including RuntimeExceptions) and just let 
 		// date be null.
 	    }
+	}
+	this.date = date;
 	}
 
 	subject = r.readString();

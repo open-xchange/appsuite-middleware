@@ -122,7 +122,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 FileVersion renamedVersion = getRenamedVersion(session, clientVersion);
                 ThreeWayComparison<FileVersion> twc = new ThreeWayComparison<FileVersion>();
                 twc.setClientVersion(clientVersion);
-                syncResult.addActionForClient(new EditFileAction(clientVersion, renamedVersion, twc, path));
+                syncResult.addActionForClient(new EditFileAction(clientVersion, renamedVersion, twc, path, false));
                 /*
                  * ... then upload it if possible
                  */
@@ -250,7 +250,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * not allowed, keep both client- and server versions, let client first rename it's file...
                  */
                 FileVersion renamedVersion = getRenamedVersion(session, comparison.getClientVersion());
-                result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path));
+                result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path, false));
                 /*
                  * ... then mark that file as error (without quarantine)...
                  */
@@ -359,7 +359,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * keep both client- and server versions, let client first rename it's file...
                  */
                 FileVersion renamedVersion = getRenamedVersion(session, comparison.getClientVersion());
-                result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path));
+                result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path, false));
                 /*
                  * ... then upload it if possible...
                  */

@@ -155,15 +155,25 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private static final Logger LOG = LoggerFactory.getLogger(BasicMailDriver.class);
 
-    // Denotes if simple queries (from the global facet) be searched within the mail body
+    /** Denotes if simple queries (from the global facet) be searched within the mail body */
     private final boolean searchMailBody;
 
-    // Name of an optional virtual all-messages folder for primary accounts
+    /** Name of an optional virtual all-messages folder for primary accounts */
     private final String virtualAllMessagesFolder;
 
+    /** Signals if there is an invalid setting for virtual all-messages folder */
+    private final boolean invalidAllMessagesFolder;
+
+    /**
+     * Initializes a new {@link BasicMailDriver}.
+     *
+     * @param virtualAllMessagesFolder Name of an optional virtual all-messages folder for primary accounts
+     * @param searchMailBody <code>true</code> to also search in messages' bodies; otherwise <code>false</code>
+     */
     public BasicMailDriver(final String virtualAllMessagesFolder, final boolean searchMailBody) {
         super();
         this.virtualAllMessagesFolder = virtualAllMessagesFolder;
+        invalidAllMessagesFolder = Strings.isEmpty(virtualAllMessagesFolder);
         this.searchMailBody = searchMailBody;
     }
 
@@ -180,7 +190,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     @Override
     public SearchConfiguration getSearchConfiguration(ServerSession session) throws OXException {
         SearchConfiguration config = new SearchConfiguration();
-        if (Strings.isEmpty(virtualAllMessagesFolder)) {
+        if (invalidAllMessagesFolder) {
             config.setRequiresFolder();
         }
 
@@ -210,7 +220,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     @Override
     public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
         String folderName = searchRequest.getFolderId();
-        if (folderName == null && Strings.isEmpty(virtualAllMessagesFolder)) {
+        if (folderName == null && invalidAllMessagesFolder) {
             throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
         }
         if (folderName == null) {
@@ -248,9 +258,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
             return new SearchResult(-1, searchRequest.getStart(), documents, searchRequest.getActiveFacets());
         } finally {
-            if (mailAccess != null) {
-                mailAccess.close(true);
-            }
+            MailAccess.closeInstance(mailAccess);
         }
     }
 

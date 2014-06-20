@@ -66,6 +66,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.util.URIUtil;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Streams;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
@@ -94,7 +95,9 @@ public class HTTPToolkit {
         client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
         client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
 
-        final java.net.URL javaURL = new java.net.URL(site);
+        String encodedSite = URIUtil.encodeQuery(site);
+
+        final java.net.URL javaURL = new java.net.URL(encodedSite);
 
         if(check) {
             checkContentAndLength(javaURL, timeout);
@@ -119,7 +122,7 @@ public class HTTPToolkit {
         /*
          * No HTTPS
          */
-        final GetMethod getMethod = new GetMethod(site);
+        final GetMethod getMethod = new GetMethod(encodedSite);
         client.executeMethod(getMethod);
         return getMethod.getResponseBodyAsStream();
     }

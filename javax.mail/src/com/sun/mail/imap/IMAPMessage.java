@@ -1137,7 +1137,19 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	    if (((IMAPFolder)folder).uidTable == null)
 		((IMAPFolder)folder).uidTable = new Hashtable();
 	    ((IMAPFolder)folder).uidTable.put(Long.valueOf(u.uid), this);
-	}
+	} else if (item instanceof X_REAL_UID) {
+        X_REAL_UID xRealUid = (X_REAL_UID) item;
+	    if (null == items) {
+            items = new HashMap<String, Object>(3);
+        }
+	    items.put("X-REAL-UID", Long.valueOf(xRealUid.uid));
+	} else if (item instanceof X_MAILBOX) {
+	    X_MAILBOX xMailbox = (X_MAILBOX) item;
+        if (null == items) {
+            items = new HashMap<String, Object>(3);
+        }
+        items.put("X-MAILBOX", xMailbox.mailbox);
+    }
 
 	// Check for header items
 	else if (item instanceof RFC822DATA ||
@@ -1279,6 +1291,18 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	if (item == null)
 	    item = fetchItem(fitem);
 	return item;
+    }
+    
+    /**
+     * Return the data associated with the FetchItem.
+     * If the data hasn't been fetched, call the fetchItem
+     * method to fetch it.  Returns null if there is no
+     * data for the FetchItem.
+     *
+     * @since JavaMail 1.4.6
+     */
+    public synchronized Object getItem(String fitemName) {
+    return items == null ? null : items.get(fitemName);
     }
 
     /*

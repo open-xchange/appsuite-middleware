@@ -62,8 +62,8 @@ public class INTERNALDATE implements Item {
 
     static final char[] name =
 	{'I','N','T','E','R','N','A','L','D','A','T','E'};
-    public int msgno;
-    protected Date date;
+    public final int msgno;
+    protected final Date date;
 
     /*
      * Used to parse dates only.  The parse method is thread safe

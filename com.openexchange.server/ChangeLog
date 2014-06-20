@@ -1,3 +1,15 @@
+* 2014-06-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32323: Introduced "acknowledge" parameter for EDIT actions to prevent implicit client-side acknowledgments of unknown files  
+
+* 2014-06-18 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33182: Also consider trash folder in the file copy optimizer  
+
+* 2014-06-17 - martin.schneider@open-xchange.com
+
+ - Fix for bug 33132: use encoded site url to get site content
+
 * 2014-06-13 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33134: Don't auto-insert system-folder permission for possible non-visible parent folders when moving to trash  

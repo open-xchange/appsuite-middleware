@@ -240,6 +240,16 @@ public class FetchResponse extends IMAPResponse {
 	    if (match(UID.name))
 		return new UID(this);
 	    break;
+    case 'X': case 'x':
+        {
+            if (match(X_REAL_UID.name)) {
+                return new X_REAL_UID(this);
+            }
+            if (match(X_MAILBOX.name)) {
+                return new X_MAILBOX(this);
+            }
+        }
+        break;
 	case 'M': case 'm':
 	    if (match(MODSEQ.name))
 		return new MODSEQ(this);

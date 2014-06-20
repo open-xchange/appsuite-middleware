@@ -482,6 +482,33 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
+     * Closes specified <tt>MailAccess</tt> instance with the attempt to put it into cache for subsequent reuse.
+     *
+     * @param mailAccess The <tt>MailAccess</tt> instance to close
+     * @since v7.6.0
+     */
+    public static void closeInstance(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+        closeInstance(mailAccess, true);
+    }
+
+    /**
+     * Closes specified <tt>MailAccess</tt> instance.
+     *
+     * @param mailAccess The <tt>MailAccess</tt> instance to close
+     * @param put2Cache true to try to put this mail connection into cache; otherwise false
+     * @since v7.6.0
+     */
+    public static void closeInstance(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final boolean put2Cache) {
+        if (null != mailAccess) {
+            try {
+                mailAccess.close(put2Cache);
+            } catch (Exception e) {
+                LOG.error("Failed to close MailAccess instance", e);
+            }
+        }
+    }
+
+    /**
      * Increments the global access counter.
      * <p>
      * <b>Does nothing at all since v6.20.</b>
