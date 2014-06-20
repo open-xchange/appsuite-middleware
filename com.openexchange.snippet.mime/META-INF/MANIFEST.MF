@@ -54,6 +54,7 @@ Import-Package: com.openexchange.cache,
  javax.net,
  javax.net.ssl,
  org.apache.commons.logging,
+ org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
