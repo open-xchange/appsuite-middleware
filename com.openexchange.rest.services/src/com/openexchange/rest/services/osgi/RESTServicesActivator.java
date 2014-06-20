@@ -50,6 +50,7 @@
 package com.openexchange.rest.services.osgi;
 
 import org.osgi.service.http.HttpService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.services.internal.OXRESTServiceFactory;
@@ -70,7 +71,7 @@ public class RESTServicesActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, SimpleConverter.class };
+        return new Class<?>[] { HttpService.class, SimpleConverter.class, ConfigurationService.class };
     }
 
     @Override

@@ -101,10 +101,7 @@ public final class Authorization {
         if (null == authScheme) {
             return false;
         }
-        if (!authScheme.equalsIgnoreCase(BASIC_AUTH)) {
-            return false;
-        }
-        return true;
+        return authScheme.equalsIgnoreCase(BASIC_AUTH);
     }
 
     /**
