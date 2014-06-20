@@ -1,3 +1,7 @@
+* 2014-06-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 32323: Introduced "acknowledge" parameter for EDIT actions to prevent implicit client-side acknowledgments of unknown files
+  
 * 2014-06-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 32743: Property was added in a patch and according post installation scripting should be contained in a patch, too.
