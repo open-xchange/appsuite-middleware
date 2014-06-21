@@ -43,7 +43,6 @@ package javax.mail.internet;
 import javax.mail.*;
 import javax.activation.*;
 import java.util.*;
-import java.util.Map.Entry;
 import java.io.*;
 import com.sun.mail.util.LineOutputStream;
 import com.sun.mail.util.LineInputStream;
@@ -202,6 +201,8 @@ public class MimeMultipart extends Multipart {
      * Calls the {@link #initializeProperties} method.<p>
      *
      * MimeBodyParts may be added later.
+     *
+     * @param	subtype	the MIME content subtype
      */
     public MimeMultipart(String subtype) {
     this(subtype, Collections.<String, String> emptyMap());
@@ -215,37 +216,42 @@ public class MimeMultipart extends Multipart {
      * Calls the {@link #initializeProperties} method.<p>
      *
      * MimeBodyParts may be added later.
+     *
+     * @param   subtype the MIME content subtype
+     * @param   parameters other Content-Type parameters
      */
     public MimeMultipart(String subtype, Map<String, String> parameters) {
-	super();
-	/*
-	 * Compute a boundary string.
-	 */
-	String boundary = UniqueValue.getUniqueBoundaryValue();
-	ContentType cType = new ContentType("multipart", subtype, null);
-	cType.setParameter("boundary", boundary);
-	/*
-	 * Other parameters - except "boundary"
-	 */
-	if (null != parameters) {
-        for (Entry<String, String> parameter : parameters.entrySet()) {
+    super();
+    /*
+     * Compute a boundary string.
+     */
+    String boundary = UniqueValue.getUniqueBoundaryValue();
+    ContentType cType = new ContentType("multipart", subtype, null);
+    cType.setParameter("boundary", boundary);
+    /*
+     * Other parameters - except "boundary"
+     */
+    if (null != parameters) {
+        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
             String key = parameter.getKey();
             if (!"boundary".equals(key)) {
                 cType.setParameter(key, parameter.getValue());
             }
         }
-	}
+    }
     /*
      * Build content type
      */
-	contentType = cType.toString();
-	initializeProperties();
+    contentType = cType.toString();
+    initializeProperties();
     }
 
     /**
      * Construct a MimeMultipart object of the default "mixed" subtype,
      * and with the given body parts.  More body parts may be added later.
      *
+     * @param	parts	the body parts
+     * @exception	MessagingException for failures
      * @since	JavaMail 1.5
      */
     public MimeMultipart(BodyPart... parts) throws MessagingException {
@@ -258,6 +264,9 @@ public class MimeMultipart extends Multipart {
      * Construct a MimeMultipart object of the given subtype
      * and with the given body parts.  More body parts may be added later.
      *
+     * @param	subtype	the MIME content subtype
+     * @param	parts	the body parts
+     * @exception	MessagingException for failures
      * @since	JavaMail 1.5
      */
     public MimeMultipart(String subtype, BodyPart... parts)
@@ -284,6 +293,7 @@ public class MimeMultipart extends Multipart {
      * boundary and creates MimeBodyParts for each part of the stream.
      *
      * @param	ds	DataSource, can be a MultipartDataSource
+     * @exception	MessagingException for failures
      */
     public MimeMultipart(DataSource ds) throws MessagingException {
 	super();
@@ -336,6 +346,7 @@ public class MimeMultipart extends Multipart {
      * of such a multipart object is "mixed". <p>
      *
      * @param	subtype		Subtype
+     * @exception	MessagingException for failures
      */
     public synchronized void setSubType(String subtype) 
 			throws MessagingException {
@@ -373,6 +384,7 @@ public class MimeMultipart extends Multipart {
      *
      * @param  CID 	the ContentID of the desired part
      * @return          the Part
+     * @exception	MessagingException for failures
      */
     public synchronized BodyPart getBodyPart(String CID) 
 			throws MessagingException {
@@ -409,12 +421,12 @@ public class MimeMultipart extends Multipart {
      * Shifts all the parts after the removed part down one.
      *
      * @param   index	Index of the part to remove
-     * @exception	MessagingException
      * @exception       IndexOutOfBoundsException if the given index
      *			is out of range.
      * @exception	IllegalWriteException if the underlying
      *			implementation does not support modification
      *			of existing values
+     * @exception	MessagingException for other failures
      */
     public void removeBodyPart(int index) throws MessagingException {
 	parse();
@@ -426,10 +438,10 @@ public class MimeMultipart extends Multipart {
      * the list of existing Parts.
      *
      * @param  part  The Part to be appended
-     * @exception       MessagingException
      * @exception	IllegalWriteException if the underlying
      *			implementation does not support modification
      *			of existing values
+     * @exception       MessagingException for other failures
      */
     public synchronized void addBodyPart(BodyPart part) 
 		throws MessagingException {
@@ -446,10 +458,10 @@ public class MimeMultipart extends Multipart {
      *
      * @param  part  The BodyPart to be inserted
      * @param  index Location where to insert the part
-     * @exception       MessagingException
      * @exception	IllegalWriteException if the underlying
      *			implementation does not support modification
      *			of existing values
+     * @exception       MessagingException for other failures
      */
     public synchronized void addBodyPart(BodyPart part, int index) 
 				throws MessagingException {
@@ -469,6 +481,7 @@ public class MimeMultipart extends Multipart {
      * MessagingException.)
      *
      * @return	true if the final boundary line was seen
+     * @exception	MessagingException for failures
      * @since		JavaMail 1.4
      */
     public synchronized boolean isComplete() throws MessagingException {
@@ -482,6 +495,7 @@ public class MimeMultipart extends Multipart {
      * such as IMAP, will not allow access to the preamble text.
      *
      * @return		the preamble text, or null if no preamble
+     * @exception	MessagingException for failures
      * @since		JavaMail 1.4
      */
     public synchronized String getPreamble() throws MessagingException {
@@ -498,6 +512,7 @@ public class MimeMultipart extends Multipart {
      * lines, including newlines.
      *
      * @param	preamble	the preamble text
+     * @exception	MessagingException for failures
      * @since		JavaMail 1.4
      */
     public synchronized void setPreamble(String preamble)
@@ -521,6 +536,8 @@ public class MimeMultipart extends Multipart {
      * expensive for a specific MimeMultipart subclass, then it
      * might itself want to track whether its internal state actually
      * did change, and do the header updating only if necessary.
+     *
+     * @exception	MessagingException for failures
      */
     protected synchronized void updateHeaders() throws MessagingException {
 	parse();
@@ -581,6 +598,7 @@ public class MimeMultipart extends Multipart {
      * The {@link #initializeProperties} method is called before
      * parsing the data.
      *
+     * @exception	MessagingException for failures
      * @since	JavaMail 1.2
      */
     protected synchronized void parse() throws MessagingException {
@@ -619,7 +637,7 @@ public class MimeMultipart extends Multipart {
 	try {
 	    // Skip and save the preamble
 	    LineInputStream lin = new LineInputStream(in);
-	    StringBuilder preamblesb = null;
+	    StringBuffer preamblesb = null;
 	    String line;
 	    String lineSeparator = null;
 	    while ((line = lin.readLine()) != null) {
@@ -679,7 +697,7 @@ public class MimeMultipart extends Multipart {
 		    }
 		    // accumulate the preamble
 		    if (preamblesb == null)
-			preamblesb = new StringBuilder(line.length() + 2);
+			preamblesb = new StringBuffer(line.length() + 2);
 		    preamblesb.append(line).append(lineSeparator);
 		}
 	    }
@@ -988,7 +1006,8 @@ public class MimeMultipart extends Multipart {
      * an InternetHeaders object.
      *
      * @param	is	the InputStream to read the headers from
-     * @exception  	MessagingException
+     * @return	an InternetHeaders object
+     * @exception  	MessagingException for failures
      * @since		JavaMail 1.2
      */
     protected InternetHeaders createInternetHeaders(InputStream is)
@@ -1005,7 +1024,8 @@ public class MimeMultipart extends Multipart {
      *
      * @param	headers		the headers for the body part
      * @param	content		the content of the body part
-     * @exception  		MessagingException
+     * @return	a MimeBodyPart
+     * @exception  		MessagingException for failures
      * @since			JavaMail 1.2
      */
     protected MimeBodyPart createMimeBodyPart(InternetHeaders headers,
@@ -1021,7 +1041,8 @@ public class MimeMultipart extends Multipart {
      * a MimeBodyPart object.
      *
      * @param	is		InputStream containing the body part
-     * @exception  		MessagingException
+     * @return	a MimeBodyPart
+     * @exception  		MessagingException for failures
      * @since			JavaMail 1.2
      */
     protected MimeBodyPart createMimeBodyPart(InputStream is)

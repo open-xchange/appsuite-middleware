@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,26 +40,20 @@
 
 package javax.mail;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.lang.reflect.Constructor;
-import java.net.InetAddress;
-import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
+import java.lang.reflect.*;
+import java.io.*;
+import java.net.*;
+import java.security.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.logging.Level;
+import java.util.concurrent.Executor;
+
+import javax.activation.*;
+
 import com.sun.mail.util.LineInputStream;
 import com.sun.mail.util.MailLogger;
 
@@ -98,13 +92,7 @@ import com.sun.mail.util.MailLogger;
  * File location depends upon how the <code>ClassLoader</code> method
  * <code>getResource</code> is implemented.  Usually, the
  * <code>getResource</code> method searches through CLASSPATH until it
- * finds the requested file and then stops.  JDK 1.1 has a limitation that
- * the number of files of each name that will be found in the CLASSPATH is
- * limited to one.  However, this only affects method two, above; method
- * one is loaded from a specific location (if allowed by the
- * SecurityManager) and method three uses a different name to ensure that
- * the default resource file is always loaded successfully.  J2SE 1.2 and
- * later are not limited to one file of a given name. <p>
+ * finds the requested file and then stops. <p>
  *
  * The ordering of entries in the resource files matters.  If multiple
  * entries exist, the first entries take precedence over the later
@@ -124,7 +112,7 @@ import com.sun.mail.util.MailLogger;
  * attributes that describe a protocol implementation.  Each attribute is
  * an "="-separated name-value pair with the name in lowercase. Each
  * name-value pair is semi-colon (";") separated.  The following names
- * are defined. <p>
+ * are defined.
  *
  * <table border=1>
  * <caption>
@@ -159,8 +147,8 @@ import com.sun.mail.util.MailLogger;
  * Here's an example of <code>META-INF/javamail.default.providers</code>
  * file contents:
  * <pre>
- * protocol=imap; type=store; class=com.sun.mail.imap.IMAPStore; vendor=Sun Microsystems, Inc.;
- * protocol=smtp; type=transport; class=com.sun.mail.smtp.SMTPTransport; vendor=Sun Microsystems, Inc.;
+ * protocol=imap; type=store; class=com.sun.mail.imap.IMAPStore; vendor=Oracle;
+ * protocol=smtp; type=transport; class=com.sun.mail.smtp.SMTPTransport; vendor=Oracle;
  * </pre><p>
  *
  * <b><code>javamail.address.map</code></b> and
@@ -168,7 +156,7 @@ import com.sun.mail.util.MailLogger;
  *
  * These resource files map transport address types to the transport
  * protocol.  The <code>getType</code> method of
- * </code>javax.mail.Address</code> returns the address type.  The
+ * <code>javax.mail.Address</code> returns the address type.  The
  * <code>javamail.address.map</code> file maps the transport type to the
  * protocol.  The file format is a series of name-value pairs.  Each key
  * name should correspond to an address type that is currently installed
@@ -205,6 +193,9 @@ public final class Session {
     private final Hashtable providersByClassName = new Hashtable();
     private final Properties addressMap = new Properties();
 						// maps type to protocol
+    // the queue of events to be delivered, if mail.event.scope===session
+    private final EventQueue q;
+
     // The default session.
     private static Session defaultSession = null;
 
@@ -213,23 +204,22 @@ public final class Session {
 	this.props = props;
 	this.authenticator = authenticator;
 
-	if (Boolean.valueOf(props.getProperty("mail.debug")).booleanValue()) {
-        debug = true;
-    }
+	if (Boolean.valueOf(props.getProperty("mail.debug")).booleanValue())
+	    debug = true;
 
 	initLogger();
-	logger.log(Level.CONFIG, "JavaMail version {0}", "1.4.7");
+	logger.log(Level.CONFIG, "JavaMail version {0}", "1.5.2");
 
 	// get the Class associated with the Authenticator
 	Class cl;
-	if (authenticator != null) {
-        cl = authenticator.getClass();
-    } else {
-        cl = this.getClass();
-    }
+	if (authenticator != null)
+	    cl = authenticator.getClass();
+	else
+	    cl = this.getClass();
 	// load the resources
 	loadProviders(cl);
 	loadAddressMap(cl);
+	q = new EventQueue((Executor)props.get("mail.event.executor"));
     }
 
     private final synchronized void initLogger() {
@@ -390,7 +380,7 @@ public final class Session {
 	this.debug = debug;
 	initLogger();
 	logger.log(Level.CONFIG, "setDebug: JavaMail version {0}",
-				    "1.5.1");
+	    "1.5.2");
     }
 
     /**
@@ -425,11 +415,10 @@ public final class Session {
      * @since		JavaMail 1.3
      */
     public synchronized PrintStream getDebugOut() {
-	if (out == null) {
-        return System.out;
-    } else {
-        return out;
-    }
+	if (out == null)
+	    return System.out;
+	else
+	    return out;
     }
 
     /**
@@ -535,7 +524,7 @@ public final class Session {
      * appropriate Store object cannot be obtained, 
      * NoSuchProviderException is thrown.
      *
-     * @param	        protocol
+     * @param	        protocol	the Store protocol
      * @return		a Store object 
      * @exception	NoSuchProviderException If a provider for the given
      *			protocol is not found.
@@ -663,6 +652,7 @@ public final class Session {
      * If an appropriate Transport object cannot be obtained, null is
      * returned.
      *
+     * @param	protocol the Transport protocol
      * @return 		a Transport object 
      * @exception	NoSuchProviderException If provider for the given
      *			protocol is not found.
@@ -710,7 +700,7 @@ public final class Session {
      * Get a Transport object that can transport a Message of the
      * specified address type.
      *
-     * @param	address
+     * @param	address	an address for which a Transport is needed
      * @return	A Transport object
      * @see javax.mail.Address
      * @exception	NoSuchProviderException If provider for the 
@@ -722,13 +712,11 @@ public final class Session {
 	String transportProtocol;
 	transportProtocol =
 	    getProperty("mail.transport.protocol." + address.getType());
-	if (transportProtocol != null) {
-        return getTransport(transportProtocol);
-    }
+	if (transportProtocol != null)
+	    return getTransport(transportProtocol);
 	transportProtocol = (String)addressMap.get(address.getType());
-	if (transportProtocol != null) {
-        return getTransport(transportProtocol);
-    }
+	if (transportProtocol != null)
+	    return getTransport(transportProtocol);
 	throw new NoSuchProviderException("No provider for Address type: "+
 						address.getType());
     }
@@ -786,29 +774,26 @@ public final class Session {
 	
 	// get the ClassLoader associated with the Authenticator
 	ClassLoader cl;
-	if (authenticator != null) {
-        cl = authenticator.getClass().getClassLoader();
-    } else {
-        cl = this.getClass().getClassLoader();
-    }
+	if (authenticator != null)
+	    cl = authenticator.getClass().getClassLoader();
+	else
+	    cl = this.getClass().getClassLoader();
 
 	// now load the class
 	Class serviceClass = null;
 	try {
 	    // First try the "application's" class loader.
 	    ClassLoader ccl = getContextClassLoader();
-	    if (ccl != null) {
-            try {
-                serviceClass =
-            	Class.forName(provider.getClassName(), false, ccl);
-            } catch (ClassNotFoundException ex) {
-                // ignore it
-            }
-        }
-	    if (serviceClass == null) {
-            serviceClass =
-                Class.forName(provider.getClassName(), false, cl);
-        }
+	    if (ccl != null)
+		try {
+		    serviceClass =
+			Class.forName(provider.getClassName(), false, ccl);
+		} catch (ClassNotFoundException ex) {
+		    // ignore it
+		}
+	    if (serviceClass == null)
+		serviceClass =
+		    Class.forName(provider.getClassName(), false, cl);
 	} catch (Exception ex1) {
 	    // That didn't work, now try the "system" class loader.
 	    // (Need both of these because JDK 1.1 class loaders
@@ -845,20 +830,23 @@ public final class Session {
      * This is normally used only by the store or transport implementations
      * to allow authentication information to be shared among multiple
      * uses of a session.
+     *
+     * @param	url	the URLName
+     * @param	pw	the PasswordAuthentication to save
      */
     public void setPasswordAuthentication(URLName url,
 					  PasswordAuthentication pw) {
-	if (pw == null) {
-        authTable.remove(url);
-    } else {
-        authTable.put(url, pw);
-    }
+	if (pw == null)
+	    authTable.remove(url);
+	else
+	    authTable.put(url, pw);
     }
 
     /**
      * Return any saved PasswordAuthentication for this (store or transport)
      * URLName.  Normally used only by store or transport implementations.
      *
+     * @param	url	the URLName
      * @return	the PasswordAuthentication corresponding to the URLName
      */
     public PasswordAuthentication getPasswordAuthentication(URLName url) {
@@ -868,7 +856,7 @@ public final class Session {
     /**
      * Call back to the application to get the needed user name and password.
      * The application should put up a dialog something like:
-     * <p> <pre>
+     * <pre>
      * Connecting to &lt;protocol&gt; mail service on host &lt;addr&gt;, port &lt;port&gt;.
      * &lt;prompt&gt;
      *
@@ -877,6 +865,7 @@ public final class Session {
      * </pre>
      *
      * @param	addr		InetAddress of the host.  may be null.
+     * @param	port		the port on the host
      * @param	protocol	protocol scheme (e.g. imap, pop3, etc.)
      * @param	prompt		any additional String to show as part of
      *                          the prompt; may be null.
@@ -909,6 +898,7 @@ public final class Session {
      * Returns the value of the specified property. Returns null
      * if this property does not exist.
      *
+     * @param	name	the property name
      * @return		String that is the property value
      */
     public String getProperty(String name) { 
@@ -920,8 +910,7 @@ public final class Session {
      */
     private void loadProviders(Class cl) {
 	StreamLoader loader = new StreamLoader() {
-	    @Override
-        public void load(InputStream is) throws IOException {
+	    public void load(InputStream is) throws IOException {
 		loadProvidersFromStream(is);
 	    }
 	};
@@ -947,22 +936,22 @@ public final class Session {
 	    // failed to load any providers, initialize with our defaults
 	    addProvider(new Provider(Provider.Type.STORE,
 			"imap", "com.sun.mail.imap.IMAPStore",
-			"Oracle", "1.5.1"));
+			"Oracle", "1.5.2"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"imaps", "com.sun.mail.imap.IMAPSSLStore",
-			"Oracle", "1.5.1"));
+			"Oracle", "1.5.2"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"pop3", "com.sun.mail.pop3.POP3Store",
-			"Oracle", "1.5.1"));
+			"Oracle", "1.5.2"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"pop3s", "com.sun.mail.pop3.POP3SSLStore",
-			"Oracle", "1.5.1"));
+			"Oracle", "1.5.2"));
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtp", "com.sun.mail.smtp.SMTPTransport",
-			"Oracle", "1.5.1"));
+			"Oracle", "1.5.2"));
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtps", "com.sun.mail.smtp.SMTPSSLTransport",
-			"Oracle", "1.5.1"));
+			"Oracle", "1.5.2"));
 	}
 
 	if (logger.isLoggable(Level.CONFIG)) {
@@ -984,9 +973,8 @@ public final class Session {
 	    // load and process one line at a time using LineInputStream
 	    while ((currLine = lis.readLine()) != null) {
 
-		if (currLine.startsWith("#")) {
-            continue;
-        }
+		if (currLine.startsWith("#"))
+		    continue;
 		Provider.Type type = null;
 		String protocol = null, className = null;
 		String vendor = null, version = null;
@@ -1042,17 +1030,15 @@ public final class Session {
     public synchronized void addProvider(Provider provider) {
 	providers.addElement(provider);
 	providersByClassName.put(provider.getClassName(), provider);
-	if (!providersByProtocol.containsKey(provider.getProtocol())) {
-        providersByProtocol.put(provider.getProtocol(), provider);
-    }
+	if (!providersByProtocol.containsKey(provider.getProtocol()))
+	    providersByProtocol.put(provider.getProtocol(), provider);
     }
 
     // load maps in reverse order of preference so that the preferred
     // map is loaded last since its entries will override the previous ones
     private void loadAddressMap(Class cl) {
 	StreamLoader loader = new StreamLoader() {
-	    @Override
-        public void load(InputStream is) throws IOException {
+	    public void load(InputStream is) throws IOException {
 		addressMap.load(is);
 	    }
 	};
@@ -1092,11 +1078,10 @@ public final class Session {
      */
     public synchronized void setProtocolForAddress(String addresstype,
 				String protocol) {
-	if (protocol == null) {
-        addressMap.remove(addresstype);
-    } else {
-        addressMap.put(addresstype, protocol);
-    }
+	if (protocol == null)
+	    addressMap.remove(addresstype);
+	else
+	    addressMap.put(addresstype, protocol);
     }
 
     /**
@@ -1111,18 +1096,15 @@ public final class Session {
 	} catch (FileNotFoundException fex) {
 	    // ignore it
 	} catch (IOException e) {
-	    if (logger.isLoggable(Level.CONFIG)) {
-            logger.log(Level.CONFIG, "not loading file: " + name, e);
-        }
+	    if (logger.isLoggable(Level.CONFIG))
+		logger.log(Level.CONFIG, "not loading file: " + name, e);
 	} catch (SecurityException sex) {
-	    if (logger.isLoggable(Level.CONFIG)) {
-            logger.log(Level.CONFIG, "not loading file: " + name, sex);
-        }
+	    if (logger.isLoggable(Level.CONFIG))
+		logger.log(Level.CONFIG, "not loading file: " + name, sex);
 	} finally {
 	    try {
-		if (clis != null) {
-            clis.close();
-        }
+		if (clis != null)
+		    clis.close();
 	    } catch (IOException ex) { }	// ignore it
 	}
     }
@@ -1149,9 +1131,8 @@ public final class Session {
 	    logger.log(Level.CONFIG, "Exception loading resource", sex);
 	} finally {
 	    try {
-		if (clis != null) {
-            clis.close();
-        }
+		if (clis != null)
+		    clis.close();
 	    } catch (IOException ex) { }	// ignore it
 	}
     }
@@ -1166,14 +1147,12 @@ public final class Session {
 	    ClassLoader cld = null;
 	    // First try the "application's" class loader.
 	    cld = getContextClassLoader();
-	    if (cld == null) {
-            cld = cl.getClassLoader();
-        }
-	    if (cld != null) {
-            urls = getResources(cld, name);
-        } else {
-            urls = getSystemResources(name);
-        }
+	    if (cld == null)
+		cld = cl.getClassLoader();
+	    if (cld != null)
+		urls = getResources(cld, name);
+	    else
+		urls = getSystemResources(name);
 	    if (urls != null) {
 		for (int i = 0; i < urls.length; i++) {
 		    URL url = urls[i];
@@ -1200,9 +1179,8 @@ public final class Session {
 				    sex);
 		    } finally {
 			try {
-			    if (clis != null) {
-                    clis.close();
-                }
+			    if (clis != null)
+				clis.close();
 			} catch (IOException cex) { }
 		    }
 		}
@@ -1224,11 +1202,10 @@ public final class Session {
      * Following are security related methods that work on JDK 1.2 or newer.
      */
 
-    private static ClassLoader getContextClassLoader() {
+    static ClassLoader getContextClassLoader() {
 	return (ClassLoader)
 		AccessController.doPrivileged(new PrivilegedAction() {
-	    @Override
-        public Object run() {
+	    public Object run() {
 		ClassLoader cl = null;
 		try {
 		    cl = Thread.currentThread().getContextClassLoader();
@@ -1243,8 +1220,7 @@ public final class Session {
 	try {
 	    return (InputStream)
 		AccessController.doPrivileged(new PrivilegedExceptionAction() {
-		    @Override
-            public Object run() throws IOException {
+		    public Object run() throws IOException {
 			return c.getResourceAsStream(name);
 		    }
 		});
@@ -1256,17 +1232,15 @@ public final class Session {
     private static URL[] getResources(final ClassLoader cl, final String name) {
 	return (URL[])
 		AccessController.doPrivileged(new PrivilegedAction() {
-	    @Override
-        public Object run() {
+	    public Object run() {
 		URL[] ret = null;
 		try {
 		    Vector v = new Vector();
 		    Enumeration e = cl.getResources(name);
 		    while (e != null && e.hasMoreElements()) {
 			URL url = (URL)e.nextElement();
-			if (url != null) {
-                v.addElement(url);
-            }
+			if (url != null)
+			    v.addElement(url);
 		    }
 		    if (v.size() > 0) {
 			ret = new URL[v.size()];
@@ -1282,17 +1256,15 @@ public final class Session {
     private static URL[] getSystemResources(final String name) {
 	return (URL[])
 		AccessController.doPrivileged(new PrivilegedAction() {
-	    @Override
-        public Object run() {
+	    public Object run() {
 		URL[] ret = null;
 		try {
 		    Vector v = new Vector();
 		    Enumeration e = ClassLoader.getSystemResources(name);
 		    while (e != null && e.hasMoreElements()) {
 			URL url = (URL)e.nextElement();
-			if (url != null) {
-                v.addElement(url);
-            }
+			if (url != null)
+			    v.addElement(url);
 		    }
 		    if (v.size() > 0) {
 			ret = new URL[v.size()];
@@ -1309,14 +1281,17 @@ public final class Session {
 	try {
 	    return (InputStream)
 		AccessController.doPrivileged(new PrivilegedExceptionAction() {
-		    @Override
-            public Object run() throws IOException {
+		    public Object run() throws IOException {
 			return url.openStream();
 		    }
 		});
 	} catch (PrivilegedActionException e) {
 	    throw (IOException)e.getException();
 	}
+    }
+
+    EventQueue getEventQueue() {
+	return q;
     }
 }
 

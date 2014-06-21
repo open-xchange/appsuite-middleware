@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JavaMail API
 Bundle-SymbolicName: javax.mail
-Bundle-Version: 1.4.7
+Bundle-Version: 1.5.2
 Bundle-Vendor: Oracle
 Bundle-License: http://www.sun.com/cddl, https://glassfish.dev.java.net/public/CDDL+GPL.html
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -33,70 +33,76 @@ Import-Package: com.openexchange.tools.ssl,
  org.osgi.framework,
  org.slf4j,
  sun.security.util
-Export-Package: com.sun.mail.auth;version="1.4.7",
- com.sun.mail.handlers;version="1.4.7";
+Export-Package: com.sun.mail.auth;version="1.5.2",
+ com.sun.mail.dsn;version="1.5.2",
+ com.sun.mail.handlers;version="1.5.2";
   uses:="javax.activation,
    javax.mail.internet,
    javax.mail,
    javax.xml.transform,
    javax.xml.transform.stream",
- com.sun.mail.iap;version="1.4.7";uses:="com.sun.mail.util,javax.net.ssl",
- com.sun.mail.imap;version="1.4.7";
-  uses:="com.sun.mail.iap,
-   com.sun.mail.imap.protocol,
+ com.sun.mail.iap;version="1.5.2";uses:="com.sun.mail.util,javax.net.ssl",
+ com.sun.mail.imap;version="1.5.2";
+  uses:="com.sun.mail.imap.protocol,
+   com.sun.mail.iap,
    javax.mail,
    javax.activation,
    com.sun.mail.util,
    javax.mail.internet,
    javax.mail.search,
    javax.mail.event",
- com.sun.mail.imap.protocol;version="1.4.7";
+ com.sun.mail.imap.protocol;version="1.5.2";
   uses:="com.sun.mail.iap,
    com.sun.mail.util,
    javax.mail.internet,
    javax.mail,
-   javax.mail.search,
    com.sun.mail.imap,
+   javax.mail.search,
    javax.security.sasl,
    javax.security.auth.callback",
- com.sun.mail.pop3;version="1.4.7";
+ com.sun.mail.mbox,
+ com.sun.mail.pop3;version="1.5.2";
   uses:="javax.mail,
    com.sun.mail.util,
    javax.mail.internet,
    javax.net.ssl,
    javax.mail.util",
- com.sun.mail.smtp;version="1.4.7";
+ com.sun.mail.remote;version="1.5.2",
+ com.sun.mail.smtp;version="1.5.2";
   uses:="com.sun.mail.util,
    javax.mail.internet,
    javax.mail,
    javax.security.sasl,
    javax.security.auth.callback,
    javax.net.ssl",
- com.sun.mail.util;version="1.4.7";
+ com.sun.mail.util;version="1.5.2";
   uses:="javax.mail,
    javax.net.ssl,
    javax.mail.internet,
    javax.mail.util,
-   sun.security.util,
    javax.net,
    javax.security.auth.x500",
- com.sun.mail.util.logging;version="1.4.7";
+ com.sun.mail.util.logging;version="1.5.2";
   uses:="javax.mail,
    javax.mail.internet,
    javax.mail.util,
    javax.activation,
    com.sun.mail.smtp",
  gnu.inet.encoding,
- javax.mail;version="1.4",
- javax.mail.event;version="1.4";uses:="javax.mail",
- javax.mail.internet;version="1.4";
+ javax.mail;version="1.5";
+  uses:="javax.mail.event,
+   javax.mail.search,
+   javax.activation,
+   com.sun.mail.util",
+ javax.mail.event;version="1.5";uses:="javax.mail",
+ javax.mail.internet;version="1.5";
   uses:="com.sun.mail.util,
    javax.mail,
    javax.activation,
    javax.mail.util",
- javax.mail.internet.idn;version="1.4",
- javax.mail.search;version="1.4";uses:="javax.mail.internet,javax.mail",
- javax.mail.util;version="1.4";uses:="javax.activation,javax.mail.internet",
+ javax.mail.internet.idn;version="1.5",
+ javax.mail.search;version="1.5";uses:="javax.mail.internet,javax.mail",
+ javax.mail.util;version="1.5";uses:="javax.activation,javax.mail.internet",
  net.freeutils.tnef,
  net.freeutils.tnef.mime,
  net.freeutils.tnef.msg

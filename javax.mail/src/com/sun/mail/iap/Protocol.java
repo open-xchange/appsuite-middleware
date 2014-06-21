@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -43,6 +43,7 @@ package com.sun.mail.iap;
 import java.util.Vector;
 import java.util.Properties;
 import java.io.*;
+import java.nio.channels.SocketChannel;
 import java.net.*;
 import java.util.logging.Level;
 import javax.net.ssl.SSLSocket;
@@ -70,7 +71,6 @@ public class Protocol {
     protected Properties props;
     protected String prefix;
 
-    private boolean connected = false;		// did constructor succeed?
     private TraceInputStream traceInput;	// the Tracer
     private volatile ResponseInputStream input;
 
@@ -108,6 +108,7 @@ public class Protocol {
 		    Properties props, String prefix,
 		    boolean isSSL, MailLogger logger)
 		    throws IOException, ProtocolException {
+	boolean connected = false;		// did constructor succeed?
 	try {
 	    this.host = host;
 	    this.port = port;
@@ -412,6 +413,25 @@ public class Protocol {
     }
 
     /**
+     * Return the address the socket connected to.
+     *
+     * @return	the InetAddress the socket is connected to
+     * @since	JavaMail 1.5.2
+     */
+    public InetAddress getInetAddress() {
+	return socket.getInetAddress();
+    }
+
+    /**
+     * Return the SocketChannel associated with this connection, if any.
+     *
+     * @since	JavaMail 1.5.2
+     */
+    public SocketChannel getChannel() {
+	return socket.getChannel();
+    }
+
+    /**
      * Disconnect.
      */
     protected synchronized void disconnect() {
@@ -427,7 +447,8 @@ public class Protocol {
 
     /**
      * Get the name of the local host.
-     * The property <prefix>.localhost overrides <prefix>.localaddress,
+     * The property &lt;prefix&gt;.localhost overrides
+     * &lt;prefix&gt;.localaddress,
      * which overrides what InetAddress would tell us.
      */
     protected synchronized String getLocalHost() {

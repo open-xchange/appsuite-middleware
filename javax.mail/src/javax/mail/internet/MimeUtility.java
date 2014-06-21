@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -76,7 +76,7 @@ import com.sun.mail.util.*;
  * <p>
  * Note that to get the actual bytes of a mail-safe String (say,
  * for sending over SMTP), one must do 
- * <p><blockquote><pre>
+ * <blockquote><pre>
  *
  *	byte[] bytes = string.getBytes("iso-8859-1");	
  *
@@ -286,6 +286,8 @@ public class MimeUtility {
      * <code>DataHandler</code> uses a thread, a pair of pipe streams,
      * and the <code>writeTo</code> method to produce the data. <p>
      *
+     * @param	dh	the DataHandler
+     * @return	the Content-Transfer-Encoding
      * @since	JavaMail 1.2
      */
     public static String getEncoding(DataHandler dh) {
@@ -434,6 +436,7 @@ public class MimeUtility {
      *                          with uuencode)
      * @return                  output stream that applies the
      *                          specified encoding.
+     * @exception		MessagingException for unknown encodings
      * @since                   JavaMail 1.2
      */
     public static OutputStream encode(OutputStream os, String encoding,
@@ -473,7 +476,7 @@ public class MimeUtility {
      * "unstructured" RFC 822 headers. <p>
      *
      * Example of usage:
-     * <p><blockquote><pre>
+     * <blockquote><pre>
      *
      *  MimePart part = ...
      *  String rawvalue = "FooBar Mailer, Japanese version 1.1"
@@ -522,6 +525,8 @@ public class MimeUtility {
      *		encoded are in the ASCII charset, otherwise "B" encoding
      *		is used.
      * @return	Unicode string containing only US-ASCII characters
+     * @exception       UnsupportedEncodingException if the charset
+     *			conversion failed.
      */
     public static String encodeText(String text, String charset,
 				    String encoding)
@@ -540,7 +545,7 @@ public class MimeUtility {
      * returned as-is <p>
      *
      * Example of usage:
-     * <p><blockquote><pre>
+     * <blockquote><pre>
      *
      *  MimePart part = ...
      *  String rawvalue = null;
@@ -558,6 +563,7 @@ public class MimeUtility {
      * </pre></blockquote><p>
      *
      * @param	etext	the possibly encoded value
+     * @return	the decoded text
      * @exception       UnsupportedEncodingException if the charset
      *			conversion failed.
      */
@@ -777,14 +783,14 @@ public class MimeUtility {
 	if ((len > avail) && ((size = string.length()) > 1)) { 
 	    // If the length is greater than 'avail', split 'string'
 	    // into two and recurse.
-	    int splitPos = size/2;
-	    if (splitPos < size && Character.isSurrogatePair(string.charAt(splitPos-1), string.charAt(splitPos))) {
-            splitPos++;
-        }
-	    // Split at detected position
-	    doEncode(string.substring(0, splitPos), b64, jcharset, 
-		     avail, prefix, first, encodingWord, buf);
-	    doEncode(string.substring(splitPos, size), b64, jcharset,
+	    // Have to make sure not to split a Unicode surrogate pair.
+	    int split = size / 2;
+	    if (Character.isHighSurrogate(string.charAt(split-1)))
+		split--;
+	    if (split > 0)
+		doEncode(string.substring(0, split), b64, jcharset, 
+			 avail, prefix, first, encodingWord, buf);
+	    doEncode(string.substring(split, size), b64, jcharset,
 		     avail, prefix, false, encodingWord, buf);
 	} else {
 	    // length <= than 'avail'. Encode the given string
@@ -824,6 +830,7 @@ public class MimeUtility {
      * fails, an UnsupportedEncodingException is thrown.<p>
      *
      * @param	eword	the encoded value
+     * @return	the decoded word
      * @exception       ParseException if the string is not an
      *			encoded-word as per RFC 2047 and RFC 2231.
      * @exception       UnsupportedEncodingException if the charset

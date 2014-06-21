@@ -58,7 +58,7 @@ import com.sun.mail.util.PropUtil;
  * {@link javax.mail.Header} objects. <p>
  *
  * This class is mostly intended for service providers. MimeMessage
- * and MimeBody use this class for holding their headers. <p>
+ * and MimeBody use this class for holding their headers.
  * 
  * <hr> <strong>A note on RFC822 and MIME headers</strong><p>
  *
@@ -116,6 +116,8 @@ public class InternetHeaders {
 	/**
 	 * Constructor that takes a line and splits out
 	 * the header name.
+	 *
+	 * @param	l	the header line
 	 */
 	public InternetHeader(String l) {
 	    super("", "");	// XXX - we'll change it later
@@ -131,6 +133,9 @@ public class InternetHeaders {
 
 	/**
 	 * Constructor that takes a header name and value.
+	 *
+	 * @param	n	the name of the header
+	 * @param	v	the value of the header
 	 */
 	public InternetHeader(String n, String v) {
 	    super(n, "");
@@ -321,6 +326,7 @@ public class InternetHeaders {
      * the headers is preserved.
      *
      * @param	is 	RFC822 input stream
+     * @exception	MessagingException for any I/O error reading the stream
      */
     public InternetHeaders(InputStream is) throws MessagingException {
    	headers = new ArrayList(40); 
@@ -339,6 +345,7 @@ public class InternetHeaders {
      * of headers, in order.
      *
      * @param	is 	RFC822 input stream
+     * @exception	MessagingException for any I/O error reading the stream
      */
     public void load(InputStream is) throws MessagingException {
 	// Read header lines until a blank line. It is valid
@@ -538,7 +545,7 @@ public class InternetHeaders {
      * Return all the headers as an Enumeration of
      * {@link javax.mail.Header} objects.
      *
-     * @return	Header objects	
+     * @return	Enumeration of Header objects	
      */
     public Enumeration getAllHeaders() {
 	return (new MatchEnum(headers, null, false, false));
@@ -547,7 +554,8 @@ public class InternetHeaders {
     /**
      * Return all matching {@link javax.mail.Header} objects.
      *
-     * @return	matching Header objects	
+     * @param	names	the headers to return
+     * @return	Enumeration of matching Header objects	
      */
     public Enumeration getMatchingHeaders(String[] names) {
 	return (new MatchEnum(headers, names, true, false));
@@ -556,7 +564,8 @@ public class InternetHeaders {
     /**
      * Return all non-matching {@link javax.mail.Header} objects.
      *
-     * @return	non-matching Header objects	
+     * @param	names	the headers to not return
+     * @return	Enumeration of non-matching Header objects	
      */
     public Enumeration getNonMatchingHeaders(String[] names) {
 	return (new MatchEnum(headers, names, false, false));
@@ -591,6 +600,8 @@ public class InternetHeaders {
 
     /**
      * Return all the header lines as an Enumeration of Strings.
+     *
+     * @return	Enumeration of Strings of all header lines
      */
     public Enumeration getAllHeaderLines() { 
 	return (getNonMatchingHeaderLines(null));
@@ -598,6 +609,9 @@ public class InternetHeaders {
 
     /**
      * Return all matching header lines as an Enumeration of Strings.
+     *
+     * @param	names	the headers to return
+     * @return	Enumeration of Strings of all matching header lines
      */
     public Enumeration getMatchingHeaderLines(String[] names) {
 	return (new MatchEnum(headers, names, true, true));	
@@ -605,6 +619,9 @@ public class InternetHeaders {
 
     /**
      * Return all non-matching header lines
+     *
+     * @param	names	the headers to not return
+     * @return	Enumeration of Strings of all non-matching header lines
      */
     public Enumeration getNonMatchingHeaderLines(String[] names) {
 	return (new MatchEnum(headers, names, false, true));

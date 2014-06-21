@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -62,6 +62,18 @@ public class SMTPSaslAuthenticator implements SaslAuthenticator {
     private Properties props;
     private MailLogger logger;
     private String host;
+
+    /*
+     * This is a hack to initialize the OAUTH SASL provider just before,
+     * and only if, we might need it.  This avoids the need for the user 
+     * to initialize it explicitly, or manually configure the security
+     * providers file.
+     */
+    static {
+	try {
+	    com.sun.mail.auth.OAuth2SaslClientFactory.init();
+	} catch (Throwable t) { }
+    }
 
     public SMTPSaslAuthenticator(SMTPTransport pr, String name,
 		Properties props, MailLogger logger, String host) {
@@ -126,12 +138,12 @@ public class SMTPSaslAuthenticator implements SaslAuthenticator {
 	    sc = Sasl.createSaslClient(mechs, authzid, name, host,
 					(Map)props, cbh);
 	} catch (SaslException sex) {
-	    logger.log(Level.FINE, "Failed to create SASL client: ", sex);
-	    return false;
+	    logger.log(Level.FINE, "Failed to create SASL client", sex);
+	    throw new UnsupportedOperationException(sex.getMessage(), sex);
 	}
 	if (sc == null) {
 	    logger.fine("No SASL support");
-	    return false;
+	    throw new UnsupportedOperationException("No SASL support");
 	}
 	if (logger.isLoggable(Level.FINE))
 	    logger.fine("SASL client " + sc.getMechanismName());
@@ -142,8 +154,11 @@ public class SMTPSaslAuthenticator implements SaslAuthenticator {
 	    String ir = null;
 	    if (sc.hasInitialResponse()) {
 		byte[] ba = sc.evaluateChallenge(new byte[0]);
-		ba = BASE64EncoderStream.encode(ba);
-		ir = ASCIIUtility.toString(ba, 0, ba.length);
+		if (ba.length > 0) {
+		    ba = BASE64EncoderStream.encode(ba);
+		    ir = ASCIIUtility.toString(ba, 0, ba.length);
+		} else
+		    ir = "=";
 	    }
 	    if (ir != null)
 		resp = pr.simpleCommand("AUTH " + mech + " " + ir);
@@ -203,6 +218,8 @@ public class SMTPSaslAuthenticator implements SaslAuthenticator {
 		// XXX - ultimately return true???
 	    }
 	}
+	if (resp != 235)
+	    return false;
 
 	if (sc.isComplete() /*&& res.status == SUCCESS*/) {
 	    String qop = (String)sc.getNegotiatedProperty(Sasl.QOP);

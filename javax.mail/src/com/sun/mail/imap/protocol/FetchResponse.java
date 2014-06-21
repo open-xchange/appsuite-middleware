@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -111,6 +111,10 @@ public class FetchResponse extends IMAPResponse {
 	return null;
     }
 
+    /**
+     * Return the first fetch response item of the given class
+     * for the given message number.
+     */
     public static <T extends Item> T getItem(Response[] r, int msgno,
 				Class<T> c) {
 	if (r == null)
@@ -133,24 +137,84 @@ public class FetchResponse extends IMAPResponse {
 	return null;
     }
 
+    /**
+     * Return the first fetch response item of the given class
+     * for the given message number.
+     */
     public static <T extends Item> T getItem(Response[] r, Class<T> c) {
-        if (r == null)
-            return null;
-
-        for (int i = 0; i < r.length; i++) {
-
-            if (r[i] == null || !(r[i] instanceof FetchResponse))
-                continue;
-
-            final FetchResponse f = (FetchResponse) r[i];
-            for (int j = 0; j < f.items.length; j++) {
-                if (c.isInstance(f.items[j])) {
-                    return c.cast(f.items[j]);
-                }
-            }
-        }
-
+    if (r == null)
         return null;
+
+    for (int i = 0; i < r.length; i++) {
+
+        if (r[i] == null || !(r[i] instanceof FetchResponse))
+        continue;
+
+        FetchResponse f = (FetchResponse)r[i];
+        for (int j = 0; j < f.items.length; j++) {
+        if (c.isInstance(f.items[j]))
+            return c.cast(f.items[j]);
+        }
+    }
+
+    return null;
+    }
+
+    /**
+     * Return all fetch response items of the given class
+     * for the given message number.
+     *
+     * @since JavaMail 1.5.2
+     */
+    public static <T extends Item> List<T> getItems(Response[] r, int msgno,
+				Class<T> c) {
+	List<T> items = new ArrayList<T>();
+
+	if (r == null)
+	    return items;
+
+	for (int i = 0; i < r.length; i++) {
+
+	    if (r[i] == null ||
+		!(r[i] instanceof FetchResponse) ||
+		((FetchResponse)r[i]).getNumber() != msgno)
+		continue;
+
+	    FetchResponse f = (FetchResponse)r[i];
+	    for (int j = 0; j < f.items.length; j++) {
+		if (c.isInstance(f.items[j]))
+		    items.add(c.cast(f.items[j]));
+	    }
+	}
+
+	return items;
+    }
+
+    /**
+     * Return all fetch response items of the given class
+     * for the given message number.
+     *
+     * @since JavaMail 1.5.2
+     */
+    public static <T extends Item> List<T> getItems(Response[] r, Class<T> c) {
+    List<T> items = new ArrayList<T>();
+
+    if (r == null)
+        return items;
+
+    for (int i = 0; i < r.length; i++) {
+
+        if (r[i] == null || !(r[i] instanceof FetchResponse))
+        continue;
+
+        FetchResponse f = (FetchResponse)r[i];
+        for (int j = 0; j < f.items.length; j++) {
+        if (c.isInstance(f.items[j]))
+            items.add(c.cast(f.items[j]));
+        }
+    }
+
+    return items;
     }
 
     /**
@@ -229,11 +293,12 @@ public class FetchResponse extends IMAPResponse {
 	    if (match(RFC822SIZE.name))
 		return new RFC822SIZE(this);
 	    else if (match(RFC822DATA.name)) {
+		boolean isHeader = false;
 		if (match(HEADER))
-		    ;	// skip ".HEADER"
+		    isHeader = true;	// skip ".HEADER"
 		else if (match(TEXT))
 		    ;	// skip ".TEXT"
-		return new RFC822DATA(this);
+		return new RFC822DATA(this, isHeader);
 	    }
 	    break;
 	case 'U': case 'u':
