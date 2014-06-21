@@ -115,8 +115,8 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
         String authPassword = service.getProperty("com.openexchange.rest.services.basic-auth.password");
         if (!Strings.isEmpty(authLogin) && !Strings.isEmpty(authPassword)) {
             doBasicAuth = true;
-            this.authLogin = authLogin;
-            this.authPassword = authPassword;
+            this.authLogin = authLogin.trim();
+            this.authPassword = authPassword.trim();
         }
     }
 
@@ -229,6 +229,9 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
         // Disable caching
         if (response.isDisableCaching()) {
             Tools.disableCaching(resp);
+        } else {
+            // For binary output
+            Tools.removeCachingHeader(resp);
         }
 
         // Write response body

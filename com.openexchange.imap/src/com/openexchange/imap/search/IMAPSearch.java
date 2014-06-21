@@ -181,12 +181,36 @@ public final class IMAPSearch {
                 i = umlautFilterThreshold;
                 if (null == i) {
                     final ConfigurationService service = Services.getService(ConfigurationService.class);
-                    i = Integer.valueOf(null == service ? 50 : service.getIntProperty("com.openexchange.imap.umlautFilterThreshold", 50));
+                    final int defaultVal = 50;
+                    if (null == service) {
+                        return defaultVal;
+                    }
+                    i = Integer.valueOf(service.getIntProperty("com.openexchange.imap.umlautFilterThreshold", defaultVal));
                     umlautFilterThreshold = i;
                 }
             }
         }
         return i.intValue();
+    }
+
+    private static volatile Boolean chunkWiseImapSearch;
+    private static boolean chunkWiseImapSearch() {
+        Boolean tmp = chunkWiseImapSearch;
+        if (null == tmp) {
+            synchronized (IMAPSearch.class) {
+                tmp = chunkWiseImapSearch;
+                if (null == tmp) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    final boolean defaultVal = false;
+                    if (null == service) {
+                        return defaultVal;
+                    }
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.imap.chunkWiseImapSearch", defaultVal));
+                    chunkWiseImapSearch = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
     }
 
     static {
@@ -195,6 +219,7 @@ public final class IMAPSearch {
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 umlautFilterThreshold = null;
+                chunkWiseImapSearch = null;
             }
 
             @Override
@@ -304,11 +329,18 @@ public final class IMAPSearch {
         if (0 >= messageCount) {
             return new int[0];
         }
-        final int[] seqNums = (int[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+        final boolean chunkWise = chunkWiseImapSearch();
+        final Object oSeqNums = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                 try {
+                    if (!chunkWise) {
+                        return protocol.search(term);
+                    }
+
+                    // Perform chunk-wise search
                     final List<MessageSet> sets = new LinkedList<MessageSet>();
                     {
                         int chunkSize = MailProperties.getInstance().getMailFetchLimit();
@@ -328,9 +360,14 @@ public final class IMAPSearch {
                     final MessageSet[] arr = new MessageSet[1];
                     for (final MessageSet messageSet : sets) {
                         arr[0] = messageSet;
-                        ret.add(protocol.search(arr, term));
+                        int[] results = protocol.search(arr, term);
+                        for (int seqNum : results) {
+                            if (seqNum >= 1 && seqNum <= messageCount) {
+                                ret.add(seqNum);
+                            }
+                        }
                     }
-                    return ret.toArray();
+                    return ret;
                 } catch (final SearchException e) {
                     throw new ProtocolException(e.getMessage(), e);
                 } catch (final MessagingException e) {
@@ -338,14 +375,7 @@ public final class IMAPSearch {
                 }
             }
         });
-        final TIntList validSeqNums = new TIntArrayList(seqNums.length);
-        for (int i = 0; i < seqNums.length; i++) {
-            final int seqNum = seqNums[i];
-            if (seqNum >= 1 && seqNum <= messageCount) {
-                validSeqNums.add(seqNum);
-            }
-        }
-        return validSeqNums.toArray();
+        return oSeqNums instanceof TIntList ? ((TIntList) oSeqNums).toArray() : (int[]) oSeqNums;
     }
 
 }
