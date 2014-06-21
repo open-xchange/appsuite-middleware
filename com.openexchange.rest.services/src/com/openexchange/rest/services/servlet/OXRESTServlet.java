@@ -229,6 +229,9 @@ public class OXRESTServlet extends HttpServlet implements Servlet {
         // Disable caching
         if (response.isDisableCaching()) {
             Tools.disableCaching(resp);
+        } else {
+            // For binary output
+            Tools.removeCachingHeader(resp);
         }
 
         // Write response body
