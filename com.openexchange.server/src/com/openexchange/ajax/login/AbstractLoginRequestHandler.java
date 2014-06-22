@@ -131,9 +131,6 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             // Add session log properties
             LogProperties.putSessionProperties(session);
 
-            // Request modules
-            final Future<Object> optModules = getModulesAsync(session, req);
-
             // Add headers and cookies from login result
             LoginServlet.addHeadersAndCookies(result, resp);
 
@@ -151,6 +148,9 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     }
                 }
             }
+
+            // Request modules
+            final Future<Object> optModules = getModulesAsync(session, req);
 
             // Remember User-Agent
             session.setParameter("user-agent", req.getHeader("user-agent"));
