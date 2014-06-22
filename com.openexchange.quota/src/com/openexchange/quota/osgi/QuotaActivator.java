@@ -166,21 +166,15 @@ public final class QuotaActivator extends HousekeepingActivator {
                     return new AmountOnlyQuota(quotaFromDB.longValue());
                 }
                 final ConfigView configView = serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
-                // Get property; first with "context" scope...
-                ConfigProperty<String> property = configView.property("context", "com.openexchange.quota.calendar", String.class);
+                // Get property
+                ConfigProperty<String> property = configView.property("com.openexchange.quota.calendar", String.class);
                 if (!property.isDefined()) {
-                    // ... then with "server" scope if not defined
-                    property = configView.property("server", "com.openexchange.quota.calendar", String.class);
-                    if (!property.isDefined()) {
-                        return UnlimitedQuota.getInstance();
-                    }
+                    return UnlimitedQuota.getInstance();
                 }
                 try {
                     return new AmountOnlyQuota(Long.parseLong(property.get().trim()));
                 } catch (final RuntimeException e) {
-                    log.warn(
-                        "Couldn't detect quota for " + resource.toString() + " (user=" + session.getUserId() + ", context=" + session.getContextId() + ")",
-                        e);
+                    log.warn("Couldn't detect quota for {} (user={}, context={})", resource.toString(), session.getUserId(), session.getContextId(), e);
                     return UnlimitedQuota.getInstance();
                 }
             }
@@ -204,21 +198,15 @@ public final class QuotaActivator extends HousekeepingActivator {
                     return new AmountOnlyQuota(quotaFromDB.longValue());
                 }
                 final ConfigView configView = serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
-                // Get property; first with "context" scope...
-                ConfigProperty<String> property = configView.property("context", "com.openexchange.quota.task", String.class);
+                // Get property
+                ConfigProperty<String> property = configView.property("com.openexchange.quota.task", String.class);
                 if (!property.isDefined()) {
-                    // ... then with "server" scope if not defined
-                    property = configView.property("server", "com.openexchange.quota.task", String.class);
-                    if (!property.isDefined()) {
-                        return UnlimitedQuota.getInstance();
-                    }
+                    return UnlimitedQuota.getInstance();
                 }
                 try {
                     return new AmountOnlyQuota(Long.parseLong(property.get().trim()));
                 } catch (final RuntimeException e) {
-                    log.warn(
-                        "Couldn't detect quota for " + resource.toString() + " (user=" + session.getUserId() + ", context=" + session.getContextId() + ")",
-                        e);
+                    log.warn("Couldn't detect quota for {} (user={}, context={})", resource.toString(), session.getUserId(), session.getContextId(), e);
                     return UnlimitedQuota.getInstance();
                 }
             }
@@ -242,21 +230,15 @@ public final class QuotaActivator extends HousekeepingActivator {
                     return new AmountOnlyQuota(quotaFromDB.longValue());
                 }
                 final ConfigView configView = serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
-                // Get property; first with "context" scope...
-                ConfigProperty<String> property = configView.property("context", "com.openexchange.quota.contact", String.class);
+                // Get property
+                ConfigProperty<String> property = configView.property("com.openexchange.quota.contact", String.class);
                 if (!property.isDefined()) {
-                    // ... then with "server" scope if not defined
-                    property = configView.property("server", "com.openexchange.quota.contact", String.class);
-                    if (!property.isDefined()) {
-                        return UnlimitedQuota.getInstance();
-                    }
+                    return UnlimitedQuota.getInstance();
                 }
                 try {
                     return new AmountOnlyQuota(Long.parseLong(property.get().trim()));
                 } catch (final RuntimeException e) {
-                    log.warn(
-                        "Couldn't detect quota for " + resource.toString() + " (user=" + session.getUserId() + ", context=" + session.getContextId() + ")",
-                        e);
+                    log.warn("Couldn't detect quota for {} (user={}, context={})", resource.toString(), session.getUserId(), session.getContextId(), e);
                     return UnlimitedQuota.getInstance();
                 }
             }
@@ -280,21 +262,15 @@ public final class QuotaActivator extends HousekeepingActivator {
                     return new AmountOnlyQuota(quotaFromDB.longValue());
                 }
                 final ConfigView configView = serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
-                // Get property; first with "context" scope...
-                ConfigProperty<String> property = configView.property("context", "com.openexchange.quota.infostore", String.class);
+                // Get property
+                ConfigProperty<String> property = configView.property("com.openexchange.quota.infostore", String.class);
                 if (!property.isDefined()) {
-                    // ... then with "server" scope if not defined
-                    property = configView.property("server", "com.openexchange.quota.infostore", String.class);
-                    if (!property.isDefined()) {
-                        return UnlimitedQuota.getInstance();
-                    }
+                    return UnlimitedQuota.getInstance();
                 }
                 try {
                     return new AmountOnlyQuota(Long.parseLong(property.get().trim()));
                 } catch (final RuntimeException e) {
-                    log.warn(
-                        "Couldn't detect quota for " + resource.toString() + " (user=" + session.getUserId() + ", context=" + session.getContextId() + ")",
-                        e);
+                    log.warn("Couldn't detect quota for {} (user={}, context={})", resource.toString(), session.getUserId(), session.getContextId(), e);
                     return UnlimitedQuota.getInstance();
                 }
             }
@@ -318,19 +294,15 @@ public final class QuotaActivator extends HousekeepingActivator {
                     return new AmountOnlyQuota(quotaFromDB.longValue());
                 }
                 final ConfigView configView = serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
-                // Get property; first with "context" scope...
-                ConfigProperty<String> property = configView.property("context", "com.openexchange.quota.attachment", String.class);
+                // Get property
+                ConfigProperty<String> property = configView.property("com.openexchange.quota.attachment", String.class);
                 if (!property.isDefined()) {
-                    // ... then with "server" scope if not defined
-                    property = configView.property("server", "com.openexchange.quota.attachment", String.class);
-                    if (!property.isDefined()) {
-                        return UnlimitedQuota.getInstance();
-                    }
+                    return UnlimitedQuota.getInstance();
                 }
                 try {
                     return new AmountOnlyQuota(Long.parseLong(property.get().trim()));
                 } catch (final RuntimeException e) {
-                    log.warn("Couldn''t detect quota for {} (user={}, context={})", resource.toString(), session.getUserId(), session.getContextId(), e);
+                    log.warn("Couldn't detect quota for {} (user={}, context={})", resource.toString(), session.getUserId(), session.getContextId(), e);
                     return UnlimitedQuota.getInstance();
                 }
             }
