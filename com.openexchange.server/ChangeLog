@@ -1,5 +1,6 @@
 * 2014-06-22 - thorben.betten@open-xchange.com
 
+ - Fix for bug 33219: Proper access to config cascade to orderly acquire scope-cascaded quota setting
  - Fix for bug 33208: Load modules information only if login's result code does signal a success (and not a redirect or a failure)
 
 * 2014-06-20 - tobias.friedrich@open-xchange.com
