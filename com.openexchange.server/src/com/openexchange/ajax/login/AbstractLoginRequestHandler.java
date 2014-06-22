@@ -172,6 +172,10 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 }
             }
 
+            // Perform client-specific ramp-up and add to JSON object
+            performRampUp(req, json, serverSession);
+
+            // Add modules information to JSON object
             if (null != optModules) {
                 // Append "config/modules"
                 try {
@@ -189,9 +193,6 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     LOG.warn("Modules could not be added to login JSON response", cause);
                 }
             }
-
-            // Perform Client Specific Ramp-Up
-            performRampUp(req, json, serverSession);
 
             // Set response
             response.setData(json);
@@ -286,7 +287,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                         if (rampUpService.contributesTo(client)) {
                             JSONObject contribution = rampUpService.getContribution(session, AJAXRequestDataTools.getInstance().parseRequest(req, false, false, session, ""));
                             json.put("rampup", contribution);
-                            break;
+                            return;
                         }
                     }
                 } catch (JSONException e) {
