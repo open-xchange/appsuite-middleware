@@ -325,6 +325,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             return null;
         }
         // Submit task
+        final org.slf4j.Logger logger = LOG;
         return ThreadPools.getThreadPool().submit(new AbstractTask<Object>() {
 
             @Override
@@ -334,11 +335,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     SettingStorage.getInstance(session).readValues(setting);
                     return convert2JS(setting);
                 } catch (final OXException e) {
-                    LOG.warn("Modules could not be added to login JSON response", e);
+                    logger.warn("Modules could not be added to login JSON response", e);
                 } catch (final JSONException e) {
-                    LOG.warn("Modules could not be added to login JSON response", e);
+                    logger.warn("Modules could not be added to login JSON response", e);
                 } catch (final Exception e) {
-                    LOG.warn("Modules could not be added to login JSON response", e);
+                    logger.warn("Modules could not be added to login JSON response", e);
                 }
                 return null;
             }
