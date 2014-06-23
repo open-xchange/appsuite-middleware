@@ -190,7 +190,7 @@ public abstract class SessionServlet extends AJAXServlet {
             if (null != sessionId && null != threadCounter) {
                 threadCounter.decrement(sessionId);
             }
-            ThreadLocalSessionHolder.getInstance().setSession(null);
+            ThreadLocalSessionHolder.getInstance().clear();
             LogProperties.removeSessionProperties();
             LogProperties.removeProperty(LogProperties.Name.DATABASE_SCHEMA);
             if (null != counter) {
