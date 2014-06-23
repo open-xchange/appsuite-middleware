@@ -243,8 +243,15 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
         List<Subscription> subscriptions = new ArrayList<Subscription>();
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.SELECT_SUBSCRIPTIONS_STMT(services, rootFolderIDs));
-            stmt.setInt(1, cid);
+            stmt = connection.prepareStatement(SQL.SELECT_SUBSCRIPTIONS_STMT(services.length, rootFolderIDs.size()));
+            int parameterIndex = 0;
+            stmt.setInt(++parameterIndex, cid);
+            for (String service : services) {
+                stmt.setString(++parameterIndex, service);
+            }
+            for (String rootFolderID : rootFolderIDs) {
+                stmt.setString(++parameterIndex, SQL.reverse(SQL.escape(rootFolderID)));
+            }
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {
                 String service = resultSet.getString(1);

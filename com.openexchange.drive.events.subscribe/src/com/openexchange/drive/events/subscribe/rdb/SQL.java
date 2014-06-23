@@ -55,8 +55,6 @@ import java.net.URLEncoder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Iterator;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -94,39 +92,16 @@ public class SQL {
 
     /**
      * SELECT service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions
-     * WHERE cid=? AND service IN (...) AND REVERSE(folder) IN (...);"
+     * WHERE cid=? AND service IN (?,?,...) AND folder IN (?,?,...);"
      */
-    public static final String SELECT_SUBSCRIPTIONS_STMT(String[] services, Collection<String> rootFolderIDs) throws OXException {
-        if (null == rootFolderIDs || 0 == rootFolderIDs.size()) {
-            throw new IllegalArgumentException("folderIDs");
-        }
-        if (null == services || 0 == services.length) {
-            throw new IllegalArgumentException("services");
-        }
-        StringBuilder allocator = new StringBuilder();
-        allocator.append("SELECT service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions ");
-        allocator.append("WHERE cid=? AND service");
-        if (1 == services.length) {
-            allocator.append("='").append(services[0]).append("'");
-        } else {
-            allocator.append(" IN ('").append(services[0]);
-            for (int i = 1; i < services.length; i++) {
-                allocator.append("','").append(services[i]);
-            }
-            allocator.append("')");
-        }
-        allocator.append(" AND REVERSE(folder)");
-        Iterator<String> iterator = rootFolderIDs.iterator();
-        if (1 == rootFolderIDs.size()) {
-            allocator.append("='").append(escape(iterator.next())).append("';");
-        } else {
-            allocator.append(" IN ('").append(escape(iterator.next()));
-            while (iterator.hasNext()) {
-                allocator.append("','").append(escape(iterator.next()));
-            }
-            allocator.append("');");
-        }
-        return allocator.toString();
+    public static final String SELECT_SUBSCRIPTIONS_STMT(int serviceCount, int folderCount) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions ");
+        stringBuilder.append("WHERE cid=? AND service");
+        appendPlaceholders(stringBuilder, serviceCount);
+        stringBuilder.append(" AND folder");
+        appendPlaceholders(stringBuilder, folderCount);
+        return stringBuilder.append(';').toString();
     }
 
     public static final String DELETE_SUBSCRIPTIONS_FOR_TOKEN_STMT =
@@ -165,11 +140,10 @@ public class SQL {
 
     public static String escape(String value) throws OXException {
         if (null == value) {
-            // System.out.println(value);
             return null;
         }
         try {
-            return URLEncoder.encode(value, "US-ASCII");
+            return URLEncoder.encode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
@@ -177,10 +151,44 @@ public class SQL {
 
     public static String unescape(String value) throws OXException {
         try {
-            return URLDecoder.decode(value, "US-ASCII");
+            return URLDecoder.decode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Returns the reverse of the supplied character sequence.
+     *
+     * @param string The string to reverse
+     * @return The reversed string
+     */
+    public static String reverse(String string) {
+        return new StringBuilder(string).reverse().toString();
+    }
+
+    /**
+     * Appends a SQL clause for the given number of placeholders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
+     * an <code>IN</code> clause like <code>IN (?,?,?,?)</code> in case <code>count</code> is greater than <code>1</code>.
+     *
+     * @param stringBuilder The string builder to append the clause
+     * @param count The number of placeholders to append
+     * @return The string builder
+     */
+    private static StringBuilder appendPlaceholders(StringBuilder stringBuilder, int count) {
+        if (0 >= count) {
+            throw new IllegalArgumentException("count");
+        }
+        if (1 == count) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" IN (?");
+            for (int i = 1; i < count; i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        return stringBuilder;
     }
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SQL.class);
