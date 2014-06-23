@@ -59,6 +59,7 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
  * {@link SQL}
@@ -79,8 +80,8 @@ public class SQL {
             "sequence BIGINT(20) NOT NULL," +
             "checksum BINARY(16) NOT NULL," +
             "PRIMARY KEY (cid, uuid)," +
-            "INDEX (folder, cid)," +
-            "INDEX (checksum, cid)" +
+            "INDEX (cid, folder)," +
+            "INDEX (cid, checksum)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=ascii;";
     }
 
@@ -94,10 +95,24 @@ public class SQL {
             "etag VARCHAR(255) DEFAULT NULL," +
             "checksum BINARY(16) NOT NULL," +
             "PRIMARY KEY (cid, uuid)," +
-            "INDEX (folder, cid)," +
-            "INDEX (checksum, cid)" +
+            "INDEX (cid, user, folder)," +
+            "INDEX (cid, checksum)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=ascii;";
     }
+
+    /**
+     * Gets all known update tasks.
+     *
+     * @return The update tasks
+     */
+    public static UpdateTaskV2[] getUpdateTasks() {
+        return new UpdateTaskV2[] {
+            new DriveCreateTableTask(),
+            new DirectoryChecksumsAddUserAndETagColumnTask(),
+            new DirectoryChecksumsReIndexTask(),
+            new FileChecksumsReIndexTask()
+        };
+    };
 
     public static final String INSERT_FILE_CHECKSUM_STMT =
         "INSERT INTO fileChecksums (uuid,cid,folder,file,version,sequence,checksum) " +
