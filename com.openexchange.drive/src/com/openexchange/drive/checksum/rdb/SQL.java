@@ -309,16 +309,6 @@ public class SQL {
     }
 
     /**
-     * Returns the reverse of the supplied character sequence.
-     *
-     * @param string The string to reverse
-     * @return The reversed string
-     */
-    public static String reverse(String string) {
-        return new StringBuilder(string).reverse().toString();
-    }
-
-    /**
      * Appends a SQL clause for the given number of placeholders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
      * an <code>IN</code> clause like <code>IN (?,?,?,?)</code> in case <code>count</code> is greater than <code>1</code>.
      *

@@ -65,6 +65,7 @@ import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.drive.events.subscribe.internal.SubscribeServiceLookup;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -250,7 +251,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
                 stmt.setString(++parameterIndex, service);
             }
             for (String rootFolderID : rootFolderIDs) {
-                stmt.setString(++parameterIndex, SQL.reverse(SQL.escape(rootFolderID)));
+                stmt.setString(++parameterIndex, Strings.reverse(SQL.escape(rootFolderID)));
             }
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {

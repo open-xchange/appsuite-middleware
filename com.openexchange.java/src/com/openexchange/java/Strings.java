@@ -909,4 +909,15 @@ public class Strings {
         return sign * num;
     }
 
+    /**
+     * Returns the reverse of the supplied character sequence.
+     *
+     * @param string The string to reverse
+     * @return The reversed string
+     * @see StringBuilder#reverse
+     */
+    public static String reverse(String string) {
+        return new StringBuilder(string).reverse().toString();
+    }
+
 }
