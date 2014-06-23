@@ -275,9 +275,14 @@ public interface Session {
     public String getUserlogin();
 
     /**
-     * Gets the full login incl. context information; e.g <code>test@foo</code>
-     *
-     * @return The full login
+     * Gets the full login information including user and context information; e.g <code>firstname.lastname@domain.tld</code>. The user
+     * entered this information into the login field on the login screen. Beware that this highly depends on the behavior of the installed
+     * {@link AuthenticationService} what information is available here and how context and user specific information is separated. You can
+     * not rely on a separating char like '@'.
+     * Beware that in single sign on (SSO) environments, this information may not be available. Kerberos uses tickets to authenticate some
+     * user and SAML uses cookies. If such a mechanism is used by the {@link AuthenticationService} no full login information will be
+     * available and this method returns <code>null</code>.
+     * @return The full login information if it is available, otherwise <code>null</code>.
      */
     public String getLogin();
 
