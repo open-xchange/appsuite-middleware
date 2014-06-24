@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -985,6 +985,9 @@ ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" 
 # SoftwareChange_Request-2037
 PFILE=/opt/open-xchange/etc/sessiond.properties
 ox_comment com.openexchange.sessiond.remoteParameterNames= add $PFILE
+# SoftwareChange_Request-2055
+ox_add_property com.openexchange.rest.services.basic-auth.login open-xchange /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.rest.services.basic-auth.password secret /opt/open-xchange/etc/server.properties
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
@@ -1025,6 +1028,10 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Jun 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Seventh candidate for 7.6.0 release
+* Fri Jun 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 7.6.0
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth release candidate for 7.6.0
 * Fri Jun 13 2014 Marcus Klein <marcus.klein@open-xchange.com>

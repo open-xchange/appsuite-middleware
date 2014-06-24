@@ -828,9 +828,15 @@ fi
 VALUE=$(ox_read_property com.openexchange.hazelcast.network.symmetricEncryption /opt/open-xchange/etc/hazelcast.properties)
 ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" /opt/open-xchange/etc/hazelcast.properties
 
+<<<<<<< HEAD
 # SoftwareChange_Request-2037
 PFILE=/opt/open-xchange/etc/sessiond.properties
 ox_comment com.openexchange.sessiond.remoteParameterNames= add $PFILE
+=======
+# SoftwareChange_Request-2055
+ox_add_property com.openexchange.rest.services.basic-auth.login open-xchange /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.rest.services.basic-auth.password secret /opt/open-xchange/etc/server.properties
+>>>>>>> 819f8891bb7bd56c54587f62e8a717e13eb383fe
 
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"

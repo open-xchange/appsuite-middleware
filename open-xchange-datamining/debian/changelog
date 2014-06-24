@@ -1,3 +1,15 @@
+open-xchange-datamining (7.6.0-7) stable; urgency=low
+
+  * Seventh candidate for 7.6.0 release
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Mon, 23 Jun 2014 13:21:51 +0200
+
+open-xchange-datamining (7.6.0-6) stable; urgency=low
+
+  * Sixth release candidate for 7.6.0
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Fri, 20 Jun 2014 13:05:09 +0200
+
 open-xchange-datamining (7.6.0-5) stable; urgency=low
 
   * Fifth release candidate for 7.6.0
