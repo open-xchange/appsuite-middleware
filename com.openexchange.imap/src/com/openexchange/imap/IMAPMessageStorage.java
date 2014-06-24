@@ -122,6 +122,7 @@ import com.openexchange.imap.command.MessageFetchIMAPCommand.FetchProfileModifie
 import com.openexchange.imap.command.MoveIMAPCommand;
 import com.openexchange.imap.command.SimpleFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
+import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.Services;
@@ -372,6 +373,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      */
     public IMAPStore getImapStore() {
         return imapStore;
+    }
+
+    /**
+     * Gets the IMAP configuration
+     *
+     * @return The IMAP configuration
+     */
+    public IMAPConfig getImapConfig() {
+        return imapConfig;
     }
 
     /**
