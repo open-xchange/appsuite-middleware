@@ -136,6 +136,8 @@ Import-Package: com.googlecode.concurrentlinkedhashmap,
 Export-Package: com.openexchange.imap,
  com.openexchange.imap.config,
  com.openexchange.imap.notify,
+ com.openexchange.imap.search,
+ com.openexchange.imap.sort,
  com.openexchange.imap.util
 Bundle-Activator: com.openexchange.imap.osgi.IMAPActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
