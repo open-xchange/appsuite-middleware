@@ -6360,6 +6360,10 @@ msgstr ""
 msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
+msgid "Priority is %d but mist be between 1 and 3."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
 "The current version number %1$s is already lower than or equal to the "
