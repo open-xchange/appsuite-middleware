@@ -71,51 +71,33 @@ import com.openexchange.rest.services.osgiservice.OXRESTActivator;
 import com.openexchange.server.ServiceLookup;
 
 /**
-<<<<<<< HEAD
  * A {@link OXRESTService} is the entry class for defining a RESTful service. Subclass this class, annotate it with annotations from com.openexchange.rest.services.annotations and
  * publish it in a subclass of {@link OXRESTActivator}.
- *
+ * <p>
  * Consider this example:
-=======
- * A {@link OXRESTService} is the entry class for defining a RESTful service. Subclass this class, annotate it with annotations from
- * com.openexchange.rest.services.annotations and publish it in a subclass of {@link OXRESTActivator}. Consider this example:
->>>>>>> ef73bf11ba492ddb5d9c656533ad4e5290c1d39c
  *
  * <pre>
- * @ROOT("/myservice")
- * public class MyService extends OXRestService<Void> {
+ *  &#064;ROOT("/myservice")
+ *  public class MyService extends OXRestService<Void> {
  *
  *   ...
  *
  * }
  * </pre>
  *
-<<<<<<< HEAD
- * Every service class declares its root URL with the {@link ROOT} annotation. The service will then be reachable under /rest/myservice. In order to implement concrete calls,
- * declare methods in the service class and annotate them with a route specifying how these methods should be accessed.
- *
- * <pre>
- * @ROOT("/myservice")
- * public class MyService extends OXRestService<Void> {
- *
- *   // e.g. /rest/myservide/bookmarks/1
- *   @GET("bookmarks/:id")
-=======
  * Every service class declares its root URL with the {@link ROOT} annotation. The service will then be reachable under /rest/myservice. In
  * order to implement concrete calls, declare methods in the service class and annotate them with a route specifying how these methods
  * should be accessed.
  *
  * <pre>
- * &#064;ROOT(&quot;/myservice&quot;)
- * public class MyService extends OXRestService&lt;Void&gt; {
+ *  &#064;ROOT(&quot;/myservice&quot;)
+ *  public class MyService extends OXRestService&lt;Void&gt; {
  *
  *     // e.g. /rest/myservide/bookmarks/1
  *     &#064;GET(&quot;bookmarks/:id&quot;)
->>>>>>> ef73bf11ba492ddb5d9c656533ad4e5290c1d39c
  *   public Object getBookmark(int bookmarkId) {
  *     return &quot;http://www.open-xchange.com&quot;
  *   }
-<<<<<<< HEAD
  *
  * }
  * </pre>
@@ -124,20 +106,20 @@ import com.openexchange.server.ServiceLookup;
  * subpath that triggers the method. A path can contain variables market by the colon sign (:), which denote arbitrary path elements. These elements are passed to the method in
  * the same order as they appear in the path. The system tries to turn them into the types declared as method parameters (say the int above). The values are also available under
  * their name via the {@link #param(String)} method. e.g. param("id") or param("id", int.class).
- *
+ * <p>
  * A method can return any object. The system tries to convert this into a String, if the object is not already one, to send back to the client.
  * Maps and Lists are turned into their respective JSON representations (see {@link JSONCoercion} ),
  * other objects are issued a #toString call to turn them into the response. Instead of returning the response, a method can also call the {@link #respond(String)} and {@link #halt()} methods
  * to set a response and optionally halt further execution. These methods can also be used to set a status code or headers. Client headers are available through the {@link #request} Object.
- *
+ * <p>
  * The methods {@link #before()} and {@link #after()} are called before and after processing respectively.
- *
+ * <p>
  * Every request instantiates a new instance of this class, so feel free to set member variables in before and after methods during processing.
  *
  * e.g:
  * <pre>
- * @ROOT("/bookmarks")
- * public class MyService extends OXRestService<VOID> {
+ *  &#064;ROOT("/bookmarks")
+ *  public class MyService extends OXRestService<VOID> {
  *
  *   private Bookmark bookmark;
  *
@@ -151,67 +133,17 @@ import com.openexchange.server.ServiceLookup;
  *      }
  *   }
  *   // e.g. GET /rest/bookmarks/1
- *   @GET("/:id")
+ *    &#064;GET("/:id")
  *   public Object getBookmark() {
  *     return bookmark.getURL(); // Populated in #before
  *   }
  *
- *   @PATCH("/:id")
+ *    &#064;PATCH("/:id")
  *   public void updateBookmark() {
  *     bookmark.setURL(param("url")); // Populated in #before
  *     context.save(bookmark);
  *     respond(200);
  *   }
-=======
- * }
- *
- *
- * </pre>
- *
- * The method annotations {@link GET}, {@link PUT}, {@link POST}, {@link DELETE}, {@link PATCH}, {@link OPTIONS}, {@link LINK},
- * {@link UNLINK} expect as their parameter the subpath that triggers the method. A path can contain variables market by the colon sign (:),
- * which denote arbitrary path elements. These elements are passed to the method in the same order as they appear in the path. The system
- * tries to turn them into the types declared as method parameters (say the int above). The values are also available under their name via
- * the {@link #param(String)} method. e.g. param("id") or param("id", int.class). A method can return any object. The system tries to
- * convert this into a String, if the object is not already one, to send back to the client. Maps and Lists are turned into their respective
- * JSON representations (see {@link JSONCoercion} ), other objects are issued a #toString call to turn them into the response. Instead of
- * returning the response, a method can also call the {@link #respond(String)} and {@link #halt()} methods to set a response and optionally
- * halt further execution. These methods can also be used to set a status code or headers. Client headers are available through the
- * {@link #request} Object. The methods {@link #before()} and {@link #after()} are called before and after processing respectively. Every
- * request instantiates a new instance of this class, so feel free to set member variables in before and after methods during processing.
- * e.g:
- *
- * <pre>
- *
- *
- * &#064;ROOT(&quot;/bookmarks&quot;)
- * public class MyService extends OXRestService&lt;VOID&gt; {
- *
- *     private Bookmark bookmark;
- *
- *     public void before() {
- *         contentType(&quot;application/json&quot;);
- *         if (isSet(&quot;id&quot;)) {
- *             this.bookmark = services.getService(BookmarkService.class).loadBookmark(param(&quot;id&quot;, int.class));
- *             if (this.bookmark == null) {
- *                 halt(404);
- *             }
- *         }
- *     }
- *
- *     // e.g. GET /rest/bookmarks/1
- *     &#064;GET(&quot;/:id&quot;)
- *     public Object getBookmark() {
- *         return bookmark.getURL(); // Populated in #before
- *     }
- *
- *     &#064;PATCH(&quot;/:id&quot;)
- *     public void updateBookmark() {
- *         bookmark.setURL(param(&quot;url&quot;)); // Populated in #before
- *         context.save(bookmark);
- *         respond(200);
- *     }
->>>>>>> ef73bf11ba492ddb5d9c656533ad4e5290c1d39c
  *
  * }
  * </pre>
