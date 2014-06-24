@@ -2777,6 +2777,63 @@ public final class IMAPCommandsCollection {
         }));
     }
 
+    private static final String COMMAND_FETCH_UIDS = "FETCH 1:* (UID)";
+
+    /**
+     * Fetches all UIDs from given IMAP folder.
+     *
+     * @param imapFolder The IMAP folder
+     * @return All UIDs from given IMAP folder
+     * @throws MessagingException If an error occurs in underlying protocol
+     */
+    public static long[] fetchUIDs(final IMAPFolder imapFolder) throws MessagingException {
+        if (imapFolder.getMessageCount() <= 0) {
+            /*
+             * Empty folder...
+             */
+            return new long[0];
+        }
+        return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                /*-
+                 * Arguments:  sequence set
+                 * message data item names or macro
+                 *
+                 * Responses:  untagged responses: FETCH
+                 *
+                 * Result:     OK - fetch completed
+                 *             NO - fetch error: can't fetch that data
+                 *             BAD - command unknown or arguments invalid
+                 */
+                final Response[] r = performCommand(p, COMMAND_FETCH_UIDS);
+                final int len = r.length - 1;
+                final Response response = r[len];
+                final TLongList l = new TLongArrayList(len);
+                if (response.isOK()) {
+                    for (int j = 0; j < len; j++) {
+                        if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
+                            l.add(getItemOf(UID.class, (FetchResponse) r[j], STR_UID).uid);
+                            r[j] = null;
+                        }
+                    }
+                    notifyResponseHandlers(r, p);
+                } else if (response.isBAD()) {
+                    if (ImapUtility.isInvalidMessageset(response)) {
+                        return new long[0];
+                    }
+                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, COMMAND_FETCH_UIDS, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                } else if (response.isNO()) {
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, COMMAND_FETCH_UIDS, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                } else {
+                    p.handleResult(response);
+                }
+                return l.toArray();
+            }
+        }));
+    }
+
     private static final String COMMAND_FETCH_UID_FLAGS = "FETCH 1:* (UID FLAGS)";
 
     /**
