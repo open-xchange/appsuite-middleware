@@ -324,6 +324,14 @@ public final class IMAPSearch {
 
     // --------------------------- IMAP commands ------------------------------
 
+    /**
+     * Searches in specified IMAP folder using given search term
+     *
+     * @param term The search term
+     * @param imapFolder The IMAP folder to search in
+     * @return The sequence number of matching messages
+     * @throws MessagingException If a messaging error occurs
+     */
     private static int[] search(final SearchTerm term, final IMAPFolder imapFolder) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (0 >= messageCount) {
