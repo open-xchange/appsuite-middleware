@@ -80,8 +80,8 @@ public class MimeUtilityTest extends TestCase {
             final String[] splits = mailSafeForm.split("\r?\n");
 
             assertEquals("Unexpected number of lines", 2, splits.length);
-            assertEquals("Unexpected first line", "=?UTF-8?B?8J+SqfCfkqnwn5Kp8J+SqfCfkqnwn5Kp8J+SqfCfkqk=?=", splits[0].trim());
-            assertEquals("Unexpected second line", "=?UTF-8?B?8J+SqfCfkqnwn5Kp8J+SqfCfkqnwn5Kp8J+SqQ==?=", splits[1].trim());
+            assertEquals("Unexpected first line", "=?UTF-8?B?8J+SqfCfkqnwn5Kp8J+SqfCfkqnwn5Kp8J+SqQ==?=", splits[0].trim());
+            assertEquals("Unexpected second line", "=?UTF-8?B?8J+SqfCfkqnwn5Kp8J+SqfCfkqnwn5Kp8J+SqfCfkqk=?=", splits[1].trim());
 
         } catch (final Exception e) {
             e.printStackTrace();
