@@ -62,11 +62,17 @@ import com.openexchange.drive.actions.AbstractAction;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DefaultSyncResult<T extends DriveVersion> implements SyncResult<T>{
+public class DefaultSyncResult<T extends DriveVersion> implements SyncResult<T> {
 
     private final List<DriveAction<T>> actionsForClient;
     private final String diagnosticsLog;
 
+    /**
+     * Initializes a new {@link DefaultSyncResult}.
+     *
+     * @param actionsForClient The resulting actions for the client
+     * @param diagnosticsLog The diagnostics log
+     */
     public DefaultSyncResult(List<AbstractAction<T>> actionsForClient, String diagnosticsLog) {
         super();
         this.actionsForClient = new ArrayList<DriveAction<T>>(actionsForClient.size());
@@ -77,9 +83,9 @@ public class DefaultSyncResult<T extends DriveVersion> implements SyncResult<T>{
     }
 
     /**
-     * Gets the actionsForClient
+     * Gets the resulting actions for the client.
      *
-     * @return The actionsForClient
+     * @return The resulting actions for the client
      */
     @Override
     public List<DriveAction<T>> getActionsForClient() {

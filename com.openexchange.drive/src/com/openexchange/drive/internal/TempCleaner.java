@@ -243,7 +243,7 @@ public class TempCleaner implements Runnable {
                         if (null != notDeleted && notDeleted.contains(file.getId())) {
                             continue;
                         }
-                        checksumStore.removeFileChecksums(IDUtil.getFileID(file));
+                        checksumStore.removeFileChecksums(DriveUtils.getFileID(file));
                     }
                 }
             }

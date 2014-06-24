@@ -62,6 +62,20 @@ import com.openexchange.exception.OXException;
  */
 public interface ActionExecutor<T extends DriveVersion> {
 
+    /**
+     * Executes the supplied list of actions.
+     * 
+     * @param actions The actions to execute
+     * @throws OXException
+     */
     void execute(List<AbstractAction<T>> actions) throws OXException;
 
+    /**
+     * Gets a list of actions the client should execute as a result of the executed server actions if applicable. This method returns
+     * <code>null</code> if no further actions are needed.
+     * 
+     * @return A list of new actions for the client, or <code>null</code> if not needed
+     */
+    List<AbstractAction<T>> getNewActionsForClient(); 
+    
 }

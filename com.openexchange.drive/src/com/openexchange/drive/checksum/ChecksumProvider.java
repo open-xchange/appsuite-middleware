@@ -62,7 +62,7 @@ import java.util.TreeSet;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.internal.IDUtil;
+import com.openexchange.drive.internal.DriveUtils;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;
@@ -91,7 +91,7 @@ public class ChecksumProvider {
      */
     public static FileChecksum getChecksum(SyncSession session, File file) throws OXException {
         FileChecksum fileChecksum = session.getChecksumStore().getFileChecksum(
-            IDUtil.getFileID(file), file.getVersion(), file.getSequenceNumber());
+            DriveUtils.getFileID(file), file.getVersion(), file.getSequenceNumber());
         if (null == fileChecksum) {
             fileChecksum = session.getChecksumStore().insertFileChecksum(calculateFileChecksum(session, file));
         }
@@ -271,7 +271,7 @@ public class ChecksumProvider {
             throw DriveExceptionCodes.NO_CHECKSUM_FOR_FILE.create(file);
         }
         FileChecksum fileChecksum = new FileChecksum();
-        fileChecksum.setFileID(IDUtil.getFileID(file));
+        fileChecksum.setFileID(DriveUtils.getFileID(file));
         fileChecksum.setSequenceNumber(file.getSequenceNumber());
         fileChecksum.setVersion(file.getVersion());
         fileChecksum.setChecksum(md5);

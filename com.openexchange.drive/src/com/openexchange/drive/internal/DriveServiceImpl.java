@@ -74,7 +74,6 @@ import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.AbstractFileAction;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
-import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.actions.EditFileAction;
 import com.openexchange.drive.actions.ErrorDirectoryAction;
 import com.openexchange.drive.actions.ErrorFileAction;
@@ -92,15 +91,12 @@ import com.openexchange.drive.storage.execute.DirectoryActionExecutor;
 import com.openexchange.drive.storage.execute.FileActionExecutor;
 import com.openexchange.drive.sync.DefaultSyncResult;
 import com.openexchange.drive.sync.IntermediateSyncResult;
-import com.openexchange.drive.sync.RenameTools;
-import com.openexchange.drive.sync.SimpleFileVersion;
 import com.openexchange.drive.sync.Synchronizer;
 import com.openexchange.drive.sync.optimize.OptimizingDirectorySynchronizer;
 import com.openexchange.drive.sync.optimize.OptimizingFileSynchronizer;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
 
@@ -165,18 +161,20 @@ public class DriveServiceImpl implements DriveService {
             if (0 == retryCount) {
                 syncResult = new SyncTracker(driveSession).trackAndCheck(syncResult);
             }
+            List<AbstractAction<DirectoryVersion>> newActionsForClient = null;
             try {
                 /*
                  * execute actions on server
                  */
                 DirectoryActionExecutor executor = new DirectoryActionExecutor(driveSession, true, retryCount < DriveConstants.MAX_RETRIES);
                 executor.execute(syncResult.getActionsForServer());
+                newActionsForClient = executor.getNewActionsForClient();
             } catch (OXException e) {
-                if (0 == retryCount || (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES)) {
+                if (0 == retryCount || (tryAgain(e) && retryCount < DriveConstants.MAX_RETRIES)) {
                     retryCount++;
                     int delay = DriveConstants.RETRY_BASEDELAY * retryCount;
                     driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + "), trying again in " +
-                        delay + "ms (" + retryCount + '/' + DriveConstants.MAX_RETRIES + ")...");
+                        delay + "ms" + (1 == retryCount ? "..." : " (" + retryCount + '/' + DriveConstants.MAX_RETRIES + ")..."));
                     delay(delay);
                     continue;
                 }
@@ -204,11 +202,21 @@ public class DriveServiceImpl implements DriveService {
             /*
              * return actions for client
              */
+            List<AbstractAction<DirectoryVersion>> actionsForClient;
+            if (null != newActionsForClient) {
+                actionsForClient = newActionsForClient;
+                if (driveSession.isTraceEnabled()) {
+                    driveSession.trace("Execution of server actions resulted in new actions for client. New actions for client:");
+                    driveSession.trace(new DefaultSyncResult<DirectoryVersion>(actionsForClient, ""));
+                }
+            } else {
+                actionsForClient = syncResult.getActionsForClient();
+            }
             if (driveSession.isTraceEnabled()) {
                 driveSession.trace("syncFolders with " + syncResult.length() + " resulting action(s) completed after "
                     + (System.currentTimeMillis() - start) + "ms.");
             }
-            return new DefaultSyncResult<DirectoryVersion>(syncResult.getActionsForClient(), driveSession.getDiagnosticsLog());
+            return new DefaultSyncResult<DirectoryVersion>(actionsForClient, driveSession.getDiagnosticsLog());
         }
     }
 
@@ -232,18 +240,20 @@ public class DriveServiceImpl implements DriveService {
             if (0 == retryCount) {
                 syncResult = new SyncTracker(driveSession).track(syncResult, path);
             }
+            List<AbstractAction<FileVersion>> newActionsForClient = null;
             try {
                 /*
                  * execute actions on server
                  */
                 FileActionExecutor executor = new FileActionExecutor(driveSession, true, retryCount < DriveConstants.MAX_RETRIES, path);
                 executor.execute(syncResult.getActionsForServer());
+                newActionsForClient = executor.getNewActionsForClient();
             } catch (OXException e) {
-                if (0 == retryCount || (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES)) {
+                if (0 == retryCount || (tryAgain(e) && retryCount < DriveConstants.MAX_RETRIES)) {
                     retryCount++;
                     int delay = DriveConstants.RETRY_BASEDELAY * retryCount;
                     driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + "), trying again in " +
-                        delay + "ms (" + retryCount + '/' + DriveConstants.MAX_RETRIES + ")...");
+                        delay + "ms" + (1 == retryCount ? "..." : " (" + retryCount + '/' + DriveConstants.MAX_RETRIES + ")..."));
                     delay(delay);
                     continue;
                 }
@@ -252,11 +262,21 @@ public class DriveServiceImpl implements DriveService {
             /*
              * return actions for client
              */
+            List<AbstractAction<FileVersion>> actionsForClient;
+            if (null != newActionsForClient) {
+                actionsForClient = newActionsForClient;
+                if (driveSession.isTraceEnabled()) {
+                    driveSession.trace("Execution of server actions resulted in new actions for client. New actions for client:");
+                    driveSession.trace(new DefaultSyncResult<FileVersion>(actionsForClient, ""));
+                }
+            } else {
+                actionsForClient = syncResult.getActionsForClient();
+            }
             if (driveSession.isTraceEnabled()) {
                 driveSession.trace("syncFiles with " + syncResult.length() + " resulting action(s) completed after "
                     + (System.currentTimeMillis() - start) + "ms.");
             }
-            return new DefaultSyncResult<FileVersion>(syncResult.getActionsForClient(), driveSession.getDiagnosticsLog());
+            return new DefaultSyncResult<FileVersion>(actionsForClient, driveSession.getDiagnosticsLog());
         }
     }
 
@@ -306,31 +326,8 @@ public class DriveServiceImpl implements DriveService {
         } catch (OXException e) {
             LOG.warn("Got exception during upload ({})\nSession: {}, path: {}, original version: {}, new version: {}, offset: {}, total length: {}",
                 e.getMessage(), driveSession, path, originalVersion, newVersion, offset, totalLength);
-            if ("FLS-0024".equals(e.getErrorCode()) || FileStorageExceptionCodes.QUOTA_REACHED.equals(e) ||
-                "SMARTDRIVEFILE_STORAGE-0008".equals(e.getErrorCode())) {
-                /*
-                 * quota reached
-                 */
-                OXException quotaException = DriveExceptionCodes.QUOTA_REACHED.create(e, (Object[])null);
-                if (null != originalVersion) {
-                    /*
-                     * upload should have replaced an existing file, let client first rename it's file and mark as error with quarantine flag...
-                     */
-                    String alternativeName = RenameTools.findRandomAlternativeName(originalVersion.getName());
-                    FileVersion renamedVersion = new SimpleFileVersion(alternativeName, originalVersion.getChecksum());
-                    syncResult.addActionForClient(new EditFileAction(newVersion, renamedVersion, null, path, false));
-                    syncResult.addActionForClient(new ErrorFileAction(newVersion, renamedVersion, null, path, quotaException, true));
-                    /*
-                     * ... then download the server version afterwards
-                     */
-                    ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(originalVersion, path, driveSession);
-                    syncResult.addActionForClient(new DownloadFileAction(driveSession, null, serverFileVersion, null, path));
-                } else {
-                    /*
-                     * upload of new file, mark as error with quarantine flag
-                     */
-                    syncResult.addActionForClient(new ErrorFileAction(null, newVersion, null, path, quotaException, true));
-                }
+            if (DriveUtils.indicatesQuotaExceeded(e)) {
+                syncResult.addActionsForClient(DriveUtils.handleQuotaExceeded(driveSession, e, path, originalVersion, newVersion));
             } else if ("IFO-0100".equals(e.getErrorCode())) {
                 /*
                  * database fields (filename/title/comment?) too long - put into quarantine to prevent repeated errors
@@ -345,7 +342,7 @@ public class DriveServiceImpl implements DriveService {
              * store checksum, invalidate parent directory checksum
              */
             FileChecksum fileChecksum = driveSession.getChecksumStore().insertFileChecksum(new FileChecksum(
-                IDUtil.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum()));
+                DriveUtils.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum()));
             driveSession.getChecksumStore().removeDirectoryChecksum(new FolderID(createdFile.getFolderId()));
             /*
              * check if created file still equals uploaded one

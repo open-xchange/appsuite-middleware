@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.storage.execute;
 
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.actions.AbstractAction;
@@ -66,15 +67,41 @@ public abstract class AbstractActionExecutor<T extends DriveVersion> implements 
     protected final SyncSession session;
     protected final boolean transactional;
 
+    private List<AbstractAction<T>> newActionsForClient;
+
     /**
      * Initializes a new {@link AbstractActionExecutor}.
      *
      * @param session The session
+     * @param transactional <code>true</code> to operate in a transactional mode, <code>false</code>, otherwise
      */
     protected AbstractActionExecutor(SyncSession session, boolean transactional) {
         super();
         this.session = session;
         this.transactional = transactional;
+    }
+
+    /**
+     * Adds a new action the client should execute as a result of the executed server actions.
+     *
+     * @param action The action to add.
+     */
+    protected void addNewActionForClient(AbstractAction<T> action) {
+        newActionsForClient.add(action);
+    }
+
+    /**
+     * Adds multiple new actions the client should execute as a result of the executed server actions.
+     *
+     * @param actions The actions to add.
+     */
+    protected void addNewActionsForClient(Collection<? extends AbstractAction<T>> actions) {
+        newActionsForClient.addAll(actions);
+    }
+
+    @Override
+    public List<AbstractAction<T>> getNewActionsForClient() {
+        return newActionsForClient;
     }
 
     @Override

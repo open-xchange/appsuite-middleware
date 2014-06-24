@@ -63,10 +63,11 @@ import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
+import com.openexchange.drive.actions.ErrorFileAction;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.comparison.ServerFileVersion;
-import com.openexchange.drive.internal.IDUtil;
+import com.openexchange.drive.internal.DriveUtils;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -132,10 +133,41 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
             remove(action);
             break;
         case DOWNLOAD:
-            download(action);
+            try {
+                download(action);
+            } catch (OXException e) {
+                LOG.warn("Got exception during server-side execution of download action: {}\nSession: {}, path: {}, action: {}",
+                    e.getMessage(), session, path, action);
+                if (DriveUtils.indicatesQuotaExceeded(e)) {
+                    /*
+                     * quota exceeded
+                     */
+                    addNewActionsForClient(DriveUtils.handleQuotaExceeded(session, e, path, action.getVersion(), action.getNewVersion()));
+                } else if ("IFO-0100".equals(e.getErrorCode())) {
+                    /*
+                     * database fields (filename/title/comment?) too long - put into quarantine to prevent repeated errors
+                     */
+                    addNewActionForClient(new ErrorFileAction(null, action.getNewVersion(), null, path, e, true));
+                } else {
+                    throw e;
+                }
+            }
             break;
         case EDIT:
-            edit(action);
+            try {
+                edit(action);
+            } catch (OXException e) {
+                LOG.warn("Got exception during server-side execution of download action: {}\nSession: {}, path: {}, action: {}",
+                    e.getMessage(), session, path, action);
+                if ("IFO-0100".equals(e.getErrorCode())) {
+                    /*
+                     * database fields (filename/title/comment?) too long - put into quarantine to prevent repeated errors
+                     */
+                    addNewActionForClient(new ErrorFileAction(null, action.getNewVersion(), null, path, e, true));
+                } else {
+                    throw e;
+                }
+            }
             break;
         default:
             throw new IllegalStateException("Can't perform action " + action + " on server");
@@ -157,7 +189,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
         } else {
             renamedFile = session.getStorage().renameFile(originalVersion.getFile(), action.getNewVersion().getName());
         }
-        fileChecksum.setFileID(IDUtil.getFileID(renamedFile));
+        fileChecksum.setFileID(DriveUtils.getFileID(renamedFile));
         fileChecksum.setVersion(renamedFile.getVersion());
         fileChecksum.setSequenceNumber(renamedFile.getSequenceNumber());
         FileChecksum updatedFileChecksum = session.getChecksumStore().updateFileChecksum(fileChecksum);
@@ -177,7 +209,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
             InputStream data = new UnsynchronizedByteArrayInputStream(new byte[0]);
             File createdFile = session.getStorage().createFile(path, action.getNewVersion().getName(), metadata, data);
             FileChecksum insertedFileChecksum = session.getChecksumStore().insertFileChecksum(new FileChecksum(
-                IDUtil.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), DriveConstants.EMPTY_MD5));
+                DriveUtils.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), DriveConstants.EMPTY_MD5));
             action.setResultingVersion(new ServerFileVersion(createdFile, insertedFileChecksum));
             return;
         }
@@ -207,7 +239,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
          */
         if (null != targetFile) {
             session.getChecksumStore().removeFileChecksum(
-                IDUtil.getFileID(targetFile), targetFile.getVersion(), targetFile.getSequenceNumber());
+                DriveUtils.getFileID(targetFile), targetFile.getVersion(), targetFile.getSequenceNumber());
         }
         if (sourceFile.isCurrentVersion() && isFromTemp(session, sourceFile)) {
             /*
@@ -216,7 +248,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
             File movedFile = null != targetFile ? session.getStorage().moveFile(sourceFile, targetFile) :
                 session.getStorage().moveFile(sourceFile, action.getNewVersion().getName(), path);
             FileChecksum fileChecksum = sourceVersion.getFileChecksum();
-            fileChecksum.setFileID(IDUtil.getFileID(movedFile));
+            fileChecksum.setFileID(DriveUtils.getFileID(movedFile));
             fileChecksum.setVersion(movedFile.getVersion());
             fileChecksum.setSequenceNumber(movedFile.getSequenceNumber());
             FileChecksum updatedFileChecksum = session.getChecksumStore().updateFileChecksum(fileChecksum);
@@ -229,12 +261,12 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                 File copiedFile = null != targetFile ? session.getStorage().copyFile(sourceFile, targetFile) :
                     session.getStorage().copyFile(sourceFile, action.getNewVersion().getName(), path);
                 FileChecksum insertedFileChecksum = session.getChecksumStore().insertFileChecksum(new FileChecksum(
-                    IDUtil.getFileID(copiedFile), copiedFile.getVersion(), copiedFile.getSequenceNumber(), sourceVersion.getChecksum()));
+                    DriveUtils.getFileID(copiedFile), copiedFile.getVersion(), copiedFile.getSequenceNumber(), sourceVersion.getChecksum()));
                 action.setResultingVersion(new ServerFileVersion(copiedFile, insertedFileChecksum));
             } catch (OXException e) {
                 if ("FLS-0017".equals(e.getErrorCode())) {
                     // not found
-                    session.getChecksumStore().removeFileChecksums(IDUtil.getFileID(sourceFile));
+                    session.getChecksumStore().removeFileChecksums(DriveUtils.getFileID(sourceFile));
                 }
                 throw e;
             }
@@ -265,7 +297,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                     versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
                 if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
                     // moved successfully, update checksum
-                    fileChecksum.setFileID(IDUtil.getFileID(removedFile));
+                    fileChecksum.setFileID(DriveUtils.getFileID(removedFile));
                     fileChecksum.setVersion(removedFile.getVersion());
                     fileChecksum.setSequenceNumber(removedFile.getSequenceNumber());
                     session.getChecksumStore().updateFileChecksum(fileChecksum);
@@ -369,7 +401,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
                             versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
                         if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
                             // moved successfully, update checksum
-                            fileChecksum.setFileID(IDUtil.getFileID(removedFile));
+                            fileChecksum.setFileID(DriveUtils.getFileID(removedFile));
                             fileChecksum.setVersion(removedFile.getVersion());
                             fileChecksum.setSequenceNumber(removedFile.getSequenceNumber());
                             checksumsToUpdate.add(fileChecksum);

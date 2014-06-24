@@ -59,7 +59,7 @@ import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.comparison.ServerFileVersion;
-import com.openexchange.drive.internal.IDUtil;
+import com.openexchange.drive.internal.DriveUtils;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -269,7 +269,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                         versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
                     if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
                         // moved successfully, update checksum
-                        fileChecksum.setFileID(IDUtil.getFileID(removedFile));
+                        fileChecksum.setFileID(DriveUtils.getFileID(removedFile));
                         fileChecksum.setVersion(removedFile.getVersion());
                         fileChecksum.setSequenceNumber(removedFile.getSequenceNumber());
                         checksumsToUpdate.add(fileChecksum);
