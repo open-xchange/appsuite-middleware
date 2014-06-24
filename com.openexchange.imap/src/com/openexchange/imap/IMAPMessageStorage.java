@@ -374,6 +374,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return imapStore;
     }
 
+    /**
+     * Handles specified {@link MessagingException} instance.
+     *
+     * @param e The {@link MessagingException} instance
+     * @return The appropriate {@link OXException} instance
+     */
+    public OXException handleMessagingException(final MessagingException e) {
+        return IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
+    }
+
     @Override
     public void clearCache() throws OXException {
         IMAPFolderWorker.clearCache(imapFolder);
