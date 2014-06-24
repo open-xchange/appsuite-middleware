@@ -735,6 +735,11 @@ public final class InternalList {
         // Ensures that each folder located below a user's default infostore trash folder is of type 16
         list.add(new com.openexchange.groupware.update.tasks.FolderInheritTrashFolderTypeTask());
 
+        // +++++++++++++++++++++++++++++++++ Version 7.6.1 starts here. +++++++++++++++++++++++++++++++++
+
+        // Removes invalid priority values from tasks
+        list.add(new com.openexchange.groupware.update.tasks.TasksDeleteInvalidPriorityTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }

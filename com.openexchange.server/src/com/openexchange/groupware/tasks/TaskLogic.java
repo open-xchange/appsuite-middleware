@@ -122,6 +122,7 @@ public final class TaskLogic {
         checkPrivateFlag(task.getPrivateFlag(), false, participants, null);
         checkParticipants(participants);
         checkRecurrence(task, null);
+        checkPriority(task);
     }
 
     /**
@@ -163,6 +164,7 @@ public final class TaskLogic {
         final Set<TaskParticipant> destParts = changedParts ? newParts : oldParts;
         checkParticipants(destParts);
         checkRecurrence(task, oldTask);
+        checkPriority(task);
     }
 
     /**
@@ -393,6 +395,19 @@ public final class TaskLogic {
         }
         // Move first due date to first occurrence like appointments do.
         moveToFirstOccurrence(task);
+    }
+
+    /**
+     * Verifies that the priority of tasks is only in the allowed range.
+     * @param task task that priority should be tested.
+     * @throws OXException if task contains an invalid priority value.
+     */
+    private static void checkPriority(Task task) throws OXException {
+        if (task.containsPriority()) {
+            if (task.getPriority() < Task.LOW || task.getPriority() > Task.HIGH) {
+                throw TaskExceptionCode.INVALID_PRIORITY.create(I(task.getPriority()));
+            }
+        }
     }
 
     /**

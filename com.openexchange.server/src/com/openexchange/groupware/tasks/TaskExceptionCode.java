@@ -254,10 +254,13 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
         Category.CATEGORY_USER_INPUT, 55),
 
     /** Can not determine delegator of task %1$d. */
-    UNKNOWN_DELEGATOR("Can not determine delegator of task %1$d.", Category.CATEGORY_ERROR, 56);
+    UNKNOWN_DELEGATOR("Can not determine delegator of task %1$d.", Category.CATEGORY_ERROR, 56),
+
+    /** Priority is %d but mist be between 1 and 3. */
+    INVALID_PRIORITY(TaskExceptionMessage.INVALID_PRIORITY_MSG, TaskExceptionMessage.INVALID_PRIORITY_MSG, Category.CATEGORY_USER_INPUT, 57);
 
     private String message;
-    
+
     private String displayMessage;
 
     private Category category;
@@ -270,7 +273,7 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
         this.category = category;
         this.number = number;
     }
-    
+
     private TaskExceptionCode(String message, Category category, int number) {
         this(message, null, category, number);
     }
@@ -284,7 +287,7 @@ public enum TaskExceptionCode implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;
