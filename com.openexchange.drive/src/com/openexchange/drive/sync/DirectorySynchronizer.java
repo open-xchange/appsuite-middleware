@@ -64,16 +64,14 @@ import com.openexchange.drive.actions.SyncDirectoryAction;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
+import com.openexchange.drive.internal.DriveUtils;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.management.DriveConfig;
-import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.java.Strings;
 
 
 /**
@@ -190,7 +188,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 return 2;
             }
         case NEW:
-            if (isInvalidPath(comparison.getClientVersion().getPath())) {
+            if (DriveUtils.isInvalidPath(comparison.getClientVersion().getPath())) {
                 /*
                  * invalid path, indicate as error with quarantine flag
                  */
@@ -199,7 +197,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 result.addActionForClient(new ErrorDirectoryAction(
                     null, comparison.getClientVersion(), comparison, e, true, false));
                 return 1;
-            } else if (isIgnoredPath(comparison.getClientVersion().getPath())) {
+            } else if (DriveUtils.isIgnoredPath(session, comparison.getClientVersion().getPath())) {
                 /*
                  * ignored path, indicate as error with quarantine flag
                  */
@@ -420,50 +418,6 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
             }
         } while (0 < idx);
         return DriveConstants.ROOT_PATH;
-    }
-
-    /**
-     * Gets a value indicating whether the supplied path is invalid, i.e. it contains illegal characters or is not supported for
-     * other reasons.
-     *
-     * @param path The path to check
-     * @return <code>true</code> if the path is considered invalid, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    private static boolean isInvalidPath(String path) throws OXException {
-        if (Strings.isEmpty(path)) {
-            return true; // no empty paths
-        }
-        if (false == DriveConstants.PATH_VALIDATION_PATTERN.matcher(path).matches()) {
-            return true; // no invalid paths
-        }
-        for (String pathSegment : DriveStorage.split(path)) {
-            if (DriveConstants.MAX_PATH_SEGMENT_LENGTH < pathSegment.length()) {
-                return true; // no too long paths
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets a value indicating whether the supplied path is ignored, i.e. it is excluded from synchronization by definition.
-     *
-     * @param path The path to check
-     * @return <code>true</code> if the path is considered to be ignored, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    private boolean isIgnoredPath(String path) throws OXException {
-        if (DriveConstants.TEMP_PATH.equalsIgnoreCase(path)) {
-            return true; // no temp path
-        }
-        if (session.getStorage().hasTrashFolder()) {
-            FileStorageFolder trashFolder = session.getStorage().getTrashFolder();
-            String trashPath = session.getStorage().getPath(trashFolder.getId());
-            if (null != trashPath && trashPath.equals(path)) {
-                return true; // no trash path
-            }
-        }
-        return false;
     }
 
 }

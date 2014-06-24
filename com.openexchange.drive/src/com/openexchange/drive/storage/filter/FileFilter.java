@@ -1,7 +1,9 @@
 package com.openexchange.drive.storage.filter;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link StorageFileFilter}
@@ -20,5 +22,23 @@ public interface FileFilter {
      * @throws OXException
      */
     boolean accept(File file) throws OXException;
+
+    /**
+     * Finds all files from the supplied search iterator that are accepted by this filter.
+     *
+     * @param searchIterator The search iterator to browse
+     * @return The accepted files, or an empty list of there are none
+     * @throws OXException
+     */
+    List<File> findAll(SearchIterator<File> searchIterator) throws OXException;
+
+    /**
+     * Finds the first file from the supplied search iterator that is accepted by this filter.
+     *
+     * @param searchIterator The search iterator to browse
+     * @return The first accepted file, or <code>null</code> if none was found
+     * @throws OXException
+     */
+    File find(SearchIterator<File> searchIterator) throws OXException;
 
 }

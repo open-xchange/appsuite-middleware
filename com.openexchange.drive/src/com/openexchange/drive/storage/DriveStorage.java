@@ -65,12 +65,11 @@ import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveStrings;
 import com.openexchange.drive.internal.DriveServiceLookup;
+import com.openexchange.drive.internal.DriveUtils;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.drive.storage.filter.FileNameFilter;
-import com.openexchange.drive.storage.filter.Filter;
-import com.openexchange.drive.storage.filter.SynchronizedFileFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
@@ -569,18 +568,21 @@ public class DriveStorage {
         if (null == folder.getOwnPermission() || FileStoragePermission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
             return Collections.emptyList();
         }
-        SearchIterator<File> filesIterator = searchDocuments(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS);
+        FileNameFilter filter;
         if (all) {
-            return Filter.apply(filesIterator, new FileNameFilter() {
+            filter = FileNameFilter.ACCEPT_ALL;
+        } else {
+            final String path = getPath(folderID);
+            filter = new FileNameFilter() {
 
                 @Override
                 protected boolean accept(String fileName) throws OXException {
-                    return null != fileName && false == Strings.isEmpty(fileName);
+                    return false == DriveUtils.isInvalidFileName(fileName) &&
+                        false == DriveUtils.isIgnoredFileName(session, path, fileName);
                 }
-            });
-        } else {
-            return Filter.apply(filesIterator, SynchronizedFileFilter.getInstance());
+            };
         }
+        return filter.findAll(searchDocuments(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS));
     }
 
     /**
@@ -634,24 +636,12 @@ public class DriveStorage {
     }
 
     private File findFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
-        List<File> files = Filter.apply(searchDocuments(getFolderID(path), name, fields), new FileNameFilter() {
-
-            @Override
-            protected boolean accept(String fileName) throws OXException {
-                return name.equals(fileName) || normalizeFileNames && PathNormalizer.equals(name, fileName);
-            }
-        });
+        List<File> files = FileNameFilter.byName(name, normalizeFileNames).findAll(searchDocuments(getFolderID(path), name, fields));
         return selectFile(files, name);
     }
 
     private File getFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
-        List<File> files = Filter.apply(getDocuments(getFolderID(path), name, fields), new FileNameFilter() {
-
-            @Override
-            protected boolean accept(String fileName) throws OXException {
-                return name.equals(fileName) || normalizeFileNames && PathNormalizer.equals(name, fileName);
-            }
-        });
+        List<File> files = FileNameFilter.byName(name, normalizeFileNames).findAll(getDocuments(getFolderID(path), name, fields));
         return selectFile(files, name);
     }
 

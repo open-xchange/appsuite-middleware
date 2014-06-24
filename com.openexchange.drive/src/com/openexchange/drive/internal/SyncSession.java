@@ -297,8 +297,11 @@ public class SyncSession {
                 Map<String, FileStorageFolder> folders = getStorage().getFolders();
                 List<String> folderIDs = new ArrayList<String>(folders.size());
                 for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
-                    if (false == DriveConstants.PATH_VALIDATION_PATTERN.matcher(entry.getKey()).matches()) {
+                    String path = entry.getKey();
+                    if (DriveUtils.isInvalidPath(path)) {
                         trace("Skipping invalid server directory: " + entry.getKey());
+                    } else if (DriveUtils.isIgnoredPath(syncSession, path)) {
+                        trace("Skipping ignored server directory: " + entry.getKey());
                     } else {
                         folderIDs.add(entry.getValue().getId());
                     }

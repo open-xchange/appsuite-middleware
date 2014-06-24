@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,50 +54,48 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
-public class Filter {
+/**
+ * {@link DefaultFileFilter}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public abstract class DefaultFileFilter implements FileFilter {
 
-    public static List<File> apply(SearchIterator<File> searchIterator, FileFilter filter) throws OXException {
+    @Override
+    public List<File> findAll(SearchIterator<File> searchIterator) throws OXException {
         List<File> files = new ArrayList<File>();
         if (null != searchIterator) {
             try {
                 while (searchIterator.hasNext()) {
                     File file = searchIterator.next();
-                    if (filter.accept(file)) {
+                    if (accept(file)) {
                         files.add(file);
                     }
                 }
             } finally {
-                close(searchIterator);
+                SearchIterators.close(searchIterator);
             }
         }
         return files;
     }
 
-    public static File find(SearchIterator<File> searchIterator, FileFilter filter) throws OXException {
+    @Override
+    public File find(SearchIterator<File> searchIterator) throws OXException {
         if (null != searchIterator) {
             try {
                 while (searchIterator.hasNext()) {
                     File file = searchIterator.next();
-                    if (filter.accept(file)) {
+                    if (accept(file)) {
                         return file;
                     }
                 }
             } finally {
-                close(searchIterator);
+                SearchIterators.close(searchIterator);
             }
         }
         return null;
-    }
-
-    private static void close(SearchIterator<?> searchIterator) {
-        if (null != searchIterator) {
-            try {
-                searchIterator.close();
-            } catch (OXException e) {
-                // ignore
-            }
-        }
     }
 
 }

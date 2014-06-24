@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.drive.DriveAction;
-import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
@@ -67,13 +66,13 @@ import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
+import com.openexchange.drive.internal.DriveUtils;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.internal.UploadHelper;
 import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.java.Strings;
 
 
 /**
@@ -287,14 +286,14 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
              * new on client
              */
             if (mayCreate()) {
-                if (isInvalidName(comparison.getClientVersion().getName())) {
+                if (DriveUtils.isInvalidFileName(comparison.getClientVersion().getName())) {
                     /*
                      * invalid name, indicate as error with quarantine flag
                      */
                     result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
                         DriveExceptionCodes.INVALID_FILENAME.create(comparison.getClientVersion().getName()), true));
                     return 1;
-                } else if (isIgnoredName(comparison.getClientVersion().getName())) {
+                } else if (DriveUtils.isIgnoredFileName(session, path, comparison.getClientVersion().getName())) {
                     /*
                      * ignored file, indicate as error with quarantine flag
                      */
@@ -456,44 +455,6 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             folderPermission = session.getStorage().getOwnPermission(path);
         }
         return folderPermission;
-    }
-
-    /**
-     * Gets a value indicating whether the supplied filename is invalid, i.e. it contains illegal characters or is not supported for
-     * other reasons.
-     *
-     * @param fileName The filename to check
-     * @return <code>true</code> if the filename is considered invalid, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    private static boolean isInvalidName(String fileName) throws OXException {
-        if (Strings.isEmpty(fileName)) {
-            return true; // no empty filenames
-        }
-        if (false == DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
-            return true; // no invalid filenames
-        }
-        if (DriveConstants.MAX_PATH_SEGMENT_LENGTH < fileName.length()) {
-            return true; // no too long filenames
-        }
-        return false;
-    }
-
-    /**
-     * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition.
-     *
-     * @param fileName The filename to check
-     * @return <code>true</code> if the filename is considered to be ignored, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    private static boolean isIgnoredName(String fileName) throws OXException {
-        if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
-            return true; // no temporary upload files
-        }
-        if (DriveConfig.getInstance().getExcludedFilenamesPattern().matcher(fileName).matches()) {
-            return true; // no excluded files
-        }
-        return false;
     }
 
 }
