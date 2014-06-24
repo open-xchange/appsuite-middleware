@@ -138,6 +138,7 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
                     fields.add(UserField.FIRST_NAME);
                     fields.add(UserField.LAST_NAME);
                     fields.add(UserField.PHOTO_URLS);
+                    fields.add(UserField.PERMALINK);
                     try {
                         Path shortestPath = api.getShortestPath(sessionUserId, userInfo.getId(), fields);
                         result.setShortestPath(shortestPath);
