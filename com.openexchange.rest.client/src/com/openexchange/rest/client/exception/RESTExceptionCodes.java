@@ -49,8 +49,12 @@
 
 package com.openexchange.rest.client.exception;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -103,7 +107,17 @@ public enum RESTExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An error occurred: "%1$s"
      */
-    ERROR("An error occurred: \"%1$s\"", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 10), ;
+    ERROR("An error occurred: \"%1$s\"", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 10),
+    /**
+     * Unauthorized
+     */
+    UNAUTHORIZED("Unauthorized", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 11),
+    /**
+     * Error parsing following response body: "%1$s".
+     */
+    PARSE_ERROR("Error parsing following response body: \"%1$s\".", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 12),
+
+    ;
 
     private static final String PREFIX = "OX-REST";
 
@@ -203,6 +217,55 @@ public enum RESTExceptionCodes implements DisplayableOXExceptionCode {
     }
 
     /**
+     * Creates a new {@link RESTOXException} from the specified {@link HttpResponse}
+     * 
+     * @param response The {@link HttpResponse} object
+     * @return The newly created {@link RESTOXException} instance
+     */
+    public OXException create(final HttpResponse response) {
+        return new RESTOXException(response);
+    }
+
+    /**
+     * Creates a new {@link RESTOXException} from the specified {@link HttpResponse} and the result object
+     * 
+     * @param response The {@link HttpResponse} object
+     * @param rest A Map of String to Object.
+     * @return The newly created {@link RESTOXException} instance
+     */
+    public OXException create(final HttpResponse response, final Object rest) {
+        return new RESTOXException(response, rest);
+    }
+
+    /**
+     * Stringifies a response. Usually called when the REST client fails to parse a response from the server
+     * 
+     * @param reader
+     * @return
+     */
+    public static String stringifyBody(BufferedReader reader) {
+        String inputLine = null;
+
+        try {
+            if (reader != null) {
+                reader.reset();
+            }
+        } catch (IOException ioe) {
+        }
+        StringBuffer result = new StringBuffer();
+        try {
+            if (reader != null) {
+                while ((inputLine = reader.readLine()) != null) {
+                    result.append(inputLine);
+                }
+            }
+        } catch (IOException e) {
+        }
+
+        return result.toString();
+    }
+
+    /**
      * Whether the given response is valid when it has no body (only some error codes are allowed without a reason, currently 302 and 304).
      * 
      * @param response The {@link HttpResponse} object
@@ -248,4 +311,105 @@ public enum RESTExceptionCodes implements DisplayableOXExceptionCode {
         return value;
     }
 
+    /**
+     * Wraps any non-200 HTTP responses from an API call. See the constants in the {@HTTPResponseCodes} class for the
+     * meaning of each error code.
+     */
+    private static final class RESTOXException extends OXException {
+
+        private static class Error {
+
+            /** English version of the error. */
+            public String error;
+
+            /** The error in the user's locale, if intended to be displayed to the user. */
+            public String userError;
+
+            public Map<String, Object> fields;
+
+            @SuppressWarnings("unchecked")
+            public Error(Map<String, Object> map) {
+                fields = map;
+                Object err = map.get("error");
+                if (err instanceof String) {
+                    error = (String) err;
+                } else if (err instanceof Map<?, ?>) {
+                    Map<String, Object> detail = (Map<String, Object>) err;
+                    for (Object val : detail.values()) {
+                        if (val instanceof String) {
+                            error = (String) val;
+                        }
+                    }
+                }
+                Object uerr = map.get("user_error");
+                if (uerr instanceof String) {
+                    userError = (String) uerr;
+                }
+
+            }
+        }
+
+        private static final long serialVersionUID = -4971138851658897323L;
+
+        private int error;
+
+        private String reason;
+
+        private String server;
+
+        private String location;
+
+        private Map<String, Object> parsedResponse;
+
+        private Error body;
+
+        /**
+         * Initializes a new {@link RESTOXException}.
+         * 
+         * @param response The {@link HttpResponse}
+         */
+        protected RESTOXException(final HttpResponse response) {
+            this.fillInStackTrace();
+            StatusLine status = response.getStatusLine();
+            error = status.getStatusCode();
+            reason = status.getReasonPhrase();
+            server = getHeader(response, "server");
+            location = getHeader(response, "location");
+        }
+
+        /**
+         * Initializes a new {@link RESTOXException}.
+         * 
+         * @param response The {@link HttpResponse}
+         * @param rest A Map of String to Object.
+         */
+        @SuppressWarnings("unchecked")
+        protected RESTOXException(final HttpResponse response, final Object rest) {
+            this(response);
+
+            if (rest != null && rest instanceof Map<?, ?>) {
+                parsedResponse = (Map<String, Object>) rest;
+                body = new Error(parsedResponse);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "RESTOXException (" + server + "): " + error + " " + reason + " (" + (body == null ? "" : body.error) + ")";
+        }
+
+        @Override
+        public String getMessage() {
+            return toString();
+        }
+
+        /**
+         * Gets the HTTP error code
+         * 
+         * @return The HTTP error code
+         */
+        public int getError() {
+            return error;
+        }
+    }
 }

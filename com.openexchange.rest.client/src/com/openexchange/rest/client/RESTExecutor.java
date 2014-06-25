@@ -51,10 +51,12 @@ package com.openexchange.rest.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
 import javax.net.ssl.SSLException;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.EncoderException;
@@ -76,13 +78,16 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.API.RequestAndResponse;
+import com.openexchange.rest.client.exception.HTTPResponseCodes;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.session.Session;
 import com.openexchange.rest.client.session.Session.ProxyInfo;
@@ -331,17 +336,16 @@ public class RESTExecutor {
         } catch (final IOException e) {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e);
         } catch (final JSONException e) {
-            // TODO exception handling
-            /*if (XingServerException.isValidWithNullBody(response)) {
+            if (RESTExceptionCodes.isValidWithNullBody(response)) {
                 // We have something from the server, but it's an error with no reason
-                throw new XingServerException(response);
+                throw RESTExceptionCodes.ERROR.create(response);
             }
-            // This is from Xing, and we shouldn't be getting it
-            String body = XingParseException.stringifyBody(bin);
+            // This is from the REST server, and we shouldn't be getting it
+            final String body = RESTExceptionCodes.stringifyBody(bin);
             if (Strings.isEmpty(body)) {
-                throw new XingServerException(response, result);
+                throw RESTExceptionCodes.ERROR.create(response, result);
             }
-            throw new XingParseException("failed to parse: " + body);
+            throw RESTExceptionCodes.PARSE_ERROR.create(body);
         } catch (final OutOfMemoryError e) {
             throw RESTExceptionCodes.OOM_EXCEPTION.create(e);
         } finally {
@@ -351,9 +355,9 @@ public class RESTExecutor {
         final int statusCode = response.getStatusLine().getStatusCode();
         if (false == expectedStatusCodes.contains(statusCode)) {
             if (statusCode == HTTPResponseCodes._401_UNAUTHORIZED) {
-                throw new XingUnlinkedException();
+                throw RESTExceptionCodes.UNAUTHORIZED.create();
             }
-            throw new XingServerException(response, result);*/
+            throw RESTExceptionCodes.ERROR.create(response, result);
         }
 
         return result;
