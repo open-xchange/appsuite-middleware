@@ -52,6 +52,7 @@ package com.openexchange.mail.dataobjects;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -522,6 +523,22 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Adds email addresses to <i>From</i>.
+     *
+     * @param addrs The addresses
+     */
+    public void addFrom(final Collection<InternetAddress> addrs) {
+        if (null == addrs) {
+            b_from = true;
+            return;
+        } else if (null == from) {
+            from = new LinkedHashSet<InternetAddress>();
+            b_from = true;
+        }
+        from.addAll(addrs);
+    }
+
+    /**
      * @return <code>true</code> if <i>From</i> is set; otherwise <code>false</code>
      */
     public boolean containsFrom() {
@@ -586,6 +603,22 @@ public abstract class MailMessage extends MailPart {
             b_to = true;
         }
         to.addAll(Arrays.asList(addrs));
+    }
+
+    /**
+     * Adds email addresses to <i>To</i>
+     *
+     * @param addrs The addresses
+     */
+    public void addTo(final Collection<InternetAddress> addrs) {
+        if (null == addrs) {
+            b_to = true;
+            return;
+        } else if (null == to) {
+            to = new LinkedHashSet<InternetAddress>();
+            b_to = true;
+        }
+        to.addAll(addrs);
     }
 
     /**
@@ -656,6 +689,22 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Adds email addresses to <i>Cc</i>
+     *
+     * @param addrs The addresses
+     */
+    public void addCc(final Collection<InternetAddress> addrs) {
+        if (null == addrs) {
+            b_cc = true;
+            return;
+        } else if (null == cc) {
+            cc = new LinkedHashSet<InternetAddress>();
+            b_cc = true;
+        }
+        cc.addAll(addrs);
+    }
+
+    /**
      * @return <code>true</code> if <i>Cc</i> is set; otherwise <code>false</code>
      */
     public boolean containsCc() {
@@ -723,6 +772,22 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Adds email addresses to <i>Bcc</i>
+     *
+     * @param addrs The addresses
+     */
+    public void addBcc(final Collection<InternetAddress> addrs) {
+        if (null == addrs) {
+            b_bcc = true;
+            return;
+        } else if (null == bcc) {
+            bcc = new LinkedHashSet<InternetAddress>();
+            b_bcc = true;
+        }
+        bcc.addAll(addrs);
+    }
+
+    /**
      * @return <code>true</code> if <i>Bcc</i> is set; otherwise <code>false</code>
      */
     public boolean containsBcc() {
@@ -787,6 +852,22 @@ public abstract class MailMessage extends MailPart {
             b_replyTo = true;
         }
         replyTo.addAll(Arrays.asList(addrs));
+    }
+
+    /**
+     * Adds email addresses to <i>Reply-To</i>
+     *
+     * @param addrs The addresses
+     */
+    public void addReplyTo(final Collection<InternetAddress> addrs) {
+        if (null == addrs) {
+            b_replyTo = true;
+            return;
+        } else if (null == replyTo) {
+            replyTo = new LinkedHashSet<InternetAddress>();
+            b_replyTo = true;
+        }
+        replyTo.addAll(addrs);
     }
 
     /**
@@ -1188,6 +1269,23 @@ public abstract class MailMessage extends MailPart {
      * @param userFlags The user flags to add
      */
     public void addUserFlags(final String[] userFlags) {
+        if (userFlags == null) {
+            return;
+        } else if (this.userFlags == null) {
+            this.userFlags = new HashSet<HeaderName>();
+            b_userFlags = true;
+        }
+        for (String userFlag : userFlags) {
+            this.userFlags.add(HeaderName.valueOf(userFlag));
+        }
+    }
+
+    /**
+     * Adds given user flags
+     *
+     * @param userFlags The user flags to add
+     */
+    public void addUserFlags(final Collection<String> userFlags) {
         if (userFlags == null) {
             return;
         } else if (this.userFlags == null) {
