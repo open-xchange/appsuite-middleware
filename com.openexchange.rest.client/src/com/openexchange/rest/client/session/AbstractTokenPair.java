@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.client.session;
 
+import java.io.Serializable;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 
@@ -57,11 +58,13 @@ import com.openexchange.rest.client.exception.RESTExceptionCodes;
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractTokenPair {
+public abstract class AbstractTokenPair implements Serializable {
 
-    private final String key;
+    private static final long serialVersionUID = 6343407953200747797L;
 
-    private final String secret;
+    protected final String key;
+
+    protected final String secret;
 
     /**
      * Initializes a new {@link AbstractTokenPair}.
