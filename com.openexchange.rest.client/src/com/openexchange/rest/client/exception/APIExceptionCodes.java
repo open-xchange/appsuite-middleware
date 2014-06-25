@@ -62,7 +62,7 @@ import com.openexchange.exception.OXExceptionStrings;
  */
 public enum APIExceptionCodes implements DisplayableOXExceptionCode {
     /**
-     * Session must not be null
+     * Session must not be null.
      */
     SESSION_NULL("Session must not be null.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 1),
     /**
@@ -73,6 +73,18 @@ public enum APIExceptionCodes implements DisplayableOXExceptionCode {
      * The specified encoding \"%1$s\" is unsupported.
      */
     UNSUPPORTED_ENCODING("The specified encoding \"%1$s\" is unsupported.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 3),
+    /**
+     * The "key" must not be null.
+     */
+    KEY_NULL("The \"key\" must not be null.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 4),
+    /**
+     * The "secret" must not be null.
+     */
+    SECRET_NULL("The \"secret\" must not be null.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 5),
+    /**
+     * The character "%1$s" is illegal for "%2$s".
+     */
+    ILLEGAL_CHARACTER("The character \"%1$s\" is illegal for key: \"%2$s\"", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 6),
     ;
 
     private static final String PREFIX = "OX-REST";

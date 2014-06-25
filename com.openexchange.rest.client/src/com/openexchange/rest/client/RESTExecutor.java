@@ -81,7 +81,7 @@ public class RESTExecutor {
     public static enum Method {
         PUT, GET, POST, DELETE;
     }
-    
+
     private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.UTF_8);
 
     /**
@@ -89,6 +89,66 @@ public class RESTExecutor {
      */
     private RESTExecutor() {
         super();
+    }
+
+    /**
+     * Creates and sends a request to the REST API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
+     * {@link HttpResponse}.
+     * 
+     * @param method The HTTP {@link Method}
+     * @param host The host on which resides the REST API (i.e., API server, content server, or web server).
+     * @param path The URL path starting with a '/'.
+     * @param apiVersion The optional API version to use. Or <code>-1</code> to ignore
+     * @param params Any URL parameters in a String array. with the even numbered elements the parameter names and odd numbered elements the
+     *            values, e.g. <code>new String[] {"path", "/Public", "locale", "en"}</code>.
+     * @param requestInformation The request's JSON object
+     * @param session The {@link Session} to use for this request.
+     * @return A parsed JSON object, either a {@link Map} or a {@link JSONArray}
+     * @throws OXException TODO define exceptions
+     */
+    public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String[] params, final JSONObject requestInformation, final Session session) throws OXException {
+        final HttpRequestBase req;
+        switch (method) {
+        case PUT: {
+            final HttpPut put = new HttpPut(buildURL(host, apiVersion, path, params));
+            if (null != requestInformation) {
+                put.setEntity(new InputStreamEntity(
+                    new JSONInputStream(requestInformation, CharEncoding.UTF_8),
+                    -1L,
+                    ContentType.APPLICATION_JSON));
+            }
+            req = put;
+        }
+            break;
+        case POST: {
+            final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
+            if (null != requestInformation) {
+                try {
+                    final int contentLength = requestInformation.toString().getBytes(CharEncoding.UTF_8).length;
+                    post.setEntity(new InputStreamEntity(
+                        new JSONInputStream(requestInformation, CharEncoding.UTF_8),
+                        contentLength,
+                        ContentType.APPLICATION_JSON));
+                } catch (UnsupportedEncodingException e) {
+                    throw APIExceptionCodes.UNSUPPORTED_ENCODING.create(CharEncoding.UTF_8);
+                }
+            }
+            req = post;
+        }
+            break;
+        case GET:
+            req = new HttpGet(buildURL(host, apiVersion, path, params));
+            break;
+        case DELETE:
+            req = new HttpDelete(buildURL(host, apiVersion, path, params));
+            break;
+        default:
+            throw APIExceptionCodes.UNSUPPORTED_METHOD.create(method);
+        }
+        // Sign request
+        session.sign(req);
+        final HttpResponse resp = execute(session, req);
+        return new RequestAndResponse(req, resp);
     }
 
     /**
@@ -101,7 +161,7 @@ public class RESTExecutor {
      *            values, e.g. <code>new String[] {"path", "/Public", "locale", "en"}</code>.
      * @return A full URL for making a request.
      */
-    public static String buildURL(final String host, final int apiVersion, final String target, final String[] params) {
+    private static String buildURL(final String host, final int apiVersion, final String target, final String[] params) {
         String trgt = new String();
         if (Strings.isEmpty(target)) {
             if (params != null && params.length > 0) {
@@ -141,60 +201,6 @@ public class RESTExecutor {
     }
 
     /**
-     * Creates and sends a request to the REST API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
-     * {@link HttpResponse}.
-     * 
-     * @param method The HTTP {@link Method}
-     * @param host The host on which resides the REST API (i.e., API server, content server, or web server).
-     * @param path The URL path starting with a '/'.
-     * @param apiVersion The optional API version to use. Or <code>-1</code> to ignore
-     * @param params Any URL parameters in a String array. with the even numbered elements the parameter names and odd numbered elements the
-     *            values, e.g. <code>new String[] {"path", "/Public", "locale", "en"}</code>.
-     * @param requestInformation The request's JSON object
-     * @param session The {@link Session} to use for this request.
-     * @return A parsed JSON object, either a {@link Map} or a {@link JSONArray}
-     * @throws OXException TODO define exceptions
-     */
-    public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String[] params, final JSONObject requestInformation, final Session session) throws OXException {
-        final HttpRequestBase req;
-        switch (method) {
-        case PUT: {
-            final HttpPut put = new HttpPut(buildURL(host, apiVersion, path, params));
-            if (null != requestInformation) {
-                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, CharEncoding.UTF_8), -1L, ContentType.APPLICATION_JSON));
-            }
-            req = put;
-        }
-            break;
-        case POST: {
-            final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
-            if (null != requestInformation) {
-                try {
-                    final int contentLength = requestInformation.toString().getBytes(CharEncoding.UTF_8).length;
-                    post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, CharEncoding.UTF_8), contentLength, ContentType.APPLICATION_JSON));
-                } catch (UnsupportedEncodingException e) {
-                    throw APIExceptionCodes.UNSUPPORTED_ENCODING.create(CharEncoding.UTF_8);
-                }
-            }
-            req = post;
-        }
-            break;
-        case GET:
-            req = new HttpGet(buildURL(host, apiVersion, path, params));
-            break;
-        case DELETE:
-            req = new HttpDelete(buildURL(host, apiVersion, path, params));
-            break;
-        default:
-            throw APIExceptionCodes.UNSUPPORTED_METHOD.create(method);
-        }
-        // Sign request
-        session.sign(req);
-        final HttpResponse resp = execute(session, req);
-        return new RequestAndResponse(req, resp);
-    }
-
-    /**
      * Executes an {@link HttpUriRequest} with the given {@link Session} and returns an {@link HttpResponse}.
      * 
      * @param session The {@link Session} to use for this request.
@@ -202,7 +208,7 @@ public class RESTExecutor {
      * @return An {@link HttpResponse}.
      * @throws OXException TODO define exceptions
      */
-    public static HttpResponse execute(final Session session, final HttpUriRequest req) throws OXException {
+    private static HttpResponse execute(final Session session, final HttpUriRequest req) throws OXException {
         return execute(session, req, -1);
     }
 
@@ -215,7 +221,7 @@ public class RESTExecutor {
      * @return An {@link HttpResponse}.
      * @throws OXException TODO define exceptions
      */
-    public static HttpResponse execute(final Session session, final HttpUriRequest req, final int socketTimeoutOverrideMs) throws OXException {
+    private static HttpResponse execute(final Session session, final HttpUriRequest req, final int socketTimeoutOverrideMs) throws OXException {
         // TODO
         return null;
     }
@@ -273,7 +279,7 @@ public class RESTExecutor {
      * @param s A string to encode
      * @return The encoded string
      */
-    public static final String encodeUrl(String s) {
+    private static final String encodeUrl(String s) {
         try {
             return Strings.isEmpty(s) ? s : URL_CODEC.encode(s);
         } catch (EncoderException e) {
