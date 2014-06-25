@@ -243,7 +243,8 @@ public class EffectivePermission extends OCLPermission {
     @Override
     public int getWritePermission() {
         if ((GAB == getFuid()) && OXFolderProperties.isEnableInternalUsersEdit()) {
-            return WRITE_OWN_OBJECTS;
+            int writePermission = super.getWritePermission();
+            return writePermission <= NO_PERMISSIONS ? WRITE_OWN_OBJECTS : writePermission;
         }
         if (validateUserConfig()) {
             if (!hasModuleAccess(folderModule)) {
