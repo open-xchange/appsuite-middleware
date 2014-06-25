@@ -50,6 +50,7 @@
 package com.openexchange.user.internal.mapping;
 
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 
 /**
@@ -70,6 +71,12 @@ public final class IMAPServerMapping extends VarCharMapping<User> {
 
     @Override
     public void set(User user, String value) {
+        // Normally this method should only be called on objects created by {@link UserMapper#newInstance()}.
+        if (user instanceof UserImpl) {
+            ((UserImpl) user).setImapServer(value);
+        } else {
+            throw new UnsupportedOperationException("com.openexchange.groupware.ldap.User.setImapServer(String)");
+        }
         throw new UnsupportedOperationException();
     }
 

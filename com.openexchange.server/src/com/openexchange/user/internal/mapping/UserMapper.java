@@ -51,6 +51,7 @@ package com.openexchange.user.internal.mapping;
 
 import java.util.EnumMap;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 
@@ -63,7 +64,7 @@ public final class UserMapper extends DefaultDbMapper<User, UserField> {
 
     @Override
     public User newInstance() {
-        throw new UnsupportedOperationException();
+        return new UserImpl();
     }
 
     @Override
@@ -74,7 +75,6 @@ public final class UserMapper extends DefaultDbMapper<User, UserField> {
     @Override
     protected EnumMap<UserField, ? extends DbMapping<? extends Object, User>> createMappings() {
         EnumMap<UserField, DbMapping<? extends Object, User>> mapping = new EnumMap<UserField, DbMapping<? extends Object, User>>(UserField.class);
-
         mapping.put(UserField.IMAP_SERVER, new IMAPServerMapping());
         mapping.put(UserField.IMAP_LOGIN, new IMAPLoginMapping());
         mapping.put(UserField.PREFERRED_LANGUAGE, new PreferredLanguageMapping());
