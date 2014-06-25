@@ -51,6 +51,8 @@ package com.openexchange.rest.client;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import com.openexchange.exception.OXException;
+import com.openexchange.rest.client.exception.APIExceptionCodes;
 import com.openexchange.rest.client.session.Session;
 
 /**
@@ -64,10 +66,12 @@ public abstract class API<S extends Session> {
 
     /**
      * Initializes a new {@link API}.
+     * 
+     * @throws OXException if the specified session is null.
      */
-    public API(final S session) {
+    public API(final S session) throws OXException {
         if (session == null) {
-            throw new IllegalArgumentException("Session must not be null.");
+            throw APIExceptionCodes.SESSION_NULL.create();
         }
         this.session = session;
     }
