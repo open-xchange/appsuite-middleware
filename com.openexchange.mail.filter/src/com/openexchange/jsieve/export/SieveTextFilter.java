@@ -95,16 +95,29 @@ public final class SieveTextFilter {
      *
      */
     public class ClientRulesAndRequire {
-        
-        private final Map<String, List<Rule>> flaggedRules;
-        
+
+        private Map<String, List<Rule>> flaggedRules;
+
         private final List<Rule> rules;
 
         private final HashSet<String> require;
 
         /**
+         * Represents a list of client rules
+         * 
          * @param rules
          * @param require
+         */
+        public ClientRulesAndRequire(final HashSet<String> require, final List<Rule> rules) {
+            this.require = require;
+            this.rules = rules;
+        }
+
+        /**
+         * Represents a flagged list of client rules
+         * 
+         * @param rules
+         * @param flagged
          */
         public ClientRulesAndRequire(final HashSet<String> require, final Map<String, List<Rule>> flagged) {
             this.require = require;
@@ -312,26 +325,27 @@ public final class SieveTextFilter {
 
     /**
      * Here we have to strip off the require line because this line should not be edited by the client
-     *
-     * @param rules
+     * 
+     * @param rules list of rules
      * @param flag The flag which should be filtered out
-     * @param error If an error in any rules has occurred while reading the sieve script. This is important because if so
-     *        we must keep the old requires line
+     * @param error If an error in any rules has occurred while reading the sieve script. This is important because if so we must keep the
+     *            old requires line
      * @return
      */
     public ClientRulesAndRequire splitClientRulesAndRequire(final List<Rule> rules, final String flag, final boolean error) {
-        final List<Rule> retval = new ArrayList<Rule>();
+        final List<Rule> listOfRules = new ArrayList<Rule>();
         final HashSet<String> requires = new HashSet<String>();
         final Map<String, List<Rule>> flagged = new HashMap<String, List<Rule>>();
+        ClientRulesAndRequire retval = new ClientRulesAndRequire(requires, rules);
         // The flag is checked here because if no flag is given we can omit some checks which increases performance
         if (null != flag) {
             for (final Rule rule : rules) {
                 final RuleComment ruleComment = rule.getRuleComment();
                 final RequireCommand requireCommand = rule.getRequireCommand();
-                if (null != requireCommand) {
+                if (null != requireCommand && error) {
                     requires.addAll(requireCommand.getList().get(0));
                 } else if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains(flag)) {
-                    retval.add(rule);
+                    listOfRules.add(rule);
                     List<Rule> fl = flagged.get(flag);
                     if (fl == null) {
                         fl = new ArrayList<Rule>();
@@ -340,20 +354,27 @@ public final class SieveTextFilter {
                     flagged.put(flag, fl);
                 }
             }
+            if (error) {
+                retval = new ClientRulesAndRequire(requires, flagged);
+            }
+
+            retval = new ClientRulesAndRequire(new HashSet<String>(), flagged);
         } else {
             for (final Rule rule : rules) {
                 final RequireCommand requireCommand = rule.getRequireCommand();
                 if (null == requireCommand) {
-                    retval.add(rule);
-                } else {
+                    listOfRules.add(rule);
+                } else if (error) {
                     requires.addAll(requireCommand.getList().get(0));
                 }
             }
+            if (error) {
+                retval = new ClientRulesAndRequire(requires, listOfRules);
+            }
+
+            retval = new ClientRulesAndRequire(new HashSet<String>(), listOfRules);
         }
-        if (error) {
-            return new ClientRulesAndRequire(requires, flagged);
-        }
-        return new ClientRulesAndRequire(new HashSet<String>(), flagged);
+        return retval;
     }
 
 
