@@ -1,3 +1,7 @@
+* 2014-06-25 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 33004: Check if user has more permissions than to write own objects
+
 * 2014-06-25 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 33273: Switched to a root bucket name per S3 filestore registration and separate context data using fixed prefixes   
