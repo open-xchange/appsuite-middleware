@@ -50,8 +50,8 @@
 package com.openexchange.capabilities;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link Capability} - Represents a capability.
@@ -64,7 +64,7 @@ public class Capability implements Serializable {
     private static final long serialVersionUID = 8389975218424678442L;
 
     private final String id;
-    private final Map<String, String> attributes = new HashMap<String, String>();
+    private final Map<String, String> attributes;
 
     /**
      * Initializes a new {@link Capability}.
@@ -74,6 +74,7 @@ public class Capability implements Serializable {
     public Capability(String id) {
         super();
         this.id = id;
+        attributes = new ConcurrentHashMap<String, String>();
     }
 
     /**
