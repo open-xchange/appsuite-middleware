@@ -56,11 +56,11 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link APIExceptionCodes}
+ * {@link RESTExceptionCodes}
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum APIExceptionCodes implements DisplayableOXExceptionCode {
+public enum RESTExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Session must not be null.
      */
@@ -85,6 +85,22 @@ public enum APIExceptionCodes implements DisplayableOXExceptionCode {
      * The character "%1$s" is illegal for "%2$s".
      */
     ILLEGAL_CHARACTER("The character \"%1$s\" is illegal for key: \"%2$s\"", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 6),
+    /**
+     * An SSL exception occurred: "%1$s"
+     */
+    SSL_EXCEPTION("An SSL exception occurred: \"%1$s\"", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 7),
+    /**
+     * An IO exception occurred: "%1$s"
+     */
+    IO_EXCEPTION("An IO exception occurred: \"%1$s\"", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 8),
+    /**
+     * An OOM exception occurred: "%1$s"
+     */
+    OOM_EXCEPTION("An OOM exception occurred: \"%1$s\"", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 9),
+    /**
+     * An error occurred: "%1$s"
+     */
+    ERROR("An error occurred: \"%1$s\"", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 10),
     ;
 
     private static final String PREFIX = "OX-REST";
@@ -117,7 +133,7 @@ public enum APIExceptionCodes implements DisplayableOXExceptionCode {
      * @param category category.
      * @param detailNumber detail number.
      */
-    private APIExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
+    private RESTExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.displayMessage = displayMessage;
         this.category = category;
