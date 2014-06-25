@@ -52,11 +52,11 @@ package com.openexchange.rest.client;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.client.exception.APIExceptionCodes;
+import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.session.Session;
 
 /**
- * {@link API}
+ * {@link API}. Defines an Abstract REST API class, which encapsulates a {@link Session} and a {@link RequestAndResponse} object
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -71,7 +71,7 @@ public abstract class API<S extends Session> {
      */
     public API(final S session) throws OXException {
         if (session == null) {
-            throw APIExceptionCodes.SESSION_NULL.create();
+            throw RESTExceptionCodes.SESSION_NULL.create();
         }
         this.session = session;
     }

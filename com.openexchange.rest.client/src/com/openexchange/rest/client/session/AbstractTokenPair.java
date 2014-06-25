@@ -50,7 +50,7 @@
 package com.openexchange.rest.client.session;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.client.exception.APIExceptionCodes;
+import com.openexchange.rest.client.exception.RESTExceptionCodes;
 
 /**
  * {@link AbstractTokenPair}
@@ -71,13 +71,13 @@ public abstract class AbstractTokenPair {
     public AbstractTokenPair(final String key, final String secret) throws OXException {
         super();
         if (key == null) {
-            throw APIExceptionCodes.KEY_NULL.create();
+            throw RESTExceptionCodes.KEY_NULL.create();
         }
         if (key.contains("|")) {
-            throw APIExceptionCodes.ILLEGAL_CHARACTER.create("|", key);
+            throw RESTExceptionCodes.ILLEGAL_CHARACTER.create("|", key);
         }
         if (secret == null) {
-            throw APIExceptionCodes.SECRET_NULL.create();
+            throw RESTExceptionCodes.SECRET_NULL.create();
         }
         this.key = key;
         this.secret = secret;

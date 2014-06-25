@@ -50,7 +50,9 @@
 package com.openexchange.rest.client.session;
 
 import org.apache.http.HttpRequest;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import com.openexchange.exception.OXException;
 
 /**
@@ -67,4 +69,54 @@ public interface Session {
      * @throws OXException If signing request fail
      */
     public void sign(HttpRequestBase request) throws OXException;
+
+    /**
+     * Will be called every time a REST request is fired, in case the proxy changes between requests. Return null if you do not want to use
+     * a proxy, or a {@link ProxyInfo} object with a host and optionally a port set.
+     */
+    public ProxyInfo getProxyInfo();
+
+    /**
+     * Will be called every time a REST request is fired, in case you want to use a new client every time. However, it's highly recommended
+     * to create a client once and reuse it to take advantage of connection reuse.
+     */
+    public HttpClient getHttpClient();
+
+    /**
+     * Will be called every time right before a REST request is fired. It should set the socket and connection timeouts on the request if
+     * the default values need to be overridden. This is abstracted out to cope with signature changes in the Apache HttpClient libraries.
+     */
+    public void setRequestTimeout(HttpUriRequest request);
+
+    /**
+     * Describes a proxy.
+     */
+    public static final class ProxyInfo {
+
+        /** The address of the proxy. */
+        public final String host;
+
+        /** The port of the proxy, or -1 to use the default port. */
+        public final int port;
+
+        /**
+         * Creates a proxy info.
+         * 
+         * @param host the host to use without a protocol (required).
+         * @param port the port to use, or -1 for default port.
+         */
+        public ProxyInfo(final String host, final int port) {
+            this.host = host;
+            this.port = port;
+        }
+
+        /**
+         * Creates a proxy info using the default port.
+         * 
+         * @param host the host to use without a protocol (required).
+         */
+        public ProxyInfo(final String host) {
+            this(host, -1);
+        }
+    }
 }

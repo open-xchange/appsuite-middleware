@@ -49,27 +49,46 @@
 
 package com.openexchange.rest.client;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
+import javax.net.ssl.SSLException;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.API.RequestAndResponse;
-import com.openexchange.rest.client.exception.APIExceptionCodes;
+import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.session.Session;
+import com.openexchange.rest.client.session.Session.ProxyInfo;
 
 /**
  * {@link RESTExecutor}. Used to create, execute and parse the responses of REST requests to any REST API.
@@ -96,17 +115,18 @@ public class RESTExecutor {
      * {@link HttpResponse}.
      * 
      * @param method The HTTP {@link Method}
-     * @param host The host on which resides the REST API (i.e., API server, content server, or web server).
+     * @param host The host on which resides the REST API
      * @param path The URL path starting with a '/'.
      * @param apiVersion The optional API version to use. Or <code>-1</code> to ignore
      * @param params Any URL parameters in a String array. with the even numbered elements the parameter names and odd numbered elements the
      *            values, e.g. <code>new String[] {"path", "/Public", "locale", "en"}</code>.
      * @param requestInformation The request's JSON object
      * @param session The {@link Session} to use for this request.
+     * @param expectedStatusCodes The expected status code(s) on successful response
      * @return A parsed JSON object, either a {@link Map} or a {@link JSONArray}
      * @throws OXException TODO define exceptions
      */
-    public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String[] params, final JSONObject requestInformation, final Session session) throws OXException {
+    public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String[] params, final JSONObject requestInformation, final Session session, final List<Integer> expectedStatusCodes) throws OXException {
         final HttpRequestBase req;
         switch (method) {
         case PUT: {
@@ -130,7 +150,7 @@ public class RESTExecutor {
                         contentLength,
                         ContentType.APPLICATION_JSON));
                 } catch (UnsupportedEncodingException e) {
-                    throw APIExceptionCodes.UNSUPPORTED_ENCODING.create(CharEncoding.UTF_8);
+                    throw RESTExceptionCodes.UNSUPPORTED_ENCODING.create(CharEncoding.UTF_8);
                 }
             }
             req = post;
@@ -143,18 +163,18 @@ public class RESTExecutor {
             req = new HttpDelete(buildURL(host, apiVersion, path, params));
             break;
         default:
-            throw APIExceptionCodes.UNSUPPORTED_METHOD.create(method);
+            throw RESTExceptionCodes.UNSUPPORTED_METHOD.create(method);
         }
         // Sign request
         session.sign(req);
-        final HttpResponse resp = execute(session, req);
+        final HttpResponse resp = execute(session, req, expectedStatusCodes);
         return new RequestAndResponse(req, resp);
     }
 
     /**
      * Creates a URL for a REST request
      * 
-     * @param host The host on which resides the REST API (i.e., API server, content server, or web server).
+     * @param host The host on which resides the REST API
      * @param apiVersion The optional API version to use. Or <code>-1</code> to ignore
      * @param target The target path, starting with a '/'.
      * @param params Any URL parameters in a String array. with the even numbered elements the parameter names and odd numbered elements the
@@ -205,11 +225,12 @@ public class RESTExecutor {
      * 
      * @param session The {@link Session} to use for this request.
      * @param req The request to execute.
+     * @param expectedStatusCodes The expected status code(s) on successful response
      * @return An {@link HttpResponse}.
      * @throws OXException TODO define exceptions
      */
-    private static HttpResponse execute(final Session session, final HttpUriRequest req) throws OXException {
-        return execute(session, req, -1);
+    private static HttpResponse execute(final Session session, final HttpUriRequest req, final List<Integer> expectedStatusCodes) throws OXException {
+        return execute(session, req, -1, expectedStatusCodes);
     }
 
     /**
@@ -218,12 +239,159 @@ public class RESTExecutor {
      * @param session The {@link Session} to use for this request.
      * @param req The request to execute.
      * @param socketTimeoutOverrideMs If >= 0, the socket timeout to set on this request. Does nothing if set to a negative number.
+     * @param expectedStatusCodes The expected status code(s) on successful response
      * @return An {@link HttpResponse}.
      * @throws OXException TODO define exceptions
      */
-    private static HttpResponse execute(final Session session, final HttpUriRequest req, final int socketTimeoutOverrideMs) throws OXException {
-        // TODO
-        return null;
+    private static HttpResponse execute(final Session session, final HttpUriRequest req, final int socketTimeoutOverrideMs, final List<Integer> expectedStatusCodes) throws OXException {
+        final HttpClient client = updatedHttpClient(session);
+
+        // Set request timeouts.
+        session.setRequestTimeout(req);
+        if (socketTimeoutOverrideMs >= 0) {
+            final HttpParams reqParams = req.getParams();
+            HttpConnectionParams.setSoTimeout(reqParams, socketTimeoutOverrideMs);
+        }
+
+        final boolean repeatable = isRequestRepeatable(req);
+
+        try {
+            HttpResponse response = null;
+            for (int retries = 0; response == null && retries < 5; retries++) {
+                /*
+                 * The try/catch is a workaround for a bug in the HttpClient libraries. It should be returning null instead when an error
+                 * occurs. Fixed in HttpClient 4.1, but we're stuck with this for now. See:
+                 * http://code.google.com/p/android/issues/detail?id=5255
+                 */
+                try {
+                    response = client.execute(req);
+                } catch (final NullPointerException e) {
+                    // Leave 'response' as null. This is handled below.
+                }
+
+                /*
+                 * We've potentially connected to a different network, but are still using the old proxy settings. Refresh proxy settings so
+                 * that we can retry this request.
+                 */
+                if (response == null) {
+                    updateClientProxy(client, session);
+                }
+
+                if (!repeatable) {
+                    break;
+                }
+            }
+
+            if (response == null) {
+                // This is from that bug, and retrying hasn't fixed it.
+                throw RESTExceptionCodes.IO_EXCEPTION.create("Apache HTTPClient encountered an error. No response, try again.");
+            }
+
+            final int statusCode = response.getStatusLine().getStatusCode();
+
+            if (false == expectedStatusCodes.contains(statusCode)) {
+                // This will throw the right thing: either a XingServerException or a XingProxyException
+                parseAsJSON(response, expectedStatusCodes);
+            }
+            return response;
+        } catch (final SSLException e) {
+            throw RESTExceptionCodes.SSL_EXCEPTION.create(e);
+        } catch (final IOException e) {
+            throw RESTExceptionCodes.IO_EXCEPTION.create(e);
+        } catch (final OutOfMemoryError e) {
+            throw RESTExceptionCodes.OOM_EXCEPTION.create(e);
+        }
+    }
+
+    /**
+     * Reads in content from an {@link HttpResponse} and parses it as JSON.
+     * 
+     * @param response The {@link HttpResponse}.
+     * @param expectedStatusCodes Contains the expected status code on successful response
+     * @return a parsed JSON object, typically a Map or a JSONArray.
+     * @throws OXException TODO define exceptions
+     */
+    private static JSONValue parseAsJSON(final HttpResponse response, final List<Integer> expectedStatusCodes) throws OXException {
+        JSONValue result = null;
+
+        BufferedReader bin = null;
+        try {
+            final HttpEntity ent = response.getEntity();
+            if (ent != null) {
+                final InputStreamReader in = new InputStreamReader(ent.getContent());
+                // Wrap this with a Buffer, so we can re-parse it if it's
+                // not JSON
+                // Has to be at least 16384, because this is defined as the buffer size in
+                // org.json.simple.parser.Yylex.java
+                // and otherwise the reset() call won't work
+                bin = new BufferedReader(in, 16384);
+                bin.mark(16384);
+                result = JSONObject.parse(bin);
+                /*
+                 * if (result.isObject()) { checkForError(result.toObject()); }
+                 */
+            }
+        } catch (final IOException e) {
+            throw RESTExceptionCodes.IO_EXCEPTION.create(e);
+        } catch (final JSONException e) {
+            // TODO exception handling
+            /*
+             * if (XingServerException.isValidWithNullBody(response)) { // We have something from the server, but it's an error with no
+             * reason throw new XingServerException(response); } // This is from Xing, and we shouldn't be getting it String body =
+             * XingParseException.stringifyBody(bin); if (Strings.isEmpty(body)) { throw new XingServerException(response, result); } throw
+             * new XingParseException("failed to parse: " + body); } catch (final OutOfMemoryError e) { throw
+             * RESTExceptionCodes.OOM_EXCEPTION.create(e); } finally { Streams.close(bin); } final int statusCode =
+             * response.getStatusLine().getStatusCode(); if (false == expectedStatusCodes.contains(statusCode)) { if (statusCode ==
+             * HTTPResponseCodes._401_UNAUTHORIZED) { throw new XingUnlinkedException(); } throw new XingServerException(response, result);
+             */
+        }
+
+        return result;
+    }
+
+    /**
+     * Verifies whether the specified {@link HttpRequest} is repeatable. If the request contains an {@link HttpEntity } that can't be "reset"
+     * (like an {@link InputStream}), hence it isn't repeatable.
+     * 
+     * @param req The {@link HttpRequest}
+     * @return true of the request is repeatable; false otherwise
+     */
+    private static boolean isRequestRepeatable(final HttpRequest req) {
+        if (req instanceof HttpEntityEnclosingRequest) {
+            final HttpEntityEnclosingRequest ereq = (HttpEntityEnclosingRequest) req;
+            final HttpEntity entity = ereq.getEntity();
+            if (entity != null && !entity.isRepeatable()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Gets the session's client and updates its proxy.
+     */
+    private static synchronized HttpClient updatedHttpClient(final Session session) {
+        final HttpClient client = session.getHttpClient();
+        updateClientProxy(client, session);
+        return client;
+    }
+
+    /**
+     * Updates the given client's proxy from the session.
+     */
+    private static void updateClientProxy(final HttpClient client, final Session session) {
+        final ProxyInfo proxyInfo = session.getProxyInfo();
+        if (proxyInfo != null && proxyInfo.host != null && !proxyInfo.host.equals("")) {
+            HttpHost proxy;
+            if (proxyInfo.port < 0) {
+                proxy = new HttpHost(proxyInfo.host);
+            } else {
+                proxy = new HttpHost(proxyInfo.host, proxyInfo.port);
+            }
+            client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+        } else {
+            client.getParams().removeParameter(ConnRoutePNames.DEFAULT_PROXY);
+        }
     }
 
     /**
