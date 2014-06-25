@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -90,6 +90,8 @@ import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
  */
 public class S3FileStorageFactory implements FileStorageFactoryCandidate {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(S3FileStorageFactory.class);
+
     /**
      * The URI scheme identifying S3 file storages.
      */
@@ -125,9 +127,19 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
     public S3FileStorage getFileStorage(URI uri) throws OXException {
         S3FileStorage storage = storages.get(uri);
         if (null == storage) {
-            AmazonS3Client client = initClient(uri);
-            String bucketName = initBucket(client, uri);
-            S3FileStorage newStorage = new S3FileStorage(client, bucketName);
+            LOG.debug("Initializing S3 client for " + uri);
+            /*
+             * extract filestore ID from authority part of URI
+             */
+            String filestoreID = extractFilestoreID(uri);
+            LOG.debug("Using \"" + filestoreID + "\" as filestore ID.");
+            /*
+             * create client
+             */
+            AmazonS3Client client = initClient(filestoreID);
+            String bucketName = initBucket(client, filestoreID);
+            LOG.debug("Using \"" + bucketName + "\" as bucket name.");
+            S3FileStorage newStorage = new S3FileStorage(client, bucketName, extractFilestorePrefix(uri));
             storage = storages.putIfAbsent(uri, newStorage);
             if (null == storage) {
                 storage = newStorage;
@@ -154,15 +166,11 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
     /**
      * Initializes an {@link AmazonS3Client} as configured by the referenced authority part of the supplied URI.
      *
-     * @param uri The URI to to create the client for
+     * @param uri The filestore ID
      * @return The client
      * @throws OXException
      */
-    private AmazonS3Client initClient(URI uri) throws OXException {
-        /*
-         * extract filestore ID from authority part of URI
-         */
-        String filestoreID = extractFilestoreID(uri);
+    private AmazonS3Client initClient(String filestoreID) throws OXException {
         /*
          * prepare credentials
          */
@@ -272,15 +280,15 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
     /**
      * Initializes the bucket denoted by the supplied URI, creating the bucket dynamically if needed.
      *
-     * @param uri The file storage URI
+     * @param s3client The S3 client
+     * @param filestoreID The filestore ID
      * @return The bucket name
      * @throws OXException If initialization fails
      */
-    private String initBucket(AmazonS3Client s3client, URI uri) throws OXException {
+    private String initBucket(AmazonS3Client s3client, String filestoreID) throws OXException {
+        String bucketName = requireProperty("com.openexchange.filestore.s3." + filestoreID + ".bucketName");
         try {
-            String bucketName = extractBucketName(uri);
             if (false == s3client.doesBucketExist(bucketName)) {
-                String filestoreID = extractFilestoreID(uri);
                 String region = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".region", "us-west-2");
                 s3client.createBucket(bucketName, Region.fromValue(region));
             }
@@ -303,13 +311,13 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
     }
 
     /**
-     * Extracts and validates the bucket name from the configured file store URI, i.e. the 'path' part of the URI.
+     * Extracts the filestore prefix from the configured file store URI, i.e. the 'path' part of the URI.
      *
      * @param uri The file store URI
-     * @return The bucket name
+     * @return The prefix to use
      * @throws IllegalArgumentException If the specified bucket name doesn't follow Amazon S3's guidelines
      */
-    private static String extractBucketName(URI uri) throws IllegalArgumentException {
+    private static String extractFilestorePrefix(URI uri) throws IllegalArgumentException {
         String path = uri.getPath();
         while (0 < path.length() && '/' == path.charAt(0)) {
             path = path.substring(1);
@@ -319,8 +327,9 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
             throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\"");
         }
         /*
-         * Remove underscore characters to be conform to bucket name restrictions
-         * http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html
+         * Remove underscore characters to be conform to bucket name & prefix restrictions
+         * http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html /
+         * http://docs.aws.amazon.com/AmazonS3/latest/dev/ListingKeysHierarchy.html
          */
         return matcher.group(1) + "ctxstore";
     }

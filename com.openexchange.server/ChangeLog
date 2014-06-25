@@ -1,3 +1,7 @@
+* 2014-06-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33273: Switched to a root bucket name per S3 filestore registration and separate context data using fixed prefixes   
+
 * 2014-06-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 33219: Proper access to config cascade to orderly acquire scope-cascaded quota setting
