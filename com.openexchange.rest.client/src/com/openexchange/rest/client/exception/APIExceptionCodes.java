@@ -64,7 +64,15 @@ public enum APIExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Session must not be null
      */
-    SESSION_NULL("Session must not be null", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 1),
+    SESSION_NULL("Session must not be null.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 1),
+    /**
+     * The HTTP method \"%1$s\" is unsupported.
+     */
+    UNSUPPORTED_METHOD("The HTTP method \"%1$s\" is unsupported.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 2),
+    /**
+     * The specified encoding \"%1$s\" is unsupported.
+     */
+    UNSUPPORTED_ENCODING("The specified encoding \"%1$s\" is unsupported.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 3),
     ;
 
     private static final String PREFIX = "OX-REST";

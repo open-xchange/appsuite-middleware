@@ -49,12 +49,22 @@
 
 package com.openexchange.rest.client.session;
 
+import org.apache.http.HttpRequest;
+import org.apache.http.client.methods.HttpRequestBase;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link Session}
- *
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface Session {
 
+    /**
+     * OAuth signs the request with the currently-set tokens and secrets.
+     * 
+     * @param request an {@link HttpRequest}.
+     * @throws OXException If signing request fail
+     */
+    public void sign(HttpRequestBase request) throws OXException;
 }

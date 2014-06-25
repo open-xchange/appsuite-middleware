@@ -54,7 +54,22 @@ import java.net.URLEncoder;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
+import org.json.JSONInputStream;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.client.API.RequestAndResponse;
+import com.openexchange.rest.client.exception.APIExceptionCodes;
+import com.openexchange.rest.client.session.Session;
 
 /**
  * {@link RESTExecutor}. Used to create, execute and parse the responses of REST requests to any REST API.
@@ -66,7 +81,7 @@ public class RESTExecutor {
     public static enum Method {
         PUT, GET, POST, DELETE;
     }
-
+    
     private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.UTF_8);
 
     /**
@@ -107,7 +122,7 @@ public class RESTExecutor {
                 if (apiVersion > 0) {
                     versionBuilder.append("/v").append(apiVersion);
                 }
-                trgt = URLEncoder.encode(versionBuilder.append(trgt).toString(), "UTF-8");
+                trgt = URLEncoder.encode(versionBuilder.append(trgt).toString(), CharEncoding.UTF_8);
                 trgt = trgt.replace("%2F", "/");
 
                 if (params != null && params.length > 0) {
@@ -123,6 +138,86 @@ public class RESTExecutor {
             }
         }
         return buildURL(host, trgt);
+    }
+
+    /**
+     * Creates and sends a request to the REST API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
+     * {@link HttpResponse}.
+     * 
+     * @param method The HTTP {@link Method}
+     * @param host The host on which resides the REST API (i.e., API server, content server, or web server).
+     * @param path The URL path starting with a '/'.
+     * @param apiVersion The optional API version to use. Or <code>-1</code> to ignore
+     * @param params Any URL parameters in a String array. with the even numbered elements the parameter names and odd numbered elements the
+     *            values, e.g. <code>new String[] {"path", "/Public", "locale", "en"}</code>.
+     * @param requestInformation The request's JSON object
+     * @param session The {@link Session} to use for this request.
+     * @return A parsed JSON object, either a {@link Map} or a {@link JSONArray}
+     * @throws OXException TODO define exceptions
+     */
+    public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String[] params, final JSONObject requestInformation, final Session session) throws OXException {
+        final HttpRequestBase req;
+        switch (method) {
+        case PUT: {
+            final HttpPut put = new HttpPut(buildURL(host, apiVersion, path, params));
+            if (null != requestInformation) {
+                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, CharEncoding.UTF_8), -1L, ContentType.APPLICATION_JSON));
+            }
+            req = put;
+        }
+            break;
+        case POST: {
+            final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
+            if (null != requestInformation) {
+                try {
+                    final int contentLength = requestInformation.toString().getBytes(CharEncoding.UTF_8).length;
+                    post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, CharEncoding.UTF_8), contentLength, ContentType.APPLICATION_JSON));
+                } catch (UnsupportedEncodingException e) {
+                    throw APIExceptionCodes.UNSUPPORTED_ENCODING.create(CharEncoding.UTF_8);
+                }
+            }
+            req = post;
+        }
+            break;
+        case GET:
+            req = new HttpGet(buildURL(host, apiVersion, path, params));
+            break;
+        case DELETE:
+            req = new HttpDelete(buildURL(host, apiVersion, path, params));
+            break;
+        default:
+            throw APIExceptionCodes.UNSUPPORTED_METHOD.create(method);
+        }
+        // Sign request
+        session.sign(req);
+        final HttpResponse resp = execute(session, req);
+        return new RequestAndResponse(req, resp);
+    }
+
+    /**
+     * Executes an {@link HttpUriRequest} with the given {@link Session} and returns an {@link HttpResponse}.
+     * 
+     * @param session The {@link Session} to use for this request.
+     * @param req The request to execute.
+     * @return An {@link HttpResponse}.
+     * @throws OXException TODO define exceptions
+     */
+    public static HttpResponse execute(final Session session, final HttpUriRequest req) throws OXException {
+        return execute(session, req, -1);
+    }
+
+    /**
+     * Executes an {@link HttpUriRequest} with the given {@link Session} and returns an {@link HttpResponse}.
+     * 
+     * @param session The {@link Session} to use for this request.
+     * @param req The request to execute.
+     * @param socketTimeoutOverrideMs If >= 0, the socket timeout to set on this request. Does nothing if set to a negative number.
+     * @return An {@link HttpResponse}.
+     * @throws OXException TODO define exceptions
+     */
+    public static HttpResponse execute(final Session session, final HttpUriRequest req, final int socketTimeoutOverrideMs) throws OXException {
+        // TODO
+        return null;
     }
 
     /**

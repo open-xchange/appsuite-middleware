@@ -11,4 +11,5 @@ Import-Package: com.openexchange.exception,
  org.apache.commons.codec.net,
  org.apache.http,
  org.apache.http.client.methods,
+ org.apache.http.entity,
  org.json
