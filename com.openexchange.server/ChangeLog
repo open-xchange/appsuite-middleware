@@ -1,3 +1,7 @@
+* 2014-06-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 33273: Switched to a root bucket name per S3 filestore registration and separate context data using fixed prefixes
+
 * 2014-06-25 - marcus.klein@open-xchange.com
 
  - Fix for bug 32860: Detect lousy clients writing always the same attribute values to the user object and avoid updating these values in
