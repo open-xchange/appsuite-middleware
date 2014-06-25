@@ -36,6 +36,7 @@ ui/mail/replyTo > io.ox/mail//showReplyTo
 modules/mail/linewrap > io.ox/mail//lineWrapAfter
 modules/mail/vcard > io.ox/mail//appendVcard
 modules/mail/unifiedinboxidentifier > io.ox/mail//unifiedInboxIdentifier
+modules/mail/msgformat > io.ox/mail//messageFormat
 
 # Migration
 gui > io.ox/migration//gui
