@@ -63,6 +63,11 @@ import com.openexchange.exception.OXException;
 public interface Session {
 
     /**
+     * @return
+     */
+    public boolean authenticated();
+
+    /**
      * OAuth signs the request with the currently-set tokens and secrets.
      * 
      * @param request an {@link HttpRequest}.
@@ -87,6 +92,20 @@ public interface Session {
      * the default values need to be overridden. This is abstracted out to cope with signature changes in the Apache HttpClient libraries.
      */
     public void setRequestTimeout(HttpUriRequest request);
+
+    /**
+     * Returns the app key and secret.
+     * 
+     * @return The app key and secret.
+     */
+    public AppKeyPair getAppKeyPair();
+
+    /**
+     * Returns the currently logged in user's access token and secret.
+     * 
+     * @return The currently logged in user's access token and secret.
+     */
+    public AccessTokenPair getAccessTokenPair();
 
     /**
      * Describes a proxy.
