@@ -63,9 +63,16 @@ import com.openexchange.exception.OXException;
 public interface Session {
 
     /**
-     * @return
+     * Returns whether or not this session has a user's access token and secret.
+     * 
+     * @return true if this session has a user's access token and secret linked; false otherwise
      */
-    public boolean authenticated();
+    public boolean isLinked();
+
+    /**
+     * Unlinks the session by removing any stored access token and secret.
+     */
+    public void unlink();
 
     /**
      * OAuth signs the request with the currently-set tokens and secrets.

@@ -71,7 +71,7 @@ public abstract class AbstractSession implements Session {
 
     private final AppKeyPair appKeyPair;
 
-    private final AccessTokenPair accessTokenPair;
+    private AccessTokenPair accessTokenPair;
 
     private volatile CommonsHttpOAuthConsumer signer = null;
 
@@ -111,6 +111,16 @@ public abstract class AbstractSession implements Session {
     @Override
     public AccessTokenPair getAccessTokenPair() {
         return accessTokenPair;
+    }
+
+    @Override
+    public boolean isLinked() {
+        return accessTokenPair != null;
+    }
+
+    @Override
+    public void unlink() {
+        accessTokenPair = null;
     }
 
     /**
