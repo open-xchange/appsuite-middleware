@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import static com.openexchange.tools.Collections.newHashMap;
 import java.io.BufferedWriter;
@@ -315,6 +314,11 @@ public class Mail extends PermissionServlet implements UploadListener {
     public static final String PARAMETER_DESTINATION_FOLDER = "dest_folder";
 
     public static final String PARAMETER_MAILCID = "cid";
+
+    /**
+     * Parameter to define the maximum desired content length (in bytes) returned for the requested mail.
+     */
+    public static final String PARAMETER_MAX_SIZE = "max_size";
 
     public static final String PARAMETER_SAVE = "save";
 

@@ -107,7 +107,8 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "src", optional=true, description = "1 to let the response contain the complete message source as plain text"),
     @Parameter(name = "save", optional=true, description = "1 to write the complete message source to output stream. NOTE: This parameter will only be used if parameter src is set to 1."),
     @Parameter(name = "view", optional=true, description = "(available with SP4) \"raw\" returns the content as it is, meaning no preparation are performed and thus no guarantee for safe contents is given (available with SP6 v6.10). \"text\" forces the server to deliver a text-only version of the requested mail's body, even if content is HTML. \"textNoHtmlAttach\" is the same as \"text\", but does not deliver the HTML part as attachment in case of multipart/alternative content. \"html\" to allow a possible HTML mail body being transferred as it is (but white-list filter applied). \"noimg\" to allow a possible HTML content being transferred but without original image src attributes which references external images: Can be used to prevent loading external linked images (spam privacy protection). NOTE: if set, the corresponding gui config setting will be ignored."),
-    @Parameter(name = "unseen", optional=true, description = "\"1\" or \"true\" to leave an unseen mail as unseen although its content is requested")
+    @Parameter(name = "unseen", optional = true, description = "\"1\" or \"true\" to leave an unseen mail as unseen although its content is requested"),
+    @Parameter(name = "max_size", optional = true, description = "Maximum size of the returned mail content")
 }, responseDescription = "(not IMAP: with timestamp): An JSON object containing all data of the requested mail. The fields of the object are listed in Detailed mail data. The fields id and attachment are not included. NOTE: Of course response is not a JSON object if either parameter hdr or parameter src are set to \"1\". Then the response contains plain text. Moreover if optional parameter save is set to \"1\" the complete message source is going to be directly written to output stream to open browser's save dialog.")
 public final class GetAction extends AbstractMailAction {
 
@@ -164,7 +165,6 @@ public final class GetAction extends AbstractMailAction {
              * Read in parameters
              */
             final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            // final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             String tmp = req.getParameter(Mail.PARAMETER_SHOW_SRC);
             final boolean showMessageSource = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
             tmp = req.getParameter(Mail.PARAMETER_SHOW_HEADER);
@@ -380,17 +380,6 @@ public final class GetAction extends AbstractMailAction {
                 } else {
                     data = new AJAXRequestResult(new String(fileHolder.toByteArray(), "UTF-8"), "string");
                 }
-                // final ContentType rct = new ContentType("text/plain");
-                // if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
-                // rct.setCharsetParameter(ct.getCharsetParameter());
-                // } else {
-                // rct.setCharsetParameter("UTF-8");
-                // }
-                // req.getRequest().setFormat("file");
-                // final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
-                // fileHolder.setContentType(rct.toString());
-                // fileHolder.setName("msgsrc.txt");
-                // data = new AJAXRequestResult(fileHolder, "file");
             } else if (showMessageHeaders) {
                 /*
                  * Get message
@@ -408,11 +397,6 @@ public final class GetAction extends AbstractMailAction {
                 } else {
                     rct.setCharsetParameter("UTF-8");
                 }
-                // req.getRequest().setFormat("file");
-                // final String sHeaders = formatMessageHeaders(mail.getHeadersIterator());
-                // final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(sHeaders.getBytes(rct.getCharsetParameter()));
-                // fileHolder.setContentType(rct.toString());
-                // data = new AJAXRequestResult(fileHolder, "file");
                 data = new AJAXRequestResult(formatMessageHeaders(mail.getHeadersIterator()), "string");
                 if (doUnseen) {
                     /*

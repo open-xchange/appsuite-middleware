@@ -111,7 +111,21 @@ public final class HtmlProcessing {
 
     /**
      * Performs all the formatting for text content for a proper display according to specified user's mail settings.
-     *
+     * 
+     * @param content The plain text content
+     * @param usm The settings used for formatting content
+     * @param mode The display mode
+     * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
+     * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
+     * @return The formatted content
+     */
+    public static String formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode, final int maxContentSize) {
+        return formatContentForDisplay(content, null, false, null, null, usm, null, mode, false, maxContentSize);
+    }
+
+    /**
+     * Performs all the formatting for text content for a proper display according to specified user's mail settings.
+     * 
      * @param content The plain text content
      * @param usm The settings used for formatting content
      * @param mode The display mode
@@ -119,7 +133,7 @@ public final class HtmlProcessing {
      * @return The formatted content
      */
     public static String formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode) {
-        return formatContentForDisplay(content, null, false, null, null, usm, null, mode, false);
+        return formatTextForDisplay(content, usm, mode, -1);
     }
 
     /**
@@ -137,7 +151,27 @@ public final class HtmlProcessing {
      * @return The formatted content
      */
     public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded) {
-        return formatContentForDisplay(content, charset, true, session, mailPath, usm, modified, mode, embedded);
+        return formatHTMLForDisplay(content, charset, session, mailPath, usm, modified, mode, embedded, -1);
+    }
+
+    /**
+     * Performs all the formatting for HTML content for a proper display according to specified user's mail settings.
+     * 
+     * @param content The HTML content
+     * @param charset The character encoding
+     * @param session The session
+     * @param mailPath The message's unique path in mailbox
+     * @param usm The settings used for formatting content
+     * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter
+     * @param mode The display mode
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise
+     *            <code>false</code>
+     * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
+     * @see #formatContentForDisplay(String, String, boolean, Session, MailPath, UserSettingMail, boolean[], DisplayMode)
+     * @return The formatted content
+     */
+    public static String formatHTMLForDisplay(final String content, final String charset, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded, final int maxContentSize) {
+        return formatContentForDisplay(content, charset, true, session, mailPath, usm, modified, mode, embedded, maxContentSize);
     }
 
     private static final String COMMENT_ID = "anchor-5fd15ca8-a027-4b14-93ea-35de1747419e:";
@@ -156,7 +190,7 @@ public final class HtmlProcessing {
      * <li>Both inline and non-inline images found in HTML content are prepared according to settings if {@link DisplayMode#DISPLAY} is
      * given</li>
      * </ol>
-     *
+     * 
      * @param content The content
      * @param charset The character encoding (only needed by HTML content; may be <code>null</code> on plain text)
      * @param isHtml <code>true</code> if content is of type <code>text/html</code>; otherwise <code>false</code>
@@ -166,18 +200,18 @@ public final class HtmlProcessing {
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status of external images filter (only
      *            needed by HTML content; may be <code>null</code> on plain text)
      * @param mode The display mode
-     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise
+     *            <code>false</code>
+     * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
      * @return The formatted content
      */
-    public static String formatContentForDisplay(final String content, final String charset, final boolean isHtml, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded) {
+    public static String formatContentForDisplay(final String content, final String charset, final boolean isHtml, final Session session, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode, final boolean embedded, final int maxContentSize) {
         String retval = null;
         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
         if (isHtml) {
             if (DisplayMode.RAW.equals(mode)) {
                 retval = content;
             } else {
-
-                // dumpToFile(content, "~/Desktop/html-original.html");
 
                 retval = htmlService.dropScriptTagsInHeader(content);
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
@@ -188,13 +222,9 @@ public final class HtmlProcessing {
                     if (useSanitize()) {
                         // No need to generate well-formed HTML
                         if (externalImagesAllowed) {
-                            /*
-                             * TODO: Does not work reliably by now
-                             */
-                            // retval = htmlService.checkExternalImages(retval);
-                            retval = htmlService.sanitize(retval, null, false, null, cssPrefix);
+                            retval = htmlService.sanitize(retval, null, false, null, cssPrefix, maxContentSize);
                         } else {
-                            retval = htmlService.sanitize(retval, null, true, modified, cssPrefix);
+                            retval = htmlService.sanitize(retval, null, true, modified, cssPrefix, maxContentSize);
                         }
                     } else {
                         retval = htmlService.getConformHTML(retval, charset == null ? CHARSET_US_ASCII : charset, false);
@@ -232,12 +262,12 @@ public final class HtmlProcessing {
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
                 if (DisplayMode.DISPLAY.equals(mode)) {
                     retval = htmlService.formatURLs(retval, COMMENT_ID);
-                    retval = htmlService.htmlFormat(retval, true, COMMENT_ID);
+                    retval = htmlService.htmlFormat(retval, true, COMMENT_ID, maxContentSize);
                     if (usm.isUseColorQuote()) {
                         retval = replaceHTMLSimpleQuotesForDisplay(retval);
                     }
                 } else {
-                    retval = htmlService.htmlFormat(retval);
+                    retval = htmlService.htmlFormat(retval, true, null, maxContentSize);
                 }
             }
         }

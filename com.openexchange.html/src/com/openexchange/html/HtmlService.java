@@ -123,8 +123,21 @@ public interface HtmlService {
     String filterExternalImages(String htmlContent, boolean[] modified);
 
     /**
+     * Sanitizes specified HTML content by limiting the content size to the character count provided with maxContentSize.
+     * 
+     * @param htmlContent The HTML content to sanitize
+     * @param optConfigName The optional configuration name to read whitelist from
+     * @param dropExternalImages Whether to drop image URLs
+     * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status
+     * @param cssPrefix The optional CSS prefix
+     * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
+     * @return The sanitized HTML content
+     */
+    String sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize);
+
+    /**
      * Sanitizes specified HTML content.
-     *
+     * 
      * @param htmlContent The HTML content to sanitize
      * @param optConfigName The optional configuration name to read whitelist from
      * @param dropExternalImages Whether to drop image URLs
@@ -136,7 +149,7 @@ public interface HtmlService {
 
     /**
      * Converts specified HTML content to plain text.
-     *
+     * 
      * @param htmlContent The <b>validated</b> HTML content
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>.<br>
      *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be
@@ -148,8 +161,21 @@ public interface HtmlService {
 
     /**
      * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
+     * <code>&quot;&amp;lt;&quot;</code>. Additionally limiting the content size to the character count provided with maxContentSize.
+     * 
+     * @param plainText The plain text
+     * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
+     * @param commentId The identifier wrapped in a comment prepended to each formatted URL:<br>
+     *            <code>"&lt;!--" + &lt;<i>comment</i>&gt; + " " + <i>&lt;anchor-tag&gt;</i> + "--&gt;"</code>
+     * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
+     * @return properly escaped HTML content
+     */
+    String htmlFormat(String plainText, boolean withQuote, String commentId, int maxContentSize);
+
+    /**
+     * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
      * <code>&quot;&amp;lt;&quot;</code>.
-     *
+     * 
      * @param plainText The plain text
      * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
      * @param commentId The identifier wrapped in a comment prepended to each formatted URL:<br>
@@ -161,7 +187,7 @@ public interface HtmlService {
     /**
      * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
      * <code>&quot;&amp;lt;&quot;</code>.
-     *
+     * 
      * @param plainText The plain text
      * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
      * @return properly escaped HTML content
