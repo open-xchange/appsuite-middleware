@@ -102,4 +102,23 @@ public abstract class API<S extends Session> {
         }
     }
 
+    /**
+     * Get the domain name of the API server
+     * 
+     * @return The domain name of the API server
+     * @throws IllegalStateException if the subclass of <b>this</b> class does not implement and hence shadow/hide this method
+     */
+    public static String getServer() {
+        throw new IllegalStateException("Subclass must implement and hence shadow this method.");
+    }
+
+    /**
+     * Get the API version
+     * 
+     * @return The API version
+     * @throws IllegalStateException if the subclass of <b>this</b> class does not implement and hence shadow/hide this method
+     */
+    public static int getVersion() {
+        throw new IllegalStateException("Subclass must implement and hence shadow this method.");
+    }
 }

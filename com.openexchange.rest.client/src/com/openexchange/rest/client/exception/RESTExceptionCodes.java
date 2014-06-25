@@ -49,11 +49,14 @@
 
 package com.openexchange.rest.client.exception;
 
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.rest.client.API;
 
 /**
  * {@link RESTExceptionCodes}
@@ -100,8 +103,7 @@ public enum RESTExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An error occurred: "%1$s"
      */
-    ERROR("An error occurred: \"%1$s\"", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 10),
-    ;
+    ERROR("An error occurred: \"%1$s\"", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 10), ;
 
     private static final String PREFIX = "OX-REST";
 
@@ -198,6 +200,52 @@ public enum RESTExceptionCodes implements DisplayableOXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /**
+     * Whether the given response is valid when it has no body (only some error codes are allowed without a reason, currently 302 and 304).
+     * 
+     * @param response The {@link HttpResponse} object
+     * @return true if the specified response is valid; false otherwise.
+     */
+    public static boolean isValidWithNullBody(final HttpResponse response) {
+        int code = response.getStatusLine().getStatusCode();
+        if (code == HTTPResponseCodes._302_FOUND) {
+            String location = getHeader(response, "location");
+
+            if (location != null) {
+                int loc = location.indexOf("://");
+                if (loc > -1) {
+                    location = location.substring(loc + 3);
+                    loc = location.indexOf("/");
+                    if (loc > -1) {
+                        location = location.substring(0, loc);
+                        if (location.toLowerCase().contains(API.getServer())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } else if (code == HTTPResponseCodes._304_NOT_MODIFIED) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get the specified header value from the the specified {@link HttpResponse}
+     * 
+     * @param response The {@link HttpResponse}
+     * @param name The header name
+     * @return The header value
+     */
+    private static String getHeader(final HttpResponse response, final String name) {
+        String value = null;
+        Header serverheader = response.getFirstHeader(name);
+        if (serverheader != null) {
+            value = serverheader.getValue();
+        }
+        return value;
     }
 
 }

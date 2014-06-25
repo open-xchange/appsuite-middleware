@@ -65,7 +65,7 @@ public class HTTPResponseCodes {
     /** Moved to a new location temporarily. */
     public static final int _302_FOUND = 302;
 
-    /** Contents have not changed (from the given hash, revision, ETag, or similar parameter). */
+    /** Contents have not changed */
     public static final int _304_NOT_MODIFIED = 304;
 
     /** Bad input parameter. Error message should indicate which one and why. */
@@ -83,14 +83,12 @@ public class HTTPResponseCodes {
     /** Request method not allowed. */
     public static final int _405_METHOD_NOT_ALLOWED = 405;
 
-    /** Too many metadata entries to return. */
     public static final int _406_NOT_ACCEPTABLE = 406;
 
     public static final int _409_CONFLICT = 409;
 
     public static final int _411_LENGTH_REQUIRED = 411;
 
-    /** When a thumbnail cannot be created for the input file. */
     public static final int _415_UNSUPPORTED_MEDIA = 415;
 
     /** Internal server error. */
