@@ -51,12 +51,10 @@ package com.openexchange.rest.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
-import java.util.Map;
 import javax.net.ssl.SSLException;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.EncoderException;
@@ -78,7 +76,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
@@ -335,15 +332,28 @@ public class RESTExecutor {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e);
         } catch (final JSONException e) {
             // TODO exception handling
-            /*
-             * if (XingServerException.isValidWithNullBody(response)) { // We have something from the server, but it's an error with no
-             * reason throw new XingServerException(response); } // This is from Xing, and we shouldn't be getting it String body =
-             * XingParseException.stringifyBody(bin); if (Strings.isEmpty(body)) { throw new XingServerException(response, result); } throw
-             * new XingParseException("failed to parse: " + body); } catch (final OutOfMemoryError e) { throw
-             * RESTExceptionCodes.OOM_EXCEPTION.create(e); } finally { Streams.close(bin); } final int statusCode =
-             * response.getStatusLine().getStatusCode(); if (false == expectedStatusCodes.contains(statusCode)) { if (statusCode ==
-             * HTTPResponseCodes._401_UNAUTHORIZED) { throw new XingUnlinkedException(); } throw new XingServerException(response, result);
-             */
+            /*if (XingServerException.isValidWithNullBody(response)) {
+                // We have something from the server, but it's an error with no reason
+                throw new XingServerException(response);
+            }
+            // This is from Xing, and we shouldn't be getting it
+            String body = XingParseException.stringifyBody(bin);
+            if (Strings.isEmpty(body)) {
+                throw new XingServerException(response, result);
+            }
+            throw new XingParseException("failed to parse: " + body);
+        } catch (final OutOfMemoryError e) {
+            throw RESTExceptionCodes.OOM_EXCEPTION.create(e);
+        } finally {
+            Streams.close(bin);
+        }
+
+        final int statusCode = response.getStatusLine().getStatusCode();
+        if (false == expectedStatusCodes.contains(statusCode)) {
+            if (statusCode == HTTPResponseCodes._401_UNAUTHORIZED) {
+                throw new XingUnlinkedException();
+            }
+            throw new XingServerException(response, result);*/
         }
 
         return result;
@@ -454,5 +464,4 @@ public class RESTExecutor {
             return s;
         }
     }
-
 }
