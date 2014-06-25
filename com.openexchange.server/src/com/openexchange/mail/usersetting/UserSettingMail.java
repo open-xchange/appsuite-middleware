@@ -154,9 +154,9 @@ public final class UserSettingMail implements Cloneable, Serializable {
     public static final int INT_APPEND_VCARD = 1 << 5;
 
     /**
-     * If this bit is set, the user is notified if a message contains a read acknowledgment
+     * If this bit is set, the user is notified if a message contains a receipt acknowledgment
      */
-    public static final int INT_NOTIFY_ON_READ_ACK = 1 << 6;
+    public static final int INT_DISPLAY_RECEIPT_NOTIFICATION = 1 << 6;
 
     /**
      * This constant is currently not in use
@@ -260,7 +260,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     private boolean appendVCard;
 
-    private boolean notifyOnReadAck;
+    private boolean displayReceiptNotification;
 
     private boolean notifyAppointments;
 
@@ -400,7 +400,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
         retval = hardDeleteMsgs ? (retval | INT_HARD_DELETE_MSGS) : retval;
         retval = forwardAsAttachment ? (retval | INT_FORWARD_AS_ATTACHMENT) : retval;
         retval = appendVCard ? (retval | INT_APPEND_VCARD) : retval;
-        retval = notifyOnReadAck ? (retval | INT_NOTIFY_ON_READ_ACK) : retval;
+        retval = displayReceiptNotification ? (retval | INT_DISPLAY_RECEIPT_NOTIFICATION) : retval;
         retval = msgPreview ? (retval | INT_MSG_PREVIEW) : retval;
 
         retval = notifyAppointments ? (retval | INT_NOTIFY_APPOINTMENTS) : retval;
@@ -708,10 +708,10 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Currently not used
+     * If the user is notified if a message contains a receipt acknowledgment.
      */
-    public boolean isNotifyOnReadAck() {
-        return notifyOnReadAck;
+    public boolean isDisplayReceiptNotification() {
+        return displayReceiptNotification;
     }
 
     /**
@@ -817,30 +817,30 @@ public final class UserSettingMail implements Cloneable, Serializable {
      * @param onOffOptions The bit pattern
      */
     public void parseBits(final int onOffOptions) {
-        displayHtmlInlineContent = ((onOffOptions & INT_DISPLAY_HTML_INLINE_CONTENT) == INT_DISPLAY_HTML_INLINE_CONTENT);
-        useColorQuote = ((onOffOptions & INT_USE_COLOR_QUOTE) == INT_USE_COLOR_QUOTE);
-        showGraphicEmoticons = ((onOffOptions & INT_SHOW_GRAPHIC_EMOTICONS) == INT_SHOW_GRAPHIC_EMOTICONS);
-        hardDeleteMsgs = ((onOffOptions & INT_HARD_DELETE_MSGS) == INT_HARD_DELETE_MSGS);
-        forwardAsAttachment = ((onOffOptions & INT_FORWARD_AS_ATTACHMENT) == INT_FORWARD_AS_ATTACHMENT);
-        appendVCard = ((onOffOptions & INT_APPEND_VCARD) == INT_APPEND_VCARD);
-        notifyOnReadAck = ((onOffOptions & INT_NOTIFY_ON_READ_ACK) == INT_NOTIFY_ON_READ_ACK);
-        msgPreview = ((onOffOptions & INT_MSG_PREVIEW) == INT_MSG_PREVIEW);
+        displayHtmlInlineContent = ((onOffOptions & INT_DISPLAY_HTML_INLINE_CONTENT) > 0);
+        useColorQuote = ((onOffOptions & INT_USE_COLOR_QUOTE) > 0);
+        showGraphicEmoticons = ((onOffOptions & INT_SHOW_GRAPHIC_EMOTICONS) > 0);
+        hardDeleteMsgs = ((onOffOptions & INT_HARD_DELETE_MSGS) > 0);
+        forwardAsAttachment = ((onOffOptions & INT_FORWARD_AS_ATTACHMENT) > 0);
+        appendVCard = ((onOffOptions & INT_APPEND_VCARD) > 0);
+        displayReceiptNotification = ((onOffOptions & INT_DISPLAY_RECEIPT_NOTIFICATION) > 0);
+        msgPreview = ((onOffOptions & INT_MSG_PREVIEW) > 0);
 
-        notifyAppointments = ((onOffOptions & INT_NOTIFY_APPOINTMENTS) == INT_NOTIFY_APPOINTMENTS);
-        notifyAppointmentsConfirmOwner = ((onOffOptions & INT_NOTIFY_APPOINTMENTS_CONFIRM_OWNER) == INT_NOTIFY_APPOINTMENTS_CONFIRM_OWNER);
-        notifyAppointmentsConfirmParticipant = ((onOffOptions & INT_NOTIFY_APPOINTMENTS_CONFIRM_PARTICIPANT) == INT_NOTIFY_APPOINTMENTS_CONFIRM_PARTICIPANT);
+        notifyAppointments = ((onOffOptions & INT_NOTIFY_APPOINTMENTS) > 0);
+        notifyAppointmentsConfirmOwner = ((onOffOptions & INT_NOTIFY_APPOINTMENTS_CONFIRM_OWNER) > 0);
+        notifyAppointmentsConfirmParticipant = ((onOffOptions & INT_NOTIFY_APPOINTMENTS_CONFIRM_PARTICIPANT) > 0);
 
-        notifyTasks = ((onOffOptions & INT_NOTIFY_TASKS) == INT_NOTIFY_TASKS);
-        notifyTasksConfirmOwner = ((onOffOptions & INT_NOTIFY_TASKS_CONFIRM_OWNER) == INT_NOTIFY_TASKS_CONFIRM_OWNER);
-        notifyTasksConfirmParticipant = ((onOffOptions & INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT) == INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT);
+        notifyTasks = ((onOffOptions & INT_NOTIFY_TASKS) > 0);
+        notifyTasksConfirmOwner = ((onOffOptions & INT_NOTIFY_TASKS_CONFIRM_OWNER) > 0);
+        notifyTasksConfirmParticipant = ((onOffOptions & INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT) > 0);
 
-        ignoreOriginalMailTextOnReply = ((onOffOptions & INT_IGNORE_ORIGINAL_TEXT_ON_REPLY) == INT_IGNORE_ORIGINAL_TEXT_ON_REPLY);
-        noCopyIntoStandardSentFolder = ((onOffOptions & INT_NO_COPY_INTO_SENT_FOLDER) == INT_NO_COPY_INTO_SENT_FOLDER);
-        spamEnabled = ((onOffOptions & INT_SPAM_ENABLED) == INT_SPAM_ENABLED);
-        textOnlyCompose = ((onOffOptions & INT_TEXT_ONLY_COMPOSE) == INT_TEXT_ONLY_COMPOSE);
-        allowHTMLImages = ((onOffOptions & INT_ALLOW_HTML_IMAGES) == INT_ALLOW_HTML_IMAGES);
+        ignoreOriginalMailTextOnReply = ((onOffOptions & INT_IGNORE_ORIGINAL_TEXT_ON_REPLY) > 0);
+        noCopyIntoStandardSentFolder = ((onOffOptions & INT_NO_COPY_INTO_SENT_FOLDER) > 0);
+        spamEnabled = ((onOffOptions & INT_SPAM_ENABLED) > 0);
+        textOnlyCompose = ((onOffOptions & INT_TEXT_ONLY_COMPOSE) > 0);
+        allowHTMLImages = ((onOffOptions & INT_ALLOW_HTML_IMAGES) > 0);
 
-        replyAllCc = ((onOffOptions & INT_REPLY_ALL_CC) == INT_REPLY_ALL_CC);
+        replyAllCc = ((onOffOptions & INT_REPLY_ALL_CC) > 0);
     }
 
     public void setAppendVCard(final boolean appendVCard) {
@@ -930,8 +930,11 @@ public final class UserSettingMail implements Cloneable, Serializable {
         modifiedDuringSession = true;
     }
 
-    public void setNotifyOnReadAck(final boolean notifyOnReadAck) {
-        this.notifyOnReadAck = notifyOnReadAck;
+    /**
+     * Sets if the user is notified if a message contains a receipt acknowledgment.
+     */
+    public void setDisplayReceiptNotification(final boolean displayReceiptNotification) {
+        this.displayReceiptNotification = displayReceiptNotification;
         modifiedDuringSession = true;
     }
 

@@ -328,6 +328,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.DefaultAddress.class,
             com.openexchange.groupware.settings.tree.modules.mail.DefaultSeparator.class,
             com.openexchange.groupware.settings.tree.modules.mail.DeleteMail.class,
+            com.openexchange.groupware.settings.tree.modules.mail.DisplayReceiptNotification.class,
             com.openexchange.groupware.settings.tree.modules.mail.UnifiedInboxEnablement.class,
             com.openexchange.groupware.settings.tree.modules.mail.UnifiedInboxIdentifier.class,
             com.openexchange.groupware.settings.tree.modules.mail.Emoticons.class,
