@@ -324,9 +324,9 @@ public class RESTExecutor {
                 bin = new BufferedReader(in, 16384);
                 bin.mark(16384);
                 result = JSONObject.parse(bin);
-                /*
-                 * if (result.isObject()) { checkForError(result.toObject()); }
-                 */
+                /*if (result.isObject()) {
+                    checkForError(result.toObject());
+                }*/
             }
         } catch (final IOException e) {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e);
@@ -464,4 +464,5 @@ public class RESTExecutor {
             return s;
         }
     }
+
 }
