@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Rest Client Bundle
+Bundle-SymbolicName: com.openexchange.rest.client
+Bundle-Version: 7.6.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.java,
+ org.apache.commons.codec;version="1.6.0",
+ org.apache.commons.codec.net,
+ org.apache.http,
+ org.apache.http.client.methods,
+ org.json
