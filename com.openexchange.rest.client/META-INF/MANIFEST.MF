@@ -16,3 +16,5 @@ Import-Package: com.openexchange.exception,
  org.apache.http.entity,
  org.apache.http.params,
  org.json
+Bundle-ClassPath: lib/signpost-1.2.1.2.jar,
+ .
