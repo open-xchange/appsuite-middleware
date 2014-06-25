@@ -126,7 +126,8 @@ public class RESTExecutor {
      * @param session The {@link Session} to use for this request.
      * @param expectedStatusCodes The expected status code(s) on successful response
      * @return A parsed JSON object, either a {@link Map} or a {@link JSONArray}
-     * @throws OXException TODO define exceptions
+     * @throws OXException If the server responds with an error code, or if any network-related error occurs, or if the user has revoked
+     *             access, or if any other unknown error occurs.
      */
     public static RequestAndResponse streamRequest(final Method method, final String host, final String path, final int apiVersion, final String[] params, final JSONObject requestInformation, final Session session, final List<Integer> expectedStatusCodes) throws OXException {
         final HttpRequestBase req;
@@ -229,7 +230,8 @@ public class RESTExecutor {
      * @param req The request to execute.
      * @param expectedStatusCodes The expected status code(s) on successful response
      * @return An {@link HttpResponse}.
-     * @throws OXException TODO define exceptions
+     * @throws OXException If the server responds with an error code, or if any network-related error occurs, or if the user has revoked
+     *             access, or if any other unknown error occurs.
      */
     private static HttpResponse execute(final Session session, final HttpUriRequest req, final List<Integer> expectedStatusCodes) throws OXException {
         return execute(session, req, -1, expectedStatusCodes);
@@ -243,7 +245,8 @@ public class RESTExecutor {
      * @param socketTimeoutOverrideMs If >= 0, the socket timeout to set on this request. Does nothing if set to a negative number.
      * @param expectedStatusCodes The expected status code(s) on successful response
      * @return An {@link HttpResponse}.
-     * @throws OXException TODO define exceptions
+     * @throws OXException If the server responds with an error code, or if any network-related error occurs, or if the user has revoked
+     *             access, or if any other unknown error occurs.
      */
     private static HttpResponse execute(final Session session, final HttpUriRequest req, final int socketTimeoutOverrideMs, final List<Integer> expectedStatusCodes) throws OXException {
         final HttpClient client = updatedHttpClient(session);
@@ -311,7 +314,9 @@ public class RESTExecutor {
      * @param response The {@link HttpResponse}.
      * @param expectedStatusCodes Contains the expected status code on successful response
      * @return a parsed JSON object, typically a Map or a JSONArray.
-     * @throws OXException TODO define exceptions
+     * @throws OXException If the server responds with an error code, or if any network-related error occurs while reading in content from
+     *             the {@link HttpResponse}, or if the user has revoked access, or if a malformed or an unknown response was received from
+     *             the server, or if any other unknown error occurs.
      */
     private static JSONValue parseAsJSON(final HttpResponse response, final List<Integer> expectedStatusCodes) throws OXException {
         JSONValue result = null;
@@ -329,9 +334,9 @@ public class RESTExecutor {
                 bin = new BufferedReader(in, 16384);
                 bin.mark(16384);
                 result = JSONObject.parse(bin);
-                /*if (result.isObject()) {
-                    checkForError(result.toObject());
-                }*/
+                /*
+                 * if (result.isObject()) { checkForError(result.toObject()); }
+                 */
             }
         } catch (final IOException e) {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e);
@@ -468,5 +473,4 @@ public class RESTExecutor {
             return s;
         }
     }
-
 }
