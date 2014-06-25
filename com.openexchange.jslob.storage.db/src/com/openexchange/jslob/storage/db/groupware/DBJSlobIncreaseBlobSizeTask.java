@@ -50,7 +50,6 @@
 package com.openexchange.jslob.storage.db.groupware;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -62,22 +61,24 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DBJSlobCreateTableTask}
+ * {@link DBJSlobIncreaseBlobSizeTask} - Changes the column "data" from table "jsonStorage" from type BLOB (64KB) to MEDIUMBLOB (16MB).
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
+public class DBJSlobIncreaseBlobSizeTask extends UpdateTaskAdapter {
 
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link DBJSlobCreateTableTask}.
+     * Initializes a new {@link DBJSlobIncreaseBlobSizeTask}.
      *
      * @param services The service look-up
      */
-    public DBJSlobCreateTableTask(final ServiceLookup services) {
+    public DBJSlobIncreaseBlobSizeTask(final ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -90,24 +91,14 @@ public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
         }
         final int contextId = params.getContextId();
         final Connection writeCon = dbService.getForUpdateTask(contextId);
-        PreparedStatement stmt = null;
+        boolean writeOperationPerformed = false;
         boolean rollback = false;
         try {
             writeCon.setAutoCommit(false); // BEGIN
             rollback = true;
-            final String[] tableNames = DBJSlobCreateTableService.getTablesToCreate();
-            final String[] createStmts = DBJSlobCreateTableService.getCreateStmts();
-            for (int i = 0; i < tableNames.length; i++) {
-                try {
-                    if (tableExists(writeCon, tableNames[i])) {
-                        continue;
-                    }
-                    stmt = writeCon.prepareStatement(createStmts[i]);
-                    stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-                }
-            }
+
+            writeOperationPerformed = doPerform(writeCon);
+
             writeCon.commit(); // COMMIT
             rollback = false;
         } catch (final SQLException e) {
@@ -118,14 +109,38 @@ public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
             if (rollback) {
                 DBUtils.autocommit(writeCon);
             }
+            if (writeOperationPerformed) {
+                dbService.backForUpdateTask(contextId, writeCon);
+            } else {
+                dbService.backForUpdateTaskAfterReading(contextId, writeCon);
+            }
+        }
+    }
+
+    private boolean doPerform(final Connection writeCon) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            boolean writeOperationPerformed = false;
+
+            // Check current type name
+            String typeName = Tools.getColumnTypeName(writeCon, "jsonStorage", "data");
+            if (!"MEDIUMBLOB".equalsIgnoreCase(typeName)) {
+                final Column column = new Column("data", "MEDIUMBLOB");
+                Tools.modifyColumns(writeCon, "jsonStorage", column);
+                writeOperationPerformed = true;
+            }
+
+            return writeOperationPerformed;
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
             closeSQLStuff(stmt);
-            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 
     @Override
     public String[] getDependencies() {
-        return new String[] {};
+        return new String[] { };
     }
 
 }

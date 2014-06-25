@@ -67,7 +67,7 @@ public final class DBJSlobCreateTableService extends AbstractCreateTableImpl {
         "  serviceId varchar(128) collate utf8_unicode_ci NOT NULL,\n" +
         "  id varchar(128) collate utf8_unicode_ci NOT NULL,\n" +
         "  locked tinyint(3) unsigned default '0',\n" +
-        "  data blob,\n" +
+        "  data MEDIUMBLOB,\n" +
         "  PRIMARY KEY  (cid,user,serviceId,id)\n" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
